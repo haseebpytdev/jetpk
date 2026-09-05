@@ -374,7 +374,9 @@ async function oneSample(browser, attempt) {
       };
     });
     sample.nav_timing = navTiming;
-    const exclusiveNav = await page.evaluate(() => {
+    let exclusiveNav = null;
+    try {
+      exclusiveNav = await page.evaluate(() => {
       const nav = performance.getEntriesByType("navigation")[0];
       const shellMark = window.__jpTravelerBoot?.marks?.TRAVELER_SHELL_MARK;
       if (!nav || nav.entryType !== "navigation") return null;
@@ -420,19 +422,8 @@ async function oneSample(browser, attempt) {
         NAV_TO_SHELL_TOTAL_RECONCILED: unattributed === 0 && childSum <= Math.round(navWall) + 1 ? "YES" : "NO",
       };
     });
-    if (exclusiveNav) {
-      sample.DNS_MS = exclusiveNav.DNS_MS;
-      sample.TCP_MS = exclusiveNav.TCP_MS;
-      sample.TLS_MS = exclusiveNav.TLS_MS;
-      sample.REQUEST_TO_FIRST_BYTE_MS = exclusiveNav.REQUEST_TO_FIRST_BYTE_MS;
-      sample.DOCUMENT_TRANSFER_MS = exclusiveNav.DOCUMENT_TRANSFER_MS;
-      sample.POST_DOCUMENT_APP_TO_SHELL_MS = exclusiveNav.POST_DOCUMENT_APP_TO_SHELL_MS;
-      sample.NAV_TO_SHELL_MS = exclusiveNav.NAV_TO_SHELL_MS;
-      sample.TRAVELER_ROUTE_SHELL_MS = exclusiveNav.NAV_TO_SHELL_MS;
-      sample.NAV_TO_SHELL_EXTERNAL_MS = exclusiveNav.NAV_TO_SHELL_EXTERNAL_MS;
-      sample.NAV_TO_SHELL_APP_MS = exclusiveNav.NAV_TO_SHELL_APP_MS;
-      sample.NAV_TO_SHELL_UNATTRIBUTED_MS = exclusiveNav.NAV_TO_SHELL_UNATTRIBUTED_MS;
-      sample.NAV_TO_SHELL_TOTAL_RECONCILED = exclusiveNav.NAV_TO_SHELL_TOTAL_RECONCILED;
+    } catch {
+      exclusiveNav = null;
     }
 
     if (/account-required|login/.test(navAssignUrl)) {
@@ -593,8 +584,20 @@ async function oneSample(browser, attempt) {
     sample.BOOK_NOW_TO_NAV_MS = T7 - T5_BOOK_NOW_CLICK;
     sample.VALIDATION_TO_NAV_MS =
       validateEnd != null ? Math.max(0, T7 - Math.max(validateEnd, T5_BOOK_NOW_CLICK)) : sample.BOOK_NOW_TO_NAV_MS;
-    sample.NAV_TO_SHELL_MS = exclusiveNav?.NAV_TO_SHELL_MS ?? (T8 - T7);
+    sample.NAV_TO_SHELL_MS = T8 - T7;
     sample.TRAVELER_ROUTE_SHELL_MS = sample.NAV_TO_SHELL_MS;
+    if (exclusiveNav && exclusiveNav.NAV_TO_SHELL_MS > 0) {
+      sample.DNS_MS = exclusiveNav.DNS_MS;
+      sample.TCP_MS = exclusiveNav.TCP_MS;
+      sample.TLS_MS = exclusiveNav.TLS_MS;
+      sample.REQUEST_TO_FIRST_BYTE_MS = exclusiveNav.REQUEST_TO_FIRST_BYTE_MS;
+      sample.DOCUMENT_TRANSFER_MS = exclusiveNav.DOCUMENT_TRANSFER_MS;
+      sample.POST_DOCUMENT_APP_TO_SHELL_MS = exclusiveNav.POST_DOCUMENT_APP_TO_SHELL_MS;
+      sample.NAV_TO_SHELL_EXTERNAL_MS = exclusiveNav.NAV_TO_SHELL_EXTERNAL_MS;
+      sample.NAV_TO_SHELL_APP_MS = exclusiveNav.NAV_TO_SHELL_APP_MS;
+      sample.NAV_TO_SHELL_UNATTRIBUTED_MS = exclusiveNav.NAV_TO_SHELL_UNATTRIBUTED_MS;
+      sample.NAV_TO_SHELL_TOTAL_RECONCILED = exclusiveNav.NAV_TO_SHELL_TOTAL_RECONCILED;
+    }
     sample.PASSENGERS_FETCH_MS = T9 != null && T10 != null ? T10 - T9 : null;
     sample.EARLY_FETCH_START_TO_RESPONSE_MS = sample.PASSENGERS_FETCH_MS;
     sample.PASSENGERS_CLIENT_MS = T10 != null ? T12 - T10 : T12 - T8;

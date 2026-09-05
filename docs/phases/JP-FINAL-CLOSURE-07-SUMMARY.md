@@ -47,16 +47,22 @@ Laravel email plain-text composition. Public Traveler passengers early-fetch scr
 
 ## Tests executed
 - Frontend: `npx tsx --test tests/regression/passengers-early-fetch.test.ts` — 7 passed, 0 failed.
-- PHPUnit OTA vendor + `APP_BASE_PATH` jetpk worktree (same Closure-06 bootstrap): 45 passed, 222 assertions, 0 failures.
+- PHPUnit OTA vendor + `APP_BASE_PATH` jetpk worktree: 45 passed, 222 assertions, 0 failures.
+- Production N30: `docs/evidence/jp-app-perf-closure-01/traveler-warm-final07-n30.json`
 
 ## Known limitations
 CUSTOMER_TICKET_ARTIFACT remains BLOCKED_NO_SAFE_LIVE_DOCUMENT.
+NAV exclusive UNATTRIBUTED is not zero on this N30 (exclusive capture ran before Traveler shell mark on some samples).
+TRAVELER_AUTO_REPRICE_POST_COUNT=3 on the valid set (existing auto-reprice path; HARD_ASSIGN not changed).
 
 ## Risks
 Early fetch uses the same `/laravel/booking/passengers` GET; failed early results fall back to the existing client GET. Duplicate POSTs are not introduced.
 
 ## Rollback
-Restore Laravel files from `/home/pkjetp/releases/jp-final-07-*`. Restore previous public BUILD_ID via protected Next rollback. Do not use SFTP.
+Restore Laravel/frontend files from `/home/pkjetp/releases/jp-final-07-20260905T205311Z`. Restore public BUILD_ID `0NMKi-2XwkblKpudgNB3h` via protected Next rollback. Do not use SFTP.
+
+## Commit SHA
+`6275f03fd16e148eea34d5ce02ec015e5c46ac8a` (runtime). Docs activate pin `ea950dc2`.
 
 ## Final status
-Code is on `phase/jp-email-prod-branding-02`. Live PERFORMANCE and EMAIL gates require protected deploy + exact-build N30 + two-family Gmail send.
+Laravel + public frontend activated. Email two-family SMTP sent. Traveler SHELL_TO_USABLE_APP_P95 431 (limit 1000) and SHELL_TO_PASSENGERS_REQUEST_P95 359 (was 1533). NAV exclusive and FRESH app walls are not a strict PASS.

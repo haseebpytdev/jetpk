@@ -1,0 +1,37 @@
+{
+  "phase": "JP-FINAL-CLOSURE-07",
+  "production_runtime_sha": "6275f03fd16e148eea34d5ce02ec015e5c46ac8a",
+  "public_build_id": "4ZjTpl0WNGS3Zn76wl6lz",
+  "dashboard_build_id": "knBdbMBLDH3sxWqzoMDYu",
+  "recipient": "myworkhaseeb@gmail.com",
+  "run_id": "jp-final-07-live-20260905T205856Z",
+  "GMAIL_INBOX_VERIFICATION": "PENDING_CHATGPT",
+  "BOOKING_PLAIN_TEXT_CTA_LABEL_PRESENT": "YES",
+  "BOOKING_PLAIN_TEXT_CTA_URL_PRESENT": "YES",
+  "BOOKING_PLAIN_TEXT_CTA_URL_MATCHES_HTML": "YES",
+  "BOOKING_PLAIN_TEXT_CTA_URL": "https://jetpakistan.pk/lookup-booking",
+  "AGENT_APPLICATION_TEXT_REQUIRED_FIELD_MISSING_COUNT": 0,
+  "AGENT_APPLICATION_TEXT_DUPLICATE_FIELD_COUNT": 0,
+  "messages": [
+    {
+      "scenario_id": "booking_confirmed__admin",
+      "intended_role": "admin",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-BOOKING-CONFIRMED-ADMIN-20260905205857-HNZKQG",
+      "subject": "[ADMIN] JetPakistan — Booking confirmed — JPK-2026-004821",
+      "send_timestamp": "2026-09-05T20:58:57Z",
+      "smtp_accepted": "sent",
+      "recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "agent_application_submitted__admin",
+      "intended_role": "admin",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-AGENT-APPLICATION-SUBMITTED-ADMIN-20260905205901-ZAKKWO",
+      "subject": "[ADMIN] JetPakistan — New agent application received",
+      "send_timestamp": "2026-09-05T20:59:01Z",
+      "smtp_accepted": "sent",
+      "recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    }
+  ]
+}
