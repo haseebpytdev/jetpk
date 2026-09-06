@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   buildFreshResultsSearchParams,
+  RESULTS_AUTHORITY_REUSE_MS,
   shouldRefreshResultsAfterCheckoutReturn,
 } from "../features/flight-results/utils/checkout-nav";
 

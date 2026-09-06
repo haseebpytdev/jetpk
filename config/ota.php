@@ -85,6 +85,14 @@ return [
         'stale_after_seconds' => max(120, (int) env('OTA_OFFER_FRESHNESS_STALE_AFTER_SECONDS', 600)),
     ],
 
+    /**
+     * Selected-offer booking authority reuse (Traveler skip window).
+     * Independent of search-result snapshot TTL and display freshness.
+     */
+    'selected_offer_authority' => [
+        'reuse_seconds' => max(1, (int) env('OTA_SELECTED_OFFER_AUTHORITY_REUSE_SECONDS', 5)),
+    ],
+
     /** F9O-R1: max minutes after F9N fresh context apply for controlled strong-linkage apply (independent of F9M stale lane). */
     'controlled_strong_linkage_apply' => [
         'max_minutes_after_fresh_context_apply' => max(

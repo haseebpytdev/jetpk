@@ -1,6 +1,7 @@
 /**
- * Selected-fare background revalidation authority helpers (JP-PERF-FINAL-02).
- * Freshness mirrors Laravel `ota.offer_freshness.stale_after_seconds` (default 600).
+ * Selected-fare background revalidation authority helpers.
+ * Booking-authority reuse is 5s (`OTA_SELECTED_OFFER_AUTHORITY_REUSE_SECONDS`).
+ * Display freshness remains independent (refresh_due / stale_after).
  */
 
 export const BOOK_NOW_VALIDATION_SOURCE = {
@@ -13,8 +14,8 @@ export const BOOK_NOW_VALIDATION_SOURCE = {
 export type BookNowValidationSource =
   (typeof BOOK_NOW_VALIDATION_SOURCE)[keyof typeof BOOK_NOW_VALIDATION_SOURCE];
 
-/** Matches `SabreOfferFreshness::revalidationValiditySeconds()` / stale_after_seconds default. */
-export const AUTHORITATIVE_REVALIDATION_FRESH_MS = 600_000;
+/** Matches `SelectedOfferAuthority::reuseSeconds()` default (5s). */
+export const AUTHORITATIVE_REVALIDATION_FRESH_MS = 5_000;
 
 export type PrevalidationSignatureParams = {
   searchId: string;
@@ -26,6 +27,15 @@ export type PrevalidationSignatureParams = {
   returnFareOptionKey?: string;
   supplierProvider?: string;
   acceptFareChange?: boolean;
+  origin?: string;
+  destination?: string;
+  departDate?: string;
+  returnDate?: string;
+  adults?: number;
+  children?: number;
+  infants?: number;
+  cabin?: string;
+  currency?: string;
 };
 
 export function buildValidationSignature(params: PrevalidationSignatureParams): string {
@@ -39,6 +49,15 @@ export function buildValidationSignature(params: PrevalidationSignatureParams): 
     (params.returnFareOptionKey ?? "").trim(),
     (params.supplierProvider ?? "").trim().toLowerCase(),
     params.acceptFareChange ? "1" : "0",
+    (params.origin ?? "").trim().toUpperCase(),
+    (params.destination ?? "").trim().toUpperCase(),
+    (params.departDate ?? "").trim(),
+    (params.returnDate ?? "").trim(),
+    String(params.adults ?? ""),
+    String(params.children ?? ""),
+    String(params.infants ?? ""),
+    (params.cabin ?? "").trim().toLowerCase(),
+    (params.currency ?? "").trim().toUpperCase(),
   ].join("|");
 }
 

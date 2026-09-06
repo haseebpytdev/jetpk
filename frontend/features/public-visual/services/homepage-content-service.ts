@@ -84,7 +84,7 @@ function mapSectionHeader(section?: RemoteSection) {
   };
 }
 
-function mapRoutes(items: Array<Record<string, unknown>> = []): HomepageRouteCard[] {
+export function mapRoutes(items: Array<Record<string, unknown>> = []): HomepageRouteCard[] {
   return items.map((item, index) => ({
     id: String(item.id ?? `route-${index}`),
     from: String(item.from ?? ""),
@@ -97,7 +97,7 @@ function mapRoutes(items: Array<Record<string, unknown>> = []): HomepageRouteCar
   }));
 }
 
-function mapDestinations(items: Array<Record<string, unknown>> = []): HomepageDestinationCard[] {
+export function mapDestinations(items: Array<Record<string, unknown>> = []): HomepageDestinationCard[] {
   return items.map((item, index) => ({
     id: String(item.id ?? item.code ?? `dest-${index}`),
     code: String(item.code ?? ""),
@@ -112,7 +112,7 @@ function mapDestinations(items: Array<Record<string, unknown>> = []): HomepageDe
   }));
 }
 
-function mapFeaturedDeals(items: Array<Record<string, unknown>> = []): HomepageFeaturedDeal[] {
+export function mapFeaturedDeals(items: Array<Record<string, unknown>> = []): HomepageFeaturedDeal[] {
   return items.map((item, index) => ({
     id: String(item.id ?? `deal-${index}`),
     airline: String(item.airline ?? ""),
@@ -146,7 +146,7 @@ function decodeCmsText(value: unknown): string {
   );
 }
 
-function mapSupportCta(remote?: Record<string, unknown>): HomepageSupportCta {
+export function mapSupportCta(remote?: Record<string, unknown>): HomepageSupportCta {
   return {
     enabled: remote?.enabled === true,
     eyebrow: decodeCmsText(remote?.eyebrow ?? ""),

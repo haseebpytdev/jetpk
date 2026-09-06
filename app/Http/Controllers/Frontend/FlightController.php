@@ -443,18 +443,26 @@ class FlightController extends Controller
                     $freshnessMeta['selected_offer_last_revalidated_at'] = $freshnessMeta['last_revalidated_at'];
                 }
                 $revalidatedAt = now()->toIso8601String();
+                $authority = app(\App\Support\FlightSearch\SelectedOfferAuthority::class);
+                $authorityFingerprint = $authority->fingerprint($offer, array_merge($criteria, [
+                    'search_id' => $searchId,
+                    'offer_id' => $offerId,
+                    'fare_option_key' => $selectedFareOptionId,
+                ]));
                 app(\App\Services\Booking\BookingDraftService::class)->merge([
                     'offer_freshness' => $freshnessMeta,
                     'search_id' => $searchId,
                     'offer_id' => $offerId,
                     'flight_id' => $offerId,
-                    // Authoritative Traveler bootstrap: passengers GET may skip live re-shop.
+                    // Authoritative Traveler bootstrap: passengers GET may skip live re-shop within 5s.
                     'authoritative_bootstrap' => ! $requiresAcceptance,
                     'authoritative_revalidation_at' => $revalidatedAt,
+                    'authoritative_signature' => $authorityFingerprint,
                 ]);
                 if (! $requiresAcceptance) {
                     $this->searchStore->patchOfferRevalidationMeta($searchId, $offerId, [
                         'authoritative_bootstrap' => true,
+                        'authoritative_signature' => $authorityFingerprint,
                         'last_revalidated_at' => $freshnessMeta['last_revalidated_at'] ?? $revalidatedAt,
                         'selected_offer_last_revalidated_at' => $freshnessMeta['last_revalidated_at'] ?? $revalidatedAt,
                         'revalidation_status' => 'success',

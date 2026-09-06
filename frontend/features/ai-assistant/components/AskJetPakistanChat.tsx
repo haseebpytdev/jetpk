@@ -141,6 +141,21 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
     };
   }, [enabled, open, conversationId]);
 
+  useEffect(() => {
+    if (!enabled || !open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+        if (window.location.hash === "#ask-jetpakistan") {
+          history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [enabled, open]);
+
   if (!enabled) return null;
 
   const close = () => {
@@ -270,6 +285,22 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
 
   return (
     <>
+      {!open ? (
+        <button
+          type="button"
+          data-testid="ask-jetpakistan-fab"
+          aria-label="Ask JetPakistan"
+          onClick={() => setOpen(true)}
+          className={cn(
+            "fixed z-50 inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-jp-brand text-white shadow-jp-md",
+            "right-[max(0.75rem,env(safe-area-inset-right))]",
+            "bottom-[max(5.75rem,calc(env(safe-area-inset-bottom)+4.75rem))] xl:bottom-[max(1.25rem,env(safe-area-inset-bottom))]",
+            "focus-visible:outline-none focus-visible:shadow-jp-focus",
+          )}
+        >
+          AI
+        </button>
+      ) : null}
       {!open ? null : (
         <div
           ref={panelRef}

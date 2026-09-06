@@ -11,7 +11,6 @@ use App\Models\SupplierConnection;
 use App\Services\Pricing\PricingRuleService;
 use App\Services\Suppliers\OfferValidationService;
 use App\Services\Suppliers\SupplierAdapterResolver;
-use App\Support\FlightSearch\SabreOfferFreshness;
 use App\Support\Platform\PlatformModuleEnforcer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -116,7 +115,6 @@ class OfferValidationRecentRevalidationSkipTest extends TestCase
         ]);
 
         [$agency, , $offer] = $this->sabreFixture();
-        $expiredAt = now()->subSeconds(app(SabreOfferFreshness::class)->revalidationValiditySeconds() + 30);
 
         $adapter = Mockery::mock(FlightSupplierInterface::class);
         $adapter->shouldReceive('validateOffer')->once()->andReturn(new OfferValidationResultData(
@@ -137,7 +135,7 @@ class OfferValidationRecentRevalidationSkipTest extends TestCase
 
         $result = $service->validateSelectedOffer($agency, $offer, $this->baseContext([
             'offer_freshness' => [
-                'last_revalidated_at' => $expiredAt->toIso8601String(),
+                'last_revalidated_at' => now()->subSeconds(6)->toIso8601String(),
                 'revalidation_status' => 'success',
             ],
         ]));

@@ -38,7 +38,7 @@ final class SabreOfferFreshness
 
     public function revalidationValiditySeconds(): int
     {
-        return $this->staleAfterSeconds();
+        return app(SelectedOfferAuthority::class)->reuseSeconds();
     }
 
     public function searchCreatedAtFromPayload(?array $searchPayload): ?Carbon

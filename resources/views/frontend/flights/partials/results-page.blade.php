@@ -660,7 +660,7 @@
         loading = true;
         armSearchLoadTimeout();
         hideFreshnessError();
-        if (summary) summary.textContent = 'Refreshing fares...';
+        if (summary) summary.textContent = 'Refreshing latest fares…';
         return fetch(resultsSearchUrl + '?' + params.toString(), {
             headers: {'X-Requested-With': 'XMLHttpRequest'}
         }).then(function (res) {
@@ -683,14 +683,13 @@
     }
 
     function handleResultsPageShow(event) {
-        var leftForCheckout = false;
-        try {
-            leftForCheckout = !!sessionStorage.getItem(checkoutNavStorageKey);
-        } catch (err) {}
-        var ref = document.referrer || '';
-        var fromCheckoutFlow = leftForCheckout || /\/booking\/|passenger|checkout/i.test(ref);
         var backNav = !!event.persisted || navigationWasBackForward();
-        if (!fromCheckoutFlow || !backNav) {
+        if (!backNav) {
+            return;
+        }
+        var age = freshnessAgeSeconds(searchFreshnessMeta);
+        if (age !== null && age <= 5) {
+            try { sessionStorage.removeItem(checkoutNavStorageKey); } catch (err) {}
             return;
         }
         try {
@@ -2394,6 +2393,11 @@
         list.addEventListener('click', function (e) {
             var link = e.target.closest('a[data-book-now]');
             if (!link || !list.contains(link) || link.getAttribute('data-checkout-loading') === '1') return;
+            if (bfcacheRefreshInFlight || freshnessAutoRefreshInFlight) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
             handleMainBookNowClick(e, link);
             if (!e.defaultPrevented && link.href) {
                 markResultsCheckoutNavigation();

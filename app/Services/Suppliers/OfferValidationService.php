@@ -55,13 +55,10 @@ class OfferValidationService
             return $this->validateSabreOfferCheckoutUsingCachedOffer($agency, $selectedOfferSnapshot, $searchContext, $connection);
         }
 
-        // REG-05: Book Now already stamped authoritative_bootstrap after live revalidation.
-        // Traveler GET must not re-shop Sabre Bargain Finder for the same selected offer.
+        // REG-05: reuse cached Sabre validation only inside the 5s authority window
+        // with an exact signature match. Boolean stamps alone are not authority.
         if (strtolower($provider) === SupplierProvider::Sabre->value
-            && (
-                ! empty($searchContext['authoritative_bootstrap'])
-                || ! empty($selectedOfferSnapshot['authoritative_bootstrap'])
-            )) {
+            && $this->sabreMayReuseSelectedOfferAuthority($selectedOfferSnapshot, $searchContext)) {
             Log::info('sabre.checkout.validate_using_authoritative_bootstrap', [
                 'search_id' => (string) ($searchContext['search_id'] ?? ''),
                 'offer_id' => (string) ($selectedOfferSnapshot['offer_id'] ?? $selectedOfferSnapshot['id'] ?? ''),
@@ -70,8 +67,8 @@ class OfferValidationService
             return $this->validateSabreOfferCheckoutUsingCachedOffer($agency, $selectedOfferSnapshot, $searchContext, $connection);
         }
 
-        // Book Now already performed live selected-offer revalidation within the freshness
-        // window — do not run a second Bargain Finder shop on Traveler GET.
+        // Book Now already performed live selected-offer revalidation within the
+        // selected-offer authority reuse window — do not run a second Bargain Finder shop.
         if (strtolower($provider) === SupplierProvider::Sabre->value
             && $this->sabreHasValidRecentRevalidation($selectedOfferSnapshot, $searchContext)) {
             Log::info('sabre.checkout.validate_using_recent_revalidation', [
@@ -403,8 +400,40 @@ class OfferValidationService
      * @param  array<string, mixed>  $selectedOfferSnapshot
      * @param  array<string, mixed>  $searchContext
      */
+    protected function sabreMayReuseSelectedOfferAuthority(array $selectedOfferSnapshot, array $searchContext): bool
+    {
+        $freshness = is_array($searchContext['offer_freshness'] ?? null)
+            ? $searchContext['offer_freshness']
+            : (is_array($selectedOfferSnapshot['offer_freshness'] ?? null)
+                ? $selectedOfferSnapshot['offer_freshness']
+                : []);
+
+        return app(\App\Support\FlightSearch\SelectedOfferAuthority::class)->mayReuse(
+            $selectedOfferSnapshot,
+            $searchContext,
+            is_string($searchContext['authoritative_revalidation_at'] ?? null)
+                ? (string) $searchContext['authoritative_revalidation_at']
+                : null,
+            $freshness,
+            false,
+            is_string($searchContext['authoritative_signature'] ?? null)
+                ? (string) $searchContext['authoritative_signature']
+                : (is_string($selectedOfferSnapshot['authoritative_signature'] ?? null)
+                    ? (string) $selectedOfferSnapshot['authoritative_signature']
+                    : null),
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>  $selectedOfferSnapshot
+     * @param  array<string, mixed>  $searchContext
+     */
     protected function sabreHasValidRecentRevalidation(array $selectedOfferSnapshot, array $searchContext): bool
     {
+        if (! $this->sabreMayReuseSelectedOfferAuthority($selectedOfferSnapshot, $searchContext)) {
+            return false;
+        }
+
         $freshness = is_array($searchContext['offer_freshness'] ?? null)
             ? $searchContext['offer_freshness']
             : (is_array($selectedOfferSnapshot['offer_freshness'] ?? null)

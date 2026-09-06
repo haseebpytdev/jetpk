@@ -10,7 +10,11 @@ import { parseUiSort, type UiSortKey } from "../utils/sorting";
 import {
   buildFreshResultsSearchParams,
   clearResultsLeftForCheckout,
+  markResultsSnapshot,
+  RESULTS_AUTHORITY_REUSE_MS,
+  resultsSnapshotAgeMs,
   shouldRefreshResultsAfterCheckoutReturn,
+  shouldRefreshStaleResultsSnapshot,
 } from "../utils/checkout-nav";
 import { EmptyResultsState } from "./EmptyResultsState";
 import { ExpiredSearchState } from "./ExpiredSearchState";
@@ -128,12 +132,30 @@ export function FlightResultsPage() {
   }, [params, router]);
 
   useEffect(() => {
+    if (results.status === "ready" || results.status === "empty") {
+      markResultsSnapshot(results.resolvedSearchId ?? searchId);
+    }
+  }, [results.status, results.resolvedSearchId, searchId]);
+
+  useEffect(() => {
     const onPageShow = (event: PageTransitionEvent) => {
-      if (!shouldRefreshResultsAfterCheckoutReturn(event)) return;
-      startFreshSearchFromCheckoutReturn();
+      if (shouldRefreshStaleResultsSnapshot(event) || shouldRefreshResultsAfterCheckoutReturn(event)) {
+        startFreshSearchFromCheckoutReturn();
+      }
     };
     window.addEventListener("pageshow", onPageShow);
-    return () => window.removeEventListener("pageshow", onPageShow);
+    const onVisibility = () => {
+      if (document.visibilityState !== "visible") return;
+      const age = resultsSnapshotAgeMs();
+      if (age !== null && age > RESULTS_AUTHORITY_REUSE_MS) {
+        startFreshSearchFromCheckoutReturn();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [startFreshSearchFromCheckoutReturn]);
 
   useEffect(() => {
@@ -485,7 +507,7 @@ export function FlightResultsPage() {
                 <SearchProgress
                   message={
                     resultsStaleLocked
-                      ? "Refreshing live fares for your search…"
+                      ? "Refreshing latest fares…"
                       : results.message || "Searching flights…"
                   }
                   summary={summary}

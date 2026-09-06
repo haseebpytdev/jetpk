@@ -12,7 +12,7 @@ const BOOK_NOW_VALIDATION_SOURCE = {
   STALE_PREVALIDATION_REVALIDATED: "STALE_PREVALIDATION_REVALIDATED",
 };
 
-const AUTHORITATIVE_REVALIDATION_FRESH_MS = 600_000;
+const AUTHORITATIVE_REVALIDATION_FRESH_MS = 5_000;
 
 function buildValidationSignature(params) {
   return [
@@ -123,8 +123,8 @@ describe("JP-PERF-FINAL-02 prevalidation authority", () => {
     assert.equal(source, BOOK_NOW_VALIDATION_SOURCE.NORMAL_FALLBACK_REVALIDATION);
   });
 
-  it("uses established 600s freshness window (not invented short TTL)", () => {
-    assert.equal(AUTHORITATIVE_REVALIDATION_FRESH_MS, 600_000);
+  it("uses a 5-second selected-offer authority reuse window", () => {
+    assert.equal(AUTHORITATIVE_REVALIDATION_FRESH_MS, 5_000);
   });
 
   it("skips traveler auto-reprice only on server-authoritative exact selection", async () => {

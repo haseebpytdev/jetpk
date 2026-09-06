@@ -960,7 +960,7 @@ class BookingController extends Controller
                 }
             }
             if ($offer === null
-                && empty($draft['authoritative_bootstrap'])
+                && ! $this->selectedOfferAuthorityStillValid($draft, null)
                 && $agency !== null
                 && $criteria['origin'] !== ''
                 && $criteria['destination'] !== ''
@@ -979,7 +979,7 @@ class BookingController extends Controller
             $timing->mark('S4_offer_resolve_end');
             if ($liveSearchUsed) {
                 $timing->mark('S4_live_search_used');
-            } elseif ($offer !== null && ! empty($draft['authoritative_bootstrap'])) {
+            } elseif ($offer !== null && $this->selectedOfferAuthorityStillValid($draft, $offer)) {
                 $timing->mark('S4_bootstrap_cache_hit');
             }
         }
@@ -1060,29 +1060,33 @@ class BookingController extends Controller
                 return $freshnessRedirect;
             }
 
-            // Recover authoritative bootstrap when the boolean was lost across hard-nav
-            // but Book Now already stamped valid offer_freshness or the cached offer.
-            if (empty($draft['authoritative_bootstrap'])) {
-                $offerFreshness = is_array($draft['offer_freshness'] ?? null) ? $draft['offer_freshness'] : [];
-                $fromOfferStamp = ! empty($offer['authoritative_bootstrap']);
-                $fromDraftFreshness = $offerFreshness !== []
-                    && $this->sabreOfferFreshness->hasValidRecentRevalidation($offerFreshness);
-                $fromOfferFreshness = $this->sabreOfferFreshness->hasValidRecentRevalidation([
-                    'last_revalidated_at' => $offer['last_revalidated_at'] ?? $offer['selected_offer_last_revalidated_at'] ?? null,
-                    'revalidation_status' => $offer['revalidation_status'] ?? $offer['selected_offer_revalidation_status'] ?? null,
-                ]);
-                if ($fromOfferStamp || $fromDraftFreshness || $fromOfferFreshness) {
+            // Recover authoritative bootstrap only inside the 5s signature window.
+            // Cached offer may remain as context after expiry, but is not booking authority.
+            if ($this->selectedOfferAuthorityStillValid($draft, $offer)) {
+                if (empty($draft['authoritative_bootstrap'])) {
+                    $offerFreshness = is_array($draft['offer_freshness'] ?? null) ? $draft['offer_freshness'] : [];
                     $this->bookingDraft->merge([
                         'authoritative_bootstrap' => true,
                         'authoritative_revalidation_at' => (string) (
-                            $offerFreshness['last_revalidated_at']
+                            $draft['authoritative_revalidation_at']
+                            ?? $offerFreshness['last_revalidated_at']
                             ?? $offer['last_revalidated_at']
                             ?? $offer['selected_offer_last_revalidated_at']
                             ?? now()->toIso8601String()
                         ),
+                        'authoritative_signature' => (string) (
+                            $draft['authoritative_signature']
+                            ?? $offer['authoritative_signature']
+                            ?? ''
+                        ),
                     ]);
                     $draft = $this->bookingDraft->current();
                 }
+            } elseif (! empty($draft['authoritative_bootstrap'])) {
+                $this->bookingDraft->merge([
+                    'authoritative_bootstrap' => false,
+                ]);
+                $draft = $this->bookingDraft->current();
             }
 
             $timing->mark('S5_hold_validate_start');
@@ -4489,27 +4493,44 @@ class BookingController extends Controller
         if (is_array($draft['offer_freshness'] ?? null)) {
             $withChannel['offer_freshness'] = $draft['offer_freshness'];
         }
-        if (! empty($draft['authoritative_bootstrap'])) {
-            $withChannel['authoritative_bootstrap'] = true;
-            if (is_string($draft['authoritative_revalidation_at'] ?? null)) {
-                $withChannel['authoritative_revalidation_at'] = $draft['authoritative_revalidation_at'];
-            }
-        } elseif (is_array($withChannel['search_payload'] ?? null)) {
+        $cachedOffer = [];
+        $wantedOfferId = trim((string) ($draft['offer_id'] ?? $draft['flight_id'] ?? ''));
+        if ($wantedOfferId !== '' && is_array($withChannel['search_payload'] ?? null)) {
             $payloadOffers = is_array($withChannel['search_payload']['offers'] ?? null)
                 ? $withChannel['search_payload']['offers']
                 : [];
-            foreach ($payloadOffers as $cachedOffer) {
-                if (! is_array($cachedOffer)) {
+            foreach ($payloadOffers as $row) {
+                if (! is_array($row)) {
                     continue;
                 }
-                if (! empty($cachedOffer['authoritative_bootstrap'])) {
-                    $withChannel['authoritative_bootstrap'] = true;
+                $rowId = trim((string) ($row['offer_id'] ?? $row['id'] ?? ''));
+                if ($rowId === $wantedOfferId) {
+                    $cachedOffer = $row;
                     break;
                 }
             }
         }
+        if ($this->selectedOfferAuthorityStillValid($draft, $cachedOffer)) {
+            $withChannel['authoritative_bootstrap'] = true;
+            if (is_string($draft['authoritative_revalidation_at'] ?? null)) {
+                $withChannel['authoritative_revalidation_at'] = $draft['authoritative_revalidation_at'];
+            }
+            if (is_string($draft['authoritative_signature'] ?? null)) {
+                $withChannel['authoritative_signature'] = $draft['authoritative_signature'];
+            }
+        }
 
         return $withChannel;
+    }
+
+    /**
+     * @param  array<string, mixed>  $draft
+     * @param  array<string, mixed>|null  $offer
+     */
+    protected function selectedOfferAuthorityStillValid(array $draft, ?array $offer): bool
+    {
+        return app(\App\Support\FlightSearch\SelectedOfferAuthority::class)
+            ->mayReuseFromDraft($draft, is_array($offer) ? $offer : []);
     }
 
     /**

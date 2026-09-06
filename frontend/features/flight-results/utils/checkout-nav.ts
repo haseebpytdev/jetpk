@@ -94,3 +94,43 @@ export function shouldRefreshResultsAfterCheckoutReturn(event: PageTransitionEve
   const backNav = Boolean(event.persisted) || navigationWasBackForward();
   return fromCheckoutFlow && backNav;
 }
+
+export const RESULTS_SNAPSHOT_AT_KEY = "ota_results_snapshot_at";
+export const RESULTS_SNAPSHOT_SEARCH_ID_KEY = "ota_results_snapshot_search_id";
+export const RESULTS_AUTHORITY_REUSE_MS = 5_000;
+
+export function markResultsSnapshot(searchId?: string | null, atMs: number = Date.now()): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(RESULTS_SNAPSHOT_AT_KEY, String(atMs));
+    window.sessionStorage.setItem(RESULTS_SNAPSHOT_SEARCH_ID_KEY, String(searchId?.trim() || ""));
+  } catch {
+    // sessionStorage may be unavailable
+  }
+}
+
+export function resultsSnapshotAgeMs(nowMs: number = Date.now()): number | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(RESULTS_SNAPSHOT_AT_KEY);
+    if (!raw) return null;
+    const at = Number(raw);
+    if (!Number.isFinite(at) || at <= 0) return null;
+    return Math.max(0, nowMs - at);
+  } catch {
+    return null;
+  }
+}
+
+export function shouldRefreshStaleResultsSnapshot(
+  event: PageTransitionEvent,
+  nowMs: number = Date.now(),
+): boolean {
+  const backNav = Boolean(event.persisted) || navigationWasBackForward();
+  if (!backNav) return false;
+  const age = resultsSnapshotAgeMs(nowMs);
+  if (age === null) {
+    return didLeaveResultsForCheckout() || shouldRefreshResultsAfterCheckoutReturn(event);
+  }
+  return age > RESULTS_AUTHORITY_REUSE_MS;
+}
