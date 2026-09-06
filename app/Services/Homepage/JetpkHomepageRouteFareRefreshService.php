@@ -93,6 +93,8 @@ final class JetpkHomepageRouteFareRefreshService
         $content = $published->content_json;
         $items = is_array($content['routes']['items'] ?? null) ? $content['routes']['items'] : [];
         $fareCache = is_array($content['_fare_cache']['routes'] ?? null) ? $content['_fare_cache']['routes'] : [];
+        $destinationItems = is_array($content['destinations']['items'] ?? null) ? $content['destinations']['items'] : [];
+        $destinationFareCache = is_array($content['_fare_cache']['destinations'] ?? null) ? $content['_fare_cache']['destinations'] : [];
 
         $summary = [
             'refreshed' => 0,
@@ -153,8 +155,34 @@ final class JetpkHomepageRouteFareRefreshService
             }
         }
 
+        foreach ($this->sortedActiveRoutes($destinationItems) as $item) {
+            $destId = (string) ($item['id'] ?? $item['code'] ?? '');
+            $destination = strtoupper(trim((string) ($item['code'] ?? '')));
+            if ($destId === '' || $destination === '') {
+                $summary['skipped']++;
+                continue;
+            }
+            if (! $this->isTruthy($item['enabled'] ?? '1')) {
+                $summary['skipped']++;
+                continue;
+            }
+
+            $result = $this->refreshDestinationItem($item, $agency, $destinationFareCache[$destId] ?? $destinationFareCache[$destination] ?? null);
+            $summary['refreshed']++;
+            $summary['results'][] = $result;
+            if (($result['status'] ?? '') === JetpkHomepageFareRefreshStatus::Success->value) {
+                $summary['success']++;
+            } else {
+                $summary['failed']++;
+            }
+            if ($persist && isset($result['cache'])) {
+                $destinationFareCache[$destId] = $result['cache'];
+            }
+        }
+
         if ($persist && $summary['refreshed'] > 0) {
             data_set($content, '_fare_cache.routes', $fareCache);
+            data_set($content, '_fare_cache.destinations', $destinationFareCache);
             $published->update(['content_json' => $content]);
 
             $draft = ClientPageSetting::query()
@@ -166,6 +194,7 @@ final class JetpkHomepageRouteFareRefreshService
             if ($draft !== null && is_array($draft->content_json)) {
                 $draftContent = $draft->content_json;
                 data_set($draftContent, '_fare_cache.routes', $fareCache);
+                data_set($draftContent, '_fare_cache.destinations', $destinationFareCache);
                 $draft->update(['content_json' => $draftContent]);
             }
         }
@@ -291,6 +320,92 @@ final class JetpkHomepageRouteFareRefreshService
                 'cache' => $this->preserveOrClearCache($previousCache, JetpkHomepageFareRefreshStatus::Failed->value, 'search_failed'),
             ];
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @param  array<string, mixed>|null  $previousCache
+     * @return array<string, mixed>
+     */
+    public function refreshDestinationItem(array $item, Agency $agency, ?array $previousCache = null): array
+    {
+        $destId = (string) ($item['id'] ?? $item['code'] ?? '');
+        $destination = strtoupper(trim((string) ($item['code'] ?? '')));
+        $origins = $this->originPool($destination);
+        $best = null;
+        $winningOrigin = null;
+
+        foreach ($origins as $origin) {
+            $synthetic = [
+                'id' => $destId.'-'.$origin,
+                'from' => $origin,
+                'to' => $destination,
+                'trip_type' => config('jetpk_homepage.default_trip_type', 'one_way'),
+                'adults' => config('jetpk_homepage.default_adults', 1),
+                'cabin' => config('jetpk_homepage.default_cabin', 'economy'),
+            ];
+            $result = $this->refreshRouteItem($synthetic, $agency, null);
+            if (($result['status'] ?? '') !== JetpkHomepageFareRefreshStatus::Success->value) {
+                continue;
+            }
+            $amount = (float) ($result['chosen_fare'] ?? 0);
+            if ($amount <= 0) {
+                continue;
+            }
+            if ($best === null || $amount < (float) ($best['chosen_fare'] ?? PHP_INT_MAX)) {
+                $best = $result;
+                $winningOrigin = $origin;
+            }
+        }
+
+        if ($best === null || $winningOrigin === null) {
+            return [
+                'route_id' => $destId,
+                'origin' => null,
+                'destination' => $destination,
+                'status' => JetpkHomepageFareRefreshStatus::NoResults->value,
+                'message' => 'No eligible origin-pool fare.',
+                'cache' => $this->preserveOrClearCache($previousCache, JetpkHomepageFareRefreshStatus::NoResults->value, 'no_origin_fare'),
+            ];
+        }
+
+        $cache = is_array($best['cache'] ?? null) ? $best['cache'] : [];
+        $cache['winning_origin'] = $winningOrigin;
+        $cache['destination'] = $destination;
+
+        return [
+            'route_id' => $destId,
+            'origin' => $winningOrigin,
+            'destination' => $destination,
+            'departure_date' => $best['departure_date'] ?? null,
+            'result_count' => $best['result_count'] ?? 0,
+            'chosen_fare' => $best['chosen_fare'] ?? null,
+            'currency' => $best['currency'] ?? 'PKR',
+            'status' => JetpkHomepageFareRefreshStatus::Success->value,
+            'cache' => $cache,
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function originPool(string $destination): array
+    {
+        $pool = config('jetpk_homepage.destination_origin_pool', ['KHI', 'LHE', 'ISB']);
+        if (! is_array($pool) || $pool === []) {
+            $pool = ['KHI', 'LHE', 'ISB'];
+        }
+
+        $codes = [];
+        foreach ($pool as $code) {
+            $iata = strtoupper(trim((string) $code));
+            if ($iata === '' || $iata === $destination || ! preg_match('/^[A-Z]{3}$/', $iata)) {
+                continue;
+            }
+            $codes[] = $iata;
+        }
+
+        return array_values(array_unique($codes));
     }
 
     /**

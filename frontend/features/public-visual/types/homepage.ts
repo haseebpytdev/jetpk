@@ -35,6 +35,7 @@ export type HomepageDestinationCard = {
   imageAlt?: string;
   priceLabel: string;
   href: string | null;
+  winningOrigin?: string | null;
 };
 
 export type HomepageFeaturedDeal = {
@@ -49,6 +50,7 @@ export type HomepageFeaturedDeal = {
   priceLabel: string;
   image?: string | null;
   imageAlt?: string;
+  href?: string | null;
 };
 
 export type HomepageWhyCard = {

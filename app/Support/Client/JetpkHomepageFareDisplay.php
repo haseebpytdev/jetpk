@@ -15,29 +15,35 @@ final class JetpkHomepageFareDisplay
      * @param  array<string, mixed>|null  $fareCache
      * @return array{amount: float, currency: string, label: string, source: string, status: string}|null
      */
-    public static function resolve(array $item, ?array $fareCache = null): ?array
+    public static function resolve(array $item, ?array $fareCache = null, bool $allowManualFallback = false): ?array
     {
         $currency = strtoupper(trim((string) ($item['currency'] ?? config('jetpk_homepage.default_currency', 'PKR'))));
         if ($currency === '') {
             $currency = 'PKR';
         }
 
-        $dynamicEnabled = self::isTruthy($item['dynamic_fare_enabled'] ?? '0');
-        $manual = self::positiveAmount($item['manual_fallback_price'] ?? null);
-
-        if ($dynamicEnabled && is_array($fareCache)) {
+        if (is_array($fareCache)) {
             $resolved = self::positiveAmount($fareCache['resolved_fare'] ?? null);
             $refreshedAt = self::parseTimestamp($fareCache['fare_refreshed_at'] ?? null);
-            $status = (string) ($fareCache['fare_status'] ?? '');
             $fresh = $refreshedAt !== null && self::isFresh($refreshedAt);
 
             if ($resolved !== null && ($fresh || (bool) config('jetpk_homepage.allow_stale_fare_display', true))) {
                 $cacheCurrency = strtoupper(trim((string) ($fareCache['resolved_currency'] ?? $currency)));
 
-                return self::buildResult($resolved, $cacheCurrency !== '' ? $cacheCurrency : $currency, 'dynamic', $fresh ? JetpkHomepageFareRefreshStatus::Success->value : JetpkHomepageFareRefreshStatus::Stale->value);
+                return self::buildResult(
+                    $resolved,
+                    $cacheCurrency !== '' ? $cacheCurrency : $currency,
+                    'dynamic',
+                    $fresh ? JetpkHomepageFareRefreshStatus::Success->value : JetpkHomepageFareRefreshStatus::Stale->value,
+                );
             }
         }
 
+        if (! $allowManualFallback) {
+            return null;
+        }
+
+        $manual = self::positiveAmount($item['manual_fallback_price'] ?? null);
         if ($manual !== null) {
             return self::buildResult($manual, $currency, 'manual', JetpkHomepageFareRefreshStatus::Manual->value);
         }
@@ -112,8 +118,4 @@ final class JetpkHomepageFareDisplay
         }
     }
 
-    private static function isTruthy(mixed $value): bool
-    {
-        return in_array((string) $value, ['1', 'true', 'yes', 'on'], true);
-    }
 }

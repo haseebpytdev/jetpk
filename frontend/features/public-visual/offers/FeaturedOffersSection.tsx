@@ -5,6 +5,7 @@ import { SectionContainer } from "@/components/layout/SectionContainer";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { ScrollReveal } from "@/features/motion";
 import { resolveOfferMedia } from "@/lib/homepage-media";
+import Link from "next/link";
 import type { HomepageFeaturedDeal, HomepageSectionHeader } from "../types/homepage";
 import { PublicSectionHeader } from "../components/PublicSectionHeader";
 import { FullCardRail, fullCardArticleClass } from "../components/FullCardRail";
@@ -38,15 +39,14 @@ export function FeaturedOffersSection({
 
           <FullCardRail
             itemCount={items.length}
-            ariaLabel="Live fare cards"
-            prevLabel="Scroll live fares left"
-            nextLabel="Scroll live fares right"
+            ariaLabel="Group ticketing deals"
+            prevLabel="Scroll deals left"
+            nextLabel="Scroll deals right"
           >
             {items.map((offer, index) => {
               const media = resolveOfferMedia(offer, index);
-
-              return (
-                <article key={offer.id} className={fullCardArticleClass} data-testid="featured-offer-card">
+              const cardInner = (
+                <>
                   <div className="relative aspect-[16/9] bg-jp-surface-muted">
                     <ImageSlot
                       src={media.image}
@@ -76,6 +76,21 @@ export function FeaturedOffersSection({
                       <p className="mt-3 text-jp-sm font-semibold text-jp-primary">{offer.priceLabel}</p>
                     ) : null}
                   </div>
+                </>
+              );
+
+              return (
+                <article key={offer.id} className={fullCardArticleClass} data-testid="featured-offer-card">
+                  {offer.href ? (
+                    <Link
+                      href={offer.href}
+                      className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
+                    >
+                      {cardInner}
+                    </Link>
+                  ) : (
+                    cardInner
+                  )}
                 </article>
               );
             })}

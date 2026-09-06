@@ -3,10 +3,11 @@
 namespace App\Support\Client;
 
 use App\Services\Client\ClientPageContentResolver;
+use App\Services\Homepage\FeaturedDeals\GroupTicketFeaturedDealSource;
 use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Support\Client\Homepage\JetpkHomepageHeroSizing;
 use App\Support\Media\PublicMediaUrl;
-use Illuminate\Support\Str;
+
 
 /**
  * Resolves JetPK homepage section content with presence-aware defaults and fare/image normalization.
@@ -81,7 +82,8 @@ final class JetpkHomepageSectionData
             }
 
             $routeId = (string) ($item['id'] ?? '');
-            $fare = JetpkHomepageFareDisplay::resolve($item, $fareCache[$routeId] ?? null);
+            $cached = is_array($fareCache[$routeId] ?? null) ? $fareCache[$routeId] : null;
+            $fare = JetpkHomepageFareDisplay::resolve($item, $cached);
             $priceLabel = $fare['label'] ?? JetpkHomepageFareDisplay::neutralAvailabilityLabel();
             $cmsImage = PublicMediaUrl::normalize($this->routeImageUrl($item, $routeId));
             $image = $cmsImage ?? '';
@@ -93,7 +95,8 @@ final class JetpkHomepageSectionData
                 'price' => $fare['label'] ?? '',
                 'airlines' => $fare['label'] ?? JetpkHomepageFareDisplay::neutralAvailabilityLabel(),
                 'fare_source' => $fare['source'] ?? 'none',
-                'search_url' => $this->routeSearchUrl($item),
+                'fare_target_date' => $cached['travel_date'] ?? null,
+                'search_url' => $this->routeSearchUrl($item, is_array($cached) ? $cached : null),
                 'image' => $image !== '' ? $image : null,
                 'image_alt' => trim((string) ($item['image_alt'] ?? $item['alt'] ?? "{$from} to {$to}")),
                 'media_source' => $image !== '' ? 'cms' : 'none',
@@ -115,6 +118,7 @@ final class JetpkHomepageSectionData
 
         $destinations = [];
         $index = 0;
+        $fareCache = $this->fareCacheDestinations();
 
         foreach ($this->sortedEnabledItems($items) as $item) {
             if (! is_array($item)) {
@@ -127,7 +131,9 @@ final class JetpkHomepageSectionData
                 continue;
             }
 
-            $fare = JetpkHomepageFareDisplay::resolve($item, null);
+            $destId = (string) ($item['id'] ?? $code);
+            $cached = is_array($fareCache[$destId] ?? null) ? $fareCache[$destId] : (is_array($fareCache[$code] ?? null) ? $fareCache[$code] : null);
+            $fare = JetpkHomepageFareDisplay::resolve($item, $cached);
             $cmsImage = PublicMediaUrl::normalize($this->destinationCmsImageUrl($item, $index));
             $image = $cmsImage ?? '';
             $mediaSource = 'cms';
@@ -135,7 +141,10 @@ final class JetpkHomepageSectionData
                 $image = $this->destinationFallbackImageUrl();
                 $mediaSource = 'fallback';
             }
-            $link = trim((string) ($item['link'] ?? $item['cta_url'] ?? ''));
+            $winningOrigin = strtoupper(trim((string) ($cached['winning_origin'] ?? '')));
+            $searchUrl = $winningOrigin !== '' && $code !== ''
+                ? $this->destinationSearchUrl($winningOrigin, $code, is_array($cached) ? $cached : null)
+                : null;
             $imageAlt = trim((string) ($item['image_alt'] ?? $item['alt'] ?? $title));
 
             $destinations[] = array_merge($item, [
@@ -144,10 +153,12 @@ final class JetpkHomepageSectionData
                 'image' => $image,
                 'image_alt' => $imageAlt,
                 'media_source' => $mediaSource,
+                'winning_origin' => $winningOrigin !== '' ? $winningOrigin : null,
                 'price' => $fare !== null ? (int) round($fare['amount']) : null,
                 'price_label' => $fare['label'] ?? JetpkHomepageFareDisplay::neutralAvailabilityLabel(),
-                'link' => $link,
-                'href' => $link !== '' ? $link : null,
+                'fare_source' => $fare['source'] ?? 'none',
+                'link' => $searchUrl ?? '',
+                'href' => $searchUrl,
             ]);
 
             $index++;
@@ -162,50 +173,21 @@ final class JetpkHomepageSectionData
     public function featuredDealsForDisplay(): array
     {
         $items = $this->field('featured_deals.items', null);
-        if (is_array($items) && $items !== []) {
-            $deals = [];
+        $editorial = [];
+        if (is_array($items)) {
             foreach ($this->sortedEnabledItems($items) as $item) {
                 if (! is_array($item)) {
                     continue;
                 }
-                $from = strtoupper(trim((string) ($item['from'] ?? '')));
-                $to = strtoupper(trim((string) ($item['to'] ?? '')));
-                if ($from === '' && $to === '') {
-                    continue;
-                }
                 $itemId = trim((string) ($item['id'] ?? ''));
                 $image = PublicMediaUrl::normalize($this->featuredDealImageUrl($item, $itemId)) ?? '';
-                $imageAlt = trim((string) ($item['image_alt'] ?? $item['alt'] ?? ''));
-                if ($imageAlt === '') {
-                    $imageAlt = trim((string) ($item['title'] ?? '')).($from !== '' && $to !== '' ? " {$from} to {$to}" : '');
-                }
-
-                $deals[] = [
-                    'id' => $itemId !== '' ? $itemId : null,
-                    'airline' => trim((string) ($item['airline'] ?? '')),
-                    'from' => $from,
-                    'to' => $to,
-                    'depart' => trim((string) ($item['depart'] ?? '')),
-                    'arrive' => trim((string) ($item['arrive'] ?? '')),
-                    'dur' => trim((string) ($item['dur'] ?? '')),
-                    'stops' => (int) ($item['stops'] ?? 0),
-                    'price' => (int) ($item['price'] ?? 0),
-                    'title' => trim((string) ($item['title'] ?? '')),
-                    'badge' => trim((string) ($item['badge'] ?? '')),
-                    'description' => trim((string) ($item['description'] ?? $item['text'] ?? '')),
+                $editorial[] = array_merge($item, [
                     'image' => $image !== '' ? $image : null,
-                    'image_alt' => $imageAlt,
-                    'image_asset_key' => trim((string) ($item['image_asset_key'] ?? '')),
-                    'media_source' => $image !== '' ? 'cms' : 'none',
-                ];
-            }
-
-            if ($deals !== []) {
-                return $deals;
+                ]);
             }
         }
 
-        return [];
+        return app(GroupTicketFeaturedDealSource::class)->deals($editorial);
     }
 
     /**
@@ -272,6 +254,19 @@ final class JetpkHomepageSectionData
     private function fareCacheRoutes(): array
     {
         $cache = $this->field('_fare_cache.routes', []);
+        if (! is_array($cache)) {
+            return [];
+        }
+
+        return $cache;
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    private function fareCacheDestinations(): array
+    {
+        $cache = $this->field('_fare_cache.destinations', []);
         if (! is_array($cache)) {
             return [];
         }
@@ -394,7 +389,7 @@ final class JetpkHomepageSectionData
     /**
      * @param  array<string, mixed>  $item
      */
-    private function routeSearchUrl(array $item): string
+    private function routeSearchUrl(array $item, ?array $fareCache = null): string
     {
         $custom = trim((string) ($item['cta_url'] ?? ''));
         if ($custom !== '') {
@@ -402,25 +397,47 @@ final class JetpkHomepageSectionData
         }
 
         $offset = max(1, (int) config('jetpk_homepage.route_date_offset_days', 7));
-        $depart = now(config('app.timezone', 'Asia/Karachi'))->addDays($offset)->toDateString();
-        $tripType = (string) ($item['trip_type'] ?? 'one_way');
+        $depart = trim((string) ($fareCache['travel_date'] ?? '')) ?: now(config('app.timezone', 'Asia/Karachi'))->addDays($offset)->toDateString();
+        $tripType = (string) ($item['trip_type'] ?? config('jetpk_homepage.default_trip_type', 'one_way'));
         $params = [
             'from' => strtoupper((string) ($item['from'] ?? '')),
             'to' => strtoupper((string) ($item['to'] ?? '')),
             'depart' => $depart,
             'trip_type' => $tripType === 'return' ? 'return' : 'one_way',
-            'cabin' => (string) ($item['cabin'] ?? 'economy'),
-            'adults' => max(1, (int) ($item['adults'] ?? 1)),
+            'cabin' => (string) ($item['cabin'] ?? config('jetpk_homepage.default_cabin', 'economy')),
+            'adults' => max(1, (int) ($item['adults'] ?? config('jetpk_homepage.default_adults', 1))),
             'children' => 0,
             'infants' => 0,
         ];
 
         if ($tripType === 'return') {
             $stay = max(1, (int) ($item['return_stay_days'] ?? config('jetpk_homepage.default_return_stay_days', 7)));
-            $params['return'] = now(config('app.timezone', 'Asia/Karachi'))->addDays($offset + $stay)->toDateString();
+            $params['return'] = trim((string) ($fareCache['return_date'] ?? ''))
+                ?: now(config('app.timezone', 'Asia/Karachi'))->addDays($offset + $stay)->toDateString();
         }
 
         return client_route('flights.results', $params);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $fareCache
+     */
+    private function destinationSearchUrl(string $origin, string $destination, ?array $fareCache = null): string
+    {
+        $offset = max(1, (int) config('jetpk_homepage.route_date_offset_days', 7));
+        $depart = trim((string) ($fareCache['travel_date'] ?? '')) ?: now(config('app.timezone', 'Asia/Karachi'))->addDays($offset)->toDateString();
+        $tripType = (string) config('jetpk_homepage.default_trip_type', 'one_way');
+
+        return client_route('flights.results', [
+            'from' => strtoupper($origin),
+            'to' => strtoupper($destination),
+            'depart' => $depart,
+            'trip_type' => $tripType === 'return' ? 'return' : 'one_way',
+            'cabin' => (string) config('jetpk_homepage.default_cabin', 'economy'),
+            'adults' => max(1, (int) config('jetpk_homepage.default_adults', 1)),
+            'children' => 0,
+            'infants' => 0,
+        ]);
     }
 
     /**

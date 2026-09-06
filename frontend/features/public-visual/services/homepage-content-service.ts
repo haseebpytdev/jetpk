@@ -108,6 +108,7 @@ function mapDestinations(items: Array<Record<string, unknown>> = []): HomepageDe
     imageAlt: item.image_alt ? String(item.image_alt) : undefined,
     priceLabel: String(item.price_label ?? ""),
     href: item.href ? String(item.href) : item.link ? String(item.link) : null,
+    winningOrigin: item.winning_origin ? String(item.winning_origin) : null,
   }));
 }
 
@@ -124,6 +125,7 @@ function mapFeaturedDeals(items: Array<Record<string, unknown>> = []): HomepageF
     priceLabel: String(item.price_label ?? ""),
     image: item.image ? String(item.image) : null,
     imageAlt: item.image_alt ? String(item.image_alt) : undefined,
+    href: item.href ? String(item.href) : null,
   }));
 }
 
@@ -137,12 +139,19 @@ function mapWhyCards(cards: Array<Record<string, unknown>> = []): HomepageWhyCar
   }));
 }
 
+function decodeCmsText(value: unknown): string {
+  const text = String(value ?? "");
+  return text.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex: string) =>
+    String.fromCharCode(Number.parseInt(hex, 16)),
+  );
+}
+
 function mapSupportCta(remote?: Record<string, unknown>): HomepageSupportCta {
   return {
     enabled: remote?.enabled === true,
-    eyebrow: String(remote?.eyebrow ?? ""),
-    title: String(remote?.title ?? ""),
-    subtitle: String(remote?.subtitle ?? ""),
+    eyebrow: decodeCmsText(remote?.eyebrow ?? ""),
+    title: decodeCmsText(remote?.title ?? ""),
+    subtitle: decodeCmsText(remote?.subtitle ?? ""),
     callEnabled: remote?.call_enabled !== false,
     callLabel: String(remote?.call_label ?? "Call support"),
     callHref: sanitizePublicActionHref(remote?.call_href ? String(remote.call_href) : null),

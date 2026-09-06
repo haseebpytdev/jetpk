@@ -5,6 +5,7 @@ namespace App\Services\PublicContent;
 use App\Services\Client\ClientPageContentResolver;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\JetpkHomepageSectionData;
+use App\Support\Cms\CmsPlainText;
 use App\Support\Media\PublicMediaUrl;
 
 /**
@@ -147,6 +148,7 @@ final class HomepagePublicContentPresenter
 
                 return [
                     'id' => $id !== '' ? $id : md5(($item['from'] ?? '').($item['to'] ?? '').($item['airline'] ?? '')),
+                    'source' => (string) ($item['source'] ?? 'group_ticket'),
                     'airline' => (string) ($item['airline'] ?? ''),
                     'from' => (string) ($item['from'] ?? ''),
                     'to' => (string) ($item['to'] ?? ''),
@@ -155,15 +157,14 @@ final class HomepagePublicContentPresenter
                     'duration' => (string) ($item['dur'] ?? ''),
                     'stops' => (int) ($item['stops'] ?? 0),
                     'price' => (int) ($item['price'] ?? 0),
-                    'price_label' => ((int) ($item['price'] ?? 0)) > 0
-                        ? 'PKR '.number_format((int) $item['price'])
-                        : '',
+                    'price_label' => (string) ($item['price_label'] ?? ''),
                     'title' => (string) ($item['title'] ?? ''),
                     'badge' => (string) ($item['badge'] ?? ''),
                     'description' => (string) ($item['description'] ?? ''),
                     'image' => $image,
                     'image_alt' => (string) ($item['image_alt'] ?? ''),
                     'media_source' => $image !== null ? 'cms' : 'none',
+                    'href' => (string) ($item['href'] ?? ''),
                 ];
             }, $items),
         ];
@@ -220,8 +221,8 @@ final class HomepagePublicContentPresenter
         }
 
         $support = $this->homepage->supportCtaForDisplay();
-        $title = trim((string) $this->homepage->field('support_cta.title', ''));
-        $subtitle = trim((string) $this->homepage->field('support_cta.subtitle', ''));
+        $title = CmsPlainText::decode($this->homepage->field('support_cta.title', ''));
+        $subtitle = CmsPlainText::decode($this->homepage->field('support_cta.subtitle', ''));
 
         if ($title === '' && $subtitle === '') {
             return ['enabled' => false];
@@ -233,14 +234,14 @@ final class HomepagePublicContentPresenter
 
         return [
             'enabled' => true,
-            'eyebrow' => trim((string) $this->homepage->field('support_cta.eyebrow', '')),
+            'eyebrow' => CmsPlainText::decode($this->homepage->field('support_cta.eyebrow', '')),
             'title' => $title,
             'subtitle' => $subtitle,
             'call_enabled' => ($support['call_enabled'] ?? '1') === '1',
-            'call_label' => trim((string) $this->homepage->field('support_cta.call_label', 'Call support')),
+            'call_label' => CmsPlainText::decode($this->homepage->field('support_cta.call_label', 'Call support')),
             'call_href' => $this->resolveActionHref($callUrlRaw, $phoneValue),
             'chat_enabled' => ($support['chat_enabled'] ?? '1') === '1',
-            'chat_label' => trim((string) $this->homepage->field('support_cta.chat_label', 'Get support')),
+            'chat_label' => CmsPlainText::decode($this->homepage->field('support_cta.chat_label', 'Get support')),
             'chat_href' => $this->resolveActionHref($chatUrlRaw, ''),
             'image' => PublicMediaUrl::normalize($this->homepage->assetUrl('support_cta_background')),
         ];

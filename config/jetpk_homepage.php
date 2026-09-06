@@ -30,6 +30,21 @@ return [
 
     'default_currency' => 'PKR',
 
+    'default_trip_type' => 'one_way',
+
+    /*
+     | Pakistan origin pool for Destinations on Rise cheapest-fare refresh.
+     | Matches the established JetPakistan primary gateways used by homepage routes.
+     */
+    'destination_origin_pool' => array_values(array_filter(array_map(
+        static fn (string $code): string => strtoupper(trim($code)),
+        explode(',', (string) env('JETPK_HOMEPAGE_DESTINATION_ORIGIN_POOL', 'KHI,LHE,ISB')),
+    ))),
+
+    'featured_deal_source' => env('JETPK_HOMEPAGE_FEATURED_DEAL_SOURCE', 'group_ticket'),
+
+    'featured_deal_limit' => (int) env('JETPK_HOMEPAGE_FEATURED_DEAL_LIMIT', 6),
+
     'destination_fallback_image' => 'themes/frontend/jetpakistan/images/homepage-destination-fallback.svg',
 
     'destination_storage_prefix' => 'jetpk/homepage/popular-destinations',

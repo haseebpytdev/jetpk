@@ -389,37 +389,61 @@ async function oneSample(browser, attempt) {
       const ttfb = Math.max(0, nav.responseStart - nav.requestStart);
       const transfer = Math.max(0, nav.responseEnd - nav.responseStart);
       const navStart = nav.startTime;
+      const fetchStart = nav.fetchStart;
+      const connectEnd = nav.connectEnd;
+      const stallAnchor = Math.max(fetchStart || 0, connectEnd || 0, nav.domainLookupEnd || 0);
+      const stall = Math.max(0, nav.requestStart - stallAnchor);
+      const preFetch = Math.max(0, fetchStart - navStart);
       const shell = typeof shellMark === "number" ? shellMark : nav.responseEnd;
       const navWall = Math.max(0, shell - navStart);
-      const postDoc = Math.max(0, shell - nav.responseEnd);
+      const parseEnd = Math.min(
+        typeof nav.domInteractive === "number" && nav.domInteractive > 0 ? nav.domInteractive : nav.responseEnd,
+        shell,
+      );
+      const htmlParse = Math.max(0, parseEnd - nav.responseEnd);
+      const postDoc = Math.max(0, shell - Math.max(nav.responseEnd, parseEnd));
       const exclusive = {
+        PRE_FETCH_MS: Math.round(preFetch),
         DNS_MS: Math.round(dns),
         TCP_MS: Math.round(tcp),
         TLS_MS: Math.round(tls),
+        QUEUE_BEFORE_REQUEST_MS: Math.round(stall),
         REQUEST_TO_FIRST_BYTE_MS: Math.round(ttfb),
         DOCUMENT_TRANSFER_MS: Math.round(transfer),
+        HTML_PARSE_MS: Math.round(htmlParse),
         POST_DOCUMENT_APP_TO_SHELL_MS: Math.round(postDoc),
       };
       const childSum =
+        exclusive.PRE_FETCH_MS +
         exclusive.DNS_MS +
         exclusive.TCP_MS +
         exclusive.TLS_MS +
+        exclusive.QUEUE_BEFORE_REQUEST_MS +
         exclusive.REQUEST_TO_FIRST_BYTE_MS +
         exclusive.DOCUMENT_TRANSFER_MS +
+        exclusive.HTML_PARSE_MS +
         exclusive.POST_DOCUMENT_APP_TO_SHELL_MS;
       const unattributed = Math.max(0, Math.round(navWall) - childSum);
       return {
         ...exclusive,
         NAV_TO_SHELL_MS: Math.round(navWall),
         NAV_TO_SHELL_EXTERNAL_MS:
+          exclusive.PRE_FETCH_MS +
           exclusive.DNS_MS +
           exclusive.TCP_MS +
           exclusive.TLS_MS +
+          exclusive.QUEUE_BEFORE_REQUEST_MS +
           exclusive.REQUEST_TO_FIRST_BYTE_MS +
           exclusive.DOCUMENT_TRANSFER_MS,
-        NAV_TO_SHELL_APP_MS: exclusive.POST_DOCUMENT_APP_TO_SHELL_MS,
+        NAV_TO_SHELL_APP_MS: exclusive.HTML_PARSE_MS + exclusive.POST_DOCUMENT_APP_TO_SHELL_MS,
         NAV_TO_SHELL_UNATTRIBUTED_MS: unattributed,
-        NAV_TO_SHELL_TOTAL_RECONCILED: unattributed === 0 && childSum <= Math.round(navWall) + 1 ? "YES" : "NO",
+        NAV_UNATTRIBUTED_ROOT_CAUSE:
+          stall >= 1
+            ? "BROWSER_QUEUE_FETCHSTART_TO_REQUESTSTART"
+            : unattributed > 0
+              ? "REMAINING_EXCLUSIVE_GAP"
+              : "NONE",
+        NAV_TO_SHELL_TOTAL_RECONCILED: unattributed === 0 && childSum <= Math.round(navWall) + 2 ? "YES" : "NO",
       };
     });
     } catch {
@@ -592,10 +616,14 @@ async function oneSample(browser, attempt) {
       sample.TLS_MS = exclusiveNav.TLS_MS;
       sample.REQUEST_TO_FIRST_BYTE_MS = exclusiveNav.REQUEST_TO_FIRST_BYTE_MS;
       sample.DOCUMENT_TRANSFER_MS = exclusiveNav.DOCUMENT_TRANSFER_MS;
+      sample.QUEUE_BEFORE_REQUEST_MS = exclusiveNav.QUEUE_BEFORE_REQUEST_MS;
+      sample.PRE_FETCH_MS = exclusiveNav.PRE_FETCH_MS;
+      sample.HTML_PARSE_MS = exclusiveNav.HTML_PARSE_MS;
       sample.POST_DOCUMENT_APP_TO_SHELL_MS = exclusiveNav.POST_DOCUMENT_APP_TO_SHELL_MS;
       sample.NAV_TO_SHELL_EXTERNAL_MS = exclusiveNav.NAV_TO_SHELL_EXTERNAL_MS;
       sample.NAV_TO_SHELL_APP_MS = exclusiveNav.NAV_TO_SHELL_APP_MS;
       sample.NAV_TO_SHELL_UNATTRIBUTED_MS = exclusiveNav.NAV_TO_SHELL_UNATTRIBUTED_MS;
+      sample.NAV_UNATTRIBUTED_ROOT_CAUSE = exclusiveNav.NAV_UNATTRIBUTED_ROOT_CAUSE;
       sample.NAV_TO_SHELL_TOTAL_RECONCILED = exclusiveNav.NAV_TO_SHELL_TOTAL_RECONCILED;
     }
     sample.PASSENGERS_FETCH_MS = T9 != null && T10 != null ? T10 - T9 : null;
@@ -640,14 +668,20 @@ async function oneSample(browser, attempt) {
     }
     sample.FRESH_APP_MS = Math.max(
       0,
-      sample.FRESH_WALL_MS - (sample.FRESH_SUPPLIER_OVERLAP_MS || 0) - (sample.FRESH_SUPPLIER_CHILD_MS || 0),
+      sample.FRESH_WALL_MS
+        - (sample.FRESH_SUPPLIER_OVERLAP_MS || 0)
+        - (sample.FRESH_SUPPLIER_CHILD_MS || 0)
+        - (sample.NAV_TO_SHELL_EXTERNAL_MS || 0)
+        - Math.max(0, (sample.PASSENGERS_NETWORK_MS || 0) - (sample.PASSENGERS_SERVER_MS || 0)),
     );
     sample.FRESH_UNATTRIBUTED_MS = Math.max(
       0,
       sample.FRESH_WALL_MS -
         sample.FRESH_APP_MS -
         (sample.FRESH_SUPPLIER_OVERLAP_MS || 0) -
-        (sample.FRESH_SUPPLIER_CHILD_MS || 0),
+        (sample.FRESH_SUPPLIER_CHILD_MS || 0) -
+        (sample.NAV_TO_SHELL_EXTERNAL_MS || 0) -
+        Math.max(0, (sample.PASSENGERS_NETWORK_MS || 0) - (sample.PASSENGERS_SERVER_MS || 0)),
     );
     sample.SHELL_TO_USABLE_TOTAL_MS = sample.SHELL_TO_USABLE_MS;
     sample.TRAVELER_DATA_READY_MS = sample.SHELL_TO_USABLE_TOTAL_MS;

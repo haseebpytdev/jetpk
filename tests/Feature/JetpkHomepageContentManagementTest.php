@@ -6,6 +6,7 @@ use App\Enums\AccountType;
 use App\Enums\ClientPageSettingStatus;
 use App\Models\ClientPageAsset;
 use App\Models\ClientPageSetting;
+use App\Models\GroupInventory;
 use App\Models\User;
 use App\Services\FlightSearch\FlightSearchService;
 use App\Services\Homepage\JetpkHomepageRouteFareRefreshService;
@@ -237,8 +238,9 @@ class JetpkHomepageContentManagementTest extends TestCase
             'fare_status' => 'success',
         ]));
 
-        $manual = JetpkHomepageFareDisplay::resolve(['manual_fallback_price' => 42000], null);
+        $manual = JetpkHomepageFareDisplay::resolve(['manual_fallback_price' => 42000], null, true);
         $this->assertSame('PKR 42,000', $manual['label']);
+        $this->assertNull(JetpkHomepageFareDisplay::resolve(['manual_fallback_price' => 42000], null));
     }
 
     public function test_homepage_content_audit_command_runs(): void
@@ -247,6 +249,101 @@ class JetpkHomepageContentManagementTest extends TestCase
         $this->seedPublishedHome($profile, $this->representativeValidFourCardHomeContent());
         Artisan::call('jetpk:homepage-content-audit', ['--profile' => 'jetpk']);
         $this->assertStringContainsString('fail_count=0', Artisan::output());
+    }
+
+    public function test_support_cta_decodes_literal_unicode_escape(): void
+    {
+        $this->makeJetpkProfile();
+        $this->seedPublishedHome(\App\Models\ClientProfile::query()->where('slug', 'jetpk')->first(), [
+            'support_cta' => [
+                'enabled' => '1',
+                'title' => 'Human Support \\u2014 real people',
+                'subtitle' => 'We are here',
+                'call_enabled' => '0',
+                'chat_enabled' => '1',
+                'chat_url' => '/support',
+            ],
+        ]);
+
+        $payload = app(\App\Services\PublicContent\HomepagePublicContentPresenter::class)->present();
+        $this->assertSame('Human Support — real people', $payload['support_cta']['title']);
+        $this->assertStringNotContainsString('\\u2014', $payload['support_cta']['title']);
+    }
+
+    public function test_featured_deals_come_from_group_inventory_not_cms_price(): void
+    {
+        $profile = $this->makeJetpkProfile();
+        GroupInventory::query()->create([
+            'supplier' => 'alhaider',
+            'supplier_package_id' => 'JP-HOME-1',
+            'public_id' => 'JP-HOME-1',
+            'title' => 'ISB DXB group',
+            'sector' => 'ISB-DXB',
+            'airline_name' => 'Air Arabia',
+            'departure_date' => now(config('app.timezone'))->addDays(14)->toDateString(),
+            'total_seats' => 20,
+            'held_seats' => 0,
+            'sold_seats' => 0,
+            'price' => 89000,
+            'currency' => 'PKR',
+            'is_active' => true,
+        ]);
+
+        $this->seedPublishedHome($profile, [
+            'featured_deals' => [
+                'enabled' => '1',
+                'items' => [[
+                    'id' => 'cms-fake',
+                    'from' => 'AAA',
+                    'to' => 'BBB',
+                    'price' => 1,
+                    'enabled' => '1',
+                ]],
+            ],
+        ]);
+
+        $deals = app(\App\Support\Client\JetpkHomepageSectionData::class)->featuredDealsForDisplay();
+        $this->assertNotEmpty($deals);
+        $this->assertSame('group_ticket', $deals[0]['source']);
+        $this->assertSame('ISB', $deals[0]['from']);
+        $this->assertSame('DXB', $deals[0]['to']);
+        $this->assertSame(89000, $deals[0]['price']);
+        $this->assertNotEmpty($deals[0]['href']);
+    }
+
+    public function test_destination_click_uses_winning_origin_from_cache(): void
+    {
+        $profile = $this->makeJetpkProfile();
+        $this->seedPublishedHome($profile, [
+            'destinations' => [
+                'enabled' => '1',
+                'items' => [[
+                    'id' => 'd-dxb',
+                    'code' => 'DXB',
+                    'title' => 'Dubai',
+                    'enabled' => '1',
+                    'manual_fallback_price' => 111,
+                ]],
+            ],
+            '_fare_cache' => [
+                'destinations' => [
+                    'd-dxb' => [
+                        'resolved_fare' => 54000,
+                        'resolved_currency' => 'PKR',
+                        'fare_refreshed_at' => now()->toIso8601String(),
+                        'fare_status' => 'success',
+                        'winning_origin' => 'LHE',
+                        'travel_date' => now(config('app.timezone'))->addDays(7)->toDateString(),
+                    ],
+                ],
+            ],
+        ]);
+
+        $cards = app(\App\Support\Client\JetpkHomepageSectionData::class)->destinationsForDisplay();
+        $this->assertSame('LHE', $cards[0]['winning_origin']);
+        $this->assertStringContainsString('from=LHE', $cards[0]['href']);
+        $this->assertStringContainsString('to=DXB', $cards[0]['href']);
+        $this->assertSame('PKR 54,000', $cards[0]['price_label']);
     }
 
     /**

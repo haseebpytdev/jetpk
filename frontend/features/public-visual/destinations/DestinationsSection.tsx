@@ -63,7 +63,11 @@ export function DestinationsSection({
                   <div className="p-jp-md">
                     {destination.code ? <Badge variant="new">{destination.code}</Badge> : null}
                     <h3 className="mt-2 font-sans text-jp-md font-semibold text-jp-text">{destination.title}</h3>
-                    {destination.country ? (
+                    {destination.winningOrigin ? (
+                      <p className="text-jp-sm text-jp-muted" data-testid="destination-winning-origin">
+                        From {destination.winningOrigin}
+                      </p>
+                    ) : destination.country ? (
                       <p className="text-jp-sm text-jp-muted">{destination.country}</p>
                     ) : destination.text ? (
                       <p className="text-jp-sm text-jp-muted">{destination.text}</p>
