@@ -14,7 +14,7 @@ Close Traveler FRESH application P95, certify NAV exclusive unattributed=0, and 
 - PRODUCTION_RUNTIME_SHA=`1af9f3d2ba4c33e940d6694e954b579065bdef6b`
 - FINAL_PUBLIC_BUILD_ID=`5tU8wCFhHmXtk5tSvTDcC`
 - FINAL_DASHBOARD_BUILD_ID=`knBdbMBLDH3sxWqzoMDYu`
-- EVIDENCE_SHA and FINAL_REMOTE_HEAD are the docs commit after this summary.
+- EVIDENCE_SHA=`2bd5d4f4d04723dbb9b9fd08cf7e58c288969b0c`
 
 ## Traveler
 Book Now now stamps `authoritative_bootstrap` onto the search-cache offer and persists the booking draft immediately. Traveler GET recovers that stamp if the session boolean is missing, so `prepareCheckoutHold` uses cached Sabre validation instead of a second live shop.
