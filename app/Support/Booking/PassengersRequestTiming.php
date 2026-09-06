@@ -118,6 +118,9 @@ final class PassengersRequestTiming
             'db_total_ms' => (int) round($this->dbTotalMs),
             'db_slowest_query_ms' => round($this->dbSlowestMs, 3),
             'db_duplicate_query_count' => count(array_filter($this->dbFingerprints, static fn (int $n): bool => $n > 1)),
+            'php_bootstrap_ms' => defined('LARAVEL_START')
+                ? (int) round(($this->t0 - (float) LARAVEL_START) * 1000)
+                : null,
         ], $deltas);
     }
 

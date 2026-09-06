@@ -14,6 +14,9 @@ class BookingDraftService
     public function merge(array $data): void
     {
         Session::put(self::SESSION_KEY, array_merge($this->current(), $data));
+        if (Session::isStarted()) {
+            Session::save();
+        }
     }
 
     /**
@@ -25,6 +28,9 @@ class BookingDraftService
         Session::put(self::SESSION_KEY, array_merge($current, $data, [
             'submitted_at' => now()->toIso8601String(),
         ]));
+        if (Session::isStarted()) {
+            Session::save();
+        }
     }
 
     /**

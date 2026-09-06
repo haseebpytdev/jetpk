@@ -179,4 +179,32 @@ class OfferValidationRecentRevalidationSkipTest extends TestCase
         $this->assertTrue($result->is_valid);
         $this->assertNotNull($result->validated_offer);
     }
+
+    public function test_sabre_skips_live_adapter_when_offer_has_authoritative_bootstrap_stamp(): void
+    {
+        config([
+            'suppliers.sabre.booking_enabled' => true,
+            'suppliers.sabre.booking_live_call_enabled' => true,
+        ]);
+
+        [$agency, , $offer] = $this->sabreFixture();
+        $offer['authoritative_bootstrap'] = true;
+        $offer['last_revalidated_at'] = now()->toIso8601String();
+        $offer['revalidation_status'] = 'success';
+
+        $resolver = Mockery::mock(SupplierAdapterResolver::class);
+        $resolver->shouldReceive('resolve')->never();
+
+        $service = new OfferValidationService(
+            $resolver,
+            app(PricingRuleService::class),
+            app(PlatformModuleEnforcer::class),
+        );
+
+        $result = $service->validateSelectedOffer($agency, $offer, $this->baseContext());
+
+        $this->assertTrue($result->is_valid);
+        $this->assertNotNull($result->validated_offer);
+        $this->assertSame('valid', $result->status);
+    }
 }

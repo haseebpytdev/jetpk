@@ -1061,19 +1061,28 @@ class BookingController extends Controller
             }
 
             // Recover authoritative bootstrap when the boolean was lost across hard-nav
-            // but Book Now already stamped valid offer_freshness (avoids a second Sabre shop).
-            if (empty($draft['authoritative_bootstrap'])
-                && is_array($draft['offer_freshness'] ?? null)
-                && $this->sabreOfferFreshness->hasValidRecentRevalidation($draft['offer_freshness'])) {
-                $this->bookingDraft->merge([
-                    'authoritative_bootstrap' => true,
-                    'authoritative_revalidation_at' => (string) (
-                        $draft['offer_freshness']['last_revalidated_at']
-                        ?? $draft['offer_freshness']['selected_offer_last_revalidated_at']
-                        ?? now()->toIso8601String()
-                    ),
+            // but Book Now already stamped valid offer_freshness or the cached offer.
+            if (empty($draft['authoritative_bootstrap'])) {
+                $offerFreshness = is_array($draft['offer_freshness'] ?? null) ? $draft['offer_freshness'] : [];
+                $fromOfferStamp = ! empty($offer['authoritative_bootstrap']);
+                $fromDraftFreshness = $offerFreshness !== []
+                    && $this->sabreOfferFreshness->hasValidRecentRevalidation($offerFreshness);
+                $fromOfferFreshness = $this->sabreOfferFreshness->hasValidRecentRevalidation([
+                    'last_revalidated_at' => $offer['last_revalidated_at'] ?? $offer['selected_offer_last_revalidated_at'] ?? null,
+                    'revalidation_status' => $offer['revalidation_status'] ?? $offer['selected_offer_revalidation_status'] ?? null,
                 ]);
-                $draft = $this->bookingDraft->current();
+                if ($fromOfferStamp || $fromDraftFreshness || $fromOfferFreshness) {
+                    $this->bookingDraft->merge([
+                        'authoritative_bootstrap' => true,
+                        'authoritative_revalidation_at' => (string) (
+                            $offerFreshness['last_revalidated_at']
+                            ?? $offer['last_revalidated_at']
+                            ?? $offer['selected_offer_last_revalidated_at']
+                            ?? now()->toIso8601String()
+                        ),
+                    ]);
+                    $draft = $this->bookingDraft->current();
+                }
             }
 
             $timing->mark('S5_hold_validate_start');
@@ -4484,6 +4493,19 @@ class BookingController extends Controller
             $withChannel['authoritative_bootstrap'] = true;
             if (is_string($draft['authoritative_revalidation_at'] ?? null)) {
                 $withChannel['authoritative_revalidation_at'] = $draft['authoritative_revalidation_at'];
+            }
+        } elseif (is_array($withChannel['search_payload'] ?? null)) {
+            $payloadOffers = is_array($withChannel['search_payload']['offers'] ?? null)
+                ? $withChannel['search_payload']['offers']
+                : [];
+            foreach ($payloadOffers as $cachedOffer) {
+                if (! is_array($cachedOffer)) {
+                    continue;
+                }
+                if (! empty($cachedOffer['authoritative_bootstrap'])) {
+                    $withChannel['authoritative_bootstrap'] = true;
+                    break;
+                }
             }
         }
 

@@ -442,6 +442,7 @@ class FlightController extends Controller
                         ?? now()->toIso8601String();
                     $freshnessMeta['selected_offer_last_revalidated_at'] = $freshnessMeta['last_revalidated_at'];
                 }
+                $revalidatedAt = now()->toIso8601String();
                 app(\App\Services\Booking\BookingDraftService::class)->merge([
                     'offer_freshness' => $freshnessMeta,
                     'search_id' => $searchId,
@@ -449,8 +450,17 @@ class FlightController extends Controller
                     'flight_id' => $offerId,
                     // Authoritative Traveler bootstrap: passengers GET may skip live re-shop.
                     'authoritative_bootstrap' => ! $requiresAcceptance,
-                    'authoritative_revalidation_at' => now()->toIso8601String(),
+                    'authoritative_revalidation_at' => $revalidatedAt,
                 ]);
+                if (! $requiresAcceptance) {
+                    $this->searchStore->patchOfferRevalidationMeta($searchId, $offerId, [
+                        'authoritative_bootstrap' => true,
+                        'last_revalidated_at' => $freshnessMeta['last_revalidated_at'] ?? $revalidatedAt,
+                        'selected_offer_last_revalidated_at' => $freshnessMeta['last_revalidated_at'] ?? $revalidatedAt,
+                        'revalidation_status' => 'success',
+                        'selected_offer_revalidation_status' => 'success',
+                    ]);
+                }
             } catch (\Throwable) {
                 // Draft merge is best-effort for Traveler performance; revalidation already succeeded.
             }

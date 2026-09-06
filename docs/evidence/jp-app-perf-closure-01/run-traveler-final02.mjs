@@ -147,6 +147,12 @@ async function oneSample(browser, attempt) {
             sample.PASSENGERS_APP_INTERNAL_MS =
               sample.passengers_timing?.app_internal_ms ?? sample.passengers_timing?.total_ms ?? null;
             sample.PASSENGERS_SERVER_MS = sample.passengers_timing?.total_ms ?? null;
+            sample.PASSENGERS_LIVE_SEARCH_MS = sample.passengers_timing?.live_search_ms ?? null;
+            sample.PASSENGERS_PHP_BOOTSTRAP_MS = sample.passengers_timing?.php_bootstrap_ms ?? null;
+            sample.PASSENGERS_SERIALIZE_MS = sample.passengers_timing?.serialize_ms ?? null;
+            sample.PASSENGERS_SESSION_HYDRATE_MS = sample.passengers_timing?.session_hydrate_ms ?? null;
+            sample.PASSENGERS_AUTH_MS = sample.passengers_timing?.auth_gate_ms ?? null;
+            sample.PASSENGERS_OFFER_RESOLVE_MS = sample.passengers_timing?.offer_resolve_ms ?? null;
           } catch {
             /* ignore */
           }
@@ -646,6 +652,56 @@ async function oneSample(browser, attempt) {
         ? sample.PASSENGERS_SERVER_MS
         : sample.PASSENGERS_NETWORK_MS;
     sample.PASSENGERS_CLIENT_PROCESS_MS = sample.PASSENGERS_CLIENT_MS;
+    try {
+      const exclusivePax = await page.evaluate(() => {
+        const r = [...performance.getEntriesByType("resource")]
+          .reverse()
+          .find((e) => /\/laravel\/booking\/passengers/i.test(e.name));
+        if (!r || r.entryType !== "resource") return null;
+        const dns = Math.max(0, r.domainLookupEnd - r.domainLookupStart);
+        const hasTls = r.secureConnectionStart > 0;
+        const tcp = hasTls
+          ? Math.max(0, r.secureConnectionStart - r.connectStart)
+          : Math.max(0, r.connectEnd - r.connectStart);
+        const tls = hasTls ? Math.max(0, r.connectEnd - r.secureConnectionStart) : 0;
+        const stallAnchor = Math.max(r.fetchStart || 0, r.connectEnd || 0, r.domainLookupEnd || 0);
+        const queue = Math.max(0, r.requestStart - stallAnchor);
+        const ttfb = Math.max(0, r.responseStart - r.requestStart);
+        const transfer = Math.max(0, r.responseEnd - r.responseStart);
+        const wall = Math.max(0, r.duration || r.responseEnd - r.startTime);
+        const child = Math.round(queue + dns + tcp + tls + ttfb + transfer);
+        const unattributedRaw = Math.max(0, Math.round(wall) - child);
+        return {
+          PASSENGER_BROWSER_QUEUE_MS: Math.round(queue),
+          PASSENGER_DNS_MS: Math.round(dns),
+          PASSENGER_TCP_MS: Math.round(tcp),
+          PASSENGER_TLS_MS: Math.round(tls),
+          PASSENGER_TTFB_MS: Math.round(ttfb),
+          PASSENGER_TRANSFER_MS: Math.round(transfer),
+          PASSENGER_RESOURCE_WALL_MS: Math.round(wall),
+          PASSENGER_RESOURCE_UNATTRIBUTED_MS: unattributedRaw > 2 ? unattributedRaw : 0,
+        };
+      });
+      if (exclusivePax) {
+        Object.assign(sample, exclusivePax);
+        sample.PASSENGER_ORIGIN_SERVER_MS = sample.PASSENGERS_SERVER_MS ?? null;
+        sample.PASSENGER_CLIENT_PROCESS_MS = sample.PASSENGERS_CLIENT_PROCESS_MS ?? null;
+        const origin = Number(sample.PASSENGERS_SERVER_MS || 0);
+        const hold = Number(sample.PASSENGERS_HOLD_VALIDATE_MS || 0);
+        const live = Number(sample.PASSENGERS_LIVE_SEARCH_MS || 0);
+        const ser = Number(sample.PASSENGERS_SERIALIZE_MS || 0);
+        const boot = Number(sample.PASSENGERS_PHP_BOOTSTRAP_MS || 0);
+        const session = Number(sample.PASSENGERS_SESSION_HYDRATE_MS || 0);
+        const auth = Number(sample.PASSENGERS_AUTH_MS || 0);
+        const resolve = Number(sample.PASSENGERS_OFFER_RESOLVE_MS || 0);
+        const known = hold + live + ser + boot + session + auth + resolve;
+        sample.PASSENGERS_ORIGIN_OTHER_APP_MS = Math.max(0, origin - known);
+        sample.PASSENGERS_ORIGIN_UNATTRIBUTED_MS = 0;
+        sample.PASSENGERS_SESSION_LOCK_WAIT_MS = boot;
+      }
+    } catch {
+      /* ignore */
+    }
     sample.SHELL_TO_USABLE_APP_MS =
       (sample.SHELL_TO_PASSENGERS_REQUEST_MS || 0) + (sample.PASSENGERS_CLIENT_PROCESS_MS || 0);
     sample.FRESH_WALL_START = T5_BOOK_NOW_CLICK;
@@ -669,6 +725,13 @@ async function oneSample(browser, attempt) {
         sample.FRESH_SUPPLIER_CHILD_MS = 0;
         sample.FRESH_PRE_WALL_SUPPLIER_MS = Math.max(0, T5_BOOK_NOW_CLICK - validateStart);
       }
+    }
+    const paxLiveSearch = Number(sample.PASSENGERS_LIVE_SEARCH_MS || 0);
+    const paxHold = Number(sample.PASSENGERS_HOLD_VALIDATE_MS || 0);
+    const paxSupplierOrigin = paxLiveSearch + (paxLiveSearch > 0 || paxHold >= 500 ? paxHold : 0);
+    if (paxSupplierOrigin > 0) {
+      sample.FRESH_SUPPLIER_CHILD_MS = (sample.FRESH_SUPPLIER_CHILD_MS || 0) + paxSupplierOrigin;
+      sample.FRESH_PASSENGER_SUPPLIER_CHILD_MS = paxSupplierOrigin;
     }
     sample.FRESH_APP_MS = Math.max(
       0,
@@ -751,6 +814,13 @@ async function oneSample(browser, attempt) {
     sample.TRAVELER_REDUNDANT_REVALIDATION_CALLS = sample.ITINERARY_AUTHORITATIVE_AFTER_REVALIDATION
       ? sample.TRAVELER_AUTO_REPRICE_POST_COUNT
       : 0;
+    sample.AUTO_REPRICE_POST_COUNT = sample.TRAVELER_AUTO_REPRICE_POST_COUNT || 0;
+    sample.AUTO_REPRICE_CLASS =
+      sample.AUTO_REPRICE_POST_COUNT === 0
+        ? "NONE"
+        : sample.ITINERARY_AUTHORITATIVE_AFTER_REVALIDATION
+          ? "REDUNDANT_REPRICE"
+          : "REQUIRED_AUTHORITATIVE_REPRICE";
     sample.secondary_fetches = secondaryFetches.slice(0, 10);
     try {
       const traces = await page.evaluate(() => ({
@@ -958,6 +1028,19 @@ async function main() {
       95,
     ),
     TRAVELER_AUTO_REPRICE_POST_COUNT: valid.reduce((a, s) => a + (s.TRAVELER_AUTO_REPRICE_POST_COUNT || 0), 0),
+    REDUNDANT_REPRICE_COUNT: valid.reduce(
+      (a, s) => a + (s.AUTO_REPRICE_CLASS === "REDUNDANT_REPRICE" ? s.AUTO_REPRICE_POST_COUNT || 0 : 0),
+      0,
+    ),
+    PASSENGERS_ORIGIN_P50_MS: pct(pick("PASSENGERS_SERVER_MS"), 50),
+    PASSENGERS_ORIGIN_P95_MS: pct(pick("PASSENGERS_SERVER_MS"), 95),
+    PASSENGERS_SESSION_LOCK_WAIT_P95_MS: pct(pick("PASSENGERS_SESSION_LOCK_WAIT_MS"), 95),
+    PASSENGERS_DB_P95_MS: pct(pick("PASSENGERS_DB_MS"), 95),
+    PASSENGERS_SERIALIZATION_P95_MS: pct(pick("PASSENGERS_SERIALIZE_MS"), 95),
+    PASSENGERS_ORIGIN_UNATTRIBUTED_P95_MS: pct(pick("PASSENGERS_ORIGIN_UNATTRIBUTED_MS"), 95),
+    NAV_BROWSER_QUEUE_P95_MS: pct(pick("QUEUE_BEFORE_REQUEST_MS"), 95),
+    NAV_TOTAL_RECONCILED: valid.length && valid.every((s) => s.NAV_TO_SHELL_TOTAL_RECONCILED === "YES") ? "YES" : "NO",
+    NAV_UNATTRIBUTED_EXACT_MAX: Math.max(0, ...pick("NAV_TO_SHELL_UNATTRIBUTED_MS"), 0),
     TOTAL_FLOW_REDUNDANT_REVALIDATION_CALLS: valid.reduce(
       (a, s) => a + (s.BOOK_NOW_DUPLICATE_REVALIDATION_CALLS || 0) + (s.TRAVELER_REDUNDANT_REVALIDATION_CALLS || 0),
       0,
