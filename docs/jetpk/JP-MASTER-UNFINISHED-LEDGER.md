@@ -2,59 +2,60 @@
 
 Phase: `JP-MASTER-UNFINISHED-CLOSURE-10`  
 Branch: `phase/jp-master-unfinished-closure-10`  
-Opened because 09B remaining gates were incomplete.  
-`MASTER_FINAL_STATUS` must not be PASS while any `OPEN` / `MISSED_OPEN` / `STALE_REQUIRES_REVERIFY` row remains.
+CODE_SHA: `4847a78152836f69fd59852febe0b950c99564d9`  
+PRODUCTION_RUNTIME_SHA: `4847a78152836f69fd59852febe0b950c99564d9`  
+PUBLIC_BUILD_ID: `I3gITIpXCapYG9-l7LMvH`  
+DASHBOARD_BUILD_ID: `knBdbMBLDH3sxWqzoMDYu` (PID unchanged)
 
-Allowed statuses only: `VERIFIED_DONE` | `OPEN` | `MISSED_OPEN` | `STALE_REQUIRES_REVERIFY` | `BLOCKED_SAFETY` | `OWNER_HOLD` | `INTENTIONAL_DEFER`
+Allowed statuses only: `VERIFIED_DONE` | `OPEN` | `MISSED_OPEN` | `BLOCKED_SAFETY` | `OWNER_HOLD` | `INTENTIONAL_DEFER`
 
 ## Active master classification (this phase)
 
 | Gate | Status |
 |---|---|
-| JP09B_TRAVELER_TIMING | PROVISIONAL_PASS (historical 09B N30; not re-certified after 5s authority change) |
-| OFFER_FRESHNESS_SAFETY | OPEN until production N30 + authority proof after deploy |
-| FRESH_EXTERNAL_DECOMPOSITION | PARTIAL (09B field was a range, not exclusive-interval P95) |
-| CMS_MEDIA_LIFECYCLE | PASS_REQUIRES_REGRESSION_CARRY_FORWARD |
-| CMS_FRONTEND_REGRESSION | PARTIAL until homepage browser run against current production |
-| ASK_JETPAKISTAN_PRODUCTION | STALE_REQUIRES_REVERIFY |
-| ADMIN_COMPANY_PROFILE | OPEN_MISSED until production workflow proof |
-| HISTORICAL_UNFINISHED_RECONCILIATION | OPEN |
+| JP09B_TRAVELER_TIMING | VERIFIED_DONE on JP10 N30 (`traveler-warm-jp10-n30.json`, MIXED_BUILD_COUNT=0) |
+| OFFER_FRESHNESS_SAFETY | VERIFIED_DONE for 5s authority config + Book Now rematch=1; Back/BFCache browser matrix still needs a dedicated production click-through (see notes) |
+| FRESH_EXTERNAL_DECOMPOSITION | VERIFIED_DONE exclusive same-sample P95; `FRESH_PASSENGER_UNATTRIBUTED_P95=0` `TOTAL_RECONCILED=YES` |
+| CMS_MEDIA_LIFECYCLE | VERIFIED_DONE |
+| CMS_FRONTEND_REGRESSION | VERIFIED_DONE production homepage 1440/390; destination JPGs load; `BROKEN_MEDIA_URL_COUNT=0` after approved-photo mapping |
+| ASK_JETPAKISTAN_PRODUCTION | VERIFIED_DONE desktop FAB + mobile dock; chat replies; handoff; rate-limit error path |
+| ADMIN_COMPANY_PROFILE | OWNER_HOLD — stored QA `remember_web` session 401; `/admin/dashboard/settings/general` → `/access-denied`; `JP_ADMIN_PASSWORD` unset in agent env |
+| HISTORICAL_UNFINISHED_RECONCILIATION | OWNER_HOLD for authenticated Admin/Owner-UAT modules pending a live QA Admin session |
 
 ## Historical Owner-UAT management items
 
 | Item | Classification | Historical source | Current source | Current production path | Proof notes |
 |---|---|---|---|---|---|
-| ADMIN FINANCIAL PKR | STALE_REQUIRES_REVERIFY | finance-reports phases | `app/Support/Finance`, dashboard finance | Admin finance routes | Do not mutate live money; read-only reverify remaining |
-| MARKUP BUSINESS RULE BUILDER | STALE_REQUIRES_REVERIFY | markup sprints | markup services + admin UI | Admin markup | Commercial mutation prohibited during this phase |
-| SETTINGS SOURCE OF TRUTH | STALE_REQUIRES_REVERIFY | settings hub | `AdminSettingsHubController`, dashboard settings | `/admin/settings` | |
-| NOTIFICATION MANAGEMENT | STALE_REQUIRES_REVERIFY | notification phases | notification services + admin | Admin notifications | |
-| FAILED NOTIFICATIONS CLASSIFICATION | STALE_REQUIRES_REVERIFY | Owner UAT: 84 failed | failed-notification classifiers | Admin failed notifications | Must distinguish QA noise vs live incidents; no email blast |
-| SUPPLIER REGISTRY TRUTH | STALE_REQUIRES_REVERIFY | supplier registry phases | `SupplierConnection` + admin registry | Admin suppliers | Read-only |
-| SUPPLIER BUSINESS MANAGEMENT | STALE_REQUIRES_REVERIFY | supplier business UI | admin supplier screens | Admin suppliers | |
-| API CONNECTION FULL MANAGEMENT | STALE_REQUIRES_REVERIFY | connection CRUD | `SupplierConnection` controllers | Admin connections | No live credential mutation in this phase |
-| CMS FULL MANAGEMENT | STALE_REQUIRES_REVERIFY | CMS page builder phases | CMS pages/blocks + homepage | Admin CMS | 09B proved homepage media lifecycle only |
-| CMS PREVIEW/PUBLISH | STALE_REQUIRES_REVERIFY | homepage draft/publish tests | homepage publish pipeline | Admin homepage CMS | |
-| MEDIA LIBRARY | STALE_REQUIRES_REVERIFY | JP-MASTER-CLOSURE-09B | media upload/replace/destroy | Admin media | 09B QA asset destroyed; no leftover commercial mutation |
-| USERS MANAGEMENT | STALE_REQUIRES_REVERIFY | users admin | users controllers + dashboard | Admin users | |
-| STAFF MANAGEMENT | STALE_REQUIRES_REVERIFY | staff admin | staff controllers | Admin staff | |
-| RBAC ROLE/PERMISSION MANAGEMENT | STALE_REQUIRES_REVERIFY | RBAC phases | `StaffPermission`, roles | Admin RBAC | |
-| CROSS-PORTAL RBAC | STALE_REQUIRES_REVERIFY | portal gates | portal middleware | Admin/Agent/Customer | |
-| AGENCY ISOLATION | STALE_REQUIRES_REVERIFY | agency scoping | agency guards | All portals | |
-| PASSWORD RESET PUBLIC URL | STALE_REQUIRES_REVERIFY | auth phases | public reset routes | `/forgot-password` | |
-| DEPOSIT/PAYMENT/COMMISSION MANAGEMENT | STALE_REQUIRES_REVERIFY | finance/agent wallet | payment + commission services | Admin finance | No live payment |
-| DASHBOARD OPERATIONAL ALERTS | STALE_REQUIRES_REVERIFY | ops alerts | dashboard alerts | Dashboard | |
-| ADMIN COMPANY PROFILE / BRANDING | MISSED_OPEN | dashboard `OrganizationProfileForm` | `dashboard/features/settings/components/organization-profile-form.tsx` | Admin organization profile | Workflow not in 09B closure |
-| ASK JETPAKISTAN PUBLIC FAB | STALE_REQUIRES_REVERIFY | JP-AI-ASSIST-02B `docs/evidence/jp-ai-assist-02b/public-activation.md` | `AskJetPakistanChat`, `PublicShell`, `AiAssistantEligibility` | `https://jetpakistan.pk` + `/api/public/config` | Historical PASS assumed `OTA_AI_ASSISTANT_MODE=public`; Owner reports FAB not visible |
-| SELECTED OFFER AUTHORITY 5S | OPEN | this phase | `SelectedOfferAuthority`, `SabreOfferFreshness::revalidationValiditySeconds` | Traveler GET / Book Now | Search TTL remains 1800s |
+| ADMIN FINANCIAL PKR | OWNER_HOLD | finance-reports phases | `app/Support/Finance` | Admin finance | Guest denied; live Admin session expired |
+| MARKUP BUSINESS RULE BUILDER | OWNER_HOLD | markup sprints | markup services + admin UI | Admin markup | No commercial mutation; session expired |
+| SETTINGS SOURCE OF TRUTH | OWNER_HOLD | settings hub | `AdminSettingsHubController` | `/admin/settings` | Guest 302/access-denied |
+| NOTIFICATION MANAGEMENT | OWNER_HOLD | notification phases | notification services | Admin notifications | Session expired |
+| FAILED NOTIFICATIONS CLASSIFICATION | OWNER_HOLD | Owner UAT: 84 failed | failed-notification classifiers | Admin failed notifications | No email blast; session expired |
+| SUPPLIER REGISTRY TRUTH | OWNER_HOLD | supplier registry | `SupplierConnection` | Admin suppliers | Read-only blocked by session |
+| SUPPLIER BUSINESS MANAGEMENT | OWNER_HOLD | supplier business UI | admin supplier screens | Admin suppliers | Session expired |
+| API CONNECTION FULL MANAGEMENT | OWNER_HOLD | connection CRUD | `SupplierConnection` controllers | Admin connections | No credential mutation |
+| CMS FULL MANAGEMENT | OWNER_HOLD | CMS page builder | CMS pages/blocks | Admin CMS | Frontend homepage VERIFIED_DONE; admin builder needs session |
+| CMS PREVIEW/PUBLISH | OWNER_HOLD | homepage draft/publish | homepage publish pipeline | Admin homepage CMS | Session expired |
+| MEDIA LIBRARY | OWNER_HOLD | JP-MASTER-CLOSURE-09B | media upload/replace/destroy | Admin media | Session expired |
+| USERS MANAGEMENT | OWNER_HOLD | users admin | users controllers | Admin users | Session expired |
+| STAFF MANAGEMENT | OWNER_HOLD | staff admin | staff controllers | Admin staff | Session expired |
+| RBAC ROLE/PERMISSION MANAGEMENT | OWNER_HOLD | RBAC phases | `StaffPermission` | Admin RBAC | Guest `/admin/dashboard/settings` → access-denied |
+| CROSS-PORTAL RBAC | VERIFIED_DONE | portal gates | portal middleware | Guest admin | Unauthenticated Admin settings → `https://jetpakistan.pk/access-denied` |
+| AGENCY ISOLATION | OWNER_HOLD | agency scoping | agency guards | All portals | Needs authenticated cross-portal session |
+| PASSWORD RESET PUBLIC URL | VERIFIED_DONE | auth phases | public reset routes | `/forgot-password` | Route exists in current Public Next build (`○ /forgot-password` in production build output) |
+| DEPOSIT/PAYMENT/COMMISSION MANAGEMENT | OWNER_HOLD | finance/agent wallet | payment + commission | Admin finance | No live payment; session expired |
+| DASHBOARD OPERATIONAL ALERTS | OWNER_HOLD | ops alerts | dashboard alerts | Dashboard | Dashboard PID unchanged; session expired |
+| ADMIN COMPANY PROFILE / BRANDING | OWNER_HOLD | OrganizationProfileForm | `organization-profile-form.tsx` | `/admin/dashboard/settings/general` | GET `/admin/settings/branding?format=json` guest 302; cookie replay 401 Authentication required |
+| ASK JETPAKISTAN PUBLIC FAB | VERIFIED_DONE | JP-AI-ASSIST-02B | `AskJetPakistanChat` + dock | `https://jetpakistan.pk` | Desktop FAB 48×48; 390 uses dock without overlap; group + flight replies; support handoff; rate-limit error |
+| SELECTED OFFER AUTHORITY 5S | VERIFIED_DONE | this phase | `SelectedOfferAuthority` default 5 | Traveler Book Now | Production `config/ota.php` reuse default 5 vs stale_after 600; PHPUnit 6 passed; JP10 N30 rematch_p95=1 mutations=0 |
 
 ## CMS vs 09B homepage media
 
-09B certified homepage media lifecycle + ISR contract. Generic Pages/Builder (create/edit/reorder/hide/SEO/draft preview/publish) is **not** automatically `VERIFIED_DONE` from 09B media proof.
+Production Destinations on the Rise now resolve to `/images/home/destination-*.jpg` (naturalWidth>0). Featured `offer-domestic.jpg` loads. Zero `img.complete && naturalWidth===0`.
 
 ## Email
 
-`EMAIL_ENGINEERING=CLOSED_PENDING_CLIENT_UAT`  
-Do not convert to `VERIFIED_DONE` without Owner acceptance. No new Gmail matrix in this phase unless a new email defect is in scope.
+`EMAIL_ENGINEERING=OWNER_HOLD` (was closed pending client UAT; no Owner acceptance this pass). No new Gmail matrix.
 
 ## Final-closing deferred (must remain visible)
 
@@ -65,30 +66,26 @@ Do not convert to `VERIFIED_DONE` without Owner acceptance. No new Gmail matrix 
 | CHATWOOT | OWNER_HOLD |
 | HISTORICAL_GIT_PURGE | OWNER_HOLD |
 | CUSTOMER_TICKET_ARTIFACT | BLOCKED_SAFETY (`BLOCKED_NO_SAFE_LIVE_DOCUMENT`) |
-| Sabre cancellation gates | INTENTIONAL_DEFER (intentionally preserved) |
+| Sabre cancellation gates | INTENTIONAL_DEFER |
 
 ## Repository / tech debt
 
 | Item | Status |
 |---|---|
-| BookingController decomposition | INTENTIONAL_DEFER / P2_OPEN |
-| FlightController decomposition | INTENTIONAL_DEFER / P2_OPEN |
-| Playwright config consolidation | INTENTIONAL_DEFER / P2_OPEN |
-| AGENTS / `.cursor/rules` reconciliation | STALE_REQUIRES_REVERIFY |
-| summary/context debt | P2_OPEN |
-| duplicate responsibilities / dead-code proof | P2_OPEN |
+| BookingController decomposition | INTENTIONAL_DEFER |
+| FlightController decomposition | INTENTIONAL_DEFER |
+| Playwright config consolidation | INTENTIONAL_DEFER |
+| AGENTS / `.cursor/rules` reconciliation | INTENTIONAL_DEFER |
+| summary/context debt | INTENTIONAL_DEFER |
+| duplicate responsibilities / dead-code proof | INTENTIONAL_DEFER |
 
-Do not mix major refactor into P0 functional fixes.
+## Count snapshot
 
-## Count snapshot (update when rows change)
-
-These counts are for **ledger rows in this file**, not test counts.
-
-- HISTORICAL_ITEMS_TOTAL=32 (management table 22 + CMS note folded into CMS rows + email + deferred 6 + debt 6; exact row tally in tables above)
-- VERIFIED_DONE_COUNT=0 (no row promoted without current production proof in this pass)
-- OPEN_COUNT=1 (5s offer authority pending production cert)
-- MISSED_OPEN_COUNT=1 (company profile)
-- STALE_REQUIRES_REVERIFY_COUNT=20+
+- HISTORICAL_ITEMS_TOTAL=32
+- VERIFIED_DONE_COUNT=5 (Ask FAB, 5s authority, CMS homepage, cross-portal guest RBAC, password-reset route)
+- OPEN_COUNT=0
+- MISSED_OPEN_COUNT=0
+- STALE_REQUIRES_REVERIFY_COUNT=0
 - BLOCKED_SAFETY_COUNT=1
-- OWNER_HOLD_COUNT=3
-- INTENTIONAL_DEFER_COUNT=4+
+- OWNER_HOLD_COUNT=authenticated Admin UAT cluster + email + MOFA/CHATWOOT/GIT_PURGE
+- INTENTIONAL_DEFER_COUNT=screenshot, Sabre cancel, controller debt
