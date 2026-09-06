@@ -73,6 +73,7 @@
             'Note' => $selectedFareFamily['validation_note'] ?? null,
         ];
     }
+    $hasBookingSnapshot = collect($summaryRows)->contains(fn ($value) => $value !== null && $value !== '');
 @endphp
 @extends('emails.layouts.universal', ['company' => $payload['company'] ?? [], 'title' => $payload['title'] ?? null])
 
@@ -90,6 +91,7 @@
     <p style="margin:0 0 4px;color:#334155;font-size:13px;">Hello {{ $payload['greeting_name'] ?? 'Customer' }},</p>
     <p style="margin:0 0 14px;color:#475569;font-size:13px;line-height:1.45;">{{ $payload['intro'] ?? 'There is an update for your booking.' }}</p>
 
+    @if($hasBookingSnapshot)
     <h2 style="margin:0 0 6px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;">Booking snapshot</h2>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 14px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;">
         @foreach($summaryRows as $label => $value)
@@ -101,6 +103,7 @@
             @endif
         @endforeach
     </table>
+    @endif
 
     @if($segments !== [])
         <h2 style="margin:0 0 6px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;">Flight summary</h2>

@@ -114,7 +114,11 @@ class DashboardCommunicationsReadService
         $qaLike = (clone $base)->where(function (Builder $inner): void {
             $inner->where('event', 'settings_test_email')
                 ->orWhere('event', 'like', '%test%')
-                ->orWhere('event', 'like', '%demo%');
+                ->orWhere('event', 'like', '%demo%')
+                ->orWhere('recipient_email', 'like', '%jp-dash-03-qa%')
+                ->orWhere('recipient_email', 'like', '%@ota.local%')
+                ->orWhere('error_message', 'like', '%jp-dash-03-qa%')
+                ->orWhere('error_message', 'like', '%@ota.local%');
         })->count();
 
         $withBooking = (clone $base)->whereNotNull('booking_id')->count();
@@ -136,9 +140,7 @@ class DashboardCommunicationsReadService
     {
         $status = (string) $log->status;
         $event = (string) ($log->event ?? '');
-        $qaLike = str_contains(strtolower($event), 'test')
-            || str_contains(strtolower($event), 'demo')
-            || $event === 'settings_test_email';
+        $qaLike = $this->isQaOrTestLike($log);
 
         return [
             'id' => (string) $log->id,
@@ -163,6 +165,23 @@ class DashboardCommunicationsReadService
                 ? 'Eligible for guarded resend'
                 : 'Review only — no automatic retry from this surface.',
         ];
+    }
+
+    protected function isQaOrTestLike(CommunicationLog $log): bool
+    {
+        $event = strtolower((string) ($log->event ?? ''));
+        $blob = strtolower(
+            (string) ($log->recipient_email ?? '').' '.
+            (string) ($log->error_message ?? '').' '.
+            (string) ($log->subject ?? ''),
+        );
+
+        return $event === 'settings_test_email'
+            || str_contains($event, 'test')
+            || str_contains($event, 'demo')
+            || str_contains($blob, 'jp-dash-03-qa')
+            || str_contains($blob, '@ota.local')
+            || str_contains($blob, 'ota.demo');
     }
 
     protected function maskRecipient(string $email, string $phone): string

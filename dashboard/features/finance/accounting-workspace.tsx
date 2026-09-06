@@ -189,7 +189,7 @@ export function AccountingWorkspace() {
   if (!isLive) {
     return (
       <p className="text-sm text-jp-muted" data-testid="accounting-preview">
-        Accounting mutations require live dashboard mode. Ledger authority remains Laravel FinanceAdjustmentController.
+        Wallet adjustments require a live Admin session. Posted entries are audited and cannot be edited.
       </p>
     );
   }
@@ -397,7 +397,7 @@ export function AccountingWorkspace() {
         <section className="rounded-xl border border-jp-border bg-white p-4" data-testid="finance-export-links">
           <h2 className="text-sm font-semibold text-gray-900">Finance exports</h2>
           <p className="mt-1 text-xs text-jp-muted">
-            Authorized Laravel CSV exports for reconciliation and the finance dashboard.
+            Authorized CSV exports for reconciliation and the finance dashboard.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <a

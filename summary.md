@@ -11,7 +11,7 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-09-05 (JP-FINAL-CLOSURE-06 email Gmail defects)
+**Last updated:** 2026-09-06 (JP10 auth login email canonical layout)
 
 ## Concurrent Codex UI Work — JP-HOME-UI-01
 
@@ -39,6 +39,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 ## Changelog (high level)
 
+| 2026-09-06 | JP10 AUTH_LOGIN_EMAIL_PATH | One Admin login sends one security mail via `AuthEmailRenderer` + modern 620px layout; new-device facts fold in; `notifyNewDeviceLogin` audit-only; CTA/logo rewrite `127.0.0.1:8088`; hide empty Booking snapshot. |
 | 2026-09-05 | JP-FINAL-CLOSURE-06 | Email QA: support CTA uses `admin.support.tickets.show`; canonical PK-211 itinerary for booking/ticket samples; booking plain-text facts; agent application single block. Traveler residual decomposed, no Traveler code change. |
 | 2026-09-03 | JP-APP-PERF-CLOSURE-01 traveler | Book Now handoff no longer window.stop()/strips prefetch; prefetch /booking/passengers during revalidation. |
 | 2026-09-03 | JP-APP-PERF-CLOSURE-01 | Return Pair poll short-circuit skips consolidator/one-way mapper on empty/partial polls; early partial onProgress throttled to 1st/every-3rd until first persisted pair; SearchModule prefetches resultsPath before hard-nav. |
@@ -532,7 +533,7 @@ Dual-channel AirBlue (PA): **`crane_ndc`** (Hitit Crane NDC 20.1) and **`zapways
 
 | Folder | Role |
 |--------|------|
-| `Communication/` | **`AgencyMessageTemplateSeeder`** (AGENCY-NOTIFICATION-TEMPLATE-SEED-1 auto-seed on new agency + backfill source), **`AuthSecurityEmailNotificationService`** + **`AuthSecurityEmailPayloadFactory`** (AUTH-SECURITY-EMAIL-1 login success/failure alerts; AUTH-AU3-NEW-DEVICE-SUSPICIOUS-LOGIN-1 `auth_new_device_login` via `notifyNewDeviceLogin()`), **`BookingEmailPayloadFactory`** + **`BookingUniversalNotification`** + **`emails/layouts/universal`** / **`emails/booking/universal-notification`** (EMAIL-UNIVERSAL-1 booking customer/admin payload path), **`OtaNotificationService`** (I6 **`OtaOperationalEmailRenderer`** / **`OtaOperationalNotificationMail`** for generic ops and booking ops without `universal_email`), **`BookingCommunicationService`** (booking customer sends/log guards), **`AbandonedFlightSearchEmailSender`** (I8 marketing recovery), manual console via **`ManualBookingCommunicationEmailRenderer`** (I8), auth registration via **`AuthEmailRenderer`** (I8). **`Support/Emails/EmailTemplateRegistry`** (I3; universal booking labels). **`OperationalEmailDefaults`** (K2D-A auth + K2D-B3 business ops default copy + backfill source). **`EmailTemplatePreviewRenderer`** + **`emails/layouts/modern`** (I4 preview; I5 test; generic live sends). **`ota:backfill-auth-email-templates`**, **`ota:backfill-business-email-templates`**. |
+| `Communication/` | **`AgencyMessageTemplateSeeder`** (AGENCY-NOTIFICATION-TEMPLATE-SEED-1 auto-seed on new agency + backfill source), **`AuthSecurityEmailNotificationService`** + **`AuthSecurityEmailPayloadFactory`** (AUTH-SECURITY-EMAIL-1 one consolidated login/security mail; AUTH-AU3 new-device facts fold into login mail; `notifyNewDeviceLogin()` audit-only), **`BookingEmailPayloadFactory`** + **`BookingUniversalNotification`** + **`emails/layouts/universal`** / **`emails/booking/universal-notification`** (EMAIL-UNIVERSAL-1 booking customer/admin payload path; empty snapshot hidden), **`OtaNotificationService`** (I6 **`OtaOperationalEmailRenderer`** / **`OtaOperationalNotificationMail`**; `auth_*` universals use **`AuthEmailRenderer`** modern layout), **`BookingCommunicationService`** (booking customer sends/log guards), **`AbandonedFlightSearchEmailSender`** (I8 marketing recovery), manual console via **`ManualBookingCommunicationEmailRenderer`** (I8), auth registration via **`AuthEmailRenderer`** (I8). **`Support/Emails/EmailTemplateRegistry`** (I3; universal booking labels). **`OperationalEmailDefaults`** (K2D-A auth + K2D-B3 business ops default copy + backfill source). **`EmailTemplatePreviewRenderer`** + **`emails/layouts/modern`** (I4 preview; I5 test; generic live sends). **`ota:backfill-auth-email-templates`**, **`ota:backfill-business-email-templates`**. |
 
 ---
 

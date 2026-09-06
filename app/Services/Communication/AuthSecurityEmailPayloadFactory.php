@@ -7,9 +7,9 @@ use App\Enums\OtaNotificationEvent;
 use App\Models\Agency;
 use App\Models\User;
 use App\Support\Branding\CompanyEmailProfileResolver;
+use App\Support\Emails\JetpkEmailBrandingResolver;
 use App\Support\Emails\OperationalEmailDefaults;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 
 /**
  * Universal-layout payloads for auth/security operational emails (AUTH-SECURITY-EMAIL-1, AUTH-AU3-NEW-DEVICE-SUSPICIOUS-LOGIN-1).
@@ -21,22 +21,35 @@ class AuthSecurityEmailPayloadFactory
         Agency $agency,
         OtaNotificationEvent $event,
         ?Request $request = null,
+        bool $newDevice = false,
+        ?string $newDeviceReason = null,
     ): array {
         $profile = CompanyEmailProfileResolver::resolve($agency);
         $timestamp = OperationalEmailDefaults::formatTimestamp();
         $ip = $request !== null ? (string) $request->ip() : '';
         $userAgent = $request !== null ? substr((string) $request->userAgent(), 0, 250) : '';
+        $portal = $this->portalLabel($user->account_type);
+        $notes = $this->securityNotes($timestamp, $ip, $userAgent, true);
+        if ($newDevice) {
+            array_splice($notes, -1, 0, [
+                'New device or browser detected'.($newDeviceReason ? ' ('.$newDeviceReason.')' : '').'.',
+            ]);
+        }
 
         return [
             'type' => $this->loginSuccessType($event),
-            'subject' => OperationalEmailDefaults::portalLabel($user->account_type).' login notice',
-            'title' => 'Login successful',
-            'status_label' => 'Login successful',
-            'status_tone' => 'info',
+            'subject' => $newDevice
+                ? 'New login detected on your account'
+                : OperationalEmailDefaults::portalLabel($user->account_type).' login notice',
+            'title' => $newDevice ? 'New login detected' : 'Login successful',
+            'status_label' => 'Security notice',
+            'status_tone' => $newDevice ? 'warning' : 'info',
             'greeting_name' => (string) $user->name,
-            'intro' => 'A login to your '.$this->portalLabel($user->account_type).' account was detected.',
+            'intro' => $newDevice
+                ? 'A login to your '.$portal.' account was detected from a new device or browser.'
+                : 'A login to your '.$portal.' account was detected.',
             'company' => $profile->toArray(),
-            'notes' => $this->securityNotes($timestamp, $ip, $userAgent, true),
+            'notes' => $notes,
             'cta' => $this->passwordResetCta(),
         ];
     }
@@ -155,13 +168,9 @@ class AuthSecurityEmailPayloadFactory
      */
     private function passwordResetCta(): array
     {
-        if (! Route::has('password.request')) {
-            return [];
-        }
-
         return [[
             'label' => 'Reset password',
-            'url' => route('password.request', absolute: true),
+            'url' => JetpkEmailBrandingResolver::publicForgotPasswordUrl(),
         ]];
     }
 }

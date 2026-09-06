@@ -156,6 +156,66 @@ class AuthEmailRenderer
         );
     }
 
+    public function loginSecurity(array $payload): CustomerFacingEmailRendered
+    {
+        $agency = null;
+        $headline = (string) ($payload['title'] ?? 'Login successful');
+        $status = (string) ($payload['status_label'] ?? 'Security notice');
+        $name = trim((string) ($payload['greeting_name'] ?? 'there')) ?: 'there';
+        $intro = (string) ($payload['intro'] ?? 'A login to your account was detected.');
+        $notes = is_array($payload['notes'] ?? null) ? $payload['notes'] : [];
+        $cta = is_array($payload['cta'][0] ?? null) ? $payload['cta'][0] : [];
+        $ctaUrl = JetpkEmailBrandingResolver::publicForgotPasswordUrl();
+        if (is_string($cta['url'] ?? null) && trim((string) $cta['url']) !== '') {
+            $ctaUrl = JetpkEmailBrandingResolver::publicAssetUrl((string) $cta['url']) ?: $ctaUrl;
+        }
+        $ctaLabel = is_string($cta['label'] ?? null) && trim((string) $cta['label']) !== ''
+            ? (string) $cta['label']
+            : 'Reset password';
+
+        $details = [];
+        foreach ($notes as $note) {
+            $line = trim((string) $note);
+            if ($line === '') {
+                continue;
+            }
+            if (str_contains($line, ':')) {
+                [$label, $value] = array_map('trim', explode(':', $line, 2));
+                if ($label !== '' && $value !== '') {
+                    $details[] = ['label' => $label, 'value' => $value];
+
+                    continue;
+                }
+            }
+            $details[] = ['label' => 'Notice', 'value' => $line];
+        }
+
+        $plain = $this->plainLines(array_merge(
+            ['Hello '.$name.',', '', $intro, ''],
+            array_map(static fn (string $note): string => trim((string) $note), $notes),
+            ['', 'Reset password: '.$ctaUrl],
+        ));
+
+        return $this->render(
+            agency: $agency,
+            headline: $headline,
+            intro: 'Hello '.$name.', '.$intro,
+            details: $details,
+            ctaUrl: $ctaUrl,
+            ctaLabel: $ctaLabel,
+            footerDisclaimer: 'If you did not perform this sign-in, reset your password and contact support immediately.',
+            emailMode: ModernEmailLayout::MODE_OPS,
+            statusBannerLabel: $status,
+            statusBannerTone: (string) ($payload['status_tone'] ?? 'info'),
+            nextSteps: [
+                'Review the time, IP address, and device shown above.',
+                'Reset your password if this sign-in was not you.',
+            ],
+            plainBody: $plain,
+            detailsTitle: 'Sign-in details',
+        );
+    }
+
     /**
      * @return array{url: string, label: string}|null
      */
@@ -186,6 +246,7 @@ class AuthEmailRenderer
         ?string $actionCardTitle = null,
         ?string $actionCardBody = null,
         array $nextSteps = [],
+        ?string $detailsTitle = null,
     ): CustomerFacingEmailRendered {
         $profile = CompanyEmailProfileResolver::resolve($agency);
         $html = View::make('emails.layouts.modern', array_merge(
@@ -210,6 +271,7 @@ class AuthEmailRenderer
                 'ctaLabel' => $ctaLabel,
                 'footerDisclaimer' => $footerDisclaimer,
                 'nextSteps' => $nextSteps,
+                'detailsTitle' => $detailsTitle,
             ]),
         ))->render();
 

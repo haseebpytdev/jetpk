@@ -327,7 +327,7 @@ class JetpkEmailBrandingResolver
 
         // Local / preview hosts must never appear in customer-facing email action URLs.
         // Prefer the canonical JetPakistan public domain over APP_URL when APP_URL itself is .test/local.
-        if ($host === 'jetpk.test' || $host === 'localhost' || str_ends_with($host, '.test')) {
+        if ($host === 'jetpk.test' || $host === 'localhost' || $host === '127.0.0.1' || $host === '::1' || str_ends_with($host, '.test') || (int) ($parsed['port'] ?? 0) === 8088) {
             // Public JetPakistan emails must never ship local/preview hosts, even when
             // APP_URL and client.canonical_client.domain are both *.test in local QA.
             $canonicalDomain = trim((string) config('client.canonical_client.domain', 'jetpakistan.pk'));
@@ -340,7 +340,14 @@ class JetpkEmailBrandingResolver
                 $canonicalDomain = 'jetpakistan.pk';
             }
             $appHost = strtolower((string) (parse_url($appUrl, PHP_URL_HOST) ?? ''));
-            $appIsLocal = $appHost === '' || $appHost === 'jetpk.test' || $appHost === 'localhost' || str_ends_with($appHost, '.test');
+            $appPort = (int) (parse_url($appUrl, PHP_URL_PORT) ?? 0);
+            $appIsLocal = $appHost === ''
+                || $appHost === 'jetpk.test'
+                || $appHost === 'localhost'
+                || $appHost === '127.0.0.1'
+                || $appHost === '::1'
+                || str_ends_with($appHost, '.test')
+                || $appPort === 8088;
             if (! $appIsLocal && $appUrl !== '') {
                 $home = $appUrl;
             } else {
@@ -375,14 +382,42 @@ class JetpkEmailBrandingResolver
 
         $parsed = parse_url($value);
         $host = strtolower((string) ($parsed['host'] ?? ''));
-        if ($host === '' || ! ($host === 'jetpk.test' || $host === 'localhost' || str_ends_with($host, '.test'))) {
+        $port = (int) ($parsed['port'] ?? 0);
+        $isLocalHost = $host === ''
+            || $host === 'jetpk.test'
+            || $host === 'localhost'
+            || $host === '127.0.0.1'
+            || $host === '::1'
+            || str_ends_with($host, '.test')
+            || $port === 8088;
+        if (! $isLocalHost) {
+            $path = (string) ($parsed['path'] ?? '');
+            if (str_contains($path, '/index.php/')) {
+                $path = str_replace('/index.php/', '/', $path);
+                $scheme = $parsed['scheme'] ?? 'https';
+                $hostOut = $parsed['host'] ?? 'jetpakistan.pk';
+
+                return $scheme.'://'.$hostOut.$path.(isset($parsed['query']) ? '?'.$parsed['query'] : '');
+            }
+
             return $value;
         }
 
         $path = (string) ($parsed['path'] ?? '');
+        $path = str_replace('/index.php/', '/', $path);
         $query = isset($parsed['query']) ? '?'.$parsed['query'] : '';
 
         return 'https://jetpakistan.pk'.$path.$query;
+    }
+
+    public static function publicAssetUrl(?string $url): ?string
+    {
+        return static::rewriteLocalAssetHostToPublic($url);
+    }
+
+    public static function publicForgotPasswordUrl(): string
+    {
+        return 'https://jetpakistan.pk/forgot-password';
     }
 
     protected static function canonicalizeManageUrl(?string $homeUrl, mixed $manageUrl): ?string

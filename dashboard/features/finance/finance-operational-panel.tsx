@@ -49,7 +49,7 @@ export function FinanceOperationalPanel() {
     <div className="space-y-3 rounded-xl border border-jp-border p-4" data-testid="finance-operational-panel">
       <h2 className="text-sm font-semibold text-gray-900">Finance operations</h2>
       <p className="text-xs text-jp-muted">
-        Smoke controls for connected mutation routes. Prefer Accounting, Deposits, and Commissions workspaces for
+        Smoke controls for connected mutation routes. Prefer Wallet Adjustments, Deposits, and Commissions workspaces for
         operator work.
       </p>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}

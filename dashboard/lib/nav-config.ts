@@ -43,7 +43,7 @@ export const navGroups: NavGroup[] = [
       { label: "Deposits", href: "/deposits", laravelRoute: "admin.agent-deposits.index" },
       { label: "Markups", href: "/markups", laravelRoute: "admin.markups" },
       { label: "Commissions", href: "/commissions", laravelRoute: "admin.commissions.index" },
-      { label: "Accounting", href: "/accounting", laravelRoute: "admin.finance.adjustments.index" },
+      { label: "Wallet Adjustments", href: "/accounting", laravelRoute: "admin.finance.adjustments.index" },
     ],
   },
     {

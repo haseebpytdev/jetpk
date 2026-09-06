@@ -55,9 +55,17 @@ class AuthSecurityEmailNotificationService
             return;
         }
 
+        $newDevice = $this->detectNewDeviceContext($user, $request);
         $defaults = OperationalEmailDefaults::forEvent($event->value);
         $templateVariables = OperationalEmailDefaults::authVariablesFromUser($agency, $user, $request);
-        $universalPayload = $this->payloadFactory->loginSuccess($user, $agency, $event, $request);
+        $universalPayload = $this->payloadFactory->loginSuccess(
+            $user,
+            $agency,
+            $event,
+            $request,
+            $newDevice !== null,
+            $newDevice['reason'] ?? null,
+        );
 
         $this->notificationService->send(
             agency: $agency,
@@ -131,39 +139,11 @@ class AuthSecurityEmailNotificationService
             return;
         }
 
-        $event = OtaNotificationEvent::AuthNewDeviceLogin;
-        $defaults = OperationalEmailDefaults::forEvent($event->value);
-        $templateVariables = OperationalEmailDefaults::authVariablesFromUser($agency, $user, $request);
-        $universalPayload = $this->payloadFactory->newDeviceLogin($user, $agency, $request, $detectionReason);
-
-        $this->notificationService->send(
-            agency: $agency,
-            eventKey: $event->value,
-            payload: [
-                'account_type' => $user->account_type?->value,
-                'timestamp' => now()->toIso8601String(),
-                'ip' => $currentIp,
-                'user_agent' => $currentUserAgent,
-                'notification_type' => 'auth_new_device_login',
-                'detection_reason' => $detectionReason,
-                'prior_login_seen' => true,
-                'cooldown_minutes' => max(1, (int) config('ota.auth_new_device_email_cooldown_minutes', 60)),
-                'universal_email' => $universalPayload,
-            ],
-            actor: $user,
-            fallbackSubject: $defaults['subject'] ?? 'New login detected',
-            fallbackBody: $defaults['body'] ?? 'A login was detected from a new device or browser.',
-            templateVariables: $templateVariables,
-            recipientContext: [
-                'logged_in_user_email' => $user->email,
-            ],
-        );
-
         $this->recordNewDeviceLoginAudit($user, $request, $detectionReason);
         $this->recordLoginSuccessAudit($user, $request);
         $this->markNewDeviceEmailSent($user, $currentFingerprint);
 
-        Log::info('auth.security_email.new_device.sent', [
+        Log::info('auth.security_email.new_device.recorded_without_separate_email', [
             'notification_type' => 'auth_new_device_login',
             'user_id' => $user->id,
             'account_type' => $user->account_type?->value,
@@ -411,6 +391,22 @@ class AuthSecurityEmailNotificationService
             'ip_address' => (string) $request->ip(),
             'user_agent' => substr((string) $request->userAgent(), 0, 250),
         ]);
+    }
+
+    /**
+     * @return array{reason: string}|null
+     */
+    protected function detectNewDeviceContext(User $user, LoginRequest $request): ?array
+    {
+        $currentFingerprint = $this->userAgentFingerprint($this->safeUserAgent($request));
+        $priorLogin = $this->findPriorSuccessfulLoginAudit($user);
+        if ($priorLogin === null || ! $this->isNewDeviceLogin($priorLogin, $currentFingerprint)) {
+            return null;
+        }
+
+        return [
+            'reason' => $this->newDeviceDetectionReason($priorLogin, (string) $request->ip(), $currentFingerprint),
+        ];
     }
 
     protected function findPriorSuccessfulLoginAudit(User $user): ?AuditLog

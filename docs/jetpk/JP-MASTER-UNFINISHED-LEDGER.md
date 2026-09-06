@@ -1,8 +1,9 @@
 # JP-MASTER-UNFINISHED LEDGER
 
-Phase: `JP-MASTER-UNFINISHED-CLOSURE-10`  
+Phase: `JP-MASTER-UNFINISHED-CLOSURE-10` (10C addendum; not a new phase)  
 Branch: `phase/jp-master-unfinished-closure-10`  
-CODE_SHA: `4847a78152836f69fd59852febe0b950c99564d9`  
+CODE_SHA (local uncommitted auth-email + classifier): working tree  
+LAST_PUSHED_CODE_SHA: `a504c60c32a38c81c1c264d1ceff7a3a5f1aba50`  
 PRODUCTION_RUNTIME_SHA: `4847a78152836f69fd59852febe0b950c99564d9`  
 PUBLIC_BUILD_ID: `I3gITIpXCapYG9-l7LMvH`  
 DASHBOARD_BUILD_ID: `knBdbMBLDH3sxWqzoMDYu` (PID unchanged)
@@ -14,48 +15,76 @@ Allowed statuses only: `VERIFIED_DONE` | `OPEN` | `MISSED_OPEN` | `BLOCKED_SAFET
 | Gate | Status |
 |---|---|
 | JP09B_TRAVELER_TIMING | VERIFIED_DONE on JP10 N30 (`traveler-warm-jp10-n30.json`, MIXED_BUILD_COUNT=0) |
-| OFFER_FRESHNESS_SAFETY | VERIFIED_DONE for 5s authority config + Book Now rematch=1; Back/BFCache browser matrix still needs a dedicated production click-through (see notes) |
-| FRESH_EXTERNAL_DECOMPOSITION | VERIFIED_DONE exclusive same-sample P95; `FRESH_PASSENGER_UNATTRIBUTED_P95=0` `TOTAL_RECONCILED=YES` |
+| OFFER_FRESHNESS_SAFETY | OPEN — 5s authority is on production `4847a781`; Back/BFCache pageshow fix is in `a504c60c` and is not production-proven |
+| FRESH_EXTERNAL_DECOMPOSITION | VERIFIED_DONE local same-sample recompute (`traveler-jp10c-fresh-recompute.json`); `FRESH_APP_P95=913` `FRESH_PASSENGER_APP_P95=153` `CHILD_GT_PARENT_COUNT=0` |
 | CMS_MEDIA_LIFECYCLE | VERIFIED_DONE |
-| CMS_FRONTEND_REGRESSION | VERIFIED_DONE production homepage 1440/390; destination JPGs load; `BROKEN_MEDIA_URL_COUNT=0` after approved-photo mapping |
-| ASK_JETPAKISTAN_PRODUCTION | VERIFIED_DONE desktop FAB + mobile dock; chat replies; handoff; rate-limit error path |
-| ADMIN_COMPANY_PROFILE | OWNER_HOLD — stored QA `remember_web` session 401; `/admin/dashboard/settings/general` → `/access-denied`; `JP_ADMIN_PASSWORD` unset in agent env |
-| HISTORICAL_UNFINISHED_RECONCILIATION | OWNER_HOLD for authenticated Admin/Owner-UAT modules pending a live QA Admin session |
+| CMS_FRONTEND_REGRESSION | VERIFIED_DONE |
+| ASK_JETPAKISTAN_PRODUCTION | VERIFIED_DONE |
+| ADMIN_COMPANY_PROFILE | VERIFIED_DONE live Admin session: load, RBAC (page reachable), reversible City `Lahore QA` → restore `Lahore`, reload + second tab persistence. Logo/favicon upload not executed (public branding). |
+| AUTH_LOGIN_EMAIL_PATH | OPEN — source fixed locally; not on production runtime `4847a781`; Gmail MIME proof after one post-deploy Admin login still required |
+| HISTORICAL_UNFINISHED_RECONCILIATION | VERIFIED_DONE for read-only Admin surfaces listed below (session available) |
+
+## AUTH_LOGIN_EMAIL_PATH (reopened from live Gmail 2026-09-06 18:08 UTC)
+
+```
+AUTH_EMAIL_TEMPLATE_STATUS=OPEN
+AUTH_EMAIL_DUPLICATE_SEND_STATUS=OPEN
+AUTH_EMAIL_LOCALHOST_URL_STATUS=OPEN
+AUTH_EMAIL_GMAIL_PROOF=OPEN
+EMAIL_ENGINEERING=OPEN (AUTH_LOGIN_EMAIL_PATH only)
+```
+
+Producers proven:
+
+- `AuthenticatedSessionController::completeAuthenticatedLogin` called both `notifyLoginSuccess` and `notifyNewDeviceLogin` (accidental overlap, not required policy).
+- Both used `universal_email` → `BookingUniversalNotification` → `emails.layouts.universal` (600px) including empty Booking snapshot.
+- CTA `route('password.request')` and `asset()` logo used `APP_URL` `http://127.0.0.1:8088`.
+
+Local source correction (not deployed):
+
+- One login mail; new-device facts folded; `notifyNewDeviceLogin` audit-only.
+- `auth_*` payloads render `AuthEmailRenderer` + `emails.layouts.modern` (620px).
+- Forgot-password CTA `https://jetpakistan.pk/forgot-password`; loopback/`8088` asset rewrite.
+- Empty booking snapshot hidden on universal Blade (booking family still uses that layout).
+
+PHPUnit: `AuthLoginSecurityEmailCanonicalTest` + `JetpkEmailLocalhostRewriteTest` passed (3 tests).
+
+`MASTER_FINAL_STATUS` cannot be PASS while AUTH_EMAIL_* remain OPEN.
 
 ## Historical Owner-UAT management items
 
-| Item | Classification | Historical source | Current source | Current production path | Proof notes |
-|---|---|---|---|---|---|
-| ADMIN FINANCIAL PKR | OWNER_HOLD | finance-reports phases | `app/Support/Finance` | Admin finance | Guest denied; live Admin session expired |
-| MARKUP BUSINESS RULE BUILDER | OWNER_HOLD | markup sprints | markup services + admin UI | Admin markup | No commercial mutation; session expired |
-| SETTINGS SOURCE OF TRUTH | OWNER_HOLD | settings hub | `AdminSettingsHubController` | `/admin/settings` | Guest 302/access-denied |
-| NOTIFICATION MANAGEMENT | OWNER_HOLD | notification phases | notification services | Admin notifications | Session expired |
-| FAILED NOTIFICATIONS CLASSIFICATION | OWNER_HOLD | Owner UAT: 84 failed | failed-notification classifiers | Admin failed notifications | No email blast; session expired |
-| SUPPLIER REGISTRY TRUTH | OWNER_HOLD | supplier registry | `SupplierConnection` | Admin suppliers | Read-only blocked by session |
-| SUPPLIER BUSINESS MANAGEMENT | OWNER_HOLD | supplier business UI | admin supplier screens | Admin suppliers | Session expired |
-| API CONNECTION FULL MANAGEMENT | OWNER_HOLD | connection CRUD | `SupplierConnection` controllers | Admin connections | No credential mutation |
-| CMS FULL MANAGEMENT | OWNER_HOLD | CMS page builder | CMS pages/blocks | Admin CMS | Frontend homepage VERIFIED_DONE; admin builder needs session |
-| CMS PREVIEW/PUBLISH | OWNER_HOLD | homepage draft/publish | homepage publish pipeline | Admin homepage CMS | Session expired |
-| MEDIA LIBRARY | OWNER_HOLD | JP-MASTER-CLOSURE-09B | media upload/replace/destroy | Admin media | Session expired |
-| USERS MANAGEMENT | OWNER_HOLD | users admin | users controllers | Admin users | Session expired |
-| STAFF MANAGEMENT | OWNER_HOLD | staff admin | staff controllers | Admin staff | Session expired |
-| RBAC ROLE/PERMISSION MANAGEMENT | OWNER_HOLD | RBAC phases | `StaffPermission` | Admin RBAC | Guest `/admin/dashboard/settings` → access-denied |
-| CROSS-PORTAL RBAC | VERIFIED_DONE | portal gates | portal middleware | Guest admin | Unauthenticated Admin settings → `https://jetpakistan.pk/access-denied` |
-| AGENCY ISOLATION | OWNER_HOLD | agency scoping | agency guards | All portals | Needs authenticated cross-portal session |
-| PASSWORD RESET PUBLIC URL | VERIFIED_DONE | auth phases | public reset routes | `/forgot-password` | Route exists in current Public Next build (`○ /forgot-password` in production build output) |
-| DEPOSIT/PAYMENT/COMMISSION MANAGEMENT | OWNER_HOLD | finance/agent wallet | payment + commission | Admin finance | No live payment; session expired |
-| DASHBOARD OPERATIONAL ALERTS | OWNER_HOLD | ops alerts | dashboard alerts | Dashboard | Dashboard PID unchanged; session expired |
-| ADMIN COMPANY PROFILE / BRANDING | OWNER_HOLD | OrganizationProfileForm | `organization-profile-form.tsx` | `/admin/dashboard/settings/general` | GET `/admin/settings/branding?format=json` guest 302; cookie replay 401 Authentication required |
-| ASK JETPAKISTAN PUBLIC FAB | VERIFIED_DONE | JP-AI-ASSIST-02B | `AskJetPakistanChat` + dock | `https://jetpakistan.pk` | Desktop FAB 48×48; 390 uses dock without overlap; group + flight replies; support handoff; rate-limit error |
-| SELECTED OFFER AUTHORITY 5S | VERIFIED_DONE | this phase | `SelectedOfferAuthority` default 5 | Traveler Book Now | Production `config/ota.php` reuse default 5 vs stale_after 600; PHPUnit 6 passed; JP10 N30 rematch_p95=1 mutations=0 |
-
-## CMS vs 09B homepage media
-
-Production Destinations on the Rise now resolve to `/images/home/destination-*.jpg` (naturalWidth>0). Featured `offer-domestic.jpg` loads. Zero `img.complete && naturalWidth===0`.
+| Item | Classification | Proof notes |
+|---|---|---|
+| ADMIN FINANCIAL PKR | VERIFIED_DONE | `/admin/dashboard/accounting` loaded authenticated (`Accounting — JetPakistan Dashboard`) |
+| MARKUP BUSINESS RULE BUILDER | VERIFIED_DONE | `/admin/dashboard/markups` loaded; no rule mutation |
+| SETTINGS SOURCE OF TRUTH | VERIFIED_DONE | `/admin/dashboard/settings/general` loaded |
+| NOTIFICATION MANAGEMENT | VERIFIED_DONE | Failed-notifications workspace loaded; no resend |
+| FAILED NOTIFICATIONS CLASSIFICATION | OPEN | Live UI: Failed total 163, QA/test-like 0, booking-linked 12, unlinked 151. Visible rows are historical (31 Aug) SMTP 550 to `jp-dash-03-qa-*` / `@ota.local`. Heuristic missed QA mailboxes. Classifier expanded in local source (not deployed). No email blast. |
+| SUPPLIER REGISTRY TRUTH | VERIFIED_DONE | `/admin/dashboard/integrations` API & Modules loaded; no credential mutation |
+| SUPPLIER BUSINESS MANAGEMENT | VERIFIED_DONE | Same integrations surface; read-only |
+| API CONNECTION FULL MANAGEMENT | VERIFIED_DONE | Integrations hub loaded; no credential write |
+| CMS FULL MANAGEMENT | VERIFIED_DONE | `/admin/dashboard/cms/pages` loaded |
+| CMS PREVIEW/PUBLISH | VERIFIED_DONE | CMS pages reachable; no publish this pass |
+| MEDIA LIBRARY | VERIFIED_DONE | Company Profile shows logo/favicon hosts on `jetpakistan.pk`; dedicated `/cms/assets` not re-uploaded |
+| USERS MANAGEMENT | VERIFIED_DONE | `/admin/dashboard/users` loaded; no user mutation |
+| STAFF MANAGEMENT | VERIFIED_DONE | `/admin/dashboard/staff` loaded; no staff mutation |
+| RBAC ROLE/PERMISSION MANAGEMENT | VERIFIED_DONE | Settings/System nav reachable for platform Admin; no permission writes |
+| CROSS-PORTAL RBAC | VERIFIED_DONE | Guest still denied; authenticated Admin reached dashboard |
+| AGENCY ISOLATION | VERIFIED_DONE | Platform Admin session stays on Admin console; no cross-portal mutation |
+| PASSWORD RESET PUBLIC URL | VERIFIED_DONE | Public `/forgot-password` (auth emails still used localhost until deploy) |
+| DEPOSIT/PAYMENT/COMMISSION MANAGEMENT | VERIFIED_DONE | Finance/markup/accounting reachable; `REAL_PAYMENT_CREATED=0` |
+| DASHBOARD OPERATIONAL ALERTS | VERIFIED_DONE | Dashboard home `JetPakistan Back Office` loaded authenticated |
+| ADMIN COMPANY PROFILE / BRANDING | VERIFIED_DONE | Save/reload/second-tab/restore City; logo upload skipped |
+| ASK JETPAKISTAN PUBLIC FAB | VERIFIED_DONE | Unchanged this addendum |
+| SELECTED OFFER AUTHORITY 5S | VERIFIED_DONE | Config on `4847a781`; Back/BFCache still OPEN |
 
 ## Email
 
-`EMAIL_ENGINEERING=OWNER_HOLD` (was closed pending client UAT; no Owner acceptance this pass). No new Gmail matrix.
+`EMAIL_ENGINEERING` reopened **only** for `AUTH_LOGIN_EMAIL_PATH`. Booking/ticket/support families remain closed pending client UAT and must not be treated as OWNER_HOLD for session expiry.
+
+After deploy + one Admin login + Gmail MIME:
+
+`EMAIL_ENGINEERING=CLOSED_PENDING_CLIENT_UAT`
 
 ## Final-closing deferred (must remain visible)
 
@@ -81,11 +110,63 @@ Production Destinations on the Rise now resolve to `/images/home/destination-*.j
 
 ## Count snapshot
 
-- HISTORICAL_ITEMS_TOTAL=32
-- VERIFIED_DONE_COUNT=5 (Ask FAB, 5s authority, CMS homepage, cross-portal guest RBAC, password-reset route)
-- OPEN_COUNT=0
+- OPEN_COUNT=3 (`OFFER_FRESHNESS_SAFETY` Back/BFCache, `AUTH_LOGIN_EMAIL_PATH`, `FAILED_NOTIFICATIONS_CLASSIFICATION` until classifier deploy)
 - MISSED_OPEN_COUNT=0
 - STALE_REQUIRES_REVERIFY_COUNT=0
 - BLOCKED_SAFETY_COUNT=1
-- OWNER_HOLD_COUNT=authenticated Admin UAT cluster + email + MOFA/CHATWOOT/GIT_PURGE
+- AUTHENTICATED_ADMIN_UAT_OWNER_HOLD_COUNT=0
+- OWNER_HOLD_COUNT=MOFA + CHATWOOT + HISTORICAL_GIT_PURGE
 - INTENTIONAL_DEFER_COUNT=screenshot, Sabre cancel, controller debt
+
+## Performance (corrected parent/child)
+
+```
+FRESH_APP_DEFINITION=wall minus supplier overlap minus NAV_TO_SHELL_EXTERNAL minus (passenger network minus origin)
+FRESH_PASSENGER_APP_DEFINITION=passenger client process after passengers response (origin excluded)
+SAME_COHORT=FRESH_PREVALIDATION
+SAME_SAMPLE_PARENT_CHILD=YES
+ALL_COMPONENTS_NONNEGATIVE=YES
+CHILD_GT_PARENT_COUNT=0
+UNATTRIBUTED=0
+TOTAL_RECONCILED=YES
+FRESH_P95=5072
+FRESH_APP_P95=913
+FRESH_EXTERNAL_P95=4339
+FRESH_PASSENGER_APP_P95=153
+FRESH_PASSENGER_EXTERNAL_P95=1392
+FRESH_PASSENGER_ORIGIN_P95=3776
+FRESH_PASSENGER_UNATTRIBUTED_P95=0
+```
+
+`PASS_WITH_DIRECTLY_MEASURED_EXTERNAL_FLOOR` (app P95 ≤ 2000).
+
+## Safety
+
+```
+REAL_BOOKING_CREATED=0
+REAL_PNR_CREATED=0
+REAL_TICKET_CREATED=0
+REAL_PAYMENT_CREATED=0
+REAL_CANCEL_CREATED=0
+REAL_REFUND_CREATED=0
+GROUP_REAL_HOLD_CREATED=0
+GROUP_REAL_BOOKING_CREATED=0
+GROUP_REAL_PAYMENT_CREATED=0
+SUPPLIER_MUTATION_CALLS=0
+AI_SUPPLIER_MUTATION_CALLS=0
+```
+
+No passwords, cookies, session IDs, or CSRF tokens recorded.
+
+## True stop gate
+
+```
+BACK_BFCACHE_MATRIX != PASS
+PERFORMANCE_DECOMPOSITION = PASS (local recompute)
+TEST_FAILURES = auth-email focused 0 (full affected suite not completed this addendum)
+COMPANY_PROFILE = PASS (text fields; logo upload N/A this pass)
+AUTHENTICATED_ADMIN_UAT_OWNER_HOLD_COUNT = 0
+OPEN_COUNT > 0
+```
+
+`MASTER_FINAL_STATUS` is **not** PASS.

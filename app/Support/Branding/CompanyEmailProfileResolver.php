@@ -5,6 +5,7 @@ namespace App\Support\Branding;
 use App\Models\Agency;
 use App\Models\AgencyCommunicationSetting;
 use App\Models\AgencySetting;
+use App\Support\Emails\JetpkEmailBrandingResolver;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
@@ -59,10 +60,10 @@ class CompanyEmailProfileResolver
             $brand['support_phone'] ?? null,
         );
 
-        $websiteUrl = self::firstNonEmptyString(
+        $websiteUrl = JetpkEmailBrandingResolver::publicAssetUrl(self::firstNonEmptyString(
             $settings?->website_url,
             self::websiteFromConfig($client, $brand),
-        );
+        ));
 
         $address = self::formatAddress($settings, $client);
 
@@ -157,7 +158,7 @@ class CompanyEmailProfileResolver
             return null;
         }
 
-        return asset('storage/'.$path);
+        return JetpkEmailBrandingResolver::publicAssetUrl(asset('storage/'.$path));
     }
 
     /**

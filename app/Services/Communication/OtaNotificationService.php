@@ -11,6 +11,7 @@ use App\Models\Booking;
 use App\Models\CommunicationLog;
 use App\Models\User;
 use App\Support\Branding\BrandDisplayResolver;
+use App\Support\Emails\AuthEmailRenderer;
 use App\Support\Emails\EmailBaseVariables;
 use App\Support\Emails\JetpkEmailEventRenderer;
 use App\Support\Emails\JetpkOperationalEmailEventRegistry;
@@ -348,9 +349,7 @@ class OtaNotificationService
         array $attachments,
         ?array $universalPayload = null,
     ): void {
-        $mail = $universalPayload !== null
-            ? new BookingUniversalNotification($universalPayload)
-            : new OtaOperationalNotificationMail($htmlBody, $subject, $plainBody, $attachments);
+        $mail = $this->mailableForSend($htmlBody, $subject, $plainBody, $attachments, $universalPayload);
         $pending = Mail::to($to);
         if ($cc !== []) {
             $pending->cc($cc);
@@ -359,6 +358,49 @@ class OtaNotificationService
             $pending->bcc($bcc);
         }
         $pending->send($mail);
+    }
+
+    /**
+     * @param  list<array{name: string, mime: string, content: string}>  $attachments
+     * @param  array<string, mixed>|null  $universalPayload
+     */
+    private function mailableForSend(
+        string $htmlBody,
+        string $subject,
+        string $plainBody,
+        array $attachments,
+        ?array $universalPayload,
+    ): BookingUniversalNotification|OtaOperationalNotificationMail {
+        if ($this->isAuthSecurityUniversal($universalPayload)) {
+            $rendered = app(AuthEmailRenderer::class)->loginSecurity($universalPayload);
+
+            return new OtaOperationalNotificationMail(
+                $rendered->html,
+                $subject !== '' ? $subject : (string) ($universalPayload['subject'] ?? 'Security notice'),
+                $rendered->plainBody,
+                $attachments,
+            );
+        }
+
+        if ($universalPayload !== null) {
+            return new BookingUniversalNotification($universalPayload);
+        }
+
+        return new OtaOperationalNotificationMail($htmlBody, $subject, $plainBody, $attachments);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $universalPayload
+     */
+    private function isAuthSecurityUniversal(?array $universalPayload): bool
+    {
+        if ($universalPayload === null) {
+            return false;
+        }
+
+        $type = (string) ($universalPayload['type'] ?? '');
+
+        return $type !== '' && str_starts_with($type, 'auth_');
     }
 
     /**
