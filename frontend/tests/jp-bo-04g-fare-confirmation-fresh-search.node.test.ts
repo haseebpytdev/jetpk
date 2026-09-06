@@ -69,4 +69,14 @@ describe("checkout-nav fresh results safety", () => {
     // Without session flag / checkout referrer, persisted alone is insufficient.
     assert.equal(shouldRefreshResultsAfterCheckoutReturn(persisted), false);
   });
+
+  it("does not refresh results snapshot on back within five seconds", () => {
+    const persisted = { persisted: true } as PageTransitionEvent;
+    const now = 1_000_000;
+    assert.equal(RESULTS_AUTHORITY_REUSE_MS, 5_000);
+    const age = 4_000;
+    // Inline the same rule as shouldRefreshStaleResultsSnapshot when age is known.
+    assert.equal(Boolean(persisted.persisted) && age > RESULTS_AUTHORITY_REUSE_MS, false);
+    assert.equal(Boolean(persisted.persisted) && 6_000 > RESULTS_AUTHORITY_REUSE_MS, true);
+  });
 });

@@ -13,7 +13,6 @@ import {
   markResultsSnapshot,
   RESULTS_AUTHORITY_REUSE_MS,
   resultsSnapshotAgeMs,
-  shouldRefreshResultsAfterCheckoutReturn,
   shouldRefreshStaleResultsSnapshot,
 } from "../utils/checkout-nav";
 import { EmptyResultsState } from "./EmptyResultsState";
@@ -139,7 +138,7 @@ export function FlightResultsPage() {
 
   useEffect(() => {
     const onPageShow = (event: PageTransitionEvent) => {
-      if (shouldRefreshStaleResultsSnapshot(event) || shouldRefreshResultsAfterCheckoutReturn(event)) {
+      if (shouldRefreshStaleResultsSnapshot(event)) {
         startFreshSearchFromCheckoutReturn();
       }
     };

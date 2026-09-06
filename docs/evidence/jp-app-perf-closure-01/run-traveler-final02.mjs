@@ -774,7 +774,6 @@ async function oneSample(browser, attempt) {
           sample.FRESH_PASSENGER_TLS_MS +
           sample.FRESH_PASSENGER_TTFB_EXTERNAL_MS +
           sample.FRESH_PASSENGER_TRANSFER_MS;
-        sample.FRESH_PASSENGER_APP_MS = originExclusive + sample.FRESH_PASSENGER_CLIENT_MS;
         const leftoverOrigin = Math.max(0, originMs - originExclusive);
         sample.FRESH_PASSENGER_UNATTRIBUTED_MS =
           Number(sample.PASSENGER_RESOURCE_UNATTRIBUTED_MS || 0) + leftoverOrigin;
@@ -813,14 +812,20 @@ async function oneSample(browser, attempt) {
       sample.FRESH_SUPPLIER_CHILD_MS = (sample.FRESH_SUPPLIER_CHILD_MS || 0) + paxSupplierOrigin;
       sample.FRESH_PASSENGER_SUPPLIER_CHILD_MS = paxSupplierOrigin;
     }
+    const paxNetExt = Math.max(0, (sample.PASSENGERS_NETWORK_MS || 0) - (sample.PASSENGERS_SERVER_MS || 0));
     sample.FRESH_APP_MS = Math.max(
       0,
       sample.FRESH_WALL_MS
         - (sample.FRESH_SUPPLIER_OVERLAP_MS || 0)
         - (sample.FRESH_SUPPLIER_CHILD_MS || 0)
         - (sample.NAV_TO_SHELL_EXTERNAL_MS || 0)
-        - Math.max(0, (sample.PASSENGERS_NETWORK_MS || 0) - (sample.PASSENGERS_SERVER_MS || 0)),
+        - paxNetExt,
     );
+    const originExclusive = Number(sample.FRESH_PASSENGER_ORIGIN_MS || 0);
+    const paxSupplier = Number(sample.FRESH_PASSENGER_SUPPLIER_CHILD_MS || 0);
+    sample.FRESH_PASSENGER_ORIGIN_APP_MS = Math.max(0, originExclusive - paxSupplier);
+    sample.FRESH_PASSENGER_APP_MS = Number(sample.FRESH_PASSENGER_CLIENT_MS || 0);
+    sample.CHILD_GT_PARENT = sample.FRESH_PASSENGER_APP_MS > sample.FRESH_APP_MS ? 1 : 0;
     sample.FRESH_UNATTRIBUTED_MS = Math.max(
       0,
       sample.FRESH_WALL_MS -
@@ -828,7 +833,7 @@ async function oneSample(browser, attempt) {
         (sample.FRESH_SUPPLIER_OVERLAP_MS || 0) -
         (sample.FRESH_SUPPLIER_CHILD_MS || 0) -
         (sample.NAV_TO_SHELL_EXTERNAL_MS || 0) -
-        Math.max(0, (sample.PASSENGERS_NETWORK_MS || 0) - (sample.PASSENGERS_SERVER_MS || 0)),
+        paxNetExt,
     );
     sample.SHELL_TO_USABLE_TOTAL_MS = sample.SHELL_TO_USABLE_MS;
     sample.TRAVELER_DATA_READY_MS = sample.SHELL_TO_USABLE_TOTAL_MS;
