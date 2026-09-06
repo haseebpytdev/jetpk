@@ -292,9 +292,9 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
           aria-label="Ask JetPakistan"
           onClick={() => setOpen(true)}
           className={cn(
-            "fixed z-50 inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-jp-brand text-white shadow-jp-md",
+            "fixed z-50 hidden h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-jp-brand text-white shadow-jp-md lg:inline-flex",
             "right-[max(0.75rem,env(safe-area-inset-right))]",
-            "bottom-[max(5.75rem,calc(env(safe-area-inset-bottom)+4.75rem))] xl:bottom-[max(1.25rem,env(safe-area-inset-bottom))]",
+            "bottom-[max(1.25rem,env(safe-area-inset-bottom))]",
             "focus-visible:outline-none focus-visible:shadow-jp-focus",
           )}
         >

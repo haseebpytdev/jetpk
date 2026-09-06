@@ -70,3 +70,9 @@ test("homepage content service uses photographic hero fallback", () => {
   assert.match(media, /hero-pakistan\.jpg/);
   assert.doesNotMatch(service, /hero-fallback\.svg/);
 });
+
+test("destination media prefers approved photography over off-inventory CMS urls", () => {
+  const media = readFileSync(path.join(frontendRoot, "lib/homepage-media.ts"), "utf8");
+  assert.match(media, /destinationMediaFallbacks/);
+  assert.match(media, /destination\.image\.startsWith\("\/images\/home\/"\)/);
+});

@@ -755,6 +755,29 @@ async function oneSample(browser, attempt) {
         sample.PASSENGERS_ORIGIN_OTHER_APP_MS = Math.max(0, origin - known);
         sample.PASSENGERS_ORIGIN_UNATTRIBUTED_MS = 0;
         sample.PASSENGERS_SESSION_LOCK_WAIT_MS = boot;
+        const ttfb = Number(sample.PASSENGER_TTFB_MS || 0);
+        const originMs = Number(sample.PASSENGER_ORIGIN_SERVER_MS || 0);
+        const originExclusive = Math.min(originMs, ttfb);
+        const ttfbExternal = Math.max(0, ttfb - originExclusive);
+        sample.FRESH_PASSENGER_BROWSER_QUEUE_MS = Number(sample.PASSENGER_BROWSER_QUEUE_MS || 0);
+        sample.FRESH_PASSENGER_DNS_MS = Number(sample.PASSENGER_DNS_MS || 0);
+        sample.FRESH_PASSENGER_TCP_MS = Number(sample.PASSENGER_TCP_MS || 0);
+        sample.FRESH_PASSENGER_TLS_MS = Number(sample.PASSENGER_TLS_MS || 0);
+        sample.FRESH_PASSENGER_TTFB_EXTERNAL_MS = ttfbExternal;
+        sample.FRESH_PASSENGER_ORIGIN_MS = originExclusive;
+        sample.FRESH_PASSENGER_TRANSFER_MS = Number(sample.PASSENGER_TRANSFER_MS || 0);
+        sample.FRESH_PASSENGER_CLIENT_MS = Number(sample.PASSENGER_CLIENT_PROCESS_MS || 0);
+        sample.FRESH_PASSENGER_EXTERNAL_MS =
+          sample.FRESH_PASSENGER_BROWSER_QUEUE_MS +
+          sample.FRESH_PASSENGER_DNS_MS +
+          sample.FRESH_PASSENGER_TCP_MS +
+          sample.FRESH_PASSENGER_TLS_MS +
+          sample.FRESH_PASSENGER_TTFB_EXTERNAL_MS +
+          sample.FRESH_PASSENGER_TRANSFER_MS;
+        sample.FRESH_PASSENGER_APP_MS = originExclusive + sample.FRESH_PASSENGER_CLIENT_MS;
+        const leftoverOrigin = Math.max(0, originMs - originExclusive);
+        sample.FRESH_PASSENGER_UNATTRIBUTED_MS =
+          Number(sample.PASSENGER_RESOURCE_UNATTRIBUTED_MS || 0) + leftoverOrigin;
       }
     } catch {
       /* ignore */
@@ -993,6 +1016,11 @@ async function main() {
       ERROR_COUNT: 0,
     };
   };
+  const freshPick = (k) =>
+    valid
+      .filter((s) => s.BOOK_NOW_VALIDATION_SOURCE === "FRESH_PREVALIDATION")
+      .map((s) => s[k])
+      .filter((n) => typeof n === "number" && Number.isFinite(n));
   const out = {
     phase: "JP-PERF-FINAL-02R",
     kind: "return_fare_traveler_prevalidation_cohorts",
@@ -1060,6 +1088,19 @@ async function main() {
         .filter((n) => typeof n === "number"),
       95,
     ),
+    FRESH_PASSENGER_BROWSER_QUEUE_P95: pct(freshPick("FRESH_PASSENGER_BROWSER_QUEUE_MS"), 95),
+    FRESH_PASSENGER_DNS_P95: pct(freshPick("FRESH_PASSENGER_DNS_MS"), 95),
+    FRESH_PASSENGER_TCP_P95: pct(freshPick("FRESH_PASSENGER_TCP_MS"), 95),
+    FRESH_PASSENGER_TLS_P95: pct(freshPick("FRESH_PASSENGER_TLS_MS"), 95),
+    FRESH_PASSENGER_TTFB_EXTERNAL_P95: pct(freshPick("FRESH_PASSENGER_TTFB_EXTERNAL_MS"), 95),
+    FRESH_PASSENGER_ORIGIN_P95: pct(freshPick("FRESH_PASSENGER_ORIGIN_MS"), 95),
+    FRESH_PASSENGER_TRANSFER_P95: pct(freshPick("FRESH_PASSENGER_TRANSFER_MS"), 95),
+    FRESH_PASSENGER_CLIENT_P95: pct(freshPick("FRESH_PASSENGER_CLIENT_MS"), 95),
+    FRESH_PASSENGER_EXTERNAL_P95: pct(freshPick("FRESH_PASSENGER_EXTERNAL_MS"), 95),
+    FRESH_PASSENGER_APP_P95: pct(freshPick("FRESH_PASSENGER_APP_MS"), 95),
+    FRESH_PASSENGER_UNATTRIBUTED_P95: pct(freshPick("FRESH_PASSENGER_UNATTRIBUTED_MS"), 95),
+    NAV_APP_P95_MS: pct(pick("NAV_TO_SHELL_APP_MS"), 95),
+    NAV_EXTERNAL_P95_MS: pct(pick("NAV_TO_SHELL_EXTERNAL_MS"), 95),
     PASSENGERS_HOLD_VALIDATE_P95_MS: pct(pick("PASSENGERS_HOLD_VALIDATE_MS"), 95),
     APP_CONTROLLED_P95_MS: pct(pick("APP_CONTROLLED_MS"), 95),
     TOTAL_RECONCILED_COUNT: valid.filter((s) => s.TOTAL_RECONCILED === "YES").length,
@@ -1116,7 +1157,8 @@ async function main() {
     (a, s) => a + (s.mutation_posts || []).filter((p) => !/revalidate-offer|select-return-combo/.test(p)).length,
     0,
   );
-  fs.writeFileSync(path.join(OUT, "traveler-warm-final02r-n30.json"), JSON.stringify(out, null, 2));
+  const outFile = process.env.JP_PERF_OUT || "traveler-warm-jp10-n30.json";
+  fs.writeFileSync(path.join(OUT, outFile), JSON.stringify(out, null, 2));
   console.log(
     JSON.stringify(
       {

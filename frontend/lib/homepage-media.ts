@@ -120,22 +120,19 @@ export function resolveDestinationMedia(
   },
   index = 0,
 ): ApprovedMedia {
-  if (destination.image && isPublicHomepageMediaUrl(destination.image)) {
+  for (const key of [destination.code, destination.id, destination.title]) {
+    const match = routeMediaByKey[normalizeMediaKey(key)];
+    if (match) return match;
+  }
+
+  if (destination.image && destination.image.startsWith("/images/home/")) {
     return {
       image: destination.image,
       imageAlt: destination.imageAlt ?? destination.title,
     };
   }
 
-  for (const key of [destination.code, destination.id, destination.title]) {
-    const match = routeMediaByKey[normalizeMediaKey(key)];
-    if (match) return match;
-  }
-
-  return {
-    image: "",
-    imageAlt: destination.title,
-  };
+  return destinationMediaFallbacks[index % destinationMediaFallbacks.length];
 }
 
 export function resolveOfferMedia(
