@@ -87,7 +87,7 @@ final class GroupTicketFeaturedDealSource implements HomepageFeaturedDealSource
                 'image_alt' => trim((string) ($editorial['image_alt'] ?? $headline)),
                 'image_asset_key' => trim((string) ($editorial['image_asset_key'] ?? '')),
                 'media_source' => $image !== null ? 'cms' : 'none',
-                'href' => (string) ($card['show_url'] ?? ''),
+                'href' => (string) (route('group-ticketing.show', $inventory->public_id ?: $inventory->id, false) ?: ''),
             ];
         }
 

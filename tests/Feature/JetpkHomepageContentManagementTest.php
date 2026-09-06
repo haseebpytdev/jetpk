@@ -309,6 +309,8 @@ class JetpkHomepageContentManagementTest extends TestCase
         $this->assertSame('DXB', $deals[0]['to']);
         $this->assertSame(89000, $deals[0]['price']);
         $this->assertNotEmpty($deals[0]['href']);
+        $this->assertStringNotContainsString('127.0.0.1', $deals[0]['href']);
+        $this->assertStringNotContainsString('8088', $deals[0]['href']);
     }
 
     public function test_destination_click_uses_winning_origin_from_cache(): void
