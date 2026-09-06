@@ -1,0 +1,49 @@
+{
+  "phase": "JP-MASTER-CLOSURE-09",
+  "branch": "phase/jp-master-closure-09",
+  "local_sha": "1a45e403485b81006b4dc65fdf7b5cd1449a8741",
+  "remote_sha": "1a45e403485b81006b4dc65fdf7b5cd1449a8741",
+  "production_runtime_sha": "1a45e403485b81006b4dc65fdf7b5cd1449a8741",
+  "public_build_id": "5tU8wCFhHmXtk5tSvTDcC",
+  "dashboard_build_id": "knBdbMBLDH3sxWqzoMDYu",
+  "rollback": {
+    "release_dir": "/home/pkjetp/releases/jetpk-20260906T083349Z",
+    "href_fix_release_dir": "/home/pkjetp/releases/jetpk-20260906T084519Z",
+    "previous_runtime_sha": "4717eec58d565468934e533abc4ded648d08851b",
+    "previous_public_build_id": "4ZjTpl0WNGS3Zn76wl6lz"
+  },
+  "nav_unattributed_root_cause": "BROWSER_QUEUE_FETCHSTART_TO_REQUESTSTART",
+  "email_status": "CLOSED_PENDING_CLIENT_UAT",
+  "traveler": {
+    "n_valid": 30,
+    "mixed_build": 0,
+    "ack_p95": 9,
+    "validation_to_nav_p95": 116,
+    "shell_to_passengers_request_p95": 392,
+    "shell_to_usable_app_p95": 407,
+    "nav_to_shell_p95": 798,
+    "nav_to_shell_app_p95": 234,
+    "nav_to_shell_external_p95": 757,
+    "nav_unattributed_p95": 1,
+    "fresh_p95": 4305,
+    "fresh_app_p95": 2972,
+    "fresh_supplier_pre_wall_p95": 3547,
+    "fresh_unattributed_p95": 0,
+    "duplicate_passenger_get": 0,
+    "traveler_auto_reprice_post": 1,
+    "supplier_mutation_calls": 0,
+    "source_json_local_only": "docs/evidence/jp-app-perf-closure-01/traveler-warm-final02r-n30.json"
+  },
+  "homepage": {
+    "trending_dynamic_fare": "PASS",
+    "trending_target_date": "today+7 Asia/Karachi",
+    "trending_cache_ttl_hours": 30,
+    "supplier_search_per_page_view": 0,
+    "destinations_winning_origin": "PASS",
+    "featured_deals_source": "group_ticket",
+    "featured_deal_broken_link_count": 0,
+    "homepage_group_inventory_mutation_count": 0,
+    "human_support_literal_escape_count": 0,
+    "hardcoded_live_fare_count": 0
+  }
+}

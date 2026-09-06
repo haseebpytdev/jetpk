@@ -423,7 +423,11 @@ async function oneSample(browser, attempt) {
         exclusive.DOCUMENT_TRANSFER_MS +
         exclusive.HTML_PARSE_MS +
         exclusive.POST_DOCUMENT_APP_TO_SHELL_MS;
-      const unattributed = Math.max(0, Math.round(navWall) - childSum);
+      const unattributedRaw = Math.max(0, Math.round(navWall) - childSum);
+      if (unattributedRaw > 0 && unattributedRaw <= 2) {
+        exclusive.QUEUE_BEFORE_REQUEST_MS += unattributedRaw;
+      }
+      const unattributed = unattributedRaw > 2 ? unattributedRaw : 0;
       return {
         ...exclusive,
         NAV_TO_SHELL_MS: Math.round(navWall),
