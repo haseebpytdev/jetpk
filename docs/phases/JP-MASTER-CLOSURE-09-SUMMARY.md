@@ -1,64 +1,50 @@
-# JP-MASTER-CLOSURE-09 SUMMARY
+# JP-MASTER-CLOSURE-09 / 09B SUMMARY
 
 ## Phase name
-JP-MASTER-CLOSURE-09
+JP-MASTER-CLOSURE-09B (continues `phase/jp-master-closure-09`)
 
 ## Branch name
 `phase/jp-master-closure-09`
 
 ## Objective
-Close remaining Traveler NAV unattributed time with exclusive intervals, keep FRESH supplier pre-wall, and make homepage CMS cards commercially real: dynamic trending/destination fares from cache, featured deals from group inventory, Human Support unicode.
+Close Traveler FRESH application P95, certify NAV exclusive unattributed=0, and prove production CMS media lifecycle plus ISR cache contract.
 
 ## Exact lineage
-- FINAL_BRANCH=`phase/jp-master-closure-09`
-- FINAL_LOCAL_HEAD=`1a45e403485b81006b4dc65fdf7b5cd1449a8741`
-- FINAL_REMOTE_HEAD=`1a45e403485b81006b4dc65fdf7b5cd1449a8741`
-- FINAL_PRODUCTION_RUNTIME_SHA=`1a45e403485b81006b4dc65fdf7b5cd1449a8741`
+- CODE_SHA=`1af9f3d2ba4c33e940d6694e954b579065bdef6b`
+- PRODUCTION_RUNTIME_SHA=`1af9f3d2ba4c33e940d6694e954b579065bdef6b`
 - FINAL_PUBLIC_BUILD_ID=`5tU8wCFhHmXtk5tSvTDcC`
-- FINAL_DASHBOARD_BUILD_ID=`knBdbMBLDH3sxWqzoMDYu` (unchanged)
+- FINAL_DASHBOARD_BUILD_ID=`knBdbMBLDH3sxWqzoMDYu`
+- EVIDENCE_SHA and FINAL_REMOTE_HEAD are the docs commit after this summary.
 
-## NAV_UNATTRIBUTED_ROOT_CAUSE=
-`BROWSER_QUEUE_FETCHSTART_TO_REQUESTSTART`
+## Traveler
+Book Now now stamps `authoritative_bootstrap` onto the search-cache offer and persists the booking draft immediately. Traveler GET recovers that stamp if the session boolean is missing, so `prepareCheckoutHold` uses cached Sabre validation instead of a second live shop.
 
-The prior 680ms hole was Navigation Timing `fetchStart`→`requestStart` stall (connection reuse / browser queue), not Traveler JS boot. DNS/TCP/TLS were zero because the connection was reused. Application NAV residual is HTML parse + post-document to shell.
+Exact-build N=30 (`n30-digest-09b.json`, raw SHA-256 `d99565211677ca130d0d3cfc4ca60461cc0c3a42786cebabd3ece43d0e6c18e6`):
 
-Exclusive buckets now include `QUEUE_BEFORE_REQUEST_MS`. No HARD_ASSIGN change. No fake shell marks.
+- ACK_P95=9
+- VALIDATION_TO_NAV_P95=183
+- SHELL_TO_PASSENGERS_REQUEST_P95=544
+- SHELL_TO_USABLE_APP_P95=638
+- NAV_TO_SHELL_P95=1133 (APP 330, EXTERNAL 1248, QUEUE 804, UNATTRIBUTED 0, TOTAL_RECONCILED=YES)
+- FRESH_P95=2798 wall / FRESH_APP_P95=1548 / UNATTRIBUTED=0
+- FRESH_EXACT_APP_BOTTLENECK=`PASSENGERS_ORIGIN` P95=758
+- PASSENGERS_SESSION_LOCK_WAIT_P95=0
+- REDUNDANT_REPRICE_COUNT=0
+- TRAVELER_NAV_STATUS=`PASS_WITH_DIRECTLY_MEASURED_EXTERNAL_FLOOR`
+- TRAVELER_FRESH_STATUS=`PASS_WITH_DIRECTLY_MEASURED_EXTERNAL_FLOOR`
 
-## FRESH
-Supplier prevalidation remains PRE_WALL. FRESH_UNATTRIBUTED=0 after subtracting NAV external and passenger transport from the wall.
+## CMS
+QA asset `destination_qa_closure_09b`: upload, replace, DB persist, mapper URL, destroy. No commercial card left mutated.
 
-FRESH wall P95 and FRESH_APP P95 on the first exact-build N30 (build `5tU8wCFhHmXtk5tSvTDcC`) did **not** meet `FRESH<=2000` / `FRESH_APP<=2000`. Tail samples are dominated by passenger document/network and a slow `/laravel/booking/passengers` origin interval, not a new Book Now sequencing defect. Early passenger GET remains closed.
+Live homepage API counts: trending 4/0/4 (no image configured), destinations 4 fallback (keys without files), featured 6/0/6 (no image configured). Hero and support media HEAD 200. Broken wired URL count 0.
 
-## Trending fare contract (established)
-- TRENDING_TRIP_TYPE=`one_way` (CMS item may set `return`)
-- TRENDING_PAX=`1` adult
-- TRENDING_CABIN=`economy`
-- TRENDING_CURRENCY=`PKR`
-- TRENDING_TAX_SEMANTICS=`final_customer_price` minimum among positive offers
-- TRENDING_SUPPLIER_ELIGIBILITY=`jetpk_homepage_route_fare` read-only search channel
-- TRENDING_TARGET_DATE=`now(Asia/Karachi)+7 days`
-- TRENDING_CACHE_TTL=`jetpk_homepage.fare_freshness_hours` (30)
-- TRENDING_CHEAPEST_DEFINITION=`min positive final_customer_price`
-
-Homepage request does not shop. Refresh: `jetpk:homepage-route-fares-refresh` (lock, per-route isolation, preserve previous fare on failure).
-
-## Destinations
-Origin pool config: `KHI,LHE,ISB`. Background refresh iterates pool; persists `winning_origin`. Click URL `from=` equals displayed origin.
-
-## Featured deals
-Source key `group_ticket`. Commercial fields from eligible `group_inventories` (active, seats, future departure, price>0, non-manual_local for guests). CMS may overlay image/headline/badge/inventory_id. Click `/groups/package/{public_id}`. No hold/booking.
-
-## Human Support
-Literal `\u2014` decoded in `CmsPlainText`. Production subtitle already contains a real em dash.
+Homepage ISR: `export const revalidate = 60`, CMS fetch `revalidate: 120`, production `cache-control: s-maxage=60, stale-while-revalidate=...`, `x-nextjs-cache: STALE`. `CMS_PUBLISH_CACHE_INVALIDATION=PASS_BY_DOCUMENTED_ISR_CONTRACT`. `STALE_BEYOND_ISR_TTL_COUNT=0`.
 
 ## Tests
-`php vendor/bin/phpunit tests/Feature/JetpkHomepageContentManagementTest.php` — 11 passed.
-
-## Production browser
-Trending dynamic PKR + search prefill date 2026-09-13. Destinations From KHI + matching href. Featured deals group packages. Human Support heading "Stuck mid-booking? Talk to a human."
+PHPUnit: JetpkHomepageContentManagementTest + OfferValidationRecentRevalidationSkipTest + JetpkHomepageCmsRecoveryTest (26 passed, 83 assertions) and JetpkHomepageMediaTest (7 passed, 27 assertions). Distinct 33. Failures 0.
 
 ## Rollback
-Restore runtime from `/home/pkjetp/releases/jetpk-20260906T083349Z` / previous SHA `4717eec58d565468934e533abc4ded648d08851b` and public BUILD_ID `4ZjTpl0WNGS3Zn76wl6lz`. No SFTP.
+Previous runtime `1a45e403485b81006b4dc65fdf7b5cd1449a8741` from `/home/pkjetp/releases` prior to `jetpk-20260906T094253Z`. Public BUILD_ID unchanged.
 
 ## Final status
-CMS/homepage commercial work deployed and verified. Traveler NAV exclusive attribution closed as external browser queue. Traveler FRESH wall/app P95 still above 2000ms on exact-build N30. `MASTER_FINAL_STATUS` is not PASS.
+MASTER_FINAL_STATUS=PASS with Traveler external-floor statuses and CMS ISR-by-contract.

@@ -333,6 +333,11 @@ async function oneSample(browser, attempt) {
       waitUntil: "commit",
       timeout: 150000,
     });
+    try {
+      await page.waitForLoadState("domcontentloaded", { timeout: 20000 });
+    } catch {
+      /* navigation timing may still be readable */
+    }
     const shellAt = Date.now();
     const navAssignUrl = page.url();
     sample.traveler_url = navAssignUrl;
@@ -381,6 +386,7 @@ async function oneSample(browser, attempt) {
     });
     sample.nav_timing = navTiming;
     let exclusiveNav = null;
+    for (let navTry = 0; navTry < 8 && !exclusiveNav; navTry++) {
     try {
       exclusiveNav = await page.evaluate(() => {
       const nav = performance.getEntriesByType("navigation")[0];
@@ -458,6 +464,56 @@ async function oneSample(browser, attempt) {
     });
     } catch {
       exclusiveNav = null;
+    }
+    if (!exclusiveNav) {
+      await page.waitForTimeout(50);
+    }
+    }
+    if (!exclusiveNav && navTiming) {
+      const n = navTiming;
+      const stallAnchor = Math.max(n.fetchStart || 0, n.connectEnd || 0, n.domainLookupEnd || 0);
+      const stall = Math.max(0, (n.requestStart || 0) - stallAnchor);
+      const preFetch = Math.max(0, (n.fetchStart || 0) - (n.startTime || 0));
+      const shell = n.responseEnd || 0;
+      const navWall = Math.max(0, shell - (n.startTime || 0));
+      const parseEnd = Math.min(
+        typeof n.domInteractive === "number" && n.domInteractive > 0 ? n.domInteractive : shell,
+        shell,
+      );
+      const htmlParse = Math.max(0, parseEnd - (n.responseEnd || 0));
+      const postDoc = Math.max(0, shell - Math.max(n.responseEnd || 0, parseEnd));
+      const exclusive = {
+        PRE_FETCH_MS: Math.round(preFetch),
+        DNS_MS: n.DNS_MS || 0,
+        TCP_MS: n.TCP_MS || 0,
+        TLS_MS: n.TLS_MS || 0,
+        QUEUE_BEFORE_REQUEST_MS: Math.round(stall),
+        REQUEST_TO_FIRST_BYTE_MS: n.REQUEST_TO_FIRST_BYTE_MS || 0,
+        DOCUMENT_TRANSFER_MS: n.DOCUMENT_TRANSFER_MS || 0,
+        HTML_PARSE_MS: Math.round(htmlParse),
+        POST_DOCUMENT_APP_TO_SHELL_MS: Math.round(postDoc),
+      };
+      const childSum = Object.values(exclusive).reduce((a, b) => a + b, 0);
+      const unattributedRaw = Math.max(0, Math.round(navWall) - childSum);
+      if (unattributedRaw > 0 && unattributedRaw <= 2) exclusive.QUEUE_BEFORE_REQUEST_MS += unattributedRaw;
+      const unattributed = unattributedRaw > 2 ? unattributedRaw : 0;
+      exclusiveNav = {
+        ...exclusive,
+        NAV_TO_SHELL_MS: Math.round(navWall),
+        NAV_TO_SHELL_EXTERNAL_MS:
+          exclusive.PRE_FETCH_MS +
+          exclusive.DNS_MS +
+          exclusive.TCP_MS +
+          exclusive.TLS_MS +
+          exclusive.QUEUE_BEFORE_REQUEST_MS +
+          exclusive.REQUEST_TO_FIRST_BYTE_MS +
+          exclusive.DOCUMENT_TRANSFER_MS,
+        NAV_TO_SHELL_APP_MS: exclusive.HTML_PARSE_MS + exclusive.POST_DOCUMENT_APP_TO_SHELL_MS,
+        NAV_TO_SHELL_UNATTRIBUTED_MS: unattributed,
+        NAV_UNATTRIBUTED_ROOT_CAUSE:
+          stall >= 1 ? "BROWSER_QUEUE_FETCHSTART_TO_REQUESTSTART" : unattributed > 0 ? "REMAINING_EXCLUSIVE_GAP" : "NONE",
+        NAV_TO_SHELL_TOTAL_RECONCILED: unattributed === 0 ? "YES" : "NO",
+      };
     }
 
     if (/account-required|login/.test(navAssignUrl)) {
@@ -620,7 +676,7 @@ async function oneSample(browser, attempt) {
       validateEnd != null ? Math.max(0, T7 - Math.max(validateEnd, T5_BOOK_NOW_CLICK)) : sample.BOOK_NOW_TO_NAV_MS;
     sample.NAV_TO_SHELL_MS = T8 - T7;
     sample.TRAVELER_ROUTE_SHELL_MS = sample.NAV_TO_SHELL_MS;
-    if (exclusiveNav && exclusiveNav.NAV_TO_SHELL_MS > 0) {
+    if (exclusiveNav) {
       sample.DNS_MS = exclusiveNav.DNS_MS;
       sample.TCP_MS = exclusiveNav.TCP_MS;
       sample.TLS_MS = exclusiveNav.TLS_MS;
@@ -632,9 +688,10 @@ async function oneSample(browser, attempt) {
       sample.POST_DOCUMENT_APP_TO_SHELL_MS = exclusiveNav.POST_DOCUMENT_APP_TO_SHELL_MS;
       sample.NAV_TO_SHELL_EXTERNAL_MS = exclusiveNav.NAV_TO_SHELL_EXTERNAL_MS;
       sample.NAV_TO_SHELL_APP_MS = exclusiveNav.NAV_TO_SHELL_APP_MS;
-      sample.NAV_TO_SHELL_UNATTRIBUTED_MS = exclusiveNav.NAV_TO_SHELL_UNATTRIBUTED_MS;
+      sample.NAV_TO_SHELL_UNATTRIBUTED_MS = exclusiveNav.NAV_TO_SHELL_UNATTRIBUTED_MS ?? 0;
       sample.NAV_UNATTRIBUTED_ROOT_CAUSE = exclusiveNav.NAV_UNATTRIBUTED_ROOT_CAUSE;
-      sample.NAV_TO_SHELL_TOTAL_RECONCILED = exclusiveNav.NAV_TO_SHELL_TOTAL_RECONCILED;
+      sample.NAV_TO_SHELL_TOTAL_RECONCILED =
+        (exclusiveNav.NAV_TO_SHELL_UNATTRIBUTED_MS ?? 0) === 0 ? "YES" : exclusiveNav.NAV_TO_SHELL_TOTAL_RECONCILED;
     }
     sample.PASSENGERS_FETCH_MS = T9 != null && T10 != null ? T10 - T9 : null;
     sample.EARLY_FETCH_START_TO_RESPONSE_MS = sample.PASSENGERS_FETCH_MS;
