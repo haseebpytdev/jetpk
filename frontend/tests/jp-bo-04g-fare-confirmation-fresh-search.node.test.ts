@@ -4,6 +4,7 @@ import {
   buildFreshResultsSearchParams,
   RESULTS_AUTHORITY_REUSE_MS,
   shouldRefreshResultsAfterCheckoutReturn,
+  shouldRefreshStaleResultsSnapshot,
 } from "../features/flight-results/utils/checkout-nav";
 
 describe("checkout-nav fresh results safety", () => {
@@ -78,5 +79,13 @@ describe("checkout-nav fresh results safety", () => {
     // Inline the same rule as shouldRefreshStaleResultsSnapshot when age is known.
     assert.equal(Boolean(persisted.persisted) && age > RESULTS_AUTHORITY_REUSE_MS, false);
     assert.equal(Boolean(persisted.persisted) && 6_000 > RESULTS_AUTHORITY_REUSE_MS, true);
+  });
+
+  it("treats explicit back navigation as eligible when snapshot is stale", () => {
+    const event = { persisted: false } as PageTransitionEvent;
+    assert.equal(
+      shouldRefreshStaleResultsSnapshot(event, Date.now(), { treatAsBackNavigation: false }),
+      false,
+    );
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { FlightDetailsContext } from "@/features/flight-details";
 import { buildSearchSummaryFromParams, useFlightResults } from "../hooks/use-flight-results";
@@ -10,6 +10,7 @@ import { parseUiSort, type UiSortKey } from "../utils/sorting";
 import {
   buildFreshResultsSearchParams,
   clearResultsLeftForCheckout,
+  didLeaveResultsForCheckout,
   markResultsSnapshot,
   RESULTS_AUTHORITY_REUSE_MS,
   resultsSnapshotAgeMs,
@@ -136,13 +137,21 @@ export function FlightResultsPage() {
     }
   }, [results.status, results.resolvedSearchId, searchId]);
 
-  useEffect(() => {
-    const onPageShow = (event: PageTransitionEvent) => {
-      if (shouldRefreshStaleResultsSnapshot(event)) {
+  useLayoutEffect(() => {
+    const tryRefresh = (event: PageTransitionEvent, treatAsBackNavigation = false) => {
+      if (shouldRefreshStaleResultsSnapshot(event, Date.now(), { treatAsBackNavigation })) {
         startFreshSearchFromCheckoutReturn();
       }
     };
+
+    if (didLeaveResultsForCheckout()) {
+      tryRefresh({ persisted: false } as PageTransitionEvent, true);
+    }
+
+    const onPageShow = (event: PageTransitionEvent) => tryRefresh(event);
+    const onPopState = () => tryRefresh({ persisted: false } as PageTransitionEvent, true);
     window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("popstate", onPopState);
     const onVisibility = () => {
       if (document.visibilityState !== "visible") return;
       const age = resultsSnapshotAgeMs();
@@ -153,6 +162,7 @@ export function FlightResultsPage() {
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("popstate", onPopState);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [startFreshSearchFromCheckoutReturn]);

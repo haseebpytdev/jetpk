@@ -5,6 +5,7 @@ export function markResultsLeftForCheckout(searchId?: string | null): void {
   if (typeof window === "undefined") return;
   try {
     window.sessionStorage.setItem(RESULTS_LEFT_FOR_CHECKOUT_KEY, String(searchId?.trim() || "1"));
+    markResultsSnapshot(searchId);
   } catch {
     // sessionStorage may be unavailable
   }
@@ -125,8 +126,12 @@ export function resultsSnapshotAgeMs(nowMs: number = Date.now()): number | null 
 export function shouldRefreshStaleResultsSnapshot(
   event: PageTransitionEvent,
   nowMs: number = Date.now(),
+  options?: { treatAsBackNavigation?: boolean },
 ): boolean {
-  const backNav = Boolean(event.persisted) || navigationWasBackForward();
+  const backNav =
+    Boolean(options?.treatAsBackNavigation) ||
+    Boolean(event?.persisted) ||
+    navigationWasBackForward();
   if (!backNav) return false;
   const age = resultsSnapshotAgeMs(nowMs);
   if (age === null) {

@@ -330,33 +330,37 @@ trait AdminLegacyViewTestHelpers
     {
         $this->actingAs($admin);
         view()->share('errors', new ViewErrorBag);
-        $request = Request::create('/admin/finance/statements', 'GET');
+        $request = Request::create('/admin/finance/statements', 'GET', ['format' => 'json']);
+        $request->headers->set('Accept', 'application/json');
         $request->setUserResolver(fn () => $admin);
 
-        return app(FinanceStatementController::class)->index($request)->render();
+        return (string) app(FinanceStatementController::class)->index($request)->getContent();
     }
 
     protected function adminFinanceStatementShowHtml(User $admin, Agency $agency): string
     {
-        $this->actingAs($admin);
-        view()->share('errors', new ViewErrorBag);
-        $request = Request::create('/admin/finance/statements/'.$agency->id, 'GET');
-        $request->setUserResolver(fn () => $admin);
-
-        return app(FinanceStatementController::class)->show($request, $agency)->render();
+        return $this->adminFinanceStatementShowHtmlWithQuery($admin, $agency, []);
     }
 
     /**
+     * Live statements are JSON (Blade show/index redirect to the dashboard).
+     * Tests still assert movement descriptions such as "Manual wallet credit".
+     *
      * @param  array<string, mixed>  $query
      */
     protected function adminFinanceStatementShowHtmlWithQuery(User $admin, Agency $agency, array $query): string
     {
         $this->actingAs($admin);
         view()->share('errors', new ViewErrorBag);
-        $request = Request::create('/admin/finance/statements/'.$agency->id, 'GET', $query);
+        $request = Request::create(
+            '/admin/finance/statements/'.$agency->id,
+            'GET',
+            array_merge($query, ['format' => 'json'])
+        );
+        $request->headers->set('Accept', 'application/json');
         $request->setUserResolver(fn () => $admin);
 
-        return app(FinanceStatementController::class)->show($request, $agency)->render();
+        return (string) app(FinanceStatementController::class)->show($request, $agency)->getContent();
     }
 
     protected function staffFinanceStatementsIndexHtml(User $staff): string
