@@ -120,9 +120,12 @@
 
             @case('detail-fields')
                 @if($detailRows !== [])
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 14px 0; border:1px solid {{ $brand['border_color'] ?? '#d9e6ee' }}; border-radius:12px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 14px 0;">
                         <tr>
-                            <td style="padding:16px 18px;">
+                            <td style="border:1px solid {{ $brand['border_color'] ?? '#d9e6ee' }}; border-radius:12px; padding:16px 20px;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                    <tr>
+                                        <td style="padding:16px 20px;">
                                 @foreach($detailRows as $row)
                                     @include('emails.themes.jetpakistan.partials.info-row', [
                                         'label' => $row['label'],
@@ -130,6 +133,9 @@
                                         'emailBrand' => $brand,
                                     ])
                                 @endforeach
+                                        </td>
+                                    </tr>
+                                </table>
                             </td>
                         </tr>
                     </table>

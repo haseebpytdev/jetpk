@@ -12,13 +12,25 @@
 @if(!empty($title) || !empty($message))
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 14px 0;">
         <tr>
-            <td style="background-color:{{ $c['bg'] }}; border:1px solid {{ $c['border'] }}; border-radius:10px; padding:14px 16px;">
-                @if(!empty($title))
-                    <div style="font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:22px; font-weight:bold; color:{{ $c['title'] }}; margin:0 0 4px 0;">{{ $title }}</div>
-                @endif
-                @if(!empty($message))
-                    <div style="font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:21px; color:{{ $c['text'] }};">{{ $message }}</div>
-                @endif
+            <td style="padding:0;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                    <tr>
+                        <td style="background-color:{{ $c['bg'] }}; border:1px solid {{ $c['border'] }}; border-radius:10px; padding:14px 20px;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                <tr>
+                                    <td style="padding:14px 20px;">
+                                        @if(!empty($title))
+                                            <div style="font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:22px; font-weight:bold; color:{{ $c['title'] }}; margin:0 0 4px 0;">{{ $title }}</div>
+                                        @endif
+                                        @if(!empty($message))
+                                            <div class="jetpk-long" style="font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:21px; color:{{ $c['text'] }}; word-break:break-word;">{{ $message }}</div>
+                                        @endif
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>

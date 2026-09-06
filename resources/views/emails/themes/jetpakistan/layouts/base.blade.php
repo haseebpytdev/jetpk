@@ -5,7 +5,8 @@
     Email-safe rules honoured here:
       - Table-based outer layout, inline critical CSS, system fonts only.
       - No web fonts, no JS, no background images, no CSS grid/flex for layout.
-      - Max width 640px, responsive via a minimal <style> media block.
+      - Max width 640px via max-width + width 100% (never a fixed 640 HTML width).
+      - Critical padding lives on structural TDs, not only class CSS.
       - Brand colours resolved to PHP locals so they can be inlined (no CSS vars).
 
     Expected (all optional, null-safe):
@@ -43,7 +44,6 @@
     <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
     <![endif]-->
     <style>
-        /* Client resets */
         html, body { margin: 0 !important; padding: 0 !important; height: 100% !important; width: 100% !important; }
         * { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
         table, td { mso-table-lspace: 0pt !important; mso-table-rspace: 0pt !important; border-collapse: collapse !important; }
@@ -54,36 +54,27 @@
         .jetpk-long { overflow-wrap: anywhere; word-break: break-word; max-width: 100%; }
         .jetpk-logo { max-width: 180px; max-height: 48px; height: auto; }
 
-        /* Mobile */
-        @media only screen and (max-width: 640px) {
+        @media only screen and (max-width: 480px) {
             .jetpk-container { width: 100% !important; max-width: 100% !important; border-radius: 0 !important; }
-            .jetpk-pad { padding-left: 20px !important; padding-right: 20px !important; }
-            .jetpk-btn a { display: block !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
-            .jetpk-h1 { font-size: 24px !important; line-height: 30px !important; }
-            .jetpk-stack { display: block !important; width: 100% !important; }
-            .jetpk-otp { font-size: 30px !important; letter-spacing: 8px !important; }
+            .jetpk-pad { padding-left: 16px !important; padding-right: 16px !important; }
+            .jetpk-h1 { font-size: 22px !important; line-height: 28px !important; }
+            .jetpk-otp { font-size: 28px !important; letter-spacing: 6px !important; }
         }
     </style>
 </head>
 <body style="margin:0; padding:0; width:100%; background-color:{{ $bgColor }}; color:{{ $textColor }};">
-    {{-- Hidden preheader --}}
     <div style="display:none; font-size:1px; color:{{ $bgColor }}; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden; mso-hide:all;">
         {{ $preheader }}
     </div>
 
-    {{-- Outer wrapper --}}
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:{{ $bgColor }};">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; background-color:{{ $bgColor }};">
         <tr>
-            <td align="center" style="padding:24px 12px;">
-
-                {{-- Main container / card --}}
-                <table role="presentation" class="jetpk-container" cellpadding="0" cellspacing="0" border="0" width="640" style="width:640px; max-width:640px; background-color:{{ $cardColor }}; border:1px solid {{ $borderColor }}; border-radius:14px; overflow:hidden;">
-
+            <td align="center" style="padding:12px 10px;">
+                <table role="presentation" class="jetpk-container" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; max-width:640px; background-color:{{ $cardColor }}; border:1px solid {{ $borderColor }}; border-radius:14px;">
                     @include('emails.themes.jetpakistan.partials.header', ['emailBrand' => $brand])
 
-                    {{-- Content --}}
                     <tr>
-                        <td class="jetpk-pad" style="padding:28px 36px 8px 36px;">
+                        <td class="jetpk-pad" style="padding:24px 28px 8px 28px;">
                             @if(!empty($headline))
                                 <h1 class="jetpk-h1" style="margin:0 0 12px 0; font-family:Arial,Helvetica,sans-serif; font-size:26px; line-height:32px; font-weight:bold; color:{{ $textColor }};">{{ $headline }}</h1>
                             @endif
@@ -100,35 +91,30 @@
                         </td>
                     </tr>
 
-                    {{-- Template-specific body --}}
                     <tr>
-                        <td class="jetpk-pad" style="padding:8px 36px 8px 36px;">
+                        <td class="jetpk-pad" style="padding:8px 28px 8px 28px;">
                             @yield('content')
                         </td>
                     </tr>
 
-                    {{-- Primary CTA (only if a URL is present) --}}
                     @if(!empty($ctaUrl) && !empty($ctaText))
                         <tr>
-                            <td class="jetpk-pad" style="padding:12px 36px 24px 36px;">
+                            <td class="jetpk-pad" style="padding:12px 28px 24px 28px;">
                                 @include('emails.themes.jetpakistan.partials.button', ['text' => $ctaText, 'url' => $ctaUrl, 'variant' => 'primary', 'emailBrand' => $brand])
                             </td>
                         </tr>
                     @endif
 
                     @include('emails.themes.jetpakistan.partials.footer', ['emailBrand' => $brand])
-
                 </table>
 
-                {{-- Sub-footer note under the card --}}
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="640" style="width:640px; max-width:640px;" class="jetpk-container">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; max-width:640px;" class="jetpk-container">
                     <tr>
-                        <td class="jetpk-pad" style="padding:16px 36px 8px 36px; text-align:center; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:18px; color:{{ $mutedColor }};">
+                        <td class="jetpk-pad" style="padding:16px 20px 8px 20px; text-align:center; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:18px; color:{{ $mutedColor }};">
                             {{ $footerText }}
                         </td>
                     </tr>
                 </table>
-
             </td>
         </tr>
     </table>

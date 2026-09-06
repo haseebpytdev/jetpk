@@ -1,8 +1,7 @@
 {{--
     Flight itinerary. Input: $itinerary, $emailBrand.
-    Accepts either:
-      $itinerary = [ ['label'=>'Outbound','from'=>'KHI','to'=>'DXB', ...], ... ]
-    or a single segment array. Fully null-safe.
+    Always stacked (origin → connector → destination) so Gmail clients that
+    strip media queries never keep a cramped 3-column row.
 --}}
 @php
     $brand       = (isset($emailBrand) && is_array($emailBrand)) ? $emailBrand : [];
@@ -14,7 +13,6 @@
     $raw = $itinerary ?? null;
     $segments = [];
     if (is_array($raw)) {
-        // If associative single segment, wrap it; else assume list of segments.
         $isList = array_keys($raw) === range(0, count($raw) - 1);
         $segments = $isList ? $raw : [$raw];
     }
@@ -22,59 +20,72 @@
 @if(!empty($segments))
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 14px 0;">
         <tr>
-            <td style="padding:0;">
-                <div style="font-family:Arial,Helvetica,sans-serif; font-size:12px; letter-spacing:0.6px; text-transform:uppercase; color:{{ $primary }}; font-weight:bold; margin:0 0 8px 0;">Flight itinerary</div>
-                @foreach($segments as $seg)
-                    @php
-                        $seg      = is_array($seg) ? $seg : [];
-                        $label    = $seg['label']    ?? null;
-                        $from     = $seg['from']     ?? null;
-                        $to       = $seg['to']       ?? null;
-                        $fromName = $seg['from_name'] ?? null;
-                        $toName   = $seg['to_name']  ?? null;
-                        $depart   = $seg['depart']   ?? null;
-                        $arrive   = $seg['arrive']   ?? null;
-                        $airline  = $seg['airline']  ?? null;
-                        $flightNo = $seg['flight_no'] ?? null;
-                        $stops    = $seg['stops']    ?? null;
-                        $baggage  = $seg['baggage']  ?? null;
-                        $cabin    = $seg['cabin']    ?? ($seg['fare_brand'] ?? null);
-                        $terminal = $seg['terminal'] ?? null;
-                        $carrier  = trim(($airline ?? '').(($airline && $flightNo) ? ' · ' : '').($flightNo ?? ''));
-                    @endphp
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid {{ $borderColor }}; border-radius:12px; background-color:#ffffff; margin:0 0 10px 0;">
-                        @if(!empty($label))
-                            <tr><td colspan="3" style="padding:12px 16px 0 16px; font-family:Arial,Helvetica,sans-serif; font-size:13px; font-weight:bold; color:{{ $primary }};">{{ $label }}</td></tr>
-                        @endif
+            <td style="padding:0 0 8px 0; font-family:Arial,Helvetica,sans-serif; font-size:12px; letter-spacing:0.6px; text-transform:uppercase; color:{{ $primary }}; font-weight:bold;">Flight itinerary</td>
+        </tr>
+        @foreach($segments as $seg)
+            @php
+                $seg      = is_array($seg) ? $seg : [];
+                $label    = $seg['label']    ?? null;
+                $from     = $seg['from']     ?? null;
+                $to       = $seg['to']       ?? null;
+                $fromName = $seg['from_name'] ?? null;
+                $toName   = $seg['to_name']  ?? null;
+                $depart   = $seg['depart']   ?? null;
+                $arrive   = $seg['arrive']   ?? null;
+                $airline  = $seg['airline']  ?? null;
+                $flightNo = $seg['flight_no'] ?? null;
+                $stops    = $seg['stops']    ?? null;
+                $baggage  = $seg['baggage']  ?? null;
+                $cabin    = $seg['cabin']    ?? ($seg['fare_brand'] ?? null);
+                $terminal = $seg['terminal'] ?? null;
+                $carrier  = trim(($airline ?? '').(($airline && $flightNo) ? ' · ' : '').($flightNo ?? ''));
+            @endphp
+            <tr>
+                <td style="padding:0 0 10px 0;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;">
                         <tr>
-                            <td valign="top" style="padding:10px 8px 10px 16px; font-family:Arial,Helvetica,sans-serif;" class="jetpk-stack">
-                                <div style="font-size:20px; font-weight:bold; color:{{ $textColor }};">{{ $from ?? '—' }}</div>
-                                @if(!empty($fromName))<div style="font-size:12px; color:{{ $mutedColor }};">{{ $fromName }}</div>@endif
-                                @if(!empty($depart))<div style="font-size:13px; color:{{ $textColor }}; margin-top:3px;">{{ $depart }}</div>@endif
-                            </td>
-                            <td valign="middle" align="center" style="padding:10px 4px; font-family:Arial,Helvetica,sans-serif; color:{{ $mutedColor }};" class="jetpk-stack">
-                                <div style="font-size:12px;">&#9992;</div>
-                                @if(!empty($stops))<div style="font-size:11px;">{{ $stops }}</div>@endif
-                            </td>
-                            <td valign="top" align="right" style="padding:10px 16px 10px 8px; font-family:Arial,Helvetica,sans-serif;" class="jetpk-stack">
-                                <div style="font-size:20px; font-weight:bold; color:{{ $textColor }};">{{ $to ?? '—' }}</div>
-                                @if(!empty($toName))<div style="font-size:12px; color:{{ $mutedColor }};">{{ $toName }}</div>@endif
-                                @if(!empty($arrive))<div style="font-size:13px; color:{{ $textColor }}; margin-top:3px;">{{ $arrive }}</div>@endif
+                            <td style="border:1px solid {{ $borderColor }}; border-radius:12px; background-color:#ffffff; padding:16px 20px;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                    @if(!empty($label))
+                                        <tr>
+                                            <td style="padding:16px 20px 0 20px; font-family:Arial,Helvetica,sans-serif; font-size:13px; font-weight:bold; color:{{ $primary }};">{{ $label }}</td>
+                                        </tr>
+                                    @endif
+                                    <tr>
+                                        <td style="padding:12px 20px 8px 20px; font-family:Arial,Helvetica,sans-serif;">
+                                            <div style="font-size:20px; line-height:26px; font-weight:bold; color:{{ $textColor }};">{{ $from ?? '—' }}</div>
+                                            @if(!empty($fromName))<div class="jetpk-long" style="font-size:12px; line-height:18px; color:{{ $mutedColor }}; word-break:break-word;">{{ $fromName }}</div>@endif
+                                            @if(!empty($depart))<div style="font-size:13px; line-height:19px; color:{{ $textColor }}; margin-top:3px;">{{ $depart }}</div>@endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:0 20px 8px 20px; font-family:Arial,Helvetica,sans-serif; color:{{ $mutedColor }};">
+                                            <div style="font-size:12px; line-height:18px;">&#8595;@if(!empty($stops)) {{ $stops }}@endif</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:0 20px 12px 20px; font-family:Arial,Helvetica,sans-serif;">
+                                            <div style="font-size:20px; line-height:26px; font-weight:bold; color:{{ $textColor }};">{{ $to ?? '—' }}</div>
+                                            @if(!empty($toName))<div class="jetpk-long" style="font-size:12px; line-height:18px; color:{{ $mutedColor }}; word-break:break-word;">{{ $toName }}</div>@endif
+                                            @if(!empty($arrive))<div style="font-size:13px; line-height:19px; color:{{ $textColor }}; margin-top:3px;">{{ $arrive }}</div>@endif
+                                        </td>
+                                    </tr>
+                                    @if(!empty($carrier) || !empty($baggage) || !empty($cabin) || !empty($terminal))
+                                        <tr>
+                                            <td style="padding:10px 20px 16px 20px; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:18px; color:{{ $mutedColor }}; border-top:1px solid {{ $borderColor }};">
+                                                @if(!empty($carrier))<div class="jetpk-long" style="word-break:break-word;">{{ $carrier }}</div>@endif
+                                                @if(!empty($cabin))<div>Cabin: {{ $cabin }}</div>@endif
+                                                @if(!empty($terminal))<div>Terminal: {{ $terminal }}</div>@endif
+                                                @if(!empty($baggage))<div>Baggage: {{ $baggage }}</div>@endif
+                                            </td>
+                                        </tr>
+                                    @endif
+                                </table>
                             </td>
                         </tr>
-                        @if(!empty($carrier) || !empty($baggage) || !empty($cabin) || !empty($terminal))
-                            <tr>
-                                <td colspan="3" style="padding:0 16px 12px 16px; font-family:Arial,Helvetica,sans-serif; font-size:12px; color:{{ $mutedColor }}; border-top:1px solid {{ $borderColor }}; padding-top:10px;">
-                                    @if(!empty($carrier)){{ $carrier }}@endif
-                                    @if(!empty($cabin)) &nbsp;·&nbsp; Cabin: {{ $cabin }}@endif
-                                    @if(!empty($terminal)) &nbsp;·&nbsp; Terminal: {{ $terminal }}@endif
-                                    @if(!empty($baggage)) &nbsp;·&nbsp; Baggage: {{ $baggage }}@endif
-                                </td>
-                            </tr>
-                        @endif
                     </table>
-                @endforeach
-            </td>
-        </tr>
+                </td>
+            </tr>
+        @endforeach
     </table>
 @endif

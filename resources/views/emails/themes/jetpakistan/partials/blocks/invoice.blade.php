@@ -25,18 +25,19 @@
     };
 @endphp
 
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:2px 0 14px 0; border:1px solid {{ $border }}; border-radius:12px; background-color:#ffffff;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:2px 0 14px 0;">
     <tr>
-        <td style="padding:18px;">
+        <td style="border:1px solid {{ $border }}; border-radius:12px; background-color:#ffffff; padding:16px 20px;">
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
-                    <td valign="top" class="jetpk-stack" style="font-family:Arial,Helvetica,sans-serif;">
+                    <td style="padding:16px 20px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                    <td valign="top" style="font-family:Arial,Helvetica,sans-serif;">
                         <div style="font-size:18px; font-weight:bold; color:{{ $textColor }};">Invoice</div>
-                        @if(!empty($invoiceNo))<div style="font-size:13px; color:{{ $muted }}; margin-top:2px;">No. {{ $invoiceNo }}</div>@endif
-                    </td>
-                    <td valign="top" align="right" class="jetpk-stack" style="font-family:Arial,Helvetica,sans-serif;">
+                        @if(!empty($invoiceNo))<div class="jetpk-long" style="font-size:13px; color:{{ $muted }}; margin-top:2px; word-break:break-word;">No. {{ $invoiceNo }}</div>@endif
                         @if(!empty($status))
-                            <span style="display:inline-block; font-size:12px; font-weight:bold; color:#0f7a3d; background-color:#e9f7ef; border:1px solid #a7e0bf; border-radius:999px; padding:5px 12px;">{{ $status }}</span>
+                            <div style="margin-top:8px; font-size:12px; font-weight:bold; color:#0f7a3d;">{{ $status }}</div>
                         @endif
                     </td>
                 </tr>
@@ -47,13 +48,19 @@
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Transaction reference', 'value' => $reference, 'emailBrand' => $brand])
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Paid at', 'value' => $p['paid_at'] ?? null, 'emailBrand' => $brand])
             </table>
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
 </table>
 
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:2px 0 14px 0; border:1px solid {{ $border }}; border-radius:12px; background-color:#ffffff;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:2px 0 14px 0;">
     <tr>
-        <td style="padding:18px;">
+        <td style="border:1px solid {{ $border }}; border-radius:12px; background-color:#ffffff; padding:16px 20px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                    <td style="padding:16px 20px;">
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                 @if(!empty($items))
                     @foreach($items as $it)
@@ -69,11 +76,16 @@
             @if(!empty($total))
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:10px; background-color:{{ $bgSoft }}; border-radius:10px;">
                     <tr>
-                        <td style="padding:12px 14px; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:bold; color:{{ $textColor }};">Total</td>
-                        <td align="right" style="padding:12px 14px; font-family:Arial,Helvetica,sans-serif; font-size:17px; font-weight:bold; color:{{ $primary }};">{{ $money($total) }}</td>
+                        <td style="padding:12px 16px; font-family:Arial,Helvetica,sans-serif;">
+                            <div style="font-size:15px; font-weight:bold; color:{{ $textColor }};">Total</div>
+                            <div class="jetpk-long" style="font-size:17px; font-weight:bold; color:{{ $primary }}; word-break:break-word;">{{ $money($total) }}</div>
+                        </td>
                     </tr>
                 </table>
             @endif
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
 </table>

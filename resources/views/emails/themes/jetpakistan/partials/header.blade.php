@@ -9,7 +9,7 @@
     $homeUrl     = $brand['home_url']       ?? null;
 @endphp
 <tr>
-    <td style="padding:22px 36px; border-bottom:3px solid {{ $primary }}; background-color:#ffffff;" class="jetpk-pad">
+    <td style="padding:20px 28px; border-bottom:3px solid {{ $primary }}; background-color:#ffffff;" class="jetpk-pad">
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
             <tr>
                 <td align="left" valign="middle" style="font-family:Arial,Helvetica,sans-serif;">

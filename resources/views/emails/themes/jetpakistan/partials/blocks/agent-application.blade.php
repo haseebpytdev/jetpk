@@ -6,9 +6,12 @@
 @endphp
 
 @if($application !== [])
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 14px 0; border:1px solid {{ $brand['border_color'] ?? '#d9e6ee' }}; border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 14px 0;">
         <tr>
-            <td style="padding:16px 18px;">
+            <td style="border:1px solid {{ $brand['border_color'] ?? '#d9e6ee' }}; border-radius:12px; padding:16px 20px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                    <tr>
+                        <td style="padding:16px 20px;">
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Application ID', 'value' => $application['reference'] ?? ($application['application_reference'] ?? null), 'emailBrand' => $brand])
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Applicant', 'value' => $application['applicant_name'] ?? null, 'emailBrand' => $brand])
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Agency / company', 'value' => $application['agency_name'] ?? null, 'emailBrand' => $brand])
@@ -18,6 +21,9 @@
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Country', 'value' => $application['country'] ?? null, 'emailBrand' => $brand])
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Submitted', 'value' => $application['submitted_at'] ?? null, 'emailBrand' => $brand])
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Status', 'value' => $application['status'] ?? ($application['application_status'] ?? null), 'emailBrand' => $brand])
+                        </td>
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>

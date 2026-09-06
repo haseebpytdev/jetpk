@@ -29,9 +29,12 @@
         $pnrText = 'Not issued yet';
     }
 @endphp
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 14px 0; border:1px solid {{ $borderColor }}; border-radius:12px; background-color:#ffffff;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 14px 0;">
     <tr>
-        <td style="padding:16px 18px 4px 18px;">
+        <td style="border:1px solid {{ $borderColor }}; border-radius:12px; background-color:#ffffff; padding:16px 20px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                    <td style="padding:16px 20px 8px 20px;">
             <div style="font-family:Arial,Helvetica,sans-serif; font-size:12px; letter-spacing:0.6px; text-transform:uppercase; color:{{ $primary }}; font-weight:bold; margin:0 0 8px 0;">Booking summary</div>
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Booking reference', 'value' => $reference, 'emailBrand' => $brand])
@@ -42,6 +45,9 @@
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Booking status', 'value' => $status, 'emailBrand' => $brand])
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Payment status', 'value' => $paymentSt, 'emailBrand' => $brand])
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Total amount', 'value' => $total, 'emailBrand' => $brand])
+            </table>
+                    </td>
+                </tr>
             </table>
         </td>
     </tr>

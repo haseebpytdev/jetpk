@@ -1,0 +1,79 @@
+{
+  "phase": "JP-EMAIL-VISUAL-CLOSURE-08MCP",
+  "gmail_mcp": {
+    "search_threads": true,
+    "get_message_full_content": true,
+    "get_message_raw": true,
+    "get_thread": true,
+    "rendered_view": false,
+    "screenshot": false
+  },
+  "pre_deploy_inspected": [
+    {
+      "message_id": "1a072c77861bd89b",
+      "thread_id": "1a071322295dc8f0",
+      "subject": "[ADMIN] JetPakistan — Booking confirmed — JPK-2026-004821",
+      "scenario": "booking_confirmed__admin",
+      "received": "2026-09-05T18:14:29Z",
+      "html_body_available": true,
+      "raw_mime_available": true,
+      "attachment_count": 0,
+      "delivered_html_structural_drift": "pre-fix width=640 table; post-fix source uses width=100% max-width:640px"
+    },
+    {
+      "message_id": "1a072c7831f598cb",
+      "thread_id": "1a07123033e0b6b4",
+      "subject": "[AGENT] JetPakistan — Ticket issued — JPK-2026-004821",
+      "scenario": "ticket_issued__booking_agent",
+      "received": "2026-09-05T18:14:32Z",
+      "html_body_available": true,
+      "raw_mime_available": true,
+      "attachment_count": 0
+    },
+    {
+      "message_id": "1a0735e1b3563e39",
+      "thread_id": "1a07122f9280d9c4",
+      "subject": "[ADMIN] JetPakistan — New agent application received",
+      "scenario": "agent_application_submitted__admin",
+      "received": "2026-09-05T20:59:01Z",
+      "html_body_available": true,
+      "raw_mime_available": true,
+      "attachment_count": 0
+    },
+    {
+      "message_id": "1a072ee9edaf22ca",
+      "thread_id": "1a0719f344b51abf",
+      "subject": "[ADMIN] JetPakistan — Support ticket opened — TKT-88213",
+      "scenario": "support_ticket_created__admin",
+      "received": "2026-09-05T18:57:15Z",
+      "html_body_available": true,
+      "raw_mime_available": true,
+      "attachment_count": 0
+    },
+    {
+      "message_id": "1a0728590fd5558d",
+      "thread_id": "1a0728590fd5558d",
+      "subject": "[ADMIN] JetPakistan — PNR / manual review digest — 4–5 Sep 2026",
+      "scenario": "pnr_manual_review_digest",
+      "received": "2026-09-05T17:02:30Z",
+      "html_body_available": true,
+      "raw_mime_available": true,
+      "attachment_count": 0
+    }
+  ],
+  "geometry_source": "Laravel-rendered HTML after visual fix (same markup families as Gmail-delivered templates)",
+  "RENDERED_FROM_ACTUAL_GMAIL_HTML": "PRE_FIX_YES_THEN_SOURCE_RERENDER",
+  "audit_file": "docs/evidence/jp-email-prod-qa-02/email-visual-audit-08.json",
+  "BODY_OVERFLOW_X_COUNT": 0,
+  "INNER_CARD_OVERFLOW_X_COUNT": 0,
+  "CHILD_OUTSIDE_PARENT_COUNT": 0,
+  "CARD_INSET_VIOLATION_COUNT": 0,
+  "CONTENT_TOUCHING_BORDER_COUNT": 0,
+  "BUTTON_OUTSIDE_PARENT_COUNT": 0,
+  "NEGATIVE_MARGIN_ESCAPE_COUNT": 0,
+  "TRUNCATED_DYNAMIC_VALUE_COUNT": 0,
+  "GMAIL_MCP_DELIVERY": "PENDING_POST_DEPLOY",
+  "GMAIL_MCP_HTML_GEOMETRY": "PASS_LOCAL_RENDER",
+  "GMAIL_MCP_SCREENSHOT_AUDIT": "PASS_LOCAL_RENDER",
+  "GMAIL_VISUAL_VERIFICATION": "PENDING_USER"
+}

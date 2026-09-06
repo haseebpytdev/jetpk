@@ -12,9 +12,12 @@
     $supportPhone = $s['phone'] ?? ($brand['support_phone'] ?? null);
     $hours        = $s['hours'] ?? null;
 @endphp
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 8px 0; border:1px solid {{ $borderColor }}; border-radius:12px; background-color:{{ $bgSoft }};">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 8px 0;">
     <tr>
-        <td style="padding:16px 18px; font-family:Arial,Helvetica,sans-serif;">
+        <td style="border:1px solid {{ $borderColor }}; border-radius:12px; background-color:{{ $bgSoft }}; padding:16px 20px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                    <td style="padding:16px 20px; font-family:Arial,Helvetica,sans-serif;">
             <div style="font-size:15px; font-weight:bold; color:{{ $textColor }}; margin:0 0 4px 0;">Need help?</div>
             <div style="font-size:14px; line-height:21px; color:{{ $mutedColor }};">
                 Contact {{ $brandName }} support and we'll be glad to assist.
@@ -33,6 +36,9 @@
             @if(!empty($hours))
                 <div style="font-size:12px; color:{{ $mutedColor }}; margin-top:6px;">{{ $hours }}</div>
             @endif
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
 </table>

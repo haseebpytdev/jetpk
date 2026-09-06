@@ -14,18 +14,17 @@
     $currentYear  = date('Y');
 @endphp
 <tr>
-    <td style="padding:24px 36px 28px 36px; border-top:1px solid {{ $borderColor }}; background-color:#fafcfd;" class="jetpk-pad">
+    <td style="padding:20px 28px 24px 28px; border-top:1px solid {{ $borderColor }}; background-color:#fafcfd;" class="jetpk-pad">
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
             @if(!empty($supportEmail) || !empty($supportPhone))
                 <tr>
                     <td style="padding:0 0 10px 0; font-family:Arial,Helvetica,sans-serif; font-size:13px; line-height:20px; color:{{ $mutedColor }};">
-                        Need help?
+                        <div>Need help?</div>
                         @if(!empty($supportEmail))
-                            <a href="mailto:{{ $supportEmail }}" style="color:{{ $primary }}; text-decoration:none; font-weight:bold;">{{ $supportEmail }}</a>
+                            <div class="jetpk-long" style="word-break:break-word;"><a href="mailto:{{ $supportEmail }}" style="color:{{ $primary }}; text-decoration:none; font-weight:bold;">{{ $supportEmail }}</a></div>
                         @endif
-                        @if(!empty($supportEmail) && !empty($supportPhone)) &nbsp;·&nbsp; @endif
                         @if(!empty($supportPhone))
-                            <a href="tel:{{ preg_replace('/[^0-9+]/', '', $supportPhone) }}" style="color:{{ $primary }}; text-decoration:none; font-weight:bold;">{{ $supportPhone }}</a>
+                            <div><a href="tel:{{ preg_replace('/[^0-9+]/', '', $supportPhone) }}" style="color:{{ $primary }}; text-decoration:none; font-weight:bold;">{{ $supportPhone }}</a></div>
                         @endif
                     </td>
                 </tr>

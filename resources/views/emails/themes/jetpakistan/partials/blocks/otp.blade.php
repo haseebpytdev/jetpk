@@ -12,12 +12,18 @@
 @if(!empty($code))
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 14px 0;">
         <tr>
-            <td align="center" style="background-color:{{ $bgSoft }}; border:1px dashed {{ $primary }}; border-radius:12px; padding:22px 16px;">
+            <td align="center" style="background-color:{{ $bgSoft }}; border:1px dashed {{ $primary }}; border-radius:12px; padding:16px 20px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                    <tr>
+                        <td align="center" style="padding:20px 16px;">
                 <div style="font-family:Arial,Helvetica,sans-serif; font-size:12px; letter-spacing:0.6px; text-transform:uppercase; color:{{ $mutedColor }}; font-weight:bold; margin:0 0 8px 0;">Your verification code</div>
-                <div class="jetpk-otp" style="font-family:Arial,Helvetica,sans-serif; font-size:38px; line-height:44px; letter-spacing:12px; font-weight:bold; color:{{ $primary }}; padding-left:12px;">{{ $code }}</div>
+                <div class="jetpk-otp" style="font-family:Arial,Helvetica,sans-serif; font-size:32px; line-height:40px; letter-spacing:6px; font-weight:bold; color:{{ $primary }}; word-break:break-word;">{{ $code }}</div>
                 @if(!empty($expiry))
                     <div style="font-family:Arial,Helvetica,sans-serif; font-size:13px; color:{{ $mutedColor }}; margin-top:10px;">This code expires in {{ $expiry }} minutes.</div>
                 @endif
+                        </td>
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>

@@ -16,9 +16,12 @@
     $paidAt    = $p['paid_at']   ?? null;
     $total     = ($amount !== null) ? trim(($currency ? $currency.' ' : '').$amount) : null;
 @endphp
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 14px 0; border:1px solid {{ $borderColor }}; border-radius:12px; background-color:#ffffff;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 14px 0;">
     <tr>
-        <td style="padding:16px 18px;">
+        <td style="border:1px solid {{ $borderColor }}; border-radius:12px; background-color:#ffffff; padding:16px 20px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                    <td style="padding:16px 20px;">
             <div style="font-family:Arial,Helvetica,sans-serif; font-size:12px; letter-spacing:0.6px; text-transform:uppercase; color:{{ $primary }}; font-weight:bold; margin:0 0 8px 0;">Payment summary</div>
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Amount', 'value' => $total, 'emailBrand' => $brand])
@@ -27,6 +30,9 @@
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Invoice number', 'value' => $invoiceNo, 'emailBrand' => $brand])
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Reference', 'value' => $reference, 'emailBrand' => $brand])
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Paid at', 'value' => $paidAt, 'emailBrand' => $brand])
+            </table>
+                    </td>
+                </tr>
             </table>
         </td>
     </tr>
