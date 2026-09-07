@@ -6,6 +6,7 @@ import { AskJetPakistanChat } from "@/features/ai-assistant/components/AskJetPak
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { PublicRoutePrefetch } from "@/components/navigation/PublicRoutePrefetch";
+import Link from "next/link";
 import {
   fetchSessionBootstrap,
   mapBootstrapToPublicSession,
@@ -79,7 +80,7 @@ export function PublicShell({
         {children}
       </main>
       {hideFooter ? null : <SiteFooter branding={branding} />}
-      <a
+      <Link
         href="/support"
         data-testid="human-support-fab"
         aria-label="Human support"
@@ -100,7 +101,7 @@ export function PublicShell({
           />
           <path d="M9 19c.8 1.2 1.9 1.8 3 1.8s2.2-.6 3-1.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
-      </a>
+      </Link>
       <AskJetPakistanChat enabled={aiEnabled} />
     </div>
   );
