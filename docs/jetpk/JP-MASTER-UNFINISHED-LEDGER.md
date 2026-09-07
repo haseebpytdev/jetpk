@@ -79,6 +79,10 @@ WALLET_TESTS_PASSED=56
 
 Carry-forward unchanged: Ask JetPakistan, CMS homepage, Company Profile, Wallet production copy, Traveler decomposition `PASS_WITH_DIRECTLY_MEASURED_EXTERNAL_FLOOR`.
 
-## Safety
+## Notification architecture P1
+
+Additive tables `notification_outbox`, `notification_deliveries`, `notification_routes`. JetPakistan auth mail remains the canonical shell. OTP/password-reset/verification stay on existing Laravel/Mail paths. Pipeline async defaults off (inline) so no stranded jobs.
+
+See `docs/jetpk/notification-architecture/`.
 
 All commercial mutation zeros remain 0. No passwords/cookies/session IDs logged.

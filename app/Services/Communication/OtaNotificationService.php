@@ -3,6 +3,7 @@
 namespace App\Services\Communication;
 
 use App\Enums\AccountType;
+use App\Jobs\Notifications\DeliverQueuedOperationalMail;
 use App\Mail\BookingUniversalNotification;
 use App\Mail\OtaOperationalNotificationMail;
 use App\Models\Agency;
@@ -10,11 +11,14 @@ use App\Models\AgencyNotificationSetting;
 use App\Models\Booking;
 use App\Models\CommunicationLog;
 use App\Models\User;
+use App\Services\Notifications\NotificationPipeline;
 use App\Support\Branding\BrandDisplayResolver;
+use App\Support\Branding\CompanyEmailProfileResolver;
 use App\Support\Emails\AuthEmailRenderer;
 use App\Support\Emails\EmailBaseVariables;
 use App\Support\Emails\JetpkEmailEventRenderer;
 use App\Support\Emails\JetpkOperationalEmailEventRegistry;
+use App\Support\Emails\OtaOperationalEmailRendered;
 use App\Support\Emails\OtaOperationalEmailRenderer;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -76,6 +80,25 @@ class OtaNotificationService
             return;
         }
 
+        if (
+            app(NotificationPipeline::class)->isEnabled()
+            && ! ($recipientContext['_pipeline_delivery'] ?? false)
+        ) {
+            app(NotificationPipeline::class)->publishOperational(
+                $agency,
+                $eventKey,
+                $payload,
+                $booking,
+                $actor,
+                $fallbackSubject,
+                $fallbackBody,
+                $templateVariables,
+                $recipientContext,
+            );
+
+            return;
+        }
+
         try {
             $settings = $this->communicationSettingsService->getOrCreateSettings($agency);
             $eventSetting = $this->getOrCreateEventSetting($agency, $eventKey);
@@ -83,6 +106,16 @@ class OtaNotificationService
             $recipientBundle = $this->qaOperationalCommunicationGuard->filterRecipientBundle($recipientBundle, $booking);
             $this->logSkippedRecipientBuckets($agency, $eventKey, $booking, $recipientBundle['skipped_buckets']);
             $scope = $recipientBundle['scope'];
+            if (is_array($recipientContext['force_to'] ?? null) && $recipientContext['force_to'] !== []) {
+                $recipientBundle['to'] = collect($recipientContext['force_to'])
+                    ->filter(fn ($email) => is_string($email) && filter_var($email, FILTER_VALIDATE_EMAIL))
+                    ->map(fn ($email) => strtolower(trim((string) $email)))
+                    ->unique()
+                    ->values()
+                    ->all();
+                $recipientBundle['cc'] = [];
+                $recipientBundle['bcc'] = [];
+            }
             $safePayload = $this->payloadSanitizer->sanitizeForScope($payload, $scope);
 
             $scalarFromPayload = [];
@@ -310,25 +343,17 @@ class OtaNotificationService
         ?array $universalPayload = null,
     ): string {
         if ($this->shouldQueueMail()) {
-            dispatch(function () use ($to, $cc, $bcc, $subject, $htmlBody, $plainBody, $attachments, $communicationLogId, $universalPayload): void {
-                try {
-                    $this->sendMailNow($to, $cc, $bcc, $subject, $htmlBody, $plainBody, $attachments, $universalPayload);
-                    if ($communicationLogId !== null) {
-                        CommunicationLog::query()->whereKey($communicationLogId)->update([
-                            'status' => 'sent',
-                            'sent_at' => now(),
-                            'error_message' => null,
-                        ]);
-                    }
-                } catch (Throwable $e) {
-                    if ($communicationLogId !== null) {
-                        CommunicationLog::query()->whereKey($communicationLogId)->update([
-                            'status' => 'failed',
-                            'error_message' => Str::limit($e->getMessage(), 2000),
-                        ]);
-                    }
-                }
-            });
+            DeliverQueuedOperationalMail::dispatch(
+                $to,
+                $cc,
+                $bcc,
+                $subject,
+                $htmlBody,
+                $plainBody,
+                $attachments,
+                $communicationLogId,
+                $universalPayload,
+            );
 
             return 'queued';
         }
@@ -711,7 +736,7 @@ class OtaNotificationService
         string $fallbackSubject,
         string $fallbackBody,
         ?Booking $booking = null,
-    ): \App\Support\Emails\OtaOperationalEmailRendered {
+    ): OtaOperationalEmailRendered {
         if (JetpkOperationalEmailEventRegistry::isJetpkClient()) {
             try {
                 JetpkOperationalEmailEventRegistry::assertKnownEvent($eventKey);
@@ -722,13 +747,13 @@ class OtaNotificationService
                 );
                 $plain = trim(html_entity_decode(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $rendered->html))));
 
-                return new \App\Support\Emails\OtaOperationalEmailRendered(
+                return new OtaOperationalEmailRendered(
                     subject: $rendered->subject !== '' ? $rendered->subject : $fallbackSubject,
                     html: $rendered->html,
                     plainBody: $plain !== '' ? $plain : $fallbackBody,
                     usedTemplate: $rendered->usedDbTemplate,
                     templateEnabled: (bool) ($rendered->content['enabled'] ?? true),
-                    profile: \App\Support\Branding\CompanyEmailProfileResolver::resolve($agency),
+                    profile: CompanyEmailProfileResolver::resolve($agency),
                 );
             } catch (Throwable $e) {
                 Log::warning('jetpk.operational_email.render_fallback', [
