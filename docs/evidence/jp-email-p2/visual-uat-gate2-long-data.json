@@ -1,0 +1,21 @@
+{
+  "LONG_DATA_OVERFLOW": 0,
+  "LONG_DATA_CUT_OFF": 0,
+  "LONG_DATA_LAYOUT": "PASS",
+  "results": [
+    {
+      "width": 1280,
+      "shot": "booking-long-data-stress-w1280.png",
+      "overflowX": 0,
+      "cutOff": 0,
+      "textSample": "\tVisit site\n\n\nBooking request received\n\nHello Alexandria Maximiliana Catherine-Therese von Hohenzollern-Sigmaringen-Passenger, thank you — we have received your booking request. Our team will review the details and contact you with the next steps.\n\n\n\nUpdated\n\nBOOKING SUMMARY\n\n\n\nBooking reference\nJP-LONGSTRESS-BOOKING-REFERENCE-ABCDEFGHIJKLMNOPQRSTUVWXYZ-20260907-999999\n\n\nRoute\nLHE → KHI → DXB → LHR → JFK → ORD → LAX → HNL\n\n\nTravel date\nTo be confirmed\n\n\nPassenger\nAlexandria Maximiliana Catherine"
+    },
+    {
+      "width": 320,
+      "shot": "booking-long-data-stress-w320.png",
+      "overflowX": 0,
+      "cutOff": 0,
+      "textSample": "\tVisit site\n\n\nBooking request received\n\nHello Alexandria Maximiliana Catherine-Therese von Hohenzollern-Sigmaringen-Passenger, thank you — we have received your booking request. Our team will review the details and contact you with the next steps.\n\n\n\nUpdated\n\nBOOKING SUMMARY\n\n\n\nBooking reference\nJP-LONGSTRESS-BOOKING-REFERENCE-ABCDEFGHIJKLMNOPQRSTUVWXYZ-20260907-999999\n\n\nRoute\nLHE → KHI → DXB → LHR → JFK → ORD → LAX → HNL\n\n\nTravel date\nTo be confirmed\n\n\nPassenger\nAlexandria Maximiliana Catherine"
+    }
+  ]
+}

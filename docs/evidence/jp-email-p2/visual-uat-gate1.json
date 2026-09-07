@@ -1,0 +1,1629 @@
+{
+  "SCREENSHOT_EVIDENCE_CREATED": "YES",
+  "DESKTOP_VISUAL_QA": "PASS",
+  "MOBILE_430": "PASS",
+  "MOBILE_390": "PASS",
+  "MOBILE_360": "PASS",
+  "MOBILE_320": "PASS",
+  "HORIZONTAL_OVERFLOW": 0,
+  "CUT_OFF_COMPONENTS": 0,
+  "BROKEN_BUTTONS": 0,
+  "BROKEN_TABLES": 0,
+  "results": [
+    {
+      "file": "auth-admin-login.html",
+      "width": 1280,
+      "shot": "auth-admin-login-w1280.png",
+      "overflowX": 0,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 449,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Reset password",
+          "href": "https://jetpakistan.pk/forgot-password",
+          "w": 123,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 12
+    },
+    {
+      "file": "auth-admin-login.html",
+      "width": 430,
+      "shot": "auth-admin-login-w430.png",
+      "overflowX": 0,
+      "scrollWidth": 430,
+      "viewport": 430,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 290,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Reset password",
+          "href": "https://jetpakistan.pk/forgot-password",
+          "w": 123,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 12
+    },
+    {
+      "file": "auth-admin-login.html",
+      "width": 390,
+      "shot": "auth-admin-login-w390.png",
+      "overflowX": 0,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 259,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Reset password",
+          "href": "https://jetpakistan.pk/forgot-password",
+          "w": 123,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 12
+    },
+    {
+      "file": "auth-admin-login.html",
+      "width": 360,
+      "shot": "auth-admin-login-w360.png",
+      "overflowX": 0,
+      "scrollWidth": 360,
+      "viewport": 360,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 236,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Reset password",
+          "href": "https://jetpakistan.pk/forgot-password",
+          "w": 123,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 12
+    },
+    {
+      "file": "auth-admin-login.html",
+      "width": 320,
+      "shot": "auth-admin-login-w320.png",
+      "overflowX": 0,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 205,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Reset password",
+          "href": "https://jetpakistan.pk/forgot-password",
+          "w": 123,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 12
+    },
+    {
+      "file": "welcome-customer.html",
+      "width": 1280,
+      "shot": "welcome-customer-w1280.png",
+      "overflowX": 0,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 449,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Go to dashboard",
+          "href": "https://jetpakistan.pk/login",
+          "w": 128,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 6
+    },
+    {
+      "file": "welcome-customer.html",
+      "width": 430,
+      "shot": "welcome-customer-w430.png",
+      "overflowX": 0,
+      "scrollWidth": 430,
+      "viewport": 430,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 290,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Go to dashboard",
+          "href": "https://jetpakistan.pk/login",
+          "w": 128,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 6
+    },
+    {
+      "file": "welcome-customer.html",
+      "width": 390,
+      "shot": "welcome-customer-w390.png",
+      "overflowX": 0,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 259,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Go to dashboard",
+          "href": "https://jetpakistan.pk/login",
+          "w": 128,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 6
+    },
+    {
+      "file": "welcome-customer.html",
+      "width": 360,
+      "shot": "welcome-customer-w360.png",
+      "overflowX": 0,
+      "scrollWidth": 360,
+      "viewport": 360,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 236,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Go to dashboard",
+          "href": "https://jetpakistan.pk/login",
+          "w": 128,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 6
+    },
+    {
+      "file": "welcome-customer.html",
+      "width": 320,
+      "shot": "welcome-customer-w320.png",
+      "overflowX": 0,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 205,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Go to dashboard",
+          "href": "https://jetpakistan.pk/login",
+          "w": 128,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 6
+    },
+    {
+      "file": "booking-confirmed-customer.html",
+      "width": 1280,
+      "shot": "booking-confirmed-customer-w1280.png",
+      "overflowX": 0,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 449,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "View booking",
+          "href": "http://jetpk.test/customer/bookings/#2",
+          "w": 103,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 11
+    },
+    {
+      "file": "booking-confirmed-customer.html",
+      "width": 430,
+      "shot": "booking-confirmed-customer-w430.png",
+      "overflowX": 0,
+      "scrollWidth": 430,
+      "viewport": 430,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 290,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "View booking",
+          "href": "http://jetpk.test/customer/bookings/#2",
+          "w": 103,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 11
+    },
+    {
+      "file": "booking-confirmed-customer.html",
+      "width": 390,
+      "shot": "booking-confirmed-customer-w390.png",
+      "overflowX": 0,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 259,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "View booking",
+          "href": "http://jetpk.test/customer/bookings/#2",
+          "w": 103,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 11
+    },
+    {
+      "file": "booking-confirmed-customer.html",
+      "width": 360,
+      "shot": "booking-confirmed-customer-w360.png",
+      "overflowX": 0,
+      "scrollWidth": 360,
+      "viewport": 360,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 236,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "View booking",
+          "href": "http://jetpk.test/customer/bookings/#2",
+          "w": 103,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 11
+    },
+    {
+      "file": "booking-confirmed-customer.html",
+      "width": 320,
+      "shot": "booking-confirmed-customer-w320.png",
+      "overflowX": 0,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 205,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "View booking",
+          "href": "http://jetpk.test/customer/bookings/#2",
+          "w": 103,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 11
+    },
+    {
+      "file": "daily-admin-report.html",
+      "width": 1280,
+      "shot": "daily-admin-report-w1280.png",
+      "overflowX": 0,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 449,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Open booking",
+          "href": "https://jetpakistan.pk/admin",
+          "w": 108,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Manage booking",
+          "href": "https://jetpakistan.pk/lookup-booking",
+          "w": 96,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 11
+    },
+    {
+      "file": "daily-admin-report.html",
+      "width": 430,
+      "shot": "daily-admin-report-w430.png",
+      "overflowX": 0,
+      "scrollWidth": 430,
+      "viewport": 430,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 290,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Open booking",
+          "href": "https://jetpakistan.pk/admin",
+          "w": 108,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Manage booking",
+          "href": "https://jetpakistan.pk/lookup-booking",
+          "w": 96,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 11
+    },
+    {
+      "file": "daily-admin-report.html",
+      "width": 390,
+      "shot": "daily-admin-report-w390.png",
+      "overflowX": 0,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 259,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Open booking",
+          "href": "https://jetpakistan.pk/admin",
+          "w": 108,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Manage booking",
+          "href": "https://jetpakistan.pk/lookup-booking",
+          "w": 96,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 11
+    },
+    {
+      "file": "daily-admin-report.html",
+      "width": 360,
+      "shot": "daily-admin-report-w360.png",
+      "overflowX": 0,
+      "scrollWidth": 360,
+      "viewport": 360,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 236,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Open booking",
+          "href": "https://jetpakistan.pk/admin",
+          "w": 108,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Manage booking",
+          "href": "https://jetpakistan.pk/lookup-booking",
+          "w": 96,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 11
+    },
+    {
+      "file": "daily-admin-report.html",
+      "width": 320,
+      "shot": "daily-admin-report-w320.png",
+      "overflowX": 0,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 205,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Open booking",
+          "href": "https://jetpakistan.pk/admin",
+          "w": 108,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Manage booking",
+          "href": "https://jetpakistan.pk/lookup-booking",
+          "w": 96,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 11
+    },
+    {
+      "file": "abandoned-search.html",
+      "width": 1280,
+      "shot": "abandoned-search-w1280.png",
+      "overflowX": 0,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 449,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Search again / View latest fares",
+          "href": "https://jetpakistan.pk/flights",
+          "w": 238,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 12
+    },
+    {
+      "file": "abandoned-search.html",
+      "width": 430,
+      "shot": "abandoned-search-w430.png",
+      "overflowX": 0,
+      "scrollWidth": 430,
+      "viewport": 430,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 290,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Search again / View latest fares",
+          "href": "https://jetpakistan.pk/flights",
+          "w": 238,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 12
+    },
+    {
+      "file": "abandoned-search.html",
+      "width": 390,
+      "shot": "abandoned-search-w390.png",
+      "overflowX": 0,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 259,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Search again / View latest fares",
+          "href": "https://jetpakistan.pk/flights",
+          "w": 238,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 12
+    },
+    {
+      "file": "abandoned-search.html",
+      "width": 360,
+      "shot": "abandoned-search-w360.png",
+      "overflowX": 0,
+      "scrollWidth": 360,
+      "viewport": 360,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 236,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Search again / View latest fares",
+          "href": "https://jetpakistan.pk/flights",
+          "w": 238,
+          "h": 20,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 12
+    },
+    {
+      "file": "abandoned-search.html",
+      "width": 320,
+      "shot": "abandoned-search-w320.png",
+      "overflowX": 0,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "overflowingCount": 0,
+      "overflowingSample": [],
+      "brokenButtons": 0,
+      "brokenTables": 0,
+      "ctaSample": [
+        {
+          "text": "",
+          "href": "https://jetpakistan.pk",
+          "w": 205,
+          "h": 38,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Visit site",
+          "href": "https://jetpakistan.pk",
+          "w": 53,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Search again / View latest fares",
+          "href": "https://jetpakistan.pk/flights",
+          "w": 222,
+          "h": 40,
+          "display": "inline-block",
+          "clipped": false
+        },
+        {
+          "text": "ota@jetpakistan.pk",
+          "href": "mailto:ota@jetpakistan.pk",
+          "w": 119,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "+92 300 4455667",
+          "href": "tel:+923004455667",
+          "w": 102,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        },
+        {
+          "text": "Home",
+          "href": "https://jetpakistan.pk",
+          "w": 35,
+          "h": 15,
+          "display": "inline",
+          "clipped": false
+        }
+      ],
+      "tableCount": 12
+    }
+  ]
+}

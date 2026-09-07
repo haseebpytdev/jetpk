@@ -213,6 +213,8 @@ class OtaOperationalNotificationModernLayoutTest extends TestCase
         Mail::to('admin@ota.demo')->send($mailable);
 
         $this->assertStringContainsString('Security notice', $mailable->render());
+        $this->assertSame('emails.themes.jetpakistan.plain-text', $mailable->content()->text);
+        $this->assertSame($plainBody, $mailable->content()->with['plainBody'] ?? null);
     }
 
     #[Test]

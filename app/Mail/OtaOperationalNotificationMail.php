@@ -37,6 +37,10 @@ class OtaOperationalNotificationMail extends Mailable
     {
         return new Content(
             htmlString: $this->htmlBody,
+            text: 'emails.themes.jetpakistan.plain-text',
+            with: [
+                'plainBody' => $this->plainBody,
+            ],
         );
     }
 

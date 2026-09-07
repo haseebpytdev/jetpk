@@ -61,6 +61,10 @@ class AuthLoginSecurityEmailCanonicalTest extends TestCase
         Mail::assertSent(OtaOperationalNotificationMail::class, function (OtaOperationalNotificationMail $mail) use (&$html): bool {
             $html = $mail->htmlBody;
             $this->assertSame('JetPakistan — Admin sign-in detected', $mail->emailSubject);
+            $this->assertNotSame('', trim($mail->plainBody));
+            $this->assertStringContainsString('Reset password', $mail->plainBody);
+            $this->assertSame('emails.themes.jetpakistan.plain-text', $mail->content()->text);
+            $this->assertSame($mail->plainBody, $mail->content()->with['plainBody'] ?? null);
 
             return true;
         });
