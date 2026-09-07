@@ -1,11 +1,9 @@
 # JP-MASTER-UNFINISHED LEDGER
 
-Phase: `JP-MASTER-UNFINISHED-CLOSURE-10` (10C residual closure; not a new phase)  
+Phase: `JP-MASTER-UNFINISHED-CLOSURE-10`  
 Branch: `phase/jp-master-unfinished-closure-10`  
-CODE_SHA: `93747b1b636202eac9a9c4e12cf8ae0310eb2d10`  
-PRODUCTION_RUNTIME_SHA: `93747b1b636202eac9a9c4e12cf8ae0310eb2d10`  
-PUBLIC_BUILD_ID: `-axCbUdJNlyjS6jLNMlkQ`  
-DASHBOARD_BUILD_ID: `T8YUZC9HsNBopkwkhfgve`
+CODE_SHA: `92fc5a6fd9214c280f9456096d3bcdb62f3257e5` (P1B live closure baseline; P2 engineering SHA supersedes after commit)  
+PRODUCTION_RUNTIME_SHA: `92fc5a6fd9214c280f9456096d3bcdb62f3257e5` until P2 protected deploy
 
 Allowed statuses only: `VERIFIED_DONE` | `OPEN` | `MISSED_OPEN` | `BLOCKED_SAFETY` | `OWNER_HOLD` | `INTENTIONAL_DEFER`
 
@@ -13,32 +11,31 @@ Allowed statuses only: `VERIFIED_DONE` | `OPEN` | `MISSED_OPEN` | `BLOCKED_SAFET
 
 | Gate | Status |
 |---|---|
-| AUTH_LOGIN_EMAIL_PATH | LOCAL_CANONICAL_RENDERER=PASS. Prior visual PASS superseded by owner screenshot of legacy modern/ops layout. PRODUCTION_CANONICAL_TEMPLATE pending protected Laravel deploy + Gmail. |
-| BACK_BFCACHE_MATRIX | VERIFIED_DONE on public build `-axCbUdJNlyjS6jLNMlkQ` |
-| OFFER_FRESHNESS_SAFETY | VERIFIED_DONE (matrix PASS: extra searches within 5s = 0; after 5s fresh refresh = 1; duplicate = 0) |
+| AUTH_LOGIN_EMAIL_PATH | VERIFIED_DONE (P0 canonical + P1B production certify) |
+| P1B_NOTIFICATION_RUNTIME | VERIFIED_DONE on `92fc5a6f` |
+| P2_EMAIL_TEMPLATE_CONSISTENCY_DATA_ACCURACY_UI | OPEN → engineering complete pending deploy/UAT |
+| BACK_BFCACHE_MATRIX | VERIFIED_DONE |
+| OFFER_FRESHNESS_SAFETY | VERIFIED_DONE |
 | ACCOUNTING_PAGE_AUDIT | VERIFIED_DONE |
-| ACCOUNTING_PAGE_PRODUCTION_COPY | VERIFIED_DONE |
 | WALLET_ADJUSTMENT_RBAC | VERIFIED_DONE |
 | WALLET_ADJUSTMENT_SAFETY | VERIFIED_DONE |
 | ADMIN_COMPANY_PROFILE | VERIFIED_DONE |
 
+## Email roadmap
+
+- P0: auth canonical shell — closed
+- P1/P1B: notification outbox/async/identity — closed on production `92fc5a6f`
+- P2: existing JetPakistan template consistency / data accuracy / UI — this phase
+- Do **not** use wording: template externalization
+- Next only if needed: `P3_EMAIL_TECHNICAL_DEBT_ONLY_IF_REQUIRED`
+
 ## Auth email
 
-Supersedes earlier “canonical login template PASS”. Owner production screenshot showed subject `JetPakistan — Admin sign-in detected` with the legacy modern/ops visual. Root cause: `AuthEmailRenderer::loginSecurity()` always used `emails.layouts.modern`.
+P0 routes JetPK `auth_*` through `JetpkEmailEventRenderer` + `emails.themes.jetpakistan.layouts.base`.  
+P2 removes unintended live `emails.layouts.modern` View callers; `ModernEmailLayout` helpers (masking) remain.
 
-P0 code now routes JetPK `auth_*` payloads through `JetpkEmailEventRenderer` and `emails.themes.jetpakistan.layouts.base`. `emails.layouts.modern` is retained for remaining booking/ops renderers.
+See `docs/jetpk/email/P2-FINAL-CLOSURE.md`.
 
-```
-AUTH_LOGIN_ROOT_CAUSE_PROVEN=YES
-AUTH_CANONICAL_RENDERER=PASS (local tests)
-AUTH_EMAIL_DEPLOY=PENDING_PROTECTED_LARAVEL_DEPLOY
-SUCCESSFUL_POST_FIX_ADMIN_LOGIN=NO
-GMAIL_AUTH_EMAIL_COUNT=PENDING
-AUTH_EMAIL_GMAIL_PROOF=BLOCKED_PENDING_PRODUCTION_DEPLOY_AND_INDEPENDENT_GMAIL_RECONCILIATION
-EXPECTED_AUTH_EMAIL_COUNT_PER_LOGIN=1
-LEGACY_LAYOUT_DELETION_STATUS=RETAINED
-P1_ARCHITECTURE_ITEMS_RECORDED=YES
-```
 
 ## Back/BFCache
 

@@ -141,6 +141,38 @@ class JetpkEmailEventRenderer
             $ctaUrl = $contextualCta['url'];
         }
 
+        if (($payload['shell_notice'] ?? false) === true) {
+            $payloadTitle = trim((string) ($payload['title'] ?? ''));
+            if ($payloadTitle !== '') {
+                $headline = $payloadTitle;
+                $subject = $payloadTitle;
+            }
+            $payloadIntro = trim((string) ($payload['intro'] ?? ''));
+            if ($payloadIntro !== '') {
+                $introText = $payloadIntro;
+            }
+            $content['content_blocks'] = ['status-alert', 'detail-fields', 'html-snippet', 'message'];
+            $content['detail_fields'] = [];
+            $content['details_title'] = is_string($payload['details_title'] ?? null) ? $payload['details_title'] : null;
+            $ctaOverride = trim((string) ($payload['cta_url_override'] ?? ''));
+            if ($ctaOverride !== '') {
+                $ctaUrl = $ctaOverride;
+            }
+            $ctaLabelOverride = trim((string) ($payload['cta_label_override'] ?? ''));
+            if ($ctaLabelOverride !== '') {
+                $ctaText = $ctaLabelOverride;
+            }
+            $messageParts = [];
+            $nextStepsText = trim((string) ($payload['next_steps_text'] ?? ''));
+            if ($nextStepsText !== '') {
+                $messageParts[] = $nextStepsText;
+            }
+            $payload['meta'] = array_merge(is_array($payload['meta'] ?? null) ? $payload['meta'] : [], [
+                'message' => implode("\n\n", $messageParts),
+                'html_snippet' => (string) ($payload['extra_html'] ?? ''),
+            ]);
+        }
+
         if (isset($payload['agent_application']) && is_array($payload['agent_application']) && ! isset($payload['application'])) {
             $payload['application'] = $payload['agent_application'];
         }
@@ -166,6 +198,11 @@ class JetpkEmailEventRenderer
             'recipientName' => null,
             'recipientGreeting' => $recipientGreeting,
         ]);
+
+        if (($payload['shell_notice'] ?? false) === true && is_array($payload['detail_rows'] ?? null)) {
+            $viewData['detailFieldValues'] = $payload['detail_rows'];
+            $viewData['eventContent'] = $content;
+        }
 
         if (is_string($content['full_html_override'] ?? null) && trim($content['full_html_override']) !== '') {
             $htmlResult = $this->stringRenderer->render($content['full_html_override'], $baseVariables, $renderContext);

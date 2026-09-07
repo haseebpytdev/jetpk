@@ -241,6 +241,7 @@ class JetpkEmailEventContentRegistry
             ['customer_welcome', 'Customer welcome', EmailTemplateRegistry::CATEGORY_AUTH_USER, 'customer', 'account_created'],
             ['itinerary_ready', 'Itinerary ready', EmailTemplateRegistry::CATEGORY_TICKETING, 'customer', 'booking_confirmed'],
             ['settings_test_email', 'Settings test email', EmailTemplateRegistry::CATEGORY_AUTH_USER, 'admin', 'notification'],
+            ['notification', 'General notification', EmailTemplateRegistry::CATEGORY_AUTH_USER, 'mixed', 'notification'],
             ['booking_expiring', 'Booking expiring', EmailTemplateRegistry::CATEGORY_BOOKING, 'customer', 'booking_expiring'],
         ];
 

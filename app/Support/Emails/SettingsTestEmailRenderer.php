@@ -6,7 +6,6 @@ use App\Models\Agency;
 use App\Models\AgencyMessageTemplate;
 use App\Support\Branding\CompanyEmailProfile;
 use App\Support\Branding\CompanyEmailProfileResolver;
-use Illuminate\Support\Facades\View;
 
 /**
  * Live send renderer for communication settings SMTP test email (I5; settings_test_email only).
@@ -37,25 +36,24 @@ class SettingsTestEmailRenderer
         $innerBody = $this->stringRenderer->render($rawBody, $variables, $context)->output;
         $innerHtml = nl2br(strip_tags($innerBody), false);
 
-        $html = View::make('emails.layouts.modern', array_merge(
-            ['companyEmailProfile' => $profile],
-            ModernEmailLayout::viewData([
-                'emailMode' => ModernEmailLayout::MODE_OPS,
-                'headline' => 'Communication settings test',
+        $result = app(JetpkEmailEventRenderer::class)->render(
+            eventKey: 'settings_test_email',
+            agency: $agency,
+            dbTemplate: $dbTemplate,
+            runtimeVariables: $variables,
+            payload: [
+                'shell_notice' => true,
+                'title' => 'Communication settings test',
                 'intro' => 'This is a safe diagnostic email from your communication settings. It confirms that outbound email can be delivered.',
-                'statusBannerLabel' => 'Settings test',
-                'statusBannerTone' => 'neutral',
-                'contentHtml' => $innerHtml,
-                'details' => [],
-                'ctaUrl' => null,
-                'ctaLabel' => null,
-                'footerDisclaimer' => 'This is a test email only. No booking or payment action is required.',
-            ]),
-        ))->render();
+                'detail_rows' => [],
+                'details_title' => null,
+                'extra_html' => $innerHtml,
+            ],
+        );
 
         return new SettingsTestEmailRendered(
             subject: $subject,
-            html: $html,
+            html: $result->html,
             innerBody: $innerBody,
             usedDbTemplate: $dbTemplate !== null && filled($dbTemplate->body),
             profile: $profile,

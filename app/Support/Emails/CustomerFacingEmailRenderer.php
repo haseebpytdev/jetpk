@@ -9,7 +9,6 @@ use App\Support\Branding\CompanyEmailProfile;
 use App\Support\Branding\CompanyEmailProfileResolver;
 use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 
 /**
@@ -344,25 +343,45 @@ class CustomerFacingEmailRenderer
         string $statusBannerTone = 'info',
         array $nextSteps = [],
     ): CustomerFacingEmailRendered {
-        $html = View::make('emails.layouts.modern', array_merge(
-            ['companyEmailProfile' => $profile],
-            ModernEmailLayout::viewData([
-                'emailMode' => ModernEmailLayout::MODE_CUSTOMER,
-                'headline' => $headline,
+        $detailRows = [];
+        foreach ($details as $row) {
+            $label = trim((string) ($row['label'] ?? ''));
+            $value = trim(html_entity_decode(strip_tags((string) ($row['value'] ?? '')), ENT_QUOTES, 'UTF-8'));
+            if ($label === '' || $value === '' || strcasecmp($value, 'null') === 0) {
+                continue;
+            }
+            $detailRows[] = ['label' => $label, 'value' => $value];
+        }
+
+        $nextStepsText = '';
+        if ($nextSteps !== []) {
+            $nextStepsText = "Next steps\n".implode("\n", array_map(static fn ($step): string => '- '.$step, $nextSteps));
+        }
+
+        $result = app(JetpkEmailEventRenderer::class)->render(
+            eventKey: 'notification',
+            agency: null,
+            runtimeVariables: [
+                'recipient_role' => 'customer',
+                'booking_url' => (string) ($ctaUrl ?? ''),
+                'brand_name' => $profile->name,
+                'company_name' => $profile->name,
+            ],
+            payload: [
+                'shell_notice' => true,
+                'title' => $headline,
                 'intro' => $intro,
-                'statusBannerLabel' => $statusBannerLabel ?? $headline,
-                'statusBannerTone' => $statusBannerTone,
-                'contentHtml' => $contentHtml ?? '',
-                'details' => $details,
-                'ctaUrl' => $ctaUrl,
-                'ctaLabel' => $ctaLabel,
-                'footerDisclaimer' => $footerDisclaimer,
-                'nextSteps' => $nextSteps,
-            ]),
-        ))->render();
+                'detail_rows' => $detailRows,
+                'details_title' => 'Booking summary',
+                'cta_url_override' => $ctaUrl,
+                'cta_label_override' => $ctaLabel,
+                'next_steps_text' => $nextStepsText,
+                'extra_html' => $contentHtml ?? '',
+            ],
+        );
 
         return new CustomerFacingEmailRendered(
-            html: $html,
+            html: $result->html,
             plainBody: $plainBody,
             profile: $profile,
         );

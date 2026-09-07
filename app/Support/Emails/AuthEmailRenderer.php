@@ -6,7 +6,6 @@ use App\Models\Agency;
 use App\Models\User;
 use App\Support\Branding\CompanyEmailProfileResolver;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\View;
 
 /**
  * Live send renderer for auth/registration emails (I8).
@@ -93,26 +92,42 @@ class AuthEmailRenderer
         $name = trim((string) ($user->name ?? 'Customer')) ?: 'Customer';
 
         if ($this->usesJetpkEmailPackage()) {
-            return $this->renderJetpkEmail(
-                type: 'account_created',
-                extra: [
-                    'title' => 'New customer signup',
-                    'intro' => 'A new customer signed up on your platform.',
-                ],
-                plainLines: [
-                    'A new customer signed up.',
-                    '',
-                    'Name: '.$name,
-                    'Email: '.$user->email,
-                    'Contact / mobile: '.$phone,
-                    'Signed up at: '.now()->toDateTimeString(),
-                ],
+            $user->loadMissing('currentAgency.agencySetting');
+            $name = trim((string) ($user->name ?? 'Customer')) ?: 'Customer';
+            $result = app(JetpkEmailEventRenderer::class)->render(
+                eventKey: 'notification',
                 agency: $user->currentAgency,
                 runtimeVariables: [
                     'customer_name' => $name,
                     'customer_email' => ModernEmailLayout::maskEmail((string) $user->email),
                     'recipient_role' => 'admin',
                 ],
+                payload: [
+                    'shell_notice' => true,
+                    'title' => 'New customer signup',
+                    'intro' => 'A new customer signed up on your platform.',
+                    'detail_rows' => [
+                        ['label' => 'Name', 'value' => $name],
+                        ['label' => 'Email', 'value' => ModernEmailLayout::maskEmail((string) $user->email)],
+                        ['label' => 'Contact / mobile', 'value' => ModernEmailLayout::maskPhone($phone)],
+                        ['label' => 'Signed up at', 'value' => now()->toDateTimeString()],
+                    ],
+                    'details_title' => 'Customer details',
+                    'next_steps_text' => "What to do next\n- Review the new customer account in the admin panel if follow-up is required.",
+                ],
+            );
+
+            return new CustomerFacingEmailRendered(
+                html: $result->html,
+                plainBody: $this->plainLines([
+                    'A new customer signed up.',
+                    '',
+                    'Name: '.$name,
+                    'Email: '.$user->email,
+                    'Contact / mobile: '.$phone,
+                    'Signed up at: '.now()->toDateTimeString(),
+                ]),
+                profile: CompanyEmailProfileResolver::resolveForPlatform(),
             );
         }
 
@@ -335,37 +350,43 @@ class AuthEmailRenderer
         array $nextSteps = [],
         ?string $detailsTitle = null,
     ): CustomerFacingEmailRendered {
-        $profile = CompanyEmailProfileResolver::resolve($agency);
-        $html = View::make('emails.layouts.modern', array_merge(
-            ['companyEmailProfile' => $profile],
-            ModernEmailLayout::viewData([
-                'emailMode' => $emailMode,
-                'headline' => $headline,
+        $detailRows = [];
+        foreach ($details as $row) {
+            $label = trim((string) ($row['label'] ?? ''));
+            $value = trim((string) ($row['value'] ?? ''));
+            if ($label === '' || $value === '') {
+                continue;
+            }
+            $detailRows[] = ['label' => $label, 'value' => $value];
+        }
+        $nextStepsText = $nextSteps !== []
+            ? "Next steps\n".implode("\n", array_map(static fn ($step): string => '- '.$step, $nextSteps))
+            : '';
+        $result = app(JetpkEmailEventRenderer::class)->render(
+            eventKey: 'notification',
+            agency: $agency,
+            runtimeVariables: [
+                'recipient_role' => $emailMode === ModernEmailLayout::MODE_OPS ? 'admin' : 'customer',
+                'reset_url' => (string) ($ctaUrl ?? ''),
+                'login_url' => (string) ($ctaUrl ?? ''),
+            ],
+            payload: [
+                'shell_notice' => true,
+                'title' => $headline,
                 'intro' => $intro,
-                'statusBannerLabel' => $statusBannerLabel ?? $headline,
-                'statusBannerTone' => $statusBannerTone,
-                'actionCardTitle' => $actionCardTitle,
-                'actionCardBody' => $actionCardBody,
-                'contentHtml' => '',
-                'details' => array_map(
-                    fn (array $row): array => [
-                        'label' => $row['label'],
-                        'value' => e((string) ($row['value'] ?? '')),
-                    ],
-                    $details,
-                ),
-                'ctaUrl' => $ctaUrl,
-                'ctaLabel' => $ctaLabel,
-                'footerDisclaimer' => $footerDisclaimer,
-                'nextSteps' => $nextSteps,
-                'detailsTitle' => $detailsTitle,
-            ]),
-        ))->render();
+                'detail_rows' => $detailRows,
+                'details_title' => $detailsTitle ?? 'Details',
+                'cta_url_override' => $ctaUrl,
+                'cta_label_override' => $ctaLabel,
+                'next_steps_text' => $nextStepsText,
+                'extra_html' => $actionCardBody ?? '',
+            ],
+        );
 
         return new CustomerFacingEmailRendered(
-            html: $html,
+            html: $result->html,
             plainBody: $plainBody,
-            profile: $profile,
+            profile: CompanyEmailProfileResolver::resolve($agency),
         );
     }
 

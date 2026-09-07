@@ -5,7 +5,6 @@ namespace App\Support\Emails;
 use App\Models\Agency;
 use App\Models\AgencyMessageTemplate;
 use App\Support\Branding\CompanyEmailProfileResolver;
-use Illuminate\Support\Facades\View;
 
 /**
  * Renders admin email template previews with I2 branding and I3 registry metadata (I4; no mail send).
@@ -80,28 +79,36 @@ class EmailTemplatePreviewRenderer
         } else {
             $innerHtml = $this->bodyToSafeHtml($innerBody);
             $details = $this->sampleDetailsRows($sampleVariables, $definition);
-            $emailMode = $definition->audience === 'customer'
-                ? ModernEmailLayout::MODE_CUSTOMER
-                : ModernEmailLayout::MODE_OPS;
-
-            $html = View::make('emails.layouts.modern', array_merge(
-                ['companyEmailProfile' => $profile],
-                ModernEmailLayout::viewData([
-                    'emailMode' => $emailMode,
-                    'headline' => $definition->name,
-                    'intro' => $emailMode === ModernEmailLayout::MODE_OPS ? null : $definition->description,
-                    'statusBannerLabel' => $definition->name,
-                    'statusBannerTone' => $emailMode === ModernEmailLayout::MODE_OPS ? 'info' : 'neutral',
-                    'actionCardTitle' => $emailMode === ModernEmailLayout::MODE_OPS ? 'What to do next' : null,
-                    'actionCardBody' => $emailMode === ModernEmailLayout::MODE_OPS ? $definition->description : null,
-                    'contentHtml' => $innerHtml,
-                    'details' => $details,
-                    'ctaUrl' => $sampleVariables['login_url'] ?? $profile->website_url,
-                    'ctaLabel' => $definition->audience === 'customer' ? 'View your booking' : 'Open in admin',
-                    'statusLabel' => $mergedVariables['booking_status'] ?? null,
-                    'footerDisclaimer' => 'This is an admin preview with sample data. No email was sent.',
+            $ctaUrl = $sampleVariables['login_url'] ?? $profile->website_url;
+            $ctaLabel = $definition->audience === 'customer' ? 'View your booking' : 'Open in admin';
+            $detailRows = [];
+            foreach ($details as $row) {
+                $label = trim((string) ($row['label'] ?? ''));
+                $value = trim(html_entity_decode(strip_tags((string) ($row['value'] ?? '')), ENT_QUOTES, 'UTF-8'));
+                if ($label === '' || $value === '') {
+                    continue;
+                }
+                $detailRows[] = ['label' => $label, 'value' => $value];
+            }
+            $jetpkResult = app(JetpkEmailEventRenderer::class)->render(
+                eventKey: 'notification',
+                agency: $agency,
+                runtimeVariables: array_merge($mergedVariables, [
+                    'recipient_role' => $definition->audience === 'customer' ? 'customer' : 'admin',
+                    'booking_url' => (string) ($ctaUrl ?? ''),
                 ]),
-            ))->render();
+                payload: [
+                    'shell_notice' => true,
+                    'title' => $definition->name,
+                    'intro' => $definition->description,
+                    'detail_rows' => $detailRows,
+                    'details_title' => 'Sample fields',
+                    'cta_url_override' => $ctaUrl,
+                    'cta_label_override' => $ctaLabel,
+                    'extra_html' => $innerHtml,
+                ],
+            );
+            $html = $jetpkResult->html;
         }
 
         return new EmailTemplatePreviewResult(

@@ -5,7 +5,6 @@ namespace App\Support\Emails;
 use App\Models\Agency;
 use App\Support\Branding\CompanyEmailProfile;
 use App\Support\Branding\CompanyEmailProfileResolver;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 
 /**
@@ -25,29 +24,26 @@ class ManualBookingCommunicationEmailRenderer
         $contentHtml = EmailBodySanitizer::toSafeHtmlBody($body);
         $headline = $definition?->name ?? Str::headline(str_replace('_', ' ', $eventKey));
 
-        $html = View::make('emails.layouts.modern', array_merge(
-            ['companyEmailProfile' => $profile],
-            ModernEmailLayout::viewData([
-                'emailMode' => ModernEmailLayout::MODE_CUSTOMER,
-                'headline' => $headline,
-                'intro' => null,
-                'statusBannerLabel' => $headline,
-                'statusBannerTone' => 'info',
-                'contentHtml' => $contentHtml,
-                'details' => [],
-                'ctaUrl' => null,
-                'ctaLabel' => null,
-                'nextSteps' => [
-                    'Review the message above regarding your booking.',
-                    'Contact support if you have questions.',
-                ],
-                'footerDisclaimer' => 'Please keep this email for your records.',
-            ]),
-        ))->render();
+        $result = app(JetpkEmailEventRenderer::class)->render(
+            eventKey: 'notification',
+            agency: $agency,
+            runtimeVariables: [
+                'recipient_role' => 'customer',
+            ],
+            payload: [
+                'shell_notice' => true,
+                'title' => $headline,
+                'intro' => '',
+                'detail_rows' => [],
+                'cta_url_override' => null,
+                'next_steps_text' => "Next steps\n- Review the message above regarding your booking.\n- Contact support if you have questions.",
+                'extra_html' => $contentHtml,
+            ],
+        );
 
         return new ManualBookingCommunicationRendered(
             subject: $subject,
-            html: $html,
+            html: $result->html,
             plainBody: $safePlain,
             profile: $profile,
         );

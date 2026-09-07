@@ -111,6 +111,14 @@
                 @include('emails.themes.jetpakistan.partials.blocks.agent-application')
                 @break
 
+            @case('html-snippet')
+                @if(!empty($meta['html_snippet']))
+                    <div class="jetpk-long" style="margin:0 0 14px 0; max-width:100%; overflow-wrap:anywhere;">
+                        {!! $meta['html_snippet'] !!}
+                    </div>
+                @endif
+                @break
+
             @case('message')
                 @php $message = $meta['message'] ?? ($message ?? null); @endphp
                 @if(!empty($message))
@@ -126,6 +134,9 @@
                                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                                     <tr>
                                         <td style="padding:16px 20px;">
+                                @if(!empty($eventContent['details_title']))
+                                    <p style="margin:0 0 10px 0; font-family:Arial,Helvetica,sans-serif; font-size:13px; line-height:18px; font-weight:bold; color:{{ $brand['muted_color'] ?? '#64748b' }}; text-transform:uppercase; letter-spacing:0.04em;">{{ $eventContent['details_title'] }}</p>
+                                @endif
                                 @foreach($detailRows as $row)
                                     @include('emails.themes.jetpakistan.partials.info-row', [
                                         'label' => $row['label'],

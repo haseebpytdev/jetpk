@@ -74,12 +74,25 @@
         ];
     }
     $hasBookingSnapshot = collect($summaryRows)->contains(fn ($value) => $value !== null && $value !== '');
+    $emailBrand = \App\Support\Emails\JetpkEmailBrandingResolver::resolve('jetpk');
+    $subjectText = (string) ($payload['subject'] ?? $payload['title'] ?? 'Booking notification');
+    $headline = (string) ($payload['title'] ?? 'Booking update');
+    $introText = (string) ($payload['intro'] ?? 'There is an update for your booking.');
+    $primaryCta = collect(array_is_list($cta) ? $cta : [$cta])
+        ->first(fn ($button): bool => is_array($button) && ! empty($button['url']) && ! empty($button['label']));
+    $ctaText = is_array($primaryCta) ? (string) $primaryCta['label'] : '';
+    $ctaUrl = is_array($primaryCta) ? (string) $primaryCta['url'] : '';
+    $preheaderText = $subjectText;
+    $recipientName = $isCustomerRecipient ? trim((string) ($payload['greeting_name'] ?? '')) : '';
+    $recipientGreeting = '';
+    $ctaButtons = array_values(array_filter(
+        array_is_list($cta) ? $cta : (is_array($primaryCta) ? [$primaryCta] : []),
+        fn ($button): bool => is_array($button) && ! empty($button['url']) && ! empty($button['label']),
+    ));
 @endphp
-@extends('emails.layouts.universal', ['company' => $payload['company'] ?? [], 'title' => $payload['title'] ?? null])
+@extends('emails.themes.jetpakistan.layouts.base')
 
 @section('content')
-    <h1 style="margin:0 0 6px;font-size:19px;line-height:1.25;color:#0f172a;font-weight:700;">{{ $payload['title'] ?? 'Booking update' }}</h1>
-
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px;border-left:3px solid {{ $statusStyle['border'] }};background-color:{{ $statusStyle['bg'] }};border-radius:6px;">
         <tr>
             <td style="padding:7px 10px;color:{{ $statusStyle['text'] }};font-size:12px;font-weight:700;">
@@ -87,9 +100,6 @@
             </td>
         </tr>
     </table>
-
-    <p style="margin:0 0 4px;color:#334155;font-size:13px;">Hello {{ $payload['greeting_name'] ?? 'Customer' }},</p>
-    <p style="margin:0 0 14px;color:#475569;font-size:13px;line-height:1.45;">{{ $payload['intro'] ?? 'There is an update for your booking.' }}</p>
 
     @if($hasBookingSnapshot)
     <h2 style="margin:0 0 6px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;">Booking snapshot</h2>
@@ -181,15 +191,13 @@
         @endif
     @endif
 
-    @if($cta !== [])
+    @if(count($ctaButtons) > 1)
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
             <tr>
-                @foreach($cta as $button)
-                    @if(!empty($button['url']) && !empty($button['label']))
-                        <td style="padding:0 7px 7px 0;">
-                            <a href="{{ $button['url'] }}" style="display:inline-block;padding:9px 16px;background-color:#0f766e;color:#ffffff;text-decoration:none;border-radius:7px;font-weight:700;font-size:13px;">{{ $button['label'] }}</a>
-                        </td>
-                    @endif
+                @foreach($ctaButtons as $button)
+                    <td style="padding:0 7px 7px 0;">
+                        <a href="{{ $button['url'] }}" style="display:inline-block;padding:9px 16px;background-color:#00843D;color:#ffffff;text-decoration:none;border-radius:7px;font-weight:700;font-size:13px;">{{ $button['label'] }}</a>
+                    </td>
                 @endforeach
             </tr>
         </table>

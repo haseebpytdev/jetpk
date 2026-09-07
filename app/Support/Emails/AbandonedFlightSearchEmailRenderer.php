@@ -4,7 +4,6 @@ namespace App\Support\Emails;
 
 use App\Models\Agency;
 use App\Support\Branding\CompanyEmailProfileResolver;
-use Illuminate\Support\Facades\View;
 
 /**
  * Renders abandoned flight search recovery emails in the modern layout (I8).
@@ -35,25 +34,26 @@ class AbandonedFlightSearchEmailRenderer
         }
         $details[] = ['label' => 'Passengers', 'value' => $passengerSummary];
 
-        $html = View::make('emails.layouts.modern', array_merge(
-            ['companyEmailProfile' => $profile],
-            ModernEmailLayout::viewData([
-                'emailMode' => ModernEmailLayout::MODE_CUSTOMER,
-                'headline' => 'Top flight offers from your recent search',
+        $result = app(JetpkEmailEventRenderer::class)->render(
+            eventKey: 'notification',
+            agency: $agency,
+            runtimeVariables: [
+                'recipient_role' => 'customer',
+                'booking_url' => $ctaUrl,
+                'search_url' => $ctaUrl,
+            ],
+            payload: [
+                'shell_notice' => true,
+                'title' => 'Top flight offers from your recent search',
                 'intro' => sprintf('You searched for flights on %s (%s).', $routeLabel, $tripTypeLabel),
-                'statusBannerLabel' => 'Offers from your search',
-                'statusBannerTone' => 'info',
-                'contentHtml' => $this->offersHtml($offers),
-                'details' => $details,
-                'ctaUrl' => $ctaUrl,
-                'ctaLabel' => 'Search again / View latest fares',
-                'nextSteps' => [
-                    'Fares were available when you searched and may have changed.',
-                    'Search again to confirm live availability before booking.',
-                ],
-                'footerDisclaimer' => 'Please keep this email for your records. Fares may change.',
-            ]),
-        ))->render();
+                'detail_rows' => $details,
+                'details_title' => 'Search summary',
+                'cta_url_override' => $ctaUrl,
+                'cta_label_override' => 'Search again / View latest fares',
+                'next_steps_text' => "Next steps\n- Fares were available when you searched and may have changed.\n- Search again to confirm live availability before booking.",
+                'extra_html' => $this->offersHtml($offers),
+            ],
+        );
 
         $plainOffers = collect($offers)->map(function (array $offer): string {
             $airline = trim((string) ($offer['airline_name'] ?: $offer['airline_code'] ?? ''));
@@ -62,7 +62,7 @@ class AbandonedFlightSearchEmailRenderer
         })->implode("\n");
 
         return new CustomerFacingEmailRendered(
-            html: $html,
+            html: $result->html,
             plainBody: implode("\n", array_filter([
                 'You searched for flights on '.$routeLabel.' ('.$tripTypeLabel.').',
                 '',
@@ -97,13 +97,27 @@ class AbandonedFlightSearchEmailRenderer
                 $html .= ' <span style="font-weight:normal;color:#64748b;">('.e($code).')</span>';
             }
             $html .= '</p>';
-            $html .= '<p style="margin:0 0 4px;font-size:14px;color:#334155;">'.e((string) $offer['origin']).' → '.e((string) $offer['destination']).'</p>';
-            $html .= '<p style="margin:0 0 4px;font-size:13px;color:#64748b;">Depart '.e((string) $offer['departure_at']).' · Arrive '.e((string) $offer['arrival_at']).'</p>';
-            $html .= '<p style="margin:0 0 8px;font-size:13px;color:#64748b;">'.e((string) $offer['stops_label']);
-            if (! empty($offer['duration'])) {
-                $html .= ' · '.e((string) $offer['duration']);
+            $html .= '<p style="margin:0 0 4px;font-size:14px;color:#334155;">'.e((string) ($offer['origin'] ?? '')).' → '.e((string) ($offer['destination'] ?? '')).'</p>';
+            $depart = trim((string) ($offer['departure_at'] ?? ''));
+            $arrive = trim((string) ($offer['arrival_at'] ?? ''));
+            if ($depart !== '' || $arrive !== '') {
+                $html .= '<p style="margin:0 0 4px;font-size:13px;color:#64748b;">';
+                if ($depart !== '') {
+                    $html .= 'Depart '.e($depart);
+                }
+                if ($arrive !== '') {
+                    $html .= ($depart !== '' ? ' · ' : '').'Arrive '.e($arrive);
+                }
+                $html .= '</p>';
             }
-            $html .= '</p>';
+            $stops = trim((string) ($offer['stops_label'] ?? ''));
+            if ($stops !== '' || ! empty($offer['duration'])) {
+                $html .= '<p style="margin:0 0 8px;font-size:13px;color:#64748b;">'.e($stops);
+                if (! empty($offer['duration'])) {
+                    $html .= ($stops !== '' ? ' · ' : '').e((string) $offer['duration']);
+                }
+                $html .= '</p>';
+            }
             $html .= '<p style="margin:0;font-size:16px;font-weight:700;color:#0f766e;">'.e((string) $offer['price_label']).'</p>';
             $html .= '</td></tr></table>';
         }
