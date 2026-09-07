@@ -3,4 +3,4 @@
 # Prefer Supervisor `deploy/supervisor/jetpk-notifications.conf` when available.
 # Hostinger/cron fallback: drain notification queues once per minute.
 
-* * * * * /usr/local/lsws/lsphp83/bin/lsphp /home/pkjetp/jetpk_app/artisan queue:work database --stop-when-empty --queue=notifications-critical,notifications-transactional,notifications-ops,notifications-bulk --tries=5 --timeout=90 >> /home/pkjetp/jetpk_app/storage/logs/notification-worker-cron.log 2>&1
+* * * * * /usr/local/lsws/lsphp83/bin/php /home/pkjetp/jetpk_app/artisan queue:work database --stop-when-empty --queue=notifications-critical,notifications-transactional,notifications-ops,notifications-bulk --tries=5 --timeout=90 >> /home/pkjetp/jetpk_app/storage/logs/notification-worker-cron.log 2>&1

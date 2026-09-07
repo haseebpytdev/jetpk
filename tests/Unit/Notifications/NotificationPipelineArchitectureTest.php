@@ -4,6 +4,7 @@ namespace Tests\Unit\Notifications;
 
 use App\Enums\OtaNotificationEvent;
 use App\Jobs\Notifications\DispatchNotificationOutboxEvent;
+use App\Models\Agency;
 use App\Models\NotificationDelivery;
 use App\Models\NotificationOutbox;
 use App\Models\NotificationRoute;
@@ -16,6 +17,7 @@ use App\Services\Notifications\NotificationRouteResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class NotificationPipelineArchitectureTest extends TestCase
@@ -152,7 +154,7 @@ class NotificationPipelineArchitectureTest extends TestCase
     {
         $a = NotificationEventIdentity::resolve('booking_confirmed', null, 'booking', '123');
         $b = NotificationEventIdentity::resolve('booking_confirmed', null, 'booking', '123');
-        $this->assertSame('semantic', $a['source']);
+        $this->assertSame('one_shot_aggregate', $a['source']);
         $this->assertSame($a['event_id'], $b['event_id']);
 
         $loginA = NotificationEventIdentity::resolve('admin_login_success', null, 'user', '9');
@@ -299,5 +301,71 @@ class NotificationPipelineArchitectureTest extends TestCase
         $asyncMs = (hrtime(true) - $started) / 1e6;
         Bus::assertDispatched(DispatchNotificationOutboxEvent::class);
         $this->assertLessThan(500, $asyncMs);
+    }
+
+    public function test_publish_inside_open_transaction_does_not_mail_and_rolls_back(): void
+    {
+        Mail::fake();
+        config([
+            'notifications.pipeline.async' => false,
+            'notifications.pipeline.enabled' => true,
+        ]);
+        $agency = Agency::factory()->create();
+        $originalName = $agency->name;
+
+        try {
+            DB::transaction(function () use ($agency): void {
+                $agency->forceFill(['name' => $agency->name.'-tx'])->save();
+                app(NotificationPipeline::class)->publishOperational(
+                    $agency,
+                    OtaNotificationEvent::AdminLoginSuccess->value,
+                    ['notification_event_id' => '77777777-7777-7777-7777-777777777777'],
+                    null,
+                    null,
+                    'subj',
+                    'body',
+                    [],
+                    ['logged_in_user_email' => 'admin@example.test'],
+                );
+                Mail::assertNothingSent();
+                $this->assertSame(1, NotificationOutbox::query()->count());
+                throw new \RuntimeException('rollback');
+            });
+        } catch (\RuntimeException) {
+            // expected
+        }
+
+        $this->assertSame($originalName, $agency->fresh()->name);
+        $this->assertSame(0, NotificationOutbox::query()->count());
+        $this->assertSame(0, NotificationDelivery::query()->count());
+        Mail::assertNothingSent();
+    }
+
+    public function test_publish_dispatches_only_after_commit(): void
+    {
+        Mail::fake();
+        config(['notifications.pipeline.async' => true, 'notifications.pipeline.enabled' => true]);
+        Bus::fake();
+        $agency = Agency::factory()->create();
+
+        DB::transaction(function () use ($agency): void {
+            app(NotificationPipeline::class)->publishOperational(
+                $agency,
+                OtaNotificationEvent::AdminLoginSuccess->value,
+                ['notification_event_id' => '88888888-8888-8888-8888-888888888888'],
+                null,
+                null,
+                'subj',
+                'body',
+                [],
+                ['logged_in_user_email' => 'admin@example.test'],
+            );
+            Bus::assertNothingDispatched();
+            Mail::assertNothingSent();
+        });
+
+        Bus::assertDispatched(DispatchNotificationOutboxEvent::class);
+        $this->assertSame(1, NotificationOutbox::query()->count());
+        Mail::assertNothingSent();
     }
 }

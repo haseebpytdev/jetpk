@@ -198,7 +198,7 @@ class SupportTicketService
         });
 
         if ($visibility === SupportTicketMessageVisibility::CustomerVisible) {
-            $this->notifyReplied($ticket->fresh(['createdBy', 'assignedTo', 'booking']), $author);
+            $this->notifyReplied($ticket->fresh(['createdBy', 'assignedTo', 'booking']), $author, $message);
         }
 
         try {
@@ -391,11 +391,13 @@ class SupportTicketService
             [],
             $this->recipientContext($ticket, [
                 'notify_buckets' => ['admin', 'ticket_assigned_staff', 'ticket_creator'],
+                'aggregate_type' => 'support_ticket',
+                'aggregate_id' => (string) $ticket->id,
             ]),
         );
     }
 
-    private function notifyReplied(SupportTicket $ticket, User $author): void
+    private function notifyReplied(SupportTicket $ticket, User $author, SupportTicketMessage $message): void
     {
         $agency = Agency::query()->findOrFail($ticket->agency_id);
 
@@ -406,14 +408,22 @@ class SupportTicketService
         $this->notifications->send(
             $agency,
             OtaNotificationEvent::SupportTicketReplied->value,
-            $this->safePayload($ticket, ['replied_by' => $author->account_type?->value ?? 'user']),
+            $this->safePayload($ticket, [
+                'replied_by' => $author->account_type?->value ?? 'user',
+                'notification_occurrence_id' => 'support_message:'.$message->id,
+            ]),
             $ticket->booking,
             $author,
             'Reply on support ticket #'.$ticket->id,
             'There is a new reply on your support ticket.',
             $this->templateVars($ticket),
             [],
-            $this->recipientContext($ticket, ['notify_buckets' => $buckets]),
+            $this->recipientContext($ticket, [
+                'notify_buckets' => $buckets,
+                'aggregate_type' => 'support_ticket',
+                'aggregate_id' => (string) $ticket->id,
+                'occurrence_id' => 'support_message:'.$message->id,
+            ]),
         );
     }
 

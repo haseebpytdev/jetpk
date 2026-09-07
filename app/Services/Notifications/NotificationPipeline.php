@@ -51,15 +51,24 @@ class NotificationPipeline
         $explicitId = is_string($payload['notification_event_id'] ?? null) && $payload['notification_event_id'] !== ''
             ? (string) $payload['notification_event_id']
             : null;
-        unset($payload['notification_event_id']);
+        $occurrenceId = is_string($payload['notification_occurrence_id'] ?? null) && $payload['notification_occurrence_id'] !== ''
+            ? (string) $payload['notification_occurrence_id']
+            : (isset($recipientContext['occurrence_id']) && is_scalar($recipientContext['occurrence_id'])
+                ? (string) $recipientContext['occurrence_id']
+                : null);
+        unset($payload['notification_event_id'], $payload['notification_occurrence_id']);
 
-        $aggregateType = $booking !== null ? 'booking' : (isset($recipientContext['aggregate_type']) && is_string($recipientContext['aggregate_type']) ? $recipientContext['aggregate_type'] : null);
-        $aggregateId = $booking !== null
-            ? (string) $booking->id
-            : (isset($recipientContext['aggregate_id']) && is_scalar($recipientContext['aggregate_id']) ? (string) $recipientContext['aggregate_id'] : null);
+        $contextAggregateType = isset($recipientContext['aggregate_type']) && is_string($recipientContext['aggregate_type'])
+            ? $recipientContext['aggregate_type']
+            : null;
+        $contextAggregateId = isset($recipientContext['aggregate_id']) && is_scalar($recipientContext['aggregate_id'])
+            ? (string) $recipientContext['aggregate_id']
+            : null;
+        $aggregateType = $contextAggregateType ?? ($booking !== null ? 'booking' : null);
+        $aggregateId = $contextAggregateId ?? ($booking !== null ? (string) $booking->id : null);
         $variant = isset($recipientContext['event_variant']) && is_string($recipientContext['event_variant'])
             ? $recipientContext['event_variant']
-            : '';
+            : (isset($payload['event_variant']) && is_string($payload['event_variant']) ? (string) $payload['event_variant'] : '');
 
         $identity = NotificationEventIdentity::resolve(
             $eventKey,
@@ -67,6 +76,7 @@ class NotificationPipeline
             $aggregateType,
             $aggregateId,
             $variant,
+            $occurrenceId,
         );
 
         $row = $this->outbox->record(
@@ -79,6 +89,7 @@ class NotificationPipeline
                 'recipient_context' => $this->safeContext($recipientContext),
                 'payload' => $payload,
                 'event_id_source' => $identity['source'],
+                'event_id_kind' => $identity['kind'],
             ],
             agencyId: $agency->id,
             aggregateType: $aggregateType,

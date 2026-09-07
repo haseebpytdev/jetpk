@@ -10,7 +10,7 @@ final class NotificationEventIdentity
     public const NAMESPACE_UUID = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
 
     /**
-     * @return array{event_id: string, source: string}
+     * @return array{event_id: string, source: string, kind: string}
      */
     public static function resolve(
         string $eventType,
@@ -18,37 +18,58 @@ final class NotificationEventIdentity
         ?string $aggregateType,
         ?string $aggregateId,
         string $variant = '',
+        ?string $occurrenceId = null,
     ): array {
+        $kind = NotificationEventIdentityPolicy::kind($eventType);
+
         if (is_string($explicitEventId) && $explicitEventId !== '') {
-            return ['event_id' => $explicitEventId, 'source' => 'explicit'];
+            return ['event_id' => $explicitEventId, 'source' => 'explicit', 'kind' => $kind->value];
         }
 
-        if (self::isOccurrenceScoped($eventType)) {
-            return ['event_id' => (string) Str::uuid(), 'source' => 'occurrence'];
-        }
-
-        if (is_string($aggregateType) && $aggregateType !== '' && is_string($aggregateId) && $aggregateId !== '') {
-            $name = strtolower($eventType).'|'.$aggregateType.':'.$aggregateId;
-            if ($variant !== '') {
-                $name .= '|'.$variant;
+        if (is_string($occurrenceId) && $occurrenceId !== '') {
+            $name = strtolower($eventType).'|occurrence:'.$occurrenceId;
+            if (is_string($aggregateType) && $aggregateType !== '' && is_string($aggregateId) && $aggregateId !== '') {
+                $name = strtolower($eventType).'|'.$aggregateType.':'.$aggregateId.'|occurrence:'.$occurrenceId;
             }
 
             return [
                 'event_id' => Uuid::uuid5(self::NAMESPACE_UUID, $name)->toString(),
-                'source' => 'semantic',
+                'source' => 'occurrence_record',
+                'kind' => $kind->value,
             ];
         }
 
-        return ['event_id' => (string) Str::uuid(), 'source' => 'generated_no_aggregate'];
-    }
+        if ($variant !== '') {
+            $name = strtolower($eventType).'|variant:'.$variant;
+            if (is_string($aggregateType) && $aggregateType !== '' && is_string($aggregateId) && $aggregateId !== '') {
+                $name = strtolower($eventType).'|'.$aggregateType.':'.$aggregateId.'|variant:'.$variant;
+            }
 
-    public static function isOccurrenceScoped(string $eventType): bool
-    {
-        $event = strtolower($eventType);
+            return [
+                'event_id' => Uuid::uuid5(self::NAMESPACE_UUID, $name)->toString(),
+                'source' => 'variant',
+                'kind' => $kind->value,
+            ];
+        }
 
-        return str_contains($event, 'login')
-            || str_contains($event, 'otp')
-            || str_contains($event, 'password_reset')
-            || str_contains($event, 'auth_new_device');
+        if (
+            $kind === NotificationEventIdentityKind::OneShotAggregate
+            && is_string($aggregateType) && $aggregateType !== ''
+            && is_string($aggregateId) && $aggregateId !== ''
+        ) {
+            $name = strtolower($eventType).'|'.$aggregateType.':'.$aggregateId;
+
+            return [
+                'event_id' => Uuid::uuid5(self::NAMESPACE_UUID, $name)->toString(),
+                'source' => 'one_shot_aggregate',
+                'kind' => $kind->value,
+            ];
+        }
+
+        return [
+            'event_id' => (string) Str::uuid(),
+            'source' => 'occurrence',
+            'kind' => $kind->value,
+        ];
     }
 }
