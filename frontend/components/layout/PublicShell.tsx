@@ -6,7 +6,6 @@ import { AskJetPakistanChat } from "@/features/ai-assistant/components/AskJetPak
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { PublicRoutePrefetch } from "@/components/navigation/PublicRoutePrefetch";
-import Link from "next/link";
 import {
   fetchSessionBootstrap,
   mapBootstrapToPublicSession,
@@ -49,10 +48,13 @@ export function PublicShell({
           fetchSessionBootstrap().catch(() => null),
           PublicConfigService.getConfig().catch(() => null),
         ]);
+
         if (cancelled) return;
+
         if (bootstrap) {
           setSession(mapBootstrapToPublicSession(bootstrap));
         }
+
         if (config) {
           setBranding({
             brand_name: config.brand_name,
@@ -80,28 +82,12 @@ export function PublicShell({
         {children}
       </main>
       {hideFooter ? null : <SiteFooter branding={branding} />}
-      <Link
-        href="/support"
-        data-testid="human-support-fab"
-        aria-label="Human support"
-        className="pointer-events-auto fixed z-40 hidden h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-jp-brand text-white shadow-jp-md lg:inline-flex right-[max(0.75rem,env(safe-area-inset-right))] bottom-[max(1.25rem,env(safe-area-inset-bottom))] focus-visible:outline-none focus-visible:shadow-jp-focus"
-      >
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-          <path
-            d="M5 13v-1.5A7 7 0 0 1 12 4.5 7 7 0 0 1 19 11.5V13"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-          />
-          <path
-            d="M5 13.5A2.5 2.5 0 0 0 7.5 16h.5v-5H7.5A2.5 2.5 0 0 0 5 13.5Zm14 0A2.5 2.5 0 0 1 16.5 16H16v-5h.5A2.5 2.5 0 0 1 19 13.5Z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-          />
-          <path d="M9 19c.8 1.2 1.9 1.8 3 1.8s2.2-.6 3-1.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        </svg>
-      </Link>
+
+      {/*
+       * Intentionally ONE public floating action button:
+       * AskJetPakistanChat owns the FAB.
+       * Human support remains accessible from inside the assistant panel.
+       */}
       <AskJetPakistanChat enabled={aiEnabled} />
     </div>
   );

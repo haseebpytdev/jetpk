@@ -1,0 +1,39 @@
+{
+  "phase": "JETPAKISTAN_ASK_UI_01",
+  "captured_at": "2026-09-08T00:45:00+05:00",
+  "baseline_sha": "2480ffffa685d468a7074a244cca590a73240019",
+  "gates": {
+    "ASK_FAB_COUNT": 1,
+    "HUMAN_SUPPORT_FAB_COUNT": 0,
+    "SUPPORT_LINK_INSIDE_ASSISTANT": "PASS",
+    "ASSISTANT_OPEN_CLOSE": "PASS",
+    "ASSISTANT_ESCAPE_CLOSE": "PASS",
+    "QUICK_ACTIONS": "PASS",
+    "CHAT_SEND_EXISTING_API_REGRESSION": "PASS",
+    "MOBILE_430": "PASS",
+    "MOBILE_390": "PASS",
+    "MOBILE_360": "PASS",
+    "MOBILE_320": "PASS",
+    "HORIZONTAL_OVERFLOW": 0,
+    "SUPPORT_FAQ_VISIBLE": "PASS",
+    "SUPPORT_FAQ_INTERACTION": "PASS",
+    "CONTACT_CARD_REGRESSION": "PASS",
+    "SUPPORT_FORM_REGRESSION": "PASS",
+    "FRONTEND_BUILD": "PASS",
+    "PLAYWRIGHT_JP_ASK_UI_01": "8/8 PASS"
+  },
+  "screenshots": [
+    "home-desktop-1280.png",
+    "assistant-open-desktop-1280.png",
+    "home-mobile-430.png",
+    "assistant-open-mobile-430.png",
+    "home-mobile-390.png",
+    "assistant-open-mobile-390.png",
+    "home-mobile-360.png",
+    "assistant-open-mobile-360.png",
+    "home-mobile-320.png",
+    "assistant-open-mobile-320.png",
+    "support-desktop-1280.png"
+  ],
+  "notes": "Local smoke server with mocked ai_assistant_enabled config. Human-support FAB removed; mobile nav PublicFloatingActionDock remains (pre-existing JP-UI-FAB-01 quick-actions dock, not human-support headset FAB)."
+}

@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PublicSectionHeader } from "@/features/public-visual";
 import {
   Breadcrumbs,
   ContactDetailsCard,
+  FaqService,
   PublicPageHero,
   SupportContentService,
   publicSeoToMetadata,
 } from "@/features/public-content";
 import { SupportContactIsland } from "@/features/public-content/components/SupportContactIsland";
+import { SupportFaqPreview } from "@/features/public-content/components/SupportFaqPreview";
 import { SupportTopicSearch } from "@/features/public-content/components/SupportTopicSearch";
 
 export const revalidate = 300;
@@ -21,16 +22,28 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Support RSC shell: heading and contact facts are server HTML so soft-nav
- * usable markers do not wait on Turnstile/form hydration.
+ * Support RSC shell: heading, FAQ preview and contact facts are server HTML so
+ * the page remains useful before Turnstile/form hydration.
  */
 export default async function SupportPage() {
-  const content = await SupportContentService.getSupportPage();
+  const [content, faqContent] = await Promise.all([
+    SupportContentService.getSupportPage(),
+    FaqService.getFaqPage(),
+  ]);
+
   const faqTeaser = content.faqTeaser;
+  const faqItems = faqContent.categories.flatMap((category) =>
+    category.items.map((item) => ({
+      id: item.id,
+      question: item.question,
+      answer: item.answer,
+    })),
+  );
 
   return (
     <PageContainer className="py-jp-4xl">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Support" }]} />
+
       <div className="mt-jp-xl space-y-jp-3xl">
         <PublicPageHero
           hero={{
@@ -45,30 +58,42 @@ export default async function SupportPage() {
         </PublicPageHero>
 
         <div className="grid gap-jp-xl lg:grid-cols-[1.1fr_0.9fr]">
-          {faqTeaser ? (
-            <section>
-              <PublicSectionHeader title="Frequently Asked Questions" ctaText={faqTeaser.linkLabel} ctaUrl={faqTeaser.linkHref} />
-              {faqTeaser.body ? <p className="mt-jp-lg text-jp-sm text-jp-muted">{faqTeaser.body}</p> : null}
-              <p className="mt-4">
-                <Link href={faqTeaser.linkHref} className="text-jp-sm font-semibold text-jp-primary hover:underline">
-                  {faqTeaser.linkLabel}
-                </Link>
-              </p>
-            </section>
-          ) : null}
+          <section aria-labelledby="support-faq-heading">
+            <div id="support-faq-heading">
+              <PublicSectionHeader
+                title="Frequently Asked Questions"
+                subtitle={
+                  faqTeaser?.body ||
+                  "Quick answers to common booking, baggage, payment and refund questions."
+                }
+                ctaText={faqTeaser?.linkLabel || "View full help centre"}
+                ctaUrl={faqTeaser?.linkHref || "/faq"}
+              />
+            </div>
+            <SupportFaqPreview items={faqItems} />
+          </section>
 
-          <section className="space-y-jp-lg">
-            <PublicSectionHeader title="Contact Us" subtitle="Multiple ways to reach our support team." />
+          <section className="space-y-jp-lg" aria-labelledby="support-contact-heading">
+            <div id="support-contact-heading">
+              <PublicSectionHeader
+                title="Contact Us"
+                subtitle="Multiple ways to reach our support team."
+              />
+            </div>
             <ContactDetailsCard contact={content.contact} />
           </section>
         </div>
 
-        <section className="rounded-jp-xl border border-jp-border bg-jp-surface p-jp-2xl shadow-jp-card" aria-labelledby="support-form-heading">
+        <section
+          className="rounded-jp-xl border border-jp-border bg-jp-surface p-jp-2xl shadow-jp-card"
+          aria-labelledby="support-form-heading"
+        >
           <h2 id="support-form-heading" className="text-jp-h3 font-semibold text-jp-text">
             Submit a support request
           </h2>
           <p className="mt-2 text-jp-sm text-jp-muted">
-            Tell us what you need and our team will respond shortly. For urgent booking status, include your booking reference.
+            Tell us what you need and our team will respond shortly. For urgent booking status,
+            include your booking reference.
           </p>
           <div className="mt-6">
             <SupportContactIsland />

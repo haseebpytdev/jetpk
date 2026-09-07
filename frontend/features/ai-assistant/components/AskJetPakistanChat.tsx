@@ -1,13 +1,25 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
-import { laravelApiPath } from "@/services/flight-search";
 import { ensureLaravelCsrfToken } from "@/features/public-content/utils/laravel-api";
-import { cn } from "@/lib/cn";
+import { laravelApiPath } from "@/services/flight-search";
 import Link from "next/link";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import styles from "./AskJetPakistanChat.module.css";
 
-type ChatAction = { label: string; href?: string; action?: string };
+type ChatAction = {
+  label: string;
+  href?: string;
+  action?: string;
+};
+
 type Recommendation = {
   id: string;
   title?: string;
@@ -32,7 +44,69 @@ type AskJetPakistanChatProps = {
   enabled: boolean;
 };
 
+type QuickAction = {
+  id: string;
+  title: string;
+  description: string;
+  icon: ReactNode;
+  message?: string;
+  href?: string;
+};
+
 const STORAGE_KEY = "jp_ai_conversation_id";
+
+const QUICK_ACTIONS: QuickAction[] = [
+  {
+    id: "flights",
+    title: "Find Flights",
+    description: "Search fares to your destination",
+    message: "Find flights Lahore to Dubai",
+    icon: <PlaneIcon />,
+  },
+  {
+    id: "groups",
+    title: "Find Groups",
+    description: "Group bookings and special fares",
+    message: "Find Groups for Dubai",
+    icon: <GroupIcon />,
+  },
+  {
+    id: "booking",
+    title: "Booking Help",
+    description: "Manage or understand a booking",
+    message: "How does booking work",
+    icon: <BookingIcon />,
+  },
+  {
+    id: "payment",
+    title: "Payment Help",
+    description: "Payments, refunds and invoices",
+    message: "Payment help",
+    icon: <PaymentIcon />,
+  },
+  {
+    id: "travelers",
+    title: "Saved Travelers",
+    description: "Manage your traveler profiles",
+    message: "Saved Travelers help",
+    icon: <TravelerIcon />,
+  },
+  {
+    id: "support",
+    title: "Talk to Support",
+    description: "Open the JetPakistan support centre",
+    href: "/support",
+    icon: <HeadsetIcon />,
+  },
+];
+
+const POPULAR_QUESTIONS = [
+  "Baggage allowance",
+  "Change my flight",
+  "Check flight status",
+  "Visa information",
+  "Refund process",
+];
 
 async function postAi(path: string, body: Record<string, unknown>) {
   const csrf = await ensureLaravelCsrfToken();
@@ -47,20 +121,24 @@ async function postAi(path: string, body: Record<string, unknown>) {
     },
     body: JSON.stringify(body),
   });
+
   const json = (await response.json().catch(() => ({}))) as Record<string, unknown>;
   return { response, json };
 }
 
 export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   const titleId = useId();
-  const panelRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+
   const lastPollId = useRef(0);
 
   const scrollToEnd = useCallback(() => {
@@ -68,119 +146,156 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
     if (el) el.scrollTop = el.scrollHeight;
   }, []);
 
+  const clearHash = useCallback(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash === "#ask-jetpakistan") {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  }, []);
+
+  const close = useCallback(() => {
+    setOpen(false);
+    setMenuOpen(false);
+    clearHash();
+  }, [clearHash]);
+
   useEffect(() => {
     if (!enabled) return;
+
     try {
       const stored = sessionStorage.getItem(STORAGE_KEY);
       if (stored) setConversationId(stored);
     } catch {
-      /* ignore */
+      /* session storage is best-effort */
     }
   }, [enabled]);
 
   useEffect(() => {
     if (!enabled) return;
+
     const syncHash = () => {
-      if (typeof window === "undefined") return;
-      if (window.location.hash === "#ask-jetpakistan") {
+      if (typeof window !== "undefined" && window.location.hash === "#ask-jetpakistan") {
         setOpen(true);
       }
     };
+
     syncHash();
     window.addEventListener("hashchange", syncHash);
     return () => window.removeEventListener("hashchange", syncHash);
   }, [enabled]);
 
   useEffect(() => {
-    if (open) scrollToEnd();
+    if (!open) return;
+
+    scrollToEnd();
+    window.setTimeout(() => inputRef.current?.focus(), 80);
   }, [messages, open, scrollToEnd]);
 
   useEffect(() => {
     if (!enabled || !open || !conversationId) return;
+
     let cancelled = false;
+
     const tick = async () => {
       try {
         const url = laravelApiPath(
           `/api/public/ai/messages?conversation_id=${encodeURIComponent(conversationId)}&since_id=${lastPollId.current}`,
         );
+
         const response = await fetch(url, {
           credentials: "include",
-          headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" },
+          headers: {
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
         });
+
         if (!response.ok || cancelled) return;
+
         const json = (await response.json()) as {
-          messages?: Array<{ id: number; role: string; body: string; meta?: { recommendations?: Recommendation[] } }>;
+          messages?: Array<{
+            id: number;
+            role: string;
+            body: string;
+            meta?: {
+              recommendations?: Recommendation[];
+              actions?: ChatAction[];
+            };
+          }>;
         };
+
         const incoming = json.messages ?? [];
         if (incoming.length === 0) return;
-        setMessages((prev) => {
-          const known = new Set(prev.map((m) => m.id));
-          const next = [...prev];
-          for (const m of incoming) {
-            const id = String(m.id);
-            lastPollId.current = Math.max(lastPollId.current, m.id);
-            if (known.has(id)) continue;
-            if (m.role === "user") continue;
+
+        setMessages((previous) => {
+          const known = new Set(previous.map((message) => message.id));
+          const next = [...previous];
+
+          for (const message of incoming) {
+            const id = String(message.id);
+            lastPollId.current = Math.max(lastPollId.current, message.id);
+
+            if (known.has(id) || message.role === "user") continue;
+
             next.push({
               id,
-              role: (m.role as ChatMessage["role"]) || "assistant",
-              body: m.body,
-              recommendations: m.meta?.recommendations,
+              role: (message.role as ChatMessage["role"]) || "assistant",
+              body: message.body,
+              recommendations: message.meta?.recommendations,
+              actions: message.meta?.actions,
             });
           }
+
           return next;
         });
       } catch {
-        /* soft poll */
+        /* polling is intentionally soft-fail */
       }
     };
+
     const timer = window.setInterval(tick, 4000);
+
     return () => {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [enabled, open, conversationId]);
+  }, [conversationId, enabled, open]);
 
   useEffect(() => {
     if (!enabled || !open) return;
-    const onKey = (event: KeyboardEvent) => {
+
+    const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        setOpen(false);
-        if (window.location.hash === "#ask-jetpakistan") {
-          history.replaceState(null, "", window.location.pathname + window.location.search);
-        }
+        close();
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [enabled, open]);
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [close, enabled, open]);
 
   if (!enabled) return null;
 
-  const close = () => {
-    setOpen(false);
-    if (typeof window !== "undefined" && window.location.hash === "#ask-jetpakistan") {
-      history.replaceState(null, "", window.location.pathname + window.location.search);
-    }
-  };
-
   const appendAssistant = (json: Record<string, unknown>) => {
     const cid = typeof json.conversation_id === "string" ? json.conversation_id : null;
+
     if (cid) {
       setConversationId(cid);
       try {
         sessionStorage.setItem(STORAGE_KEY, cid);
       } catch {
-        /* ignore */
+        /* best-effort */
       }
     }
+
     const body =
       typeof json.message === "string"
         ? json.message
         : "Something went wrong. Please try again.";
-    setMessages((prev) => [
-      ...prev,
+
+    setMessages((previous) => [
+      ...previous,
       {
         id: `a-${Date.now()}`,
         role: "assistant",
@@ -188,7 +303,9 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
         recommendations: Array.isArray(json.recommendations)
           ? (json.recommendations as Recommendation[])
           : undefined,
-        actions: Array.isArray(json.actions) ? (json.actions as ChatAction[]) : undefined,
+        actions: Array.isArray(json.actions)
+          ? (json.actions as ChatAction[])
+          : undefined,
       },
     ]);
   };
@@ -196,24 +313,40 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   const send = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || busy) return;
+
     setBusy(true);
     setError(null);
-    setMessages((prev) => [...prev, { id: `u-${Date.now()}`, role: "user", body: trimmed }]);
+    setMessages((previous) => [
+      ...previous,
+      {
+        id: `u-${Date.now()}`,
+        role: "user",
+        body: trimmed,
+      },
+    ]);
     setInput("");
+
     try {
       const { response, json } = await postAi("/api/public/ai/chat", {
         message: trimmed,
         conversation_id: conversationId,
       });
+
       if (response.status === 503 || json.status === "unavailable") {
         appendAssistant(json);
         return;
       }
-      if (!response.ok && response.status !== 200) {
-        setError(typeof json.message === "string" ? json.message : "Request failed. Retry.");
+
+      if (!response.ok) {
+        setError(
+          typeof json.message === "string"
+            ? json.message
+            : "Request failed. Please retry.",
+        );
         appendAssistant(json);
         return;
       }
+
       appendAssistant(json);
     } catch {
       setError("Network error. Please retry.");
@@ -227,47 +360,55 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
       await send("Talk to support");
       return;
     }
+
     setBusy(true);
+    setError(null);
+
     try {
-      const { json } = await postAi("/api/public/ai/handoff", { conversation_id: conversationId });
+      const { json } = await postAi("/api/public/ai/handoff", {
+        conversation_id: conversationId,
+      });
       appendAssistant(json);
     } catch {
-      setError("Could not reach support queue.");
+      setError("Could not reach the support queue.");
     } finally {
       setBusy(false);
     }
   };
 
   const clearChat = async () => {
+    setMenuOpen(false);
     setBusy(true);
+    setError(null);
+
     try {
       const { json } = await postAi("/api/public/ai/clear", {
         conversation_id: conversationId,
       });
-      const cid = typeof json.conversation_id === "string" ? json.conversation_id : null;
+
+      const cid =
+        typeof json.conversation_id === "string" ? json.conversation_id : null;
+
       setConversationId(cid);
+
       if (cid) {
         try {
           sessionStorage.setItem(STORAGE_KEY, cid);
         } catch {
-          /* ignore */
+          /* best-effort */
+        }
+      } else {
+        try {
+          sessionStorage.removeItem(STORAGE_KEY);
+        } catch {
+          /* best-effort */
         }
       }
+
       lastPollId.current = 0;
-      setMessages([
-        {
-          id: `a-${Date.now()}`,
-          role: "assistant",
-          body: "New chat started. Ask about flights, groups, payments, or talk to support.",
-          actions: [
-            { label: "Search Flights", href: "/#flight-search" },
-            { label: "Browse Groups", href: "/groups" },
-            { label: "Talk to Support", action: "handoff" },
-          ],
-        },
-      ]);
+      setMessages([]);
     } catch {
-      setError("Could not clear chat.");
+      setError("Could not clear the conversation.");
     } finally {
       setBusy(false);
     }
@@ -278,208 +419,500 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
       void handoff();
       return;
     }
+
     if (action.href) {
-      window.location.href = action.href;
+      window.location.assign(action.href);
+    }
+  };
+
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void send(input);
+  };
+
+  const runQuickAction = (action: QuickAction) => {
+    if (action.href) {
+      window.location.assign(action.href);
+      return;
+    }
+
+    if (action.message) {
+      void send(action.message);
     }
   };
 
   return (
     <>
       {!open ? (
-        <button
-          type="button"
-          data-testid="ask-jetpakistan-fab"
-          aria-label="Ask JetPakistan"
-          onClick={() => setOpen(true)}
-          className={cn(
-            "pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-jp-brand text-white shadow-jp-md",
-            "fixed z-50 right-[max(0.75rem,env(safe-area-inset-right))]",
-            "bottom-[max(5.75rem,calc(env(safe-area-inset-bottom)+4.75rem))] lg:bottom-[max(5.25rem,calc(env(safe-area-inset-bottom)+4.25rem))]",
-            "focus-visible:outline-none focus-visible:shadow-jp-focus",
-          )}
-        >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-            <path
-              d="M4.5 11.5c0-3.7 3.58-6.75 8-6.75s8 3.05 8 6.75-3.58 6.75-8 6.75c-.62 0-1.22-.05-1.79-.16L6.2 19.4c-.45.22-.95-.24-.78-.71l.9-2.48C5.18 15.3 4.5 13.48 4.5 11.5Z"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+        <div className={styles.fabWrap}>
+          <span className={styles.fabTooltip} role="tooltip">
+            Ask JetPakistan
+            <small>Get instant travel help</small>
+          </span>
+          <button
+            type="button"
+            data-testid="ask-jetpakistan-fab"
+            aria-label="Ask JetPakistan"
+            onClick={() => setOpen(true)}
+            className={styles.fab}
+          >
+            <AssistantFabIcon />
+          </button>
+        </div>
       ) : null}
-      {!open ? null : (
-        <div
-          ref={panelRef}
+
+      {open ? (
+        <section
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}
           data-testid="ask-jetpakistan-panel"
-          className={cn(
-            "fixed z-50 flex w-[min(24rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-jp-lg border border-jp-border bg-jp-surface shadow-jp-md",
-            "right-[max(0.75rem,env(safe-area-inset-right))] bottom-[max(5.5rem,calc(env(safe-area-inset-bottom)+4.5rem))] lg:bottom-[max(11.5rem,calc(env(safe-area-inset-bottom)+10rem))]",
-            "max-h-[min(70vh,32rem)]",
-          )}
+          className={styles.panel}
         >
-          <div className="flex items-center justify-between gap-2 border-b border-jp-border px-3 py-2">
-            <h2 id={titleId} className="text-jp-sm font-semibold text-jp-text">
-              Ask JetPakistan
-            </h2>
-            <div className="flex items-center gap-1">
-              <Button type="button" variant="ghost" className="min-h-9 px-2 text-jp-xs" onClick={() => void clearChat()}>
-                Clear
-              </Button>
-              <Button type="button" variant="ghost" className="min-h-9 px-2 text-jp-xs" onClick={close} aria-label="Close chat">
-                Close
-              </Button>
-            </div>
-          </div>
+          <header className={styles.header}>
+            <div className={styles.identity}>
+              <div className={styles.avatar} aria-hidden="true">
+                <PlaneIcon />
+              </div>
 
-          <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-3 py-3" data-testid="ask-jetpakistan-messages">
-            {messages.length === 0 ? (
-              <p className="text-jp-sm text-jp-muted">
-                Ask for flights (e.g. LHE to DXB), groups, booking or payment help — or talk to support.
-              </p>
-            ) : null}
-            {messages.map((m) => (
-              <div
-                key={m.id}
-                className={cn(
-                  "rounded-jp-md px-3 py-2 text-jp-sm",
-                  m.role === "user" ? "ml-6 bg-jp-brand text-white" : "mr-4 bg-jp-brand-soft text-jp-text",
-                )}
-              >
-                <p className="whitespace-pre-wrap">{m.body}</p>
-                {m.recommendations && m.recommendations.length > 0 ? (
-                  <ul className="mt-2 space-y-2">
-                    {m.recommendations.map((r) => (
-                      <li key={r.id} className="rounded-jp-md border border-jp-border bg-jp-surface p-2">
-                        <div className="font-semibold">{r.title}</div>
-                        {r.subtitle ? <div className="text-jp-xs text-jp-muted">{r.subtitle}</div> : null}
-                        {r.view_and_book_url ? (
-                          <Link
-                            href={r.view_and_book_url}
-                            className="mt-1 inline-flex text-jp-xs font-semibold text-jp-brand underline focus-visible:outline-none focus-visible:shadow-jp-focus"
-                          >
-                            View &amp; Book
-                          </Link>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-                {m.actions && m.actions.length > 0 ? (
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {m.actions.map((a) =>
-                      a.href && !a.action ? (
-                        <Link
-                          key={a.label}
-                          href={a.href}
-                          className="rounded-jp-md border border-jp-border bg-jp-surface px-2 py-1 text-jp-xs font-semibold text-jp-text focus-visible:outline-none focus-visible:shadow-jp-focus"
-                        >
-                          {a.label}
-                        </Link>
-                      ) : (
-                        <button
-                          key={a.label}
-                          type="button"
-                          onClick={() => onAction(a)}
-                          className="rounded-jp-md border border-jp-border bg-jp-surface px-2 py-1 text-jp-xs font-semibold text-jp-text focus-visible:outline-none focus-visible:shadow-jp-focus"
-                        >
-                          {a.label}
-                        </button>
-                      ),
-                    )}
+              <div className={styles.identityCopy}>
+                <h2 id={titleId}>Ask JetPakistan</h2>
+                <p>
+                  <span className={styles.onlineDot} aria-hidden="true" />
+                  Online <span aria-hidden="true">•</span> Your AI travel assistant
+                </p>
+              </div>
+            </div>
+
+            <div className={styles.headerActions}>
+              <div className={styles.menuWrap}>
+                <button
+                  type="button"
+                  className={styles.headerIconButton}
+                  aria-label="Chat options"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen((value) => !value)}
+                >
+                  <MoreIcon />
+                </button>
+
+                {menuOpen ? (
+                  <div className={styles.headerMenu} role="menu">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => void clearChat()}
+                      disabled={busy}
+                    >
+                      Clear conversation
+                    </button>
+                    <Link href="/support" role="menuitem" onClick={() => setMenuOpen(false)}>
+                      Open support centre
+                    </Link>
                   </div>
                 ) : null}
               </div>
-            ))}
-            {busy ? (
-              <p className="text-jp-xs text-jp-muted" aria-live="polite">
-                Thinking…
-              </p>
+
+              <button
+                type="button"
+                className={styles.headerIconButton}
+                aria-label="Minimize Ask JetPakistan"
+                onClick={close}
+              >
+                <MinimizeIcon />
+              </button>
+
+              <button
+                type="button"
+                className={styles.headerIconButton}
+                aria-label="Close Ask JetPakistan"
+                onClick={close}
+              >
+                <CloseIcon />
+              </button>
+            </div>
+          </header>
+
+          <div
+            ref={listRef}
+            className={styles.scrollArea}
+            data-testid="ask-jetpakistan-messages"
+          >
+            {messages.length === 0 ? (
+              <div className={styles.onboarding}>
+                <div className={styles.assistantRow}>
+                  <div className={styles.messageAvatar} aria-hidden="true">
+                    <PlaneIcon />
+                  </div>
+                  <div className={`${styles.messageBubble} ${styles.assistantBubble}`}>
+                    <strong>Hi! I&apos;m Ask JetPakistan 👋</strong>
+                    <p>
+                      I can help you find flights, check bookings, manage payments,
+                      or answer travel questions.
+                    </p>
+                    <p>How can I help you today?</p>
+                  </div>
+                </div>
+
+                <div className={styles.quickGrid} aria-label="Quick actions">
+                  {QUICK_ACTIONS.map((action) => (
+                    <button
+                      key={action.id}
+                      type="button"
+                      className={styles.quickCard}
+                      onClick={() => runQuickAction(action)}
+                      disabled={busy}
+                    >
+                      <span className={styles.quickIcon} aria-hidden="true">
+                        {action.icon}
+                      </span>
+                      <span className={styles.quickCopy}>
+                        <strong>{action.title}</strong>
+                        <small>{action.description}</small>
+                      </span>
+                      <ArrowRightIcon />
+                    </button>
+                  ))}
+                </div>
+
+                <div className={styles.popular}>
+                  <div className={styles.sectionLabel}>
+                    <span>Popular questions</span>
+                    <i />
+                  </div>
+                  <div className={styles.chips}>
+                    {POPULAR_QUESTIONS.map((question) => (
+                      <button
+                        key={question}
+                        type="button"
+                        onClick={() => void send(question)}
+                        disabled={busy}
+                      >
+                        {question}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => void handoff()}
+                      disabled={busy}
+                    >
+                      Talk to a person
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : null}
+
+            {messages.map((message) => (
+              <MessageItem
+                key={message.id}
+                message={message}
+                onAction={onAction}
+              />
+            ))}
+
+            {busy ? (
+              <div className={styles.typingRow} aria-live="polite" aria-label="Ask JetPakistan is thinking">
+                <div className={styles.messageAvatar} aria-hidden="true">
+                  <PlaneIcon />
+                </div>
+                <div className={styles.typingBubble}>
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              </div>
+            ) : null}
+
             {error ? (
-              <p className="text-jp-xs text-red-700" role="alert">
-                {error}{" "}
-                <button type="button" className="underline" onClick={() => setError(null)}>
+              <div className={styles.error} role="alert">
+                <span>{error}</span>
+                <button type="button" onClick={() => setError(null)}>
                   Dismiss
                 </button>
-              </p>
+              </div>
             ) : null}
           </div>
 
-          <div className="border-t border-jp-border p-2">
-            <div className="mb-2 flex flex-wrap gap-1">
-              <button
-                type="button"
-                className="rounded-jp-md border border-jp-border px-2 py-1 text-jp-xs font-semibold"
-                onClick={() => void send("Find flights Lahore to Dubai")}
-              >
-                Find Flights
-              </button>
-              <button
-                type="button"
-                className="rounded-jp-md border border-jp-border px-2 py-1 text-jp-xs font-semibold"
-                onClick={() => void send("Find Groups for Dubai")}
-              >
-                Find Groups
-              </button>
-              <button
-                type="button"
-                className="rounded-jp-md border border-jp-border px-2 py-1 text-jp-xs font-semibold"
-                onClick={() => void send("How does booking work")}
-              >
-                Booking Help
-              </button>
-              <button
-                type="button"
-                className="rounded-jp-md border border-jp-border px-2 py-1 text-jp-xs font-semibold"
-                onClick={() => void send("payment deadline help")}
-              >
-                Payment Help
-              </button>
-              <button
-                type="button"
-                className="rounded-jp-md border border-jp-border px-2 py-1 text-jp-xs font-semibold"
-                onClick={() => void send("Saved Travelers help")}
-              >
-                Saved Travelers
-              </button>
-              <button
-                type="button"
-                className="rounded-jp-md border border-jp-border px-2 py-1 text-jp-xs font-semibold"
-                onClick={() => void handoff()}
-              >
-                Talk to Support
-              </button>
-            </div>
-            <form
-              className="flex gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void send(input);
-              }}
-            >
-              <label className="sr-only" htmlFor="ask-jp-input">
-                Message
-              </label>
+          <footer className={styles.composer}>
+            <form className={styles.inputBar} onSubmit={onSubmit}>
               <input
-                id="ask-jp-input"
+                ref={inputRef}
+                type="text"
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                maxLength={2000}
-                placeholder="Ask about travel…"
-                className="min-h-11 flex-1 rounded-jp-md border border-jp-border bg-jp-surface px-3 text-jp-sm text-jp-text focus-visible:outline-none focus-visible:shadow-jp-focus"
+                onChange={(event) => setInput(event.target.value)}
+                placeholder="Type your message…"
+                aria-label="Message Ask JetPakistan"
+                autoComplete="off"
+                maxLength={1200}
                 disabled={busy}
               />
-              <Button type="submit" variant="primary" className="min-h-11 shrink-0" disabled={busy || !input.trim()}>
-                Send
-              </Button>
+
+              <button
+                type="submit"
+                className={styles.sendButton}
+                aria-label="Send message"
+                disabled={busy || input.trim().length === 0}
+              >
+                <SendIcon />
+              </button>
             </form>
-          </div>
-        </div>
-      )}
+
+            <p className={styles.powered}>
+              Powered by JetPakistan AI <span aria-hidden="true">•</span> For travel assistance only
+            </p>
+          </footer>
+        </section>
+      ) : null}
     </>
+  );
+}
+
+function MessageItem({
+  message,
+  onAction,
+}: {
+  message: ChatMessage;
+  onAction: (action: ChatAction) => void;
+}) {
+  const isUser = message.role === "user";
+  const isStaff = message.role === "staff";
+
+  return (
+    <div
+      className={`${styles.messageRow} ${
+        isUser ? styles.userRow : styles.assistantRow
+      }`}
+    >
+      {!isUser ? (
+        <div className={styles.messageAvatar} aria-hidden="true">
+          {isStaff ? <HeadsetIcon /> : <PlaneIcon />}
+        </div>
+      ) : null}
+
+      <div className={styles.messageColumn}>
+        <div
+          className={`${styles.messageBubble} ${
+            isUser ? styles.userBubble : styles.assistantBubble
+          }`}
+        >
+          <p className={styles.messageBody}>{message.body}</p>
+        </div>
+
+        {message.recommendations?.length ? (
+          <div className={styles.recommendationList}>
+            {message.recommendations.map((recommendation) => (
+              <RecommendationCard
+                key={recommendation.id}
+                recommendation={recommendation}
+              />
+            ))}
+          </div>
+        ) : null}
+
+        {message.actions?.length ? (
+          <div className={styles.messageActions}>
+            {message.actions.map((action) =>
+              action.href && !action.action ? (
+                <Link key={`${message.id}-${action.label}`} href={action.href}>
+                  {action.label}
+                </Link>
+              ) : (
+                <button
+                  key={`${message.id}-${action.label}`}
+                  type="button"
+                  onClick={() => onAction(action)}
+                >
+                  {action.label}
+                </button>
+              ),
+            )}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function RecommendationCard({
+  recommendation,
+}: {
+  recommendation: Recommendation;
+}) {
+  const href =
+    recommendation.view_and_book_url ||
+    recommendation.package_url ||
+    recommendation.results_url;
+
+  const formattedPrice =
+    typeof recommendation.price === "number"
+      ? `${recommendation.currency || "PKR"} ${new Intl.NumberFormat("en-PK").format(
+          recommendation.price,
+        )}`
+      : null;
+
+  return (
+    <article className={styles.recommendation}>
+      <div className={styles.recommendationTop}>
+        <div>
+          <strong>{recommendation.title || "Recommended option"}</strong>
+          {recommendation.subtitle ? <p>{recommendation.subtitle}</p> : null}
+        </div>
+        {formattedPrice ? <b>{formattedPrice}</b> : null}
+      </div>
+
+      {recommendation.labels?.length ? (
+        <div className={styles.recommendationLabels}>
+          {recommendation.labels.map((label) => (
+            <span key={label}>{label}</span>
+          ))}
+        </div>
+      ) : null}
+
+      {href ? (
+        <Link href={href} className={styles.recommendationCta}>
+          View &amp; Book <ArrowRightIcon />
+        </Link>
+      ) : null}
+    </article>
+  );
+}
+
+function IconBase({
+  children,
+  viewBox = "0 0 24 24",
+}: {
+  children: ReactNode;
+  viewBox?: string;
+}) {
+  return (
+    <svg
+      viewBox={viewBox}
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {children}
+    </svg>
+  );
+}
+
+function AssistantFabIcon() {
+  return (
+    <IconBase>
+      <path
+        d="M5 5.8h14a2 2 0 0 1 2 2v7.4a2 2 0 0 1-2 2h-7.2L7.2 20v-2.8H5a2 2 0 0 1-2-2V7.8a2 2 0 0 1 2-2Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <path
+        d="m8.1 13.4 7.5-4.5.9.6-2.6 2.1 2.2 1.4-.8.7-3-1-2.4 1.9-.7-.4 1.4-2.3-2.5 1.5Z"
+        fill="currentColor"
+      />
+    </IconBase>
+  );
+}
+
+function PlaneIcon() {
+  return (
+    <IconBase>
+      <path
+        d="m4.2 13.2 6.2-2.3 4.7-6.2c.7-.9 1.9-1.3 3-.8 1 .5 1.3 1.7.7 2.7l-3.9 6.8 3.4 3.3-1.1 1.1-4.4-2-2.3 3.5-1.2-.5.9-4.3-4.9.2-1.1-1.5Z"
+        fill="currentColor"
+      />
+    </IconBase>
+  );
+}
+
+function GroupIcon() {
+  return (
+    <IconBase>
+      <circle cx="9" cy="8" r="3" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="16.5" cy="9" r="2.3" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M3.8 18c.4-3 2.1-4.6 5.2-4.6s4.8 1.6 5.2 4.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M14.3 14.1c2.8-.5 4.8.8 5.6 3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </IconBase>
+  );
+}
+
+function BookingIcon() {
+  return (
+    <IconBase>
+      <rect x="4" y="5.5" width="16" height="14" rx="2.4" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8 3.8v3.5M16 3.8v3.5M4 9h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M8 12.5h3M8 15.8h6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </IconBase>
+  );
+}
+
+function PaymentIcon() {
+  return (
+    <IconBase>
+      <rect x="3.5" y="5.5" width="17" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M3.8 9.4h16.4M7 14.3h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </IconBase>
+  );
+}
+
+function TravelerIcon() {
+  return (
+    <IconBase>
+      <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M5.5 19c.5-4 2.7-6 6.5-6s6 2 6.5 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </IconBase>
+  );
+}
+
+function HeadsetIcon() {
+  return (
+    <IconBase>
+      <path d="M5 13v-1.4a7 7 0 0 1 14 0V13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M5 13.5A2.5 2.5 0 0 0 7.5 16H8v-5h-.5A2.5 2.5 0 0 0 5 13.5Zm14 0a2.5 2.5 0 0 1-2.5 2.5H16v-5h.5a2.5 2.5 0 0 1 2.5 2.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M15.5 18.2c-.8 1-2 1.6-3.5 1.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </IconBase>
+  );
+}
+
+function ArrowRightIcon() {
+  return (
+    <IconBase>
+      <path d="M7 12h10M13.5 8.5 17 12l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </IconBase>
+  );
+}
+
+function SendIcon() {
+  return (
+    <IconBase>
+      <path d="m4 5 16 7-16 7 2.4-6.1L14 12 6.4 11.1 4 5Z" fill="currentColor" />
+    </IconBase>
+  );
+}
+
+function MoreIcon() {
+  return (
+    <IconBase>
+      <circle cx="6" cy="12" r="1.6" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+      <circle cx="18" cy="12" r="1.6" fill="currentColor" />
+    </IconBase>
+  );
+}
+
+function MinimizeIcon() {
+  return (
+    <IconBase>
+      <path d="M6 12h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </IconBase>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <IconBase>
+      <path d="m7 7 10 10M17 7 7 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </IconBase>
   );
 }
