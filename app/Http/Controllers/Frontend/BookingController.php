@@ -37,6 +37,7 @@ use App\Services\Suppliers\Sabre\SabreBookingOfferRefreshService;
 use App\Services\Suppliers\Sabre\SabreBookingService;
 use App\Services\Suppliers\Sabre\SabreFlightSearchNormalizer;
 use App\Services\TravelData\AirlineBrandingService;
+use App\Support\Auth\BestEffortEmailVerification;
 use App\Support\Booking\AgentBookingContext;
 use App\Support\Booking\PassengersRequestTiming;
 use App\Support\Booking\StandardBookingCheckoutJsonResponder;
@@ -531,7 +532,6 @@ class BookingController extends Controller
                     ]);
                     $inlineRegisteredUser = $user;
                     Auth::login($user);
-                    $request->session()->regenerate();
                 }
 
                 $actor = Auth::user();
@@ -756,8 +756,12 @@ class BookingController extends Controller
             });
 
             if ($inlineRegisteredUser instanceof User) {
-                // After commit: best-effort verification (listener never throws / never 500s).
+                // After commit + session regenerate so verification delivery state survives (same as /register).
+                $request->session()->regenerate();
                 event(new Registered($inlineRegisteredUser));
+                if (BestEffortEmailVerification::lastDeliverySucceeded() === null) {
+                    BestEffortEmailVerification::send($inlineRegisteredUser);
+                }
             }
 
             $softBlockRedirect = $this->maybeRedirectSabrePreCheckoutSoftBlock($request, $booking->fresh());
@@ -865,7 +869,7 @@ class BookingController extends Controller
 
             if ($this->wantsBookingJson($request)) {
                 $verificationDeliveryOk = $inlineRegisteredUser instanceof User
-                    ? \App\Support\Auth\BestEffortEmailVerification::lastDeliverySucceeded()
+                    ? BestEffortEmailVerification::lastDeliverySucceeded()
                     : null;
 
                 return response()->json(
@@ -876,7 +880,13 @@ class BookingController extends Controller
                 );
             }
 
-            return $this->clientRedirect()->route('booking.review');
+            $redirect = $this->clientRedirect()->route('booking.review');
+            if ($inlineRegisteredUser instanceof User && BestEffortEmailVerification::lastDeliverySucceeded() === false) {
+                $redirect->with('status', 'verification-delivery-failed')
+                    ->with('verification_delivery_failed', BestEffortEmailVerification::FAILURE_MESSAGE);
+            }
+
+            return $redirect;
         }
 
         $this->mergeReturnSplitCheckoutDraft($request);

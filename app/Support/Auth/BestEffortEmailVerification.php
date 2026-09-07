@@ -69,8 +69,12 @@ final class BestEffortEmailVerification
 
     public static function rememberDelivery(bool $ok): void
     {
-        if (! app()->bound('session') || ! session()->isStarted()) {
+        if (! app()->bound('session')) {
             return;
+        }
+
+        if (! session()->isStarted()) {
+            session()->start();
         }
 
         session([
@@ -85,8 +89,12 @@ final class BestEffortEmailVerification
 
     public static function lastDeliverySucceeded(): ?bool
     {
-        if (! app()->bound('session') || ! session()->isStarted()) {
+        if (! app()->bound('session')) {
             return null;
+        }
+
+        if (! session()->isStarted()) {
+            session()->start();
         }
 
         $value = session(self::SESSION_DELIVERY_KEY);

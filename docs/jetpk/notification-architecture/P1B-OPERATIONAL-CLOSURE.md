@@ -74,3 +74,13 @@ If `DB::transactionLevel() > 0`, outbox row is written in the transaction; dispa
 | Registration welcome/admin | queued mailables (same templates; not pipeline render) |
 | BookingCommunicationService customer mail | LEGACY_PENDING_MIGRATION |
 | POLICY_BUCKETS | retained fallback |
+
+## Checkout verification-delivery state
+
+Inline checkout account creation must record `verification_delivery` after the booking transaction commits (session regenerate, then `Registered`). SMTP failure must not 500 or roll back the customer/draft. This was already broken on production baseline `1a2881cf` (not introduced by P1B identity work).
+
+## Next phase
+
+`P2_EMAIL_TEMPLATE_CONSISTENCY_DATA_ACCURACY_UI_CLOSURE`
+
+P2 is existing JetPakistan templates only: visual consistency, accurate dynamic information, role-appropriate content, subjects/headings/CTAs/URLs, mobile/desktop/Gmail/Outlook rendering, no overflow, eliminate unintended legacy callers, preserve OTP/reset/verification security. No new third-party template system. Do not use the superseded label `P2_NOTIFICATION_TEMPLATE_EXTERNALIZATION`.
