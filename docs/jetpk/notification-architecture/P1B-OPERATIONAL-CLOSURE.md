@@ -40,11 +40,21 @@ Route rows drive audience, strategy, queue_name, priority, template_key, provide
 
 ## Event identity
 
-`NotificationEventIdentity`:
+Current precedence in `NotificationEventIdentity::resolve`:
 
-- explicit `notification_event_id` wins
-- login/OTP/password-reset/new-device are occurrence-scoped UUIDs (not user_id)
-- booking/user aggregates use UUID v5 from `event_type|aggregate_type:id`
+1. explicit `notification_event_id`
+2. immutable `occurrence_id` / `notification_occurrence_id` → UUID v5
+3. explicit `event_variant` → UUID v5
+4. proven one-shot aggregate (`NotificationEventIdentityPolicy::ONE_SHOT_ALLOWLIST`) → UUID v5 `event_type|aggregate_type:id`
+5. otherwise a fresh occurrence UUID
+
+Superseded (pre-`1a2881cf`): default identity was aggregate-only `event_type|aggregate_type:id` for any booking/user aggregate. That default is no longer current.
+
+`invoice_generated`, `payment_receipt_generated`, and `ticket_itinerary_generated` are **not** one-shot aggregates. Repeat generations of the same booking/document family get new event IDs unless the producer supplies an immutable generation `occurrence_id`.
+
+## Worker probe
+
+`php artisan notifications:probe-worker` dispatches `NotificationWorkerProbe` (no email, no business mutation) onto the four notification queues and waits for cache tokens. Use this to prove cron `queue:work --stop-when-empty` actually consumes jobs. Cron count and empty backlog are not sufficient.
 
 ## Outbox race
 

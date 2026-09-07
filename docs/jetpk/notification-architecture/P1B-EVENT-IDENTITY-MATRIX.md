@@ -20,5 +20,8 @@ Default: **OCCURRENCE_SCOPED** (fresh UUID) unless explicit id, occurrence recor
 | booking_confirmed | booking | no (allowlisted) | booking id | one_shot_aggregate | yes |
 | reports/digests | agency/period | yes | none unless run id | occurrence UUID | pass period+run id |
 | supplier_*_failed | booking | yes | none | occurrence UUID | pass attempt id |
+| invoice_generated | booking/document | yes | immutable generation version if available | occurrence UUID unless occurrence_id supplied | same occurrence_id retries; two generations differ |
+| payment_receipt_generated | booking/document | yes | immutable receipt version if available | occurrence UUID unless occurrence_id supplied | same as invoice |
+| ticket_itinerary_generated | booking/document | yes | immutable itinerary version if available | occurrence UUID unless occurrence_id supplied | same as invoice |
 
 Registration: keep `Mail::queue` of existing welcome/admin mailables so templates are unchanged and HTTP is not blocked on SMTP.

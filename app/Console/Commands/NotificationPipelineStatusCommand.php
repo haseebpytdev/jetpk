@@ -25,6 +25,15 @@ class NotificationPipelineStatusCommand extends Command
         $this->line('oldest_pending='.($oldest ?? 'none'));
         $this->line('deliveries_failed='.$failedDeliveries);
         $this->line('async='.(config('notifications.pipeline.async') ? 'true' : 'false'));
+        $this->line('queue_connection='.(string) config('queue.default'));
+        $this->line('pipeline_enabled='.(config('notifications.pipeline.enabled') ? 'true' : 'false'));
+        $failedJobs = 0;
+        try {
+            $failedJobs = (int) \Illuminate\Support\Facades\DB::table('failed_jobs')->count();
+        } catch (\Throwable) {
+            $failedJobs = -1;
+        }
+        $this->line('failed_jobs='.$failedJobs);
 
         return self::SUCCESS;
     }

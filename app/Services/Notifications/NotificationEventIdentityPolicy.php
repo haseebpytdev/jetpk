@@ -14,6 +14,8 @@ final class NotificationEventIdentityPolicy
 {
     /**
      * Events allowed to use deterministic event_type|aggregate_type:id identity.
+     * Document-generation events are NOT here: invoice/receipt/itinerary rows are
+     * not proven immutable generation versions, so they stay occurrence-scoped.
      *
      * @var list<string>
      */
@@ -27,9 +29,6 @@ final class NotificationEventIdentityPolicy
         OtaNotificationEvent::StaffCreated->value,
         OtaNotificationEvent::AgentCreated->value,
         OtaNotificationEvent::AdminCreated->value,
-        OtaNotificationEvent::InvoiceGenerated->value,
-        OtaNotificationEvent::PaymentReceiptGenerated->value,
-        OtaNotificationEvent::TicketItineraryGenerated->value,
         'admin_new_customer_signup',
     ];
 
@@ -80,6 +79,10 @@ final class NotificationEventIdentityPolicy
         OtaNotificationEvent::LoginFailedAlert->value,
         OtaNotificationEvent::AuthNewDeviceLogin->value,
         OtaNotificationEvent::PasswordResetRequested->value,
+        OtaNotificationEvent::InvoiceGenerated->value,
+        OtaNotificationEvent::PaymentReceiptGenerated->value,
+        OtaNotificationEvent::TicketItineraryGenerated->value,
+        OtaNotificationEvent::DocumentGenerated->value,
     ];
 
     public static function kind(string $eventType): NotificationEventIdentityKind

@@ -74,6 +74,29 @@ class NotificationEventIdentityPolicyTest extends TestCase
         $this->assertSame($a['event_id'], $b['event_id']);
     }
 
+    public function test_document_generation_is_not_one_shot_aggregate(): void
+    {
+        foreach ([
+            OtaNotificationEvent::InvoiceGenerated->value,
+            OtaNotificationEvent::PaymentReceiptGenerated->value,
+            OtaNotificationEvent::TicketItineraryGenerated->value,
+        ] as $event) {
+            $this->assertSame(
+                NotificationEventIdentityKind::RequiresVariantOrOccurrence,
+                NotificationEventIdentityPolicy::kind($event),
+            );
+            $first = NotificationEventIdentity::resolve($event, null, 'booking', '99');
+            $second = NotificationEventIdentity::resolve($event, null, 'booking', '99');
+            $this->assertNotSame($first['event_id'], $second['event_id']);
+            $this->assertSame('occurrence', $first['source']);
+
+            $retry = NotificationEventIdentity::resolve($event, null, 'booking', '99', '', 'invoice:version:7');
+            $same = NotificationEventIdentity::resolve($event, null, 'booking', '99', '', 'invoice:version:7');
+            $this->assertSame($retry['event_id'], $same['event_id']);
+            $this->assertSame('occurrence_record', $retry['source']);
+        }
+    }
+
     public function test_uncertain_events_default_to_occurrence_scoped(): void
     {
         $this->assertSame(
