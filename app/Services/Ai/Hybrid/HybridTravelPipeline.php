@@ -301,7 +301,7 @@ final class HybridTravelPipeline
     private function wantsHandoff(string $normalized, string $original): bool
     {
         return (bool) preg_match(
-            '/talk to (a )?(person|human)|human (support|agent)|agent please|live agent|speak to (support|agent)|real person|human please|staff please|talk to support|connect (me )?to (a )?(human|agent|support)|handoff|insaan se baat|انسانی\s*سپورٹ|انسان سے بات/u',
+            '/talk to (a )?(person|human)|speak to (a )?(person|human|support|agent)|need to speak to|human (support|agent)|agent please|live agent|real person|human please|staff please|talk to support|connect (me )?to (a )?(human|agent|support)|handoff|insaan se baat|انسانی\s*سپورٹ|انسان سے بات/u',
             $normalized.' '.$original
         );
     }
@@ -309,7 +309,7 @@ final class HybridTravelPipeline
     private function wantsKnowledge(string $normalized, string $original): bool
     {
         return (bool) preg_match(
-            '/how (does |do )?booking|guest booking|customer registration|payment (deadline|process|help)|cancellation|refund policy|saved travelers?|support hours|faq|ادائیگی|ریفنڈ|محفوظ مسافر/u',
+            '/how (does |do )?booking|how (can|do) i (contact|check)|contact (jetpakistan )?support|check (an |my )?existing booking|lookup booking|manage booking|guest booking|customer registration|payment (deadline|process|help)|cancellation|refund policy|saved travelers?|support hours|group ticket|group ticketing|faq|ادائیگی|ریفنڈ|محفوظ مسافر/u',
             $normalized.' '.$original
         );
     }

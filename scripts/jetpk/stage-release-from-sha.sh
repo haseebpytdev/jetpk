@@ -13,6 +13,7 @@
 #   REPO_ROOT=...
 #   STAGE_ROOT=...          (default: <repo>/tmp/releases)
 #   RELEASE_SCOPE=frontend  (default; only public frontend runtime)
+#   RELEASE_SCOPE=laravel   (app/config/routes/resources/views only)
 #   LOCAL_ONLY=1            (unused here; reserved for wrappers)
 #
 # Emits machine-readable KEY=value lines and writes:
@@ -90,6 +91,17 @@ is_allowed_runtime_path() {
       [[ "${path}" == frontend/* ]] || return 1
       is_excluded_runtime_path "${path}" && return 1
       return 0
+      ;;
+    laravel)
+      case "${path}" in
+        app/*|config/*|routes/*|resources/views/*|ai-assistant/knowledge/*)
+          is_excluded_runtime_path "${path}" && return 1
+          return 0
+          ;;
+        *)
+          return 1
+          ;;
+      esac
       ;;
     *)
       echo "UNSUPPORTED_RELEASE_SCOPE=${RELEASE_SCOPE}"

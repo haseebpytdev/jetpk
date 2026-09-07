@@ -179,5 +179,28 @@ class PublicAiAssistantTest extends TestCase
             ->assertOk()
             ->assertJsonPath('status', 'refused');
     }
+
+    public function test_contact_support_question_uses_knowledge_not_flight_clarify(): void
+    {
+        config([
+            'ota.ai_assistant.mode' => 'public',
+            'ota.ai_assistant.enabled' => true,
+            'ota.ai_assistant.knowledge_enabled' => true,
+        ]);
+        $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
+
+        $response = $this->withCookie('jp_ai_vid', str_repeat('g', 40))
+            ->postJson('/api/public/ai/chat', [
+                'message' => 'How can I contact JetPakistan support?',
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('meta.intent.intent', 'knowledge');
+        $this->assertNotSame('clarify', $response->json('status'));
+        $body = mb_strtolower((string) $response->json('message'));
+        $this->assertStringNotContainsString('origin and destination', $body);
+        $this->assertTrue(str_contains($body, 'support') || str_contains($body, 'help'));
+    }
 }
 

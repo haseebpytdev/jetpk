@@ -181,10 +181,10 @@ final class LocationResolver
                 return [$o['code'], $d['code'], false, false, [], []];
             }
             // Fall through — avoid treating word tails like "war se shj" as IATA pairs.
-        } elseif (preg_match('/\bfrom\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)\s+to\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)(?=\s+(?:on|for|under|direct|cheapest|sasti|tomorrow|today|\d)|$|,|\.)/u', $clean, $m) === 1) {
+        } elseif (preg_match('/\bfrom\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)\s+to\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)(?=\s+(?:on|for|under|direct|cheapest|sasti|tomorrow|today|\d)|$|,|\.|\?|!)/u', $clean, $m) === 1) {
             $originText = trim($m[1]);
             $destText = trim($m[2]);
-        } elseif (preg_match('/([a-z]+(?:\s+[a-z]+){0,3}?)\s+(?:to|→|->|se)\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)(?=\s+(?:on|for|under|direct|cheapest|sasti|jaldi|emirates|saudia|tomorrow|today|\d)|$|,|\.)/u', $clean, $m) === 1) {
+        } elseif (preg_match('/([a-z]+(?:\s+[a-z]+){0,3}?)\s+(?:to|→|->|se)\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)(?=\s+(?:on|for|under|direct|cheapest|sasti|jaldi|emirates|saudia|tomorrow|today|\d)|$|,|\.|\?|!)/u', $clean, $m) === 1) {
             $originText = trim($m[1]);
             $destText = trim($m[2]);
         } elseif (preg_match('/([\p{Arabic}][\p{Arabic}\s]{1,30}?)\s*سے\s*([\p{Arabic}][\p{Arabic}\s]{1,30}?)(?:\s|$|براہ)/u', $original, $m) === 1) {

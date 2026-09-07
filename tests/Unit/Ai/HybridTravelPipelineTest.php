@@ -116,6 +116,19 @@ class HybridTravelPipelineTest extends TestCase
         $this->assertSame('knowledge', $k->intent->intent);
     }
 
+    public function test_owner_support_flight_group_booking_phrases(): void
+    {
+        $this->assertSame('knowledge', $this->pipeline->parse('How can I contact JetPakistan support?')->intent->intent);
+        $this->assertSame('knowledge', $this->pipeline->parse('Do you have group ticket options?')->intent->intent);
+        $this->assertSame('knowledge', $this->pipeline->parse('How do I check an existing booking?')->intent->intent);
+        $this->assertSame('handoff', $this->pipeline->parse('I need to speak to a person.')->intent->intent);
+
+        $flight = $this->pipeline->parse('Can you help me find flights from Lahore to Dubai?', null, Carbon::parse('2026-09-01'));
+        $this->assertSame('flight_search', $flight->intent->intent);
+        $this->assertSame('LHE', $flight->intent->origin);
+        $this->assertSame('DXB', $flight->intent->destination);
+    }
+
     public function test_day_without_month_clarifies(): void
     {
         $r = $this->pipeline->parse('18 ko LHE DXB', null, Carbon::parse('2026-09-01'));
