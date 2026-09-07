@@ -24,4 +24,5 @@ Schedule::command('group-ticketing:sync-inventory')->dailyAt('02:00');
 Schedule::command('group-ticketing:release-expired')->everyMinute();
 Schedule::command('ota:expire-unpaid-bookings')->everyMinute();
 Schedule::command('ota:send-payment-reminders')->everyFiveMinutes();
+Schedule::command('notifications:recover-outbox')->everyMinute();
 Schedule::command('jetpk:branding-background-cleanup')->dailyAt('03:15');

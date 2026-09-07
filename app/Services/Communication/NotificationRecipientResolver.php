@@ -73,6 +73,8 @@ class NotificationRecipientResolver
         OtaNotificationEvent::LoginFailedSensitive->value => ['admin'],
         OtaNotificationEvent::LoginFailedAlert->value => ['logged_in_user'],
         OtaNotificationEvent::AuthNewDeviceLogin->value => ['logged_in_user'],
+        OtaNotificationEvent::CustomerRegistered->value => ['logged_in_user'],
+        'admin_new_customer_signup' => ['admin'],
         OtaNotificationEvent::TicketIssued->value => ['booking_agent', 'agency_admin', 'agent_staff_creator'],
         OtaNotificationEvent::TicketingFailed->value => ['assigned_staff', 'operations_queue', 'platform_admin'],
         OtaNotificationEvent::TicketingNotSupported->value => ['assigned_staff', 'operations_queue', 'platform_admin'],

@@ -42,8 +42,13 @@ class DeliverNotification implements ShouldQueue
         public string $fallbackBody,
         public array $templateVariables,
         public array $recipientContext,
+        ?string $queueName = null,
     ) {
-        $this->onQueue((string) config('notifications.pipeline.compat_queue', 'default'));
+        $queue = $queueName
+            ?: ((bool) config('notifications.pipeline.async', false)
+                ? (string) config('notifications.queues.transactional', 'notifications-transactional')
+                : (string) config('notifications.pipeline.compat_queue', 'default'));
+        $this->onQueue($queue);
     }
 
     public function handle(
@@ -73,7 +78,9 @@ class DeliverNotification implements ShouldQueue
         $context['notify_buckets'] = [$delivery->audience];
         $context['logged_in_user_email'] = $context['logged_in_user_email'] ?? $delivery->recipient;
 
-        $delivery->forceFill(['status' => 'processing', 'processing_at' => now()])->save();
+        if (! $deliveries->beginAttempt($delivery)) {
+            return;
+        }
 
         try {
             $notifications->send(

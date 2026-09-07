@@ -13,7 +13,7 @@ Business action
 ```
 
 Queues (logical): `notifications-critical|transactional|ops|bulk`.  
-Production dispatch uses `notifications.pipeline.compat_queue` (`default`) until dedicated workers exist. `pipeline.async=false` processes inline so jobs cannot accumulate.
+P1B: after-commit dispatch; DB routes (agency then global) drive queue metadata; `pipeline.async` remains env-driven. Dedicated workers consume `notifications-*` queues. `pipeline.async=false` still processes inline via `dispatch_sync` after commit.
 
 Idempotency: `sha256(event_id|channel|audience|normalized_email|variant)`.
 

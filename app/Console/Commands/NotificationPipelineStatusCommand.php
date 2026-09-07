@@ -20,9 +20,11 @@ class NotificationPipelineStatusCommand extends Command
         $failedDeliveries = NotificationDelivery::query()->where('status', 'failed')->count();
 
         $this->line('outbox_pending='.$pending);
+        $this->line('outbox_processing='.NotificationOutbox::query()->where('status', 'processing')->count());
         $this->line('outbox_failed='.$failedOutbox);
         $this->line('oldest_pending='.($oldest ?? 'none'));
         $this->line('deliveries_failed='.$failedDeliveries);
+        $this->line('async='.(config('notifications.pipeline.async') ? 'true' : 'false'));
 
         return self::SUCCESS;
     }

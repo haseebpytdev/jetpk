@@ -49,7 +49,10 @@ class DeliverQueuedOperationalMail implements ShouldQueue
         public ?array $universalPayload = null,
         public ?int $deliveryId = null,
     ) {
-        $this->onQueue((string) config('notifications.pipeline.compat_queue', 'default'));
+        $queue = (bool) config('notifications.pipeline.async', false)
+            ? (string) config('notifications.queues.transactional', 'notifications-transactional')
+            : (string) config('notifications.pipeline.compat_queue', 'default');
+        $this->onQueue($queue);
     }
 
     public function handle(NotificationDeliveryService $deliveries): void
@@ -59,6 +62,10 @@ class DeliverQueuedOperationalMail implements ShouldQueue
             : null;
 
         if ($delivery !== null && in_array($delivery->status, ['sent', 'delivered'], true)) {
+            return;
+        }
+
+        if ($delivery !== null && ! $deliveries->beginAttempt($delivery)) {
             return;
         }
 

@@ -21,9 +21,13 @@ class DispatchNotificationOutboxEvent implements ShouldQueue
     /** @var list<int> */
     public array $backoff = [10, 30, 60];
 
-    public function __construct(public int $outboxId)
+    public function __construct(public int $outboxId, ?string $queueName = null)
     {
-        $this->onQueue((string) config('notifications.pipeline.compat_queue', 'default'));
+        $queue = $queueName
+            ?: ((bool) config('notifications.pipeline.async', false)
+                ? (string) config('notifications.queues.transactional', 'notifications-transactional')
+                : (string) config('notifications.pipeline.compat_queue', 'default'));
+        $this->onQueue($queue);
     }
 
     public function handle(NotificationPipeline $pipeline): void

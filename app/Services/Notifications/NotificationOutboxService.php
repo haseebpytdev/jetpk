@@ -4,6 +4,8 @@ namespace App\Services\Notifications;
 
 use App\Enums\NotificationQueueName;
 use App\Models\NotificationOutbox;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
@@ -25,8 +27,30 @@ class NotificationOutboxService
     ): NotificationOutbox {
         $eventId = $eventId !== null && $eventId !== '' ? $eventId : (string) Str::uuid();
 
-        $existing = NotificationOutbox::query()->where('event_id', $eventId)->first();
-        if ($existing !== null) {
+        try {
+            $row = NotificationOutbox::query()->create([
+                'event_id' => $eventId,
+                'event_type' => $eventType,
+                'schema_version' => $schemaVersion,
+                'agency_id' => $agencyId,
+                'aggregate_type' => $aggregateType,
+                'aggregate_id' => $aggregateId,
+                'actor_user_id' => $actorUserId,
+                'payload' => $this->sanitizePayload($payload),
+                'status' => 'pending',
+                'attempt_count' => 0,
+                'available_at' => now(),
+            ]);
+        } catch (QueryException $e) {
+            if (! NotificationUniqueConstraint::causedBy($e)) {
+                throw $e;
+            }
+
+            $existing = NotificationOutbox::query()->where('event_id', $eventId)->first();
+            if ($existing === null) {
+                throw $e;
+            }
+
             Log::info('notification.outbox.created', [
                 'event_id' => $eventId,
                 'event_type' => $eventType,
@@ -36,20 +60,6 @@ class NotificationOutboxService
 
             return $existing;
         }
-
-        $row = NotificationOutbox::query()->create([
-            'event_id' => $eventId,
-            'event_type' => $eventType,
-            'schema_version' => $schemaVersion,
-            'agency_id' => $agencyId,
-            'aggregate_type' => $aggregateType,
-            'aggregate_id' => $aggregateId,
-            'actor_user_id' => $actorUserId,
-            'payload' => $this->sanitizePayload($payload),
-            'status' => 'pending',
-            'attempt_count' => 0,
-            'available_at' => now(),
-        ]);
 
         Log::info('notification.outbox.created', [
             'event_id' => $eventId,
@@ -63,13 +73,24 @@ class NotificationOutboxService
 
     public function claim(NotificationOutbox $row): ?NotificationOutbox
     {
+        $maxAttempts = $this->maxAttempts();
+        $staleBefore = now()->subSeconds($this->lockTimeoutSeconds());
+
         $updated = NotificationOutbox::query()
             ->whereKey($row->id)
-            ->where('status', 'pending')
+            ->where('attempt_count', '<', $maxAttempts)
+            ->where(function ($query) use ($staleBefore): void {
+                $query->where('status', 'pending')
+                    ->orWhere(function ($processing) use ($staleBefore): void {
+                        $processing->where('status', 'processing')
+                            ->whereNotNull('locked_at')
+                            ->where('locked_at', '<=', $staleBefore);
+                    });
+            })
             ->update([
                 'status' => 'processing',
                 'locked_at' => now(),
-                'attempt_count' => $row->attempt_count + 1,
+                'attempt_count' => DB::raw('attempt_count + 1'),
                 'updated_at' => now(),
             ]);
 
@@ -78,6 +99,24 @@ class NotificationOutboxService
         }
 
         return $row->fresh();
+    }
+
+    public function recoverStale(): int
+    {
+        $staleBefore = now()->subSeconds($this->lockTimeoutSeconds());
+        $maxAttempts = $this->maxAttempts();
+
+        return NotificationOutbox::query()
+            ->where('status', 'processing')
+            ->whereNotNull('locked_at')
+            ->where('locked_at', '<=', $staleBefore)
+            ->where('attempt_count', '<', $maxAttempts)
+            ->update([
+                'status' => 'pending',
+                'available_at' => now(),
+                'locked_at' => null,
+                'updated_at' => now(),
+            ]);
     }
 
     public function markProcessed(NotificationOutbox $row): void
@@ -97,10 +136,25 @@ class NotificationOutboxService
 
     public function markFailed(NotificationOutbox $row, Throwable $e): void
     {
+        $maxAttempts = $this->maxAttempts();
+        $permanent = $row->attempt_count >= $maxAttempts;
+
         $row->forceFill([
-            'status' => 'failed',
+            'status' => $permanent ? 'failed' : 'pending',
+            'available_at' => $permanent ? $row->available_at : now()->addSeconds(30),
+            'locked_at' => null,
             'last_error' => $this->safeError($e->getMessage()),
         ])->save();
+    }
+
+    public function lockTimeoutSeconds(): int
+    {
+        return max(30, (int) config('notifications.pipeline.lock_timeout_seconds', 300));
+    }
+
+    public function maxAttempts(): int
+    {
+        return max(1, (int) config('notifications.pipeline.max_attempts', 8));
     }
 
     /**

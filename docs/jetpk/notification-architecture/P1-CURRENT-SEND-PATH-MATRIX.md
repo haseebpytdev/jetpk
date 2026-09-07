@@ -7,8 +7,8 @@ Inventory date: 2026-09-07. Visual rendering remains `JetpkEmailEventRenderer` +
 | admin/staff/agent/customer login | AuthSecurityEmailNotificationService | OtaNotificationService::send | logged_in_user | OtaOperationalNotificationMail | AuthEmailRenderer → Jetpk shell | pipeline then existing send (phpunit sync) | CommunicationLog + new deliveries unique | pipeline (done) |
 | login failed | same | same | admin / logged_in_user | same | same | same | same | pipeline |
 | OTP | LoginOtpService | LoginOtpMail | customer | LoginOtpMail | AuthEmailRenderer JetPK OTP | **SYNC Mail::send** | cooldown | retain sync (OTP safety) |
-| customer welcome | RegisteredUserController | CustomerWelcomeMail | customer | CustomerWelcomeMail | AuthEmailRenderer | **SYNC** | none | later |
-| admin signup notice | RegisteredUserController | AdminNewCustomerSignupMail | admin | same family | AuthEmailRenderer | **SYNC** | none | later |
+| customer welcome | RegisteredUserController | CustomerWelcomeMail | customer | CustomerWelcomeMail | AuthEmailRenderer | **queued** (`notifications-transactional` when async) | none | keep mailable |
+| admin signup notice | RegisteredUserController | AdminNewCustomerSignupMail | admin | same family | AuthEmailRenderer | **queued** | none | keep mailable |
 | email verification | BestEffortEmailVerification | Laravel VerifyEmail | customer | framework | framework | sync/notify | Laravel | retain |
 | password reset | Laravel ResetPassword | notification | mixed | framework | framework | notify | token | retain |
 | booking/payment/ticket/support/ops | various services | OtaNotificationService | POLICY_BUCKETS / notification_routes | operational / universal | JetpkEmailEventRenderer | pipeline | CommunicationLog | pipeline |

@@ -22,20 +22,9 @@ class NotificationDeliveryService
         ?string $templateKey = null,
         string $channel = 'email',
         ?int $recipientUserId = null,
+        ?string $provider = null,
     ): array {
         $key = NotificationIdempotency::key($eventId, $channel, $audience, $recipient);
-
-        $existing = NotificationDelivery::query()->where('idempotency_key', $key)->first();
-        if ($existing !== null) {
-            Log::info('notification.delivery.skipped_duplicate', [
-                'event_id' => $eventId,
-                'event_type' => $eventType,
-                'delivery_id' => $existing->id,
-                'audience' => $audience,
-            ]);
-
-            return ['delivery' => $existing, 'created' => false];
-        }
 
         try {
             $delivery = NotificationDelivery::query()->create([
@@ -46,7 +35,7 @@ class NotificationDeliveryService
                 'audience' => $audience,
                 'recipient' => strtolower(trim($recipient)),
                 'recipient_user_id' => $recipientUserId,
-                'provider' => (string) config('mail.default'),
+                'provider' => $provider ?: (string) config('mail.default'),
                 'template_key' => $templateKey ?? $eventType,
                 'template_version' => 'jetpk-local-v1',
                 'queue_name' => $queueName,
@@ -56,12 +45,23 @@ class NotificationDeliveryService
                 'queued_at' => now(),
             ]);
         } catch (QueryException $e) {
-            $existing = NotificationDelivery::query()->where('idempotency_key', $key)->first();
-            if ($existing !== null) {
-                return ['delivery' => $existing, 'created' => false];
+            if (! NotificationUniqueConstraint::causedBy($e)) {
+                throw $e;
             }
 
-            throw $e;
+            $existing = NotificationDelivery::query()->where('idempotency_key', $key)->first();
+            if ($existing === null) {
+                throw $e;
+            }
+
+            Log::info('notification.delivery.skipped_duplicate', [
+                'event_id' => $eventId,
+                'event_type' => $eventType,
+                'delivery_id' => $existing->id,
+                'audience' => $audience,
+            ]);
+
+            return ['delivery' => $existing, 'created' => false];
         }
 
         Log::info('notification.delivery.queued', [
@@ -77,6 +77,22 @@ class NotificationDeliveryService
         return ['delivery' => $delivery, 'created' => true];
     }
 
+    public function beginAttempt(NotificationDelivery $delivery): bool
+    {
+        if (in_array($delivery->status, ['sent', 'delivered'], true)) {
+            return false;
+        }
+
+        $delivery->forceFill([
+            'status' => 'processing',
+            'processing_at' => now(),
+            'failed_at' => null,
+            'attempt_count' => $delivery->attempt_count + 1,
+        ])->save();
+
+        return true;
+    }
+
     public function markSent(NotificationDelivery $delivery, ?string $providerMessageId = null): void
     {
         $delivery->forceFill([
@@ -84,7 +100,7 @@ class NotificationDeliveryService
             'sent_at' => now(),
             'provider_message_id' => $providerMessageId,
             'last_error' => null,
-            'attempt_count' => $delivery->attempt_count + 1,
+            'failed_at' => null,
         ])->save();
 
         Log::info('notification.delivery.sent', [
@@ -106,7 +122,6 @@ class NotificationDeliveryService
             'status' => 'failed',
             'failed_at' => now(),
             'last_error' => mb_substr($safe, 0, 2000),
-            'attempt_count' => $delivery->attempt_count + 1,
         ])->save();
 
         Log::warning('notification.delivery.failed', [

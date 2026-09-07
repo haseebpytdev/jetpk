@@ -10,6 +10,7 @@ use App\Models\Booking;
 use App\Models\NotificationOutbox;
 use App\Models\User;
 use App\Services\Communication\NotificationRecipientResolver;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class NotificationPipeline
@@ -24,6 +25,11 @@ class NotificationPipeline
     public function isEnabled(): bool
     {
         return (bool) config('notifications.pipeline.enabled', true);
+    }
+
+    public function isAsync(): bool
+    {
+        return (bool) config('notifications.pipeline.async', false);
     }
 
     /**
@@ -42,10 +48,26 @@ class NotificationPipeline
         array $templateVariables,
         array $recipientContext,
     ): NotificationOutbox {
-        $eventId = is_string($payload['notification_event_id'] ?? null) && $payload['notification_event_id'] !== ''
+        $explicitId = is_string($payload['notification_event_id'] ?? null) && $payload['notification_event_id'] !== ''
             ? (string) $payload['notification_event_id']
             : null;
         unset($payload['notification_event_id']);
+
+        $aggregateType = $booking !== null ? 'booking' : (isset($recipientContext['aggregate_type']) && is_string($recipientContext['aggregate_type']) ? $recipientContext['aggregate_type'] : null);
+        $aggregateId = $booking !== null
+            ? (string) $booking->id
+            : (isset($recipientContext['aggregate_id']) && is_scalar($recipientContext['aggregate_id']) ? (string) $recipientContext['aggregate_id'] : null);
+        $variant = isset($recipientContext['event_variant']) && is_string($recipientContext['event_variant'])
+            ? $recipientContext['event_variant']
+            : '';
+
+        $identity = NotificationEventIdentity::resolve(
+            $eventKey,
+            $explicitId,
+            $aggregateType,
+            $aggregateId,
+            $variant,
+        );
 
         $row = $this->outbox->record(
             eventType: $eventKey,
@@ -56,12 +78,13 @@ class NotificationPipeline
                 'template_variables' => $this->scalarOnly($templateVariables),
                 'recipient_context' => $this->safeContext($recipientContext),
                 'payload' => $payload,
+                'event_id_source' => $identity['source'],
             ],
             agencyId: $agency->id,
-            aggregateType: $booking !== null ? 'booking' : null,
-            aggregateId: $booking !== null ? (string) $booking->id : null,
+            aggregateType: $aggregateType,
+            aggregateId: $aggregateId,
             actorUserId: $actor?->id,
-            eventId: $eventId,
+            eventId: $identity['event_id'],
         );
 
         $this->dispatchOutbox($row);
@@ -71,12 +94,23 @@ class NotificationPipeline
 
     public function dispatchOutbox(NotificationOutbox $row): void
     {
-        $job = new DispatchNotificationOutboxEvent($row->id);
-        if ((bool) config('notifications.pipeline.async', false)) {
-            dispatch($job);
-        } else {
-            dispatch_sync($job);
+        $queue = $this->jobQueueName($row->event_type);
+        $run = function () use ($row, $queue): void {
+            $job = new DispatchNotificationOutboxEvent($row->id, $queue);
+            if ($this->isAsync()) {
+                dispatch($job);
+            } else {
+                dispatch_sync($job);
+            }
+        };
+
+        if (DB::transactionLevel() > 0) {
+            DB::afterCommit($run);
+
+            return;
         }
+
+        $run();
     }
 
     public function processOutbox(NotificationOutbox $row): void
@@ -108,30 +142,46 @@ class NotificationPipeline
                 : null;
             $actor = $claimed->actor_user_id !== null ? User::query()->find($claimed->actor_user_id) : null;
 
-            $resolvedRoutes = $this->routes->audiencesFor($eventKey);
-            $audiences = $recipientContext['notify_buckets'] ?? $resolvedRoutes['audiences'];
-            if (! is_array($audiences) || $audiences === []) {
-                $audiences = ['admin'];
+            $resolved = $this->routes->resolve($eventKey, $agency->id);
+            $routes = $resolved->routes;
+            if ($routes === []) {
+                $routes = [
+                    new ResolvedNotificationRoute(
+                        audience: 'admin',
+                        recipientStrategy: 'admin',
+                        queueName: NotificationQueueName::forEventType($eventKey)->value,
+                        priority: NotificationQueueName::forEventType($eventKey)->name,
+                        templateKey: $eventKey,
+                        provider: 'laravel_mail',
+                        locale: null,
+                        fromLegacyFallback: true,
+                    ),
+                ];
             }
 
-            $queueName = NotificationRouteResolver::queueFor($eventKey);
-            $priority = NotificationQueueName::forEventType($eventKey)->name;
+            $notifyBuckets = $recipientContext['notify_buckets'] ?? null;
+            if (is_array($notifyBuckets) && $notifyBuckets !== []) {
+                $allowed = array_fill_keys(array_values(array_filter($notifyBuckets, 'is_string')), true);
+                $routes = array_values(array_filter(
+                    $routes,
+                    fn (ResolvedNotificationRoute $route): bool => isset($allowed[$route->audience]) || isset($allowed[$route->recipientStrategy]),
+                ));
+            }
 
-            foreach ($audiences as $audience) {
-                if (! is_string($audience) || $audience === '') {
-                    continue;
-                }
-                $bucket = $this->recipients->resolveBucket($agency, $audience, $booking, $actor, $recipientContext);
+            foreach ($routes as $route) {
+                $bucket = $this->recipients->resolveBucket($agency, $route->recipientStrategy, $booking, $actor, $recipientContext);
+                $queueName = $this->isAsync() ? $route->queueName : (string) config('notifications.pipeline.compat_queue', 'default');
                 foreach ($bucket['emails'] as $email) {
                     $result = $this->deliveries->firstOrCreatePending(
                         eventId: $claimed->event_id,
                         eventType: $eventKey,
-                        audience: $audience,
+                        audience: $route->audience,
                         recipient: $email,
                         agencyId: $agency->id,
                         queueName: $queueName,
-                        priority: $priority,
-                        templateKey: $eventKey,
+                        priority: $route->priority,
+                        templateKey: $route->templateKey ?? $eventKey,
+                        provider: $route->provider,
                     );
                     if (! $result['created'] && in_array($result['delivery']->status, ['sent', 'delivered', 'processing'], true)) {
                         continue;
@@ -149,11 +199,12 @@ class NotificationPipeline
                         templateVariables: $templateVariables,
                         recipientContext: array_merge($recipientContext, [
                             'force_to' => [$email],
-                            'notify_buckets' => [$audience],
+                            'notify_buckets' => [$route->audience],
                         ]),
+                        queueName: $queueName,
                     );
 
-                    if ((bool) config('notifications.pipeline.async', false)) {
+                    if ($this->isAsync()) {
                         dispatch($job);
                     } else {
                         dispatch_sync($job);
@@ -166,6 +217,15 @@ class NotificationPipeline
             $this->outbox->markFailed($claimed, $e);
             throw $e;
         }
+    }
+
+    public function jobQueueName(string $eventType): string
+    {
+        if (! $this->isAsync()) {
+            return (string) config('notifications.pipeline.compat_queue', 'default');
+        }
+
+        return NotificationQueueName::forEventType($eventType)->value;
     }
 
     /**

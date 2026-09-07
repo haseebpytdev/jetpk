@@ -41,34 +41,53 @@ class NotificationRouteResolver
     /**
      * @return array{audiences: list<string>, fallback: bool}
      */
-    public function audiencesFor(string $eventType): array
+    public function audiencesFor(string $eventType, ?int $agencyId = null): array
     {
-        $rows = NotificationRoute::query()
-            ->where('event_type', $eventType)
-            ->where('channel', 'email')
-            ->where('enabled', true)
-            ->whereNull('agency_id')
-            ->orderBy('id')
-            ->get();
+        $resolved = $this->resolve($eventType, $agencyId);
 
-        if ($rows->isNotEmpty()) {
-            $audiences = $rows
-                ->pluck('recipient_strategy')
-                ->filter(fn ($strategy): bool => is_string($strategy) && in_array($strategy, self::STRATEGY_ALLOWLIST, true))
-                ->values()
-                ->all();
+        return ['audiences' => $resolved->audiences(), 'fallback' => $resolved->fallback];
+    }
 
-            return ['audiences' => $audiences, 'fallback' => false];
+    public function resolve(string $eventType, ?int $agencyId = null, string $channel = 'email'): ResolvedNotificationRouteSet
+    {
+        if ($agencyId !== null) {
+            $agencyRoutes = $this->loadRoutes($eventType, $channel, $agencyId);
+            if ($agencyRoutes !== []) {
+                return new ResolvedNotificationRouteSet($agencyRoutes, false, 'agency');
+            }
         }
 
-        $legacy = NotificationRecipientResolver::policyBucketsFor($eventType);
-        Log::info('notification.route.unresolved', [
+        $globalRoutes = $this->loadRoutes($eventType, $channel, null);
+        if ($globalRoutes !== []) {
+            return new ResolvedNotificationRouteSet($globalRoutes, false, 'global');
+        }
+
+        Log::info('notification.route.legacy_fallback', [
             'event_type' => $eventType,
-            'legacy_fallback' => true,
-            'legacy_count' => count($legacy),
+            'agency_id' => $agencyId,
+            'channel' => $channel,
         ]);
 
-        return ['audiences' => $legacy, 'fallback' => true];
+        $legacy = NotificationRecipientResolver::policyBucketsFor($eventType);
+        $queue = NotificationQueueName::forEventType($eventType);
+        $routes = [];
+        foreach ($legacy as $bucket) {
+            if (! in_array($bucket, self::STRATEGY_ALLOWLIST, true)) {
+                continue;
+            }
+            $routes[] = new ResolvedNotificationRoute(
+                audience: $bucket,
+                recipientStrategy: $bucket,
+                queueName: $queue->value,
+                priority: $queue->name,
+                templateKey: $eventType,
+                provider: 'laravel_mail',
+                locale: null,
+                fromLegacyFallback: true,
+            );
+        }
+
+        return new ResolvedNotificationRouteSet($routes, true, 'legacy');
     }
 
     public static function queueFor(string $eventType): string
@@ -78,5 +97,45 @@ class NotificationRouteResolver
         }
 
         return NotificationQueueName::forEventType($eventType)->value;
+    }
+
+    /**
+     * @return list<ResolvedNotificationRoute>
+     */
+    protected function loadRoutes(string $eventType, string $channel, ?int $agencyId): array
+    {
+        $query = NotificationRoute::query()
+            ->where('event_type', $eventType)
+            ->where('channel', $channel)
+            ->where('enabled', true);
+
+        if ($agencyId === null) {
+            $query->whereNull('agency_id');
+        } else {
+            $query->where('agency_id', $agencyId);
+        }
+
+        $rows = $query->orderBy('id')->get();
+        $routes = [];
+        foreach ($rows as $row) {
+            $strategy = (string) $row->recipient_strategy;
+            if (! in_array($strategy, self::STRATEGY_ALLOWLIST, true)) {
+                continue;
+            }
+            $queueName = is_string($row->queue_name) && $row->queue_name !== ''
+                ? $row->queue_name
+                : NotificationQueueName::forEventType($eventType)->value;
+            $routes[] = new ResolvedNotificationRoute(
+                audience: is_string($row->audience) && $row->audience !== '' ? $row->audience : $strategy,
+                recipientStrategy: $strategy,
+                queueName: $queueName,
+                priority: is_string($row->priority) && $row->priority !== '' ? $row->priority : NotificationQueueName::forEventType($eventType)->name,
+                templateKey: is_string($row->template_key) ? $row->template_key : $eventType,
+                provider: is_string($row->provider) && $row->provider !== '' ? $row->provider : 'laravel_mail',
+                locale: is_string($row->locale) ? $row->locale : null,
+            );
+        }
+
+        return $routes;
     }
 }

@@ -45,6 +45,33 @@ class NotificationRouteSeeder
             }
         }
 
+        $extra = [
+            ['admin_new_customer_signup', 'admin'],
+        ];
+        foreach ($extra as [$eventType, $bucket]) {
+            if (! in_array($bucket, NotificationRouteResolver::STRATEGY_ALLOWLIST, true)) {
+                continue;
+            }
+            $queue = NotificationQueueName::forEventType($eventType);
+            $routeKey = 'global|'.$eventType.'|email|'.$bucket;
+            NotificationRoute::query()->updateOrCreate(
+                ['route_key' => $routeKey],
+                [
+                    'agency_id' => null,
+                    'event_type' => $eventType,
+                    'channel' => 'email',
+                    'audience' => $bucket,
+                    'recipient_strategy' => $bucket,
+                    'provider' => 'laravel_mail',
+                    'template_key' => $eventType,
+                    'priority' => $queue->name,
+                    'queue_name' => $queue->value,
+                    'enabled' => true,
+                ],
+            );
+            $count++;
+        }
+
         return $count;
     }
 }

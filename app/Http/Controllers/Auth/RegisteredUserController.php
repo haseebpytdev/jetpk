@@ -215,7 +215,9 @@ class RegisteredUserController extends Controller
     private function sendCustomerWelcomeEmail(User $user): void
     {
         try {
-            Mail::to($user->email)->send(CustomerWelcomeMail::forUser($user));
+            Mail::to($user->email)->queue(
+                CustomerWelcomeMail::forUser($user)->onQueue($this->registrationMailQueue())
+            );
         } catch (Throwable $e) {
             report($e);
         }
@@ -229,10 +231,21 @@ class RegisteredUserController extends Controller
         }
 
         try {
-            Mail::to($recipients)->send(new AdminNewCustomerSignupMail($user, $phone));
+            Mail::to($recipients)->queue(
+                (new AdminNewCustomerSignupMail($user, $phone))->onQueue($this->registrationMailQueue())
+            );
         } catch (Throwable $e) {
             report($e);
         }
+    }
+
+    private function registrationMailQueue(): string
+    {
+        if ((bool) config('notifications.pipeline.async', false)) {
+            return (string) config('notifications.queues.transactional', 'notifications-transactional');
+        }
+
+        return (string) config('notifications.pipeline.compat_queue', 'default');
     }
 
     /**

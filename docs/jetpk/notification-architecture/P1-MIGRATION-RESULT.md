@@ -25,7 +25,7 @@ Post-deploy `notifications:status`: `outbox_pending=0` `outbox_failed=0` `delive
 | FILE | METHOD | WHY | NEXT |
 |---|---|---|---|
 | LoginOtpService | Mail::to send | OTP latency/UX | P2 critical queue after worker split |
-| RegisteredUserController | welcome/signup Mail::send | sync registration UX | pipeline wrap |
+| RegisteredUserController | welcome/signup Mail::queue | same templates, HTTP decoupled | keep mailables or wrap pipeline |
 | BestEffortEmailVerification | notify() | signed URL security | keep Laravel |
 | Password reset | Laravel notification | tokens | keep Laravel |
 | BookingCommunicationService | Mail send/queue | customer modern renderer | later |
