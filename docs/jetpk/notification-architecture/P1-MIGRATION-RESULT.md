@@ -1,6 +1,14 @@
 # P1 migration result
 
-Engineering SHA recorded at commit time.
+Engineering SHA: `f396c2c25db042900230a36b47c7f4381bce4abe`
+
+Production: `PRODUCTION_RUNTIME_SHA=f396c2c25db042900230a36b47c7f4381bce4abe`  
+Release: `/home/pkjetp/releases/jetpk-20260907T110128Z`  
+Backup: `BACKUP_TS=20260907T110140Z`  
+`MIGRATE_OK` for `2026_09_07_150000_create_notification_architecture_tables`
+
+Post-deploy `notifications:status`: `outbox_pending=0` `outbox_failed=0` `deliveries_failed=0`  
+`QUEUE_WORKERS=0` is expected (`NOTIFICATION_PIPELINE_ASYNC=false`, inline `dispatch_sync`).
 
 ## Implemented
 

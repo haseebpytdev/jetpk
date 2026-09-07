@@ -81,7 +81,7 @@ Carry-forward unchanged: Ask JetPakistan, CMS homepage, Company Profile, Wallet 
 
 ## Notification architecture P1
 
-Additive tables `notification_outbox`, `notification_deliveries`, `notification_routes`. JetPakistan auth mail remains the canonical shell. OTP/password-reset/verification stay on existing Laravel/Mail paths. Pipeline async defaults off (inline) so no stranded jobs.
+Additive tables `notification_outbox`, `notification_deliveries`, `notification_routes`. Deployed `f396c2c25db042900230a36b47c7f4381bce4abe` (`MIGRATE_OK`, outbox backlog 0). JetPakistan auth mail remains the canonical shell. OTP/password-reset/verification stay on existing Laravel/Mail paths. Pipeline async defaults off (inline) so no stranded jobs.
 
 See `docs/jetpk/notification-architecture/`.
 
