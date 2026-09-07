@@ -292,13 +292,20 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
           aria-label="Ask JetPakistan"
           onClick={() => setOpen(true)}
           className={cn(
-            "fixed z-50 hidden h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-jp-brand text-white shadow-jp-md lg:inline-flex",
-            "right-[max(0.75rem,env(safe-area-inset-right))]",
-            "bottom-[max(1.25rem,env(safe-area-inset-bottom))]",
+            "pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-jp-brand text-white shadow-jp-md",
+            "fixed z-50 right-[max(0.75rem,env(safe-area-inset-right))]",
+            "bottom-[max(5.75rem,calc(env(safe-area-inset-bottom)+4.75rem))] lg:bottom-[max(5.25rem,calc(env(safe-area-inset-bottom)+4.25rem))]",
             "focus-visible:outline-none focus-visible:shadow-jp-focus",
           )}
         >
-          AI
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+            <path
+              d="M4.5 11.5c0-3.7 3.58-6.75 8-6.75s8 3.05 8 6.75-3.58 6.75-8 6.75c-.62 0-1.22-.05-1.79-.16L6.2 19.4c-.45.22-.95-.24-.78-.71l.9-2.48C5.18 15.3 4.5 13.48 4.5 11.5Z"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
       ) : null}
       {!open ? null : (
@@ -310,7 +317,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
           data-testid="ask-jetpakistan-panel"
           className={cn(
             "fixed z-50 flex w-[min(24rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-jp-lg border border-jp-border bg-jp-surface shadow-jp-md",
-            "right-[max(0.75rem,env(safe-area-inset-right))] bottom-[max(5.5rem,calc(env(safe-area-inset-bottom)+4.5rem))] xl:bottom-[max(1.25rem,env(safe-area-inset-bottom))] xl:right-[max(1.25rem,env(safe-area-inset-right))]",
+            "right-[max(0.75rem,env(safe-area-inset-right))] bottom-[max(5.5rem,calc(env(safe-area-inset-bottom)+4.5rem))] lg:bottom-[max(11.5rem,calc(env(safe-area-inset-bottom)+10rem))]",
             "max-h-[min(70vh,32rem)]",
           )}
         >

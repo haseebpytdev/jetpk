@@ -240,7 +240,8 @@ return [
     'notify_failed_login' => filter_var(env('NOTIFY_FAILED_LOGIN', true), FILTER_VALIDATE_BOOL),
     'auth_failed_login_email_threshold' => max(1, (int) env('AUTH_FAILED_LOGIN_EMAIL_THRESHOLD', 3)),
     'auth_failed_login_email_cooldown_minutes' => max(1, (int) env('AUTH_FAILED_LOGIN_EMAIL_COOLDOWN_MINUTES', 60)),
-    'auth_login_success_email_cooldown_minutes' => max(0, (int) env('AUTH_LOGIN_SUCCESS_EMAIL_COOLDOWN_MINUTES', 15)),
+    // 0 = every successful credential login sends one security email (owner JP10C).
+    'auth_login_success_email_cooldown_minutes' => max(0, (int) env('AUTH_LOGIN_SUCCESS_EMAIL_COOLDOWN_MINUTES', 0)),
     'notify_auth_new_device_login' => filter_var(env('NOTIFY_AUTH_NEW_DEVICE_LOGIN', true), FILTER_VALIDATE_BOOL),
     'auth_new_device_email_cooldown_minutes' => max(1, (int) env('AUTH_NEW_DEVICE_EMAIL_COOLDOWN_MINUTES', 60)),
 

@@ -131,8 +131,13 @@ class OtaNotificationService
         }
 
         $universalPayload = $this->universalPayloadFrom($safePayload);
+        $mailSubject = $rendered->subject;
         if ($universalPayload !== null) {
-            $universalPayload['subject'] = $rendered->subject;
+            if ($this->isAuthSecurityUniversal($universalPayload) && filled($universalPayload['subject'] ?? null)) {
+                $mailSubject = (string) $universalPayload['subject'];
+            } else {
+                $universalPayload['subject'] = $rendered->subject;
+            }
         }
 
         if (! $settings->email_enabled || ! $eventSetting->enabled || ! $rendered->templateEnabled) {
@@ -154,7 +159,7 @@ class OtaNotificationService
             'channel' => 'email',
             'event' => $eventKey,
             'recipient_email' => implode(', ', $recipientBundle['to']),
-            'subject' => $rendered->subject,
+            'subject' => $mailSubject,
             'message' => $rendered->plainBody,
             'status' => $this->isImmediateMailer() ? 'sending' : 'queued',
             'provider' => (string) config('mail.default'),
@@ -189,7 +194,7 @@ class OtaNotificationService
                 $recipientBundle['to'],
                 $recipientBundle['cc'],
                 $recipientBundle['bcc'],
-                $rendered->subject,
+                $mailSubject,
                 $rendered->html,
                 $rendered->plainBody,
                 $attachments,

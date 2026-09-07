@@ -38,9 +38,7 @@ class AuthSecurityEmailPayloadFactory
 
         return [
             'type' => $this->loginSuccessType($event),
-            'subject' => $newDevice
-                ? 'New login detected on your account'
-                : OperationalEmailDefaults::portalLabel($user->account_type).' login notice',
+            'subject' => $this->loginSuccessSubject($user->account_type),
             'title' => $newDevice ? 'New login detected' : 'Login successful',
             'status_label' => 'Security notice',
             'status_tone' => $newDevice ? 'warning' : 'info',
@@ -118,6 +116,17 @@ class AuthSecurityEmailPayloadFactory
             ])),
             'cta' => $this->passwordResetCta(),
         ];
+    }
+
+    private function loginSuccessSubject(?AccountType $accountType): string
+    {
+        if ($accountType === AccountType::PlatformAdmin || $accountType === AccountType::AgencyAdmin) {
+            return 'JetPakistan — Admin sign-in detected';
+        }
+
+        $portal = OperationalEmailDefaults::portalLabel($accountType);
+
+        return 'JetPakistan — '.$portal.' sign-in detected';
     }
 
     private function loginSuccessType(OtaNotificationEvent $event): string

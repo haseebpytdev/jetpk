@@ -55,6 +55,7 @@ class AuthLoginSecurityEmailCanonicalTest extends TestCase
         $html = '';
         Mail::assertSent(OtaOperationalNotificationMail::class, function (OtaOperationalNotificationMail $mail) use (&$html): bool {
             $html = $mail->htmlBody;
+            $this->assertSame('JetPakistan — Admin sign-in detected', $mail->emailSubject);
 
             return true;
         });
@@ -115,6 +116,31 @@ class AuthLoginSecurityEmailCanonicalTest extends TestCase
             $this->assertLessThanOrEqual(1, substr_count($mail->htmlBody, 'Login successful'));
 
             return true;
+        });
+    }
+
+    public function test_two_successive_admin_logins_each_send_one_security_email(): void
+    {
+        Mail::fake();
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin->forceFill(['account_type' => AccountType::PlatformAdmin])->save();
+
+        $this->post('/login', [
+            'login' => $admin->email,
+            'password' => 'password',
+        ])->assertRedirect(route('admin.dashboard', absolute: false));
+        Mail::assertSent(OtaOperationalNotificationMail::class, 1);
+
+        $this->post('/logout')->assertRedirect();
+        Mail::fake();
+
+        $this->post('/login', [
+            'login' => $admin->email,
+            'password' => 'password',
+        ])->assertRedirect(route('admin.dashboard', absolute: false));
+        Mail::assertSent(OtaOperationalNotificationMail::class, 1);
+        Mail::assertSent(OtaOperationalNotificationMail::class, function (OtaOperationalNotificationMail $mail): bool {
+            return $mail->emailSubject === 'JetPakistan — Admin sign-in detected';
         });
     }
 }

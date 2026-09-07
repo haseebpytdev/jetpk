@@ -277,7 +277,7 @@ class AuthSecurityEmailNotificationService
 
     protected function loginSuccessCooldownAllows(User $user): bool
     {
-        $minutes = max(0, (int) config('ota.auth_login_success_email_cooldown_minutes', 15));
+        $minutes = max(0, (int) config('ota.auth_login_success_email_cooldown_minutes', 0));
         if ($minutes === 0) {
             return true;
         }
@@ -294,7 +294,7 @@ class AuthSecurityEmailNotificationService
 
     protected function markLoginSuccessEmailSent(User $user): void
     {
-        $minutes = max(0, (int) config('ota.auth_login_success_email_cooldown_minutes', 15));
+        $minutes = max(0, (int) config('ota.auth_login_success_email_cooldown_minutes', 0));
         if ($minutes === 0) {
             return;
         }

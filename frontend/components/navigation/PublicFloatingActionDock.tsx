@@ -73,10 +73,7 @@ export function PublicFloatingActionDock({
     }
   }
 
-  tiles.push({ href: "/support", label: "Support" });
-  if (aiEnabled) {
-    tiles.push({ href: "/#ask-jetpakistan", label: "Ask JetPakistan", testId: "fab-ask-ai" });
-  }
+          tiles.push({ href: "/support", label: "Support" });
   tiles.push({
     href: signedIn ? (session.dashboardUrl || "/customer/dashboard") : "/login",
     label: signedIn ? "Account" : "Login",
@@ -94,6 +91,7 @@ export function PublicFloatingActionDock({
           : "bottom-[max(1rem,env(safe-area-inset-bottom))]",
       )}
       data-testid="public-fab-dock"
+      data-ai-enabled={aiEnabled ? "1" : "0"}
       data-lift-checkout={liftForCheckoutSticky ? "1" : "0"}
       data-lift-flight-cta={liftForFlightCta ? "1" : "0"}
       onToggle={(event) => {
