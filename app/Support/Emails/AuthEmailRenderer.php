@@ -20,6 +20,38 @@ class AuthEmailRenderer
         $name = trim((string) ($user->name ?? 'Customer')) ?: 'Customer';
         $cta = $this->loginCta();
 
+        if ($this->usesJetpkEmailPackage()) {
+            return $this->renderJetpkEmail(
+                type: 'account_created',
+                extra: [
+                    'title' => 'Welcome to '.$brandName,
+                    'intro' => sprintf(
+                        'Hello %s, your customer account at %s was created successfully. Please verify your email address using the verification link we sent separately. The link expires in 24 hours.',
+                        $name,
+                        $brandName,
+                    ),
+                ],
+                plainLines: [
+                    'Hello '.$name.',',
+                    '',
+                    'Your customer account at '.$brandName.' was created successfully.',
+                    '',
+                    'Please verify your email address using the verification link we sent separately.',
+                    'The link expires in 24 hours.',
+                    '',
+                    'If you did not create this account, please contact support.',
+                ],
+                agency: $user->currentAgency,
+                runtimeVariables: [
+                    'customer_name' => $name,
+                    'customer_email' => (string) $user->email,
+                    'user_name' => $name,
+                    'recipient_role' => 'customer',
+                    'login_url' => JetpkEmailBrandingResolver::publicAssetUrl($cta['url'] ?? 'https://jetpakistan.pk/login') ?? 'https://jetpakistan.pk/login',
+                ],
+            );
+        }
+
         return $this->render(
             agency: $user->currentAgency,
             headline: 'Welcome to '.$brandName,
@@ -59,6 +91,30 @@ class AuthEmailRenderer
         $user->loadMissing('currentAgency.agencySetting');
         $profile = CompanyEmailProfileResolver::resolve($user->currentAgency);
         $name = trim((string) ($user->name ?? 'Customer')) ?: 'Customer';
+
+        if ($this->usesJetpkEmailPackage()) {
+            return $this->renderJetpkEmail(
+                type: 'account_created',
+                extra: [
+                    'title' => 'New customer signup',
+                    'intro' => 'A new customer signed up on your platform.',
+                ],
+                plainLines: [
+                    'A new customer signed up.',
+                    '',
+                    'Name: '.$name,
+                    'Email: '.$user->email,
+                    'Contact / mobile: '.$phone,
+                    'Signed up at: '.now()->toDateTimeString(),
+                ],
+                agency: $user->currentAgency,
+                runtimeVariables: [
+                    'customer_name' => $name,
+                    'customer_email' => ModernEmailLayout::maskEmail((string) $user->email),
+                    'recipient_role' => 'admin',
+                ],
+            );
+        }
 
         return $this->render(
             agency: $user->currentAgency,
@@ -196,6 +252,37 @@ class AuthEmailRenderer
             ['', 'Reset password: '.$ctaUrl],
         ));
 
+        if ($this->usesJetpkEmailPackage()) {
+            $security = $this->securityFactsFromDetails($details);
+            $eventKey = $this->loginSecurityEventKey($payload);
+
+            $result = app(JetpkEmailEventRenderer::class)->render(
+                eventKey: $eventKey,
+                agency: $agency,
+                dbTemplate: null,
+                runtimeVariables: [
+                    'customer_name' => $name,
+                    'user_name' => $name,
+                    'login_time' => $security['login_time'] ?? '',
+                    'device' => $security['device'] ?? '',
+                    'location' => $security['ip'] ?? '',
+                    'reset_url' => $ctaUrl,
+                    'recipient_role' => $this->recipientRoleForLoginEvent($eventKey),
+                ],
+                payload: [
+                    'title' => $headline,
+                    'intro' => $intro,
+                    'security' => $security,
+                ],
+            );
+
+            return new CustomerFacingEmailRendered(
+                html: $result->html,
+                plainBody: $result->plainBody !== '' ? $result->plainBody : $plain,
+                profile: CompanyEmailProfileResolver::resolveForPlatform(),
+            );
+        }
+
         return $this->render(
             agency: $agency,
             headline: $headline,
@@ -282,6 +369,65 @@ class AuthEmailRenderer
         );
     }
 
+    /**
+     * @param  list<array{label: string, value: string}>  $details
+     * @return array{login_time?: string, device?: string, ip?: string, location?: string}
+     */
+    protected function securityFactsFromDetails(array $details): array
+    {
+        $facts = [];
+        foreach ($details as $row) {
+            $label = strtolower(trim((string) ($row['label'] ?? '')));
+            $value = trim((string) ($row['value'] ?? ''));
+            if ($value === '') {
+                continue;
+            }
+            if (str_contains($label, 'time')) {
+                $facts['login_time'] = $value;
+            } elseif (str_contains($label, 'device') || str_contains($label, 'browser')) {
+                $facts['device'] = $value;
+            } elseif (str_contains($label, 'ip')) {
+                $facts['ip'] = $value;
+            } elseif (str_contains($label, 'location')) {
+                $facts['location'] = $value;
+            }
+        }
+
+        return $facts;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function loginSecurityEventKey(array $payload): string
+    {
+        $event = trim((string) ($payload['event'] ?? ''));
+        if ($event !== '' && JetpkEmailEventContentRegistry::find($event) !== null) {
+            return $event;
+        }
+
+        $type = strtolower(trim((string) ($payload['type'] ?? '')));
+
+        return match ($type) {
+            'auth_agent_login_success' => 'agent_login_success',
+            'auth_login_success' => 'customer_login_success',
+            'auth_new_device_login' => 'auth_new_device_login',
+            'auth_failed_login_alert' => 'login_failed_alert',
+            default => 'admin_login_success',
+        };
+    }
+
+    protected function recipientRoleForLoginEvent(string $eventKey): string
+    {
+        return match ($eventKey) {
+            'staff_login_success' => 'staff',
+            'agent_login_success' => 'agent',
+            'customer_login_success' => 'customer',
+            'login_failed_alert' => 'customer',
+            default => 'admin',
+        };
+    }
+
     protected function usesJetpkEmailPackage(): bool
     {
         if ((string) config('ota_client.slug', '') === 'jetpk') {
@@ -298,9 +444,15 @@ class AuthEmailRenderer
     /**
      * @param  array<string, mixed>  $extra
      * @param  list<string>  $plainLines
+     * @param  array<string, mixed>  $runtimeVariables
      */
-    protected function renderJetpkEmail(string $type, array $extra, array $plainLines, ?Agency $agency = null): CustomerFacingEmailRendered
-    {
+    protected function renderJetpkEmail(
+        string $type,
+        array $extra,
+        array $plainLines,
+        ?Agency $agency = null,
+        array $runtimeVariables = [],
+    ): CustomerFacingEmailRendered {
         $eventKey = JetpkEmailViewResolver::eventKeyForType($type);
         if ($eventKey === null) {
             throw new \RuntimeException('JetPK email event missing for type: '.$type);
@@ -310,7 +462,7 @@ class AuthEmailRenderer
             eventKey: $eventKey,
             agency: $agency,
             dbTemplate: null,
-            runtimeVariables: [],
+            runtimeVariables: $runtimeVariables,
             payload: $extra,
         );
 

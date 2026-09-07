@@ -667,6 +667,21 @@ class JetpkEmailEventContentRegistry
         } elseif (str_contains($eventKey, 'login') || str_contains($eventKey, 'password') || str_contains($eventKey, 'auth_')) {
             $blocks = ['security-details', 'status-alert', 'support-card'];
             $detailFields = ['login_time', 'device', 'location'];
+            $ctaLabel = 'Reset password';
+            $ctaUrlKey = 'reset_url';
+
+            return [
+                'preheader' => 'A sign-in event was recorded on your account.',
+                'heading' => 'Login successful',
+                'status_label' => 'Security notice',
+                'status_type' => str_contains($eventKey, 'failed') ? 'error' : 'info',
+                'detail_fields' => $detailFields,
+                'content_blocks' => $blocks,
+                'cta_label' => $ctaLabel,
+                'cta_url_key' => $ctaUrlKey,
+                'alert_title' => 'Was this you?',
+                'alert_message' => 'If you recognise this activity, no action is needed. If not, reset your password and contact support.',
+            ];
         } elseif (str_contains($eventKey, 'agent_application') || str_contains($eventKey, 'agent_registration')) {
             $blocks = ['status-alert', 'agent-application'];
             $detailFields = [];

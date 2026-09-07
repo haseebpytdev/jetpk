@@ -38,6 +38,7 @@ class AuthSecurityEmailPayloadFactory
 
         return [
             'type' => $this->loginSuccessType($event),
+            'event' => $event->value,
             'subject' => $this->loginSuccessSubject($user->account_type),
             'title' => $newDevice ? 'New login detected' : 'Login successful',
             'status_label' => 'Security notice',
@@ -64,7 +65,10 @@ class AuthSecurityEmailPayloadFactory
         $userAgent = $request !== null ? substr((string) $request->userAgent(), 0, 250) : '';
 
         return [
-            'type' => $privilegedAdminContext ? 'auth_failed_login_alert' : 'auth_failed_login_alert',
+            'type' => 'auth_failed_login_alert',
+            'event' => $privilegedAdminContext
+                ? OtaNotificationEvent::LoginFailedSensitive->value
+                : OtaNotificationEvent::LoginFailedAlert->value,
             'subject' => 'Failed sign-in attempt',
             'title' => 'Failed login attempt',
             'status_label' => 'Security alert',
@@ -100,6 +104,7 @@ class AuthSecurityEmailPayloadFactory
 
         return [
             'type' => 'auth_new_device_login',
+            'event' => OtaNotificationEvent::AuthNewDeviceLogin->value,
             'subject' => 'New login detected on your account',
             'title' => 'New login detected',
             'status_label' => 'Security notice',

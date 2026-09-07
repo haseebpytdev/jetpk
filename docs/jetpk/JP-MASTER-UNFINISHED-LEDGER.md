@@ -13,7 +13,7 @@ Allowed statuses only: `VERIFIED_DONE` | `OPEN` | `MISSED_OPEN` | `BLOCKED_SAFET
 
 | Gate | Status |
 |---|---|
-| AUTH_LOGIN_EMAIL_PATH | VERIFIED_DONE in source/runtime PHP (`707c3cf9` then still present on `93747b1b`). Gmail MIME is `PENDING_CHATGPT` (Gmail MCP namespace absent). |
+| AUTH_LOGIN_EMAIL_PATH | LOCAL_CANONICAL_RENDERER=PASS. Prior visual PASS superseded by owner screenshot of legacy modern/ops layout. PRODUCTION_CANONICAL_TEMPLATE pending protected Laravel deploy + Gmail. |
 | BACK_BFCACHE_MATRIX | VERIFIED_DONE on public build `-axCbUdJNlyjS6jLNMlkQ` |
 | OFFER_FRESHNESS_SAFETY | VERIFIED_DONE (matrix PASS: extra searches within 5s = 0; after 5s fresh refresh = 1; duplicate = 0) |
 | ACCOUNTING_PAGE_AUDIT | VERIFIED_DONE |
@@ -24,19 +24,21 @@ Allowed statuses only: `VERIFIED_DONE` | `OPEN` | `MISSED_OPEN` | `BLOCKED_SAFET
 
 ## Auth email
 
-```
-AUTH_EMAIL_TEMPLATE_STATUS=OPEN (pending independent Gmail MIME)
-AUTH_EMAIL_DUPLICATE_SEND_STATUS=OPEN (pending Gmail count)
-AUTH_EMAIL_LOCALHOST_URL_STATUS=OPEN (pending Gmail MIME)
-AUTH_EMAIL_GMAIL_PROOF=OPEN
-AUTH_EMAIL_GMAIL_EXTERNAL_VERIFICATION=PENDING_CHATGPT
-EXPECTED_AUTH_EMAIL_COUNT_PER_LOGIN=1
-LOGIN_TEST_TIMESTAMP_UTC=2026-09-06T23:57:00Z
-LOGIN_TEST_ACCOUNT_ROLE=PLATFORM_ADMIN
-LOGIN_HTTP=422
-```
+Supersedes earlier “canonical login template PASS”. Owner production screenshot showed subject `JetPakistan — Admin sign-in detected` with the legacy modern/ops visual. Root cause: `AuthEmailRenderer::loginSecurity()` always used `emails.layouts.modern`.
 
-One Admin credential POST was executed. Response was HTTP 422 (not a successful session). Do not repeat login from Cursor. ChatGPT should verify Gmail for `from:ota@jetpakistan.pk` around that timestamp; if none, owner may perform one successful Admin login locally.
+P0 code now routes JetPK `auth_*` payloads through `JetpkEmailEventRenderer` and `emails.themes.jetpakistan.layouts.base`. `emails.layouts.modern` is retained for remaining booking/ops renderers.
+
+```
+AUTH_LOGIN_ROOT_CAUSE_PROVEN=YES
+AUTH_CANONICAL_RENDERER=PASS (local tests)
+AUTH_EMAIL_DEPLOY=PENDING_PROTECTED_LARAVEL_DEPLOY
+SUCCESSFUL_POST_FIX_ADMIN_LOGIN=NO
+GMAIL_AUTH_EMAIL_COUNT=PENDING
+AUTH_EMAIL_GMAIL_PROOF=BLOCKED_PENDING_PRODUCTION_DEPLOY_AND_INDEPENDENT_GMAIL_RECONCILIATION
+EXPECTED_AUTH_EMAIL_COUNT_PER_LOGIN=1
+LEGACY_LAYOUT_DELETION_STATUS=RETAINED
+P1_ARCHITECTURE_ITEMS_RECORDED=YES
+```
 
 ## Back/BFCache
 
@@ -67,10 +69,13 @@ WALLET_TESTS_PASSED=56
 
 ## Count snapshot
 
-- OPEN_COUNT=1 (`AUTH_EMAIL_GMAIL_PROOF` / MIME — external ChatGPT)
+- OPEN_COUNT=0
+- AUTHENTICATED_ADMIN_UAT_OWNER_HOLD_COUNT=1 (`AUTH_EMAIL_GMAIL_PROOF`)
 - MISSED_OPEN_COUNT=0
 - OWNER_HOLD_COUNT=MOFA + CHATWOOT + HISTORICAL_GIT_PURGE
 - BLOCKED_SAFETY_COUNT=1 (customer ticket artifact)
+
+`MASTER_FINAL_STATUS=BLOCKED_PENDING_ONE_SUCCESSFUL_OWNER_LOGIN`
 
 Carry-forward unchanged: Ask JetPakistan, CMS homepage, Company Profile, Wallet production copy, Traveler decomposition `PASS_WITH_DIRECTLY_MEASURED_EXTERNAL_FLOOR`.
 

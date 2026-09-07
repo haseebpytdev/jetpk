@@ -97,6 +97,16 @@ final class EmailContextualCtaResolver
             return $login !== null ? ['label' => 'Sign in', 'url' => $login] : null;
         }
 
+        if (
+            (str_contains($event, 'login') || str_contains($event, 'auth_'))
+            && ! str_contains($event, 'otp')
+        ) {
+            $reset = self::firstUrl($variables['reset_url'] ?? null)
+                ?? JetpkEmailBrandingResolver::publicForgotPasswordUrl();
+
+            return ['label' => 'Reset password', 'url' => $reset];
+        }
+
         return null;
     }
 

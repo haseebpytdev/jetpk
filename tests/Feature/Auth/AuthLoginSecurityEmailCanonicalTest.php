@@ -32,7 +32,12 @@ class AuthLoginSecurityEmailCanonicalTest extends TestCase
         );
         config([
             'app.url' => 'http://127.0.0.1:8088',
+            'ota_client.slug' => 'jetpk',
+            'ota_client.auth.require_login_otp' => false,
             'ota.notify_admin_login' => true,
+            'ota.notify_staff_login' => true,
+            'ota.notify_agent_login' => true,
+            'ota.notify_customer_login' => true,
             'ota.notify_auth_new_device_login' => true,
             'ota.auth_login_success_email_cooldown_minutes' => 0,
         ]);
@@ -60,8 +65,11 @@ class AuthLoginSecurityEmailCanonicalTest extends TestCase
             return true;
         });
 
-        $this->assertStringContainsString('width="620"', $html);
-        $this->assertStringContainsString('max-width:620px', $html);
+        $this->assertStringContainsString('jetpk-container', $html);
+        $this->assertStringContainsString('max-width:640px', $html);
+        $this->assertStringContainsString('content="light only"', $html);
+        $this->assertStringNotContainsString('width="620"', $html);
+        $this->assertStringNotContainsString('max-width:620px', $html);
         $this->assertStringNotContainsString('href="http://127.0.0.1', $html);
         $this->assertStringNotContainsString('href="https://127.0.0.1', $html);
         $this->assertStringNotContainsString('src="http://127.0.0.1', $html);
@@ -73,7 +81,8 @@ class AuthLoginSecurityEmailCanonicalTest extends TestCase
         $this->assertStringNotContainsString('Booking snapshot', $html);
         $this->assertStringNotContainsString('Booking summary', $html);
         $this->assertSame(1, substr_count($html, '>Login successful</h1>'));
-        $this->assertStringContainsString('Security notice', $html);
+        $this->assertStringContainsString('Sign-in details', $html);
+        $this->assertStringContainsString('Was this you?', $html);
         $this->assertDatabaseHas('communication_logs', [
             'event' => OtaNotificationEvent::AdminLoginSuccess->value,
         ]);
@@ -111,9 +120,10 @@ class AuthLoginSecurityEmailCanonicalTest extends TestCase
 
         Mail::assertSent(OtaOperationalNotificationMail::class, function (OtaOperationalNotificationMail $mail): bool {
             $this->assertStringContainsString('New login detected', $mail->htmlBody);
-            $this->assertStringContainsString('Security notice', $mail->htmlBody);
+            $this->assertStringContainsString('Sign-in details', $mail->htmlBody);
             $this->assertStringContainsString('new device or browser', strtolower($mail->htmlBody));
             $this->assertLessThanOrEqual(1, substr_count($mail->htmlBody, 'Login successful'));
+            $this->assertStringContainsString('jetpk-container', $mail->htmlBody);
 
             return true;
         });

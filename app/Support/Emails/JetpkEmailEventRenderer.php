@@ -74,6 +74,17 @@ class JetpkEmailEventRenderer
         $introText = $introResult->output;
         $this->collectPlaceholderMetrics($introResult, $unresolvedPlaceholders, $fallbackKeysApplied);
 
+        if ($this->isSecurityIdentityEvent($eventKey, $definition)) {
+            $payloadTitle = trim((string) ($payload['title'] ?? ''));
+            if ($payloadTitle !== '') {
+                $headline = $payloadTitle;
+            }
+            $payloadIntro = trim((string) ($payload['intro'] ?? ''));
+            if ($payloadIntro !== '') {
+                $introText = $payloadIntro;
+            }
+        }
+
         $emailBrand = JetpkEmailBrandingResolver::resolve('jetpk');
         $payload = $this->sanitizePayloadForEvent($eventKey, $payload);
         if ($this->isSecurityIdentityEvent($eventKey, $definition)
