@@ -71,6 +71,9 @@ Standing SSH/server access does **not** authorize unrelated or destructive actio
 
 For risky infrastructure changes, take/verify backups first, use the smallest reversible change, and verify service health immediately afterward. Avoid full service stop/start sequences when a graceful reload is sufficient.
 
+Authority: `docs/jetpk/DEPLOYMENT-CONTEXT.md` has precedence over `.cursor` rules, skills,
+historical runbooks, and generic deployment documentation.
+
 ## Development Safety
 
 Prefer:

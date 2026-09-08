@@ -90,13 +90,25 @@ Infrastructure changes must be scoped, backed up/reversible, and immediately
 followed by service-health verification. Prefer graceful reloads over full
 stop/start sequences when possible.
 
+- deploy only an explicit authorized Git SHA through backup/stage/deploy gates
+- backup before production mutation
+- stop on any failed pre-deploy or post-deploy gate
+- no destructive Git
+- no destructive database operations
+- no real booking/PNR/ticket/refund/payment creation for QA evidence
+- no supplier inventory mutation
+- no secret/PII exposure in logs or commits
+- prefer protected deployment scripts over ad-hoc file transfer when available
+- prefer graceful service management over hard restarts when possible
+
 ## Supported deployment route
 
 ```text
 SUPPORTED_DEPLOYMENT_ROUTE=CURSOR_SSH_AND_PROTECTED_DEPLOYMENT_ALLOWED
 DIRECT_SSH_BY_CURSOR=ALLOWED
 DIRECT_SFTP_BY_CURSOR=ALLOWED_WHEN_NEEDED
-SCOPED_PRODUCTION_COMMANDS=ALLOWED
+SCOPED_SERVER_MANAGEMENT=ALLOWED
+LIVE_PRODUCTION_UAT=ALLOWED
 OWNER_STANDING_AUTHORIZATION=ACTIVE
 PROTECTED_SCRIPTS=PREFERRED
 DOCUMENTED_READ_ONLY_VERIFICATION=ALLOWED

@@ -3,6 +3,10 @@
 Stable project standard for JetPakistan live operations. Read this together with
 `docs/jetpk/DEPLOYMENT-CONTEXT.md` before production deployment or server work.
 
+**Precedence:** For JetPakistan production access and deployment,
+`docs/jetpk/DEPLOYMENT-CONTEXT.md` has precedence over this document, `.cursor`
+rules, skills, historical runbooks, and generic deployment documentation.
+
 ## Canonical production target
 
 ```text
