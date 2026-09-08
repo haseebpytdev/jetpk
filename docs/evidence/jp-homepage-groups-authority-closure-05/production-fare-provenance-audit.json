@@ -1,0 +1,208 @@
+﻿{
+    "trending": [
+        {
+            "route": "seed-khi-dxb",
+            "origin": "LHE",
+            "destination": "DXB",
+            "trip_type": "one_way",
+            "search_date_context": {
+                "departure_date": "2026-09-15",
+                "return_date": null
+            },
+            "offers_considered": 30,
+            "eligible_offers": 30,
+            "min_eligible_customer_price": 104278.24,
+            "winning_provider": "sabre",
+            "winning_date": "2026-09-15",
+            "displayed_price": 104278.24,
+            "displayed_label": "PKR 104,278",
+            "cta_url": "/flights/results?from=LHE&to=DXB&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+            "price_match": true,
+            "date_match": true,
+            "cta_match": true,
+            "search_status": "success",
+            "cache_fresh": true
+        },
+        {
+            "route": "seed-lhe-jed",
+            "origin": "LHE",
+            "destination": "JED",
+            "trip_type": "one_way",
+            "search_date_context": {
+                "departure_date": "2026-09-15",
+                "return_date": null
+            },
+            "offers_considered": 47,
+            "eligible_offers": 47,
+            "min_eligible_customer_price": 99577.44,
+            "winning_provider": "sabre",
+            "winning_date": "2026-09-15",
+            "displayed_price": 99577.44,
+            "displayed_label": "PKR 99,577",
+            "cta_url": "/flights/results?from=LHE&to=JED&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+            "price_match": true,
+            "date_match": true,
+            "cta_match": true,
+            "search_status": "success",
+            "cache_fresh": true
+        },
+        {
+            "route": "seed-isb-lhr",
+            "origin": "ISB",
+            "destination": "LHR",
+            "trip_type": "one_way",
+            "search_date_context": {
+                "departure_date": "2026-09-15",
+                "return_date": null
+            },
+            "offers_considered": 49,
+            "eligible_offers": 49,
+            "min_eligible_customer_price": 192529.9,
+            "winning_provider": "sabre",
+            "winning_date": "2026-09-15",
+            "displayed_price": 192529.9,
+            "displayed_label": "PKR 192,530",
+            "cta_url": "/flights/results?from=ISB&to=LHR&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+            "price_match": true,
+            "date_match": true,
+            "cta_match": true,
+            "search_status": "success",
+            "cache_fresh": true
+        },
+        {
+            "route": "seed-khi-ruh",
+            "origin": "KHI",
+            "destination": "RUH",
+            "trip_type": "one_way",
+            "search_date_context": {
+                "departure_date": "2026-09-15",
+                "return_date": null
+            },
+            "offers_considered": 70,
+            "eligible_offers": 70,
+            "min_eligible_customer_price": 65675.08,
+            "winning_provider": "sabre",
+            "winning_date": "2026-09-15",
+            "displayed_price": 65675.08,
+            "displayed_label": "PKR 65,675",
+            "cta_url": "/flights/results?from=KHI&to=RUH&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+            "price_match": true,
+            "date_match": true,
+            "cta_match": true,
+            "search_status": "success",
+            "cache_fresh": true
+        }
+    ],
+    "destinations": [
+        {
+            "destination": "DXB",
+            "origins_tested": [
+                "KHI",
+                "LHE",
+                "ISB"
+            ],
+            "per_origin_minimums": {
+                "KHI": 59919.17,
+                "LHE": 104278.24,
+                "ISB": 91572.49
+            },
+            "winning_origin": "KHI",
+            "winning_price": 59919.17,
+            "winning_date": "2026-09-15",
+            "displayed_price": 59919.17,
+            "displayed_label": "PKR 59,919",
+            "public_link_origin": "KHI",
+            "public_link_destination": "DXB",
+            "public_link_date": "2026-09-15",
+            "price_match": true,
+            "origin_match": true,
+            "date_match": true,
+            "search_status": "success"
+        },
+        {
+            "destination": "JED",
+            "origins_tested": [
+                "KHI",
+                "LHE",
+                "ISB"
+            ],
+            "per_origin_minimums": {
+                "KHI": 67896.36,
+                "LHE": 99577.44,
+                "ISB": 99577.44
+            },
+            "winning_origin": "KHI",
+            "winning_price": 67896.36,
+            "winning_date": "2026-09-15",
+            "displayed_price": 67896.36,
+            "displayed_label": "PKR 67,896",
+            "public_link_origin": "KHI",
+            "public_link_destination": "JED",
+            "public_link_date": "2026-09-15",
+            "price_match": true,
+            "origin_match": true,
+            "date_match": true,
+            "search_status": "success"
+        },
+        {
+            "destination": "LHR",
+            "origins_tested": [
+                "KHI",
+                "LHE",
+                "ISB"
+            ],
+            "per_origin_minimums": {
+                "KHI": 141773.53,
+                "LHE": 177775.02,
+                "ISB": 192529.9
+            },
+            "winning_origin": "KHI",
+            "winning_price": 141773.53,
+            "winning_date": "2026-09-15",
+            "displayed_price": 141773.53,
+            "displayed_label": "PKR 141,774",
+            "public_link_origin": "KHI",
+            "public_link_destination": "LHR",
+            "public_link_date": "2026-09-15",
+            "price_match": true,
+            "origin_match": true,
+            "date_match": true,
+            "search_status": "success"
+        },
+        {
+            "destination": "IST",
+            "origins_tested": [
+                "KHI",
+                "LHE",
+                "ISB"
+            ],
+            "per_origin_minimums": {
+                "KHI": 75718.06,
+                "LHE": 118327.87,
+                "ISB": 115828.92
+            },
+            "winning_origin": "KHI",
+            "winning_price": 75718.06,
+            "winning_date": "2026-09-15",
+            "displayed_price": 75718.06,
+            "displayed_label": "PKR 75,718",
+            "public_link_origin": "KHI",
+            "public_link_destination": "IST",
+            "public_link_date": "2026-09-15",
+            "price_match": true,
+            "origin_match": true,
+            "date_match": true,
+            "search_status": "success"
+        }
+    ],
+    "meta": {
+        "audited_at": "2026-09-08T18:35:25+00:00",
+        "fare_freshness_hours": 30,
+        "allow_stale_fare_display": false,
+        "destination_origin_pool": [
+            "KHI",
+            "LHE",
+            "ISB"
+        ]
+    }
+}

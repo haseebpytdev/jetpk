@@ -1,0 +1,95 @@
+{
+  "captured_at": "2026-09-08T18:56:06.108Z",
+  "environment": "production",
+  "engineering_sha": "f039bef3dda1320c08fdccb4633d5c7c34b3b61e",
+  "gates": {
+    "PRODUCTION_HOMEPAGE_API": {
+      "pass": true,
+      "status": 200
+    },
+    "FEATURED_NEXT_HREFS": {
+      "pass": true,
+      "next_count": 3,
+      "legacy_count": 0,
+      "sample_href": "/groups/ALH-3335"
+    },
+    "UNAVAILABLE_FEATURED_COUNT_ZERO": {
+      "pass": true,
+      "unavailable_count": 0
+    },
+    "SUPPORT_CTA_PRESENT": {
+      "pass": true,
+      "support_image": "present"
+    },
+    "STALE_FARE_NEUTRAL_LABELS": {
+      "pass": true,
+      "check_fare_count": 0
+    },
+    "GROUPS_SEARCH_NEXT_UI": {
+      "pass": true,
+      "url": "https://jetpakistan.pk/groups/search"
+    },
+    "FEATURED_DETAIL_NEXT_UI": {
+      "pass": true,
+      "url": "https://jetpakistan.pk/groups/ALH-3335",
+      "href": "/groups/ALH-3335",
+      "public_id": "ALH-3335"
+    },
+    "FEATURED_DETAIL_REFRESH_BACK": {
+      "pass": true,
+      "refreshOk": true,
+      "backOk": true
+    },
+    "GROUPS_INDEX_DIRECT": {
+      "pass": true,
+      "url": "https://jetpakistan.pk/groups"
+    },
+    "LEGACY_PACKAGE_REDIRECT": {
+      "pass": true,
+      "status": 302,
+      "location": "https://jetpakistan.pk/groups/ALH-3335"
+    },
+    "TRENDING_DESTINATION_LABELS_PRESENT": {
+      "pass": true,
+      "trending_dynamic_count": 4,
+      "trending_sample": "PKR 104,278",
+      "destination_sample": "PKR 59,919"
+    }
+  },
+  "network": [],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    }
+  ],
+  "screenshots": {
+    "prod_home_desktop": "screenshots/prod-home-desktop.png",
+    "prod_featured_detail_desktop": "screenshots/prod-featured-detail-desktop.png",
+    "prod_groups_index_desktop": "screenshots/prod-groups-index-desktop.png",
+    "prod_home_mobile": "screenshots/prod-home-mobile.png",
+    "prod_groups_search_mobile": "screenshots/prod-groups-search-mobile.png"
+  },
+  "CMS_PRODUCTION_BROWSER_CERT": "PASS",
+  "result": "PASS"
+}
