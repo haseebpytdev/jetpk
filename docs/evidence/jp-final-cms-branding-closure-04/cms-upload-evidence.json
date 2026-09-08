@@ -1,0 +1,44 @@
+{
+  "captured_at": "2026-09-08T12:57:00.277Z",
+  "authorized_sha": "20e921661da55e121a9b2353cba535b350613493",
+  "steps": [
+    {
+      "step": "upload",
+      "http": 422,
+      "asset_key": "route_closure04_qa_1788872222422",
+      "file_size_bytes": 2304000
+    },
+    {
+      "step": "editor_asset_record",
+      "http": 200,
+      "found": false,
+      "asset": null,
+      "publishing": {
+        "has_draft": true,
+        "has_published": true,
+        "archived": false,
+        "can_unpublish": false,
+        "status": "draft_ahead"
+      }
+    },
+    {
+      "step": "media_url",
+      "curl_head": 0,
+      "browser_get": 0,
+      "url": ""
+    },
+    {
+      "step": "draft_preview",
+      "preview_begin_http": 200,
+      "preview_api_http": 200,
+      "preview_image_http": 0,
+      "preview_url": "/?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg3MjUyNn0.eab71eb8264f43008743da2b5ac29d6dc06073e50810091152a60b54ff5f90ce"
+    },
+    {
+      "step": "published_probe",
+      "http": 200,
+      "contains_asset_key": false,
+      "contains_closure04_marker": false
+    }
+  ]
+}

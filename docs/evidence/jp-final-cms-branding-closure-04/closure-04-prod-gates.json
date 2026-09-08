@@ -1,13 +1,13 @@
 {
-  "captured_at": "2026-09-08T12:31:59.683Z",
+  "captured_at": "2026-09-08T12:56:17.387Z",
   "authorized_sha": "20e921661da55e121a9b2353cba535b350613493",
   "production_build_id": null,
   "gates": {
     "CMS_ADMIN_AUTH": {
-      "pass": false,
+      "pass": true,
       "detail": {
-        "reason": "LOGIN_FAILED:422",
-        "stale_storage_url_probe": "access-denied"
+        "login": "ok",
+        "storage_refreshed": true
       }
     },
     "FAVICON_METADATA_AND_HTTP": {
@@ -15,9 +15,9 @@
       "detail": {
         "favicon_url": "/storage/agencies/1/branding/D6KHoEYws3Asonu9vIci3r5OdjONr247WXnkTL74.png?v=1788851020",
         "storage_http": 200,
-        "curl_evidence": "prod-curl-probes.txt",
         "dom_link_href": null,
-        "note": "Next.js head may inject favicon client-side; storage URL HEAD 200 is authoritative HTTP proof"
+        "dom_link_http": 0,
+        "curl_probe": "curl.exe -I"
       }
     },
     "BRANDING_STORAGE_LOGO": {
@@ -75,11 +75,59 @@
         ]
       }
     },
+    "CMS_2250KB_DRAFT_UPLOAD": {
+      "pass": false,
+      "detail": {
+        "upload_http": 422,
+        "file_size_bytes": 2304000,
+        "asset_key": "route_closure04_qa_1788872222422",
+        "published": false
+      }
+    },
+    "CMS_ASSET_RECORD": {
+      "pass": false,
+      "detail": {
+        "editor_http": 200,
+        "asset_key": "route_closure04_qa_1788872222422",
+        "publishing_status": "draft_ahead"
+      }
+    },
+    "CMS_MEDIA_URL_HTTP_200": {
+      "pass": false,
+      "detail": {
+        "curl_head_http": 0,
+        "browser_get_http": 0
+      }
+    },
+    "CMS_DRAFT_PREVIEW": {
+      "pass": false,
+      "detail": {
+        "preview_begin_http": 200,
+        "preview_api_http": 200,
+        "preview_image_http": 0,
+        "preview_url": "/?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg3MjUyNn0.eab71eb8264f43008743da2b5ac29d6dc06073e50810091152a60b54ff5f90ce"
+      }
+    },
+    "TEST_FIXTURE_NOT_PUBLISHED": {
+      "pass": true,
+      "detail": {
+        "published_homepage_http": 200,
+        "contains_asset_key": false,
+        "publish_action_taken": false
+      }
+    },
+    "CMS_TEST_FIXTURE_CLEANUP": {
+      "pass": false,
+      "detail": {
+        "delete_http": 0,
+        "asset_record_removed": false
+      }
+    },
     "CMS_225MB_DRAFT_UPLOAD_CLEANUP": {
       "pass": false,
       "detail": {
-        "reason": "admin_session_invalid",
-        "url": "https://jetpakistan.pk/access-denied"
+        "composite": true,
+        "asset_key": "route_closure04_qa_1788872222422"
       }
     },
     "ASK_ROMAN_URDU_GROUNDING": {
@@ -147,11 +195,8 @@
     "FAB_COLLISION_MOBILE_390": {
       "pass": true,
       "detail": {
-        "source": "prod-uat-postdeploy.json rerun 2026-09-08T12:36:50Z",
-        "ask_fab_visible": true,
-        "dock_visible": true,
-        "fab_overlap": false,
-        "ask_fab_bottom_css": 86
+        "overlap": false,
+        "ask_bottom_css": 86
       }
     },
     "HOMEPAGE_API_CURL_PROBE": {
@@ -167,7 +212,7 @@
         "n": 1,
         "user": "Hello JetPakistan",
         "status": 200,
-        "message_id": 492,
+        "message_id": 534,
         "intent": "unknown",
         "has_body": true,
         "body_preview": "Assalamualaikum — I can help search flights or Groups, answer booking FAQs, or c"
@@ -176,7 +221,7 @@
         "n": 2,
         "user": "I need a one way flight from Lahore to Dubai",
         "status": 200,
-        "message_id": 494,
+        "message_id": 536,
         "intent": "flight_search",
         "has_body": true,
         "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
@@ -185,7 +230,7 @@
         "n": 3,
         "user": "Make it 12 October instead",
         "status": 200,
-        "message_id": 496,
+        "message_id": 538,
         "intent": "flight_search",
         "has_body": true,
         "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
@@ -194,7 +239,7 @@
         "n": 4,
         "user": "Show me the cheapest option",
         "status": 200,
-        "message_id": 498,
+        "message_id": 540,
         "intent": "flight_search",
         "has_body": true,
         "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
@@ -203,7 +248,7 @@
         "n": 5,
         "user": "What is your baggage allowance?",
         "status": 200,
-        "message_id": 500,
+        "message_id": 542,
         "intent": "flight_search",
         "has_body": true,
         "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
@@ -212,7 +257,7 @@
         "n": 6,
         "user": "How does refund process work?",
         "status": 200,
-        "message_id": 502,
+        "message_id": 544,
         "intent": "flight_search",
         "has_body": true,
         "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
@@ -221,7 +266,7 @@
         "n": 7,
         "user": "How do I contact support?",
         "status": 200,
-        "message_id": 504,
+        "message_id": 546,
         "intent": "knowledge",
         "has_body": true,
         "body_preview": "Here is what I found in JetPakistan help:\n\n**Cancellation and refund guidance**\n"
@@ -230,7 +275,7 @@
         "n": 8,
         "user": "mjhy LHE se DXB flight chahiye one way",
         "status": 200,
-        "message_id": 506,
+        "message_id": 548,
         "intent": "flight_search",
         "has_body": true,
         "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
@@ -239,7 +284,7 @@
         "n": 9,
         "user": "mera booking check krdo",
         "status": 200,
-        "message_id": 508,
+        "message_id": 550,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Of course — I can help you check a booking. Please send your booking reference a"
@@ -248,7 +293,7 @@
         "n": 10,
         "user": "My booking reference is CLOSURE04GUESS",
         "status": 200,
-        "message_id": 510,
+        "message_id": 552,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Of course — I can help you check a booking. Please send your booking reference a"
@@ -257,7 +302,7 @@
         "n": 11,
         "user": "My email is qa-not-real@jetpakistan.pk",
         "status": 200,
-        "message_id": 512,
+        "message_id": 554,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -266,7 +311,7 @@
         "n": 12,
         "user": "I already gave you the reference",
         "status": 200,
-        "message_id": 514,
+        "message_id": 556,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -275,7 +320,7 @@
         "n": 13,
         "user": "Tell me about group travel",
         "status": 200,
-        "message_id": 516,
+        "message_id": 558,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -284,7 +329,7 @@
         "n": 14,
         "user": "What documents do I need?",
         "status": 200,
-        "message_id": 518,
+        "message_id": 560,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -293,7 +338,7 @@
         "n": 15,
         "user": "Can I change my travel date?",
         "status": 200,
-        "message_id": 520,
+        "message_id": 562,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -302,7 +347,7 @@
         "n": 16,
         "user": "Show flights Karachi to London",
         "status": 200,
-        "message_id": 522,
+        "message_id": 564,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -311,7 +356,7 @@
         "n": 17,
         "user": "Make it economy class",
         "status": 200,
-        "message_id": 524,
+        "message_id": 566,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -320,7 +365,7 @@
         "n": 18,
         "user": "What payment methods do you accept?",
         "status": 200,
-        "message_id": 526,
+        "message_id": 568,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -329,7 +374,7 @@
         "n": 19,
         "user": "Thanks, that helps",
         "status": 200,
-        "message_id": 528,
+        "message_id": 570,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -338,7 +383,7 @@
         "n": 20,
         "user": "Goodbye",
         "status": 200,
-        "message_id": 530,
+        "message_id": 572,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -350,16 +395,60 @@
   "screenshots": {
     "home_mobile": {
       "pass": false,
-      "error": "page.screenshot: Timeout 8000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n"
+      "error": "page.screenshot: caret: expected one of (hide|initial)"
     },
     "ask_open_mobile": {
-      "path": "prod-gate-ask-open-mobile.png",
-      "pass": true
+      "pass": false,
+      "error": "page.screenshot: caret: expected one of (hide|initial)"
     }
   },
   "limitations": [
-    "Admin session refresh failed: LOGIN_FAILED:422",
-    "Screenshot home_mobile: page.screenshot: Timeout 8000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n"
+    "Screenshot home_mobile: page.screenshot: caret: expected one of (hide|initial)",
+    "Screenshot ask_open_mobile: page.screenshot: caret: expected one of (hide|initial)"
   ],
+  "cms_upload_evidence": {
+    "captured_at": "2026-09-08T12:57:00.277Z",
+    "authorized_sha": "20e921661da55e121a9b2353cba535b350613493",
+    "steps": [
+      {
+        "step": "upload",
+        "http": 422,
+        "asset_key": "route_closure04_qa_1788872222422",
+        "file_size_bytes": 2304000
+      },
+      {
+        "step": "editor_asset_record",
+        "http": 200,
+        "found": false,
+        "asset": null,
+        "publishing": {
+          "has_draft": true,
+          "has_published": true,
+          "archived": false,
+          "can_unpublish": false,
+          "status": "draft_ahead"
+        }
+      },
+      {
+        "step": "media_url",
+        "curl_head": 0,
+        "browser_get": 0,
+        "url": ""
+      },
+      {
+        "step": "draft_preview",
+        "preview_begin_http": 200,
+        "preview_api_http": 200,
+        "preview_image_http": 0,
+        "preview_url": "/?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg3MjUyNn0.eab71eb8264f43008743da2b5ac29d6dc06073e50810091152a60b54ff5f90ce"
+      },
+      {
+        "step": "published_probe",
+        "http": 200,
+        "contains_asset_key": false,
+        "contains_closure04_marker": false
+      }
+    ]
+  },
   "FINAL_CLOSURE_04_PROD_GATES": "PARTIAL"
 }

@@ -192,10 +192,26 @@ async function screenshotTry(page, file, label) {
 
 
 async function runCmsUpload(adminPage) {
+  const cmsEvidence = {
+    captured_at: new Date().toISOString(),
+    authorized_sha: SHA,
+    steps: [],
+  };
+  report.cms_upload_evidence = cmsEvidence;
+
   await adminPage.goto(`${BASE}/admin/dashboard`, { waitUntil: "domcontentloaded", timeout: 120000 });
   const dashUrl = adminPage.url();
   if (!/\/admin\/dashboard/.test(dashUrl) || /access-denied/.test(dashUrl)) {
-    gate("CMS_225MB_DRAFT_UPLOAD_CLEANUP", false, { reason: "admin_session_invalid", url: dashUrl });
+    for (const g of [
+      "CMS_2250KB_DRAFT_UPLOAD",
+      "CMS_ASSET_RECORD",
+      "CMS_MEDIA_URL_HTTP_200",
+      "CMS_DRAFT_PREVIEW",
+      "TEST_FIXTURE_NOT_PUBLISHED",
+      "CMS_TEST_FIXTURE_CLEANUP",
+    ]) {
+      gate(g, false, { reason: "admin_session_invalid", url: dashUrl });
+    }
     return false;
   }
 
@@ -204,42 +220,83 @@ async function runCmsUpload(adminPage) {
   const assetKey = routeAssetKey(routeId);
   const jpeg = createJpeg2250Kb();
   const filename = `jp-closure04-2250kb-${stamp}.jpg`;
+  const fileSizeBytes = jpeg.length;
 
-  const uploadResult = await adminPage.evaluate(
-    async ({ assetKey, b64, filename }) => {
-      const token = document.cookie.split("; ").find((c) => c.startsWith("XSRF-TOKEN="));
-      const csrf = token ? decodeURIComponent(token.split("=")[1]) : "";
-      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-      const blob = new Blob([bytes], { type: "image/jpeg" });
-      const file = new File([blob], filename, { type: "image/jpeg" });
-      const fd = new FormData();
-      fd.append("asset_key", assetKey);
-      fd.append("alt_text", "Closure-04 QA draft-only upload");
-      fd.append("file", file);
-      const res = await fetch("/admin/page-settings/home/assets?format=json", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-          "X-XSRF-TOKEN": csrf,
-        },
-        body: fd,
-      });
-      const json = await res.json().catch(() => ({}));
-      return { status: res.status, json };
+  const cookies = await adminPage.context().cookies();
+  const xsrf = cookies.find((c) => c.name === "XSRF-TOKEN");
+  const csrfToken = xsrf ? decodeURIComponent(xsrf.value) : "";
+  const request = adminPage.context().request;
+  const uploadRes = await request.post(`${BASE}/admin/page-settings/home/assets?format=json`, {
+    headers: {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+      "X-XSRF-TOKEN": csrfToken,
     },
-    { assetKey, b64: jpeg.toString("base64"), filename },
-  );
+    multipart: {
+      asset_key: assetKey,
+      alt_text: "Closure-04 QA draft-only upload",
+      file: { name: filename, mimeType: "image/jpeg", buffer: jpeg },
+    },
+  });
+  const uploadResult = { status: uploadRes.status(), json: await uploadRes.json().catch(() => ({})) };
+  cmsEvidence.steps.push({
+    step: "upload",
+    http: uploadResult.status,
+    asset_key: assetKey,
+    file_size_bytes: fileSizeBytes,
+    message: uploadResult.json?.message ?? null,
+  });
 
   const uploadOk = uploadResult.status >= 200 && uploadResult.status < 300 && uploadResult.json?.ok === true;
   const assetId = uploadResult.json?.asset?.id;
   const mediaUrl = uploadResult.json?.asset?.url;
+  gate("CMS_2250KB_DRAFT_UPLOAD", uploadOk, {
+    upload_http: uploadResult.status,
+    file_size_bytes: fileSizeBytes,
+    asset_key: assetKey,
+    asset_id: assetId,
+    published: false,
+  });
+
+  const editorRecord = await adminPage.evaluate(async ({ assetKey }) => {
+    const token = document.cookie.split("; ").find((c) => c.startsWith("XSRF-TOKEN="));
+    const csrf = token ? decodeURIComponent(token.split("=")[1]) : "";
+    const res = await fetch("/admin/page-settings/home?format=json", {
+      credentials: "include",
+      headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest", "X-XSRF-TOKEN": csrf },
+    });
+    const json = await res.json().catch(() => ({}));
+    const assets = Array.isArray(json.assets) ? json.assets : [];
+    const hit = assets.find((a) => a.asset_key === assetKey || a.assetKey === assetKey);
+    return { http: res.status, found: Boolean(hit), asset: hit ?? null, publishing: json.publishing ?? null };
+  }, { assetKey });
+  cmsEvidence.steps.push({ step: "editor_asset_record", ...editorRecord });
+  gate("CMS_ASSET_RECORD", editorRecord.http === 200 && editorRecord.found, {
+    editor_http: editorRecord.http,
+    asset_key: assetKey,
+    asset_id: assetId,
+    publishing_status: editorRecord.publishing?.status ?? null,
+  });
+
   let mediaHttp = 0;
-  if (mediaUrl) {
-    const absolute = mediaUrl.startsWith("http") ? mediaUrl : `${BASE}${mediaUrl.startsWith("/") ? "" : "/"}${mediaUrl}`;
-    mediaHttp = curlHead(absolute);
-  }
+  const absoluteMedia = mediaUrl
+    ? mediaUrl.startsWith("http")
+      ? mediaUrl
+      : `${BASE}${mediaUrl.startsWith("/") ? "" : "/"}${mediaUrl}`
+    : "";
+  if (absoluteMedia) mediaHttp = curlHead(absoluteMedia);
+  const browserMediaHttp = absoluteMedia
+    ? await adminPage.evaluate(async (url) => {
+        const res = await fetch(url, { credentials: "include", method: "GET" });
+        return res.status;
+      }, absoluteMedia)
+    : 0;
+  cmsEvidence.steps.push({ step: "media_url", curl_head: mediaHttp, browser_get: browserMediaHttp, url: absoluteMedia });
+  gate("CMS_MEDIA_URL_HTTP_200", mediaHttp === 200 && browserMediaHttp === 200, {
+    media_url: mediaUrl,
+    curl_head_http: mediaHttp,
+    browser_get_http: browserMediaHttp,
+  });
 
   const previewResult = await adminPage.evaluate(async () => {
     const token = document.cookie.split("; ").find((c) => c.startsWith("XSRF-TOKEN="));
@@ -256,53 +313,100 @@ async function runCmsUpload(adminPage) {
     const json = await res.json().catch(() => ({}));
     return { status: res.status, json };
   });
-  const token = previewResult.json?.preview_token;
-  let previewHttp = 0;
-  if (token) {
-    previewHttp = curlHead(
-      `${BASE}/laravel/api/public/content/homepage?jp_preview=1&jp_preview_token=${encodeURIComponent(token)}`,
+  const previewToken = previewResult.json?.preview_token;
+  const previewUrl = previewResult.json?.preview_url || previewResult.json?.previewUrl;
+  let previewApiHttp = 0;
+  let previewImageHttp = 0;
+  if (previewToken) {
+    previewApiHttp = curlHead(
+      `${BASE}/laravel/api/public/content/homepage?jp_preview=1&jp_preview_token=${encodeURIComponent(previewToken)}`,
     );
   }
+  if (previewUrl && absoluteMedia) {
+    await adminPage.goto(previewUrl.startsWith("http") ? previewUrl : `${BASE}${previewUrl}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 120000,
+    });
+    previewImageHttp = await adminPage.evaluate(async (mediaPath) => {
+      const res = await fetch(mediaPath, { credentials: "include" });
+      return res.status;
+    }, mediaUrl);
+    await screenshotTry(adminPage, "prod-cms-draft-preview.png", "cms_draft_preview");
+  }
+  cmsEvidence.steps.push({
+    step: "draft_preview",
+    preview_begin_http: previewResult.status,
+    preview_api_http: previewApiHttp,
+    preview_image_http: previewImageHttp,
+    preview_url: previewUrl,
+  });
+  gate("CMS_DRAFT_PREVIEW", previewResult.status >= 200 && previewResult.status < 300 && previewApiHttp === 200 && previewImageHttp === 200, {
+    preview_begin_http: previewResult.status,
+    preview_api_http: previewApiHttp,
+    preview_image_http: previewImageHttp,
+    preview_url: previewUrl,
+  });
+
+  const publishedProbe = await adminPage.evaluate(async ({ assetKey }) => {
+    const res = await fetch("/laravel/api/public/content/homepage", { credentials: "include" });
+    const body = await res.json().catch(() => ({}));
+    const serialized = JSON.stringify(body);
+    return {
+      http: res.status,
+      contains_asset_key: serialized.includes(assetKey),
+      contains_closure04_marker: serialized.includes("closure04-qa"),
+    };
+  }, { assetKey });
+  cmsEvidence.steps.push({ step: "published_probe", ...publishedProbe });
+  gate("TEST_FIXTURE_NOT_PUBLISHED", publishedProbe.http === 200 && !publishedProbe.contains_asset_key && !publishedProbe.contains_closure04_marker, {
+    published_homepage_http: publishedProbe.http,
+    contains_asset_key: publishedProbe.contains_asset_key,
+    publish_action_taken: false,
+  });
 
   let deleteStatus = 0;
+  let recordGone = false;
   if (assetId) {
-    const del = await adminPage.evaluate(async ({ assetId }) => {
+    const delRes = await request.delete(`${BASE}/admin/page-settings/home/assets/${assetId}?force=1`, {
+      headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest", "X-XSRF-TOKEN": csrfToken },
+      maxRedirects: 0,
+    });
+    deleteStatus = delRes.status();
+    const afterDelete = await adminPage.evaluate(async ({ assetKey }) => {
       const token = document.cookie.split("; ").find((c) => c.startsWith("XSRF-TOKEN="));
       const csrf = token ? decodeURIComponent(token.split("=")[1]) : "";
-      const res = await fetch(`/admin/page-settings/home/assets/${assetId}?force=1`, {
-        method: "DELETE",
+      const res = await fetch("/admin/page-settings/home?format=json", {
         credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-          "X-XSRF-TOKEN": csrf,
-        },
-        redirect: "manual",
+        headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest", "X-XSRF-TOKEN": csrf },
       });
-      return res.status;
-    }, { assetId });
-    deleteStatus = del;
+      const json = await res.json().catch(() => ({}));
+      const assets = Array.isArray(json.assets) ? json.assets : [];
+      return !assets.some((a) => a.asset_key === assetKey || a.assetKey === assetKey);
+    }, { assetKey });
+    recordGone = afterDelete;
+    if (absoluteMedia) {
+      const mediaAfterDelete = curlHead(absoluteMedia);
+      cmsEvidence.steps.push({ step: "cleanup", delete_http: deleteStatus, record_gone: recordGone, media_after_delete: mediaAfterDelete });
+    }
   }
-
-  const pass =
-    uploadOk &&
-    Boolean(assetId) &&
-    mediaHttp >= 200 &&
-    mediaHttp < 300 &&
-    previewHttp >= 200 &&
-    previewHttp < 300 &&
-    deleteStatus >= 200 &&
-    deleteStatus < 400;
-  gate("CMS_225MB_DRAFT_UPLOAD_CLEANUP", pass, {
-    upload_http: uploadResult.status,
-    asset_id: assetId,
-    asset_key: assetKey,
-    media_http: mediaHttp,
-    preview_http: previewHttp,
+  gate("CMS_TEST_FIXTURE_CLEANUP", deleteStatus >= 200 && deleteStatus < 400 && recordGone, {
     delete_http: deleteStatus,
-    published: false,
+    asset_record_removed: recordGone,
+    asset_id: assetId,
   });
-  return pass;
+
+  fs.writeFileSync(path.join(__dirname, "cms-upload-evidence.json"), JSON.stringify(cmsEvidence, null, 2));
+
+  const allCmsPass = [
+    "CMS_2250KB_DRAFT_UPLOAD",
+    "CMS_ASSET_RECORD",
+    "CMS_MEDIA_URL_HTTP_200",
+    "CMS_DRAFT_PREVIEW",
+    "TEST_FIXTURE_NOT_PUBLISHED",
+    "CMS_TEST_FIXTURE_CLEANUP",
+  ].every((k) => report.gates[k]?.pass);
+  gate("CMS_225MB_DRAFT_UPLOAD_CLEANUP", allCmsPass, { composite: true, asset_key: assetKey, asset_id: assetId });
+  return allCmsPass;
 }
 
 async function runAsk20(page) {
@@ -503,11 +607,17 @@ async function main() {
   if (adminPage) {
     await runCmsUpload(adminPage);
   } else {
-    gate("CMS_225MB_DRAFT_UPLOAD_CLEANUP", false, {
-      reason: "admin_auth_unavailable",
-      local_phpunit_proxy: "JetpkHomepageCmsAssetUploadTest 2.25MB PASS at SHA 20e92166",
-      owner_action: "Refresh JP-DASH-03 QA admin password in Credential Manager or JP_DASH_03_QA_ADMIN_PASSWORD",
-    });
+    for (const g of [
+      "CMS_2250KB_DRAFT_UPLOAD",
+      "CMS_ASSET_RECORD",
+      "CMS_MEDIA_URL_HTTP_200",
+      "CMS_DRAFT_PREVIEW",
+      "TEST_FIXTURE_NOT_PUBLISHED",
+      "CMS_TEST_FIXTURE_CLEANUP",
+      "CMS_225MB_DRAFT_UPLOAD_CLEANUP",
+    ]) {
+      gate(g, false, { reason: "admin_auth_unavailable" });
+    }
   }
 
   await pubPage.goto(`${BASE}/`, { waitUntil: "domcontentloaded", timeout: 120000 });
