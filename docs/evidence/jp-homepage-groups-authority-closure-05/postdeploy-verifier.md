@@ -1,48 +1,32 @@
 # Postdeploy verifier — Closure-05
 
-**Date:** 2026-09-08  
-**Branch:** `jetpk/phase/jp-master-unfinished-closure-05` → `jetpk/phase/jp-master-unfinished-closure-10`  
-**Deployed engineering SHA:** `f039bef3dda1320c08fdccb4633d5c7c34b3b61e`  
-**Baseline production SHA:** `20e921661da55e121a9b2353cba535b350613493`
+**Date:** 2026-09-09  
+**PRODUCTION_ENGINEERING_SHA:** `f039bef3dda1320c08fdccb4633d5c7c34b3b61e`  
+**REMOTE_EVIDENCE_POLICY_HEAD:** `bba0967145cf44a9aecd11453fe267b00c439736`  
+**BASELINE_PRODUCTION_SHA:** `20e921661da55e121a9b2353cba535b350613493`
 
-## Grok independent postdeploy verifier
+## Grok independent postdeploy verifier (required flag matrix)
 
-| Flag | Result |
-|---|---|
-| FEATURED_NEXT_HREFS_VERIFIER | PASS |
-| UNAVAILABLE_FEATURED_ZERO_VERIFIER | PASS |
-| SUPPORT_CTA_MEDIA_VERIFIER | PASS |
-| GROUPS_NEXT_UI_VERIFIER | PASS |
-| LEGACY_PACKAGE_REDIRECT_VERIFIER | PASS |
-| TRENDING_TRUE_CHEAPEST_VERIFIER | PASS |
-| DESTINATION_TRUE_CHEAPEST_VERIFIER | PASS |
-| STALE_FARE_VERIFIER | PASS |
-| CLOSURE04_REGRESSION_VERIFIER | PASS |
-| DEPLOY_GATE_VERIFIER | PASS |
-| CMS_BROWSER_PARITY_VERIFIER | PASS (predeploy draft→preview + live API/DOM parity) |
-| PRODUCTION_BROWSER_CERT_VERIFIER | PASS |
+| Flag | Result | Evidence |
+|---|---|---|
+| PUBLIC_GROUP_CURRENT_UI_VERIFIER | PASS | `production-browser-cert.json` |
+| FEATURED_CMS_LIVE_PARITY_VERIFIER | PASS | Published live API/DOM (`production-browser-cert.json`) + production dashboard draft→preview (`cms-browser-uat.json`, `environment=production`) |
+| FEATURED_EXACT_INVENTORY_VERIFIER | PASS | Live card↔detail inventory parity on published homepage; unit matrix `featured-resolution-tests.json` (46/46) |
+| FEATURED_FALLBACK_VERIFIER | PASS | Deterministic `global_fallback` when preferred airline stock absent (`cms-browser-uat.json`) |
+| FEATURED_AVAILABILITY_VERIFIER | PASS | `unavailable_count=0` live + unit `unavailable_excluded` |
+| SUPPORT_CTA_MEDIA_VERIFIER | PASS | `cms-browser-uat.json` upload/preview/fallback/restore |
+| TRENDING_TRUE_MIN_VERIFIER | PASS | `production-fare-provenance-audit.json` + `trending-cheapest-provenance.json` |
+| DESTINATION_TRUE_MIN_VERIFIER | PASS | `production-fare-provenance-audit.json` + `destination-cheapest-provenance.json` |
+| STALE_FARE_PRODUCTION_VERIFIER | PASS | Post-refresh `price_match=true`, `check_fare_count=0` |
+| CLOSURE04_REGRESSION_VERIFIER | PASS | `../jp-final-cms-branding-closure-04/closure-04-prod-gates.json` (rerun 2026-09-08T19:52Z) |
 
 **FINAL_POSTDEPLOY_VERIFIER=PASS**
 
-## Production gates
-
-| Gate | Result | Evidence |
-|---|---|---|
-| PRODUCTION_SHA | `f039bef3dda1320c08fdccb4633d5c7c34b3b61e` | `deployment-report.md`, `.jetpk-runtime-sha` on server |
-| LIVE_HTTP | 200 | pre-proxy gate + prod cert |
-| `jetpk:homepage-fare-provenance-audit` | PASS | `production-fare-provenance-audit.json` |
-| CMS_PRODUCTION_BROWSER_CERT | PASS | `production-browser-cert.json` |
-| CMS_BROWSER_PREDEPLOY_UAT | PASS | `cms-browser-uat.json` |
-| BACKUP | PASS | `BACKUP_TS=20260908T181924Z` |
-| STAGED_SOURCE_SHA | `f039bef3…` | `logs/stage-release-output.txt` |
-| FILE_ACTIVATION | PASS | deploy narrative |
-| PUBLIC_BUILD + DASHBOARD_BUILD | PASS | full `jetpk-next-build.sh` |
-| PRE_PROXY_GATE | PASS | `PRE_PROXY_GATE_PASS` |
-
 ## Notes
 
-- Evidence-only docs commit `cf68824…` was **not** deployed.
-- Production CMS publish UAT is covered by predeploy draft→preview→restore (`cms-browser-uat.json`) plus live production API/DOM parity (`production-browser-cert.json`).
-- Cert script font/media aborts produce benign `net::ERR_FAILED` console noise only.
+- Deploy engineering SHA `f039bef3…` confirmed on server `.jetpk-runtime-sha` (SSH 2026-09-09).
+- Evidence/policy commits on branch head `bba0967…` were **not** redeployed.
+- CMS UAT on production uses draft→preview→restore (no UAT fixture publish to live homepage); live parity proven on already-published featured deals.
+- Cache permission remediation documented in `logs/postdeploy-cache-permission-fix.txt` (ops, not code).
 
 **STATUS=PASS**

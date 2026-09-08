@@ -19,13 +19,17 @@ const LARAVEL = process.env.CLOSURE05_LARAVEL_BASE ?? "http://127.0.0.1:8000";
 const DASHBOARD = process.env.CLOSURE05_DASHBOARD_BASE ?? "http://127.0.0.1:3001";
 const PUBLIC = process.env.CLOSURE05_PUBLIC_BASE ?? "http://127.0.0.1:3010";
 
-const TARGET = { from: "ISB", to: "DXB", airline: "Air Arabia" };
+const TARGET = {
+  from: process.env.CLOSURE05_FEATURED_FROM ?? "ISB",
+  to: process.env.CLOSURE05_FEATURED_TO ?? "SHJ",
+  airline: process.env.CLOSURE05_FEATURED_AIRLINE ?? "FLY JINNAH",
+};
 const SUPPORT_ASSET_KEY = "support_cta_background";
 const STAMP = Date.now();
 
 const report = {
   captured_at: new Date().toISOString(),
-  environment: "local_closure05_worktree",
+  environment: LARAVEL.includes("jetpakistan.pk") ? "production" : "local_closure05_worktree",
   bases: { laravel: LARAVEL, dashboard: DASHBOARD, public: PUBLIC },
   gates: {},
   steps: [],
@@ -39,6 +43,17 @@ const report = {
 
 function gate(name, pass, detail = {}) {
   report.gates[name] = { pass, ...detail };
+}
+
+async function safeShot(page, file, key) {
+  try {
+    await page.screenshot({ path: file, fullPage: false, timeout: 120000, animations: "disabled" });
+    report.screenshots[key] = path.relative(OUT_DIR, file).replace(/\\/g, "/");
+    return true;
+  } catch (e) {
+    report.console.push({ type: "warning", text: `screenshot_fail:${key}:${String(e?.message || e).slice(0, 120)}` });
+    return false;
+  }
 }
 
 function ensureDirs() {
@@ -169,7 +184,14 @@ async function main() {
   ensureDirs();
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ baseURL: DASHBOARD });
+  await context.route("**/*", (route) => {
+    const type = route.request().resourceType();
+    if (type === "font" || type === "media") return route.abort();
+    return route.continue();
+  });
   const page = await context.newPage();
+  page.setDefaultNavigationTimeout(120000);
+  page.setDefaultTimeout(60000);
   const request = context.request;
 
   page.on("console", (msg) => {
@@ -238,18 +260,21 @@ async function main() {
     const priceInputs = await page.locator('input[name*="price"], input[placeholder*="price" i]').count();
     gate("FEATURED_CMS_NO_MANUAL_PRICE_INPUT", priceInputs === 0, { price_input_count: priceInputs });
 
-    await page.screenshot({ path: path.join(SCREEN_DIR, "cms-featured-desktop.png"), fullPage: true });
-    report.screenshots.cms_featured_desktop = "screenshots/cms-featured-desktop.png";
+    await safeShot(page, path.join(SCREEN_DIR, "cms-featured-desktop.png"), "cms_featured_desktop");
 
     const tablet = await browser.newContext({ ...devices["iPad (gen 7)"], storageState: undefined });
+    await tablet.route("**/*", (route) => {
+      const type = route.request().resourceType();
+      if (type === "font" || type === "media") return route.abort();
+      return route.continue();
+    });
     await tablet.addCookies(jarToPlaywrightCookies(jar));
     const tabletPage = await tablet.newPage();
     await tabletPage.goto(`${DASHBOARD}/admin/dashboard/cms/sections#jp-section-featured-deals`, {
       waitUntil: "domcontentloaded",
       timeout: 120000,
     });
-    await tabletPage.screenshot({ path: path.join(SCREEN_DIR, "cms-featured-tablet.png"), fullPage: true });
-    report.screenshots.cms_featured_tablet = "screenshots/cms-featured-tablet.png";
+    await safeShot(tabletPage, path.join(SCREEN_DIR, "cms-featured-tablet.png"), "cms_featured_tablet");
     await tablet.close();
 
     const previewBegin = await apiJson(jar, "POST", `${LARAVEL}/admin/page-settings/home/preview?format=json`);
@@ -267,8 +292,7 @@ async function main() {
 
     const previewPageUrl = `${PUBLIC}/?jp_preview=1&jp_preview_token=${encodeURIComponent(previewToken ?? "")}#jp-section-featured-deals`;
     await page.goto(previewPageUrl, { waitUntil: "domcontentloaded", timeout: 120000 });
-    await page.screenshot({ path: path.join(SCREEN_DIR, "featured-preview-desktop.png"), fullPage: true });
-    report.screenshots.featured_preview_desktop = "screenshots/featured-preview-desktop.png";
+    await safeShot(page, path.join(SCREEN_DIR, "featured-preview-desktop.png"), "featured_preview_desktop");
 
     const dealHref = previewDeal?.href ?? `/groups/${resolved?.public_id}`;
     const publicPage = await context.newPage();
@@ -283,16 +307,19 @@ async function main() {
       url: publicPage.url(),
       expected_public_id: resolved?.public_id,
     });
-    await publicPage.reload();
-    await publicPage.goBack();
-    await publicPage.screenshot({ path: path.join(SCREEN_DIR, "featured-detail-desktop.png") });
-    report.screenshots.featured_detail_desktop = "screenshots/featured-detail-desktop.png";
+    await publicPage.reload({ waitUntil: "domcontentloaded", timeout: 120000 });
+    await publicPage.goBack({ waitUntil: "domcontentloaded", timeout: 120000 });
+    await safeShot(publicPage, path.join(SCREEN_DIR, "featured-detail-desktop.png"), "featured_detail_desktop");
 
     const mobile = await browser.newContext({ ...devices["iPhone 13"] });
+    await mobile.route("**/*", (route) => {
+      const type = route.request().resourceType();
+      if (type === "font" || type === "media") return route.abort();
+      return route.continue();
+    });
     const mobilePage = await mobile.newPage();
     await mobilePage.goto(previewPageUrl, { waitUntil: "domcontentloaded", timeout: 120000 });
-    await mobilePage.screenshot({ path: path.join(SCREEN_DIR, "featured-preview-mobile.png") });
-    report.screenshots.featured_preview_mobile = "screenshots/featured-preview-mobile.png";
+    await safeShot(mobilePage, path.join(SCREEN_DIR, "featured-preview-mobile.png"), "featured_preview_mobile");
     await mobile.close();
 
     const assetsBefore = await apiJson(jar, "GET", `${LARAVEL}/admin/page-settings/home?format=json`);
@@ -344,8 +371,7 @@ async function main() {
       waitUntil: "domcontentloaded",
       timeout: 120000,
     });
-    await page.screenshot({ path: path.join(SCREEN_DIR, "support-cta-preview-desktop.png"), fullPage: true });
-    report.screenshots.support_cta_preview_desktop = "screenshots/support-cta-preview-desktop.png";
+    await safeShot(page, path.join(SCREEN_DIR, "support-cta-preview-desktop.png"), "support_cta_preview_desktop");
 
     let deleteOk = false;
     if (uploadedAssetId) {

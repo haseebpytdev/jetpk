@@ -1,5 +1,5 @@
 {
-  "audited_at": "2026-09-08T17:33:48.562Z",
+  "audited_at": "2026-09-08T19:26:08.112Z",
   "environment": "production_read_only",
   "homepage_api": "https://jetpakistan.pk/api/public/content/homepage",
   "search_base": "https://jetpakistan.pk",
@@ -17,22 +17,22 @@
         "ISB"
       ],
       "per_origin_minimums": {
-        "KHI": 59919.17,
-        "LHE": 104278.24,
-        "ISB": 91572.49
+        "KHI": 60085.77,
+        "LHE": 105638.78,
+        "ISB": 91739.08
       },
       "winning_origin": "KHI",
-      "winning_price": 59919.17,
+      "winning_price": 60085.77,
       "winning_date": "2026-09-15",
-      "displayed_price": 59919,
+      "displayed_price": 60086,
       "public_link_origin": "KHI",
       "public_link_destination": "DXB",
       "public_link_date": "2026-09-15",
       "OFFERS_CONSIDERED": 3,
-      "MIN_ELIGIBLE_CUSTOMER_PRICE": 59919.17,
+      "MIN_ELIGIBLE_CUSTOMER_PRICE": 60085.77,
       "WINNING_PROVIDER": null,
       "WINNING_DATE": "2026-09-15",
-      "DISPLAYED_PRICE": 59919,
+      "DISPLAYED_PRICE": 60086,
       "PRICE_MATCH": true,
       "ORIGIN_MATCH": true,
       "DATE_MATCH": true,
@@ -48,22 +48,22 @@
         "ISB"
       ],
       "per_origin_minimums": {
-        "KHI": 67896.36,
-        "LHE": 99577.44,
-        "ISB": 99577.44
+        "KHI": 68062.96,
+        "LHE": 100799.15,
+        "ISB": 100799.15
       },
       "winning_origin": "KHI",
-      "winning_price": 67896.36,
+      "winning_price": 68062.96,
       "winning_date": "2026-09-15",
-      "displayed_price": 67896,
+      "displayed_price": 68063,
       "public_link_origin": "KHI",
       "public_link_destination": "JED",
       "public_link_date": "2026-09-15",
       "OFFERS_CONSIDERED": 3,
-      "MIN_ELIGIBLE_CUSTOMER_PRICE": 67896.36,
+      "MIN_ELIGIBLE_CUSTOMER_PRICE": 68062.96,
       "WINNING_PROVIDER": null,
       "WINNING_DATE": "2026-09-15",
-      "DISPLAYED_PRICE": 67896,
+      "DISPLAYED_PRICE": 68063,
       "PRICE_MATCH": true,
       "ORIGIN_MATCH": true,
       "DATE_MATCH": true,
@@ -79,22 +79,22 @@
         "ISB"
       ],
       "per_origin_minimums": {
-        "KHI": 141773.53,
-        "LHE": 177775.02,
-        "ISB": 192529.9
+        "KHI": 141940.13,
+        "LHE": 178052.68,
+        "ISB": 173537.91
       },
       "winning_origin": "KHI",
-      "winning_price": 141773.53,
+      "winning_price": 141940.13,
       "winning_date": "2026-09-15",
-      "displayed_price": 141774,
+      "displayed_price": 141940,
       "public_link_origin": "KHI",
       "public_link_destination": "LHR",
       "public_link_date": "2026-09-15",
       "OFFERS_CONSIDERED": 3,
-      "MIN_ELIGIBLE_CUSTOMER_PRICE": 141773.53,
+      "MIN_ELIGIBLE_CUSTOMER_PRICE": 141940.13,
       "WINNING_PROVIDER": null,
       "WINNING_DATE": "2026-09-15",
-      "DISPLAYED_PRICE": 141774,
+      "DISPLAYED_PRICE": 141940,
       "PRICE_MATCH": true,
       "ORIGIN_MATCH": true,
       "DATE_MATCH": true,
@@ -110,22 +110,22 @@
         "ISB"
       ],
       "per_origin_minimums": {
-        "KHI": 75718.06,
-        "LHE": 118327.87,
-        "ISB": 115828.92
+        "KHI": 75884.66,
+        "LHE": 119966.07,
+        "ISB": 117467.12
       },
       "winning_origin": "KHI",
-      "winning_price": 75718.06,
+      "winning_price": 75884.66,
       "winning_date": "2026-09-15",
-      "displayed_price": 75718,
+      "displayed_price": 75885,
       "public_link_origin": "KHI",
       "public_link_destination": "IST",
       "public_link_date": "2026-09-15",
       "OFFERS_CONSIDERED": 3,
-      "MIN_ELIGIBLE_CUSTOMER_PRICE": 75718.06,
+      "MIN_ELIGIBLE_CUSTOMER_PRICE": 75884.66,
       "WINNING_PROVIDER": null,
       "WINNING_DATE": "2026-09-15",
-      "DISPLAYED_PRICE": 75718,
+      "DISPLAYED_PRICE": 75885,
       "PRICE_MATCH": true,
       "ORIGIN_MATCH": true,
       "DATE_MATCH": true,
@@ -134,11 +134,5 @@
       "date_match": true
     }
   ],
-  "result": "PASS",
-  "production_fare_refresh": {
-    "at": "2026-09-08T17:34:42.254Z",
-    "http": 500,
-    "success": null,
-    "failed": null
-  }
+  "result": "PASS"
 }

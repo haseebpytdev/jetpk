@@ -1,5 +1,5 @@
 {
-  "audited_at": "2026-09-08T17:33:32.809Z",
+  "audited_at": "2026-09-08T19:25:35.861Z",
   "environment": "production_read_only",
   "homepage_api": "https://jetpakistan.pk/api/public/content/homepage",
   "search_base": "https://jetpakistan.pk",
@@ -13,23 +13,40 @@
       "search_date_context": "2026-09-15",
       "OFFERS_CONSIDERED": 25,
       "ELIGIBLE_OFFERS": 25,
-      "MIN_ELIGIBLE_CUSTOMER_PRICE": 104278.24,
+      "MIN_ELIGIBLE_CUSTOMER_PRICE": 105638.78,
       "WINNING_PROVIDER": "sabre",
       "WINNING_DATE": "2026-09-15",
-      "DISPLAYED_PRICE": 104278,
+      "DISPLAYED_PRICE": 105639,
       "PRICE_MATCH": true,
       "DATE_MATCH": true,
       "CTA_MATCH": true,
-      "search_id": "1550550b-6146-4109-98da-cb01b3f42d4e",
+      "search_id": "ad714c04-3efe-4139-97d6-347aa77ac269",
       "search_status": "ready",
       "offers_considered": 25,
       "eligible_offers": 25,
-      "min_eligible_customer_price": 104278.24,
+      "min_eligible_customer_price": 105638.78,
       "winning_provider": "sabre",
       "winning_date": "2026-09-15",
       "pages_fetched": 1,
-      "suppliers": [],
-      "displayed_price": 104278,
+      "suppliers": [
+        {
+          "name": "sabre",
+          "skip_reason": null
+        },
+        {
+          "name": "pia_ndc",
+          "skip_reason": null
+        },
+        {
+          "name": "smtp",
+          "skip_reason": "non_flight_provider"
+        },
+        {
+          "name": "al_haider",
+          "skip_reason": "non_flight_provider"
+        }
+      ],
+      "displayed_price": 105639,
       "cta_url": "/flights/results?from=LHE&to=DXB&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
       "price_match": true,
       "date_match": true,
@@ -43,23 +60,40 @@
       "search_date_context": "2026-09-15",
       "OFFERS_CONSIDERED": 25,
       "ELIGIBLE_OFFERS": 25,
-      "MIN_ELIGIBLE_CUSTOMER_PRICE": 99577.44,
+      "MIN_ELIGIBLE_CUSTOMER_PRICE": 100799.15,
       "WINNING_PROVIDER": "sabre",
       "WINNING_DATE": "2026-09-15",
-      "DISPLAYED_PRICE": 99577,
+      "DISPLAYED_PRICE": 100799,
       "PRICE_MATCH": true,
       "DATE_MATCH": true,
       "CTA_MATCH": true,
-      "search_id": "ce8fc37f-d93c-45b9-98a0-afb3cce57ba3",
+      "search_id": "c70d2e0e-7b1c-4d57-a99a-1b11c0733284",
       "search_status": "ready",
       "offers_considered": 25,
       "eligible_offers": 25,
-      "min_eligible_customer_price": 99577.44,
+      "min_eligible_customer_price": 100799.15,
       "winning_provider": "sabre",
       "winning_date": "2026-09-15",
       "pages_fetched": 1,
-      "suppliers": [],
-      "displayed_price": 99577,
+      "suppliers": [
+        {
+          "name": "sabre",
+          "skip_reason": null
+        },
+        {
+          "name": "pia_ndc",
+          "skip_reason": null
+        },
+        {
+          "name": "smtp",
+          "skip_reason": "non_flight_provider"
+        },
+        {
+          "name": "al_haider",
+          "skip_reason": "non_flight_provider"
+        }
+      ],
+      "displayed_price": 100799,
       "cta_url": "/flights/results?from=LHE&to=JED&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
       "price_match": true,
       "date_match": true,
@@ -73,23 +107,40 @@
       "search_date_context": "2026-09-15",
       "OFFERS_CONSIDERED": 25,
       "ELIGIBLE_OFFERS": 25,
-      "MIN_ELIGIBLE_CUSTOMER_PRICE": 192529.9,
+      "MIN_ELIGIBLE_CUSTOMER_PRICE": 173537.91,
       "WINNING_PROVIDER": "sabre",
       "WINNING_DATE": "2026-09-15",
-      "DISPLAYED_PRICE": 192530,
+      "DISPLAYED_PRICE": 173538,
       "PRICE_MATCH": true,
       "DATE_MATCH": true,
       "CTA_MATCH": true,
-      "search_id": "e1fce974-d27f-404f-a7ce-ec7928a578a3",
+      "search_id": "551f55ac-a4b9-4b95-af7d-402f993e1977",
       "search_status": "ready",
       "offers_considered": 25,
       "eligible_offers": 25,
-      "min_eligible_customer_price": 192529.9,
+      "min_eligible_customer_price": 173537.91,
       "winning_provider": "sabre",
       "winning_date": "2026-09-15",
       "pages_fetched": 1,
-      "suppliers": [],
-      "displayed_price": 192530,
+      "suppliers": [
+        {
+          "name": "sabre",
+          "skip_reason": null
+        },
+        {
+          "name": "pia_ndc",
+          "skip_reason": null
+        },
+        {
+          "name": "smtp",
+          "skip_reason": "non_flight_provider"
+        },
+        {
+          "name": "al_haider",
+          "skip_reason": "non_flight_provider"
+        }
+      ],
+      "displayed_price": 173538,
       "cta_url": "/flights/results?from=ISB&to=LHR&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
       "price_match": true,
       "date_match": true,
@@ -103,34 +154,45 @@
       "search_date_context": "2026-09-15",
       "OFFERS_CONSIDERED": 25,
       "ELIGIBLE_OFFERS": 25,
-      "MIN_ELIGIBLE_CUSTOMER_PRICE": 65675.08,
+      "MIN_ELIGIBLE_CUSTOMER_PRICE": 65841.67,
       "WINNING_PROVIDER": "sabre",
       "WINNING_DATE": "2026-09-15",
-      "DISPLAYED_PRICE": 65675,
+      "DISPLAYED_PRICE": 65842,
       "PRICE_MATCH": true,
       "DATE_MATCH": true,
       "CTA_MATCH": true,
-      "search_id": "6ac867ab-dcb2-4c1f-8656-4797c62be3de",
+      "search_id": "e49bde9b-3cb5-4d66-b759-cea12f0ca5e8",
       "search_status": "ready",
       "offers_considered": 25,
       "eligible_offers": 25,
-      "min_eligible_customer_price": 65675.08,
+      "min_eligible_customer_price": 65841.67,
       "winning_provider": "sabre",
       "winning_date": "2026-09-15",
       "pages_fetched": 1,
-      "suppliers": [],
-      "displayed_price": 65675,
+      "suppliers": [
+        {
+          "name": "sabre",
+          "skip_reason": null
+        },
+        {
+          "name": "pia_ndc",
+          "skip_reason": null
+        },
+        {
+          "name": "smtp",
+          "skip_reason": "non_flight_provider"
+        },
+        {
+          "name": "al_haider",
+          "skip_reason": "non_flight_provider"
+        }
+      ],
+      "displayed_price": 65842,
       "cta_url": "/flights/results?from=KHI&to=RUH&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
       "price_match": true,
       "date_match": true,
       "cta_match": true
     }
   ],
-  "result": "PASS",
-  "production_fare_refresh": {
-    "at": "2026-09-08T17:34:42.254Z",
-    "http": 500,
-    "success": null,
-    "failed": null
-  }
+  "result": "PASS"
 }

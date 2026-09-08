@@ -1,0 +1,21 @@
+Closure-05 postdeploy operational remediation
+Date: 2026-09-09T00:25+05:00
+Host: vmi3400777 (185.215.166.176)
+
+Symptom:
+- jetpk:homepage-fare-provenance-audit search_status=failed
+- flight_search.progressive.failed ErrorException: file_put_contents(...storage/framework/cache/data/...): Permission denied
+- Public /laravel/flights/results/data redirected to access-denied?reason=service-error
+
+Root cause:
+- Subdirectory db/0c under storage/framework/cache/data owned root:root after deploy extract
+
+Fix:
+- chown -R pkjetp:pkjetp /home/pkjetp/jetpk_app/storage/framework/cache
+- chown -R pkjetp:pkjetp /home/pkjetp/jetpk_app/storage/framework/views
+- chown -R pkjetp:pkjetp /home/pkjetp/jetpk_app/bootstrap/cache
+
+Verification:
+- Debug refreshRouteItem LHE→DXB: status=success, result_count=30
+- artisan jetpk:homepage-fare-provenance-audit: all trending+destination price_match=true after jetpk:homepage-route-fares-refresh
+- run-closure-05-fare-provenance.mjs: TRENDING_TRUE_CHEAPEST=PASS, DESTINATION_TRUE_CHEAPEST=PASS

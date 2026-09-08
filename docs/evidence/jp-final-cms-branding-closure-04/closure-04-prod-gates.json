@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-09-08T13:33:05.778Z",
+  "captured_at": "2026-09-08T19:52:14.532Z",
   "authorized_sha": "20e921661da55e121a9b2353cba535b350613493",
   "production_build_id": null,
   "gates": {
@@ -80,8 +80,8 @@
       "detail": {
         "upload_http": 200,
         "file_size_bytes": 2304000,
-        "asset_key": "route_closure04_qa_1788874430584",
-        "asset_id": 20,
+        "asset_key": "route_closure04_qa_1788897199611",
+        "asset_id": 22,
         "published": false
       }
     },
@@ -89,15 +89,15 @@
       "pass": true,
       "detail": {
         "editor_http": 200,
-        "asset_key": "route_closure04_qa_1788874430584",
-        "asset_id": 20,
+        "asset_key": "route_closure04_qa_1788897199611",
+        "asset_id": 22,
         "publishing_status": "draft_ahead"
       }
     },
     "CMS_MEDIA_URL_HTTP_200": {
       "pass": true,
       "detail": {
-        "media_url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_closure04_qa_1788874430584-20260908133352.jpg",
+        "media_url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_closure04_qa_1788897199611-20260908195322.jpg",
         "curl_head_http": 200,
         "browser_get_http": 200
       }
@@ -108,7 +108,7 @@
         "preview_begin_http": 200,
         "preview_api_http": 200,
         "preview_image_http": 200,
-        "preview_url": "/?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg3NDczNH0.6dcfb6538636a1e661ab2d5cfc6fba8d8c37a52a235385f0f4200a6a0ed8ccef"
+        "preview_url": "/?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg5NzUwOX0.f05247bf73048b98a84e1ba816f91c5570dcc225d120836fa9c4fe406d882150"
       }
     },
     "TEST_FIXTURE_NOT_PUBLISHED": {
@@ -122,17 +122,17 @@
     "CMS_TEST_FIXTURE_CLEANUP": {
       "pass": true,
       "detail": {
-        "delete_http": 302,
+        "delete_http": 200,
         "asset_record_removed": true,
-        "asset_id": 20
+        "asset_id": 22
       }
     },
     "CMS_225MB_DRAFT_UPLOAD_CLEANUP": {
       "pass": true,
       "detail": {
         "composite": true,
-        "asset_key": "route_closure04_qa_1788874430584",
-        "asset_id": 20
+        "asset_key": "route_closure04_qa_1788897199611",
+        "asset_id": 22
       }
     },
     "ASK_ROMAN_URDU_GROUNDING": {
@@ -217,7 +217,7 @@
         "n": 1,
         "user": "Hello JetPakistan",
         "status": 200,
-        "message_id": 574,
+        "message_id": 614,
         "intent": "unknown",
         "has_body": true,
         "body_preview": "Assalamualaikum — I can help search flights or Groups, answer booking FAQs, or c"
@@ -226,7 +226,7 @@
         "n": 2,
         "user": "I need a one way flight from Lahore to Dubai",
         "status": 200,
-        "message_id": 576,
+        "message_id": 616,
         "intent": "flight_search",
         "has_body": true,
         "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
@@ -235,7 +235,7 @@
         "n": 3,
         "user": "Make it 12 October instead",
         "status": 200,
-        "message_id": 578,
+        "message_id": 618,
         "intent": "flight_search",
         "has_body": true,
         "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
@@ -244,7 +244,7 @@
         "n": 4,
         "user": "Show me the cheapest option",
         "status": 200,
-        "message_id": 580,
+        "message_id": 620,
         "intent": "flight_search",
         "has_body": true,
         "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
@@ -253,7 +253,7 @@
         "n": 5,
         "user": "What is your baggage allowance?",
         "status": 200,
-        "message_id": 582,
+        "message_id": 622,
         "intent": "flight_search",
         "has_body": true,
         "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
@@ -262,7 +262,7 @@
         "n": 6,
         "user": "How does refund process work?",
         "status": 200,
-        "message_id": 584,
+        "message_id": 624,
         "intent": "flight_search",
         "has_body": true,
         "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
@@ -271,7 +271,7 @@
         "n": 7,
         "user": "How do I contact support?",
         "status": 200,
-        "message_id": 586,
+        "message_id": 626,
         "intent": "knowledge",
         "has_body": true,
         "body_preview": "Here is what I found in JetPakistan help:\n\n**Cancellation and refund guidance**\n"
@@ -280,7 +280,7 @@
         "n": 8,
         "user": "mjhy LHE se DXB flight chahiye one way",
         "status": 200,
-        "message_id": 588,
+        "message_id": 628,
         "intent": "flight_search",
         "has_body": true,
         "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
@@ -289,7 +289,7 @@
         "n": 9,
         "user": "mera booking check krdo",
         "status": 200,
-        "message_id": 590,
+        "message_id": 630,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Of course — I can help you check a booking. Please send your booking reference a"
@@ -298,7 +298,7 @@
         "n": 10,
         "user": "My booking reference is CLOSURE04GUESS",
         "status": 200,
-        "message_id": 592,
+        "message_id": 632,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Of course — I can help you check a booking. Please send your booking reference a"
@@ -307,7 +307,7 @@
         "n": 11,
         "user": "My email is qa-not-real@jetpakistan.pk",
         "status": 200,
-        "message_id": 594,
+        "message_id": 634,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -316,7 +316,7 @@
         "n": 12,
         "user": "I already gave you the reference",
         "status": 200,
-        "message_id": 596,
+        "message_id": 636,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -325,7 +325,7 @@
         "n": 13,
         "user": "Tell me about group travel",
         "status": 200,
-        "message_id": 598,
+        "message_id": 638,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -334,7 +334,7 @@
         "n": 14,
         "user": "What documents do I need?",
         "status": 200,
-        "message_id": 600,
+        "message_id": 640,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -343,7 +343,7 @@
         "n": 15,
         "user": "Can I change my travel date?",
         "status": 200,
-        "message_id": 602,
+        "message_id": 642,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -352,7 +352,7 @@
         "n": 16,
         "user": "Show flights Karachi to London",
         "status": 200,
-        "message_id": 604,
+        "message_id": 644,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -361,7 +361,7 @@
         "n": 17,
         "user": "Make it economy class",
         "status": 200,
-        "message_id": 606,
+        "message_id": 646,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -370,7 +370,7 @@
         "n": 18,
         "user": "What payment methods do you accept?",
         "status": 200,
-        "message_id": 608,
+        "message_id": 648,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -379,7 +379,7 @@
         "n": 19,
         "user": "Thanks, that helps",
         "status": 200,
-        "message_id": 610,
+        "message_id": 650,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -388,7 +388,7 @@
         "n": 20,
         "user": "Goodbye",
         "status": 200,
-        "message_id": 612,
+        "message_id": 652,
         "intent": "booking_lookup",
         "has_body": true,
         "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
@@ -417,13 +417,13 @@
     "Screenshot ask_open_mobile: page.screenshot: caret: expected one of (hide|initial)"
   ],
   "cms_upload_evidence": {
-    "captured_at": "2026-09-08T13:33:48.758Z",
+    "captured_at": "2026-09-08T19:53:16.921Z",
     "authorized_sha": "20e921661da55e121a9b2353cba535b350613493",
     "steps": [
       {
         "step": "upload",
         "http": 200,
-        "asset_key": "route_closure04_qa_1788874430584",
+        "asset_key": "route_closure04_qa_1788897199611",
         "file_size_bytes": 2304000,
         "message": "Asset uploaded."
       },
@@ -432,15 +432,15 @@
         "http": 200,
         "found": true,
         "asset": {
-          "id": 20,
-          "asset_key": "route_closure04_qa_1788874430584",
+          "id": 22,
+          "asset_key": "route_closure04_qa_1788897199611",
           "alt_text": "Closure-04 QA draft-only upload",
-          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_closure04_qa_1788874430584-20260908133352.jpg",
-          "public_url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_closure04_qa_1788874430584-20260908133352.jpg",
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_closure04_qa_1788897199611-20260908195322.jpg",
+          "public_url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_closure04_qa_1788897199611-20260908195322.jpg",
           "meta": {
             "mime": "image/jpeg",
             "size": 2304000,
-            "original_name": "jp-closure04-2250kb-1788874430584.jpg",
+            "original_name": "jp-closure04-2250kb-1788897199611.jpg",
             "extension": "jpg"
           }
         },
@@ -456,14 +456,14 @@
         "step": "media_url",
         "curl_head": 200,
         "browser_get": 200,
-        "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_closure04_qa_1788874430584-20260908133352.jpg"
+        "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_closure04_qa_1788897199611-20260908195322.jpg"
       },
       {
         "step": "draft_preview",
         "preview_begin_http": 200,
         "preview_api_http": 200,
         "preview_image_http": 200,
-        "preview_url": "/?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg3NDczNH0.6dcfb6538636a1e661ab2d5cfc6fba8d8c37a52a235385f0f4200a6a0ed8ccef"
+        "preview_url": "/?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg5NzUwOX0.f05247bf73048b98a84e1ba816f91c5570dcc225d120836fa9c4fe406d882150"
       },
       {
         "step": "published_probe",
@@ -473,7 +473,7 @@
       },
       {
         "step": "cleanup",
-        "delete_http": 302,
+        "delete_http": 200,
         "record_gone": true,
         "media_after_delete": 302
       }

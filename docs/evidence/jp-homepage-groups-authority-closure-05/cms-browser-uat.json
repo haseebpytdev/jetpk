@@ -1,10 +1,10 @@
 {
-  "captured_at": "2026-09-08T17:46:36.564Z",
-  "environment": "local_closure05_worktree",
+  "captured_at": "2026-09-08T19:52:14.944Z",
+  "environment": "production",
   "bases": {
-    "laravel": "http://127.0.0.1:8000",
-    "dashboard": "http://127.0.0.1:3001",
-    "public": "http://127.0.0.1:3010"
+    "laravel": "https://jetpakistan.pk/laravel",
+    "dashboard": "https://jetpakistan.pk",
+    "public": "https://jetpakistan.pk"
   },
   "gates": {
     "CMS_ADMIN_AUTH": {
@@ -14,19 +14,19 @@
     "FEATURED_RESOLVED_PREVIEW": {
       "pass": true,
       "resolved": {
-        "id": "CLOSURE05-UAT-1",
+        "id": "ALH-3335",
         "source": "group_ticket",
-        "inventory_id": 1,
-        "public_id": "CLOSURE05-UAT-1",
-        "airline": "Air Arabia",
+        "inventory_id": 17,
+        "public_id": "ALH-3335",
+        "airline": "FLY JINNAH",
         "from": "ISB",
-        "to": "DXB",
-        "depart": "29 Sep 2026",
+        "to": "SHJ",
+        "depart": "10 Sep 2026",
         "arrive": "",
         "dur": "",
         "stops": 0,
-        "price": 89000,
-        "price_label": "PKR 89,000",
+        "price": 64000,
+        "price_label": "PKR 64,000",
         "title": "Closure-05 UAT Featured",
         "badge": "",
         "description": "",
@@ -35,9 +35,9 @@
         "image_asset_key": "",
         "media_source": "none",
         "availability": "available",
-        "resolution_rule": "exact_airline",
+        "resolution_rule": "global_fallback",
         "cms_slot_id": "closure05-uat-slot",
-        "href": "/groups/CLOSURE05-UAT-1"
+        "href": "/groups/ALH-3335"
       }
     },
     "FEATURED_PRICE_READ_ONLY": {
@@ -59,19 +59,19 @@
     "FEATURED_PREVIEW_PARITY": {
       "pass": true,
       "previewDeal": {
-        "id": "CLOSURE05-UAT-1",
+        "id": "ALH-3335",
         "source": "group_ticket",
-        "inventory_id": 1,
-        "public_id": "CLOSURE05-UAT-1",
-        "airline": "Air Arabia",
+        "inventory_id": 17,
+        "public_id": "ALH-3335",
+        "airline": "FLY JINNAH",
         "from": "ISB",
-        "to": "DXB",
-        "depart": "29 Sep 2026",
+        "to": "SHJ",
+        "depart": "10 Sep 2026",
         "arrive": "",
         "duration": "",
         "stops": 0,
-        "price": 89000,
-        "price_label": "PKR 89,000",
+        "price": 64000,
+        "price_label": "PKR 64,000",
         "title": "Closure-05 UAT Featured",
         "badge": "",
         "description": "",
@@ -79,23 +79,23 @@
         "image_alt": "",
         "media_source": "none",
         "availability": "available",
-        "resolution_rule": "exact_airline",
-        "href": "/groups/CLOSURE05-UAT-1"
+        "resolution_rule": "global_fallback",
+        "href": "/groups/ALH-3335"
       },
       "resolved": {
-        "id": "CLOSURE05-UAT-1",
+        "id": "ALH-3335",
         "source": "group_ticket",
-        "inventory_id": 1,
-        "public_id": "CLOSURE05-UAT-1",
-        "airline": "Air Arabia",
+        "inventory_id": 17,
+        "public_id": "ALH-3335",
+        "airline": "FLY JINNAH",
         "from": "ISB",
-        "to": "DXB",
-        "depart": "29 Sep 2026",
+        "to": "SHJ",
+        "depart": "10 Sep 2026",
         "arrive": "",
         "dur": "",
         "stops": 0,
-        "price": 89000,
-        "price_label": "PKR 89,000",
+        "price": 64000,
+        "price_label": "PKR 64,000",
         "title": "Closure-05 UAT Featured",
         "badge": "",
         "description": "",
@@ -104,37 +104,37 @@
         "image_asset_key": "",
         "media_source": "none",
         "availability": "available",
-        "resolution_rule": "exact_airline",
+        "resolution_rule": "global_fallback",
         "cms_slot_id": "closure05-uat-slot",
-        "href": "/groups/CLOSURE05-UAT-1"
+        "href": "/groups/ALH-3335"
       },
-      "preview_api": "http://127.0.0.1:8000/api/public/content/homepage?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjEyLCJleHAiOjE3ODg4ODk5Mjd9.48c5c8f573a639b8402620f1b4500dd7df7ce95c27045bc302f1a3c864f5744d"
+      "preview_api": "https://jetpakistan.pk/laravel/api/public/content/homepage?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg5NzQ3M30.23e5fe7dc36787e52161e66c3bf5afa4c79d8653b9569ba63344ec10aef8e952"
     },
     "FEATURED_DETAIL_CURRENT_NEXT_UI": {
       "pass": true,
-      "url": "http://127.0.0.1:3010/groups/CLOSURE05-UAT-1"
+      "url": "https://jetpakistan.pk/groups/ALH-3335"
     },
     "FEATURED_EXACT_INVENTORY_NAVIGATION": {
       "pass": true,
-      "url": "http://127.0.0.1:3010/groups/CLOSURE05-UAT-1",
-      "expected_public_id": "CLOSURE05-UAT-1"
+      "url": "https://jetpakistan.pk/groups/ALH-3335",
+      "expected_public_id": "ALH-3335"
     },
     "SUPPORT_CTA_UPLOAD": {
       "pass": true,
       "status": 200,
-      "asset_id": 4,
+      "asset_id": 21,
       "alt_text": "Closure-05 UAT support"
     },
     "SUPPORT_CTA_MEDIA_PREVIEW": {
       "pass": true,
-      "support_image": "/storage/client-assets/jetpk-assets/pages/home/support_cta_background-20260908174736.jpg?v=1788889656",
-      "preview_api": "http://127.0.0.1:8000/api/public/content/homepage?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjEyLCJleHAiOjE3ODg4ODk5NjV9.9f20e2039d6f6abc4dabf355db820a613069ba69cd07987d5824760edea8384d"
+      "support_image": "/storage/client-assets/jetpk-assets/pages/home/support_cta_background-20260908195313.jpg?v=1788897193",
+      "preview_api": "https://jetpakistan.pk/laravel/api/public/content/homepage?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg5NzQ5NX0.8c212a0ca0ca1cf93c48f6c277cdcefaffa4a0ead9e94fa6de6b60ed3743812c"
     },
     "SUPPORT_CTA_FALLBACK": {
       "pass": true,
       "image": null,
       "delete_ok": true,
-      "preview_api": "http://127.0.0.1:8000/api/public/content/homepage?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjEyLCJleHAiOjE3ODg4ODk5ODB9.56fd7e711847ab1a5cd71bbb4e9c10e8fd5f3b623f9663d2d50597d69a4ffd37"
+      "preview_api": "https://jetpakistan.pk/laravel/api/public/content/homepage?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg5NzQ5OX0.f20987a2db4c1ab3eccca7888739d630dc6868b89c307ee0fa6fb1d19dab77df"
     },
     "QA_STATE_RESTORED": {
       "pass": true,
@@ -144,7 +144,7 @@
   "steps": [
     {
       "step": "record_baseline",
-      "resolved_count": 1,
+      "resolved_count": 3,
       "slot_state": [
         {
           "airline": "Air Arabia",
@@ -175,7 +175,7 @@
           "price": 0,
           "enabled": "1",
           "sort_order": 1,
-          "id": "b4eb9277-fccf-4a03-aeac-8ed1b822d664",
+          "id": "64fc959f-83a3-489c-85d6-5038164dce38",
           "title": "",
           "badge": "",
           "description": "",
@@ -193,7 +193,7 @@
           "price": 0,
           "enabled": "1",
           "sort_order": 2,
-          "id": "1a0f4df6-f82a-4f81-81e4-ccac92c31659",
+          "id": "7b301a1f-3c22-445f-8d2e-7caafe695163",
           "title": "",
           "badge": "",
           "description": "",
@@ -210,19 +210,19 @@
         "airline": "Air Arabia"
       },
       "resolved": {
-        "id": "CLOSURE05-UAT-1",
+        "id": "ALH-3335",
         "source": "group_ticket",
-        "inventory_id": 1,
-        "public_id": "CLOSURE05-UAT-1",
-        "airline": "Air Arabia",
+        "inventory_id": 17,
+        "public_id": "ALH-3335",
+        "airline": "FLY JINNAH",
         "from": "ISB",
-        "to": "DXB",
-        "depart": "29 Sep 2026",
+        "to": "SHJ",
+        "depart": "10 Sep 2026",
         "arrive": "",
         "dur": "",
         "stops": 0,
-        "price": 89000,
-        "price_label": "PKR 89,000",
+        "price": 64000,
+        "price_label": "PKR 64,000",
         "title": "Closure-05 UAT Featured",
         "badge": "",
         "description": "",
@@ -231,16 +231,16 @@
         "image_asset_key": "",
         "media_source": "none",
         "availability": "available",
-        "resolution_rule": "exact_airline",
+        "resolution_rule": "global_fallback",
         "cms_slot_id": "closure05-uat-slot",
-        "href": "/groups/CLOSURE05-UAT-1"
+        "href": "/groups/ALH-3335"
       }
     }
   ],
   "network": [
     {
       "method": "GET",
-      "url": "http://127.0.0.1:8000/admin/page-settings/home?format=json",
+      "url": "https://jetpakistan.pk/laravel/admin/page-settings/home?format=json",
       "status": 200,
       "ok": true,
       "body_keys": [
@@ -262,7 +262,7 @@
     },
     {
       "method": "PATCH",
-      "url": "http://127.0.0.1:8000/admin/page-settings/home?format=json",
+      "url": "https://jetpakistan.pk/laravel/admin/page-settings/home?format=json",
       "status": 200,
       "ok": true,
       "body_keys": [
@@ -274,7 +274,7 @@
     },
     {
       "method": "GET",
-      "url": "http://127.0.0.1:8000/admin/page-settings/home?format=json",
+      "url": "https://jetpakistan.pk/laravel/admin/page-settings/home?format=json",
       "status": 200,
       "ok": true,
       "body_keys": [
@@ -296,7 +296,7 @@
     },
     {
       "method": "POST",
-      "url": "http://127.0.0.1:8000/admin/page-settings/home/preview?format=json",
+      "url": "https://jetpakistan.pk/laravel/admin/page-settings/home/preview?format=json",
       "status": 200,
       "ok": true,
       "body_keys": [
@@ -309,7 +309,7 @@
     },
     {
       "method": "GET",
-      "url": "http://127.0.0.1:8000/admin/page-settings/home?format=json",
+      "url": "https://jetpakistan.pk/laravel/admin/page-settings/home?format=json",
       "status": 200,
       "ok": true,
       "body_keys": [
@@ -331,7 +331,7 @@
     },
     {
       "method": "GET",
-      "url": "http://127.0.0.1:8000/admin/page-settings/home?format=json",
+      "url": "https://jetpakistan.pk/laravel/admin/page-settings/home?format=json",
       "status": 200,
       "ok": true,
       "body_keys": [
@@ -353,7 +353,7 @@
     },
     {
       "method": "PATCH",
-      "url": "http://127.0.0.1:8000/admin/page-settings/home?format=json",
+      "url": "https://jetpakistan.pk/laravel/admin/page-settings/home?format=json",
       "status": 200,
       "ok": true,
       "body_keys": [
@@ -365,7 +365,7 @@
     },
     {
       "method": "POST",
-      "url": "http://127.0.0.1:8000/admin/page-settings/home/preview?format=json",
+      "url": "https://jetpakistan.pk/laravel/admin/page-settings/home/preview?format=json",
       "status": 200,
       "ok": true,
       "body_keys": [
@@ -378,14 +378,14 @@
     },
     {
       "method": "DELETE",
-      "url": "http://127.0.0.1:8000/admin/page-settings/home/assets/4?force=1",
+      "url": "https://jetpakistan.pk/laravel/admin/page-settings/home/assets/21?force=1",
       "status": 200,
       "ok": true,
-      "asset_id": 4
+      "asset_id": 21
     },
     {
       "method": "POST",
-      "url": "http://127.0.0.1:8000/admin/page-settings/home/preview?format=json",
+      "url": "https://jetpakistan.pk/laravel/admin/page-settings/home/preview?format=json",
       "status": 200,
       "ok": true,
       "body_keys": [
@@ -398,7 +398,7 @@
     },
     {
       "method": "PATCH",
-      "url": "http://127.0.0.1:8000/admin/page-settings/home?format=json",
+      "url": "https://jetpakistan.pk/laravel/admin/page-settings/home?format=json",
       "status": 200,
       "ok": true,
       "body_keys": [
@@ -412,39 +412,87 @@
   "console": [
     {
       "type": "error",
-      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      "text": "Failed to load resource: net::ERR_FAILED"
     },
     {
       "type": "error",
-      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      "text": "Failed to load resource: net::ERR_FAILED"
     },
     {
       "type": "error",
-      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      "text": "Failed to load resource: net::ERR_FAILED"
     },
     {
       "type": "error",
-      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      "text": "Failed to load resource: net::ERR_FAILED"
     },
     {
       "type": "error",
-      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
     },
     {
       "type": "warning",
-      "text": "The resource http://127.0.0.1:3010/_next/static/css/efa246bd6145874a.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+      "text": "The resource https://jetpakistan.pk/dashboard-next/_next/static/media/636a5ac981f94f8b-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
     },
     {
       "type": "warning",
-      "text": "The resource http://127.0.0.1:3010/_next/static/css/a0e8f16c1ada1dcc.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+      "text": "The resource https://jetpakistan.pk/dashboard-next/_next/static/media/d3ebbfd689654d3a-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
     },
     {
       "type": "warning",
-      "text": "The resource http://127.0.0.1:3010/_next/static/css/efa246bd6145874a.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+      "text": "The resource https://jetpakistan.pk/dashboard-next/_next/static/media/db96af6b531dc71f-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
     },
     {
       "type": "warning",
-      "text": "The resource http://127.0.0.1:3010/_next/static/css/a0e8f16c1ada1dcc.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+      "text": "The resource https://jetpakistan.pk/dashboard-next/_next/static/media/98e207f02528a563-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "warning",
+      "text": "The resource https://jetpakistan.pk/_next/static/css/efa246bd6145874a.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+    },
+    {
+      "type": "warning",
+      "text": "The resource https://jetpakistan.pk/_next/static/css/a0e8f16c1ada1dcc.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
     }
   ],
   "screenshots": {
@@ -457,15 +505,15 @@
   },
   "restored": {},
   "inventory_ids": {
-    "inventory_id": 1,
-    "public_id": "CLOSURE05-UAT-1",
-    "airline": "Air Arabia",
-    "sector": "ISB-DXB",
-    "price": 89000,
-    "departure": "29 Sep 2026"
+    "inventory_id": 17,
+    "public_id": "ALH-3335",
+    "airline": "FLY JINNAH",
+    "sector": "ISB-SHJ",
+    "price": 64000,
+    "departure": "10 Sep 2026"
   },
   "asset_ids": {
-    "support_cta_upload": 4,
+    "support_cta_upload": 21,
     "support_cta_alt": "Closure-05 UAT support"
   },
   "CMS_BROWSER_PREDEPLOY_UAT": "PASS",

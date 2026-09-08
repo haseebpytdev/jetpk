@@ -1,0 +1,121 @@
+﻿{
+  "result": "FAIL",
+  "gates": {
+    "CMS_ADMIN_AUTH": {
+      "pass": true,
+      "login": "jp-dash-03-qa-admin@jetpakistan.pk"
+    },
+    "FEATURED_RESOLVED_PREVIEW": {
+      "pass": true,
+      "resolved": {
+        "id": "ALH-3335",
+        "source": "group_ticket",
+        "inventory_id": 17,
+        "public_id": "ALH-3335",
+        "airline": "FLY JINNAH",
+        "from": "ISB",
+        "to": "SHJ",
+        "depart": "10 Sep 2026",
+        "arrive": "",
+        "dur": "",
+        "stops": 0,
+        "price": 64000,
+        "price_label": "PKR 64,000",
+        "title": "Closure-05 UAT Featured",
+        "badge": "",
+        "description": "",
+        "image": null,
+        "image_alt": "",
+        "image_asset_key": "",
+        "media_source": "none",
+        "availability": "available",
+        "resolution_rule": "global_fallback",
+        "cms_slot_id": "closure05-uat-slot",
+        "href": "/groups/ALH-3335"
+      }
+    },
+    "FEATURED_PRICE_READ_ONLY": {
+      "pass": true,
+      "cms_item": {
+        "id": "closure05-uat-slot",
+        "from": "ISB",
+        "to": "DXB",
+        "airline": "Air Arabia",
+        "enabled": "1",
+        "sort_order": 0,
+        "title": "Closure-05 UAT Featured"
+      }
+    },
+    "FEATURED_CMS_NO_MANUAL_PRICE_INPUT": {
+      "pass": true,
+      "price_input_count": 0
+    },
+    "FEATURED_PREVIEW_PARITY": {
+      "pass": true,
+      "previewDeal": {
+        "id": "ALH-3335",
+        "source": "group_ticket",
+        "inventory_id": 17,
+        "public_id": "ALH-3335",
+        "airline": "FLY JINNAH",
+        "from": "ISB",
+        "to": "SHJ",
+        "depart": "10 Sep 2026",
+        "arrive": "",
+        "duration": "",
+        "stops": 0,
+        "price": 64000,
+        "price_label": "PKR 64,000",
+        "title": "Closure-05 UAT Featured",
+        "badge": "",
+        "description": "",
+        "image": null,
+        "image_alt": "",
+        "media_source": "none",
+        "availability": "available",
+        "resolution_rule": "global_fallback",
+        "href": "/groups/ALH-3335"
+      },
+      "resolved": {
+        "id": "ALH-3335",
+        "source": "group_ticket",
+        "inventory_id": 17,
+        "public_id": "ALH-3335",
+        "airline": "FLY JINNAH",
+        "from": "ISB",
+        "to": "SHJ",
+        "depart": "10 Sep 2026",
+        "arrive": "",
+        "dur": "",
+        "stops": 0,
+        "price": 64000,
+        "price_label": "PKR 64,000",
+        "title": "Closure-05 UAT Featured",
+        "badge": "",
+        "description": "",
+        "image": null,
+        "image_alt": "",
+        "image_asset_key": "",
+        "media_source": "none",
+        "availability": "available",
+        "resolution_rule": "global_fallback",
+        "cms_slot_id": "closure05-uat-slot",
+        "href": "/groups/ALH-3335"
+      },
+      "preview_api": "https://jetpakistan.pk/laravel/api/public/content/homepage?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg5NjI0Nn0.48afeb068b8361ee26cd44746608053136cc272c5021820b6d9580792e2e907f"
+    },
+    "FEATURED_DETAIL_CURRENT_NEXT_UI": {
+      "pass": true,
+      "url": "https://jetpakistan.pk/groups/ALH-3335"
+    },
+    "FEATURED_EXACT_INVENTORY_NAVIGATION": {
+      "pass": true,
+      "url": "https://jetpakistan.pk/groups/ALH-3335",
+      "expected_public_id": "ALH-3335"
+    },
+    "CMS_BROWSER_UAT_RUN": {
+      "pass": false,
+      "error": "page.reload: Timeout 30000ms exceeded.\nCall log:\n  - waiting for navigation until \"load\"\n    - navigated to \"https://jetpakistan.pk/groups/ALH-3335\"\n"
+    }
+  }
+}
