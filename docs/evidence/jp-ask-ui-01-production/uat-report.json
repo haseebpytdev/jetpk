@@ -1,0 +1,85 @@
+{
+  "captured_at": "2026-09-08T04:13:46.652Z",
+  "base": "https://jetpakistan.pk",
+  "screenshots": [
+    {
+      "name": "home-desktop-1280.png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "assistant-open-desktop-1280.png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "home-mobile-390.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "assistant-open-mobile-390.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "home-mobile-320.png",
+      "width": 320,
+      "height": 568
+    },
+    {
+      "name": "assistant-open-mobile-320.png",
+      "width": 320,
+      "height": 568
+    },
+    {
+      "name": "support-desktop-1280.png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "support-mobile-390.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "support-mobile-320.png",
+      "width": 320,
+      "height": 568
+    }
+  ],
+  "gates": {
+    "desktop-1280_human_support_fab": 0,
+    "desktop-1280_ask_fab": 1,
+    "desktop-1280_overflow": 0,
+    "quick_actions": 6,
+    "support_inside_assistant": true,
+    "escape_close": true,
+    "desktop-1280_ask_open_close": true,
+    "mobile-390_human_support_fab": 0,
+    "mobile-390_ask_fab": 1,
+    "mobile-390_overflow": 0,
+    "mobile-390_ask_open_close": true,
+    "mobile-320_human_support_fab": 0,
+    "mobile-320_ask_fab": 1,
+    "mobile-320_overflow": 0,
+    "mobile-320_ask_open_close": true,
+    "support_desktop-1280_faq_visible": true,
+    "support_desktop-1280_faq_interaction": false,
+    "support_desktop-1280_contact": true,
+    "support_desktop-1280_form": true,
+    "support_desktop-1280_overflow": 0,
+    "duplicate_empty_faq_area": 0,
+    "support_mobile-390_faq_visible": true,
+    "support_mobile-390_faq_interaction": true,
+    "support_mobile-390_contact": true,
+    "support_mobile-390_form": true,
+    "support_mobile-390_overflow": 0,
+    "support_mobile-320_faq_visible": true,
+    "support_mobile-320_faq_interaction": true,
+    "support_mobile-320_contact": true,
+    "support_mobile-320_form": true,
+    "support_mobile-320_overflow": 0
+  },
+  "errors": []
+}

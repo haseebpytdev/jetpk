@@ -1,0 +1,38 @@
+{
+  "phase": "JETPAKISTAN_ASK_UI_01_PRODUCTION_CLOSURE",
+  "captured_at": "2026-09-08T02:50:00+05:00",
+  "source_sha": "544904ab951fb142de3f429296f51d259d76caa0",
+  "remote_sha": "544904ab951fb142de3f429296f51d259d76caa0",
+  "production_sha": "544904ab951fb142de3f429296f51d259d76caa0",
+  "backup_id": "jp-ask-ui-01-20260907T211951Z",
+  "release": "jetpk-20260907T211800Z",
+  "production_build_id": "2YbbV6thMl8GnXCjJRqhr",
+  "http_health": { "/": 200, "/support": 200 },
+  "chat_probe": { "status": 200, "ok": true, "hasMessage": true },
+  "uat": {
+    "standalone_human_support_fab": 0,
+    "ask_jetpakistan_fab": 1,
+    "assistant_panel": true,
+    "talk_to_support_inside_assistant": true,
+    "chat_options_menu": true,
+    "support_faq_preview": true,
+    "support_faq_interaction": true,
+    "contact_card": true,
+    "support_form": true,
+    "horizontal_overflow_desktop": 0,
+    "horizontal_overflow_mobile_390": 0,
+    "horizontal_overflow_mobile_320": 0
+  },
+  "typecheck": {
+    "app_build_typecheck": "PASS",
+    "repo_typecheck": "FAIL_PREEXISTING",
+    "typecheck_failures_preexisting": 14,
+    "new_type_errors_introduced": 0
+  },
+  "runtime_probes": {
+    "handoff": "NOT_RUNTIME_PROBED",
+    "clear": "NOT_RUNTIME_PROBED",
+    "poll": "NOT_RUNTIME_PROBED"
+  },
+  "screenshot_note": "Playwright font-load screenshot timeouts on this host; DOM/UAT probes used instead. chat-probe.json captured."
+}

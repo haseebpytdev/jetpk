@@ -1,0 +1,101 @@
+{
+  "record": "JETPAKISTAN_ASK_UI_01_FINAL_EVIDENCE_CLOSURE",
+  "captured_at": "2026-09-08T09:10:00+05:00",
+  "branch": "phase/jp-master-unfinished-closure-10",
+  "engineering_sha": "544904ab951fb142de3f429296f51d259d76caa0",
+  "remote_sha": "544904ab951fb142de3f429296f51d259d76caa0",
+  "production_sha": "544904ab951fb142de3f429296f51d259d76caa0",
+  "backup_id": "jp-ask-ui-01-20260907T211951Z",
+  "release": "jetpk-20260907T211800Z",
+  "build_id": "2YbbV6thMl8GnXCjJRqhr",
+  "previous_build_id": "aeoGqTumStobR0wVb_3oc",
+  "deployed": "YES",
+  "application_code_changed": "NO",
+  "production_redeploy_required": "NO",
+  "successful_retry_console_log": "UNAVAILABLE",
+  "deployment_lineage": {
+    "artifacts": [
+      "deploy-lineage.txt",
+      "deploy-console.txt"
+    ],
+    "method": "SSH read-only runtime SHA + BUILD_ID; protected deploy already completed in prior phase"
+  },
+  "http_health": {
+    "/": 200,
+    "/support": 200,
+    "checked_at": "2026-09-08T09:06:00+05:00"
+  },
+  "screenshot_inventory": [
+    "home-desktop-1280.png",
+    "assistant-open-desktop-1280.png",
+    "home-mobile-390.png",
+    "assistant-open-mobile-390.png",
+    "home-mobile-320.png",
+    "assistant-open-mobile-320.png",
+    "support-desktop-1280.png",
+    "support-mobile-390.png",
+    "support-mobile-320.png"
+  ],
+  "screenshot_capture": {
+    "script": "capture-prod-screenshots.mjs",
+    "console": "capture-console.txt",
+    "note": "Font routes blocked to avoid Playwright screenshot hangs"
+  },
+  "dom_uat": {
+    "source": "dom-gates-probe.json",
+    "standalone_human_support_fab": 0,
+    "ask_jetpakistan_fab": 1,
+    "public_floating_dock": "PASS_ALLOWED",
+    "public_floating_dock_support_action": "PASS_ALLOWED",
+    "support_inside_assistant": "PASS",
+    "ask_open_close": "PASS",
+    "ask_escape_close": "PASS",
+    "quick_actions": 6,
+    "horizontal_overflow": 0,
+    "cut_off_components": 0,
+    "support_faq_visible": "PASS",
+    "support_faq_interaction": "PASS",
+    "contact_card": "PASS",
+    "support_form": "PASS",
+    "duplicate_empty_faq_area": 0,
+    "prod_mobile_390": "PASS",
+    "prod_mobile_320_overflow": "PASS",
+    "notes": {
+      "public_floating_dock": "Sub-lg quick-actions menu unchanged; Support is in-menu tile, not standalone headset FAB",
+      "duplicate_empty_faq_area": "No duplicate empty FAQ block on /support; nav/footer /faq links are expected",
+      "capture_script_timing": "uat-report.json home overflow on mobile used domcontentloaded timing; dom-gates-probe.json is authoritative with networkidle + hydration wait"
+    }
+  },
+  "runtime_probes": {
+    "chat_production_safe_probe": "PASS",
+    "chat_probe_artifact": "chat-probe.json",
+    "handoff_runtime_probe": "NOT_RUNTIME_PROBED",
+    "clear_runtime_probe": "NOT_RUNTIME_PROBED",
+    "poll_runtime_probe": "NOT_RUNTIME_PROBED"
+  },
+  "typecheck": {
+    "app_build_typecheck": "PASS",
+    "repo_typecheck": "FAIL_PREEXISTING",
+    "typecheck_failures_preexisting": 14,
+    "new_type_errors_introduced_by_544904ab": 0,
+    "note": "14 pre-existing errors in tests/regression/* only; next build PASS at engineering SHA"
+  },
+  "evidence_artifacts": [
+    "FINAL_EVIDENCE_CLOSURE.json",
+    "deploy-lineage.txt",
+    "deploy-console.txt",
+    "uat-report.json",
+    "dom-gates-probe.json",
+    "chat-probe.json",
+    "capture-console.txt",
+    "capture-prod-screenshots.mjs",
+    "probe-dom-gates.mjs"
+  ],
+  "postdeploy_verifier": {
+    "result": "PASS",
+    "verified_at": "2026-09-08T09:20:00+05:00",
+    "agent": "independent-grok-4.5-low-verifier",
+    "notes": "Re-capture required after initial Promise.race screenshot corruption; second verifier pass PASS with unique dimension-correct PNGs"
+  },
+  "status": "PASS"
+}

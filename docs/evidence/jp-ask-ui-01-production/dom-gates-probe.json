@@ -1,0 +1,57 @@
+{
+  "captured_at": "2026-09-08T04:06:48.128Z",
+  "base": "https://jetpakistan.pk",
+  "viewports": {
+    "desktop-1280": {
+      "home": {
+        "humanSupportFab": 0,
+        "askFab": 1,
+        "overflow": 0,
+        "bodyOverflow": 0
+      },
+      "assistant": {
+        "talkToSupport": true,
+        "chatOptions": true,
+        "quickCards": 6,
+        "panelOverflow": 0,
+        "escapeClose": true
+      }
+    },
+    "mobile-390": {
+      "home": {
+        "humanSupportFab": 0,
+        "askFab": 1,
+        "overflow": 0,
+        "bodyOverflow": 0
+      },
+      "assistant": {
+        "talkToSupport": true,
+        "chatOptions": true,
+        "quickCards": 6,
+        "panelOverflow": 0
+      }
+    },
+    "mobile-320": {
+      "home": {
+        "humanSupportFab": 0,
+        "askFab": 1,
+        "overflow": 0,
+        "bodyOverflow": 0
+      },
+      "assistant": {
+        "talkToSupport": true,
+        "chatOptions": true,
+        "quickCards": 6,
+        "panelOverflow": 0
+      }
+    }
+  },
+  "support": {
+    "faqVisible": true,
+    "faqExpanded": true,
+    "contactCard": true,
+    "supportForm": true,
+    "duplicateFaqLinks": 3,
+    "overflow": 0
+  }
+}

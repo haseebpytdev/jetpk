@@ -1,0 +1,14 @@
+PRODUCTION_RUNTIME_SHA=544904ab951fb142de3f429296f51d259d76caa0
+REMOTE_ENGINEERING_SHA=544904ab951fb142de3f429296f51d259d76caa0
+PUBLIC_BUILD_ID=2YbbV6thMl8GnXCjJRqhr
+PREVIOUS_PUBLIC_BUILD_ID=aeoGqTumStobR0wVb_3oc
+BACKUP_ID=jp-ask-ui-01-20260907T211951Z
+RELEASE=jetpk-20260907T211800Z
+RELEASE_PATH=/home/pkjetp/releases/jetpk-20260907T211800Z
+LARAVEL_APP=/home/pkjetp/jetpk_app
+PUBLIC_FRONTEND=/home/pkjetp/jetpk_app/frontend
+PM2_PUBLIC_PROCESS=jetpk-public-frontend
+LINEAGE_CAPTURED_AT=2026-09-08T04:05:06Z
+LINEAGE_METHOD=SSH_READ_ONLY_cat_runtime_sha_and_BUILD_ID
+SUCCESSFUL_RETRY_CONSOLE_LOG=UNAVAILABLE
+DEPLOY_CONSOLE_NOTE=deploy-console.txt preserves first failed activate attempt only; successful retry lineage confirmed via runtime SHA + BUILD_ID change
