@@ -1,0 +1,6 @@
+﻿# Production curl.exe probes (PowerShell-safe) - 2026-09-08
+# SHA: 20e921661da55e121a9b2353cba535b350613493
+
+HOMEPAGE_API => 200
+FAVICON_STORAGE => 200
+LOGO_STORAGE => 200

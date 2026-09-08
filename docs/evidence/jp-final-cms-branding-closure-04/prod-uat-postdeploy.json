@@ -1,0 +1,51 @@
+{
+  "ts": "2026-09-08T12:36:50.401Z",
+  "base": "https://jetpakistan.pk",
+  "authorized_sha": "20e921661da55e121a9b2353cba535b350613493",
+  "home_status": 200,
+  "support_status": 200,
+  "ai_health": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "enabled": true,
+      "gateway": "disabled",
+      "provider": "local_llama",
+      "mode": "STRUCTURED_FALLBACK",
+      "assistant_mode": "public",
+      "status": {
+        "mode": "public",
+        "runtime_on": true,
+        "public_enabled": true,
+        "internal_canary_enabled": false,
+        "language_engine": "hybrid_model_free",
+        "local_llm_required": false,
+        "flight_tool": true,
+        "group_tool": true,
+        "knowledge": true,
+        "human_handoff": true
+      }
+    }
+  },
+  "public_config": {
+    "status": 200,
+    "ai_enabled": true,
+    "logo_url": "/storage/agencies/1/branding/DQ2UqebIhLm3bub7p1Z3iUnAbWdGojOKzc23Fgk1.png?v=1788851020",
+    "brand_name": "JetPakistan"
+  },
+  "ask_fab_visible": true,
+  "dock_visible": true,
+  "fab_overlap": false,
+  "ask_fab_bottom_css": 86,
+  "header_logo_src": "/storage/agencies/1/branding/DQ2UqebIhLm3bub7p1Z3iUnAbWdGojOKzc23Fgk1.png?v=1788851020",
+  "header_logo_uses_storage": true,
+  "screenshot_home_error": "page.screenshot: Timeout 5000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n",
+  "ask_panel_visible": true,
+  "screenshot_ask_error": "page.screenshot: Timeout 5000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n",
+  "trending_cta_href_sample": null,
+  "ai_chat_probe": {
+    "status": 200,
+    "has_message": true,
+    "message_id": 532
+  }
+}

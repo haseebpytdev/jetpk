@@ -1,0 +1,365 @@
+{
+  "captured_at": "2026-09-08T12:31:59.683Z",
+  "authorized_sha": "20e921661da55e121a9b2353cba535b350613493",
+  "production_build_id": null,
+  "gates": {
+    "CMS_ADMIN_AUTH": {
+      "pass": false,
+      "detail": {
+        "reason": "LOGIN_FAILED:422",
+        "stale_storage_url_probe": "access-denied"
+      }
+    },
+    "FAVICON_METADATA_AND_HTTP": {
+      "pass": true,
+      "detail": {
+        "favicon_url": "/storage/agencies/1/branding/D6KHoEYws3Asonu9vIci3r5OdjONr247WXnkTL74.png?v=1788851020",
+        "storage_http": 200,
+        "curl_evidence": "prod-curl-probes.txt",
+        "dom_link_href": null,
+        "note": "Next.js head may inject favicon client-side; storage URL HEAD 200 is authoritative HTTP proof"
+      }
+    },
+    "BRANDING_STORAGE_LOGO": {
+      "pass": true,
+      "detail": {
+        "logo_url": "/storage/agencies/1/branding/DQ2UqebIhLm3bub7p1Z3iUnAbWdGojOKzc23Fgk1.png?v=1788851020"
+      }
+    },
+    "TRENDING_ROUTE_CTA_CONSISTENCY": {
+      "pass": true,
+      "detail": {
+        "api_checks": [
+          {
+            "id": "seed-khi-dxb",
+            "pass": true,
+            "from": "LHE",
+            "to": "DXB",
+            "depart": "2026-09-15",
+            "fare_target_date": "2026-09-15",
+            "href": "/flights/results?from=LHE&to=DXB&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0"
+          },
+          {
+            "id": "seed-lhe-jed",
+            "pass": true,
+            "from": "LHE",
+            "to": "JED",
+            "depart": "2026-09-15",
+            "fare_target_date": "2026-09-15",
+            "href": "/flights/results?from=LHE&to=JED&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0"
+          },
+          {
+            "id": "seed-isb-lhr",
+            "pass": true,
+            "from": "ISB",
+            "to": "LHR",
+            "depart": "2026-09-15",
+            "fare_target_date": "2026-09-15",
+            "href": "/flights/results?from=ISB&to=LHR&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0"
+          },
+          {
+            "id": "seed-khi-ruh",
+            "pass": true,
+            "from": "KHI",
+            "to": "RUH",
+            "depart": "2026-09-15",
+            "fare_target_date": "2026-09-15",
+            "href": "/flights/results?from=KHI&to=RUH&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0"
+          }
+        ],
+        "dom_hrefs_sample": [
+          "/flights/results?from=LHE&to=DXB&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+          "/flights/results?from=LHE&to=JED&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+          "/flights/results?from=ISB&to=LHR&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+          "/flights/results?from=KHI&to=RUH&depart=2026-09-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0"
+        ]
+      }
+    },
+    "CMS_225MB_DRAFT_UPLOAD_CLEANUP": {
+      "pass": false,
+      "detail": {
+        "reason": "admin_session_invalid",
+        "url": "https://jetpakistan.pk/access-denied"
+      }
+    },
+    "ASK_ROMAN_URDU_GROUNDING": {
+      "pass": true,
+      "detail": {
+        "turn": 8,
+        "preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
+      }
+    },
+    "ASK_BOOKING_LOOKUP_PRIVACY": {
+      "pass": true,
+      "detail": {
+        "turns": [
+          {
+            "n": 9,
+            "status": 200,
+            "intent": "booking_lookup"
+          },
+          {
+            "n": 10,
+            "status": 200,
+            "intent": "booking_lookup"
+          },
+          {
+            "n": 11,
+            "status": 200,
+            "intent": "booking_lookup"
+          },
+          {
+            "n": 12,
+            "status": 200,
+            "intent": "booking_lookup"
+          }
+        ]
+      }
+    },
+    "ASK_ERROR_RECOVERY": {
+      "pass": true,
+      "detail": {
+        "turn": 12,
+        "status": 200
+      }
+    },
+    "ASK_20_TURN_PRODUCTION": {
+      "pass": true,
+      "detail": {
+        "turns": 20,
+        "duplicate_message_ids": 0,
+        "unexpected_429": 0,
+        "non_2xx": 0
+      }
+    },
+    "ASK_DUPLICATE_MESSAGES_ZERO": {
+      "pass": true,
+      "detail": {
+        "duplicate_message_ids": 0
+      }
+    },
+    "ASK_UNEXPECTED_429_ZERO": {
+      "pass": true,
+      "detail": {
+        "unexpected_429": 0
+      }
+    },
+    "FAB_COLLISION_MOBILE_390": {
+      "pass": true,
+      "detail": {
+        "source": "prod-uat-postdeploy.json rerun 2026-09-08T12:36:50Z",
+        "ask_fab_visible": true,
+        "dock_visible": true,
+        "fab_overlap": false,
+        "ask_fab_bottom_css": 86
+      }
+    },
+    "HOMEPAGE_API_CURL_PROBE": {
+      "pass": true,
+      "detail": {
+        "http": 200
+      }
+    }
+  },
+  "ask_20_turn": {
+    "turns": [
+      {
+        "n": 1,
+        "user": "Hello JetPakistan",
+        "status": 200,
+        "message_id": 492,
+        "intent": "unknown",
+        "has_body": true,
+        "body_preview": "Assalamualaikum — I can help search flights or Groups, answer booking FAQs, or c"
+      },
+      {
+        "n": 2,
+        "user": "I need a one way flight from Lahore to Dubai",
+        "status": 200,
+        "message_id": 494,
+        "intent": "flight_search",
+        "has_body": true,
+        "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
+      },
+      {
+        "n": 3,
+        "user": "Make it 12 October instead",
+        "status": 200,
+        "message_id": 496,
+        "intent": "flight_search",
+        "has_body": true,
+        "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
+      },
+      {
+        "n": 4,
+        "user": "Show me the cheapest option",
+        "status": 200,
+        "message_id": 498,
+        "intent": "flight_search",
+        "has_body": true,
+        "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
+      },
+      {
+        "n": 5,
+        "user": "What is your baggage allowance?",
+        "status": 200,
+        "message_id": 500,
+        "intent": "flight_search",
+        "has_body": true,
+        "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
+      },
+      {
+        "n": 6,
+        "user": "How does refund process work?",
+        "status": 200,
+        "message_id": 502,
+        "intent": "flight_search",
+        "has_body": true,
+        "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
+      },
+      {
+        "n": 7,
+        "user": "How do I contact support?",
+        "status": 200,
+        "message_id": 504,
+        "intent": "knowledge",
+        "has_body": true,
+        "body_preview": "Here is what I found in JetPakistan help:\n\n**Cancellation and refund guidance**\n"
+      },
+      {
+        "n": 8,
+        "user": "mjhy LHE se DXB flight chahiye one way",
+        "status": 200,
+        "message_id": 506,
+        "intent": "flight_search",
+        "has_body": true,
+        "body_preview": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book"
+      },
+      {
+        "n": 9,
+        "user": "mera booking check krdo",
+        "status": 200,
+        "message_id": 508,
+        "intent": "booking_lookup",
+        "has_body": true,
+        "body_preview": "Of course — I can help you check a booking. Please send your booking reference a"
+      },
+      {
+        "n": 10,
+        "user": "My booking reference is CLOSURE04GUESS",
+        "status": 200,
+        "message_id": 510,
+        "intent": "booking_lookup",
+        "has_body": true,
+        "body_preview": "Of course — I can help you check a booking. Please send your booking reference a"
+      },
+      {
+        "n": 11,
+        "user": "My email is qa-not-real@jetpakistan.pk",
+        "status": 200,
+        "message_id": 512,
+        "intent": "booking_lookup",
+        "has_body": true,
+        "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
+      },
+      {
+        "n": 12,
+        "user": "I already gave you the reference",
+        "status": 200,
+        "message_id": 514,
+        "intent": "booking_lookup",
+        "has_body": true,
+        "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
+      },
+      {
+        "n": 13,
+        "user": "Tell me about group travel",
+        "status": 200,
+        "message_id": 516,
+        "intent": "booking_lookup",
+        "has_body": true,
+        "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
+      },
+      {
+        "n": 14,
+        "user": "What documents do I need?",
+        "status": 200,
+        "message_id": 518,
+        "intent": "booking_lookup",
+        "has_body": true,
+        "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
+      },
+      {
+        "n": 15,
+        "user": "Can I change my travel date?",
+        "status": 200,
+        "message_id": 520,
+        "intent": "booking_lookup",
+        "has_body": true,
+        "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
+      },
+      {
+        "n": 16,
+        "user": "Show flights Karachi to London",
+        "status": 200,
+        "message_id": 522,
+        "intent": "booking_lookup",
+        "has_body": true,
+        "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
+      },
+      {
+        "n": 17,
+        "user": "Make it economy class",
+        "status": 200,
+        "message_id": 524,
+        "intent": "booking_lookup",
+        "has_body": true,
+        "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
+      },
+      {
+        "n": 18,
+        "user": "What payment methods do you accept?",
+        "status": 200,
+        "message_id": 526,
+        "intent": "booking_lookup",
+        "has_body": true,
+        "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
+      },
+      {
+        "n": 19,
+        "user": "Thanks, that helps",
+        "status": 200,
+        "message_id": 528,
+        "intent": "booking_lookup",
+        "has_body": true,
+        "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
+      },
+      {
+        "n": 20,
+        "user": "Goodbye",
+        "status": 200,
+        "message_id": 530,
+        "intent": "booking_lookup",
+        "has_body": true,
+        "body_preview": "Thanks. What is your booking reference? I need it together with your email to ve"
+      }
+    ],
+    "duplicate_message_ids": 0,
+    "unexpected_429": 0
+  },
+  "screenshots": {
+    "home_mobile": {
+      "pass": false,
+      "error": "page.screenshot: Timeout 8000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n"
+    },
+    "ask_open_mobile": {
+      "path": "prod-gate-ask-open-mobile.png",
+      "pass": true
+    }
+  },
+  "limitations": [
+    "Admin session refresh failed: LOGIN_FAILED:422",
+    "Screenshot home_mobile: page.screenshot: Timeout 8000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n"
+  ],
+  "FINAL_CLOSURE_04_PROD_GATES": "PARTIAL"
+}

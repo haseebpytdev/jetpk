@@ -1,0 +1,14 @@
+CLOSURE-04 OWNERSHIP PREFLIGHT — 2026-09-08T11:27:16Z
+USER=pkjetp UID=5002
+RUNTIME_SHA=20e921661da55e121a9b2353cba535b350613493 (prior partial activate; disk incomplete)
+PUBLIC_BUILD_ID=MISSING
+DASHBOARD_BUILD_ID=T8YUZC9HsNBopkwkhfgve
+
+PATH=/home/pkjetp/jetpk_app OWNER=pkjetp:pkjetp WRITABLE=Y PROBE=PASS
+PATH=/home/pkjetp/jetpk_app/frontend OWNER=pkjetp:pkjetp WRITABLE=Y PROBE=PASS
+PATH=/home/pkjetp/jetpk_app/app/Services OWNER=pkjetp:pkjetp WRITABLE=Y PROBE=PASS
+PATH=/home/pkjetp/jetpk_app/frontend/features OWNER=pkjetp:pkjetp WRITABLE=Y PROBE=PASS
+PATH=/home/pkjetp/releases OWNER=pkjetp:pkjetp WRITABLE=Y PROBE=PASS
+PUBLIC_FLOATING_DIR=MISSING
+
+PM2_RESTART_FORBIDDEN until PUBLIC_BUILD_ID valid post jetpk-next-build.sh
