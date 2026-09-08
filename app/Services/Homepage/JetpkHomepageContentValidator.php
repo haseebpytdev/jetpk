@@ -235,9 +235,9 @@ final class JetpkHomepageContentValidator
                 continue;
             }
 
-            $from = strtoupper(trim((string) ($raw['from'] ?? '')));
-            $to = strtoupper(trim((string) ($raw['to'] ?? '')));
-            $airline = $this->sanitize($raw['airline'] ?? '');
+            $from = strtoupper(trim((string) ($raw['from'] ?? $raw['origin'] ?? '')));
+            $to = strtoupper(trim((string) ($raw['to'] ?? $raw['destination'] ?? '')));
+            $airline = $this->sanitize($raw['airline'] ?? $raw['preferred_airline'] ?? '');
             if ($airline === '' && $from === '' && $to === '') {
                 continue;
             }
@@ -247,11 +247,6 @@ final class JetpkHomepageContentValidator
             }
             if ($to !== '' && ! preg_match('/^[A-Z]{3}$/', $to)) {
                 $errors["content.featured_deals.items.{$index}.to"] = 'Destination must be a 3-letter IATA code.';
-            }
-
-            $price = $this->optionalPositivePrice($raw['price'] ?? null);
-            if ($price === false) {
-                $errors["content.featured_deals.items.{$index}.price"] = 'Price must be a positive number when provided.';
             }
 
             $id = trim((string) ($raw['id'] ?? ''));
@@ -268,7 +263,7 @@ final class JetpkHomepageContentValidator
                 'arrive' => $this->sanitize($raw['arrive'] ?? ''),
                 'dur' => $this->sanitize($raw['dur'] ?? ''),
                 'stops' => max(0, min(9, (int) ($raw['stops'] ?? 0))),
-                'price' => $price === false ? 0 : (int) round((float) ($price ?? 0)),
+                'price' => 0,
                 'title' => $this->sanitize($raw['title'] ?? ''),
                 'badge' => $this->sanitize($raw['badge'] ?? ''),
                 'description' => $this->sanitize($raw['description'] ?? ''),

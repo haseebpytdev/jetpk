@@ -171,14 +171,14 @@ final class HomepageCanonicalSchema
                 self::field('featured_deals.enabled', 'Visible', 'bool_string', default: '1'),
                 self::field('featured_deals.eyebrow', 'Eyebrow', 'string', default: 'Editorial picks'),
                 self::field('featured_deals.title', 'Heading', 'string', default: 'Featured deals'),
-                self::field('featured_deals.subtitle', 'Subtitle', 'text', default: 'Hand-picked sample fares for inspiration — prices shown are editorial examples, not live quotes.'),
+                self::field('featured_deals.subtitle', 'Subtitle', 'text', default: 'Live group ticket fares resolved from current inventory.'),
                 self::field('featured_deals.cta_text', 'CTA label', 'string'),
                 self::field('featured_deals.cta_url', 'CTA URL', 'url'),
                 self::field('featured_deals.card_count', 'Card count', 'int', default: 3, validation: 'min:1,max:6'),
                 self::field('featured_deals.items', 'Deal cards', 'repeating', repeating: [
-                    'item_fields' => ['id', 'airline', 'from', 'to', 'depart', 'arrive', 'dur', 'stops', 'price', 'title', 'badge', 'description', 'enabled', 'sort_order', 'image_asset_key', 'image_alt'],
+                    'item_fields' => ['id', 'airline', 'from', 'to', 'title', 'badge', 'description', 'enabled', 'sort_order', 'image_asset_key', 'image_alt'],
                     'max_items_config' => 'jetpk_homepage.max_featured_deals',
-                ], note: 'Editorial CMS items — no supplier calls on homepage render. image_asset_key uses featured_deal_<item-id>.'),
+                ], note: 'CMS TARGET + editorial only. Origin/destination/preferred airline select inventory; commercial fields resolve from GroupInventory. image_asset_key uses featured_deal_<item-id>.'),
             ],
 
             'routes' => [

@@ -285,7 +285,15 @@ Route::middleware('platform.module:public_umrah_groups')->group(function (): voi
         Route::get('/groups/booking/{groupBooking}/status', [GroupTicketingBookingController::class, 'bookingStatus'])->name('group-ticketing.booking.status');
     });
     Route::get('/umrah-groups', fn () => redirect()->route('group-ticketing.search'))->name('umrah-groups.index');
-    Route::get('/umrah-groups/{package}', fn (string $package) => redirect()->route('group-ticketing.show', $package))->name('umrah-groups.show');
+    Route::get('/umrah-groups/{package}', function (string $package) {
+        return redirect()->to(\App\Support\GroupTicketing\GroupTicketingNextFrontend::detailPath($package));
+    })->name('umrah-groups.show');
+    Route::get('/groups/{packageId}', function (string $packageId) {
+        return \App\Support\GroupTicketing\GroupTicketingNextFrontend::proxy(
+            request(),
+            '/groups/'.$packageId,
+        );
+    })->where('packageId', '^(?!search$|package$|facets$|booking$).+')->name('group-ticketing.next-detail');
 });
 
 Route::middleware('platform.module:customer_checkout')->group(function (): void {

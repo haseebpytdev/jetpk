@@ -102,6 +102,19 @@ type HomepageContent = {
   [key: string]: unknown;
 };
 
+type ResolvedFeaturedDeal = {
+  cms_slot_id?: string;
+  inventory_id?: number;
+  public_id?: string;
+  airline?: string;
+  from?: string;
+  to?: string;
+  price_label?: string;
+  href?: string;
+  resolution_rule?: string;
+  availability?: string;
+};
+
 type AssetMap = Record<string, { id?: number; url?: string; alt?: string }>;
 
 type SectionId =
@@ -121,7 +134,8 @@ type PickerContext =
   | { kind: "hero"; assetKey: "hero_background" | "hero_background_mobile" }
   | { kind: "route"; index: number; assetKey: string }
   | { kind: "destination"; index: number; assetKey: string }
-  | { kind: "deal"; index: number; assetKey: string };
+  | { kind: "deal"; index: number; assetKey: string }
+  | { kind: "support"; assetKey: "support_cta_background" | "support_cta_background_mobile" };
 
 const SECTIONS: Array<{ id: SectionId; label: string; hash: string }> = [
   { id: "hero", label: "Hero", hash: "jp-section-hero" },
@@ -364,6 +378,7 @@ function CardMediaControls({
 
 export function HomepageSettingsPanel() {
   const [content, setContent] = useState<HomepageContent>({});
+  const [resolvedFeaturedDeals, setResolvedFeaturedDeals] = useState<ResolvedFeaturedDeal[]>([]);
   const [assets, setAssets] = useState<AssetMap>({});
   const [formSource, setFormSource] = useState<string>("");
   const [busy, setBusy] = useState(false);
@@ -403,6 +418,7 @@ export function HomepageSettingsPanel() {
       content?: Record<string, unknown>;
       assets?: Array<Record<string, unknown>>;
       editorMeta?: { form_source?: string; effective_source?: string };
+      resolved_featured_deals?: ResolvedFeaturedDeal[];
     };
     const next = asRecord(payload.content);
     if (Array.isArray(next.routes?.items)) {
@@ -416,6 +432,7 @@ export function HomepageSettingsPanel() {
     }
     setContent(next);
     setAssets(mapAssets(payload.assets));
+    setResolvedFeaturedDeals(Array.isArray(payload.resolved_featured_deals) ? payload.resolved_featured_deals : []);
     setFormSource(payload.editorMeta?.effective_source ?? payload.editorMeta?.form_source ?? "");
   }
 
@@ -436,6 +453,7 @@ export function HomepageSettingsPanel() {
 
   const desktopHero = assets.hero_background;
   const mobileHero = assets.hero_background_mobile;
+  const supportBackground = assets.support_cta_background;
 
   async function persist(next: HomepageContent, publish = false) {
     setBusy(true);
@@ -461,6 +479,7 @@ export function HomepageSettingsPanel() {
       setSuccess("Homepage draft saved. Public production content unchanged until Publish.");
     }
     setBusy(false);
+    await reloadHome();
   }
 
   async function previewDraft() {
@@ -559,6 +578,7 @@ export function HomepageSettingsPanel() {
     }
     if (picker.kind === "route") return "Select route card media";
     if (picker.kind === "destination") return "Select destination card media";
+    if (picker.kind === "support") return "Select support CTA illustration";
     return "Select featured deal media";
   }, [picker]);
 
@@ -1134,16 +1154,20 @@ export function HomepageSettingsPanel() {
               setContent({ ...content, featured_deals: { ...content.featured_deals, ...meta, items: deals } })
             }
           />
+          <p className="text-[11px] text-jp-muted">
+            Target origin/destination and optional preferred airline. Commercial fare, inventory, and detail URL resolve from live group inventory on save and publish.
+          </p>
           {deals.map((raw, index) => {
             const item = ensureDealId(raw);
             const assetKey = item.image_asset_key || featuredDealAssetKey(item.id!);
             const asset = assets[assetKey];
             const hasCms = Boolean(asset?.url || item.image_asset_key);
+            const resolved = resolvedFeaturedDeals.find((row) => row.cms_slot_id === item.id);
             return (
               <div key={item.id ?? index} className="rounded-lg border border-jp-border p-3">
                 <div className="grid gap-2 sm:grid-cols-2">
                   <Field
-                    label="Airline"
+                    label="Preferred airline (optional)"
                     value={item.airline ?? ""}
                     onChange={(v) => {
                       const items = [...deals];
@@ -1166,15 +1190,6 @@ export function HomepageSettingsPanel() {
                     onChange={(v) => {
                       const items = [...deals];
                       items[index] = { ...item, to: v.toUpperCase() };
-                      patchDeals(items);
-                    }}
-                  />
-                  <Field
-                    label="Price"
-                    value={String(item.price ?? "")}
-                    onChange={(v) => {
-                      const items = [...deals];
-                      items[index] = { ...item, price: v };
                       patchDeals(items);
                     }}
                   />
@@ -1223,6 +1238,24 @@ export function HomepageSettingsPanel() {
                       patchDeals(items);
                     }}
                   />
+                </div>
+                <div
+                  className="mt-3 rounded-lg border border-dashed border-jp-border bg-jp-surface-muted/60 p-3 text-xs"
+                  data-testid="cms-featured-deal-resolved-preview"
+                >
+                  <p className="font-medium text-jp-text">Resolved commercial preview (read-only)</p>
+                  {resolved ? (
+                    <dl className="mt-2 grid gap-1 text-jp-muted">
+                      <div>Inventory: {resolved.public_id ?? resolved.inventory_id ?? "—"}</div>
+                      <div>Sector: {resolved.from ?? "—"} → {resolved.to ?? "—"}</div>
+                      <div>Airline: {resolved.airline ?? "—"}</div>
+                      <div>Price: {resolved.price_label ?? "—"}</div>
+                      <div>Detail URL: {resolved.href ?? "—"}</div>
+                      <div>Rule: {resolved.resolution_rule ?? "—"}</div>
+                    </dl>
+                  ) : (
+                    <p className="mt-2 text-jp-muted">No eligible inventory resolved for this target yet.</p>
+                  )}
                 </div>
                 <CardMediaControls
                   testId="cms-featured-deal-media"
@@ -1286,7 +1319,7 @@ export function HomepageSettingsPanel() {
             onClick={() =>
               patchDeals([
                 ...deals,
-                { id: newId("deal"), airline: "", from: "", to: "", price: "", title: "", enabled: "1" },
+                { id: newId("deal"), airline: "", from: "", to: "", title: "", enabled: "1" },
               ])
             }
           >
@@ -1469,6 +1502,27 @@ export function HomepageSettingsPanel() {
               Chat enabled
             </label>
           </div>
+          <CardMediaControls
+            testId="cms-support-cta-media"
+            label="Support illustration (support_cta_background)"
+            assetUrl={supportBackground?.url}
+            assetAlt={supportBackground?.alt}
+            hasCms={Boolean(supportBackground?.url)}
+            onSelectLibrary={() => setPicker({ kind: "support", assetKey: "support_cta_background" })}
+            onUpload={(file) => {
+              void (async () => {
+                try {
+                  await uploadAsset("support_cta_background", file);
+                  setSuccess("Support CTA image uploaded.");
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Upload failed");
+                }
+              })();
+            }}
+            onRemove={() => {
+              setSuccess("Support CTA uses default illustration until a new image is uploaded.");
+            }}
+          />
         </fieldset>
       ) : null}
 
@@ -1537,6 +1591,8 @@ export function HomepageSettingsPanel() {
             const current = ensureDealId(items[picker.index] ?? {});
             items[picker.index] = { ...current, image_asset_key: picker.assetKey };
             patchDeals(items);
+          } else if (picker.kind === "support") {
+            await reloadHome();
           }
         }}
         onSelect={(item) => {
@@ -1567,6 +1623,8 @@ export function HomepageSettingsPanel() {
                 const next = { ...content, featured_deals: { ...content.featured_deals, items } };
                 setContent(next);
                 await savePageSettings("home", next);
+              } else if (picker.kind === "support") {
+                await reloadHome();
               }
               setPicker(null);
               setSuccess("Media attached from library without re-upload.");

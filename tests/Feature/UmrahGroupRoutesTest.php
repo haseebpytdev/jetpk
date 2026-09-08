@@ -31,7 +31,7 @@ class UmrahGroupRoutesTest extends TestCase
             ->assertRedirect(route('group-ticketing.search'));
     }
 
-    public function test_group_search_renders_inventory_from_database(): void
+    public function test_group_search_data_returns_inventory_from_database(): void
     {
         $this->seed(OtaFoundationSeeder::class);
 
@@ -50,10 +50,10 @@ class UmrahGroupRoutesTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->get('/groups/search')
+        $this->getJson('/groups/search/data')
             ->assertOk()
-            ->assertSee('LHE-JED', false)
-            ->assertSee('185,000', false);
+            ->assertJsonPath('total', 1)
+            ->assertJsonPath('cards.0.sector_code', 'LHE-JED');
     }
 
     public function test_umrah_groups_show_redirects_to_group_package_page(): void
@@ -76,12 +76,10 @@ class UmrahGroupRoutesTest extends TestCase
         ]);
 
         $this->get('/umrah-groups/ALH-1')
-            ->assertRedirect(route('group-ticketing.show', 'ALH-1'));
+            ->assertRedirect('/groups/ALH-1');
 
         $this->get('/groups/package/ALH-1')
-            ->assertOk()
-            ->assertSee('Fixture Umrah Package', false)
-            ->assertSee('Book now', false);
+            ->assertRedirect('/groups/ALH-1');
     }
 
     public function test_group_inventory_model_resolves_public_id_without_route_bind(): void

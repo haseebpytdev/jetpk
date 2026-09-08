@@ -15,17 +15,14 @@ use App\Services\GroupTicketing\GroupFinalCheckoutDecisionService;
 use App\Services\GroupTicketing\GroupInventoryAvailabilityService;
 use App\Services\GroupTicketing\GroupInventorySearchService;
 use App\Services\GroupTicketing\GroupReservationService;
-use App\Support\Geo\CountryList;
 use App\Support\GroupTicketing\GroupInventoryCardPresenter;
 use App\Support\GroupTicketing\GroupTicketingJsonPresenter;
+use App\Support\GroupTicketing\GroupTicketingNextFrontend;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 /**
  * Auth-gated group ticketing checkout (separate from Sabre flight BookingController).
@@ -43,7 +40,7 @@ class GroupTicketingBookingController extends Controller
         protected GroupBookingEligibilityService $eligibilityService,
     ) {}
 
-    public function passengers(GroupInventory $inventory, Request $request): View|RedirectResponse|JsonResponse|Response
+    public function passengers(GroupInventory $inventory, Request $request): RedirectResponse|JsonResponse|Response
     {
         if ($gate = $this->eligibilityService->gateResponse($request, $request->user())) {
             return $gate;
@@ -83,7 +80,7 @@ class GroupTicketingBookingController extends Controller
         $card = $this->cardPresenter->present($inventory);
         $seatCount = (int) old('seat_count', 1);
 
-        if ($request->wantsJson() || $request->query('format') === 'json') {
+        if (GroupTicketingNextFrontend::wantsJson($request)) {
             return response()->json([
                 'success' => true,
                 ...$this->jsonPresenter->presentPassengersContext($inventory, $card, $seatCount),
@@ -91,22 +88,10 @@ class GroupTicketingBookingController extends Controller
             ]);
         }
 
-        // Public UI is Next GroupPassengersPage. When OLS hits Laravel for this path,
-        // proxy Next HTML so checkout polish (selects/OCR/summary) is what owners see.
-        $packageKey = trim((string) ($inventory->public_id ?: $inventory->id));
-        $proxied = $this->proxyNextGroupHtml('/groups/'.rawurlencode($packageKey).'/passengers', $request);
-        if ($proxied !== null) {
-            return $proxied;
-        }
-
-        return view('frontend.group-ticketing.passengers', [
-            'inventory' => $inventory,
-            'card' => $card,
-            'seatCount' => $seatCount,
-            'checkoutCountries' => CountryList::forSelect(),
-            'checkoutSummary' => $this->cardPresenter->buildCheckoutSummary($card, $seatCount),
-            'activeStep' => 'passengers',
-        ]);
+        return GroupTicketingNextFrontend::proxy(
+            $request,
+            GroupTicketingNextFrontend::detailPath($inventory).'/passengers',
+        );
     }
 
     public function storePassengers(GroupInventory $inventory, GroupTicketingPassengersRequest $request): RedirectResponse|JsonResponse
@@ -238,7 +223,7 @@ class GroupTicketingBookingController extends Controller
         return redirect()->route('group-ticketing.booking.review', $booking);
     }
 
-    public function review(GroupBooking $groupBooking, Request $request): View|RedirectResponse|JsonResponse
+    public function review(GroupBooking $groupBooking, Request $request): RedirectResponse|JsonResponse|Response
     {
         $authResponse = $this->authorizeBookingResponse($groupBooking, $request);
         if ($authResponse !== null) {
@@ -260,24 +245,17 @@ class GroupTicketingBookingController extends Controller
         $groupBooking->load(['passengers', 'inventory']);
         $card = $this->cardPresenter->present($groupBooking->inventory);
 
-        if ($request->wantsJson() || $request->query('format') === 'json') {
+        if (GroupTicketingNextFrontend::wantsJson($request)) {
             return response()->json([
                 'success' => true,
                 ...$this->jsonPresenter->presentReview($groupBooking, $card),
             ]);
         }
 
-        return view('frontend.group-ticketing.review', [
-            'booking' => $groupBooking,
-            'card' => $card,
-            'holdMinutes' => $this->reservationService->holdMinutes(),
-            'checkoutSummary' => $this->cardPresenter->buildCheckoutSummary(
-                $card,
-                (int) $groupBooking->seat_count,
-                (float) $groupBooking->total_amount,
-            ),
-            'activeStep' => 'review',
-        ]);
+        return GroupTicketingNextFrontend::proxy(
+            $request,
+            '/groups/booking/'.$groupBooking->reference.'/review',
+        );
     }
 
     public function confirmReview(GroupBooking $groupBooking, Request $request): RedirectResponse|JsonResponse
@@ -330,7 +308,7 @@ class GroupTicketingBookingController extends Controller
         return redirect()->route('group-ticketing.booking.payment', $booking);
     }
 
-    public function payment(GroupBooking $groupBooking, Request $request): View|RedirectResponse|JsonResponse
+    public function payment(GroupBooking $groupBooking, Request $request): RedirectResponse|JsonResponse|Response
     {
         $authResponse = $this->authorizeBookingResponse($groupBooking, $request);
         if ($authResponse !== null) {
@@ -384,23 +362,17 @@ class GroupTicketingBookingController extends Controller
         $booking = $groupBooking->fresh(['inventory', 'passengers']);
         $card = $this->cardPresenter->present($booking->inventory);
 
-        if ($request->wantsJson() || $request->query('format') === 'json') {
+        if (GroupTicketingNextFrontend::wantsJson($request)) {
             return response()->json([
                 'success' => true,
                 ...$this->jsonPresenter->presentPayment($booking, $card),
             ]);
         }
 
-        return view('frontend.group-ticketing.payment', [
-            'booking' => $booking,
-            'card' => $card,
-            'checkoutSummary' => $this->cardPresenter->buildCheckoutSummary(
-                $card,
-                (int) $booking->seat_count,
-                (float) $booking->total_amount,
-            ),
-            'activeStep' => 'payment',
-        ]);
+        return GroupTicketingNextFrontend::proxy(
+            $request,
+            '/groups/booking/'.$booking->reference.'/payment',
+        );
     }
 
     public function submitPayment(GroupBooking $groupBooking, GroupTicketingPaymentRequest $request): RedirectResponse|JsonResponse
@@ -451,7 +423,7 @@ class GroupTicketingBookingController extends Controller
         return redirect()->route('group-ticketing.booking.confirmation', $groupBooking);
     }
 
-    public function confirmation(GroupBooking $groupBooking, Request $request): View|JsonResponse
+    public function confirmation(GroupBooking $groupBooking, Request $request): JsonResponse|Response
     {
         $authResponse = $this->authorizeBookingResponse($groupBooking, $request);
         if ($authResponse !== null) {
@@ -461,23 +433,17 @@ class GroupTicketingBookingController extends Controller
         $booking = $groupBooking->load(['inventory', 'passengers']);
         $card = $this->cardPresenter->present($booking->inventory);
 
-        if ($request->wantsJson() || $request->query('format') === 'json') {
+        if (GroupTicketingNextFrontend::wantsJson($request)) {
             return response()->json([
                 'success' => true,
                 ...$this->jsonPresenter->presentConfirmation($booking, $card),
             ]);
         }
 
-        return view('frontend.group-ticketing.confirmation', [
-            'booking' => $booking,
-            'card' => $card,
-            'checkoutSummary' => $this->cardPresenter->buildCheckoutSummary(
-                $card,
-                (int) $booking->seat_count,
-                (float) $booking->total_amount,
-            ),
-            'activeStep' => 'confirmation',
-        ]);
+        return GroupTicketingNextFrontend::proxy(
+            $request,
+            '/groups/booking/'.$booking->reference.'/confirmation',
+        );
     }
 
     public function bookingStatus(GroupBooking $groupBooking, Request $request): JsonResponse
@@ -525,38 +491,4 @@ class GroupTicketingBookingController extends Controller
         return null;
     }
 
-    /**
-     * Proxy HTML from the public Next process when OLS still lands on Laravel.
-     */
-    private function proxyNextGroupHtml(string $path, Request $request): ?Response
-    {
-        try {
-            $cookieHeader = collect($request->cookies->all())
-                ->map(static fn ($value, $name): string => $name.'='.$value)
-                ->implode('; ');
-
-            $response = Http::timeout(8)
-                ->withHeaders(array_filter([
-                    'Accept' => 'text/html,application/xhtml+xml',
-                    'Cookie' => $cookieHeader !== '' ? $cookieHeader : null,
-                    'X-Forwarded-Host' => $request->getHost(),
-                    'X-Forwarded-Proto' => $request->isSecure() ? 'https' : 'http',
-                    'User-Agent' => (string) $request->userAgent(),
-                ]))
-                ->get('http://127.0.0.1:3010'.$path);
-
-            if ($response->successful() && is_string($response->body()) && $response->body() !== '') {
-                return response($response->body(), 200)
-                    ->header('Content-Type', 'text/html; charset=utf-8')
-                    ->header('X-JP-Groups-Checkout', 'next-proxy');
-            }
-        } catch (\Throwable $exception) {
-            Log::warning('groups_passengers_next_proxy_failed', [
-                'path' => $path,
-                'message' => $exception->getMessage(),
-            ]);
-        }
-
-        return null;
-    }
 }

@@ -1,0 +1,144 @@
+{
+  "audited_at": "2026-09-08T17:33:48.562Z",
+  "environment": "production_read_only",
+  "homepage_api": "https://jetpakistan.pk/api/public/content/homepage",
+  "search_base": "https://jetpakistan.pk",
+  "origin_pool": [
+    "KHI",
+    "LHE",
+    "ISB"
+  ],
+  "destinations": [
+    {
+      "destination": "DXB",
+      "origins_tested": [
+        "KHI",
+        "LHE",
+        "ISB"
+      ],
+      "per_origin_minimums": {
+        "KHI": 59919.17,
+        "LHE": 104278.24,
+        "ISB": 91572.49
+      },
+      "winning_origin": "KHI",
+      "winning_price": 59919.17,
+      "winning_date": "2026-09-15",
+      "displayed_price": 59919,
+      "public_link_origin": "KHI",
+      "public_link_destination": "DXB",
+      "public_link_date": "2026-09-15",
+      "OFFERS_CONSIDERED": 3,
+      "MIN_ELIGIBLE_CUSTOMER_PRICE": 59919.17,
+      "WINNING_PROVIDER": null,
+      "WINNING_DATE": "2026-09-15",
+      "DISPLAYED_PRICE": 59919,
+      "PRICE_MATCH": true,
+      "ORIGIN_MATCH": true,
+      "DATE_MATCH": true,
+      "price_match": true,
+      "origin_match": true,
+      "date_match": true
+    },
+    {
+      "destination": "JED",
+      "origins_tested": [
+        "KHI",
+        "LHE",
+        "ISB"
+      ],
+      "per_origin_minimums": {
+        "KHI": 67896.36,
+        "LHE": 99577.44,
+        "ISB": 99577.44
+      },
+      "winning_origin": "KHI",
+      "winning_price": 67896.36,
+      "winning_date": "2026-09-15",
+      "displayed_price": 67896,
+      "public_link_origin": "KHI",
+      "public_link_destination": "JED",
+      "public_link_date": "2026-09-15",
+      "OFFERS_CONSIDERED": 3,
+      "MIN_ELIGIBLE_CUSTOMER_PRICE": 67896.36,
+      "WINNING_PROVIDER": null,
+      "WINNING_DATE": "2026-09-15",
+      "DISPLAYED_PRICE": 67896,
+      "PRICE_MATCH": true,
+      "ORIGIN_MATCH": true,
+      "DATE_MATCH": true,
+      "price_match": true,
+      "origin_match": true,
+      "date_match": true
+    },
+    {
+      "destination": "LHR",
+      "origins_tested": [
+        "KHI",
+        "LHE",
+        "ISB"
+      ],
+      "per_origin_minimums": {
+        "KHI": 141773.53,
+        "LHE": 177775.02,
+        "ISB": 192529.9
+      },
+      "winning_origin": "KHI",
+      "winning_price": 141773.53,
+      "winning_date": "2026-09-15",
+      "displayed_price": 141774,
+      "public_link_origin": "KHI",
+      "public_link_destination": "LHR",
+      "public_link_date": "2026-09-15",
+      "OFFERS_CONSIDERED": 3,
+      "MIN_ELIGIBLE_CUSTOMER_PRICE": 141773.53,
+      "WINNING_PROVIDER": null,
+      "WINNING_DATE": "2026-09-15",
+      "DISPLAYED_PRICE": 141774,
+      "PRICE_MATCH": true,
+      "ORIGIN_MATCH": true,
+      "DATE_MATCH": true,
+      "price_match": true,
+      "origin_match": true,
+      "date_match": true
+    },
+    {
+      "destination": "IST",
+      "origins_tested": [
+        "KHI",
+        "LHE",
+        "ISB"
+      ],
+      "per_origin_minimums": {
+        "KHI": 75718.06,
+        "LHE": 118327.87,
+        "ISB": 115828.92
+      },
+      "winning_origin": "KHI",
+      "winning_price": 75718.06,
+      "winning_date": "2026-09-15",
+      "displayed_price": 75718,
+      "public_link_origin": "KHI",
+      "public_link_destination": "IST",
+      "public_link_date": "2026-09-15",
+      "OFFERS_CONSIDERED": 3,
+      "MIN_ELIGIBLE_CUSTOMER_PRICE": 75718.06,
+      "WINNING_PROVIDER": null,
+      "WINNING_DATE": "2026-09-15",
+      "DISPLAYED_PRICE": 75718,
+      "PRICE_MATCH": true,
+      "ORIGIN_MATCH": true,
+      "DATE_MATCH": true,
+      "price_match": true,
+      "origin_match": true,
+      "date_match": true
+    }
+  ],
+  "result": "PASS",
+  "production_fare_refresh": {
+    "at": "2026-09-08T17:34:42.254Z",
+    "http": 500,
+    "success": null,
+    "failed": null
+  }
+}

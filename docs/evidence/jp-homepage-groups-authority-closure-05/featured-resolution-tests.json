@@ -1,0 +1,20 @@
+{
+  "suite": "Closure-05 featured resolution",
+  "phpunit": {
+    "FeaturedDealInventoryResolverTest": "6 passed",
+    "FeaturedDealHomepageAuthorityTest": "3 passed",
+    "JetpkHomepageContentManagementTest::test_featured_deals_come_from_group_inventory_not_cms_price": "passed",
+    "total_closure05_backend": "46/46 PASS"
+  },
+  "assertions": [
+    "exact_airline_cheapest",
+    "same_sector_fallback",
+    "global_fallback",
+    "unavailable_excluded",
+    "dedupe_across_slots",
+    "cms_price_ignored",
+    "href_next_groups_public_id",
+    "suppress_when_no_inventory"
+  ],
+  "result": "PASS"
+}

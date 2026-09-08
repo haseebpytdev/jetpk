@@ -13,7 +13,10 @@ use App\Support\Client\ClientPageKeys;
 use App\Support\GroupTicketing\GroupInventoryCardPresenter;
 use App\Support\GroupTicketing\GroupTicketingJsonPresenter;
 use App\Support\GroupTicketing\GroupTicketingLivePolicy;
+use App\Support\GroupTicketing\GroupTicketingNextFrontend;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -88,11 +91,13 @@ class GroupTicketingSearchController extends Controller
         return response()->json($payload);
     }
 
-    public function index(GroupTicketingSearchRequest $request): View
+    public function index(GroupTicketingSearchRequest $request): View|JsonResponse|Response
     {
-        $inventoryFreshness = $this->freshnessService->ensureFreshForSearch();
+        if (GroupTicketingNextFrontend::wantsJson($request)) {
+            return $this->searchData($request);
+        }
 
-        return $this->renderSearch($request, $inventoryFreshness, 1);
+        return GroupTicketingNextFrontend::proxy($request, '/groups/search');
     }
 
     public function results(GroupTicketingSearchRequest $request): JsonResponse
@@ -144,12 +149,13 @@ class GroupTicketingSearchController extends Controller
         return response()->json($payload);
     }
 
-    public function show(GroupInventory $inventory, GroupTicketingSearchRequest $request): View|JsonResponse
+    public function show(GroupInventory $inventory, GroupTicketingSearchRequest $request): View|JsonResponse|RedirectResponse
     {
         $item = $inventory;
+        $wantsJson = GroupTicketingNextFrontend::wantsJson($request);
 
         if (! $item->is_active) {
-            if ($request->wantsJson() || $request->query('format') === 'json') {
+            if ($wantsJson) {
                 return response()->json([
                     'success' => false,
                     'status' => 'not_found',
@@ -163,7 +169,7 @@ class GroupTicketingSearchController extends Controller
         $bookable = GroupTicketingLivePolicy::publicResultsMustBeProviderConfirmed() ? false : true;
         $card = $this->cardPresenter->present($item, $bookable);
 
-        if ($request->wantsJson() || $request->query('format') === 'json') {
+        if ($wantsJson) {
             $availability = app(\App\Services\GroupTicketing\GroupInventoryAvailabilityService::class)
                 ->revalidate($item, 1);
 
@@ -178,10 +184,7 @@ class GroupTicketingSearchController extends Controller
             ]);
         }
 
-        return view('frontend.group-ticketing.show', [
-            'inventory' => $item,
-            'card' => $card,
-        ]);
+        return GroupTicketingNextFrontend::redirectToDetail($item, $request);
     }
 
     public function facets(): JsonResponse

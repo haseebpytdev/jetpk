@@ -27,14 +27,14 @@ final class JetpkHomepageFareDisplay
             $refreshedAt = self::parseTimestamp($fareCache['fare_refreshed_at'] ?? null);
             $fresh = $refreshedAt !== null && self::isFresh($refreshedAt);
 
-            if ($resolved !== null && ($fresh || (bool) config('jetpk_homepage.allow_stale_fare_display', true))) {
+            if ($resolved !== null && $fresh) {
                 $cacheCurrency = strtoupper(trim((string) ($fareCache['resolved_currency'] ?? $currency)));
 
                 return self::buildResult(
                     $resolved,
                     $cacheCurrency !== '' ? $cacheCurrency : $currency,
                     'dynamic',
-                    $fresh ? JetpkHomepageFareRefreshStatus::Success->value : JetpkHomepageFareRefreshStatus::Stale->value,
+                    JetpkHomepageFareRefreshStatus::Success->value,
                 );
             }
         }
@@ -66,7 +66,12 @@ final class JetpkHomepageFareDisplay
 
     public static function neutralAvailabilityLabel(): string
     {
-        return 'Fares available';
+        return 'Check fare';
+    }
+
+    public static function checkFareLabel(): string
+    {
+        return self::neutralAvailabilityLabel();
     }
 
     public static function isFresh(Carbon $refreshedAt): bool

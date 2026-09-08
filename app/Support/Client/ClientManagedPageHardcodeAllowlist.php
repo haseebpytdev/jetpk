@@ -38,7 +38,7 @@ final class ClientManagedPageHardcodeAllowlist
             'Preparing your journey',
             'Search flights',
             'Contact support',
-            'Fares available',
+            'Check fare',
             'CSRF',
             '@csrf',
             'aria-label',

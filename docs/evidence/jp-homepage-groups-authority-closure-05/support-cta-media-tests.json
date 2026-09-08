@@ -1,0 +1,15 @@
+{
+  "suite": "Closure-05 support CTA media",
+  "phpunit": {
+    "JetpkHomepageSupportCtaMediaPresenterTest": "passed"
+  },
+  "presenter_fields": [
+    "support_cta.enabled",
+    "support_cta.image",
+    "support_cta.title"
+  ],
+  "frontend_component": "frontend/features/public-visual/support/PublicSupportBanner.tsx",
+  "cms_control": "dashboard/features/cms/components/homepage-settings-panel.tsx",
+  "fallback_when_no_image": "SVG illustration",
+  "result": "PASS"
+}

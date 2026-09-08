@@ -1,0 +1,16 @@
+{
+  "suite": "Closure-05 group modern UI",
+  "playwright": "frontend/tests/closure-05-homepage-groups-authority.spec.ts",
+  "phpunit": "tests/Feature/GroupTicketing/GroupTicketingNextUiRouteParityTest.php",
+  "cases": [
+    "groups_search_next_proxy_header",
+    "package_html_redirect_to_public_id",
+    "search_json_endpoints_laravel",
+    "deep_link_query_preserved",
+    "legacy_package_redirect",
+    "mobile_viewport",
+    "desktop_viewport"
+  ],
+  "legacy_blade_public_html": false,
+  "result": "PASS"
+}

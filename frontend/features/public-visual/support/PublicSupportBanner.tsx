@@ -9,8 +9,29 @@ type PublicSupportBannerProps = {
   support: HomepageSupportCta;
 };
 
+function SupportIllustration() {
+  return (
+    <svg viewBox="0 0 280 180" className="h-full w-full text-jp-brand" fill="none">
+      <circle cx="210" cy="70" r="42" stroke="currentColor" strokeWidth="1.5" className="opacity-30" />
+      <path
+        d="M36 120 C90 50, 140 140, 210 70"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeDasharray="5 7"
+        strokeLinecap="round"
+        className="opacity-45"
+      />
+      <rect x="48" y="48" width="88" height="64" rx="14" stroke="currentColor" strokeWidth="1.8" className="opacity-55" />
+      <path d="M66 72h52M66 88h36" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="opacity-70" />
+      <circle cx="210" cy="70" r="4" fill="currentColor" />
+    </svg>
+  );
+}
+
 export function PublicSupportBanner({ support }: PublicSupportBannerProps) {
   if (!support.enabled) return null;
+
+  const cmsImage = support.image?.trim() ?? "";
 
   return (
     <ScrollReveal as="section">
@@ -50,23 +71,16 @@ export function PublicSupportBanner({ support }: PublicSupportBannerProps) {
 
           <div
             className="relative hidden min-h-[9.5rem] overflow-hidden rounded-jp-lg border border-jp-brand-border/40 bg-gradient-to-br from-jp-brand-soft via-jp-surface to-jp-surface-muted lg:block"
-            aria-hidden="true"
             data-media-slot="support-callout-illustration"
           >
-            <svg viewBox="0 0 280 180" className="h-full w-full text-jp-brand" fill="none">
-              <circle cx="210" cy="70" r="42" stroke="currentColor" strokeWidth="1.5" className="opacity-30" />
-              <path
-                d="M36 120 C90 50, 140 140, 210 70"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="5 7"
-                strokeLinecap="round"
-                className="opacity-45"
-              />
-              <rect x="48" y="48" width="88" height="64" rx="14" stroke="currentColor" strokeWidth="1.8" className="opacity-55" />
-              <path d="M66 72h52M66 88h36" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="opacity-70" />
-              <circle cx="210" cy="70" r="4" fill="currentColor" />
-            </svg>
+            {cmsImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={cmsImage} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div aria-hidden="true" className="h-full w-full">
+                <SupportIllustration />
+              </div>
+            )}
           </div>
         </PageContainer>
       </section>

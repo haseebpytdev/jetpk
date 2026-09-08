@@ -195,7 +195,7 @@ class JetpkHomepageContentManagementTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertDontSee('PKR 0', false)
-            ->assertSee('Fares available', false);
+            ->assertSee('Check fare', false);
     }
 
     public function test_destination_image_upload_on_save(): void
@@ -294,8 +294,8 @@ class JetpkHomepageContentManagementTest extends TestCase
                 'enabled' => '1',
                 'items' => [[
                     'id' => 'cms-fake',
-                    'from' => 'AAA',
-                    'to' => 'BBB',
+                    'from' => 'ISB',
+                    'to' => 'DXB',
                     'price' => 1,
                     'enabled' => '1',
                 ]],
@@ -308,9 +308,7 @@ class JetpkHomepageContentManagementTest extends TestCase
         $this->assertSame('ISB', $deals[0]['from']);
         $this->assertSame('DXB', $deals[0]['to']);
         $this->assertSame(89000, $deals[0]['price']);
-        $this->assertNotEmpty($deals[0]['href']);
-        $this->assertStringNotContainsString('127.0.0.1', $deals[0]['href']);
-        $this->assertStringNotContainsString('8088', $deals[0]['href']);
+        $this->assertSame('/groups/JP-HOME-1', $deals[0]['href']);
     }
 
     public function test_destination_click_uses_winning_origin_from_cache(): void

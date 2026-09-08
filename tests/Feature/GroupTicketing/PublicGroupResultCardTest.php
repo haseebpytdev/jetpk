@@ -11,6 +11,16 @@ class PublicGroupResultCardTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config([
+            'ota.group_ticketing.inventory_search_sync_enabled' => false,
+            'ota.group_ticketing.realtime_search_enabled' => false,
+            'ota.group_ticketing.require_live_provider_for_public_results' => false,
+        ]);
+    }
+
     public function test_public_header_hides_group_ticketing_nav_link(): void
     {
         $this->seed(OtaFoundationSeeder::class);
@@ -48,17 +58,10 @@ class PublicGroupResultCardTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->get(route('group-ticketing.search'))
+        $this->getJson(route('group-ticketing.search.data'))
             ->assertOk()
-            ->assertSee('data-testid="group-result-row"', false)
-            ->assertSee('Sialkot (SKT)', false)
-            ->assertSee('Sharjah (SHJ)', false)
-            ->assertSee('ota-group-result-row__route-icon', false)
-            ->assertSee('Sector: SKT-SHJ', false)
-            ->assertSee('Checked 20kg', false)
-            ->assertSee('Cabin 10kg', false)
-            ->assertSee('PKR 99,000', false)
-            ->assertSee('Book now', false)
-            ->assertDontSee('→', false);
+            ->assertJsonPath('total', 1)
+            ->assertJsonPath('cards.0.sector_code', 'SKT-SHJ')
+            ->assertJsonPath('cards.0.price_formatted', '99,000');
     }
 }

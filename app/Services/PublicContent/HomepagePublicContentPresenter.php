@@ -149,6 +149,8 @@ final class HomepagePublicContentPresenter
                 return [
                     'id' => $id !== '' ? $id : md5(($item['from'] ?? '').($item['to'] ?? '').($item['airline'] ?? '')),
                     'source' => (string) ($item['source'] ?? 'group_ticket'),
+                    'inventory_id' => (int) ($item['inventory_id'] ?? 0),
+                    'public_id' => (string) ($item['public_id'] ?? $id),
                     'airline' => (string) ($item['airline'] ?? ''),
                     'from' => (string) ($item['from'] ?? ''),
                     'to' => (string) ($item['to'] ?? ''),
@@ -164,6 +166,8 @@ final class HomepagePublicContentPresenter
                     'image' => $image,
                     'image_alt' => (string) ($item['image_alt'] ?? ''),
                     'media_source' => $image !== null ? 'cms' : 'none',
+                    'availability' => (string) ($item['availability'] ?? 'available'),
+                    'resolution_rule' => (string) ($item['resolution_rule'] ?? ''),
                     'href' => (string) ($item['href'] ?? ''),
                 ];
             }, $items),

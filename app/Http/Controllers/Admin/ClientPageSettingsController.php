@@ -15,6 +15,7 @@ use App\Services\Client\ClientPageAssetService;
 use App\Services\Client\ClientPageContentResolver;
 use App\Services\Client\ClientPageSettingDefaultService;
 use App\Services\Client\ClientPageResetService;
+use App\Services\Homepage\FeaturedDeals\GroupTicketFeaturedDealSource;
 use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Services\Homepage\JetpkHomepageContentMergeService;
 use App\Services\Homepage\JetpkHomepageContentValidator;
@@ -121,8 +122,7 @@ class ClientPageSettingsController extends Controller
             $draftSettings = is_array($draftRow?->settings_json) ? $draftRow->settings_json : [];
             $archived = (bool) ($draftSettings['archived'] ?? false);
             $content = $this->adminContentResolver->formContentFor($profile, $pageKey);
-
-            return $this->backOfficeJson([
+            $payload = [
                 'ok' => true,
                 'page_key' => $pageKey,
                 'pageKey' => $pageKey,
@@ -146,7 +146,13 @@ class ClientPageSettingsController extends Controller
                 ],
                 'previewUrl' => client_route($previewRoute),
                 'preview_url' => client_route($previewRoute),
-            ]);
+            ];
+
+            if ($pageKey === ClientPageKeys::HOME) {
+                $payload['resolved_featured_deals'] = $this->resolvedFeaturedDealsForContent($content, (int) $profile->id);
+            }
+
+            return $this->backOfficeJson($payload);
         }
 
         return redirect()->to('/admin/dashboard/cms/pages');
@@ -238,7 +244,8 @@ class ClientPageSettingsController extends Controller
     {
         Gate::authorize('client.page-settings.manage');
         $profile = $this->requireProfile();
-        $summary = $this->routeFareRefreshService->refreshProfile($profile, true);
+        $persist = ! $request->boolean('dry_run');
+        $summary = $this->routeFareRefreshService->refreshProfile($profile, $persist);
 
         $message = sprintf(
             'Route fare refresh complete: %d refreshed, %d success, %d failed, %d skipped.',
@@ -253,6 +260,7 @@ class ClientPageSettingsController extends Controller
                 'ok' => true,
                 'message' => $message,
                 'summary' => $summary,
+                'dry_run' => ! $persist,
             ]);
         }
 
@@ -796,7 +804,7 @@ class ClientPageSettingsController extends Controller
         return $redirect;
     }
 
-    public function destroyAsset(string $pageKey, ClientPageAsset $asset, Request $request): RedirectResponse
+    public function destroyAsset(string $pageKey, ClientPageAsset $asset, Request $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('client.page-settings.manage');
         abort_unless(ClientPageKeys::isValid($pageKey), 404);
@@ -805,13 +813,25 @@ class ClientPageSettingsController extends Controller
         abort_unless($asset->client_profile_id === $profile->id, 404);
 
         if (! $request->boolean('force') && $this->assetIsStillReferenced($profile, $pageKey, $asset->asset_key)) {
-            return back()->withErrors([
-                'asset' => "\"{$asset->asset_key}\" is still referenced in this page's Draft or Published content. "
-                    .'Remove the reference first, or resubmit with force=1 to delete anyway and leave a broken image reference.',
-            ]);
+            $message = "\"{$asset->asset_key}\" is still referenced in this page's Draft or Published content. "
+                .'Remove the reference first, or resubmit with force=1 to delete anyway and leave a broken image reference.';
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson(['ok' => false, 'message' => $message], 422);
+            }
+
+            return back()->withErrors(['asset' => $message]);
         }
 
+        $assetId = $asset->id;
         $this->assetService->destroy($asset);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Asset removed.',
+                'asset_id' => $assetId,
+            ]);
+        }
 
         return back()->with('status', 'Asset removed.');
     }
@@ -1074,5 +1094,46 @@ class ClientPageSettingsController extends Controller
         }
 
         return $content;
+    }
+
+    /**
+     * @param  array<string, mixed>  $content
+     * @return list<array<string, mixed>>
+     */
+    private function resolvedFeaturedDealsForContent(array $content, int $profileId): array
+    {
+        $items = data_get($content, 'featured_deals.items', []);
+        if (! is_array($items)) {
+            return [];
+        }
+
+        $editorial = [];
+        foreach ($items as $item) {
+            if (! is_array($item) || in_array((string) ($item['enabled'] ?? '1'), ['0', 'false', 'no', 'off'], true)) {
+                continue;
+            }
+
+            $itemId = trim((string) ($item['id'] ?? ''));
+            $assetKey = trim((string) ($item['image_asset_key'] ?? ''));
+            if ($assetKey === '' && $itemId !== '') {
+                $assetKey = JetpkHomepageAssetService::featuredDealAssetKey($itemId);
+            }
+
+            $image = null;
+            if ($assetKey !== '') {
+                $asset = ClientPageAsset::query()
+                    ->where('client_profile_id', $profileId)
+                    ->where('page_key', ClientPageKeys::HOME)
+                    ->where('asset_key', $assetKey)
+                    ->first();
+                $image = $asset?->public_url;
+            }
+
+            $editorial[] = array_merge($item, [
+                'image' => $image,
+            ]);
+        }
+
+        return app(GroupTicketFeaturedDealSource::class)->deals($editorial);
     }
 }

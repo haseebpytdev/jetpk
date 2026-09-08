@@ -12,7 +12,7 @@ return [
 
     'fare_freshness_hours' => (int) env('JETPK_HOMEPAGE_FARE_FRESHNESS_HOURS', 30),
 
-    'allow_stale_fare_display' => (bool) env('JETPK_HOMEPAGE_ALLOW_STALE_FARE_DISPLAY', true),
+    'allow_stale_fare_display' => (bool) env('JETPK_HOMEPAGE_ALLOW_STALE_FARE_DISPLAY', false),
 
     'min_active_routes' => 4,
 
