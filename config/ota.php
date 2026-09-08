@@ -318,7 +318,7 @@ return [
         'enabled' => filter_var(env('OTA_AI_ASSISTANT_ENABLED', false), FILTER_VALIDATE_BOOL),
         'gateway_url' => env('OTA_AI_GATEWAY_URL', 'http://127.0.0.1:3921'),
         'timeout_seconds' => max(3, (int) env('OTA_AI_TIMEOUT_SECONDS', 45)),
-        'anonymous_per_minute' => max(1, (int) env('OTA_AI_ANON_PER_MINUTE', 8)),
+        'anonymous_per_minute' => max(8, (int) env('OTA_AI_ANON_PER_MINUTE', 24)),
         'max_message_chars' => max(100, (int) env('OTA_AI_MAX_MESSAGE_CHARS', 2000)),
         'model_id' => (string) env('OTA_AI_MODEL_ID', 'local'),
         'flight_search_enabled' => filter_var(env('OTA_AI_FLIGHT_SEARCH_ENABLED', true), FILTER_VALIDATE_BOOL),
@@ -329,5 +329,7 @@ return [
         'load_shed_available_mb_min' => max(256, (int) env('OTA_AI_LOAD_SHED_AVAILABLE_MB_MIN', 2000)),
         /** Optional local LLM phrasing assist — never required for core Flight/Group authority. */
         'optional_llm_assist' => filter_var(env('OTA_AI_OPTIONAL_LLM_ASSIST', false), FILTER_VALIDATE_BOOL),
+        /** Conversational LLM layer with approved tools; falls back to hybrid parser when unavailable. */
+        'conversational_enabled' => filter_var(env('OTA_AI_CONVERSATIONAL_ENABLED', true), FILTER_VALIDATE_BOOL),
     ],
 ];

@@ -719,13 +719,18 @@ class ClientPageSettingsController extends Controller
 
         $validator = Validator::make($request->all(), [
             'asset_key' => ['required', 'string', 'max:64'],
-            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:5120'],
+            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'alt_text' => ['nullable', 'string', 'max:255'],
+        ], [
+            'file.max' => 'Image exceeds the 5 MB limit.',
+            'file.mimes' => 'Only JPG, PNG and WebP images are supported.',
+            'file.required' => 'Choose an image file to upload.',
         ]);
 
         if ($validator->fails()) {
+            $message = $this->firstValidationMessage($validator->errors()->toArray()) ?? 'Asset validation failed.';
             if ($this->wantsBackOfficeJson($request)) {
-                return $this->backOfficeJson(['ok' => false, 'message' => 'Asset validation failed.', 'errors' => $validator->errors()], 422);
+                return $this->backOfficeJson(['ok' => false, 'message' => $message, 'errors' => $validator->errors()], 422);
             }
 
             return redirect()
@@ -748,8 +753,9 @@ class ClientPageSettingsController extends Controller
                 $validated['alt_text'] ?? null,
             );
         } catch (ValidationException $e) {
+            $message = $this->firstValidationMessage($e->errors()) ?? 'Asset validation failed.';
             if ($this->wantsBackOfficeJson($request)) {
-                return $this->backOfficeJson(['ok' => false, 'message' => 'Asset validation failed.', 'errors' => $e->errors()], 422);
+                return $this->backOfficeJson(['ok' => false, 'message' => $message, 'errors' => $e->errors()], 422);
             }
             $e->redirectTo($mediaEditUrl);
             throw $e;
@@ -883,6 +889,25 @@ class ClientPageSettingsController extends Controller
     private function mediaTabEditUrl(string $pageKey): string
     {
         return client_route('admin.page-settings.edit', ['pageKey' => $pageKey]).'#media';
+    }
+
+    /**
+     * @param  array<string, list<string>>  $errors
+     */
+    private function firstValidationMessage(array $errors): ?string
+    {
+        foreach ($errors as $messages) {
+            if (! is_array($messages)) {
+                continue;
+            }
+            foreach ($messages as $message) {
+                if (is_string($message) && trim($message) !== '') {
+                    return trim($message);
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

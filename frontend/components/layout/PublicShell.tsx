@@ -3,6 +3,7 @@
 import type { PublicConfig } from "@/features/public-content/services/public-config-service";
 import { PublicConfigService } from "@/features/public-content/services/public-config-service";
 import { AskJetPakistanChat } from "@/features/ai-assistant/components/AskJetPakistanChat";
+import { PublicFloatingLayoutProvider } from "@/features/public-floating/PublicFloatingLayoutProvider";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { PublicRoutePrefetch } from "@/components/navigation/PublicRoutePrefetch";
@@ -75,20 +76,22 @@ export function PublicShell({
   }, []);
 
   return (
-    <div className="jp-page flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-jp-page text-jp-text">
-      <PublicRoutePrefetch />
-      <SiteHeader session={session} branding={branding} aiEnabled={aiEnabled} />
-      <main id="main-content" className="jp-main flex-1">
-        {children}
-      </main>
-      {hideFooter ? null : <SiteFooter branding={branding} />}
+    <PublicFloatingLayoutProvider aiEnabled={aiEnabled}>
+      <div className="jp-page flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-jp-page text-jp-text">
+        <PublicRoutePrefetch />
+        <SiteHeader session={session} branding={branding} aiEnabled={aiEnabled} />
+        <main id="main-content" className="jp-main flex-1">
+          {children}
+        </main>
+        {hideFooter ? null : <SiteFooter branding={branding} />}
 
-      {/*
-       * Intentionally ONE public floating action button:
-       * AskJetPakistanChat owns the FAB.
-       * Human support remains accessible from inside the assistant panel.
-       */}
-      <AskJetPakistanChat enabled={aiEnabled} />
-    </div>
+        {/*
+         * Intentionally ONE public floating action button:
+         * AskJetPakistanChat owns the FAB.
+         * Human support remains accessible from inside the assistant panel.
+         */}
+        <AskJetPakistanChat enabled={aiEnabled} />
+      </div>
+    </PublicFloatingLayoutProvider>
   );
 }

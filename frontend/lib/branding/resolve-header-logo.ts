@@ -1,15 +1,27 @@
-/** Canonical JetPakistan header logo (owner-approved artwork, PNG). */
+/** Canonical JetPakistan header logo fallback when no organization logo is configured. */
 export const CANONICAL_JETPK_HEADER_LOGO_PATH = "/client-assets/jetpk/logo/logo.png";
 
 function isClientAssetsPath(pathname: string): boolean {
   return pathname.startsWith("/client-assets/") || pathname.startsWith("client-assets/");
 }
 
+function isOrganizationStoragePath(pathname: string): boolean {
+  return (
+    pathname.startsWith("/storage/") ||
+    pathname.startsWith("storage/") ||
+    pathname.includes("/agencies/") ||
+    pathname.includes("/branding/")
+  );
+}
+
+function normalizeRelativePath(path: string): string {
+  return path.startsWith("/") ? path : `/${path.replace(/^\/+/, "")}`;
+}
+
 /**
  * Resolve a header logo URL for the Next public shell.
- * The JetPakistan header always uses the canonical client-assets mark unless an
- * explicit client-assets path is supplied. CMS/storage agency uploads are not
- * used here because they are not bundled with the Next production server.
+ * Organization logos from Laravel public storage are authoritative; static
+ * client-assets remain the fallback when no valid organization logo exists.
  */
 export function resolveHeaderLogoUrl(logoUrl?: string | null): string {
   const trimmed = logoUrl?.trim() ?? "";
@@ -21,20 +33,29 @@ export function resolveHeaderLogoUrl(logoUrl?: string | null): string {
     return trimmed;
   }
 
+  if (trimmed.startsWith("/") && isOrganizationStoragePath(trimmed)) {
+    return trimmed;
+  }
+
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
     try {
       const url = new URL(trimmed);
-      if (isClientAssetsPath(url.pathname)) {
-        return url.pathname;
+      if (isClientAssetsPath(url.pathname) || isOrganizationStoragePath(url.pathname)) {
+        return normalizeRelativePath(`${url.pathname}${url.search}`);
       }
     } catch {
       return CANONICAL_JETPK_HEADER_LOGO_PATH;
     }
+
     return CANONICAL_JETPK_HEADER_LOGO_PATH;
   }
 
   if (trimmed.startsWith("client-assets/")) {
-    return `/${trimmed.replace(/^\/+/, "")}`;
+    return normalizeRelativePath(trimmed);
+  }
+
+  if (trimmed.startsWith("storage/")) {
+    return normalizeRelativePath(trimmed);
   }
 
   return CANONICAL_JETPK_HEADER_LOGO_PATH;

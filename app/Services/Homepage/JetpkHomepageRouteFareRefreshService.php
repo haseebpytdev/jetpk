@@ -10,6 +10,7 @@ use App\Models\ClientPageSetting;
 use App\Models\ClientProfile;
 use App\Services\FlightSearch\FlightSearchService;
 use App\Support\Client\ClientPageKeys;
+use App\Support\Homepage\JetpkHomepageRouteSearchUrlBuilder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -22,6 +23,7 @@ final class JetpkHomepageRouteFareRefreshService
 {
     public function __construct(
         private readonly FlightSearchService $flightSearch,
+        private readonly JetpkHomepageRouteSearchUrlBuilder $searchUrlBuilder,
     ) {}
 
     /**
@@ -146,6 +148,7 @@ final class JetpkHomepageRouteFareRefreshService
                 $summary['success']++;
                 if ($persist) {
                     $fareCache[$routeId] = $result['cache'];
+                    $content = $this->applyAutoCtaToRouteItem($content, $routeId, $item, $result['cache']);
                 }
             } else {
                 $summary['failed']++;
@@ -195,11 +198,89 @@ final class JetpkHomepageRouteFareRefreshService
                 $draftContent = $draft->content_json;
                 data_set($draftContent, '_fare_cache.routes', $fareCache);
                 data_set($draftContent, '_fare_cache.destinations', $destinationFareCache);
+                $draftContent = $this->syncRouteCtasFromSource($draftContent, $content);
                 $draft->update(['content_json' => $draftContent]);
             }
         }
 
         return $summary;
+    }
+
+    /**
+     * @param  array<string, mixed>  $content
+     * @param  array<string, mixed>  $item
+     * @param  array<string, mixed>  $fareCache
+     * @return array<string, mixed>
+     */
+    private function applyAutoCtaToRouteItem(array $content, string $routeId, array $item, array $fareCache): array
+    {
+        if ($this->searchUrlBuilder->isManualCta($item)) {
+            return $content;
+        }
+
+        $items = is_array($content['routes']['items'] ?? null) ? $content['routes']['items'] : [];
+        foreach ($items as $index => $routeItem) {
+            if (! is_array($routeItem) || (string) ($routeItem['id'] ?? '') !== $routeId) {
+                continue;
+            }
+
+            $merged = array_merge($routeItem, $item);
+            $items[$index]['cta_url'] = $this->searchUrlBuilder->fromRouteItem($merged, $fareCache, false);
+            $items[$index]['cta_mode'] = 'auto';
+            break;
+        }
+
+        data_set($content, 'routes.items', $items);
+
+        return $content;
+    }
+
+    /**
+     * @param  array<string, mixed>  $target
+     * @param  array<string, mixed>  $source
+     * @return array<string, mixed>
+     */
+    private function syncRouteCtasFromSource(array $target, array $source): array
+    {
+        $sourceItems = is_array($source['routes']['items'] ?? null) ? $source['routes']['items'] : [];
+        $targetItems = is_array($target['routes']['items'] ?? null) ? $target['routes']['items'] : [];
+        if ($sourceItems === [] || $targetItems === []) {
+            return $target;
+        }
+
+        $ctaById = [];
+        foreach ($sourceItems as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $id = (string) ($item['id'] ?? '');
+            if ($id === '') {
+                continue;
+            }
+            $ctaById[$id] = [
+                'cta_url' => $item['cta_url'] ?? null,
+                'cta_mode' => $item['cta_mode'] ?? 'auto',
+            ];
+        }
+
+        foreach ($targetItems as $index => $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $id = (string) ($item['id'] ?? '');
+            if ($id === '' || ! isset($ctaById[$id])) {
+                continue;
+            }
+            if ($this->searchUrlBuilder->isManualCta($item)) {
+                continue;
+            }
+            $targetItems[$index]['cta_url'] = $ctaById[$id]['cta_url'];
+            $targetItems[$index]['cta_mode'] = $ctaById[$id]['cta_mode'];
+        }
+
+        data_set($target, 'routes.items', $targetItems);
+
+        return $target;
     }
 
     /**

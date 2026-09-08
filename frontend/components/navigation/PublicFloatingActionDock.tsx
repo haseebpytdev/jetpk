@@ -5,8 +5,9 @@ import { primaryNavigationForSession } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
 import type { PublicSession } from "@/types/session";
 import Link from "next/link";
-import { useEffect, useId, useRef } from "react";
+import { usePublicFloatingLayoutOptional } from "@/features/public-floating/PublicFloatingLayoutProvider";
 import { usePathname } from "next/navigation";
+import { useEffect, useId, useRef } from "react";
 
 type PublicFloatingActionDockProps = {
   session: PublicSession;
@@ -24,6 +25,7 @@ export function PublicFloatingActionDock({
   const panelId = useId();
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const summaryRef = useRef<HTMLElement>(null);
+  const layout = usePublicFloatingLayoutOptional();
   const signedIn = session.status === "authenticated";
   const pathname = usePathname() ?? "";
   const liftForCheckoutSticky =
@@ -86,16 +88,16 @@ export function PublicFloatingActionDock({
       tabIndex={-1}
       className={cn(
         "jp-public-fab-dock group pointer-events-none fixed right-[max(1rem,env(safe-area-inset-right))] z-50 lg:hidden",
-        liftFab
-          ? "bottom-[max(6.75rem,calc(env(safe-area-inset-bottom)+5.5rem))]"
-          : "bottom-[max(1rem,env(safe-area-inset-bottom))]",
+        liftFab ? "jp-public-fab-dock--lift" : "jp-public-fab-dock--base",
       )}
       data-testid="public-fab-dock"
       data-ai-enabled={aiEnabled ? "1" : "0"}
       data-lift-checkout={liftForCheckoutSticky ? "1" : "0"}
       data-lift-flight-cta={liftForFlightCta ? "1" : "0"}
       onToggle={(event) => {
-        if (event.currentTarget.open) {
+        const open = event.currentTarget.open;
+        layout?.setDockOpen(open);
+        if (open) {
           event.currentTarget.focus();
         }
       }}

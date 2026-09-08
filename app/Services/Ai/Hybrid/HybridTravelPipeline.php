@@ -65,6 +65,15 @@ final class HybridTravelPipeline
             );
         }
 
+        if ($this->wantsBookingLookup($normalized, $original)) {
+            return new HybridParseResult(
+                intent: TravelIntent::fromArray(['intent' => 'booking_lookup'], 'STRUCTURED_FALLBACK'),
+                language: $language,
+                provenance: ['intent' => 'EXPLICIT_USER'],
+                state: $prior,
+            );
+        }
+
         if ($this->wantsKnowledge($normalized, $original)) {
             return new HybridParseResult(
                 intent: TravelIntent::fromArray(['intent' => 'knowledge'], 'STRUCTURED_FALLBACK'),
@@ -309,7 +318,15 @@ final class HybridTravelPipeline
     private function wantsKnowledge(string $normalized, string $original): bool
     {
         return (bool) preg_match(
-            '/how (does |do )?booking|how (can|do) i (contact|check)|contact (jetpakistan )?support|check (an |my )?existing booking|lookup booking|manage booking|guest booking|customer registration|payment (deadline|process|help)|cancellation|refund policy|saved travelers?|support hours|group ticket|group ticketing|faq|ادائیگی|ریفنڈ|محفوظ مسافر/u',
+            '/how (does |do )?booking|how (can|do) i (contact|check)|contact (jetpakistan )?support|guest booking|customer registration|payment (deadline|process|help)|cancellation|refund policy|saved travelers?|support hours|group ticket|group ticketing|faq|ادائیگی|ریفنڈ|محفوظ مسافر/u',
+            $normalized.' '.$original
+        );
+    }
+
+    private function wantsBookingLookup(string $normalized, string $original): bool
+    {
+        return (bool) preg_match(
+            '/\b(look\s*up|lookup|find|check|track|status\s+of)\s+(my\s+)?(booking|reservation|pnr)\b|\b(my\s+)?booking\s+(reference|ref|status)\b|\bbooking\s+reference\b|\bpnr\b|\bmera\s+booking\b|\bbooking\s+check\b|\bmanage\s+my\s+booking\b/u',
             $normalized.' '.$original
         );
     }

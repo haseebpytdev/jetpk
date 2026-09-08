@@ -101,14 +101,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Support\Sabre\Scenario\SabreGdsScenarioCorrelationRegistry::class);
 
         $this->app->singleton(InferenceProvider::class, function (): InferenceProvider {
-            // Hybrid core never requires a local LLM process.
-            if (! (bool) config('ota.ai_assistant.optional_llm_assist', false)) {
-                return new NullInferenceProvider;
-            }
             $mode = strtolower((string) config('ota.ai_assistant.mode', 'off'));
             $legacyOn = (bool) config('ota.ai_assistant.enabled', false);
             $runtimeOn = $mode === 'public' || $mode === 'internal_canary' || ($mode === 'off' && $legacyOn);
-            if (! $runtimeOn) {
+            $conversational = (bool) config('ota.ai_assistant.conversational_enabled', true);
+            $optionalAssist = (bool) config('ota.ai_assistant.optional_llm_assist', false);
+
+            if (! $runtimeOn || (! $conversational && ! $optionalAssist)) {
                 return new NullInferenceProvider;
             }
 

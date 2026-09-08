@@ -66,7 +66,7 @@ Route::get('/api/public/ai/health', [PublicAiAssistantController::class, 'health
     ->middleware('throttle:60,1')
     ->name('api.public.ai.health');
 Route::post('/api/public/ai/chat', [PublicAiAssistantController::class, 'chat'])
-    ->middleware('throttle:8,1')
+    ->middleware('throttle:60,1')
     ->name('api.public.ai.chat');
 Route::get('/api/public/ai/messages', [PublicAiAssistantController::class, 'messages'])
     ->middleware('throttle:60,1')

@@ -139,6 +139,15 @@ export function OrganizationProfileForm() {
         onClick={async () => {
           setMediaBusy(true);
           setMediaError(null);
+          if (faviconFile) {
+            const allowed = ["image/png", "image/x-icon", "image/vnd.microsoft.icon"];
+            const ext = faviconFile.name.split(".").pop()?.toLowerCase() ?? "";
+            if (!allowed.includes(faviconFile.type) && ext !== "ico" && ext !== "png") {
+              setMediaBusy(false);
+              setMediaError("Favicon must be a PNG or ICO file.");
+              return;
+            }
+          }
           const formData = new FormData();
           if (logoFile) formData.append("logo", logoFile);
           if (faviconFile) formData.append("favicon", faviconFile);

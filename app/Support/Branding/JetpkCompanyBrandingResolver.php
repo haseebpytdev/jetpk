@@ -48,7 +48,7 @@ final class JetpkCompanyBrandingResolver
         $config = $this->brandingConfig();
         $storagePath = trim((string) ($config['storage_logo_path'] ?? ''));
         if ($storagePath !== '' && $this->storageExists($storagePath)) {
-            return $this->storageUrl($storagePath);
+            return $this->versionedStorageUrl($storagePath, $config);
         }
 
         $logoPath = trim((string) ($config['logo_path'] ?? ''));
@@ -57,7 +57,7 @@ final class JetpkCompanyBrandingResolver
         }
 
         if (str_starts_with($logoPath, 'agencies/') && $this->storageExists($logoPath)) {
-            return $this->storageUrl($logoPath);
+            return $this->versionedStorageUrl($logoPath, $config);
         }
 
         $profile = trim((string) config('ota_client.asset_profile', config('ota_client.slug', 'jetpk')));
@@ -70,7 +70,7 @@ final class JetpkCompanyBrandingResolver
         $config = $this->brandingConfig();
         $storagePath = trim((string) ($config['storage_favicon_path'] ?? ''));
         if ($storagePath !== '' && $this->storageExists($storagePath)) {
-            return $this->storageUrl($storagePath);
+            return $this->versionedStorageUrl($storagePath, $config);
         }
 
         $faviconPath = trim((string) ($config['favicon_path'] ?? ''));
@@ -79,7 +79,7 @@ final class JetpkCompanyBrandingResolver
         }
 
         if (str_starts_with($faviconPath, 'agencies/') && $this->storageExists($faviconPath)) {
-            return $this->storageUrl($faviconPath);
+            return $this->versionedStorageUrl($faviconPath, $config);
         }
 
         $profile = trim((string) config('ota_client.asset_profile', config('ota_client.slug', 'jetpk')));
@@ -186,5 +186,21 @@ final class JetpkCompanyBrandingResolver
         }
 
         return asset('storage/'.$path);
+    }
+
+    /**
+     * @param  array<string, mixed>  $config
+     */
+    private function versionedStorageUrl(string $path, array $config): string
+    {
+        $url = $this->storageUrl($path);
+        $version = $config['branding_media_version'] ?? null;
+        if ($version === null || $version === '') {
+            return $url;
+        }
+
+        $separator = str_contains($url, '?') ? '&' : '?';
+
+        return $url.$separator.'v='.(string) $version;
     }
 }

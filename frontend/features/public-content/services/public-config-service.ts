@@ -65,8 +65,8 @@ export const PublicConfigService = {
         headers: { Accept: "application/json" },
         credentials: typeof window !== "undefined" ? "include" : "omit",
         ...(typeof window === "undefined"
-          ? { next: { revalidate: 300 } }
-          : { cache: "force-cache" as RequestCache }),
+          ? { next: { revalidate: 60 } }
+          : { cache: "no-store" as RequestCache }),
       });
       if (!response.ok) return null;
       return (await response.json()) as PublicConfig;

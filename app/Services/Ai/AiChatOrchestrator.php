@@ -22,6 +22,8 @@ final class AiChatOrchestrator
         private readonly TravelIntentExtractor $extractor,
         private readonly KnowledgeSearchService $knowledge,
         private readonly AiShoppingTools $tools,
+        private readonly AiConversationalAgent $conversational,
+        private readonly AiAssistantBookingLookupTool $bookingLookupTool,
     ) {}
 
     /**
@@ -192,7 +194,42 @@ final class AiChatOrchestrator
             $conversation->save();
         }
 
-        // Hybrid model-free core: mode label stays STRUCTURED_FALLBACK for routine chat.
+        $baseMeta = [
+            'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+            'AI_GROUP_SEARCH_READ_CALLS' => 0,
+            'LOCAL_LLM_REQUIRED_FOR_CORE' => false,
+        ];
+
+        $conversational = $this->conversational->tryHandle($conversation, $cleanMessage, $baseMeta);
+        if (is_array($conversational)) {
+            if (! empty($conversational['handoff'])) {
+                return $this->beginHandoff($conversation, 'llm_requested', 'LLM_ASSISTED', $baseMeta);
+            }
+
+            $mode = (string) ($conversational['mode'] ?? 'LLM_ASSISTED');
+            $body = (string) ($conversational['message'] ?? '');
+            if ($body !== '') {
+                $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+                    'mode' => $mode,
+                    'tool' => $conversational['tool'] ?? null,
+                ]);
+
+                return $this->withMessageId($assistant, [
+                    'ok' => true,
+                    'status' => 'ok',
+                    'mode' => $mode,
+                    'conversation_id' => $conversation->public_id,
+                    'state' => $conversation->state,
+                    'message' => $body,
+                    'recommendations' => $conversational['recommendations'] ?? [],
+                    'knowledge' => $conversational['knowledge'] ?? [],
+                    'actions' => $conversational['actions'] ?? $this->defaultActions(),
+                    'meta' => $conversational['meta'] ?? $baseMeta,
+                ]);
+            }
+        }
+
+        // Hybrid model-free core when LLM unavailable or did not produce a reply.
         $mode = 'STRUCTURED_FALLBACK';
         $prior = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
         $hybrid = $this->extractor->extractHybrid($cleanMessage, $prior);
@@ -222,15 +259,19 @@ final class AiChatOrchestrator
             return $this->replyKnowledge($conversation, $cleanMessage, $mode, $meta);
         }
 
+        if ($intent->intent === 'booking_lookup' || $this->shouldContinueBookingLookup($prior, $cleanMessage)) {
+            return $this->replyBookingLookup($conversation, $cleanMessage, $mode, $meta);
+        }
+
         if ($hybrid->clarificationRequired) {
             $body = $hybrid->clarificationMessage ?: $this->clarifyMessage($intent, $mode);
-            $this->storeMessage($conversation, 'assistant', $body, [
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, [
                 'mode' => $mode,
                 'intent' => $intent->toArray(),
                 'clarification_options' => $hybrid->clarificationOptions,
             ]);
 
-            return [
+            return $this->withMessageId($assistant, [
                 'ok' => true,
                 'status' => 'clarify',
                 'mode' => $mode,
@@ -241,7 +282,7 @@ final class AiChatOrchestrator
                 'recommendations' => [],
                 'actions' => $this->defaultActions(),
                 'meta' => $meta,
-            ];
+            ]);
         }
 
         if ($intent->intent === 'flight_search' || ($intent->isSearchable() && $intent->intent !== 'group_search')) {
@@ -255,12 +296,12 @@ final class AiChatOrchestrator
         }
 
         $body = $hybrid->clarificationMessage ?: $this->clarifyMessage($intent, $mode);
-        $this->storeMessage($conversation, 'assistant', $body, [
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
             'mode' => $mode,
             'intent' => $intent->toArray(),
         ]);
 
-        return [
+        return $this->withMessageId($assistant, [
             'ok' => true,
             'status' => 'ok',
             'mode' => $mode,
@@ -270,7 +311,7 @@ final class AiChatOrchestrator
             'recommendations' => [],
             'actions' => $this->defaultActions(),
             'meta' => $meta,
-        ];
+        ]);
     }
 
     /**
@@ -350,7 +391,13 @@ final class AiChatOrchestrator
         if (! $eligibility->isRuntimeOn()) {
             return 'AI_UNAVAILABLE';
         }
-        if ($this->memoryPressure() || ! $this->provider->isHealthy()) {
+        if ($this->memoryPressure()) {
+            return 'STRUCTURED_FALLBACK';
+        }
+        if ($this->conversational->isEnabled() && $this->provider->isHealthy()) {
+            return 'LLM_ASSISTED';
+        }
+        if (! $this->provider->isHealthy()) {
             return 'STRUCTURED_FALLBACK';
         }
 
@@ -398,9 +445,9 @@ final class AiChatOrchestrator
     {
         if (! (bool) config('ota.ai_assistant.human_handoff_enabled', true)) {
             $body = 'I could not reach a human agent right now. Please use Contact Support.';
-            $this->storeMessage($conversation, 'assistant', $body, ['mode' => $mode]);
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => $mode]);
 
-            return [
+            return $this->withMessageId($assistant, [
                 'ok' => true,
                 'status' => 'ok',
                 'mode' => $mode,
@@ -410,7 +457,7 @@ final class AiChatOrchestrator
                 'recommendations' => [],
                 'actions' => [['label' => 'Contact Support', 'href' => '/support']],
                 'meta' => $meta,
-            ];
+            ]);
         }
 
         $from = $conversation->state;
@@ -426,12 +473,12 @@ final class AiChatOrchestrator
         ]);
 
         $body = 'I have connected you with our support queue. A team member will reply in this chat. AI replies are paused.';
-        $this->storeMessage($conversation, 'assistant', $body, [
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
             'mode' => $mode,
             'handoff' => true,
         ]);
 
-        return [
+        return $this->withMessageId($assistant, [
             'ok' => true,
             'status' => 'waiting_for_human',
             'mode' => $mode,
@@ -444,7 +491,7 @@ final class AiChatOrchestrator
                 ['label' => 'Lookup Booking', 'href' => '/lookup-booking'],
             ],
             'meta' => $meta,
-        ];
+        ]);
     }
 
     /**
@@ -456,9 +503,9 @@ final class AiChatOrchestrator
         $hits = $this->knowledge->search($message, 3);
         if ($hits === []) {
             $body = 'I could not find an approved answer for that. Would you like to talk to support?';
-            $this->storeMessage($conversation, 'assistant', $body, ['mode' => $mode, 'knowledge_hits' => 0]);
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => $mode, 'knowledge_hits' => 0]);
 
-            return [
+            return $this->withMessageId($assistant, [
                 'ok' => true,
                 'status' => 'ok',
                 'mode' => $mode,
@@ -473,7 +520,7 @@ final class AiChatOrchestrator
                     ['label' => 'FAQ', 'href' => '/faq'],
                 ],
                 'meta' => $meta,
-            ];
+            ]);
         }
 
         $parts = [];
@@ -481,12 +528,12 @@ final class AiChatOrchestrator
             $parts[] = '**'.$hit['title']."**\n".$hit['excerpt'];
         }
         $body = "Here is what I found in JetPakistan help:\n\n".implode("\n\n", $parts);
-        $this->storeMessage($conversation, 'assistant', $body, [
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
             'mode' => $mode,
             'knowledge' => array_map(static fn ($h) => $h['slug'], $hits),
         ]);
 
-        return [
+        return $this->withMessageId($assistant, [
             'ok' => true,
             'status' => 'ok',
             'mode' => $mode,
@@ -497,7 +544,87 @@ final class AiChatOrchestrator
             'recommendations' => [],
             'actions' => $this->defaultActions(),
             'meta' => $meta,
-        ];
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    private function replyBookingLookup(AiConversation $conversation, string $message, string $mode, array $meta): array
+    {
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        $state = $this->bookingLookupTool->patchState($state, $message);
+        $state['intent'] = 'booking_lookup';
+        $conversation->shopping_state = $state;
+        $conversation->save();
+
+        $reference = is_string($state['booking_reference'] ?? null) ? $state['booking_reference'] : null;
+        $email = is_string($state['booking_email'] ?? null) ? $state['booking_email'] : null;
+
+        if ($reference === null && $email === null) {
+            $body = 'Of course — I can help you check a booking. Please send your booking reference and the email address used when you booked.';
+            $status = 'clarify';
+            $bookingPayload = null;
+        } elseif ($reference === null) {
+            $body = 'Thanks. What is your booking reference? I need it together with your email to verify your booking securely.';
+            $status = 'clarify';
+            $bookingPayload = null;
+        } elseif ($email === null) {
+            $body = 'Thanks. What email address was used for booking '.$reference.'? JetPakistan verifies both before showing booking details.';
+            $status = 'clarify';
+            $bookingPayload = null;
+        } else {
+            $lookup = $this->bookingLookupTool->lookup($reference, $email);
+            $body = (string) ($lookup['message'] ?? 'Lookup complete.');
+            $status = ($lookup['found'] ?? false) ? 'ok' : 'not_found';
+            $bookingPayload = $lookup['booking'] ?? null;
+        }
+
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+            'mode' => $mode,
+            'intent' => ['intent' => 'booking_lookup', 'booking_reference' => $reference, 'booking_email' => $email],
+            'booking' => $bookingPayload,
+        ]);
+
+        $meta['intent'] = ['intent' => 'booking_lookup'];
+        if (is_array($bookingPayload)) {
+            $meta['booking_lookup'] = $bookingPayload;
+        }
+
+        return $this->withMessageId($assistant, [
+            'ok' => true,
+            'status' => $status,
+            'mode' => $mode,
+            'conversation_id' => $conversation->public_id,
+            'state' => $conversation->state,
+            'message' => $body,
+            'recommendations' => [],
+            'booking' => $bookingPayload,
+            'actions' => [
+                ['label' => 'Lookup Booking', 'href' => '/lookup-booking'],
+                ['label' => 'Talk to Support', 'action' => 'handoff'],
+            ],
+            'meta' => $meta,
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $prior
+     */
+    private function shouldContinueBookingLookup(array $prior, string $message): bool
+    {
+        if (($prior['intent'] ?? '') === 'booking_lookup') {
+            return true;
+        }
+
+        if (! isset($prior['booking_reference']) && ! isset($prior['booking_email'])) {
+            return false;
+        }
+
+        return preg_match('/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i', $message) === 1
+            || preg_match('/\b(reference|ref|pnr)\s*(is|:)?\s*[A-Z0-9]{5,12}\b/i', $message) === 1
+            || preg_match('/\b[A-Z0-9]{5,12}\b/u', $message) === 1;
     }
 
     /**
@@ -517,12 +644,12 @@ final class AiChatOrchestrator
             $body = 'I prepared a flight search for '.$intent->origin.' → '.$intent->destination.'. '.$note;
         }
 
-        $this->storeMessage($conversation, 'assistant', $body, [
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
             'mode' => $mode,
             'recommendations' => $recs,
         ]);
 
-        return [
+        return $this->withMessageId($assistant, [
             'ok' => true,
             'status' => 'ok',
             'mode' => $mode,
@@ -535,7 +662,7 @@ final class AiChatOrchestrator
                 ['label' => 'Talk to Support', 'action' => 'handoff'],
             ],
             'meta' => $meta,
-        ];
+        ]);
     }
 
     /**
@@ -555,12 +682,12 @@ final class AiChatOrchestrator
             $body = 'Here are up to '.count($recs).' group options. '.$note;
         }
 
-        $this->storeMessage($conversation, 'assistant', $body, [
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
             'mode' => $mode,
             'recommendations' => $recs,
         ]);
 
-        return [
+        return $this->withMessageId($assistant, [
             'ok' => true,
             'status' => 'ok',
             'mode' => $mode,
@@ -573,7 +700,7 @@ final class AiChatOrchestrator
                 ['label' => 'Talk to Support', 'action' => 'handoff'],
             ],
             'meta' => $meta,
-        ];
+        ]);
     }
 
     private function clarifyMessage($intent, string $mode): string
@@ -587,6 +714,17 @@ final class AiChatOrchestrator
         }
 
         return 'I can help search flights or groups, answer booking/payment FAQs, or connect you with support. What would you like to do?';
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function withMessageId(AiMessage $message, array $payload): array
+    {
+        $payload['message_id'] = $message->id;
+
+        return $payload;
     }
 
     /**

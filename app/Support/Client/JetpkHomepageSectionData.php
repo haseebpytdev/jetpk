@@ -6,6 +6,7 @@ use App\Services\Client\ClientPageContentResolver;
 use App\Services\Homepage\FeaturedDeals\GroupTicketFeaturedDealSource;
 use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Support\Client\Homepage\JetpkHomepageHeroSizing;
+use App\Support\Homepage\JetpkHomepageRouteSearchUrlBuilder;
 use App\Support\Media\PublicMediaUrl;
 
 
@@ -391,53 +392,12 @@ final class JetpkHomepageSectionData
      */
     private function routeSearchUrl(array $item, ?array $fareCache = null): string
     {
-        $custom = trim((string) ($item['cta_url'] ?? ''));
-        if ($custom !== '') {
-            return str_starts_with($custom, 'http') ? $custom : client_url($custom);
-        }
-
-        $offset = max(1, (int) config('jetpk_homepage.route_date_offset_days', 7));
-        $depart = trim((string) ($fareCache['travel_date'] ?? '')) ?: now(config('app.timezone', 'Asia/Karachi'))->addDays($offset)->toDateString();
-        $tripType = (string) ($item['trip_type'] ?? config('jetpk_homepage.default_trip_type', 'one_way'));
-        $params = [
-            'from' => strtoupper((string) ($item['from'] ?? '')),
-            'to' => strtoupper((string) ($item['to'] ?? '')),
-            'depart' => $depart,
-            'trip_type' => $tripType === 'return' ? 'return' : 'one_way',
-            'cabin' => (string) ($item['cabin'] ?? config('jetpk_homepage.default_cabin', 'economy')),
-            'adults' => max(1, (int) ($item['adults'] ?? config('jetpk_homepage.default_adults', 1))),
-            'children' => 0,
-            'infants' => 0,
-        ];
-
-        if ($tripType === 'return') {
-            $stay = max(1, (int) ($item['return_stay_days'] ?? config('jetpk_homepage.default_return_stay_days', 7)));
-            $params['return'] = trim((string) ($fareCache['return_date'] ?? ''))
-                ?: now(config('app.timezone', 'Asia/Karachi'))->addDays($offset + $stay)->toDateString();
-        }
-
-        return client_route('flights.results', $params);
+        return app(JetpkHomepageRouteSearchUrlBuilder::class)->fromRouteItem($item, $fareCache);
     }
 
-    /**
-     * @param  array<string, mixed>|null  $fareCache
-     */
     private function destinationSearchUrl(string $origin, string $destination, ?array $fareCache = null): string
     {
-        $offset = max(1, (int) config('jetpk_homepage.route_date_offset_days', 7));
-        $depart = trim((string) ($fareCache['travel_date'] ?? '')) ?: now(config('app.timezone', 'Asia/Karachi'))->addDays($offset)->toDateString();
-        $tripType = (string) config('jetpk_homepage.default_trip_type', 'one_way');
-
-        return client_route('flights.results', [
-            'from' => strtoupper($origin),
-            'to' => strtoupper($destination),
-            'depart' => $depart,
-            'trip_type' => $tripType === 'return' ? 'return' : 'one_way',
-            'cabin' => (string) config('jetpk_homepage.default_cabin', 'economy'),
-            'adults' => max(1, (int) config('jetpk_homepage.default_adults', 1)),
-            'children' => 0,
-            'infants' => 0,
-        ]);
+        return app(JetpkHomepageRouteSearchUrlBuilder::class)->fromDestination($origin, $destination, $fareCache);
     }
 
     /**

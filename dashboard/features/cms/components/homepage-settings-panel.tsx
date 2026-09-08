@@ -34,6 +34,7 @@ type RouteItem = {
   image_asset_key?: string;
   image_alt?: string;
   cta_url?: string;
+  cta_mode?: "auto" | "manual";
 };
 
 type DestinationItem = {
@@ -47,6 +48,7 @@ type DestinationItem = {
   image_alt?: string;
   link?: string;
   cta_url?: string;
+  cta_mode?: "auto" | "manual";
 };
 
 type DealItem = {
@@ -70,6 +72,7 @@ type SectionMeta = {
   subtitle?: string;
   cta_text?: string;
   cta_url?: string;
+  cta_mode?: "auto" | "manual";
 };
 
 type TrustChip = { label?: string };
@@ -170,7 +173,7 @@ function slugifyAssetId(raw: string): string {
 }
 
 function routeAssetKey(itemId: string): string {
-  return `route_${itemId}`;
+  return `route_${slugifyAssetId(itemId)}`;
 }
 
 function destinationAssetKey(itemId: string): string {
@@ -500,7 +503,14 @@ export function HomepageSettingsPanel() {
     formData.set("alt_text", altText || hero.image_alt || file.name);
     const result = await uploadPageSettingsAsset("home", formData);
     if (!result.ok) {
-      throw new Error(result.message ?? "Asset upload failed");
+      const errors = (result as { errors?: Record<string, string[] | string> }).errors;
+      const firstFieldError =
+        errors && typeof errors === "object"
+          ? Object.values(errors)
+              .flatMap((value) => (Array.isArray(value) ? value : [value]))
+              .find((value) => typeof value === "string" && value.trim() !== "")
+          : undefined;
+      throw new Error(firstFieldError ?? result.message ?? "Asset upload failed");
     }
     const refreshed = await loadPageSettings("home");
     if (refreshed.ok) {
@@ -833,15 +843,53 @@ export function HomepageSettingsPanel() {
                       patchRoutes(items);
                     }}
                   />
-                  <Field
-                    label="CTA / search URL"
-                    value={item.cta_url ?? ""}
-                    onChange={(v) => {
-                      const items = [...routes];
-                      items[index] = { ...item, cta_url: v };
-                      patchRoutes(items);
-                    }}
-                  />
+                  <div className="space-y-1">
+                    <label className="block text-xs font-medium text-jp-muted">
+                      CTA / search URL
+                      <span className="ml-2 font-normal text-jp-muted">(auto from cheapest fare)</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="mt-1 w-full rounded-lg border border-jp-border bg-jp-surface-muted px-3 py-2 text-sm"
+                      value={item.cta_url ?? ""}
+                      readOnly={item.cta_mode !== "manual"}
+                      placeholder="Refresh route fares to auto-generate"
+                      onChange={(e) => {
+                        const items = [...routes];
+                        items[index] = { ...item, cta_url: e.target.value, cta_mode: "manual" };
+                        patchRoutes(items);
+                      }}
+                      data-testid={`cms-route-cta-${index}`}
+                    />
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-jp-muted">
+                      <span>Mode: {item.cta_mode === "manual" ? "Manual override" : "Auto"}</span>
+                      {item.cta_mode === "manual" ? (
+                        <button
+                          type="button"
+                          className="rounded border border-jp-border px-2 py-0.5"
+                          onClick={() => {
+                            const items = [...routes];
+                            items[index] = { ...item, cta_mode: "auto", cta_url: "" };
+                            patchRoutes(items);
+                          }}
+                        >
+                          Use auto-generated
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="rounded border border-jp-border px-2 py-0.5"
+                          onClick={() => {
+                            const items = [...routes];
+                            items[index] = { ...item, cta_mode: "manual" };
+                            patchRoutes(items);
+                          }}
+                        >
+                          Manual override
+                        </button>
+                      )}
+                    </div>
+                  </div>
                   <Field
                     label="Image alt"
                     value={item.image_alt ?? ""}

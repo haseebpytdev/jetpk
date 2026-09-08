@@ -62,11 +62,14 @@ final class TravelIntent
             'human' => 'handoff',
             'agent' => 'handoff',
             'chatbot' => 'unknown',
+            'lookup' => 'booking_lookup',
+            'manage_booking' => 'booking_lookup',
+            'booking' => 'booking_lookup',
         ];
         if (isset($intentAliases[$intent])) {
             $intent = $intentAliases[$intent];
         }
-        $allowed = ['flight_search', 'group_search', 'knowledge', 'handoff', 'unknown'];
+        $allowed = ['flight_search', 'group_search', 'knowledge', 'handoff', 'booking_lookup', 'unknown'];
         if (! in_array($intent, $allowed, true)) {
             $intent = 'unknown';
         }

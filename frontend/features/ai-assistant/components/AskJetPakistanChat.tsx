@@ -1,5 +1,6 @@
 "use client";
 
+import { usePublicFloatingLayoutOptional } from "@/features/public-floating/PublicFloatingLayoutProvider";
 import { ensureLaravelCsrfToken } from "@/features/public-content/utils/laravel-api";
 import { laravelApiPath } from "@/services/flight-search";
 import Link from "next/link";
@@ -130,6 +131,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   const titleId = useId();
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const floatingLayout = usePublicFloatingLayoutOptional();
 
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -156,8 +158,18 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   const close = useCallback(() => {
     setOpen(false);
     setMenuOpen(false);
+    floatingLayout?.setAskOpen(false);
     clearHash();
-  }, [clearHash]);
+  }, [clearHash, floatingLayout]);
+
+  const openPanel = useCallback(() => {
+    setOpen(true);
+    floatingLayout?.setAskOpen(true);
+  }, [floatingLayout]);
+
+  useEffect(() => {
+    floatingLayout?.setAskOpen(open);
+  }, [floatingLayout, open]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -175,7 +187,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
 
     const syncHash = () => {
       if (typeof window !== "undefined" && window.location.hash === "#ask-jetpakistan") {
-        setOpen(true);
+        openPanel();
       }
     };
 
@@ -237,6 +249,12 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
 
             if (known.has(id) || message.role === "user") continue;
 
+            const duplicateBody = next.some(
+              (existing) =>
+                existing.role === "assistant" && existing.body === message.body,
+            );
+            if (duplicateBody) continue;
+
             next.push({
               id,
               role: (message.role as ChatMessage["role"]) || "assistant",
@@ -294,20 +312,44 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
         ? json.message
         : "Something went wrong. Please try again.";
 
-    setMessages((previous) => [
-      ...previous,
-      {
-        id: `a-${Date.now()}`,
-        role: "assistant",
-        body,
-        recommendations: Array.isArray(json.recommendations)
-          ? (json.recommendations as Recommendation[])
-          : undefined,
-        actions: Array.isArray(json.actions)
-          ? (json.actions as ChatAction[])
-          : undefined,
-      },
-    ]);
+    const serverId =
+      typeof json.message_id === "number"
+        ? String(json.message_id)
+        : typeof json.message_id === "string" && json.message_id !== ""
+          ? json.message_id
+          : `a-${Date.now()}`;
+
+    if (typeof json.message_id === "number") {
+      lastPollId.current = Math.max(lastPollId.current, json.message_id);
+    }
+
+    setMessages((previous) => {
+      if (previous.some((message) => message.id === serverId)) {
+        return previous;
+      }
+
+      const duplicateBody = previous.some(
+        (message) => message.role === "assistant" && message.body === body,
+      );
+      if (duplicateBody) {
+        return previous;
+      }
+
+      return [
+        ...previous,
+        {
+          id: serverId,
+          role: "assistant",
+          body,
+          recommendations: Array.isArray(json.recommendations)
+            ? (json.recommendations as Recommendation[])
+            : undefined,
+          actions: Array.isArray(json.actions)
+            ? (json.actions as ChatAction[])
+            : undefined,
+        },
+      ];
+    });
   };
 
   const send = async (text: string) => {
@@ -343,7 +385,6 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
             ? json.message
             : "Request failed. Please retry.",
         );
-        appendAssistant(json);
         return;
       }
 
@@ -453,7 +494,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
             type="button"
             data-testid="ask-jetpakistan-fab"
             aria-label="Ask JetPakistan"
-            onClick={() => setOpen(true)}
+            onClick={openPanel}
             className={styles.fab}
           >
             <AssistantFabIcon />

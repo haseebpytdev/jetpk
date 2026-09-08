@@ -164,6 +164,7 @@ final class ClientProfileConfigReader
             'storage_logo_path' => $db['storage_logo_path'] ?? null,
             'storage_favicon_path' => $db['storage_favicon_path'] ?? null,
             'storage_hero_image_path' => $db['storage_hero_image_path'] ?? null,
+            'branding_media_version' => $db['branding_media_version'] ?? null,
             'header_logo_height' => $db['header_logo_height'] ?? null,
         ];
     }
@@ -277,6 +278,7 @@ final class ClientProfileConfigReader
             'storage_logo_path' => trim((string) ($settings->logo_path ?? '')) ?: null,
             'storage_favicon_path' => trim((string) ($settings->favicon_path ?? '')) ?: null,
             'storage_hero_image_path' => trim((string) ($settings->hero_image_path ?? '')) ?: null,
+            'branding_media_version' => $settings->updated_at?->getTimestamp(),
             'timezone' => trim((string) ($settings->timezone ?? '')) ?: null,
             'currency' => trim((string) ($settings->currency ?? '')) ?: null,
             'header_logo_height' => \App\Support\Branding\PlatformBrandingResolver::headerLogoHeight($settings),

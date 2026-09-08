@@ -47,6 +47,22 @@ body {
   animation: jp-fab-panel-in var(--jp-motion-fast) var(--jp-ease-standard);
 }
 
+/* JP-ASK-AI-FAB-03: coordinated floating control layout (sub-lg only) */
+@media (max-width: 1023px) {
+  .jp-public-fab-dock--base {
+    bottom: var(--jp-dock-fab-bottom, max(1rem, env(safe-area-inset-bottom)));
+  }
+
+  .jp-public-fab-dock--lift {
+    bottom: max(6.75rem, calc(env(safe-area-inset-bottom) + 5.5rem));
+  }
+
+  html[data-jp-ask-open="1"] .jp-public-fab-dock {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
