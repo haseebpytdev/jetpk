@@ -9,7 +9,7 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -69,7 +69,7 @@ export function PublicFloatingLayoutProvider({
     [aiEnabled, askOpen, dockOpen, liftCheckout, liftFlightCta],
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     applyPublicFloatingLayout(layoutState);
   }, [layoutState]);
 

@@ -13,20 +13,26 @@ export type PublicFloatingLayoutState = {
   liftFlightCta: boolean;
 };
 
-export const FAB_DOCK_SIZE_PX = 56;
-export const FAB_GAP_PX = 12;
+export const FAB_SAFE_BOTTOM_PX = 18;
+export const FAB_DOCK_BOTTOM_PX = 16;
+export const FAB_DOCK_TRIGGER_PX = 56;
+export const FAB_ASK_SIZE_PX = 58;
+export const FAB_GAP_PX = 14;
 export const FAB_DOCK_PANEL_OFFSET_PX = 72;
 
 export function computeAskFabBottomPx(state: PublicFloatingLayoutState): number {
-  const safe = 18;
-  let bottom = safe;
+  let bottom = FAB_SAFE_BOTTOM_PX;
 
   if (state.liftCheckout || state.liftFlightCta) {
     bottom = Math.max(bottom, 108);
   }
 
   if (state.aiEnabled && !state.askOpen) {
-    bottom += FAB_DOCK_SIZE_PX + FAB_GAP_PX;
+    // Stack Ask FAB above the dock trigger footprint (bottom + height + gap).
+    bottom = Math.max(
+      bottom,
+      FAB_DOCK_BOTTOM_PX + FAB_DOCK_TRIGGER_PX + FAB_GAP_PX,
+    );
     if (state.dockOpen) {
       bottom += FAB_DOCK_PANEL_OFFSET_PX;
     }

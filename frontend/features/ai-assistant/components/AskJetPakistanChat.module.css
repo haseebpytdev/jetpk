@@ -726,7 +726,7 @@
 @media (max-width: 640px) {
   .fabWrap {
     right: max(14px, env(safe-area-inset-right));
-    bottom: max(14px, env(safe-area-inset-bottom));
+    bottom: var(--jp-ask-fab-bottom, max(14px, env(safe-area-inset-bottom)));
   }
 
   .fab {

@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 import {
   computeAskFabBottomPx,
-  FAB_DOCK_SIZE_PX,
+  FAB_DOCK_BOTTOM_PX,
+  FAB_DOCK_TRIGGER_PX,
   FAB_GAP_PX,
 } from "../features/public-floating/public-floating-layout";
 
@@ -14,7 +15,7 @@ test.describe("JP-ASK-FAB-03 layout contract", () => {
       liftCheckout: false,
       liftFlightCta: false,
     });
-    expect(base).toBeGreaterThanOrEqual(18 + FAB_DOCK_SIZE_PX + FAB_GAP_PX);
+    expect(base).toBeGreaterThanOrEqual(FAB_DOCK_BOTTOM_PX + FAB_DOCK_TRIGGER_PX + FAB_GAP_PX);
   });
 
   test("dock open adds extra offset", () => {
