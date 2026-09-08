@@ -1,181 +1,187 @@
-# Production Deployment Safety (OTA)
+# Production Deployment Safety — JetPakistan
 
-Stable project standard for live Laravel OTA changes. **Read and obey this document before modifying files.**
+Stable project standard for JetPakistan live operations. Read this together with
+`docs/jetpk/DEPLOYMENT-CONTEXT.md` before production deployment or server work.
 
-Stability is more important than speed. This codebase runs on a live Hostinger production server synced via SFTP.
+## Canonical production target
 
----
+```text
+PUBLIC_HOST=https://jetpakistan.pk
+PRODUCTION_IP=185.215.166.176
+APP=/home/pkjetp/jetpk_app
+PUBLIC_FRONTEND=/home/pkjetp/jetpk_app/frontend
+PUBLIC_PM2=jetpk-public-frontend
+DASHBOARD_PM2=jetpk-dashboard
+PHP=/usr/local/lsws/lsphp83/bin/lsphp
+```
 
-## Mandatory pre-task checklist
+Historical Hostinger/shared-preview/SFTP-only instructions are not authoritative
+for current JetPakistan production.
 
-Before making changes:
+## Standing Cursor production access
 
-1. Search for every referenced class before adding or using it.
-2. Confirm namespace imports are correct (see **No blind namespace** below).
-3. Do not create duplicate classes if a real class already exists.
-4. Keep the change scoped — smallest safe fix only.
-5. Run or provide syntax checks on touched PHP files.
-6. Run or provide route/view/cache verification after deploy.
-7. Wrap non-critical email/API/notification code in `try-catch (\Throwable)` — log warning, do not throw.
-8. After implementation, list touched files and exact verification commands with expected results.
+The owner has granted Cursor standing operational access to the canonical
+JetPakistan server for normal project work.
 
-Also obey `.cursor/rules/sftp-live-server-rules.mdc` for upload and SSH cache clears.
+Cursor may directly use SSH for:
 
----
+- server inspection and management
+- protected deployments
+- deployment-wrapper recovery/verification
+- service/process/build/cache/runtime checks
+- Laravel/Artisan diagnostics
+- log inspection
+- production API/browser UAT
+- read-only live fare/inventory/search verification
+- incident investigation and scoped reversible fixes
 
-## Strongest rule: no blind namespace
+Cursor may also use SFTP/SCP when legitimately needed for operational recovery
+or server management, but normal application releases should use the established
+protected Git-SHA deployment path.
 
-**Cursor must never use an unqualified class name in a namespaced PHP file unless:**
+The owner should not need to manually run routine SSH commands when Cursor has
+working access.
 
-1. The class exists in the **same namespace** as the file using it, **or**
-2. The correct `use ...;` import is present at the top of the file, **or**
-3. The class is referenced with a **fully-qualified** name (leading `\`).
+## Mandatory safety boundaries
 
-### Before every class reference
+Direct SSH access does not remove production safeguards.
 
-1. **Search** the project for the real class file (`grep`, IDE search, or `Glob`).
-2. **Open** that file and read the `namespace` declaration.
-3. **Add** the exact `use Vendor\Package\ClassName;` import — or use the FQCN inline.
-4. **Never** assume Laravel will resolve a short name from another namespace.
-5. **Never** create a duplicate stub/fallback class if the real class exists elsewhere.
+Do not solely for testing/evidence:
 
-This single rule prevents production 500s from missing imports (e.g. login/auth controllers).
+- create bookings, PNRs, supplier holds, tickets, cancellations, voids or refunds
+- process real payments
+- mutate supplier inventory or settlement data
+- perform destructive database reset/drop/truncate operations
+- bulk-edit production customer/business records
+- expose secrets, credentials, private keys, tokens or PII
+- force push or rewrite Git history
+- delete the application/release tree wholesale
+- reboot/upgrade the server or perform broad infrastructure changes without task justification
 
-### Constructor dependency injection
+Dedicated QA/admin credentials and safe reversible CMS QA draft/publish/restore
+actions are permitted when required by an acceptance test.
 
-Every type-hinted constructor parameter must be resolvable by Laravel's container. Verify touched controllers via `php artisan route:list` or targeted tests before calling deploy complete.
+Read-only live supplier/search calls are permitted when required to verify fares,
+availability or inventory. Do not cross into commercial mutations.
 
----
+## Mandatory deployment workflow
+
+For a normal application release, prefer the established protected scripts:
+
+```bash
+bash jetpk-backup.sh
+AUTHORIZED_SHA=<approved-engineering-sha> bash jetpk-stage-release.sh
+bash jetpk-deploy.sh <RELEASE_DIR> <TIMESTAMP>
+bash jetpk-next-build.sh
+bash jetpk-pre-proxy-gate.sh
+```
+
+A public-only build may use:
+
+```bash
+PUBLIC_ONLY=1 bash jetpk-next-build.sh
+```
+
+only when Dashboard/CMS source did not change.
+
+Required invariant:
+
+```text
+STAGED_SOURCE_SHA == AUTHORIZED_SHA
+```
+
+Do not deploy an evidence-only commit when a distinct engineering SHA is the
+authorized runtime SHA.
+
+## Preflight
+
+Before activation verify:
+
+1. exact engineering SHA authorized for deployment
+2. current production HTTP health
+3. `pkjetp` can write required application/release paths
+4. backup destination is writable
+5. protected wrappers are present and verified
+6. current runtime/build IDs are known
+7. database/app backup succeeds
+
+If a protected wrapper is missing from `/tmp`, Cursor may use SSH to locate the
+established copy, compare SHA256 where possible, restore it, and continue. Do
+not recreate a wrapper casually when an authoritative copy exists.
+
+## Build/runtime safety
+
+- Do not restart/switch PM2 to a frontend whose `.next/BUILD_ID` is missing or invalid.
+- If Dashboard/CMS code changed, require a dashboard build as well as public build.
+- Treat runtime SHA markers as evidence only after activation/build/pre-proxy gates pass.
+- Prefer graceful service reloads to full stop/start operations where supported.
+- After any infrastructure/configuration change, verify ports/services/HTTP immediately.
 
 ## Defensive coding rules
 
+### No blind namespace
+
+Cursor must never use an unqualified class name in a namespaced PHP file unless:
+
+1. the class exists in the same namespace, or
+2. the exact `use ...;` import is present, or
+3. the class is referenced with a fully-qualified name.
+
+Search for the real class and verify its namespace before adding references.
+
 ### Non-critical paths must not crash critical pages
 
-Login, register, checkout, booking detail, dashboard, and admin pages must still render if email, notifications, Sabre, Duffel, payment, or file-generation logic fails.
-
-```php
-try {
-    $this->notificationService->send(...);
-} catch (\Throwable $e) {
-    report($e); // or Log::warning with context — never expose secrets
-}
-```
-
-### Blade templates
-
-- Use `?->` for nullable relationships.
-- Use `data_get()` for nested arrays/JSON.
-- Use `@forelse($items ?? [] as $item)` for lists that may be empty.
-- Never assume a relation, array key, or metadata path exists.
-
-### Controllers and services
-
-- Wrap external supplier/mail/payment calls in `try-catch` when the page must still render.
-- Return safe fallback values to the view (empty collection, null coalescing defaults).
+Login, registration, checkout, booking detail, dashboard and admin pages must
+not fail because of non-critical email, notification, external API or file-generation
+work. Use guarded error handling where the page must remain available.
 
 ### Incident fixes
 
-- No broad refactors during production incidents.
-- Fix the smallest root cause first, verify, then optional cleanup in a separate pass.
+During a production incident:
 
----
+- identify root cause first
+- apply the smallest reversible fix
+- preserve/verify backups when changing server configuration
+- avoid broad refactors
+- verify live HTTP/process/log state immediately afterward
 
-## Best practical workflow (every change)
+## Postdeploy verification
 
-Use this order:
+A deployment is not complete until applicable gates pass:
 
-| Step | Action | Where |
-|------|--------|-------|
-| 1 | Cursor changes files locally | Local |
-| 2 | Cursor lists touched files | Chat / report |
-| 3 | Run local syntax/import checks if possible | Local |
-| 4 | Sync files to live (single-file SFTP per server rules) | SFTP |
-| 5 | `composer dump-autoload` | Server SSH |
-| 6 | `php artisan optimize:clear` | Server SSH |
-| 7 | `php artisan route:list` | Server SSH |
-| 8 | `php artisan view:cache` — **only if Blade/views changed** | Server SSH |
-| 9 | Open the affected URL in a browser | Browser |
-| 10 | Immediately tail `storage/logs/laravel.log` | Server SSH |
+- production SHA equals authorized engineering SHA
+- public build PASS
+- dashboard build PASS when applicable
+- pre-proxy/live HTTP PASS
+- affected browser workflows PASS
+- network/API evidence PASS
+- fresh Laravel/server logs show no related ERROR/CRITICAL entries
+- independent verifier PASS when required by the active closure
 
-**No live deployment is complete until all applicable steps pass.**
+Production browser evidence must use `https://jetpakistan.pk`.
 
----
+## Completion report
 
-## Commands reference
+Record at minimum:
 
-### Local (step 3 — before upload)
+- engineering SHA deployed
+- remote evidence head separately, if different
+- backup/release identifier
+- public/dashboard build IDs
+- activation/build/pre-proxy results
+- production HTTP/runtime state
+- browser/API/log UAT
+- rollback reference
+- known limitations
+- final verifier result
 
-```bash
-php -l path/to/touched-file.php
-```
+Never report PASS while a mandatory acceptance gate remains FAIL, PARTIAL or
+BLOCKED unless the owner explicitly approves that gate as a documented exception.
 
-Repeat `php -l` for each touched PHP file. Optionally:
+## Related authority
 
-```bash
-composer dump-autoload
-php artisan optimize:clear
-php artisan route:list
-```
-
-### Server SSH (steps 5–8 — after upload)
-
-```bash
-php -l path/to/touched-file.php
-composer dump-autoload
-php artisan optimize:clear
-php artisan route:list
-```
-
-If Blade/views changed:
-
-```bash
-php artisan view:clear
-php artisan view:cache
-```
-
-Run `view:clear` before `view:cache` when replacing compiled views on live.
-
-### Post-deploy (steps 9–10)
-
-- Browser: load the affected URL; confirm no 500 / white screen; exercise the fixed behavior.
-- Log:
-
-```bash
-tail -n 80 storage/logs/laravel.log
-```
-
-Look for fresh `ERROR` / `CRITICAL` entries tied to the URL you just tested. None = pass.
-
----
-
-## Expected results
-
-| Check | Pass criteria |
-|-------|----------------|
-| `php -l` | No syntax errors |
-| `composer dump-autoload` | Completes without fatal errors |
-| `php artisan optimize:clear` | All caches cleared successfully |
-| `php artisan route:list` | Full route table loads without exception |
-| `php artisan view:cache` | Completes without exception (Blade changes only) |
-| Browser test | Page renders; fix behaves as expected |
-| `laravel.log` tail | No new errors after the browser test |
-
----
-
-## Agent completion report (required)
-
-Every implementation must end with:
-
-1. **Files changed** (local)
-2. **Files to upload** (exact paths for SFTP)
-3. **Commands to run after upload** (from this doc, steps 5–10 as applicable)
-4. **Test steps** (affected URL(s))
-5. **Rollback instructions** (revert which files)
-
----
-
-## Related docs
-
-- `.cursor/rules/laravel-production-safety.mdc` — Cursor always-on rule (points here)
-- `.cursor/rules/sftp-live-server-rules.mdc` — SFTP upload and cache-clear policy
-- `docs/deployment.md` — first-time server setup and infrastructure
+- `CLAUDE.md`
+- `docs/jetpk/DEPLOYMENT-CONTEXT.md`
+- `scripts/jetpk/stage-release-from-sha.sh`
+- `scripts/jetpk/apply-delete-manifest.sh`
+- `scripts/jetpk/README.md`
