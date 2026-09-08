@@ -1,0 +1,39 @@
+# CMS upload size probe — 2026-09-08T13:32:28.236Z
+SHA=20e921661da55e121a9b2353cba535b350613493
+2048KB_UPLOAD=200 ok=true bytes=2097152 message=Asset uploaded.
+2250KB_UPLOAD=200 ok=true bytes=2304000 message=Asset uploaded.
+5000KB_OR_NEAR_LIMIT_BEHAVIOR=200 ok=true bytes=5120000 message=Asset uploaded.
+
+JSON:
+{
+  "r2048": {
+    "kb": 2048,
+    "http": 200,
+    "ok": true,
+    "message": "Asset uploaded.",
+    "errors": null,
+    "asset_id": 17,
+    "file_bytes": 2097152,
+    "delete_http": 302
+  },
+  "r2250": {
+    "kb": 2250,
+    "http": 200,
+    "ok": true,
+    "message": "Asset uploaded.",
+    "errors": null,
+    "asset_id": 18,
+    "file_bytes": 2304000,
+    "delete_http": 302
+  },
+  "r5000": {
+    "kb": 5000,
+    "http": 200,
+    "ok": true,
+    "message": "Asset uploaded.",
+    "errors": null,
+    "asset_id": 19,
+    "file_bytes": 5120000,
+    "delete_http": 302
+  }
+}

@@ -1,18 +1,31 @@
 {
-  "captured_at": "2026-09-08T12:57:00.277Z",
+  "captured_at": "2026-09-08T13:33:48.758Z",
   "authorized_sha": "20e921661da55e121a9b2353cba535b350613493",
   "steps": [
     {
       "step": "upload",
-      "http": 422,
-      "asset_key": "route_closure04_qa_1788872222422",
-      "file_size_bytes": 2304000
+      "http": 200,
+      "asset_key": "route_closure04_qa_1788874430584",
+      "file_size_bytes": 2304000,
+      "message": "Asset uploaded."
     },
     {
       "step": "editor_asset_record",
       "http": 200,
-      "found": false,
-      "asset": null,
+      "found": true,
+      "asset": {
+        "id": 20,
+        "asset_key": "route_closure04_qa_1788874430584",
+        "alt_text": "Closure-04 QA draft-only upload",
+        "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_closure04_qa_1788874430584-20260908133352.jpg",
+        "public_url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_closure04_qa_1788874430584-20260908133352.jpg",
+        "meta": {
+          "mime": "image/jpeg",
+          "size": 2304000,
+          "original_name": "jp-closure04-2250kb-1788874430584.jpg",
+          "extension": "jpg"
+        }
+      },
       "publishing": {
         "has_draft": true,
         "has_published": true,
@@ -23,22 +36,28 @@
     },
     {
       "step": "media_url",
-      "curl_head": 0,
-      "browser_get": 0,
-      "url": ""
+      "curl_head": 200,
+      "browser_get": 200,
+      "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_closure04_qa_1788874430584-20260908133352.jpg"
     },
     {
       "step": "draft_preview",
       "preview_begin_http": 200,
       "preview_api_http": 200,
-      "preview_image_http": 0,
-      "preview_url": "/?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg3MjUyNn0.eab71eb8264f43008743da2b5ac29d6dc06073e50810091152a60b54ff5f90ce"
+      "preview_image_http": 200,
+      "preview_url": "/?jp_preview=1&jp_preview_token=eyJ2IjoxLCJwYWdlX2tleSI6ImhvbWUiLCJ1aWQiOjksImV4cCI6MTc4ODg3NDczNH0.6dcfb6538636a1e661ab2d5cfc6fba8d8c37a52a235385f0f4200a6a0ed8ccef"
     },
     {
       "step": "published_probe",
       "http": 200,
       "contains_asset_key": false,
       "contains_closure04_marker": false
+    },
+    {
+      "step": "cleanup",
+      "delete_http": 302,
+      "record_gone": true,
+      "media_after_delete": 302
     }
   ]
 }

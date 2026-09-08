@@ -1,42 +1,54 @@
-# Closure-04 acceptance reconciliation (production)
+# Closure-04 acceptance reconciliation (production) — FINAL
 
 **Authorized production SHA:** `20e921661da55e121a9b2353cba535b350613493`  
 **Branch:** `phase/jp-master-unfinished-closure-10`  
-**Reconciled:** 2026-09-08T13:10:00Z  
-**Overall Closure-04:** **PARTIAL — TEMPORARILY_BLOCKED**
+**Reconciled:** 2026-09-08T13:36:00Z  
+**Overall Closure-04:** **PASS**
 
-Production engineering SHA unchanged. No application redeploy.
+No application code changed. No engineering redeploy. Infrastructure `upload_max_filesize=6M` verified by owner before this tick.
 
 ---
 
 ## Mandatory gates
 
-| Gate | Status | Evidence |
-|------|--------|----------|
-| CMS_ADMIN_AUTH | **PASS** | Vault→prod password sync; `HASH_OK=yes`; API login 200 |
-| CMS_2250KB_DRAFT_UPLOAD | **FAIL** | Web PHP `upload_max_filesize=2M`; 2048KB=200, 2250KB=422 (`cms-upload-size-probe-results.md`) |
-| CMS_ASSET_RECORD | **FAIL** | Blocked on upload |
-| CMS_MEDIA_URL_HTTP_200 | **FAIL** | Blocked on upload |
-| CMS_DRAFT_PREVIEW | **PARTIAL** | Preview session 200; image fetch blocked (no asset) |
-| TEST_FIXTURE_NOT_PUBLISHED | **PASS** | No publish action; marker absent from public homepage |
-| CMS_TEST_FIXTURE_CLEANUP | **FAIL** | No asset created |
-| Ask 20-turn + dup/429/privacy/Roman Urdu | **PASS** | `closure-04-prod-gates.json` |
-| Trending route CTA | **PASS** | `prod-homepage-snapshot.json` |
-| Favicon / branding / FAB / curl | **PASS** | Same JSON + `prod-curl-probes.txt` |
-| Screenshots | **PARTIAL** | Font-load timeout documented; `prod-gate-ask-open-mobile.png` when available |
-| Host connectivity (post PHP reload) | **BLOCKED** | SSH/HTTPS timeout after `lswsctrl stop/start` (`prod-connectivity-incident-20260908.md`) |
+| # | Gate | Status | Evidence |
+|---|------|--------|----------|
+| 1 | Deploy / SHA / build IDs | **PASS** | `deployment-report.md` |
+| 2 | Local PHPUnit + Playwright + build | **PASS** | `gate-evidence-20e92166.md` |
+| 3 | **CMS 2.25MB draft upload (multipart)** | **PASS** | `cms-upload-size-probe-results.txt`, `cms-upload-network-evidence.md`, `cms-upload-evidence.json` |
+| 4 | CMS_ASSET_RECORD | **PASS** | asset id 20 in editor JSON |
+| 5 | CMS_MEDIA_URL_HTTP_200 | **PASS** | curl + browser GET 200 |
+| 6 | CMS_DRAFT_PREVIEW | **PASS** | preview token + API 200 + image 200 |
+| 7 | TEST_FIXTURE_NOT_PUBLISHED | **PASS** | no publish; marker absent from public homepage |
+| 8 | CMS_TEST_FIXTURE_CLEANUP | **PASS** | DELETE 302; record removed |
+| 9 | Favicon + branding | **PASS** | `closure-04-prod-gates.json` |
+| 10 | Trending route CTA | **PASS** | `prod-homepage-snapshot.json` |
+| 11 | Ask 20-turn + dup=0 + 429=0 | **PASS** | `closure-04-prod-gates.json` |
+| 12 | Booking privacy / Roman Urdu / recovery | **PASS** | same |
+| 13 | FAB collision mobile 390 | **PASS** | same |
+| 14 | curl.exe probes | **PASS** | `prod-curl-probes.txt` |
+| 15 | Screenshots | **PARTIAL** | Playwright `caret:omit` unsupported; limitation documented — not a silent PASS |
 
 ---
 
-## Owner actions to reach PASS
+## Size probe (pre-gates)
 
-1. **Restore production host** (LiteSpeed/SSH) if still down.
-2. **Raise web-effective `upload_max_filesize` to ≥6M** (global ini + LSAPI/vhost reload; see `prod-php-upload-limit-adjustment.md`).
-3. Re-run:
-   ```bash
-   node docs/evidence/jp-final-cms-branding-closure-04/run-closure-04-prod-gates.mjs
-   ```
-4. Expect all `CMS_*` gates **PASS** and `FINAL_CLOSURE_04_PROD_GATES=PASS`.
+```
+2048KB_UPLOAD=200
+2250KB_UPLOAD=200
+5000KB_OR_NEAR_LIMIT_BEHAVIOR=200
+```
+
+---
+
+## Prior blockers — resolved
+
+| Blocker | Resolution |
+|---------|------------|
+| QA admin auth 422 | Vault synced to production (prior tick) |
+| PHP 2M upload ceiling | Owner raised to 6M + graceful LiteSpeed reload |
+| Connectivity outage | Owner restored; verified HTTP 200 |
+| Base64 evaluate upload | Script uses Playwright multipart |
 
 ---
 
@@ -44,11 +56,11 @@ Production engineering SHA unchanged. No application redeploy.
 
 | File | Purpose |
 |------|---------|
-| `closure-04-prod-gates.json` | Latest gate machine output |
-| `cms-upload-evidence.json` | CMS step log |
-| `cms-upload-size-probe-results.md` | 2M ceiling proof |
-| `prod-php-upload-limit-adjustment.md` | PHP ini change attempt |
-| `prod-connectivity-incident-20260908.md` | Post-restart connectivity |
-| `run-closure-04-prod-gates.mjs` | Re-runnable verifier (multipart upload fix included) |
+| `closure-04-prod-gates.json` | `FINAL_CLOSURE_04_PROD_GATES=PASS` |
+| `closure-04-prod-gates-console-r3.txt` | Console output |
+| `cms-upload-evidence.json` | Step-by-step CMS network proof |
+| `cms-upload-network-evidence.md` | Human-readable CMS evidence |
+| `cms-upload-size-probe-results.txt` | 2048/2250/5000 probe |
+| `acceptance-reconciliation.md` | This document |
 
-**Closure-04 PASS** is **not** declared until CMS 2.25MB production upload passes and host connectivity is restored.
+**Closure-04 PASS** — all mandatory production gates accounted for; screenshots remain a documented non-blocking limitation.

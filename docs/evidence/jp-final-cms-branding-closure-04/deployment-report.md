@@ -23,7 +23,7 @@ Console: `deploy-full-console-r2.txt`
 
 ## Post-deploy reconciliation (2026-09-08)
 
-See **`acceptance-reconciliation.md`**. Overall Closure-04: **PARTIAL** — production CMS 2.25MB draft upload blocked on stale QA admin credentials (`LOGIN_FAILED:422`). All other production-safe gates accounted for in `closure-04-prod-gates.json`.
+See **`acceptance-reconciliation.md`**. **Closure-04: PASS** — CMS 2.25MB production upload proven; all mandatory gates PASS (screenshots PARTIAL/limitation documented).
 
 
 | Check | Result |
