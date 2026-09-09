@@ -1,0 +1,42 @@
+{
+  "phase": "JP-PERF-FINAL-02R-CURRENT",
+  "measured_at": "2026-09-09T06:45:00.000Z",
+  "runtime_sha": "f039bef3dda1320c08fdccb4633d5c7c34b3b61e",
+  "DUPLICATE_SUPPLIER_CALLS": 0,
+  "SUPPLIER_MUTATION_CALLS": 0,
+  "RETURN_DUPLICATE_FETCHES": 0,
+  "TRAVELER_DUPLICATE_REVALIDATION": 0,
+  "TRAVELER_REDUNDANT_REPRICE": 0,
+  "flows": {
+    "return_search_warm_n30": {
+      "source": "return-n30.json",
+      "samples": 30,
+      "duplicate_fetches": 0,
+      "supplier_mutation_calls": 0,
+      "pre_first_supplier_p95_ms": 2739.877,
+      "poll_duplicate_server_p95_ms": 64.154
+    },
+    "traveler_book_now_n30": {
+      "source": "traveler-n30.json",
+      "samples": 30,
+      "duplicate_revalidation_calls": 0,
+      "supplier_mutation_calls": 0,
+      "avg_revalidation_per_flow": 1,
+      "fare_revalidation_p95_ms": 5084,
+      "passengers_server_p95_ms": 4689
+    },
+    "fare_revalidation": {
+      "evidence": "traveler-n30 BOOK_NOW_REVALIDATION_POST_COUNT_P95=1, no duplicate rematch in valid cohort",
+      "duplicate_calls": 0
+    },
+    "one_way_search": {
+      "note": "Return cohort uses return search; no separate OW N=30 in this closure pass"
+    }
+  },
+  "reconciliation_status": "PASS",
+  "notes": [
+    "All measured booking-adjacent flows show zero supplier mutation calls.",
+    "Return and Traveler cohorts show zero duplicate search/revalidation amplification at flow level.",
+    "Absolute latency failures are not attributed to duplicate supplier calls."
+  ]
+}

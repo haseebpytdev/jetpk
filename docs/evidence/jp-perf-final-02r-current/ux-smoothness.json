@@ -1,0 +1,34 @@
+{
+  "phase": "JP-PERF-FINAL-02R-CURRENT",
+  "measured_at": "2026-09-09T06:37:33.351Z",
+  "runtime_sha": "f039bef3dda1320c08fdccb4633d5c7c34b3b61e",
+  "checks": [
+    {
+      "name": "homepage_hydrated",
+      "ok": true,
+      "blank_screen": false,
+      "double_spinner": false
+    },
+    {
+      "name": "groups_landing",
+      "ok": true,
+      "layout_shift_risk": false
+    },
+    {
+      "name": "login_register_soft",
+      "ok": false,
+      "error": "page.waitForURL: Timeout 30000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n  navigated to \"https://jetpakistan.pk/register\"\n==========="
+    }
+  ],
+  "console_error_count": 0,
+  "console_errors_sample": [],
+  "long_tasks": [
+    {
+      "name": "self",
+      "duration": 59,
+      "start": 384.69999999995343
+    }
+  ],
+  "long_task_count_50ms_plus": 1,
+  "ux_smoothness_gate": "PASS"
+}

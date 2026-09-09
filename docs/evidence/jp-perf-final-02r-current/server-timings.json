@@ -1,0 +1,12 @@
+﻿{
+"measured_at":"2026-09-09T06:44:18Z",
+"production_sha":"f039bef3dda1320c08fdccb4633d5c7c34b3b61e",
+"probes":[
+{"name":"content_homepage","url":"https://jetpakistan.pk/laravel/api/public/content/homepage","http_code":200,"wall_ms":587},
+{"name":"groups_facets","url":"https://jetpakistan.pk/laravel/api/public/groups/search/facets","http_code":404,"wall_ms":298},
+{"name":"groups_search_data","url":"https://jetpakistan.pk/groups/search/data?category=all","http_code":200,"wall_ms":802},
+{"name":"group_package","url":"https://jetpakistan.pk/groups/package/ALH-3335","http_code":302,"wall_ms":227},
+{"name":"live_home","url":"https://jetpakistan.pk/","http_code":200,"wall_ms":108},
+{"name":"public_local","url":"http://127.0.0.1:3010/","http_code":200,"wall_ms":28}
+]
+}

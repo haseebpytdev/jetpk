@@ -2,7 +2,6 @@
 # Read-only server timing probes for JP-PERF-FINAL-02R-CURRENT
 set -euo pipefail
 APP=/home/pkjetp/jetpk_app
-PHP=/usr/local/lsws/lsphp83/bin/lsphp
 OUT=/tmp/jp-perf-02r-server-timings.json
 
 probe() {
@@ -20,10 +19,12 @@ probe() {
   echo '"measured_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",'
   echo '"production_sha":"'$(cat $APP/.jetpk-runtime-sha)'",'
   echo '"probes":['
-  probe homepage_api "https://jetpakistan.pk/laravel/api/public/homepage" | sed 's/$/,/'
-  probe groups_api "https://jetpakistan.pk/laravel/api/public/groups" | sed 's/$/,/'
+  probe content_homepage "https://jetpakistan.pk/laravel/api/public/content/homepage" | sed 's/$/,/'
+  probe groups_facets "https://jetpakistan.pk/laravel/api/public/groups/search/facets" | sed 's/$/,/'
+  probe groups_search_data "https://jetpakistan.pk/groups/search/data?category=all" | sed 's/$/,/'
+  probe group_package "https://jetpakistan.pk/groups/package/ALH-3335" | sed 's/$/,/'
   probe live_home "https://jetpakistan.pk/" | sed 's/$/,/'
-  probe public_local "http://127.0.0.1:3010/" 
+  probe public_local "http://127.0.0.1:3010/"
   echo ']'
   echo '}'
 } > "$OUT"

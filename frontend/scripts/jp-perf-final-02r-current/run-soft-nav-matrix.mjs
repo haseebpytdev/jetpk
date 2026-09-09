@@ -57,10 +57,32 @@ const transitions = [
     soft: true,
   },
   {
+    name: "groups_to_group_detail",
+    from: "/groups/search?category=all",
+    href: process.env.JP_GROUP_DETAIL_HREF || "/groups/ALH-3335",
+    usable: '[data-testid="group-package-details"], main, h1',
+    soft: true,
+    cardLink: true,
+  },
+  {
+    name: "group_detail_to_groups",
+    from: process.env.JP_GROUP_DETAIL_HREF || "/groups/ALH-3335",
+    href: "/groups",
+    usable: '[data-testid="groups-landing-page"], main, h1',
+    soft: true,
+  },
+  {
     name: "home_to_support",
     from: "/",
     href: "/support",
     usable: "main, h1, form",
+    soft: true,
+  },
+  {
+    name: "support_to_home",
+    from: "/support",
+    href: "/",
+    usable: '[data-testid="search-module"], [data-testid="homepage-public-hero"], main',
     soft: true,
   },
   {
@@ -71,8 +93,8 @@ const transitions = [
     soft: true,
   },
   {
-    name: "home_to_terms",
-    from: "/",
+    name: "privacy_to_terms",
+    from: "/privacy",
     href: "/terms",
     usable: "main, h1",
     soft: true,
@@ -130,9 +152,19 @@ async function gotoRetry(page, url, opts = {}, attempts = 6) {
   throw lastErr;
 }
 
-async function softClickNav(page, href) {
+async function softClickNav(page, href, opts = {}) {
   const beforeUrl = page.url();
   const wantPath = href.replace(/\/$/, "") || "/";
+  if (opts.cardLink) {
+    const card = page.locator(`a[href="${wantPath}"], a[href="${href}"]`).first();
+    if ((await card.count()) > 0) {
+      await card.click({ timeout: 10000 }).catch(() => {});
+      await page
+        .waitForFunction((prev) => window.location.href !== prev, beforeUrl, { timeout: 30000 })
+        .catch(() => {});
+      return { ok: page.url() !== beforeUrl, href: wantPath, via: "card_link" };
+    }
+  }
   // Prefer real Playwright click on header nav Link (more reliable than evaluate click).
   const navLink = page.locator(`nav a[href="${wantPath}"], nav a[href="${href}"]`).first();
   if ((await navLink.count()) > 0) {
@@ -209,6 +241,10 @@ for (const t of transitions) {
   softCandidatesFound += 1;
   // Warm from page once
   try {
+    if (t.primeFrom) {
+      await gotoRetry(page, BASE + t.primeFrom);
+      await page.waitForTimeout(800);
+    }
     await gotoRetry(page, BASE + t.from);
   } catch (e) {
     console.error(`${t.name}: warmup failed`, String(e?.message || e).slice(0, 160));
@@ -266,7 +302,7 @@ for (const t of transitions) {
     };
     page.on("request", onRequest);
 
-    const click = await softClickNav(page, t.href);
+    const click = await softClickNav(page, t.href, { cardLink: t.cardLink });
     let fullReload = false;
     if (!click.ok) {
       if (i > 0) legacyHard += 1;
