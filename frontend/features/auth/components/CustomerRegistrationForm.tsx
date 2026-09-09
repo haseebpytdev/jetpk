@@ -32,12 +32,15 @@ export function CustomerRegistrationForm() {
     const load = () => {
       void fetchRegistrationSecurityQuestion().then(setSecurityQuestion);
     };
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+    if (typeof window === "undefined") {
+      return;
+    }
+    if ("requestIdleCallback" in window) {
       const id = window.requestIdleCallback(load, { timeout: 1500 });
       return () => window.cancelIdleCallback(id);
     }
-    const timer = window.setTimeout(load, 150);
-    return () => window.clearTimeout(timer);
+    const timer = globalThis.setTimeout(load, 150);
+    return () => globalThis.clearTimeout(timer);
   }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
