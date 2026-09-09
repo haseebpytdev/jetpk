@@ -8,7 +8,7 @@
     "start": "next start -p 3000",
     "start:smoke": "node scripts/start-smoke.mjs",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.application.json",
     "postinstall": "node scripts/bundle-tesseract-assets.mjs",
     "bundle:tesseract": "node scripts/bundle-tesseract-assets.mjs",
     "test:document-reader": "npx tsx --test tests/regression/document-reader-mrz.test.ts tests/regression/document-reader-ocr-safety.test.ts",

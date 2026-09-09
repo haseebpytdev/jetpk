@@ -71,8 +71,9 @@ test("homepage content service uses photographic hero fallback", () => {
   assert.doesNotMatch(service, /hero-fallback\.svg/);
 });
 
-test("destination media prefers approved photography over off-inventory CMS urls", () => {
+test("destination media accepts published CMS urls before approved photography fallback", () => {
   const media = readFileSync(path.join(frontendRoot, "lib/homepage-media.ts"), "utf8");
   assert.match(media, /destinationMediaFallbacks/);
-  assert.match(media, /destination\.image\.startsWith\("\/images\/home\/"\)/);
+  assert.match(media, /isPublicHomepageMediaUrl/);
+  assert.match(media, /destination\.image && isPublicHomepageMediaUrl\(destination\.image\)/);
 });

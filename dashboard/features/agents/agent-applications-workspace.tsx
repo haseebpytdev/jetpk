@@ -69,6 +69,11 @@ export function AgentApplicationsWorkspace({ applications }: { applications: Age
             <p className="text-xs text-jp-muted">
               {[selected.city, selected.country, selected.businessType].filter(Boolean).join(" · ") || "No extra applicant details"}
             </p>
+            {selected.licenseNumber ? (
+              <p className="text-xs text-jp-muted" data-testid="agent-application-license-number">
+                License {selected.licenseNumber}
+              </p>
+            ) : null}
             {selected.ntn || selected.iataNumber ? (
               <p className="text-xs text-jp-muted">
                 {selected.ntn ? `NTN ${selected.ntn}` : ""}

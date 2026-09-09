@@ -26,6 +26,7 @@ export type AgentApplicationRecord = {
   businessType?: string;
   ntn?: string;
   iataNumber?: string;
+  licenseNumber?: string;
   internalNote?: string;
   reviewedAt?: string;
   status: string;

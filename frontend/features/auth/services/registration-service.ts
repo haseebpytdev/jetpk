@@ -62,6 +62,7 @@ export async function registerAgent(payload: AgentRegistrationPayload) {
       email: payload.email,
       mobile_country_code: payload.mobile_country_code,
       mobile: payload.mobile,
+      license_number: payload.license_number,
       country: payload.country ?? "Pakistan",
       office_address: payload.office_address ?? "To be shared during onboarding",
       notes: payload.notes ?? "",

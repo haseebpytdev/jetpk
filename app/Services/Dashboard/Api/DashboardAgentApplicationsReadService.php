@@ -41,6 +41,7 @@ class DashboardAgentApplicationsReadService
                 'businessType' => (string) ($application->business_type ?? ''),
                 'ntn' => (string) ($application->ntn ?? ''),
                 'iataNumber' => (string) ($application->iata_number ?? ''),
+                'licenseNumber' => (string) ($application->license_number ?? ''),
                 'internalNote' => (string) ($application->internal_note ?? ''),
                 'reviewedAt' => $application->reviewed_at?->toIso8601String() ?? '',
                 'status' => is_object($status) && property_exists($status, 'value')

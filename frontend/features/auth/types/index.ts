@@ -100,6 +100,7 @@ export type AgentRegistrationPayload = {
   mobile: string;
   country?: string;
   office_address?: string;
+  license_number: string;
   notes?: string;
   terms: string;
 };

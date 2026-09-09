@@ -1,0 +1,11 @@
+asset_key,surface,authority,status,owner_action,notes
+hero_background,homepage_hero,CMS_or_approved_fallback,ENGINEERING_OK,optional,"Uses approvedHeroMedia when CMS asset missing"
+hero_background_mobile,homepage_hero,CMS,MISSING_OWNER_CONTENT,optional,"Mobile hero override when uploaded"
+destination_dxb,homepage_destinations,CMS,ENGINEERING_OK,none,"DXB published CMS URL chain fixed in homepage-media.ts"
+destination_jed,homepage_destinations,CMS,ENGINEERING_OK,none,"JED published CMS URL chain fixed"
+destination_lhr,homepage_destinations,CMS,ENGINEERING_OK,none,"LHR published CMS URL chain fixed"
+destination_ist,homepage_destinations,CMS,ENGINEERING_OK,none,"IST published CMS URL chain fixed"
+featured_deal_*,homepage_featured,CMS_card_image,CMS_or_fallback,optional,"Editorial card image; commercial inventory from resolver"
+support_cta_background,support_cta,CMS,MISSING_OWNER_CONTENT,optional,"Falls back to gradient illustration"
+company_logo,branding,CMS,ENGINEERING_OK,none,"Company profile logo upload + header_logo_height"
+favicon,branding,CMS,ENGINEERING_OK,none,"Metadata wired via generateMetadata icons"

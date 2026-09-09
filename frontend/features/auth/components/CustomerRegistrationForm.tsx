@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -133,13 +132,6 @@ export function CustomerRegistrationForm() {
       <PrimaryButton type="submit" className="w-full" disabled={submitting}>
         {submitting ? "Creating account…" : "Create account"}
       </PrimaryButton>
-
-      <p className="text-center text-jp-sm text-jp-muted">
-        Already have an account?{" "}
-        <Link href="/login" prefetch className="font-semibold text-jp-primary hover:underline">
-          Sign in
-        </Link>
-      </p>
     </form>
   );
 }

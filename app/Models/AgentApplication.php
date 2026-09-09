@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'cnic',
     'ntn',
     'iata_number',
+    'license_number',
     'years_in_business',
     'expected_booking_volume',
     'services_interested',

@@ -20,6 +20,7 @@ export function AgentRegistrationForm() {
   const [companyName, setCompanyName] = useState("");
   const [city, setCity] = useState("");
   const [businessType, setBusinessType] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [mobileCountryCode, setMobileCountryCode] = useState("+92");
@@ -44,6 +45,7 @@ export function AgentRegistrationForm() {
       company_name: companyName.trim(),
       city: city.trim(),
       business_type: businessType,
+      license_number: licenseNumber.trim(),
       first_name: firstName.trim(),
       email: email.trim().toLowerCase(),
       mobile_country_code: mobileCountryCode,
@@ -94,6 +96,15 @@ export function AgentRegistrationForm() {
           {fieldErrors.business_type ? <p className="mt-1 text-jp-xs text-jp-danger">{fieldErrors.business_type}</p> : null}
         </div>
       </div>
+
+      <Field
+        label="License number"
+        id="license_number"
+        value={licenseNumber}
+        onChange={setLicenseNumber}
+        error={fieldErrors.license_number}
+        disabled={submitting}
+      />
 
       <Field label="Applicant first name" id="first_name" value={firstName} onChange={setFirstName} error={fieldErrors.first_name} disabled={submitting} />
       <Field label="Email" id="email" type="email" value={email} onChange={setEmail} error={fieldErrors.email} disabled={submitting} />

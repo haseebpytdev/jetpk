@@ -9,6 +9,7 @@ use App\Services\Agencies\AgencyBrandingService;
 use App\Services\Agencies\SlimTopbarPresenter;
 use App\Services\Communication\AgencyCommunicationSettingsService;
 use App\Services\Media\BackgroundRemovalSettingsService;
+use App\Services\Next\JetpkNextCacheRevalidationService;
 use App\Support\Agencies\AgencyPrefixService;
 use App\Support\Branding\BrandDisplayResolver;
 use App\Support\Branding\PlatformBrandingResolver;
@@ -26,6 +27,7 @@ class AgencyBrandingController extends Controller
         protected SlimTopbarPresenter $slimTopbarPresenter,
         protected AgencyCommunicationSettingsService $communicationSettingsService,
         protected BackgroundRemovalSettingsService $backgroundRemovalSettingsService,
+        protected JetpkNextCacheRevalidationService $nextCacheRevalidation,
     ) {}
 
     public function edit(Request $request): View|JsonResponse
@@ -58,6 +60,10 @@ class AgencyBrandingController extends Controller
                     'timezone' => (string) ($settings->timezone ?: 'Asia/Karachi'),
                     'logo_url' => is_string($logoPath) && $logoPath !== '' ? asset('storage/'.$logoPath) : null,
                     'favicon_url' => filled($settings->favicon_path) ? asset('storage/'.$settings->favicon_path) : null,
+                    'header_logo_height' => PlatformBrandingResolver::headerLogoHeight($settings),
+                    'header_logo_height_min' => PlatformBrandingResolver::MIN_HEADER_LOGO_HEIGHT,
+                    'header_logo_height_max' => PlatformBrandingResolver::MAX_HEADER_LOGO_HEIGHT,
+                    'header_logo_height_default' => PlatformBrandingResolver::DEFAULT_HEADER_LOGO_HEIGHT,
                     'tagline' => (string) ($settings->tagline ?? ''),
                     'color_scheme' => BrandDisplayResolver::colorSchemeKey($settings),
                     'primary_color' => (string) ($settings->primary_color ?? ''),
@@ -210,6 +216,8 @@ class AgencyBrandingController extends Controller
         $slimTopbar = $this->slimTopbarPresenter->buildForStorage($request->all());
 
         $this->brandingService->updateSettings($agency, $request->user(), $validated, $colorScheme, $slimTopbar);
+
+        $this->nextCacheRevalidation->revalidateHomepageAndPublicConfig();
 
         if ($referencePrefixMeta !== []) {
             $settings = $this->brandingService->getSettingsForAgency($agency)->fresh();

@@ -61,6 +61,7 @@ import {
   deliveryLogResendPath,
   reportsExportPath,
   pageSettingsRefreshHomeFaresPath,
+  pageSettingsFeaturedDealInventoryPath,
   depositApprovePath,
   depositRejectPath,
   issueTicketPath,
@@ -679,6 +680,15 @@ export async function resendDeliveryLog(
 export async function refreshHomepageRouteFares(): Promise<MutationResponse<{ summary?: Record<string, unknown> }>> {
   return laravelRequest(pageSettingsRefreshHomeFaresPath(), {
     method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadFeaturedDealInventory(
+  query?: string,
+): Promise<MutationResponse<{ items?: Array<Record<string, unknown>> }>> {
+  return laravelRequest(pageSettingsFeaturedDealInventoryPath(query), {
+    method: "GET",
     retryCsrfOnce: false,
   });
 }
