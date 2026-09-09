@@ -1,0 +1,66 @@
+{
+  "captured_at": "2026-09-09T21:47:32.327Z",
+  "public_build_id": "vkC0lfkEH9Gfj7CHfwcuO",
+  "trending_routes_tested": 4,
+  "infinite_searching_count": 0,
+  "duplicate_search_count": 0,
+  "results": [
+    {
+      "route": "seed-khi-dxb",
+      "from": "LHE",
+      "to": "DXB",
+      "href": "/flights/results?from=LHE&to=DXB&depart=2026-09-16&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "search_id": "27df7252-c0b1-435b-8396-f3f357a753c3",
+      "poll_count": 3,
+      "frontend_terminal_status": "success",
+      "backend_terminal_status": "ready",
+      "infinite_searching": false,
+      "duplicate_searches": 0,
+      "total_wait_ms": 19319,
+      "final_url": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-16&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&search_id=27df7252-c0b1-435b-8396-f3f357a753c3"
+    },
+    {
+      "route": "seed-lhe-jed",
+      "from": "LHE",
+      "to": "JED",
+      "href": "/flights/results?from=LHE&to=JED&depart=2026-09-16&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "search_id": "a074c222-2aec-4ca4-9586-ea40c4a711f6",
+      "poll_count": 3,
+      "frontend_terminal_status": "success",
+      "backend_terminal_status": "ready",
+      "infinite_searching": false,
+      "duplicate_searches": 0,
+      "total_wait_ms": 10700,
+      "final_url": "https://jetpakistan.pk/flights/results?from=LHE&to=JED&depart=2026-09-16&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&search_id=a074c222-2aec-4ca4-9586-ea40c4a711f6"
+    },
+    {
+      "route": "seed-isb-lhr",
+      "from": "ISB",
+      "to": "LHR",
+      "href": "/flights/results?from=ISB&to=LHR&depart=2026-09-16&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "search_id": "5d8b5d5a-1eb6-42fa-a8fc-00793ae638ec",
+      "poll_count": 1,
+      "frontend_terminal_status": "success",
+      "backend_terminal_status": "ready",
+      "infinite_searching": false,
+      "duplicate_searches": 0,
+      "total_wait_ms": 21348,
+      "final_url": "https://jetpakistan.pk/flights/results?from=ISB&to=LHR&depart=2026-09-16&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&search_id=5d8b5d5a-1eb6-42fa-a8fc-00793ae638ec"
+    },
+    {
+      "route": "seed-khi-ruh",
+      "from": "KHI",
+      "to": "RUH",
+      "href": "/flights/results?from=KHI&to=RUH&depart=2026-09-16&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "search_id": "4aa14973-834e-4ff5-95cd-9f4243d24745",
+      "poll_count": 4,
+      "frontend_terminal_status": "success",
+      "backend_terminal_status": "ready",
+      "infinite_searching": false,
+      "duplicate_searches": 0,
+      "total_wait_ms": 12585,
+      "final_url": "https://jetpakistan.pk/flights/results?from=KHI&to=RUH&depart=2026-09-16&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&search_id=4aa14973-834e-4ff5-95cd-9f4243d24745"
+    }
+  ],
+  "pass": true
+}

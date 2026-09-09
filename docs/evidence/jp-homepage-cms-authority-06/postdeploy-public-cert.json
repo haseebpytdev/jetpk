@@ -1,0 +1,744 @@
+{
+  "captured_at": "2026-09-09T20:49:05.445Z",
+  "engineering_sha": "f7d37b6cd641db66671ba02d7c95dc4591643b51",
+  "public_build_id": "vkC0lfkEH9Gfj7CHfwcuO",
+  "gates": {
+    "HOMEPAGE_API_200": {
+      "pass": true,
+      "status": 200
+    },
+    "FEATURED_UNAVAILABLE_COUNT_ZERO": {
+      "pass": true,
+      "count": 0
+    },
+    "FEATURED_LEGACY_UI_VISIBLE_NO": {
+      "pass": true,
+      "legacy_count": 0
+    },
+    "DESTINATION_DXB_API_IMAGE": {
+      "pass": true,
+      "image": "/storage/client-assets/jetpk-assets/pages/home/destination_seed_dxb-20260909074636.png?v=1788939996",
+      "http": 200
+    },
+    "DESTINATION_JED_API_IMAGE": {
+      "pass": true,
+      "image": "/storage/client-assets/jetpk-assets/pages/home/destination_seed_jed-20260909074645.png?v=1788940005",
+      "http": 200
+    },
+    "DESTINATION_LHR_API_IMAGE": {
+      "pass": true,
+      "image": "/storage/client-assets/jetpk-assets/pages/home/destination_seed_lhr-20260909074700.png?v=1788940020",
+      "http": 200
+    },
+    "DESTINATION_IST_API_IMAGE": {
+      "pass": true,
+      "image": "/storage/client-assets/jetpk-assets/pages/home/destination_seed_ist-20260909074703.png?v=1788940023",
+      "http": 200
+    },
+    "PUBLIC_BUILD_ID_IN_HTML": {
+      "pass": true,
+      "found": true
+    },
+    "FAVICON_HEAD_REFERENCE": {
+      "pass": true,
+      "href": "/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png?v=1788986322"
+    },
+    "FAVICON_HTTP_200": {
+      "pass": true,
+      "status": 200
+    },
+    "HEADER_REGISTER_VISIBLE_NO": {
+      "pass": true,
+      "count": 0
+    },
+    "HEADER_LOGIN_VISIBLE": {
+      "pass": true,
+      "count": 2
+    },
+    "DESTINATION_DXB_DOM_PARITY": {
+      "pass": true,
+      "apiImg": "/storage/client-assets/jetpk-assets/pages/home/destination_seed_dxb-20260909074636.png?v=1788939996",
+      "domKey": "destination_seed_dxb-20260909074636.png"
+    },
+    "DESTINATION_JED_DOM_PARITY": {
+      "pass": true,
+      "apiImg": "/storage/client-assets/jetpk-assets/pages/home/destination_seed_jed-20260909074645.png?v=1788940005",
+      "domKey": "destination_seed_jed-20260909074645.png"
+    },
+    "DESTINATION_LHR_DOM_PARITY": {
+      "pass": true,
+      "apiImg": "/storage/client-assets/jetpk-assets/pages/home/destination_seed_lhr-20260909074700.png?v=1788940020",
+      "domKey": "destination_seed_lhr-20260909074700.png"
+    },
+    "DESTINATION_IST_DOM_PARITY": {
+      "pass": true,
+      "apiImg": "/storage/client-assets/jetpk-assets/pages/home/destination_seed_ist-20260909074703.png?v=1788940023",
+      "domKey": "destination_seed_ist-20260909074703.png"
+    },
+    "TRENDING_INFINITE_SEARCHING_ZERO": {
+      "pass": false,
+      "infinite": 4,
+      "trendingResults": [
+        {
+          "route": "seed-khi-dxb",
+          "from": "LHE",
+          "to": "DXB",
+          "search_id": null,
+          "poll_count": 0,
+          "backend_terminal_status": null,
+          "frontend_terminal_status": "searching",
+          "infinite_searching": true,
+          "duplicate_searches": 0,
+          "total_wait_ms": 71013
+        },
+        {
+          "route": "seed-lhe-jed",
+          "from": "LHE",
+          "to": "JED",
+          "search_id": null,
+          "poll_count": 0,
+          "backend_terminal_status": null,
+          "frontend_terminal_status": "searching",
+          "infinite_searching": true,
+          "duplicate_searches": 0,
+          "total_wait_ms": 70187
+        },
+        {
+          "route": "seed-isb-lhr",
+          "from": "ISB",
+          "to": "LHR",
+          "search_id": null,
+          "poll_count": 0,
+          "backend_terminal_status": null,
+          "frontend_terminal_status": "searching",
+          "infinite_searching": true,
+          "duplicate_searches": 0,
+          "total_wait_ms": 70049
+        },
+        {
+          "route": "seed-khi-ruh",
+          "from": "KHI",
+          "to": "RUH",
+          "search_id": null,
+          "poll_count": 0,
+          "backend_terminal_status": null,
+          "frontend_terminal_status": "searching",
+          "infinite_searching": true,
+          "duplicate_searches": 0,
+          "total_wait_ms": 70606
+        }
+      ]
+    },
+    "TRENDING_DUPLICATE_SEARCH_ZERO": {
+      "pass": true,
+      "dup": 0
+    },
+    "FEATURED_DETAIL_PAGE": {
+      "pass": true,
+      "url": "https://jetpakistan.pk/groups/ALH-3344"
+    },
+    "BROKEN_PUBLIC_LINKS_ZERO": {
+      "pass": true,
+      "broken_count": 0,
+      "broken": []
+    },
+    "FRESH_HOMEPAGE_NO_BLANK_15S": {
+      "pass": true,
+      "n": 20,
+      "ttfb_p50_ms": 1531,
+      "ttfb_p95_ms": 2069,
+      "fcp_p95_ms": 2572,
+      "blank_15s": 0,
+      "rows": [
+        {
+          "i": 0,
+          "navMs": 1531,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 1,
+          "navMs": 1934,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 2,
+          "navMs": 1467,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 3,
+          "navMs": 1716,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 4,
+          "navMs": 1369,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 5,
+          "navMs": 1237,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 6,
+          "navMs": 1489,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 7,
+          "navMs": 1415,
+          "fcp": 1768,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 8,
+          "navMs": 2069,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 9,
+          "navMs": 1901,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 10,
+          "navMs": 1799,
+          "fcp": 1740,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 11,
+          "navMs": 1612,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 12,
+          "navMs": 1506,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 13,
+          "navMs": 1732,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 14,
+          "navMs": 1694,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 15,
+          "navMs": 1317,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 16,
+          "navMs": 2401,
+          "fcp": 2572,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 17,
+          "navMs": 1603,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 18,
+          "navMs": 1386,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 19,
+          "navMs": 1425,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        }
+      ]
+    },
+    "LOGIN_CUSTOMER_REGISTER_ROUTE": {
+      "pass": true,
+      "count": 3
+    },
+    "LOGIN_AGENT_REGISTER_ROUTE": {
+      "pass": true,
+      "count": 1
+    },
+    "CUSTOMER_REGISTER_DUPLICATION_ZERO": {
+      "pass": true,
+      "existingPrompts": 1
+    },
+    "AGENT_LICENSE_FIELD_VISIBLE": {
+      "pass": true,
+      "count": 1
+    },
+    "GROUPS_UAT": {
+      "pass": true,
+      "url": "https://jetpakistan.pk/groups"
+    },
+    "SUPPORT_UAT": {
+      "pass": true,
+      "url": "https://jetpakistan.pk/support"
+    }
+  },
+  "samples": {
+    "trending": [
+      {
+        "route": "seed-khi-dxb",
+        "from": "LHE",
+        "to": "DXB",
+        "search_id": null,
+        "poll_count": 0,
+        "backend_terminal_status": null,
+        "frontend_terminal_status": "searching",
+        "infinite_searching": true,
+        "duplicate_searches": 0,
+        "total_wait_ms": 71013
+      },
+      {
+        "route": "seed-lhe-jed",
+        "from": "LHE",
+        "to": "JED",
+        "search_id": null,
+        "poll_count": 0,
+        "backend_terminal_status": null,
+        "frontend_terminal_status": "searching",
+        "infinite_searching": true,
+        "duplicate_searches": 0,
+        "total_wait_ms": 70187
+      },
+      {
+        "route": "seed-isb-lhr",
+        "from": "ISB",
+        "to": "LHR",
+        "search_id": null,
+        "poll_count": 0,
+        "backend_terminal_status": null,
+        "frontend_terminal_status": "searching",
+        "infinite_searching": true,
+        "duplicate_searches": 0,
+        "total_wait_ms": 70049
+      },
+      {
+        "route": "seed-khi-ruh",
+        "from": "KHI",
+        "to": "RUH",
+        "search_id": null,
+        "poll_count": 0,
+        "backend_terminal_status": null,
+        "frontend_terminal_status": "searching",
+        "infinite_searching": true,
+        "duplicate_searches": 0,
+        "total_wait_ms": 70606
+      }
+    ],
+    "featured_detail": {
+      "card": {
+        "id": "ALH-3344",
+        "source": "group_ticket",
+        "inventory_id": 40,
+        "public_id": "ALH-3344",
+        "airline": "AIR ARABIA",
+        "from": "PEW",
+        "to": "SHJ",
+        "depart": "12 Sep 2026",
+        "arrive": "",
+        "duration": "",
+        "stops": 0,
+        "price": 68000,
+        "price_label": "PKR 68,000",
+        "title": "UAE — PEW-SHJ",
+        "badge": "",
+        "description": "",
+        "image": "/storage/client-assets/jetpk-assets/pages/home/featured_deal_closure05_uat_slot-20260909080049.png?v=1788940849",
+        "image_alt": "",
+        "media_source": "cms",
+        "availability": "available",
+        "resolution_rule": "global_fallback",
+        "href": "/groups/ALH-3344"
+      },
+      "url": "https://jetpakistan.pk/groups/ALH-3344"
+    },
+    "fresh_homepage": {
+      "n": 20,
+      "ttfb_p50_ms": 1531,
+      "ttfb_p95_ms": 2069,
+      "fcp_p95_ms": 2572,
+      "blank_15s": 0,
+      "rows": [
+        {
+          "i": 0,
+          "navMs": 1531,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 1,
+          "navMs": 1934,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 2,
+          "navMs": 1467,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 3,
+          "navMs": 1716,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 4,
+          "navMs": 1369,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 5,
+          "navMs": 1237,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 6,
+          "navMs": 1489,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 7,
+          "navMs": 1415,
+          "fcp": 1768,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 8,
+          "navMs": 2069,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 9,
+          "navMs": 1901,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 10,
+          "navMs": 1799,
+          "fcp": 1740,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 11,
+          "navMs": 1612,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 12,
+          "navMs": 1506,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 13,
+          "navMs": 1732,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 14,
+          "navMs": 1694,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 15,
+          "navMs": 1317,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 16,
+          "navMs": 2401,
+          "fcp": 2572,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 17,
+          "navMs": 1603,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 18,
+          "navMs": 1386,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        },
+        {
+          "i": 19,
+          "navMs": 1425,
+          "fcp": null,
+          "hero": true,
+          "search": false,
+          "destImgs": 15,
+          "build": true
+        }
+      ]
+    }
+  },
+  "links": [
+    {
+      "source": "homepage_nav",
+      "text": "",
+      "href": "/",
+      "final_url": "https://jetpakistan.pk/",
+      "http_status": 200,
+      "load_ms": 964,
+      "legacy_leakage": false
+    },
+    {
+      "source": "homepage_nav",
+      "text": "GroupsNew",
+      "href": "/groups",
+      "final_url": "https://jetpakistan.pk/groups",
+      "http_status": 200,
+      "load_ms": 2417,
+      "legacy_leakage": false
+    },
+    {
+      "source": "homepage_nav",
+      "text": "Login",
+      "href": "/login",
+      "final_url": "https://jetpakistan.pk/login",
+      "http_status": 200,
+      "load_ms": 1859,
+      "legacy_leakage": false
+    },
+    {
+      "source": "homepage_nav",
+      "text": "Back to search",
+      "href": "/groups/search",
+      "final_url": "https://jetpakistan.pk/groups/search",
+      "http_status": 200,
+      "load_ms": 3200,
+      "legacy_leakage": false
+    },
+    {
+      "source": "homepage_nav",
+      "text": "Manage Booking",
+      "href": "/lookup-booking",
+      "final_url": "https://jetpakistan.pk/lookup-booking",
+      "http_status": 200,
+      "load_ms": 1116,
+      "legacy_leakage": false
+    },
+    {
+      "source": "homepage_nav",
+      "text": "About Us",
+      "href": "/about-us",
+      "final_url": "https://jetpakistan.pk/about-us",
+      "http_status": 200,
+      "load_ms": 183,
+      "legacy_leakage": false
+    },
+    {
+      "source": "homepage_nav",
+      "text": "Sitemap",
+      "href": "/sitemap",
+      "final_url": "https://jetpakistan.pk/sitemap",
+      "http_status": 200,
+      "load_ms": 283,
+      "legacy_leakage": false
+    },
+    {
+      "source": "homepage_nav",
+      "text": "Help Center",
+      "href": "/support",
+      "final_url": "https://jetpakistan.pk/support",
+      "http_status": 200,
+      "load_ms": 218,
+      "legacy_leakage": false
+    },
+    {
+      "source": "homepage_nav",
+      "text": "Contact Us",
+      "href": "/contact",
+      "final_url": "https://jetpakistan.pk/contact",
+      "http_status": 200,
+      "load_ms": 201,
+      "legacy_leakage": false
+    },
+    {
+      "source": "homepage_nav",
+      "text": "FAQ",
+      "href": "/faq",
+      "final_url": "https://jetpakistan.pk/faq",
+      "http_status": 200,
+      "load_ms": 197,
+      "legacy_leakage": false
+    },
+    {
+      "source": "homepage_nav",
+      "text": "Terms & Conditions",
+      "href": "/terms",
+      "final_url": "https://jetpakistan.pk/terms",
+      "http_status": 200,
+      "load_ms": 245,
+      "legacy_leakage": false
+    },
+    {
+      "source": "homepage_nav",
+      "text": "Privacy Policy",
+      "href": "/privacy",
+      "final_url": "https://jetpakistan.pk/privacy",
+      "http_status": 200,
+      "load_ms": 200,
+      "legacy_leakage": false
+    }
+  ],
+  "console": [
+    "Failed to load resource: the server responded with a status of 408 ()",
+    "Failed to load resource: the server responded with a status of 408 ()",
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ],
+  "result": "PARTIAL"
+}
