@@ -1,0 +1,13 @@
+Ownership gate fixture tests (production host, /tmp fixtures only)
+Date: 2026-09-09
+
+Command:
+bash /home/pkjetp/jetpk_app/scripts/jetpk/test-runtime-ownership-gate.sh
+
+Results:
+OWNERSHIP_GATE_POSITIVE_TEST=PASS
+OWNERSHIP_GATE_NEGATIVE_TEST=PASS
+IDEMPOTENCY_TEST=PASS
+NO_PRODUCTION_SHA_CHANGE=PASS
+
+Negative test: injected root:root file under fixture cache/data; assert failed; normalize repaired; second normalize no-op.

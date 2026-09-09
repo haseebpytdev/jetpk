@@ -29,3 +29,45 @@ bash scripts/jetpk/apply-delete-manifest.sh
 ```
 
 No wildcards. No directory-wide recursive deletion. Frontend runtime paths only.
+
+## Runtime ownership assert / normalize
+
+Protected deploy wrappers must finish with Laravel writable runtime trees owned by
+the application account (`pkjetp:pkjetp` on production). Root-run deploy extract,
+`rsync`/`cp`, and `artisan` commands can otherwise leave root-owned cache files
+that break flight search and other cache writes.
+
+```bash
+APP_ROOT=/home/pkjetp/jetpk_app \
+RUNTIME_USER=pkjetp \
+RUNTIME_GROUP=pkjetp \
+MODE=assert \
+bash scripts/jetpk/assert-runtime-ownership.sh
+```
+
+Modes:
+
+- `MODE=assert` — fail when any scanned runtime path is not `pkjetp:pkjetp`
+- `MODE=normalize` — scoped `chown -R pkjetp:pkjetp` on writable runtime trees, then assert
+
+Optional write probe (safe temp file under cache data):
+
+```bash
+RUNTIME_WRITE_TEST=1 APP_ROOT=/home/pkjetp/jetpk_app bash scripts/jetpk/assert-runtime-ownership.sh
+```
+
+Gate outputs include:
+
+```text
+RUNTIME_OWNER_EXPECTED=pkjetp:pkjetp
+ROOT_OWNED_RUNTIME_FILES=<n>
+NON_PKJETP_RUNTIME_FILES=<n>
+RUNTIME_WRITABLE_AS_PKJETP=PASS|FAIL
+RUNTIME_OWNERSHIP_GATE=PASS|FAIL
+```
+
+Local fixture tests (no production mutation):
+
+```bash
+bash scripts/jetpk/test-runtime-ownership-gate.sh
+```

@@ -1,0 +1,16 @@
+Laravel cache round-trip as pkjetp (QA-only unique key)
+Date: 2026-09-09
+
+Command:
+sudo -u pkjetp php artisan tinker --execute \
+  "Cache::put('<unique-key>', 'probe-ok', 60); echo Cache::get(...); Cache::forget(...);"
+
+Output:
+probe-ok
+
+Results:
+CACHE_PUT_AS_PKJETP=PASS
+CACHE_READ_AS_PKJETP=PASS
+CACHE_FORGET_AS_PKJETP=PASS
+
+No customer or supplier data touched.

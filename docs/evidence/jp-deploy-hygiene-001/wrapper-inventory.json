@@ -1,0 +1,63 @@
+{
+  "audit_date": "2026-09-09",
+  "closure_05_generation_used": {
+    "jetpk-backup.sh": "f038391830b8cb3dd34e2af686e7362223d32e7effdc61661081026a110cb63c",
+    "jetpk-deploy.sh": "5477c9891467d52d3cda8e61346f5de4776326c06ab5e06abc273a63861ac668",
+    "jetpk-next-build.sh": "e9baf4ca8b651c97b6840c5be4d20bb83b07863ae2c12e29bf47b3e6f63f0b67",
+    "jetpk-pre-proxy-gate.sh": "717f17e21b5b0632378205199c00670c7e5fdc32b95f9c783fc4e95a3a56dd17",
+    "jetpk-stage-release.sh_server_tmp": "c94ebf1b4e7adb876235048c13b90fccc24927f837ea964092d8751bbfcbb5d6",
+    "jetpk-stage-release.sh_local_tmp": "f7d4ea30d09f37ea4bdc306ec69d15ab387627ab8d4f939ad36c6eb63125f5e0"
+  },
+  "post_fix_generation": {
+    "jetpk-deploy.sh": {
+      "local_sha256": "b6693c96157863af75903207cac0a2f7ec540cedad7a10f1cdbef3f2e1dbdba9",
+      "server_tmp_sha256": "b6693c96157863af75903207cac0a2f7ec540cedad7a10f1cdbef3f2e1dbdba9",
+      "owner": "root:root",
+      "mode": "0755"
+    },
+    "jetpk-pre-proxy-gate.sh": {
+      "local_sha256": "597e20f1e7e199434bd0359e4fe4f37da3f07a1fdc1662485b570c1e4dde1605",
+      "server_tmp_sha256": "597e20f1e7e199434bd0359e4fe4f37da3f07a1fdc1662485b570c1e4dde1605",
+      "owner": "root:root",
+      "mode": "0755"
+    },
+    "jetpk-stage-release.sh": {
+      "local_sha256": "766683ed19b2735590d07bc4f7af67349d260cae7e5ce862050282184e0d2e9f",
+      "server_tmp_sha256": "766683ed19b2735590d07bc4f7af67349d260cae7e5ce862050282184e0d2e9f",
+      "owner": "root:root",
+      "mode": "0755"
+    },
+    "jetpk-backup.sh": {
+      "local_sha256": "f038391830b8cb3dd34e2af686e7362223d32e7effdc61661081026a110cb63c",
+      "server_tmp_sha256": "f038391830b8cb3dd34e2af686e7362223d32e7effdc61661081026a110cb63c",
+      "unchanged": true
+    },
+    "jetpk-next-build.sh": {
+      "local_sha256": "e9baf4ca8b651c97b6840c5be4d20bb83b07863ae2c12e29bf47b3e6f63f0b67",
+      "server_tmp_sha256": "e9baf4ca8b651c97b6840c5be4d20bb83b07863ae2c12e29bf47b3e6f63f0b67",
+      "unchanged": true
+    },
+    "home_pkjetp_jetpk-stage-release.sh": {
+      "sha256": "766683ed19b2735590d07bc4f7af67349d260cae7e5ce862050282184e0d2e9f",
+      "owner": "pkjetp:pkjetp",
+      "mode": "0755",
+      "reconciled_with_tmp": true,
+      "reconcile_date": "2026-09-09"
+    }
+  },
+  "tracked_helpers": {
+    "assert-runtime-ownership.sh": {
+      "local_sha256": "6b65c043a2e7e593e887ccef62e6d28c181b523a85ff844eedc521d595a0ad4d",
+      "server_sha256": "6b65c043a2e7e593e887ccef62e6d28c181b523a85ff844eedc521d595a0ad4d",
+      "path": "/home/pkjetp/jetpk_app/scripts/jetpk/assert-runtime-ownership.sh"
+    },
+    "test-runtime-ownership-gate.sh": {
+      "local_sha256": "07b98cfb58f674f46ea3547d4fd2e500f8c994ea29e1a5c25b79fa53c098082a"
+    }
+  },
+  "authoritative_sources": {
+    "gitignored_operational_wrappers": "tmp/jetpk-*.sh",
+    "server_operational_wrappers": "/tmp/jetpk-*.sh",
+    "tracked_reusable_logic": "scripts/jetpk/"
+  }
+}

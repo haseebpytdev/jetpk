@@ -1,0 +1,14 @@
+Runtime write probe as pkjetp
+Date: 2026-09-09
+
+Command:
+APP_ROOT=/home/pkjetp/jetpk_app MODE=assert RUNTIME_WRITE_TEST=1 \
+  bash scripts/jetpk/assert-runtime-ownership.sh
+
+Results:
+PKJETP_RUNTIME_WRITE=PASS
+TEMP_FIXTURE_CLEANUP=PASS
+RUNTIME_WRITABLE_AS_PKJETP=PASS
+RUNTIME_OWNERSHIP_GATE=PASS
+
+Probe path: storage/framework/cache/data/.jetpk-runtime-write-probe-* (created, read, removed as pkjetp)

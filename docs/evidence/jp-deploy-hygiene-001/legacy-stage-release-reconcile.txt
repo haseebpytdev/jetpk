@@ -1,0 +1,12 @@
+Legacy stage-release wrapper reconciliation transcript
+Date: 2026-09-09
+Command: sha256sum /home/pkjetp/jetpk-stage-release.sh /tmp/jetpk-stage-release.sh
+
+766683ed19b2735590d07bc4f7af67349d260cae7e5ce862050282184e0d2e9f  /home/pkjetp/jetpk-stage-release.sh
+766683ed19b2735590d07bc4f7af67349d260cae7e5ce862050282184e0d2e9f  /tmp/jetpk-stage-release.sh
+
+Ownership:
+-rwxr-xr-x 1 pkjetp pkjetp ... /home/pkjetp/jetpk-stage-release.sh
+-rwxr-xr-x 1 root root ... /tmp/jetpk-stage-release.sh
+
+Prior legacy SHA (pre-reconcile): c94ebf1b4e7adb876235048c13b90fccc24927f837ea964092d8751bbfcbb5d6

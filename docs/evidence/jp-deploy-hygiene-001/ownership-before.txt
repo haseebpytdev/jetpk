@@ -1,0 +1,16 @@
+Ownership scan BEFORE tooling fix (post Closure-05 emergency chown)
+Date: 2026-09-09T04:02+02:00
+Host: vmi3400777
+
+PATH=/home/pkjetp/jetpk_app/storage TOTAL=4644 ROOT_OR_NON_PKJETP=0 NON_PKJETP=0
+PATH=/home/pkjetp/jetpk_app/storage/framework TOTAL=1318 ROOT_OR_NON_PKJETP=0 NON_PKJETP=0
+PATH=/home/pkjetp/jetpk_app/storage/framework/cache TOTAL=1095 ROOT_OR_NON_PKJETP=0 NON_PKJETP=0
+PATH=/home/pkjetp/jetpk_app/storage/framework/cache/data TOTAL=283 ROOT_OR_NON_PKJETP=0 NON_PKJETP=0
+PATH=/home/pkjetp/jetpk_app/storage/framework/views TOTAL=10 ROOT_OR_NON_PKJETP=0 NON_PKJETP=0
+PATH=/home/pkjetp/jetpk_app/storage/framework/sessions TOTAL=211 ROOT_OR_NON_PKJETP=0 NON_PKJETP=0
+PATH=/home/pkjetp/jetpk_app/storage/logs TOTAL=28 ROOT_OR_NON_PKJETP=0 NON_PKJETP=0
+PATH=/home/pkjetp/jetpk_app/bootstrap/cache TOTAL=5 ROOT_OR_NON_PKJETP=0 NON_PKJETP=0
+
+ROOT_OWNED_WRITABLE_RUNTIME_FILES=0
+
+Historical defect (Closure-05): storage/framework/cache/data/db/0c was root:root before emergency chown.

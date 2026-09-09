@@ -1,0 +1,27 @@
+Pre-proxy gate raw transcript (updated wrapper with ownership assert)
+Date: 2026-09-09T04:29+02:00
+Host: vmi3400777
+Command: bash /tmp/jetpk-pre-proxy-gate.sh
+
+=== PRE_PROXY_GATE ===
+LIVE_HTTPS=200
+PUBLIC_LOCAL=200
+BRIDGE=200
+DASH_ADMIN=307 DASH_STAFF=307
+PENDING_MIGRATIONS=0
+=== PHASE: runtime ownership assert gate ===
+RUNTIME_OWNER_EXPECTED=pkjetp:pkjetp
+APP_ROOT=/home/pkjetp/jetpk_app
+MODE=assert
+TOTAL_FILES=7629
+ROOT_OWNED_RUNTIME_FILES=0
+NON_PKJETP_RUNTIME_FILES=0
+NON_WRITABLE_DIRS=0
+RUNTIME_WRITABLE_AS_PKJETP=PASS
+RUNTIME_OWNERSHIP_GATE=PASS
+RUNTIME_OWNERSHIP_ASSERT_COMPLETE
+PRE_PROXY_GATE_PASS
+PRE_PROXY_EXIT=0
+
+Production runtime SHA at gate time:
+f039bef3dda1320c08fdccb4633d5c7c34b3b61e

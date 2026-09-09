@@ -148,6 +148,12 @@ Use the `RELEASE_STAGED_AT` value emitted by `jetpk-stage-release.sh` as
 When the staged release includes `DELETE_RUNTIME_FILES`, `jetpk-deploy.sh`
 applies only those exact allowlisted paths after backup.
 
+After file activation, `jetpk-deploy.sh` normalizes and asserts runtime ownership
+via `scripts/jetpk/assert-runtime-ownership.sh`. `jetpk-pre-proxy-gate.sh`
+re-runs the assert-only gate and fails closed when any Laravel writable runtime
+path is not owned by `pkjetp:pkjetp`. Root-run deploy extract, copy, and artisan
+steps must not leave root-owned files under `storage/` or `bootstrap/cache/`.
+
 If an established protected wrapper is missing from `/tmp`, Cursor may use SSH
 to locate and restore the authoritative existing copy, verify SHA256, and then
 continue the protected sequence. Do not invent a new deployment wrapper when an
@@ -165,7 +171,8 @@ other public host is an accepted JetPakistan production evidence source.
 - `docs/jetpk/sftp-deployment-checklist.md` — JetPK gates and smoke scope
 - `scripts/jetpk/stage-release-from-sha.sh` — tracked SHA-parameterized staging
 - `scripts/jetpk/apply-delete-manifest.sh` — tracked exact deletion helper
-- `scripts/jetpk/README.md` — staging/deletion usage
+- `scripts/jetpk/assert-runtime-ownership.sh` — runtime ownership normalize/assert gate
+- `scripts/jetpk/README.md` — staging/deletion/ownership usage
 - `tmp/jetpk-backup.sh`
 - `tmp/jetpk-stage-release.sh`
 - `tmp/jetpk-deploy.sh`
