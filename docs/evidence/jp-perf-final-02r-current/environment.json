@@ -1,0 +1,23 @@
+{
+  "certification": "JP-PERF-FINAL-02R-CURRENT",
+  "measured_at": "2026-09-09T04:50:00Z",
+  "baseline_remote_head": "fb2cdc508154dc3f10e4afefcae16a9276e85e94",
+  "production_engineering_sha": "f039bef3dda1320c08fdccb4633d5c7c34b3b61e",
+  "public_build_id": "m_8GEC6BnMkGnfo7ET_Z5v5VXBZjJPRs_a8PUQO8xw",
+  "dashboard_build_id": null,
+  "canonical_host": "https://jetpakistan.pk",
+  "host": "vmi3400777",
+  "host_ip": "185.215.166.176",
+  "load_average": [0.01, 0.04, 0.07],
+  "memory": "11Gi total, 1.4Gi used, 10Gi available",
+  "disk_root_pct": 39,
+  "live_http": 200,
+  "runtime_ownership_gate": "PASS",
+  "root_owned_runtime_files": 0,
+  "prior_closures": {
+    "closure_04": "PASS",
+    "closure_05": "PASS",
+    "deploy_hygiene_001": "PASS"
+  },
+  "historical_evidence_excluded": "docs/evidence/jp-app-perf-closure-01/"
+}

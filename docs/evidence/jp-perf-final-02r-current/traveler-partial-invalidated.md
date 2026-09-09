@@ -1,0 +1,8 @@
+TRAVELER_INTERRUPTED=YES
+TRAVELER_PARTIAL_N=8
+TRAVELER_PARTIAL_COHORT_VALID_FOR_FINAL_P95=NO
+TRAVELER_RESTART_REQUIRED=YES
+TRAVELER_RESUME_FROM=0/30
+
+This file marks the partial traveler-run.log samples as diagnostic-only.
+Do not use them in final TRAVELER_VALID_N>=30 certification.
