@@ -34,6 +34,8 @@ const checks = [
       s.includes("viewChanged") &&
       s.includes("viewPayloadCacheRef") &&
       s.includes("Switching view…") &&
+      s.includes("void loadPage(id, 1, false, \"init\")") &&
+      s.includes('viewKey === "pair"') &&
       !s.includes("View / filter / sort changes must not leave the prior flow's cards on screen."),
   ],
   [
@@ -65,6 +67,14 @@ const checks = [
   [
     "features/standard-booking/components/PassengerDetailsPage.tsx",
     (s) => s.includes('router.prefetch("/booking/review")'),
+  ],
+  [
+    "features/auth/components/LoginPageClient.tsx",
+    (s) => s.includes("readLoginQuery") && !s.includes("<Suspense") && s.includes("prefetch"),
+  ],
+  [
+    "features/auth/components/CustomerRegistrationForm.tsx",
+    (s) => s.includes("requestIdleCallback") && s.includes('href="/login" prefetch'),
   ],
 ];
 

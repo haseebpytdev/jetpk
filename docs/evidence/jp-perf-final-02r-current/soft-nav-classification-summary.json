@@ -1,0 +1,61 @@
+{
+  "TRUE_SOFT_NAV_ROUTES": 15,
+  "HARD_NAV_ROUTES": 1,
+  "TRUE_SOFT_NAV_WORST_APP_P95": 1693,
+  "TRUE_SOFT_NAV_APP_P95": 1693,
+  "APP_MULTI_SECOND_SOFT_ROUTE_COUNT": 2,
+  "SOFT_NAV_FAIL_1500": [
+    {
+      "name": "home_to_register",
+      "app_p95": 1601
+    },
+    {
+      "name": "register_to_login",
+      "app_p95": 1693
+    }
+  ],
+  "SOFT_NAV_INVESTIGATE_750": [
+    {
+      "name": "home_to_login",
+      "app_p95": 798
+    },
+    {
+      "name": "home_to_register",
+      "app_p95": 1601
+    },
+    {
+      "name": "home_to_about",
+      "app_p95": 860
+    },
+    {
+      "name": "home_to_support",
+      "app_p95": 797
+    },
+    {
+      "name": "support_to_home",
+      "app_p95": 941
+    },
+    {
+      "name": "home_to_privacy",
+      "app_p95": 777
+    },
+    {
+      "name": "register_to_login",
+      "app_p95": 1693
+    },
+    {
+      "name": "login_to_agent_register",
+      "app_p95": 1369
+    }
+  ],
+  "HARD_NAV_UX": [
+    {
+      "name": "groups_to_group_detail",
+      "nav_type": "HARD_REQUIRED",
+      "app_p95": 2720
+    }
+  ],
+  "excluded_from_soft_gates": [
+    "groups_to_group_detail"
+  ]
+}

@@ -1,26 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useMemo } from "react";
+import { useMemo } from "react";
 import { AuthShell, LoginForm } from "@/features/auth";
 import { GuestAuthRedirect } from "@/features/auth/components/GuestAuthRedirect";
 import { LoginSessionNotice } from "@/features/auth/components/LoginSessionNotice";
 import { BookingProgress } from "@/features/booking-progress";
 import { sanitizeCheckoutReturnUrl } from "@/features/auth/utils/checkout-return-allowlist";
 
-function LoginPageInner() {
-  const searchParams = useSearchParams();
-  const reason = searchParams.get("reason") ?? undefined;
-  const redirectParam = searchParams.get("redirect") ?? undefined;
-  const checkoutReturn = searchParams.get("checkout_return") ?? undefined;
-  const bookingGate = searchParams.get("booking_gate") ?? undefined;
+function readLoginQuery() {
+  if (typeof window === "undefined") {
+    return {
+      reason: undefined as string | undefined,
+      redirectParam: undefined as string | undefined,
+      checkoutReturn: undefined as string | undefined,
+      bookingGate: undefined as string | undefined,
+    };
+  }
+  const sp = new URLSearchParams(window.location.search);
+  return {
+    reason: sp.get("reason") ?? undefined,
+    redirectParam: sp.get("redirect") ?? undefined,
+    checkoutReturn: sp.get("checkout_return") ?? undefined,
+    bookingGate: sp.get("booking_gate") ?? undefined,
+  };
+}
+
+/** Client login — no Suspense/useSearchParams stall on soft-nav arrivals. */
+export function LoginPageClient() {
+  const { reason, redirectParam, checkoutReturn, bookingGate } = useMemo(() => readLoginQuery(), []);
   const returnPath = useMemo(
     () => sanitizeCheckoutReturnUrl(checkoutReturn || redirectParam, ""),
     [checkoutReturn, redirectParam],
   );
   const isBookingAccountGate = bookingGate === "account";
-  // Ordinary login always offers register; booking-gate commerce check is SSR-free fail-open.
   const canRegister = true;
   const registerHref = returnPath
     ? `/register?redirect=${encodeURIComponent(returnPath)}${isBookingAccountGate ? "&booking_gate=account" : ""}`
@@ -51,6 +64,7 @@ function LoginPageInner() {
               <p className="text-jp-sm text-jp-muted">Create an account and start your journey with us.</p>
               <Link
                 href={registerHref}
+                prefetch
                 className="inline-flex min-h-jp-button w-full items-center justify-center rounded-jp-md border border-jp-brand px-4 text-jp-sm font-semibold text-jp-brand hover:bg-jp-brand-soft focus-visible:shadow-jp-focus"
                 data-testid="login-register-link"
               >
@@ -77,14 +91,5 @@ function LoginPageInner() {
         <LoginForm returnPath={returnPath || undefined} showRegisterLink={canRegister} />
       </AuthShell>
     </>
-  );
-}
-
-/** Client login — keeps /login free of server searchParams (soft-nav static). */
-export function LoginPageClient() {
-  return (
-    <Suspense fallback={<AuthShell title="Log in to your account" description="Welcome back. Enter your details to continue."><div className="min-h-[12rem]" aria-busy="true" /></AuthShell>}>
-      <LoginPageInner />
-    </Suspense>
   );
 }

@@ -318,8 +318,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
           setSearchStillActive(false);
           return;
         }
-        // Compensate: prior loop did await(loadPage) + 200ms, so actual interval was
-        // ~RTT+parse+200 (~600–900ms). Target wall cadence ≈ POLL_INTERVAL_MS.
+        // Compensate poll RTT; keep floor at POLL_INTERVAL_MS (public-flight-results-data throttle).
         const spent = Date.now() - tickStarted;
         const delay = Math.max(0, POLL_INTERVAL_MS - spent);
         pollTimerRef.current = setTimeout(() => {
@@ -379,11 +378,10 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       }
 
       lastBootstrappedId.current = id;
-      // JP-DEEP-CLOSURE-01: start the poll loop immediately. Waiting for an initial
-      // loadPage round-trip before schedulePoll serialized ~1 poll interval behind
-      // pair persistence once the results shell finally hydrated.
+      // JP-PERF-FINAL-02R: parallel init fetch + poll loop — do not serialize behind first poll RTT.
       if (!cancelled) {
         schedulePoll(id);
+        void loadPage(id, 1, false, "init");
       }
     };
 
@@ -530,7 +528,8 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     outboundOptions: useMemo(() => data?.outbound_options ?? [], [data]),
     pairedOptions: useMemo(() => data?.paired_options ?? [], [data]),
     isReturnSplit: data?.flow === "return_split_outbound",
-    isReturnPair: data?.flow === "return_pair",
+    isReturnPair:
+      data?.flow === "return_pair" || (viewKey === "pair" && (data?.paired_options?.length ?? 0) > 0),
     pairingAuthority: data?.pairing_authority ?? null,
     freshness: data?.search_freshness ?? null,
     page,

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -28,7 +29,15 @@ export function CustomerRegistrationForm() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    void fetchRegistrationSecurityQuestion().then(setSecurityQuestion);
+    const load = () => {
+      void fetchRegistrationSecurityQuestion().then(setSecurityQuestion);
+    };
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(load, { timeout: 1500 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const timer = window.setTimeout(load, 150);
+    return () => window.clearTimeout(timer);
   }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -124,9 +133,9 @@ export function CustomerRegistrationForm() {
 
       <p className="text-center text-jp-sm text-jp-muted">
         Already have an account?{" "}
-        <a href="/login" className="font-semibold text-jp-primary hover:underline">
+        <Link href="/login" prefetch className="font-semibold text-jp-primary hover:underline">
           Sign in
-        </a>
+        </Link>
       </p>
     </form>
   );

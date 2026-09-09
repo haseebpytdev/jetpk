@@ -22,7 +22,7 @@ export default function RegisterPage() {
         footer={
           <span>
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold text-jp-primary hover:underline">
+            <Link href="/login" prefetch className="font-semibold text-jp-primary hover:underline">
               Log in
             </Link>
           </span>
