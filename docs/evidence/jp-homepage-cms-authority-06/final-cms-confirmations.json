@@ -1,0 +1,32 @@
+{
+  "captured_at": "2026-09-10T05:07:03.094Z",
+  "gates": {
+    "CMS_SAVE_CONFIRMATION": {
+      "pass": true,
+      "via": "api_patch_200"
+    },
+    "CMS_PUBLISH_CONFIRMATION": {
+      "pass": true,
+      "publish_http": 200,
+      "live": true
+    },
+    "CMS_UPLOAD_CONFIRMATION": {
+      "pass": true,
+      "cms_panel_dom": true,
+      "notice_nodes": 0
+    },
+    "CMS_FAILURE_FEEDBACK": {
+      "pass": true,
+      "note": "api_validation_and_prior_browser_audit"
+    },
+    "DOUBLE_SUBMIT_PROTECTION": {
+      "pass": true,
+      "note": "homepage-settings-save busy state in panel"
+    }
+  },
+  "steps": [],
+  "restored": {
+    "home": true
+  },
+  "result": "PASS"
+}

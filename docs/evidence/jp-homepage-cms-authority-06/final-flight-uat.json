@@ -1,0 +1,183 @@
+{
+  "captured_at": "2026-09-10T05:15:15.879Z",
+  "gates": {
+    "ONE_WAY_UAT": {
+      "pass": true,
+      "results_count": 12,
+      "branded": {
+        "branded_visible": true,
+        "fare_cards": 4,
+        "fare_breakdown": true,
+        "baggage_policy": true,
+        "terminal_loading_seen": false,
+        "price_text": ""
+      },
+      "url": "https://jetpakistan.pk/flights/results?from=ISB&to=DXB&depart=2026-10-20&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&search_id=d3b09da7-939a-4392-91ef-ec5c2e9950a1"
+    },
+    "RETURN_SEGMENTED_UAT": {
+      "pass": false,
+      "view_param": "segmented",
+      "outbound_count": 1,
+      "return_step": "https://jetpakistan.pk/flights/results?from=ISB&to=DXB&depart=2026-10-20&return_date=2026-10-27&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=segmented&search_id=ecabf696-6caf-4895-bb5e-25cbc64f2709",
+      "return_count": 0,
+      "branded": {
+        "branded_visible": false
+      },
+      "pair_leakage": false
+    },
+    "TRAVELER_UAT": {
+      "pass": true,
+      "n": 5,
+      "valid": 5,
+      "samples": [
+        {
+          "attempt": 0,
+          "valid": true,
+          "rematch": 1,
+          "preview": 1,
+          "fare": 4,
+          "save_continue": 1,
+          "duplicate_revalidation": false,
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&search_id=b992dce0-e476-4ec0-bb32-d2697bb3a621&offer_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&from=ISB&to=DXB&depart=2026-10-20&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&return_date=2026-10-27&fare_option_key=ecolite-pi0&combo_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&outbound_key=859d4af71e7524b3714e334bb26063dccc9c3c5e3ba67d86ef10bcc576cfd1af&return_fare_option_key=ecolite-pi0"
+        },
+        {
+          "attempt": 1,
+          "valid": true,
+          "rematch": 2,
+          "preview": 1,
+          "fare": 2,
+          "save_continue": 1,
+          "duplicate_revalidation": false,
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&search_id=daa6f14c-c566-411c-8859-b6b789860842&offer_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&from=ISB&to=DXB&depart=2026-10-20&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&return_date=2026-10-27&fare_option_key=ecolite-pi0&combo_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&outbound_key=859d4af71e7524b3714e334bb26063dccc9c3c5e3ba67d86ef10bcc576cfd1af&return_fare_option_key=ecolite-pi0"
+        },
+        {
+          "attempt": 2,
+          "valid": true,
+          "rematch": 1,
+          "preview": 1,
+          "fare": 4,
+          "save_continue": 1,
+          "duplicate_revalidation": false,
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&search_id=0073b6f5-5829-40b5-ba7c-539a2d3a0ca3&offer_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&from=ISB&to=DXB&depart=2026-10-20&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&return_date=2026-10-27&fare_option_key=ecolite-pi0&combo_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&outbound_key=859d4af71e7524b3714e334bb26063dccc9c3c5e3ba67d86ef10bcc576cfd1af&return_fare_option_key=ecolite-pi0"
+        },
+        {
+          "attempt": 3,
+          "valid": true,
+          "rematch": 1,
+          "preview": 1,
+          "fare": 4,
+          "save_continue": 1,
+          "duplicate_revalidation": false,
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&search_id=85c12dce-d6fa-4b1c-b1ea-1e8844297bed&offer_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&from=ISB&to=DXB&depart=2026-10-20&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&return_date=2026-10-27&fare_option_key=ecolite-pi0&combo_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&outbound_key=859d4af71e7524b3714e334bb26063dccc9c3c5e3ba67d86ef10bcc576cfd1af&return_fare_option_key=ecolite-pi0"
+        },
+        {
+          "attempt": 4,
+          "valid": true,
+          "rematch": 1,
+          "preview": 1,
+          "fare": 4,
+          "save_continue": 1,
+          "duplicate_revalidation": false,
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&search_id=6f3a0173-ca86-4631-8e8e-7afd9a7a7f10&offer_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&from=ISB&to=DXB&depart=2026-10-20&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&return_date=2026-10-27&fare_option_key=ecolite-pi0&combo_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&outbound_key=859d4af71e7524b3714e334bb26063dccc9c3c5e3ba67d86ef10bcc576cfd1af&return_fare_option_key=ecolite-pi0"
+        }
+      ]
+    },
+    "CHECKOUT_SAFE_UAT": {
+      "pass": false,
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"save-and-continue\"]').first()\n    - locator resolved to <button disabled type=\"submit\" aria-busy=\"false\" data-"
+    },
+    "SUPPLIER_MUTATION_CALLS_ZERO": {
+      "pass": true,
+      "count": 0,
+      "items": []
+    }
+  },
+  "flows": {
+    "one_way": {
+      "results_count": 12,
+      "branded": {
+        "branded_visible": true,
+        "fare_cards": 4,
+        "fare_breakdown": true,
+        "baggage_policy": true,
+        "terminal_loading_seen": false,
+        "price_text": ""
+      },
+      "url": "https://jetpakistan.pk/flights/results?from=ISB&to=DXB&depart=2026-10-20&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&search_id=d3b09da7-939a-4392-91ef-ec5c2e9950a1",
+      "pass": true
+    },
+    "return_segmented": {
+      "view_param": "segmented",
+      "outbound_count": 1,
+      "return_step": "https://jetpakistan.pk/flights/results?from=ISB&to=DXB&depart=2026-10-20&return_date=2026-10-27&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=segmented&search_id=ecabf696-6caf-4895-bb5e-25cbc64f2709",
+      "return_count": 0,
+      "branded": {
+        "branded_visible": false
+      },
+      "pair_leakage": false,
+      "pass": false
+    },
+    "traveler": {
+      "n": 5,
+      "valid": 5,
+      "samples": [
+        {
+          "attempt": 0,
+          "valid": true,
+          "rematch": 1,
+          "preview": 1,
+          "fare": 4,
+          "save_continue": 1,
+          "duplicate_revalidation": false,
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&search_id=b992dce0-e476-4ec0-bb32-d2697bb3a621&offer_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&from=ISB&to=DXB&depart=2026-10-20&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&return_date=2026-10-27&fare_option_key=ecolite-pi0&combo_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&outbound_key=859d4af71e7524b3714e334bb26063dccc9c3c5e3ba67d86ef10bcc576cfd1af&return_fare_option_key=ecolite-pi0"
+        },
+        {
+          "attempt": 1,
+          "valid": true,
+          "rematch": 2,
+          "preview": 1,
+          "fare": 2,
+          "save_continue": 1,
+          "duplicate_revalidation": false,
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&search_id=daa6f14c-c566-411c-8859-b6b789860842&offer_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&from=ISB&to=DXB&depart=2026-10-20&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&return_date=2026-10-27&fare_option_key=ecolite-pi0&combo_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&outbound_key=859d4af71e7524b3714e334bb26063dccc9c3c5e3ba67d86ef10bcc576cfd1af&return_fare_option_key=ecolite-pi0"
+        },
+        {
+          "attempt": 2,
+          "valid": true,
+          "rematch": 1,
+          "preview": 1,
+          "fare": 4,
+          "save_continue": 1,
+          "duplicate_revalidation": false,
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&search_id=0073b6f5-5829-40b5-ba7c-539a2d3a0ca3&offer_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&from=ISB&to=DXB&depart=2026-10-20&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&return_date=2026-10-27&fare_option_key=ecolite-pi0&combo_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&outbound_key=859d4af71e7524b3714e334bb26063dccc9c3c5e3ba67d86ef10bcc576cfd1af&return_fare_option_key=ecolite-pi0"
+        },
+        {
+          "attempt": 3,
+          "valid": true,
+          "rematch": 1,
+          "preview": 1,
+          "fare": 4,
+          "save_continue": 1,
+          "duplicate_revalidation": false,
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&search_id=85c12dce-d6fa-4b1c-b1ea-1e8844297bed&offer_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&from=ISB&to=DXB&depart=2026-10-20&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&return_date=2026-10-27&fare_option_key=ecolite-pi0&combo_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&outbound_key=859d4af71e7524b3714e334bb26063dccc9c3c5e3ba67d86ef10bcc576cfd1af&return_fare_option_key=ecolite-pi0"
+        },
+        {
+          "attempt": 4,
+          "valid": true,
+          "rematch": 1,
+          "preview": 1,
+          "fare": 4,
+          "save_continue": 1,
+          "duplicate_revalidation": false,
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&search_id=6f3a0173-ca86-4631-8e8e-7afd9a7a7f10&offer_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&from=ISB&to=DXB&depart=2026-10-20&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&return_date=2026-10-27&fare_option_key=ecolite-pi0&combo_id=e25d200faf10f5a8b51256cb27c6a8d55067b1c9dd8e8bd8d9c8c70aa5ccb24b&outbound_key=859d4af71e7524b3714e334bb26063dccc9c3c5e3ba67d86ef10bcc576cfd1af&return_fare_option_key=ecolite-pi0"
+        }
+      ]
+    },
+    "checkout_safe": {
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"save-and-continue\"]').first()\n    - locator resolved to <button disabled type=\"submit\" aria-busy=\"false\" data-",
+      "pass": false
+    }
+  },
+  "supplier_mutations": [],
+  "result": "PARTIAL"
+}

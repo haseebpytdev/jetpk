@@ -1,0 +1,275 @@
+{
+  "captured_at": "2026-09-10T03:45:49.900Z",
+  "EXPECTED_SAFE_LINKS": 26,
+  "TESTED_SAFE_LINKS": 26,
+  "UNCOVERED_SAFE_LINKS": 0,
+  "BROKEN_PUBLIC_LINKS": 0,
+  "UNEXPECTED_404": 0,
+  "UNEXPECTED_500": 0,
+  "REDIRECT_LOOPS": 0,
+  "LEGACY_UI_LEAKAGE": 0,
+  "broken": [],
+  "tested": [
+    {
+      "url": "https://jetpakistan.pk/",
+      "source": "header",
+      "text": "",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/",
+      "load_ms": 1742,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/groups",
+      "source": "header",
+      "text": "GroupsNew",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/groups",
+      "load_ms": 977,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/login",
+      "source": "header",
+      "text": "Login",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/login",
+      "load_ms": 328,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/lookup-booking",
+      "source": "footer",
+      "text": "Manage Booking",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/lookup-booking",
+      "load_ms": 356,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/about-us",
+      "source": "footer",
+      "text": "About Us",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/about-us",
+      "load_ms": 277,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/sitemap",
+      "source": "footer",
+      "text": "Sitemap",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/sitemap",
+      "load_ms": 400,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/support",
+      "source": "footer",
+      "text": "Help Center",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/support",
+      "load_ms": 184,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/contact",
+      "source": "footer",
+      "text": "Contact Us",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/contact",
+      "load_ms": 193,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/faq",
+      "source": "footer",
+      "text": "FAQ",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/faq",
+      "load_ms": 205,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/terms",
+      "source": "footer",
+      "text": "Terms & Conditions",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/terms",
+      "load_ms": 261,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/privacy",
+      "source": "footer",
+      "text": "Privacy Policy",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/privacy",
+      "load_ms": 2390,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "source": "main",
+      "text": "Search route",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "load_ms": 521,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/flights/results?from=LHE&to=JED&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "source": "main",
+      "text": "Search route",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/flights/results?from=LHE&to=JED&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "load_ms": 344,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/flights/results?from=ISB&to=LHR&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "source": "main",
+      "text": "Search route",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/flights/results?from=ISB&to=LHR&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "load_ms": 373,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/flights/results?from=KHI&to=RUH&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "source": "main",
+      "text": "Search route",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/flights/results?from=KHI&to=RUH&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "load_ms": 344,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/flights/results?from=KHI&to=DXB&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "source": "main",
+      "text": "DXBDubaiFrom KHIPKR 60,059",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/flights/results?from=KHI&to=DXB&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "load_ms": 351,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/flights/results?from=KHI&to=JED&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "source": "main",
+      "text": "JEDJeddahFrom KHIPKR 68,115",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/flights/results?from=KHI&to=JED&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "load_ms": 350,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/flights/results?from=KHI&to=LHR&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "source": "main",
+      "text": "LHRLondonFrom KHIPKR 141,876",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/flights/results?from=KHI&to=LHR&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "load_ms": 316,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/flights/results?from=KHI&to=IST&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "source": "main",
+      "text": "ISTIstanbulFrom KHIPKR 75,850",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/flights/results?from=KHI&to=IST&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      "load_ms": 332,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/groups/ALH-3331",
+      "source": "main",
+      "text": "AIR SIALLHE — DXBPKR 68,000",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/groups/ALH-3331",
+      "load_ms": 2705,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/groups/ALH-3350",
+      "source": "main",
+      "text": "AIR ARABIALYP — SHJPKR 68,000",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/groups/ALH-3350",
+      "load_ms": 2251,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/groups/ALH-3338",
+      "source": "main",
+      "text": "FLY JINNAHISB — SHJPKR 68,000",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/groups/ALH-3338",
+      "load_ms": 1327,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/forgot-password",
+      "source": "main",
+      "text": "Forgot password?",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/forgot-password",
+      "load_ms": 330,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/register",
+      "source": "main",
+      "text": "Create account",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/register",
+      "load_ms": 284,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/agent/register",
+      "source": "main",
+      "text": "Apply as an Agent",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/agent/register",
+      "load_ms": 327,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    },
+    {
+      "url": "https://jetpakistan.pk/groups/search?category=uae",
+      "source": "main",
+      "text": "UAE8 departures available",
+      "http_status": 200,
+      "final_url": "https://jetpakistan.pk/groups/search?category=uae",
+      "load_ms": 823,
+      "legacy_leakage": false,
+      "redirect_loop": false
+    }
+  ],
+  "CRAWL_PASS": true
+}
