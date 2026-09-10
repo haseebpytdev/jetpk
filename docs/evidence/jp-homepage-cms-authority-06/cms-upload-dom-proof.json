@@ -1,0 +1,19 @@
+{
+  "captured_at": "2026-09-10T19:40:40.404Z",
+  "gates": {
+    "CMS_UPLOAD_DOM_PROOF": {
+      "pass": true,
+      "UPLOAD_REQUEST_HTTP": 200,
+      "UPLOAD_RESPONSE_SUCCESS": true,
+      "NOTICE_SELECTOR": "[data-testid=\"cms-action-success\"]",
+      "NOTICE_VISIBLE": true,
+      "NOTICE_TEXT_PRESENT": true,
+      "NOTICE_APPEARED_AFTER_RESPONSE": true,
+      "NOTICE_TEXT": "Completed\n\nRoute image uploaded.",
+      "DOM_ASSERTION_COUNT": 1
+    }
+  },
+  "restored": {},
+  "UPLOAD_ACTION_TRIGGERED": true,
+  "result": "PASS"
+}
