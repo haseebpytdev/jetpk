@@ -55,10 +55,8 @@ export function PublicRoutePrefetch() {
       prefetchNext();
     };
 
-    // Login/register are header CTAs — prefetch on first paint so sub-2.5s clicks reuse RSC.
-    window.setTimeout(() => {
-      for (const href of PRIORITY_PREFETCH_ROUTES) prefetchHref(href);
-    }, 0);
+    // Login/register are header CTAs — prefetch immediately on mount (no timer) so 0ms-delay clicks reuse RSC.
+    for (const href of PRIORITY_PREFETCH_ROUTES) prefetchHref(href);
 
     const ric = (window as Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
