@@ -27,8 +27,11 @@ const ROUTES = [
   {
     name: "home_to_groups",
     href: "/groups",
-    click: async (page) =>
-      page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: /^groups$/i }).click({ timeout: 8000 }),
+    click: async (page) => {
+      const link = page.locator('nav[aria-label="Primary"] a[href="/groups"]').first();
+      await link.waitFor({ state: "visible", timeout: 10000 });
+      await link.click({ timeout: 8000 });
+    },
     usable: '[data-testid="groups-landing-page"], main h1',
   },
   {
@@ -200,7 +203,17 @@ async function main() {
   for (const route of ROUTES) {
     for (const delay of DELAYS) {
       for (let i = 0; i < N; i += 1) {
-        allSamples.push(await oneSample(page, route, delay, i));
+        try {
+          allSamples.push(await oneSample(page, route, delay, i));
+        } catch (error) {
+          allSamples.push({
+            route: route.name,
+            delay_ms: delay,
+            sample: i,
+            ERROR: String(error?.message ?? error),
+            TOTAL_USABLE_MS: null,
+          });
+        }
         await page.waitForTimeout(150);
       }
     }

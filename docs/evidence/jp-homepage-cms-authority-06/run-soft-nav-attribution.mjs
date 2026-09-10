@@ -9,6 +9,8 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const BASE = process.env.JP_BASE_URL || "https://jetpakistan.pk";
 const N = Number(process.env.JP_NAV_N || 20);
+/** Realistic early-click: click immediately after hydration unless overridden. */
+const CLICK_DELAY_MS = Number(process.env.JP_CLICK_DELAY_MS ?? 0);
 const OUT = path.join(__dirname, "soft-nav-attribution.json");
 
 const routes = [
@@ -69,7 +71,7 @@ async function measureRoute(page, route) {
   for (let i = 0; i < N + 1; i += 1) {
     await page.goto(BASE + route.from, { waitUntil: "domcontentloaded", timeout: 120000 });
     await page.waitForFunction(() => document.documentElement.dataset.jpHydrated === "1", null, { timeout: 20000 }).catch(() => {});
-    await page.waitForTimeout(400);
+    if (CLICK_DELAY_MS > 0) await page.waitForTimeout(CLICK_DELAY_MS);
 
     const rscMeta = [];
     const onRes = async (res) => {
