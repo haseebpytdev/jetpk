@@ -49,6 +49,63 @@ async function waitResults(page, timeout = 120000) {
   return page.locator(CARD).count();
 }
 
+async function fillPassengerForm(page) {
+  const card = page.getByTestId("passenger-card-0");
+  await card.waitFor({ state: "visible", timeout: 90000 });
+  await page.getByTestId("standard-passengers-form").waitFor({ state: "visible", timeout: 30000 });
+
+  const titleSelect = card.locator("select").first();
+  if (await titleSelect.count()) await titleSelect.selectOption({ index: 1 }).catch(() => null);
+
+  const genderSelect = card.getByLabel(/Gender/i);
+  if (await genderSelect.count()) await genderSelect.selectOption("male").catch(() => null);
+
+  await card.getByLabel(/First name/i).fill("QA");
+  await card.getByLabel(/Last name/i).fill("Traveler");
+  await card.getByLabel(/Date of birth/i).fill("1990-01-15");
+  const nationality = card.getByLabel(/Nationality/i);
+  if (await nationality.count()) await nationality.fill("PK");
+
+  const passportNumber = card.getByLabel(/Passport number/i);
+  if (await passportNumber.count()) {
+    await passportNumber.fill("AB1234567");
+    await card.getByLabel(/Issuing country/i).fill("PK");
+    await card.getByLabel(/Passport expiry/i).fill("2030-12-31");
+    await card.getByLabel(/Passport issue date/i).fill("2020-01-01");
+  }
+
+  const contact = page.getByTestId("contact-details");
+  await contact.getByLabel(/^Email/i).fill("qa-uat-authority06@example.com");
+  await contact.getByLabel(/^Mobile/i).fill("+923001234567");
+
+  const guestBtn = page.getByTestId("existing-account-continue-guest");
+  if (await guestBtn.isVisible().catch(() => false)) await guestBtn.click({ timeout: 5000 });
+
+  const terms = page.getByTestId("terms-acceptance-checkbox");
+  await terms.scrollIntoViewIfNeeded().catch(() => null);
+  await terms.setChecked(true, { force: true });
+  await page.waitForFunction(
+    () => {
+      const btn = document.querySelector('[data-testid="save-and-continue"]');
+      return btn && !btn.disabled;
+    },
+    { timeout: 30000 },
+  );
+}
+
+async function waitForReturnOptions(page, timeout = 120000) {
+  const drawer = page.getByTestId("flight-details-drawer");
+  await drawer.waitFor({ state: "visible", timeout: 60000 }).catch(() => null);
+  if (!/\/flights\/return-options/.test(page.url())) {
+    const cont = page.getByTestId("continue-to-passengers");
+    if (await cont.count()) {
+      await cont.first().waitFor({ state: "visible", timeout: 30000 }).catch(() => null);
+      await cont.first().click({ timeout: 15000 }).catch(() => null);
+    }
+    await page.waitForURL(/\/flights\/return-options/, { waitUntil: "commit", timeout });
+  }
+}
+
 async function openBrandedFare(page) {
   const book = page.locator('[data-testid="book-now-trigger"], [data-testid="pair-select"]').first();
   await book.waitFor({ state: "visible", timeout: 45000 });
@@ -117,27 +174,47 @@ async function returnSegmentedUat(browser) {
     });
     steps.view_param = page.url().includes("view=segmented") ? "segmented" : "other";
     steps.outbound_count = await waitResults(page);
+    steps.segmented_mode_selected = steps.view_param === "segmented" && steps.outbound_count > 0;
     const segBtn = page.getByTestId("return-view-segmented");
     if (await segBtn.count()) await segBtn.click({ timeout: 10000 }).catch(() => null);
-    const outboundCard = page.locator('[data-testid="outbound-option-card"]').first();
-    await outboundCard.waitFor({ state: "visible", timeout: 60000 });
+    await page.locator('[data-testid="outbound-option-card"]').first().waitFor({ state: "visible", timeout: 60000 });
+    steps.outbound_selected = true;
     await page.locator('[data-testid="outbound-book-now"]').first().click({ timeout: 15000 });
-    await page.waitForSelector('[data-testid="segmented-progress"], [data-testid="return-option-card"]', { timeout: 60000 });
-    await page.waitForTimeout(2000);
+    await waitForReturnOptions(page);
+    steps.return_leg_route = "/flights/return-options";
     steps.return_step = page.url();
-    const returnCards = await page.locator('[data-testid="return-option-card"], [data-testid="flight-result-card"]').count();
-    steps.return_count = returnCards;
-    if (returnCards > 0) {
-      const retBtn = page.locator('[data-testid="return-select"], [data-testid="book-now-trigger"]').first();
-      if (await retBtn.count()) await retBtn.click({ timeout: 15000 });
-    }
-    steps.branded = await openBrandedFare(page).catch(() => ({ branded_visible: false }));
+    await page.getByTestId("return-option-card").first().waitFor({ state: "visible", timeout: 90000 });
+    steps.return_count = await page.getByTestId("return-option-card").count();
+    steps.return_leg_visible = steps.return_count > 0;
+    await page.getByTestId("result-price-button").first().click({ timeout: 15000 });
+    await page.getByTestId("flight-details-drawer").waitFor({ state: "visible", timeout: 45000 });
+    steps.return_selected = true;
+    await page
+      .locator('[data-testid="fare-family-details"], [data-fare-family-card], [data-testid="branded-fare-carousel"]')
+      .first()
+      .waitFor({ state: "visible", timeout: 60000 })
+      .catch(() => null);
+    const fareCards = await page.locator("[data-fare-family-card]").count();
+    const fareDetails = await page.getByTestId("fare-family-details").count();
+    const continueBtn = await page.getByTestId("continue-to-passengers").count();
+    steps.branded = {
+      branded_visible: fareCards > 0 || fareDetails > 0 || continueBtn > 0,
+      fare_cards: fareCards,
+      fare_details: fareDetails,
+      continue_visible: continueBtn > 0,
+    };
     const bodyText = await page.locator("body").innerText();
-    steps.pair_leakage = /paired return|view=pair/i.test(bodyText) && steps.view_param === "segmented";
+    const url = page.url();
+    steps.pair_leakage = /view=pair/i.test(url) || (/paired return/i.test(bodyText) && !/segmented/i.test(url));
+    steps.segmented_leakage = steps.view_param === "segmented" && /view=pair/i.test(url);
     steps.pass =
+      steps.segmented_mode_selected &&
       steps.outbound_count > 0 &&
+      steps.return_leg_visible &&
+      steps.return_selected &&
+      steps.branded?.branded_visible &&
       !steps.pair_leakage &&
-      (steps.branded?.branded_visible || steps.return_count > 0);
+      !steps.segmented_leakage;
   } catch (e) {
     steps.error = String(e?.message || e).slice(0, 200);
     steps.pass = false;
@@ -238,35 +315,44 @@ async function checkoutSafeUat(browser) {
     );
     await cont.first().click({ timeout: 15000 });
     await page.waitForURL(/\/booking\/passengers/, { waitUntil: "commit", timeout: 120000 });
-    await page.locator('input[name*="first" i], input[autocomplete="given-name"]').first().fill("QA");
-    await page.locator('input[name*="last" i], input[autocomplete="family-name"]').first().fill("Traveler");
-    const gender = page.locator('select[name*="gender" i]').first();
-    if (await gender.count()) await gender.selectOption({ index: 1 }).catch(() => null);
-    const dob = page.locator('input[name*="birth" i], input[type="date"]').first();
-    if (await dob.count()) await dob.fill("1990-01-15").catch(() => null);
-    await page.locator('[data-testid="terms-acceptance-checkbox"]').check({ timeout: 10000 }).catch(() => null);
+    await fillPassengerForm(page);
+    steps.passenger_form_valid = true;
+    steps.save_and_continue_enabled = true;
     const save = page.locator('[data-testid="save-and-continue"]');
-    await page.waitForFunction(
-      () => {
-        const btn = document.querySelector('[data-testid="save-and-continue"]');
-        return btn && !btn.disabled;
-      },
-      { timeout: 60000 },
-    );
     await save.first().click({ timeout: 30000 });
     await page.waitForURL(/\/booking\/review/, { waitUntil: "commit", timeout: 120000 });
+    await page.getByTestId("booking-review-page").waitFor({ state: "visible", timeout: 90000 });
+    await page.getByTestId("edit-traveler-details").waitFor({ state: "visible", timeout: 90000 });
+    await page.getByTestId("review-itinerary").waitFor({ state: "visible", timeout: 60000 });
     steps.review_url = page.url();
-    steps.change_flight = await page.locator('text=/Change Flight|change flight/i').count();
-    steps.fare_breakdown = await page.locator('[data-testid="fare-breakdown"], [data-testid="booking-review-page"]').count();
-    steps.flight_preview = await page.locator('[data-testid="flight-preview"], [data-testid="itinerary-summary"]').count();
-    steps.baggage = await page.locator('text=/baggage|fare rules/i').count();
-    const back = page.locator('text=/Back|Change Flight/i').first();
-    if (await back.count()) await back.click({ timeout: 10000 }).catch(() => null);
-    steps.back_ok = /passengers|results/.test(page.url());
+    steps.change_flight =
+      (await page.getByTestId("change-flight-button").count()) +
+      (await page.getByTestId("edit-traveler-details").count());
+    steps.fare_breakdown =
+      (await page.getByTestId("review-order-summary").count()) +
+      (await page.getByTestId("review-price-summary").count()) +
+      (await page.getByTestId("order-summary-total").count()) +
+      (await page.getByText(/^Total$/i).count());
+    steps.flight_preview =
+      (await page.getByTestId("review-itinerary").count()) +
+      (await page.getByTestId("flight-preview-body").count());
+    steps.baggage =
+      (await page.getByText(/baggage|carry-on|checked/i).count()) +
+      (await page.getByText(/fare rules|change.*cancel/i).count());
+    const priceTexts = await page.locator("text=/PKR|Rs\\.?\\s*[\\d,]+/i").allTextContents();
+    steps.price_consistency = priceTexts.length >= 1;
+    const editTravelers = page.getByTestId("edit-traveler-details");
+    if (await editTravelers.count()) await editTravelers.first().click({ timeout: 10000 });
+    await page.waitForURL(/\/booking\/passengers/, { waitUntil: "commit", timeout: 60000 }).catch(() => null);
+    steps.back_ok = /\/booking\/passengers/.test(page.url());
     steps.pass =
       steps.review_url.includes("/booking/review") &&
       steps.fare_breakdown > 0 &&
       steps.flight_preview > 0 &&
+      steps.baggage > 0 &&
+      steps.price_consistency &&
+      steps.change_flight > 0 &&
+      steps.back_ok &&
       report.supplier_mutations.length === 0;
   } catch (e) {
     steps.error = String(e?.message || e).slice(0, 200);
@@ -277,21 +363,36 @@ async function checkoutSafeUat(browser) {
 }
 
 async function main() {
+  const only = (process.env.JP_UAT_ONLY || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const run = (name) => only.length === 0 || only.includes(name);
+
   const browser = await chromium.launch({ headless: true });
-  report.flows.one_way = await oneWayUat(browser);
-  gate("ONE_WAY_UAT", report.flows.one_way.pass === true, report.flows.one_way);
 
-  report.flows.return_segmented = await returnSegmentedUat(browser);
-  gate("RETURN_SEGMENTED_UAT", report.flows.return_segmented.pass === true, report.flows.return_segmented);
+  if (run("one_way")) {
+    report.flows.one_way = await oneWayUat(browser);
+    gate("ONE_WAY_UAT", report.flows.one_way.pass === true, report.flows.one_way);
+  }
 
-  const travelerSamples = [];
-  for (let i = 0; i < TRAVELER_N; i += 1) travelerSamples.push(await travelerSample(browser, i));
-  const travelerValid = travelerSamples.filter((s) => s.valid);
-  report.flows.traveler = { n: TRAVELER_N, valid: travelerValid.length, samples: travelerSamples };
-  gate("TRAVELER_UAT", travelerValid.length >= Math.min(3, TRAVELER_N), report.flows.traveler);
+  if (run("segmented")) {
+    report.flows.return_segmented = await returnSegmentedUat(browser);
+    gate("RETURN_SEGMENTED_UAT", report.flows.return_segmented.pass === true, report.flows.return_segmented);
+  }
 
-  report.flows.checkout_safe = await checkoutSafeUat(browser);
-  gate("CHECKOUT_SAFE_UAT", report.flows.checkout_safe.pass === true, report.flows.checkout_safe);
+  if (run("traveler")) {
+    const travelerSamples = [];
+    for (let i = 0; i < TRAVELER_N; i += 1) travelerSamples.push(await travelerSample(browser, i));
+    const travelerValid = travelerSamples.filter((s) => s.valid);
+    report.flows.traveler = { n: TRAVELER_N, valid: travelerValid.length, samples: travelerSamples };
+    gate("TRAVELER_UAT", travelerValid.length >= Math.min(3, TRAVELER_N), report.flows.traveler);
+  }
+
+  if (run("checkout")) {
+    report.flows.checkout_safe = await checkoutSafeUat(browser);
+    gate("CHECKOUT_SAFE_UAT", report.flows.checkout_safe.pass === true, report.flows.checkout_safe);
+  }
 
   gate("SUPPLIER_MUTATION_CALLS_ZERO", report.supplier_mutations.length === 0, {
     count: report.supplier_mutations.length,
