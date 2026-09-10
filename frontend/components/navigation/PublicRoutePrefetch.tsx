@@ -3,9 +3,10 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+/** Soft-nav CTAs: warm immediately so early header clicks reuse RSC. */
+const PRIORITY_PREFETCH_ROUTES = ["/login", "/register"] as const;
+
 const PREFETCH_ROUTES = [
-  "/login",
-  "/register",
   "/groups",
   "/about-us",
   "/contact",
@@ -34,33 +35,40 @@ export function PublicRoutePrefetch() {
 
     let index = 0;
 
-    const prefetchNext = () => {
-      if (index >= PREFETCH_ROUTES.length) return;
-      const href = PREFETCH_ROUTES[index++];
+    const prefetchHref = (href: string) => {
       try {
         void router.prefetch(href);
       } catch {
         /* best-effort */
       }
+    };
+
+    const prefetchNext = () => {
+      if (index >= PREFETCH_ROUTES.length) return;
+      const href = PREFETCH_ROUTES[index++];
+      prefetchHref(href);
       // Wide stagger: soft-nav RSC must not share the pipe with a prefetch burst.
       window.setTimeout(prefetchNext, 350);
     };
 
-    const start = () => {
+    const startDeferredQueue = () => {
       prefetchNext();
     };
 
-    // Delay past first paint/hydration so an early Link click is not contended
-    // with our own idle prefetch queue (login/about/contact/…).
+    // Login/register are header CTAs — prefetch on first paint so sub-2.5s clicks reuse RSC.
+    window.setTimeout(() => {
+      for (const href of PRIORITY_PREFETCH_ROUTES) prefetchHref(href);
+    }, 0);
+
     const ric = (window as Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
     }).requestIdleCallback;
 
     window.setTimeout(() => {
       if (typeof ric === "function") {
-        ric(start, { timeout: 4000 });
+        ric(startDeferredQueue, { timeout: 4000 });
       } else {
-        start();
+        startDeferredQueue();
       }
     }, 2500);
   }, [router]);

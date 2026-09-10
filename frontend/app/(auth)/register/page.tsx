@@ -3,6 +3,10 @@ import { AuthShell, CustomerRegistrationForm } from "@/features/auth";
 import { GuestAuthRedirect } from "@/features/auth/components/GuestAuthRedirect";
 import { SIGNUP_BENEFITS } from "@/features/auth/config/auth-benefits";
 
+/** Cacheable auth shell — no cookies()/session on RSC path (client redirect only). */
+export const revalidate = 300;
+export const dynamic = "force-static";
+
 /**
  * Guest registration — no SSR cookies()/session await (soft-nav).
  * Signed-in visitors are redirected client-side.
