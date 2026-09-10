@@ -11,7 +11,7 @@ const BASE = process.env.JP_BASE_URL || "https://jetpakistan.pk";
 const N = Number(process.env.JP_NAV_N || 20);
 /** Realistic early-click: click immediately after hydration unless overridden. */
 const CLICK_DELAY_MS = Number(process.env.JP_CLICK_DELAY_MS ?? 0);
-const OUT = path.join(__dirname, "soft-nav-attribution.json");
+const OUT = path.join(__dirname, process.env.JP_NAV_OUT || "soft-nav-attribution.json");
 
 const routes = [
   { name: "home_to_login", from: "/", href: "/login", usable: 'input[type="password"], form', testid: "header-login-cta" },
@@ -47,8 +47,17 @@ async function clickNav(page, route) {
   }
   const primary = page.getByRole("navigation", { name: "Primary" });
   if (route.dropdown) {
-    await primary.getByRole("button", { name: route.dropdown }).click({ timeout: 8000 });
-    await page.getByRole("link", { name: route.label, exact: true }).click({ timeout: 8000 });
+    const direct = page.locator(`a[href="${route.href}"]`).first();
+    if (await direct.count()) {
+      try {
+        await direct.click({ timeout: 5000, force: true });
+        return;
+      } catch {
+        /* fall through to menu */
+      }
+    }
+    await primary.getByRole("button", { name: route.dropdown }).click({ timeout: 8000, force: true });
+    await page.getByRole("link", { name: route.label, exact: true }).click({ timeout: 8000, force: true });
     return;
   }
   const primaryLink = primary.getByRole("link", { name: new RegExp(route.label || route.href.replace(/^\//, ""), "i") });
@@ -66,10 +75,24 @@ async function clickNav(page, route) {
   }
 }
 
+async function gotoWithRetry(page, url, attempts = 3) {
+  let lastErr;
+  for (let a = 0; a < attempts; a += 1) {
+    try {
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 120000 });
+      return;
+    } catch (err) {
+      lastErr = err;
+      await page.waitForTimeout(1500 * (a + 1));
+    }
+  }
+  throw lastErr;
+}
+
 async function measureRoute(page, route) {
   const samples = [];
   for (let i = 0; i < N + 1; i += 1) {
-    await page.goto(BASE + route.from, { waitUntil: "domcontentloaded", timeout: 120000 });
+    await gotoWithRetry(page, BASE + route.from);
     await page.waitForFunction(() => document.documentElement.dataset.jpHydrated === "1", null, { timeout: 20000 }).catch(() => {});
     if (CLICK_DELAY_MS > 0) await page.waitForTimeout(CLICK_DELAY_MS);
 
@@ -159,6 +182,7 @@ async function main() {
     phase: "JP-HOMEPAGE-CMS-AUTHORITY-06-ATTRIBUTION",
     measured_at: new Date().toISOString(),
     base: BASE,
+    click_delay_ms: CLICK_DELAY_MS,
     n_per_route: N,
     matrix,
     TRUE_SOFT_NAV_WORST_USABLE_P95: Math.max(...matrix.map((m) => m.USABLE_P95 || 0)),
