@@ -268,6 +268,7 @@ final class ClientPageContentResolver
 
         if ($pageKey === ClientPageKeys::HOME) {
             $this->assetService->publishAllForPage($profile, $pageKey);
+            app(\App\Services\Next\JetpkNextCacheRevalidationService::class)->revalidateHomepageAndPublicConfig();
         }
 
         return $published;

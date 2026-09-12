@@ -16,6 +16,7 @@ use App\Services\Client\ClientPageContentResolver;
 use App\Services\Client\ClientPageSettingDefaultService;
 use App\Services\Client\ClientPageResetService;
 use App\Services\Homepage\FeaturedDeals\GroupTicketFeaturedDealSource;
+use App\Services\Homepage\FeaturedDeals\HomepageFeaturedDealInventoryPickerService;
 use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Services\Homepage\JetpkHomepageContentMergeService;
 use App\Services\Homepage\JetpkHomepageContentValidator;
@@ -1135,5 +1136,20 @@ class ClientPageSettingsController extends Controller
         }
 
         return app(GroupTicketFeaturedDealSource::class)->deals($editorial);
+    }
+
+    public function featuredDealInventory(Request $request): JsonResponse
+    {
+        Gate::authorize('client.page-settings.manage');
+
+        $items = app(HomepageFeaturedDealInventoryPickerService::class)->listEligible(
+            $request->query('q') !== null ? (string) $request->query('q') : null,
+            max(1, min(100, (int) $request->query('limit', 50))),
+        );
+
+        return $this->backOfficeJson([
+            'ok' => true,
+            'items' => $items,
+        ]);
     }
 }

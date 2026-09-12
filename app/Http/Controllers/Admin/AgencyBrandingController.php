@@ -9,6 +9,7 @@ use App\Services\Agencies\AgencyBrandingService;
 use App\Services\Agencies\SlimTopbarPresenter;
 use App\Services\Communication\AgencyCommunicationSettingsService;
 use App\Services\Media\BackgroundRemovalSettingsService;
+use App\Services\Next\JetpkNextCacheRevalidationService;
 use App\Support\Agencies\AgencyPrefixService;
 use App\Support\Branding\BrandDisplayResolver;
 use App\Support\Branding\PlatformBrandingResolver;
@@ -26,6 +27,7 @@ class AgencyBrandingController extends Controller
         protected SlimTopbarPresenter $slimTopbarPresenter,
         protected AgencyCommunicationSettingsService $communicationSettingsService,
         protected BackgroundRemovalSettingsService $backgroundRemovalSettingsService,
+        protected JetpkNextCacheRevalidationService $nextCacheRevalidation,
     ) {}
 
     public function edit(Request $request): View|JsonResponse
@@ -210,6 +212,8 @@ class AgencyBrandingController extends Controller
         $slimTopbar = $this->slimTopbarPresenter->buildForStorage($request->all());
 
         $this->brandingService->updateSettings($agency, $request->user(), $validated, $colorScheme, $slimTopbar);
+
+        $this->nextCacheRevalidation->revalidateHomepageAndPublicConfig();
 
         if ($referencePrefixMeta !== []) {
             $settings = $this->brandingService->getSettingsForAgency($agency)->fresh();
