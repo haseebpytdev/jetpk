@@ -113,6 +113,16 @@ test("support links and quick actions inside assistant", async ({ page }) => {
 test("chat send uses existing AI API contract", async ({ page }) => {
   let chatHit = false;
 
+  await page.context().clearCookies();
+  await page.route("**/laravel/api/public/content/csrf-token", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ csrf_token: "test-csrf-token" }),
+      headers: { "set-cookie": "XSRF-TOKEN=test-csrf-token; Path=/" },
+    });
+  });
+
   await page.route("**/laravel/api/public/ai/chat", async (route) => {
     chatHit = true;
     await route.fulfill({

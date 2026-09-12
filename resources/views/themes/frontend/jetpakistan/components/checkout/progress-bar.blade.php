@@ -19,7 +19,7 @@
                 ])>
                     <span class="jp-checkout-progress__marker" aria-hidden="true">
                         @if ($number < $active)
-                            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M6.2 11.6 3.4 8.8l1-1 1.8 1.8 4.4-4.4 1 1z"/></svg>
+                            <x-jp.icon name="check" style="width:12px;height:12px" />
                         @else
                             {{ $number }}
                         @endif

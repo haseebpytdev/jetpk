@@ -7,6 +7,8 @@ import type { PublicSession } from "@/types/session";
 import Link from "next/link";
 import { usePublicFloatingLayoutOptional } from "@/features/public-floating/PublicFloatingLayoutProvider";
 import { usePathname } from "next/navigation";
+import { UI_ICON_FAB_CLASS, UI_ICON_STROKE } from "@/lib/ui-icon";
+import { Menu, X } from "lucide-react";
 import { useEffect, useId, useRef } from "react";
 
 type PublicFloatingActionDockProps = {
@@ -122,14 +124,10 @@ export function PublicFloatingActionDock({
         data-testid="public-fab-trigger"
       >
         <span className="inline-flex group-open:hidden" aria-hidden="true">
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
-            <path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
+          <Menu className={UI_ICON_FAB_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
         </span>
         <span className="hidden group-open:inline-flex" aria-hidden="true">
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
-            <path d="m6.5 6.5 11 11m0-11-11 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
+          <X className={UI_ICON_FAB_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
         </span>
       </summary>
 
@@ -137,10 +135,10 @@ export function PublicFloatingActionDock({
         id={panelId}
         role="group"
         aria-label="JetPakistan quick actions"
-        className="jp-public-fab-panel pointer-events-auto absolute bottom-16 right-0 mb-2 w-[min(18rem,calc(100vw-2rem))] origin-bottom-right rounded-jp-xl border border-jp-brand-border bg-jp-surface p-3 shadow-jp-raised"
+        className="jp-public-fab-panel pointer-events-auto absolute bottom-16 right-0 mb-2 w-[min(18rem,calc(100vw-2rem))] max-h-[var(--jp-dock-panel-max-height,22rem)] origin-bottom-right rounded-jp-xl border border-jp-brand-border bg-jp-surface p-3 shadow-jp-raised"
       >
         <p className="px-2 pb-2 text-jp-xs font-semibold uppercase tracking-[0.14em] text-jp-muted">Quick actions</p>
-        <ul className="max-h-[min(60vh,22rem)] space-y-1 overflow-y-auto">
+        <ul className="max-h-[calc(var(--jp-dock-panel-max-height,22rem)-4.5rem)] space-y-1 overflow-y-auto">
           {tiles.map((tile) => (
             <li key={`${tile.label}-${tile.href}`}>
               <Link

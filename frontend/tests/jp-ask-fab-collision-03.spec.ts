@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { assertNoOverlap, getLocatorRect } from "./helpers/fab-geometry";
 
 const MOBILE = { width: 390, height: 844 };
 
@@ -53,20 +54,20 @@ test.describe("JP-ASK-FAB-03 collision", () => {
     });
 
     await page.waitForFunction(() => {
-      const bottom = Number.parseInt(
+      const askBottom = Number.parseFloat(
         getComputedStyle(document.documentElement).getPropertyValue("--jp-ask-fab-bottom"),
-        10,
       );
-      return bottom >= 80;
+      const dockBottom = Number.parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--jp-dock-fab-bottom"),
+      );
+      return askBottom > dockBottom + 50;
     });
 
-    const askBox = await ask.boundingBox();
-    const dockBox = await dock.boundingBox();
+    const askBox = await getLocatorRect(ask);
+    const dockBox = await getLocatorRect(dock);
     expect(askBox).not.toBeNull();
     expect(dockBox).not.toBeNull();
-
-    const overlap = boxesOverlap(askBox!, dockBox!);
-    expect(overlap).toBe(false);
+    assertNoOverlap(askBox!, dockBox!, "homepage collision");
   });
 
   test("dock hidden while Ask panel is open", async ({ page }) => {
@@ -86,15 +87,3 @@ test.describe("JP-ASK-FAB-03 collision", () => {
     expect(hidden).toBe(true);
   });
 });
-
-function boxesOverlap(
-  a: { x: number; y: number; width: number; height: number },
-  b: { x: number; y: number; width: number; height: number },
-): boolean {
-  return !(
-    a.x + a.width <= b.x ||
-    b.x + b.width <= a.x ||
-    a.y + a.height <= b.y ||
-    b.y + b.height <= a.y
-  );
-}

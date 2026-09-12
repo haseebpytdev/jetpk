@@ -7,17 +7,17 @@
 <div class="jp-search-action-row search-bottom" data-jp-search-action-row>
     <div class="checks jp-search-checks" data-jp-search-checks>
         <label class="check @if($directChecked) on @endif" data-jp-direct-filter>
-            <span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2.6"/></svg></span>
+            <span class="box" aria-hidden="true"><x-jp.icon name="check" /></span>
             <input type="checkbox" name="stops" value="direct" @checked($directChecked) hidden>
             <span>Direct flights only</span>
         </label>
         <label class="check @if($nearbyChecked) on @endif" data-jp-nearby-filter>
-            <span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2.6"/></svg></span>
+            <span class="box" aria-hidden="true"><x-jp.icon name="check" /></span>
             <input type="checkbox" name="include_nearby" value="1" @checked($nearbyChecked) hidden>
             <span>Include nearby airports</span>
         </label>
         <label class="check @if($flexibleChecked) on @endif" data-jp-flexible-dates-filter>
-            <span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2.6"/></svg></span>
+            <span class="box" aria-hidden="true"><x-jp.icon name="check" /></span>
             <input type="checkbox" name="flexible_dates" value="1" @checked($flexibleChecked) hidden>
             <span>Flexible dates &plusmn;1 day</span>
         </label>

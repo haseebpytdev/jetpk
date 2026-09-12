@@ -114,6 +114,13 @@ function laravelServerBaseUrl(): string {
 async function fetchLaravelJsonServer<T>(path: string): Promise<T | null> {
   const laravelBase = laravelServerBaseUrl();
   const url = laravelBase !== "" ? `${laravelBase}${path}` : laravelApiPath(path);
+  const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timer =
+    controller != null
+      ? setTimeout(() => {
+          controller.abort();
+        }, 8000)
+      : null;
 
   try {
     const response = await fetch(url, {
@@ -123,11 +130,14 @@ async function fetchLaravelJsonServer<T>(path: string): Promise<T | null> {
         "X-Requested-With": "XMLHttpRequest",
       },
       cache: "no-store",
+      signal: controller?.signal,
     });
     if (!response.ok) return null;
     return (await response.json()) as T;
   } catch {
     return null;
+  } finally {
+    if (timer != null) clearTimeout(timer);
   }
 }
 

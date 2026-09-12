@@ -22,7 +22,7 @@
 <div class="field jp-pax-field ota-hero-search-field--pax" data-jp-pax-picker data-pax-picker>
     <label id="{{ $widgetId }}-pax-label">Travellers</label>
     <div class="jp-field-value-row">
-        <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-8 0v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>
+        <x-jp.icon name="users" class="icon" />
         <button
             type="button"
             class="jp-pax-trigger ota-hero-search-pax__trigger"

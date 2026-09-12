@@ -31,7 +31,7 @@
 
                 <div class="swap-wrap">
                     <button type="button" class="swap" id="swapBtn" data-jp-swap aria-label="Swap origin and destination">
-                        <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><path d="M7 16V4M7 4 3 8M7 4l4 4M17 8v12M17 20l4-4M17 20l-4-4"/></svg>
+                        <x-jp.icon name="swap" class="icon" />
                     </button>
                 </div>
 
@@ -98,7 +98,7 @@
             <div class="field jp-submit-field" data-jp-submit-field>
                 <span class="jp-field-sr-label">Search</span>
                 <button type="submit" class="btn btn-primary btn-search jp-search-submit ota-hero-search-submit" data-jp-flight-submit>
-                    <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                    <x-jp.icon name="search" class="icon" />
                     <span class="jp-search-submit-text">Search</span>
                 </button>
             </div>

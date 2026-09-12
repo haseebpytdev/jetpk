@@ -17,6 +17,11 @@
 @case('zap')<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>@break
 @case('clock')<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2"/>@break
 @case('arrow-right')<path d="M5 12h14M13 6l6 6-6 6"/>@break
+@case('chevron-down')<path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2"/>@break
+@case('sun')<circle cx="12" cy="12" r="4" stroke="none" fill="currentColor"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="2.4"/>@break
+@case('moon')<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="none" fill="currentColor"/>@break
+@case('star')<path d="M12 2 9.2 8.6 2 9.3l5.4 4.7L5.8 21 12 17.3 18.2 21l-1.6-7 5.4-4.7-7.2-.7z" stroke="none" fill="currentColor"/>@break
+@case('utensils')<path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>@break
 @case('chat')<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>@break
 @case('menu')<path d="M3 6h18M3 12h18M3 18h18"/>@break
 @case('close')<path d="M18 6 6 18M6 6l12 12"/>@break

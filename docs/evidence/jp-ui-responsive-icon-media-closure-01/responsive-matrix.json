@@ -1,0 +1,22 @@
+{
+  "phase": "JP-UI-RESPONSIVE-ICON-MEDIA-CLOSURE-01",
+  "suite": "frontend/tests/jp-fab-geometry-matrix-01.spec.ts",
+  "viewports": [
+    "320x568", "360x640", "375x667", "390x844", "412x915", "430x932",
+    "568x320", "667x375", "844x390", "915x412",
+    "600x960", "768x1024", "820x1180",
+    "960x600", "1024x768", "1180x820",
+    "1280x720"
+  ],
+  "routes": ["/", "/flights", "/groups", "/support", "/login"],
+  "scrollPositions": ["top", "middle", "footer"],
+  "assertions": [
+    "FAB in visual viewport",
+    "no FAB/FAB overlap",
+    "touch target >= 48px",
+    "dock-open panel in viewport",
+    "ask-open dock hidden",
+    "dock-open ask hidden"
+  ],
+  "realDeviceOwnerQa": "PENDING_OWNER"
+}

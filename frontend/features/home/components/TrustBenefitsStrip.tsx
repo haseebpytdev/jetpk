@@ -1,4 +1,6 @@
 import { cn } from "@/lib/cn";
+import { UI_ICON_ACTION_CLASS, UI_ICON_STROKE } from "@/lib/ui-icon";
+import { Headphones, Heart, Shield, Ticket } from "lucide-react";
 import { BENEFIT_FIXTURES } from "../fixtures/benefits";
 
 type TrustBenefitsStripProps = {
@@ -6,25 +8,24 @@ type TrustBenefitsStripProps = {
 };
 
 function BenefitIcon({ type }: { type: (typeof BENEFIT_FIXTURES)[number]["icon"] }) {
-  const paths: Record<(typeof BENEFIT_FIXTURES)[number]["icon"], string> = {
-    shield: "M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6l-8-3Z",
-    headset: "M4 14a8 8 0 0 1 16 0v3a3 3 0 0 1-3 3h-1v-6h4M8 17H7a3 3 0 0 1-3-3v-1",
-    fare: "M4 7h16v10H4z M8 11h8 M8 15h5",
-    pakistan: "M12 3c-4 3-7 7-7 11a7 7 0 0 0 14 0c0-4-3-8-7-11Z",
+  const iconProps = {
+    className: cn(UI_ICON_ACTION_CLASS, "text-jp-primary"),
+    strokeWidth: UI_ICON_STROKE,
+    "aria-hidden": true as const,
   };
 
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5 text-jp-primary" aria-hidden="true">
-      <path
-        d={paths[type]}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
+  switch (type) {
+    case "shield":
+      return <Shield {...iconProps} />;
+    case "headset":
+      return <Headphones {...iconProps} />;
+    case "fare":
+      return <Ticket {...iconProps} />;
+    case "pakistan":
+      return <Heart {...iconProps} />;
+    default:
+      return <Shield {...iconProps} />;
+  }
 }
 
 export function TrustBenefitsStrip({ className }: TrustBenefitsStripProps) {

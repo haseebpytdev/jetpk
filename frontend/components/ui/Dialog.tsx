@@ -1,5 +1,6 @@
 "use client";
 
+import { UiCloseIcon } from "@/components/ui/SharedLucideIcons";
 import { cn } from "@/lib/cn";
 import { useBodyScrollLock } from "@/lib/hooks/use-body-scroll-lock";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
@@ -75,9 +76,7 @@ export function Dialog({
             className="rounded-jp-md p-1 text-jp-muted hover:text-jp-text focus-visible:shadow-jp-focus"
             aria-label="Close"
           >
-            <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor" aria-hidden="true">
-              <path d="M4.293 4.293a1 1 0 0 1 1.414 0L10 8.586l4.293-4.293a1 1 0 1 1 1.414 1.414L11.414 10l4.293 4.293a1 1 0 0 1-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L8.586 10 4.293 5.707a1 1 0 0 1 0-1.414z" />
-            </svg>
+            <UiCloseIcon />
           </button>
         </div>
         <div>{children}</div>

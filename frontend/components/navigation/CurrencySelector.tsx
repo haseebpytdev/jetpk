@@ -4,6 +4,7 @@ import { cn } from "@/lib/cn";
 import { currencyOptions } from "@/lib/navigation";
 import type { CurrencyOption } from "@/types/navigation";
 import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
+import { UiChevronDownIcon } from "@/components/ui/SharedLucideIcons";
 import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "jp-currency-code";
@@ -79,7 +80,7 @@ export function CurrencySelector({ className, appearance = "default" }: Currency
         >
           {footer ? <span className="text-jp-xs font-medium uppercase tracking-wide text-white/60">Currency</span> : null}
           <span className={cn("font-semibold tracking-wide", footer ? "text-white" : undefined)}>{currency.code}</span>
-          <ChevronDownIcon
+          <UiChevronDownIcon
             className={cn(
               "h-3.5 w-3.5 transition-transform",
               footer ? (expanded ? "rotate-0" : "rotate-180") : expanded && "rotate-180",
@@ -116,13 +117,5 @@ export function CurrencySelector({ className, appearance = "default" }: Currency
         );
       })}
     </Dropdown>
-  );
-}
-
-function ChevronDownIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
-      <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }

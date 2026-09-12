@@ -39,7 +39,7 @@
         <div class="jp-register-menu" data-jp-register-menu>
           <button type="button" class="btn btn-primary jp-register-menu__trigger jp-header-register" aria-expanded="false" aria-haspopup="true">
             {{ $jpHeader['register_label'] ?? 'Register' }}
-            <svg class="jp-register-menu__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>
+            <x-jp.icon name="chevron-down" class="jp-register-menu__chev" />
           </button>
           <div class="jp-register-menu__panel" hidden>
             <a href="{{ client_route('register') }}">Customer Registration</a>
@@ -52,8 +52,8 @@
       @if ($jpHeader['theme_toggle_visible'] ?? true)
         <button class="toggle jp-header-theme-toggle" id="themeToggle" aria-label="Switch day or night theme">
           <span class="knob">
-            <svg class="ico-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="none" fill="currentColor"/></svg>
-            <svg class="ico-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" stroke="none" fill="currentColor"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="2.4"/></svg>
+            <x-jp.icon name="moon" class="ico-moon" />
+            <x-jp.icon name="sun" class="ico-sun" />
           </span>
         </button>
       @endif

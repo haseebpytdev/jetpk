@@ -1,5 +1,8 @@
 "use client";
 
+import { cn } from "@/lib/cn";
+import { UI_ICON_ACTION_CLASS, UI_ICON_STROKE } from "@/lib/ui-icon";
+import { Plane } from "lucide-react";
 import { useId, useMemo, useState } from "react";
 import type { FareRulesContract } from "../types";
 
@@ -113,9 +116,7 @@ export function FareRulesAccordion({
           className="mb-3 flex items-center gap-2 rounded-jp-md bg-jp-surface-muted px-3 py-2 text-sm font-medium text-jp-text"
           data-testid="fare-policy-route-header"
         >
-          <span className="text-jp-primary" aria-hidden>
-            ✈
-          </span>
+          <Plane className={cn(UI_ICON_ACTION_CLASS, "text-jp-primary")} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
           <span>{routeLabel}</span>
         </div>
       ) : null}

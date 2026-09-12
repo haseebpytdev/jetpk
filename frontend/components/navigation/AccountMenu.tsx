@@ -1,6 +1,7 @@
 "use client";
 
 import { Dropdown } from "@/components/ui/Dropdown";
+import { UiChevronDownIcon } from "@/components/ui/SharedLucideIcons";
 import { logout } from "@/features/auth/services/auth-service";
 import { cn } from "@/lib/cn";
 import type { AuthenticatedSession, PublicSession } from "@/types/session";
@@ -141,7 +142,7 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
               {user.displayName}
             </span>
           ) : null}
-          <ChevronDownIcon className={cn("h-4 w-4", expanded && "rotate-180")} />
+          <UiChevronDownIcon className={cn("h-4 w-4", expanded && "rotate-180")} />
         </button>
       )}
     >
@@ -169,19 +170,5 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
         {loggingOut ? "Signing out…" : "Logout"}
       </button>
     </Dropdown>
-  );
-}
-
-function ChevronDownIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M5 7.5L10 12.5L15 7.5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

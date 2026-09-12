@@ -2,7 +2,7 @@
   position: fixed;
   right: max(18px, env(safe-area-inset-right));
   bottom: var(--jp-ask-fab-bottom, max(18px, env(safe-area-inset-bottom)));
-  z-index: 60;
+  z-index: var(--jp-z-ask-fab, 60);
   display: flex;
   align-items: center;
   gap: 10px;

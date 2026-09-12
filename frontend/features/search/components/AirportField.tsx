@@ -2,6 +2,8 @@
 
 import { IconButton } from "@/components/ui/IconButton";
 import { cn } from "@/lib/cn";
+import { UI_ICON_STROKE } from "@/lib/ui-icon";
+import { ArrowUpDown } from "lucide-react";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
 import {
@@ -303,11 +305,11 @@ export const AirportField = forwardRef<AirportFieldHandle, AirportFieldProps>(fu
       style={listStyle}
       className="overflow-auto rounded-jp-md border border-jp-border bg-jp-surface py-1 shadow-jp-md"
     >
-      {loading ? (
+      {loading && results.length === 0 ? (
         <li className="px-3 py-2 text-jp-sm text-jp-muted" role="status" aria-live="polite">
           Searching airports…
         </li>
-      ) : error ? (
+      ) : error && results.length === 0 ? (
         <li className="px-3 py-2 text-jp-sm">
           <p className="text-jp-danger">{error}</p>
           <button type="button" className="mt-1 text-jp-primary underline" onMouseDown={(e) => e.preventDefault()} onClick={retrySearch}>
@@ -420,16 +422,7 @@ export function AirportSwapButton({ onSwap, className }: AirportSwapButtonProps)
       onClick={onSwap}
       className={cn("shrink-0 self-end mb-0.5", className)}
     >
-      <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-        <path
-          d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <ArrowUpDown className="h-4 w-4" strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
     </IconButton>
   );
 }

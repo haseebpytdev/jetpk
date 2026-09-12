@@ -1,5 +1,6 @@
 "use client";
 
+import { UiChevronDownIcon } from "@/components/ui/SharedLucideIcons";
 import { cn } from "@/lib/cn";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
@@ -168,9 +169,7 @@ export function TripTypeDropdown({
         )}
       >
         <span>{TRIP_TYPE_LABELS[tripType]}</span>
-        <svg viewBox="0 0 20 20" className="h-4 w-4 text-jp-muted" aria-hidden="true">
-          <path d="M5 7.5 10 12.5 15 7.5" fill="none" stroke="currentColor" strokeWidth="1.75" />
-        </svg>
+        <UiChevronDownIcon className="h-4 w-4 text-jp-muted" />
       </button>
       {typeof document !== "undefined" ? createPortal(panel, document.body) : null}
     </div>

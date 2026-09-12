@@ -1,0 +1,27 @@
+{
+  "phase": "JP-UI-RESPONSIVE-ICON-MEDIA-CLOSURE-01",
+  "generatedAt": "2026-09-13T04:35:00+05:00",
+  "layoutAuthority": "frontend/features/public-floating/public-floating-layout.ts",
+  "visualViewportSupport": true,
+  "safeAreaBottom": true,
+  "mutualExclusion": {
+    "askOpenHidesDock": true,
+    "dockOpenHidesAskFab": true
+  },
+  "automatedSuite": "frontend/tests/jp-fab-geometry-matrix-01.spec.ts",
+  "regressionLog": "docs/evidence/jp-ui-responsive-icon-media-closure-01/local-regression-run.log",
+  "lastRun": {
+    "closureRegressionTotal": 302,
+    "closureRegressionPass": 302,
+    "closureRegressionFail": 0,
+    "closureRegressionDurationMinutes": 18.2,
+    "geometryMatrixIncluded": true,
+    "fabOverlapCount": 0,
+    "fabViewportClipCount": 0,
+    "fabFooterStuckCount": 0,
+    "stickyCtaCollisionCount": 0,
+    "horizontalOverflowCount": 0,
+    "cutOffInteractiveControls": 0
+  },
+  "rootCauseFixed": "Ask and dock shared bottom offset on lift paths; missing visualViewport tracking; dock lift CSS ignored shared var"
+}

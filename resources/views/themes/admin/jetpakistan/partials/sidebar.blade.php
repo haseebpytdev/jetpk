@@ -67,7 +67,7 @@
                 @endif
                 @if ($navPublicSite && $dashArea === 'admin')
                     <a href="{{ client_route('flights.search') }}" class="jp-navlink @if(request()->routeIs('flights.*')) is-active @endif">
-                        <span class="jp-navlink__ic" aria-hidden="true">✈</span>
+                        <x-jp.icon name="plane" class="jp-navlink__ic" />
                         <span class="jp-navlink__txt">Flight search</span>
                     </a>
                 @endif

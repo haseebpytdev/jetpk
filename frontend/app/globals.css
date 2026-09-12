@@ -47,17 +47,19 @@ body {
   animation: jp-fab-panel-in var(--jp-motion-fast) var(--jp-ease-standard);
 }
 
-/* JP-ASK-AI-FAB-03: coordinated floating control layout (sub-lg only) */
+/* JP-UI-FAB-CLOSURE-01: single geometry authority via --jp-dock-fab-bottom (sub-lg) */
 @media (max-width: 1023px) {
-  .jp-public-fab-dock--base {
+  .jp-public-fab-dock--base,
+  .jp-public-fab-dock--lift {
     bottom: var(--jp-dock-fab-bottom, max(1rem, env(safe-area-inset-bottom)));
   }
 
-  .jp-public-fab-dock--lift {
-    bottom: max(6.75rem, calc(env(safe-area-inset-bottom) + 5.5rem));
+  html[data-jp-ask-open="1"] .jp-public-fab-dock {
+    visibility: hidden;
+    pointer-events: none;
   }
 
-  html[data-jp-ask-open="1"] .jp-public-fab-dock {
+  html[data-jp-dock-open="1"] [data-testid="ask-jetpakistan-fab"] {
     visibility: hidden;
     pointer-events: none;
   }

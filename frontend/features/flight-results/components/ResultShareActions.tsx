@@ -1,5 +1,7 @@
 "use client";
 
+import { UI_ICON_ACTION_CLASS, UI_ICON_STROKE } from "@/lib/ui-icon";
+import { Copy } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { FlightOffer } from "../types";
 import {
@@ -9,15 +11,6 @@ import {
   copyTextToClipboard,
   createFlightShortShareUrl,
 } from "../utils/share-flight";
-
-function CopyIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="1.75" />
-      <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" stroke="currentColor" strokeWidth="1.75" />
-    </svg>
-  );
-}
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -123,7 +116,7 @@ export function ResultShareActions({ offer, searchParams, displayAmount }: Resul
         data-testid="result-copy-share"
         onClick={() => void handleCopy()}
       >
-        <CopyIcon className="h-3.5 w-3.5" />
+        <Copy className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
       </button>
       <a
         href={buildWhatsAppShareUrl(

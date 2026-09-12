@@ -12,6 +12,8 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   timeout: 60_000,
+  globalSetup: "./scripts/playwright-laravel-setup.mjs",
+  globalTeardown: "./scripts/playwright-laravel-teardown.mjs",
   use: {
     baseURL,
     trace: "off",
@@ -19,13 +21,14 @@ export default defineConfig({
   webServer: {
     command: "node scripts/playwright-server.mjs",
     url: baseURL,
-    reuseExistingServer: false,
+    reuseExistingServer: !isCi,
     timeout: 300_000,
     stdout: "pipe",
     stderr: "pipe",
     env: {
       PLAYWRIGHT_PORT: smokePort,
       NODE_ENV: "production",
+      LARAVEL_URL: process.env.LARAVEL_URL ?? "http://127.0.0.1:8000",
       NEXT_PUBLIC_SESSION_PREVIEW: "logged-out",
       OTA_ALLOW_SESSION_FIXTURE: "true",
       OTA_ALLOW_CONTENT_FIXTURE: "true",

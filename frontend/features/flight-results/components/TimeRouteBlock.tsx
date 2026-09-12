@@ -1,4 +1,6 @@
 import { cn } from "@/lib/cn";
+import { UI_ICON_STROKE } from "@/lib/ui-icon";
+import { Plane } from "lucide-react";
 import { compactEndpointDate } from "../utils/endpoint-date";
 import { StopsAndLayover, type LayoverDetail } from "./StopsAndLayover";
 
@@ -102,7 +104,11 @@ export function TimeRouteBlock({
         data-testid="center-route-block"
       >
         <span className="text-[10px] text-jp-text-muted sm:text-xs">{duration ?? ""}</span>
-        <span className="mt-1 flex w-full items-center" aria-hidden="true"><span className="h-px flex-1 bg-jp-border" /><span className="px-1 text-jp-primary">✈</span><span className="h-px flex-1 bg-jp-border" /></span>
+        <span className="mt-1 flex w-full items-center" aria-hidden="true">
+          <span className="h-px flex-1 bg-jp-border" />
+          <Plane className="mx-1 h-3 w-3 shrink-0 text-jp-primary" strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
+          <span className="h-px flex-1 bg-jp-border" />
+        </span>
         {!hideStops ? (
           <StopsAndLayover
             stops={stops}

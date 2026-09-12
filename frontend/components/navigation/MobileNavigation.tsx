@@ -12,7 +12,9 @@ import { cn } from "@/lib/cn";
 import Link from "next/link";
 import type { PublicSession } from "@/types/session";
 import { useCallback, useRef, useState } from "react";
+import { UI_ICON_NAV_CLASS, UI_ICON_STROKE } from "@/lib/ui-icon";
 import type { NavItem } from "@/types/navigation";
+import { Menu, X } from "lucide-react";
 
 type MobileNavigationProps = {
   session: PublicSession;
@@ -44,7 +46,11 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
           aria-controls="mobile-navigation-panel"
           onClick={() => setOpen((value) => !value)}
         >
-          {open ? <CloseIcon /> : <MenuIcon />}
+          {open ? (
+            <X className={UI_ICON_NAV_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
+          ) : (
+            <Menu className={UI_ICON_NAV_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
+          )}
         </IconButton>
       </div>
 
@@ -67,7 +73,7 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
             <div className="flex items-center justify-between border-b border-jp-border px-4 py-4">
               <p className="text-jp-sm font-semibold text-jp-text">Menu</p>
               <IconButton label="Close navigation menu" onClick={closeMenu}>
-                <CloseIcon />
+                <X className={UI_ICON_NAV_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
               </IconButton>
             </div>
 
@@ -139,21 +145,5 @@ function MobileNavItem({
         ))}
       </ul>
     </li>
-  );
-}
-
-function MenuIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-      <path d="M4 7H20M4 12H20M4 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-      <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
   );
 }

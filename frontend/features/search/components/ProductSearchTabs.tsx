@@ -1,6 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/cn";
+import { UI_ICON_COMPACT_CLASS, UI_ICON_STROKE } from "@/lib/ui-icon";
+import { Plane, Users } from "lucide-react";
 import { useCallback } from "react";
 import type { ProductTab } from "../types";
 
@@ -17,53 +19,9 @@ const PRODUCT_LABELS: Record<ProductTab, string> = {
   group: "Groups",
 };
 
-/** Recognizable forward-flying airplane (not an abstract arrow). */
-function FlightsIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M2.5 12.5 21 4l-3.5 16-4.5-4.5L8.5 20l-1-4.5L2.5 12.5Z" />
-      <path d="M21 4 10.5 14.5" />
-    </svg>
-  );
-}
-
-/** Multiple people — unmistakable group/users mark. */
-function GroupsIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="9" cy="7" r="3" />
-      <circle cx="17" cy="8" r="2.5" />
-      <path d="M3.5 19c.5-3 2.8-5 5.5-5s5 2 5.5 5" />
-      <path d="M14 14.2c1.7-.4 3.5.3 4.5 2.3" />
-    </svg>
-  );
-}
-
-const PRODUCT_ICONS: Record<ProductTab, (props: { className?: string }) => React.ReactNode> = {
-  flights: FlightsIcon,
-  group: GroupsIcon,
+const PRODUCT_ICONS: Record<ProductTab, React.ReactNode> = {
+  flights: <Plane className={cn(UI_ICON_COMPACT_CLASS, "opacity-90")} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />,
+  group: <Users className={cn(UI_ICON_COMPACT_CLASS, "opacity-90")} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />,
 };
 
 export function ProductSearchTabs({
@@ -101,7 +59,6 @@ export function ProductSearchTabs({
     >
       {PRODUCT_TABS.map((tab) => {
         const selected = productTab === tab;
-        const Icon = PRODUCT_ICONS[tab];
         return (
           <button
             key={tab}
@@ -122,7 +79,7 @@ export function ProductSearchTabs({
                 : "border-transparent text-jp-text/70 hover:text-jp-text",
             )}
           >
-            <Icon className="opacity-90" />
+            {PRODUCT_ICONS[tab]}
             <span>{PRODUCT_LABELS[tab]}</span>
           </button>
         );

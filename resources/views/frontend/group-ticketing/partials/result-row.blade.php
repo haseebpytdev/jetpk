@@ -28,9 +28,7 @@
                     <span class="ota-group-result-row__route-endpoint">{{ e($originLabel) }}</span>
                 @endif
                 @if ($hasOrigin && $hasDest)
-                    <svg class="ota-group-result-row__route-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
-                        <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-                    </svg>
+                    <x-jp.icon name="plane" class="ota-group-result-row__route-icon" style="width:16px;height:16px" />
                 @endif
                 @if ($hasDest)
                     <span class="ota-group-result-row__route-endpoint">{{ e($destLabel) }}</span>
@@ -49,17 +47,11 @@
             $mealLabel = (string) ($card['meal_label'] ?? 'Meal: Not specified');
         @endphp
         <p class="ota-group-result-row__meal ota-group-result-row__meal--{{ $mealStatus }}" aria-label="{{ e($mealLabel) }}">
-            <svg class="ota-group-result-row__meal-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-                <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>
-            </svg>
+            <x-jp.icon name="utensils" class="ota-group-result-row__meal-icon" style="width:14px;height:14px" />
             @if ($mealStatus === 'included')
-                <svg class="ota-group-result-row__meal-status" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
-                    <path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                </svg>
+                <x-jp.icon name="check" class="ota-group-result-row__meal-status" style="width:12px;height:12px" />
             @elseif ($mealStatus === 'excluded')
-                <svg class="ota-group-result-row__meal-status" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
-                    <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
+                <x-jp.icon name="x" class="ota-group-result-row__meal-status" style="width:12px;height:12px" />
             @endif
             <span class="ota-group-result-row__meal-text">{{ e($mealLabel) }}</span>
         </p>

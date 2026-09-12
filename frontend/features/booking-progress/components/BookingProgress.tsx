@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import { UI_ICON_STROKE } from "@/lib/ui-icon";
+import { Check } from "lucide-react";
 import type { BookingProgressStep } from "../types";
 import { visibleProgressSteps, BOOKING_JOURNEY_STEP_LABELS } from "@/features/booking-layout/constants/journey-steps";
 
@@ -42,9 +44,7 @@ function StepIndicator({
       )}
     >
       {isComplete ? (
-        <svg viewBox="0 0 16 16" className={compact ? "h-3 w-3" : "h-4 w-4"} fill="currentColor" aria-hidden="true">
-          <path d="M6.5 11.5 3.5 8.5l1-1 2 2 5-5 1 1-6 6z" />
-        </svg>
+        <Check className={compact ? "h-3 w-3" : "h-4 w-4"} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
       ) : (
         displayNumber
       )}

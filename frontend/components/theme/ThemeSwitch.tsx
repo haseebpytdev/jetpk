@@ -2,6 +2,8 @@
 
 import { THEME_CYCLE_VALUES, type ThemePreference } from "@/lib/theme/constants";
 import { cn } from "@/lib/cn";
+import { UI_ICON_NAV_CLASS, UI_ICON_STROKE } from "@/lib/ui-icon";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
 const LABELS: Record<"light" | "dark", string> = {
@@ -52,24 +54,11 @@ export function ThemeSwitch({ className, iconOnly = true }: ThemeSwitchProps) {
 function ThemeIcon({ preference }: { preference: ThemePreference }) {
   if (preference === "dark") {
     return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" aria-hidden="true">
-        <path
-          d="M21 14.5A8.5 8.5 0 1 1 9.5 3a6.5 6.5 0 0 0 11.5 11.5Z"
-          fill="currentColor"
-        />
-      </svg>
+      <Moon className={UI_ICON_NAV_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
     );
   }
 
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" aria-hidden="true">
-      <circle cx="12" cy="12" r="4" fill="currentColor" />
-      <path
-        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
+    <Sun className={UI_ICON_NAV_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
   );
 }

@@ -150,10 +150,10 @@ test("branded 404 route", async ({ page }) => {
 test("mobile public navigation includes support links", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "load" });
-  await page.getByRole("button", { name: "Open navigation menu" }).click();
-  const mobileNav = page.getByRole("navigation", { name: "Mobile primary" });
-  await expect(mobileNav.getByRole("link", { name: "Contact Us" })).toHaveAttribute("href", "/contact");
-  await expect(mobileNav.getByRole("link", { name: "FAQs" })).toHaveAttribute("href", "/faq");
+  await page.getByTestId("public-fab-trigger").click();
+  const quickActions = page.getByRole("group", { name: "JetPakistan quick actions" });
+  await expect(quickActions.getByRole("link", { name: "Contact Us" })).toHaveAttribute("href", "/contact");
+  await expect(quickActions.getByRole("link", { name: "FAQs" })).toHaveAttribute("href", "/faq");
 });
 
 test("homepage search regression", async ({ page }) => {

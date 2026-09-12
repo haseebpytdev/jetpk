@@ -78,7 +78,7 @@
             <div class="field jp-airport-field" data-jp-airport-field>
                 <label>From</label>
                 <div class="jp-field-value-row">
-                    <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                    <x-jp.icon name="map-pin" class="icon" />
                     <input type="text" name="multi_from_display[]" class="jp-airport-display" data-jp-airport-display="multi_from" data-jp-airport-input autocomplete="off" placeholder="City or airport" role="combobox" aria-autocomplete="list" aria-expanded="false">
                 </div>
                 <input type="hidden" name="multi_from[]" data-jp-airport-code="multi_from" value="">
@@ -87,7 +87,7 @@
             <div class="field jp-airport-field" data-jp-airport-field>
                 <label>To</label>
                 <div class="jp-field-value-row">
-                    <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                    <x-jp.icon name="map-pin" class="icon" />
                     <input type="text" name="multi_to_display[]" class="jp-airport-display" data-jp-airport-display="multi_to" data-jp-airport-input autocomplete="off" placeholder="City or airport" role="combobox" aria-autocomplete="list" aria-expanded="false">
                 </div>
                 <input type="hidden" name="multi_to[]" data-jp-airport-code="multi_to" value="">
@@ -96,7 +96,7 @@
             <div class="field dep jp-date-field" data-jp-date-field data-jp-date-role="multi_depart" data-jp-date-placeholder="Departure">
                 <label>Depart</label>
                 <div class="jp-field-value-row">
-                    <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2.5"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+                    <x-jp.icon name="calendar" class="icon" />
                     <button type="button" class="jp-date-trigger" data-jp-date-trigger aria-haspopup="dialog" aria-expanded="false">
                         <span class="jp-date-display is-placeholder" data-jp-date-display>Departure</span>
                     </button>

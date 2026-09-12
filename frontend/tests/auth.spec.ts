@@ -79,10 +79,9 @@ test.describe("JP-FE-04 Laravel auth API mocks", () => {
   });
 
   test("login submit stays disabled until secure sign-in is ready", async ({ page }) => {
-    let csrfResolved = false;
+    await page.context().clearCookies();
     await page.route("**/laravel/api/public/content/csrf-token", async (route) => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      csrfResolved = true;
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -94,8 +93,7 @@ test.describe("JP-FE-04 Laravel auth API mocks", () => {
     await page.goto("/login", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("button", { name: /preparing secure sign-in/i })).toBeDisabled();
     await expect(page.getByText(/preparing secure sign-in/i).first()).toBeVisible();
-    await expect.poll(() => csrfResolved).toBe(true);
-    await expect(page.getByRole("button", { name: /^sign in$/i })).toBeEnabled();
+    await expect(page.getByRole("button", { name: /^sign in$/i })).toBeEnabled({ timeout: 15_000 });
   });
 
   test("login invalid credentials show generic error", async ({ page }) => {

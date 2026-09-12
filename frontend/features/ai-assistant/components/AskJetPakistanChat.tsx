@@ -2,7 +2,22 @@
 
 import { usePublicFloatingLayoutOptional } from "@/features/public-floating/PublicFloatingLayoutProvider";
 import { ensureLaravelCsrfToken } from "@/features/public-content/utils/laravel-api";
+import { UI_ICON_ACTION_CLASS, UI_ICON_FAB_CLASS, UI_ICON_STROKE } from "@/lib/ui-icon";
 import { laravelApiPath } from "@/services/flight-search";
+import {
+  ArrowRight,
+  CalendarDays,
+  CreditCard,
+  Headphones,
+  MessageCircle,
+  Minus,
+  MoreHorizontal,
+  Plane,
+  Send,
+  UserRound,
+  UsersRound,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import {
   useCallback,
@@ -62,42 +77,42 @@ const QUICK_ACTIONS: QuickAction[] = [
     title: "Find Flights",
     description: "Search fares to your destination",
     message: "Find flights Lahore to Dubai",
-    icon: <PlaneIcon />,
+    icon: <Plane className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />,
   },
   {
     id: "groups",
     title: "Find Groups",
     description: "Group bookings and special fares",
     message: "Find Groups for Dubai",
-    icon: <GroupIcon />,
+    icon: <UsersRound className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />,
   },
   {
     id: "booking",
     title: "Booking Help",
     description: "Manage or understand a booking",
     message: "How does booking work",
-    icon: <BookingIcon />,
+    icon: <CalendarDays className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />,
   },
   {
     id: "payment",
     title: "Payment Help",
     description: "Payments, refunds and invoices",
     message: "Payment help",
-    icon: <PaymentIcon />,
+    icon: <CreditCard className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />,
   },
   {
     id: "travelers",
     title: "Saved Travelers",
     description: "Manage your traveler profiles",
     message: "Saved Travelers help",
-    icon: <TravelerIcon />,
+    icon: <UserRound className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />,
   },
   {
     id: "support",
     title: "Talk to Support",
     description: "Open the JetPakistan support centre",
     href: "/support",
-    icon: <HeadsetIcon />,
+    icon: <Headphones className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />,
   },
 ];
 
@@ -497,7 +512,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
             onClick={openPanel}
             className={styles.fab}
           >
-            <AssistantFabIcon />
+            <MessageCircle className={UI_ICON_FAB_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
           </button>
         </div>
       ) : null}
@@ -513,7 +528,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
           <header className={styles.header}>
             <div className={styles.identity}>
               <div className={styles.avatar} aria-hidden="true">
-                <PlaneIcon />
+                <Plane className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
               </div>
 
               <div className={styles.identityCopy}>
@@ -535,7 +550,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
                   aria-expanded={menuOpen}
                   onClick={() => setMenuOpen((value) => !value)}
                 >
-                  <MoreIcon />
+                  <MoreHorizontal className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
                 </button>
 
                 {menuOpen ? (
@@ -561,7 +576,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
                 aria-label="Minimize Ask JetPakistan"
                 onClick={close}
               >
-                <MinimizeIcon />
+                <Minus className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
               </button>
 
               <button
@@ -570,7 +585,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
                 aria-label="Close Ask JetPakistan"
                 onClick={close}
               >
-                <CloseIcon />
+                <X className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
               </button>
             </div>
           </header>
@@ -584,10 +599,10 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
               <div className={styles.onboarding}>
                 <div className={styles.assistantRow}>
                   <div className={styles.messageAvatar} aria-hidden="true">
-                    <PlaneIcon />
+                    <Plane className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
                   </div>
                   <div className={`${styles.messageBubble} ${styles.assistantBubble}`}>
-                    <strong>Hi! I&apos;m Ask JetPakistan 👋</strong>
+                    <strong>Hi! I&apos;m Ask JetPakistan</strong>
                     <p>
                       I can help you find flights, check bookings, manage payments,
                       or answer travel questions.
@@ -612,7 +627,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
                         <strong>{action.title}</strong>
                         <small>{action.description}</small>
                       </span>
-                      <ArrowRightIcon />
+                      <ArrowRight className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
                     </button>
                   ))}
                 </div>
@@ -656,7 +671,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
             {busy ? (
               <div className={styles.typingRow} aria-live="polite" aria-label="Ask JetPakistan is thinking">
                 <div className={styles.messageAvatar} aria-hidden="true">
-                  <PlaneIcon />
+                  <Plane className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
                 </div>
                 <div className={styles.typingBubble}>
                   <span />
@@ -696,7 +711,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
                 aria-label="Send message"
                 disabled={busy || input.trim().length === 0}
               >
-                <SendIcon />
+                <Send className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
               </button>
             </form>
 
@@ -728,7 +743,11 @@ function MessageItem({
     >
       {!isUser ? (
         <div className={styles.messageAvatar} aria-hidden="true">
-          {isStaff ? <HeadsetIcon /> : <PlaneIcon />}
+          {isStaff ? (
+            <Headphones className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
+          ) : (
+            <Plane className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
+          )}
         </div>
       ) : null}
 
@@ -813,147 +832,10 @@ function RecommendationCard({
 
       {href ? (
         <Link href={href} className={styles.recommendationCta}>
-          View &amp; Book <ArrowRightIcon />
+          View &amp; Book{" "}
+          <ArrowRight className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
         </Link>
       ) : null}
     </article>
-  );
-}
-
-function IconBase({
-  children,
-  viewBox = "0 0 24 24",
-}: {
-  children: ReactNode;
-  viewBox?: string;
-}) {
-  return (
-    <svg
-      viewBox={viewBox}
-      fill="none"
-      aria-hidden="true"
-      focusable="false"
-    >
-      {children}
-    </svg>
-  );
-}
-
-function AssistantFabIcon() {
-  return (
-    <IconBase>
-      <path
-        d="M5 5.8h14a2 2 0 0 1 2 2v7.4a2 2 0 0 1-2 2h-7.2L7.2 20v-2.8H5a2 2 0 0 1-2-2V7.8a2 2 0 0 1 2-2Z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-      />
-      <path
-        d="m8.1 13.4 7.5-4.5.9.6-2.6 2.1 2.2 1.4-.8.7-3-1-2.4 1.9-.7-.4 1.4-2.3-2.5 1.5Z"
-        fill="currentColor"
-      />
-    </IconBase>
-  );
-}
-
-function PlaneIcon() {
-  return (
-    <IconBase>
-      <path
-        d="m4.2 13.2 6.2-2.3 4.7-6.2c.7-.9 1.9-1.3 3-.8 1 .5 1.3 1.7.7 2.7l-3.9 6.8 3.4 3.3-1.1 1.1-4.4-2-2.3 3.5-1.2-.5.9-4.3-4.9.2-1.1-1.5Z"
-        fill="currentColor"
-      />
-    </IconBase>
-  );
-}
-
-function GroupIcon() {
-  return (
-    <IconBase>
-      <circle cx="9" cy="8" r="3" stroke="currentColor" strokeWidth="1.8" />
-      <circle cx="16.5" cy="9" r="2.3" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M3.8 18c.4-3 2.1-4.6 5.2-4.6s4.8 1.6 5.2 4.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M14.3 14.1c2.8-.5 4.8.8 5.6 3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </IconBase>
-  );
-}
-
-function BookingIcon() {
-  return (
-    <IconBase>
-      <rect x="4" y="5.5" width="16" height="14" rx="2.4" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M8 3.8v3.5M16 3.8v3.5M4 9h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M8 12.5h3M8 15.8h6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-    </IconBase>
-  );
-}
-
-function PaymentIcon() {
-  return (
-    <IconBase>
-      <rect x="3.5" y="5.5" width="17" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M3.8 9.4h16.4M7 14.3h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </IconBase>
-  );
-}
-
-function TravelerIcon() {
-  return (
-    <IconBase>
-      <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M5.5 19c.5-4 2.7-6 6.5-6s6 2 6.5 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </IconBase>
-  );
-}
-
-function HeadsetIcon() {
-  return (
-    <IconBase>
-      <path d="M5 13v-1.4a7 7 0 0 1 14 0V13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M5 13.5A2.5 2.5 0 0 0 7.5 16H8v-5h-.5A2.5 2.5 0 0 0 5 13.5Zm14 0a2.5 2.5 0 0 1-2.5 2.5H16v-5h.5a2.5 2.5 0 0 1 2.5 2.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M15.5 18.2c-.8 1-2 1.6-3.5 1.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </IconBase>
-  );
-}
-
-function ArrowRightIcon() {
-  return (
-    <IconBase>
-      <path d="M7 12h10M13.5 8.5 17 12l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </IconBase>
-  );
-}
-
-function SendIcon() {
-  return (
-    <IconBase>
-      <path d="m4 5 16 7-16 7 2.4-6.1L14 12 6.4 11.1 4 5Z" fill="currentColor" />
-    </IconBase>
-  );
-}
-
-function MoreIcon() {
-  return (
-    <IconBase>
-      <circle cx="6" cy="12" r="1.6" fill="currentColor" />
-      <circle cx="12" cy="12" r="1.6" fill="currentColor" />
-      <circle cx="18" cy="12" r="1.6" fill="currentColor" />
-    </IconBase>
-  );
-}
-
-function MinimizeIcon() {
-  return (
-    <IconBase>
-      <path d="M6 12h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </IconBase>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <IconBase>
-      <path d="m7 7 10 10M17 7 7 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </IconBase>
   );
 }

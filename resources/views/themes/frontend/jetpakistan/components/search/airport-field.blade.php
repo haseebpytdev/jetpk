@@ -13,7 +13,7 @@
 <div class="field jp-airport-field" data-jp-airport-field>
     <label for="{{ $id }}-display">{{ $label }}</label>
     <div class="jp-field-value-row">
-        <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        <x-jp.icon name="map-pin" class="icon" />
         <input
             type="text"
             id="{{ $id }}-display"

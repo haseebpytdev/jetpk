@@ -2,6 +2,7 @@
 
 import {
   applyPublicFloatingLayout,
+  readVisualViewportMetrics,
   type PublicFloatingLayoutState,
 } from "@/features/public-floating/public-floating-layout";
 import { usePathname } from "next/navigation";
@@ -11,6 +12,7 @@ import {
   useContext,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -50,6 +52,7 @@ export function PublicFloatingLayoutProvider({
   const pathname = usePathname() ?? "";
   const [askOpen, setAskOpen] = useState(false);
   const [dockOpen, setDockOpen] = useState(false);
+  const rafRef = useRef<number | null>(null);
 
   const liftCheckout =
     pathname.startsWith("/booking/") || pathname.startsWith("/groups/booking/");
@@ -69,9 +72,40 @@ export function PublicFloatingLayoutProvider({
     [aiEnabled, askOpen, dockOpen, liftCheckout, liftFlightCta],
   );
 
-  useLayoutEffect(() => {
-    applyPublicFloatingLayout(layoutState);
+  const applyLayout = useCallback(() => {
+    applyPublicFloatingLayout(layoutState, readVisualViewportMetrics());
   }, [layoutState]);
+
+  useLayoutEffect(() => {
+    applyLayout();
+
+    const schedule = () => {
+      if (rafRef.current !== null) return;
+      rafRef.current = window.requestAnimationFrame(() => {
+        rafRef.current = null;
+        applyLayout();
+      });
+    };
+
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", schedule);
+    vv?.addEventListener("scroll", schedule);
+    window.addEventListener("resize", schedule);
+    window.addEventListener("orientationchange", schedule);
+    window.addEventListener("scroll", schedule, { passive: true });
+
+    return () => {
+      if (rafRef.current !== null) {
+        window.cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      vv?.removeEventListener("resize", schedule);
+      vv?.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      window.removeEventListener("orientationchange", schedule);
+      window.removeEventListener("scroll", schedule);
+    };
+  }, [applyLayout]);
 
   const setAskOpenStable = useCallback((open: boolean) => {
     setAskOpen(open);

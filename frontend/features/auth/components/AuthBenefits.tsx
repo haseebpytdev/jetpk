@@ -1,4 +1,14 @@
 import type { AuthBenefitItem } from "../config/auth-benefits";
+import { UI_ICON_ACTION_CLASS, UI_ICON_STROKE } from "@/lib/ui-icon";
+import {
+  Calendar,
+  Clock,
+  Shield,
+  Tag,
+  Ticket,
+  Users,
+  Zap,
+} from "lucide-react";
 
 type AuthBenefitsProps = {
   items: AuthBenefitItem[];
@@ -24,54 +34,26 @@ export function AuthBenefits({ items, className = "" }: AuthBenefitsProps) {
 }
 
 function BenefitIcon({ type }: { type: AuthBenefitItem["icon"] }) {
-  const className = "h-5 w-5";
+  const iconProps = {
+    className: UI_ICON_ACTION_CLASS,
+    strokeWidth: UI_ICON_STROKE,
+    "aria-hidden": true as const,
+  };
+
   switch (type) {
     case "ticket":
-      return (
-        <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-          <path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z" fill="none" stroke="currentColor" strokeWidth="1.75" />
-        </svg>
-      );
+      return <Ticket {...iconProps} />;
     case "tag":
-      return (
-        <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-          <path d="M3 12 12 3l9 9-9 9-9-9Z" fill="none" stroke="currentColor" strokeWidth="1.75" />
-          <circle cx="15.5" cy="8.5" r="1.5" fill="currentColor" />
-        </svg>
-      );
+      return <Tag {...iconProps} />;
     case "clock":
-      return (
-        <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.75" />
-          <path d="M12 7v5l3 2" fill="none" stroke="currentColor" strokeWidth="1.75" />
-        </svg>
-      );
+      return <Clock {...iconProps} />;
     case "bolt":
-      return (
-        <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-          <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" fill="currentColor" />
-        </svg>
-      );
+      return <Zap {...iconProps} fill="currentColor" />;
     case "users":
-      return (
-        <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-          <circle cx="9" cy="8" r="3" fill="none" stroke="currentColor" strokeWidth="1.75" />
-          <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" fill="none" stroke="currentColor" strokeWidth="1.75" />
-          <circle cx="17" cy="9" r="2.5" fill="none" stroke="currentColor" strokeWidth="1.75" />
-        </svg>
-      );
+      return <Users {...iconProps} />;
     case "calendar":
-      return (
-        <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-          <rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" strokeWidth="1.75" />
-          <path d="M8 3v4M16 3v4M3 10h18" fill="none" stroke="currentColor" strokeWidth="1.75" />
-        </svg>
-      );
+      return <Calendar {...iconProps} />;
     default:
-      return (
-        <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-          <path d="M12 3 4 6v6c0 4.4 3.4 8.5 8 9 4.6-.5 8-4.6 8-9V6l-8-3Z" fill="none" stroke="currentColor" strokeWidth="1.75" />
-        </svg>
-      );
+      return <Shield {...iconProps} />;
   }
 }

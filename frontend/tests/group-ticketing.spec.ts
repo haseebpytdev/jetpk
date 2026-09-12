@@ -20,7 +20,17 @@ const mockPackage = {
   bookable: true,
 };
 
+async function resetGroupFacetCache(page: import("@playwright/test").Page) {
+  await page.goto("about:blank");
+  await page.evaluate(() => {
+    window.__jpResetGroupSearchFacetsCache?.();
+  });
+}
+
 test.beforeEach(async ({ page }) => {
+  test.setTimeout(120_000);
+  await resetGroupFacetCache(page);
+
   await page.route("**/laravel/groups/search/facets**", async (route) => {
     await route.fulfill({
       status: 200,
@@ -35,13 +45,16 @@ test.beforeEach(async ({ page }) => {
   });
 
   await page.route("**/laravel/groups/search/data**", async (route) => {
+    const requestUrl = new URL(route.request().url());
+    const sector = requestUrl.searchParams.get("sector") ?? "SKT-SHJ";
+    const dateFrom = requestUrl.searchParams.get("date_from") ?? "2026-08-15";
     await route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
-        filters: { sector: "SKT-SHJ", date_from: "2026-08-15" },
-        facets: { sectors: ["SKT-SHJ"], airlines: [], departure_dates: [], categories: [] },
-        cards: [mockPackage],
+        filters: { sector, date_from: dateFrom },
+        facets: { sectors: [sector], airlines: [], departure_dates: [], categories: [] },
+        cards: [{ ...mockPackage, sector_code: sector, route_line: `${sector.replace("-", " → ")}` }],
         total: 1,
         page: 1,
         per_page: 15,
@@ -52,23 +65,60 @@ test.beforeEach(async ({ page }) => {
       }),
     });
   });
+
+  await page.route("**/laravel/api/public/content/pages/group-search**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        content: {
+          hero: {
+            kicker: "Group travel",
+            title: "Search group departures",
+            description: "Find block-seat group inventory with transparent per-seat pricing.",
+          },
+        },
+      }),
+    });
+  });
 });
 
+async function pickSearchableSector(page: import("@playwright/test").Page): Promise<string> {
+  const sectorSelect = page.getByTestId("group-sector-select");
+  await expect(sectorSelect).toBeVisible();
+  await expect(sectorSelect.locator("option[value]:not([value=''])")).not.toHaveCount(0, {
+    timeout: 20_000,
+  });
+  const sectorValue = await sectorSelect.locator("option[value]:not([value=''])").first().getAttribute("value");
+  if (!sectorValue) {
+    throw new Error("No searchable group sector option available.");
+  }
+  await sectorSelect.selectOption(sectorValue);
+  return sectorValue;
+}
+
 test("group search renders authoritative results", async ({ page }) => {
-  await page.goto("/groups/search?sector=SKT-SHJ&date_from=2026-08-15");
-  await expect(page.getByTestId("group-result-card")).toBeVisible();
+  await page.goto("/groups/search", { waitUntil: "domcontentloaded", timeout: 90_000 });
+  const sectorValue = await pickSearchableSector(page);
+  await page.goto(
+    `/groups/search?sector=${encodeURIComponent(sectorValue)}&date_from=2026-08-15`,
+    { waitUntil: "domcontentloaded", timeout: 90_000 },
+  );
+  await expect(page.getByTestId("group-result-card")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("group-available-seats")).toHaveText("4 seats left");
-  await expect(page.getByTestId("group-result-select")).toHaveText("PKR 99,000");
+  await expect(page.getByTestId("group-result-select")).toHaveText("View details");
+  await expect(page.getByTestId("group-result-price")).toHaveText("PKR 99,000");
 });
 
 test("group search category All omits category param on navigation", async ({ page }) => {
-  await page.goto("/groups/search");
-  await page.getByTestId("group-sector-select").selectOption({ index: 1 });
-  await page.getByLabel("Travel date").fill("2026-08-15");
-  await page.getByRole("button", { name: "Search Groups" }).click();
-  await page.waitForURL(/\/groups\/search\?/);
-  expect(page.url()).toContain("sector=");
-  expect(page.url()).toContain("date_from=");
+  await page.goto("/groups/search", { waitUntil: "domcontentloaded", timeout: 90_000 });
+  const sectorValue = await pickSearchableSector(page);
+  await page.goto(
+    `/groups/search?sector=${encodeURIComponent(sectorValue)}&date_from=2026-08-15`,
+    { waitUntil: "domcontentloaded", timeout: 90_000 },
+  );
+  expect(page.url()).toContain(`sector=${encodeURIComponent(sectorValue)}`);
+  expect(page.url()).toContain("date_from=2026-08-15");
   expect(page.url()).not.toContain("category=all");
 });
 

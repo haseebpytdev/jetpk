@@ -1,3 +1,4 @@
+import { UiSelectChevronIcon } from "@/components/ui/SharedLucideIcons";
 import { cn } from "@/lib/cn";
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 
@@ -26,15 +27,7 @@ export function Select({ className, children, ...props }: SelectHTMLAttributes<H
         className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-jp-muted"
         aria-hidden="true"
       >
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-          <path
-            d="M5 7.5L10 12.5L15 7.5"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <UiSelectChevronIcon />
       </span>
     </span>
   );

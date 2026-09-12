@@ -29,7 +29,7 @@
 >
     <label id="{{ $id }}-label">Departure - Return</label>
     <div class="jp-field-value-row">
-        <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2.5"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+        <x-jp.icon name="calendar" class="icon" />
         <button
             type="button"
             class="jp-date-trigger"

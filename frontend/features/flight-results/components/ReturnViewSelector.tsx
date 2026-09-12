@@ -1,5 +1,7 @@
 "use client";
 
+import { UI_ICON_ACTION_CLASS, UI_ICON_STROKE } from "@/lib/ui-icon";
+import { LayoutList, Rows2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 type ReturnViewSelectorProps = {
@@ -42,11 +44,7 @@ export function ReturnViewSelector({ open, onSelect }: ReturnViewSelectorProps) 
             onClick={() => onSelect("pair")}
           >
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-jp-md bg-jp-surface-muted text-jp-primary" aria-hidden="true">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75">
-                <path d="M4 8h16M4 16h16" strokeLinecap="round" />
-                <circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none" />
-                <circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none" />
-              </svg>
+              <Rows2 className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
             </div>
             <p className="text-base font-semibold text-jp-text">Paired view</p>
             <p className="mt-1.5 text-sm text-jp-text-muted">See outbound and return combinations together.</p>
@@ -58,9 +56,7 @@ export function ReturnViewSelector({ open, onSelect }: ReturnViewSelectorProps) 
             onClick={() => onSelect("segmented")}
           >
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-jp-md bg-jp-surface-muted text-jp-primary" aria-hidden="true">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75">
-                <path d="M5 7h14M5 12h10M5 17h14" strokeLinecap="round" />
-              </svg>
+              <LayoutList className={UI_ICON_ACTION_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
             </div>
             <p className="text-base font-semibold text-jp-text">Segmented view</p>
             <p className="mt-1.5 text-sm text-jp-text-muted">Choose your outbound first, then select your return.</p>

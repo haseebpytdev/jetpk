@@ -2,6 +2,8 @@
 
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { Select } from "@/components/ui/FormControls";
+import { UI_ICON_COMPACT_CLASS, UI_ICON_STROKE } from "@/lib/ui-icon";
+import { ArrowLeftRight, Plane } from "lucide-react";
 import { useId } from "react";
 import type { GroupSearchFacetsLoadState, GroupSearchFacetOption } from "@/features/group-ticketing/types";
 import { DateField } from "./DateField";
@@ -111,10 +113,7 @@ export function GroupTicketingForm({
           </label>
           <div className="relative">
             <FieldIcon>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M2.5 12.5 21 4l-3.5 16-4.5-4.5L8.5 20l-1-4.5L2.5 12.5Z" />
-                <path d="M21 4 10.5 14.5" />
-              </svg>
+              <Plane className={UI_ICON_COMPACT_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
             </FieldIcon>
             <Select
               id={`${id}-airline`}
@@ -141,9 +140,7 @@ export function GroupTicketingForm({
           </label>
           <div className="relative">
             <FieldIcon>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                <path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <ArrowLeftRight className={UI_ICON_COMPACT_CLASS} strokeWidth={UI_ICON_STROKE} aria-hidden="true" />
             </FieldIcon>
             <Select
               id={`${id}-sector`}
