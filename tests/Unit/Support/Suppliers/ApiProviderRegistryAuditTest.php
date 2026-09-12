@@ -55,9 +55,9 @@ class ApiProviderRegistryAuditTest extends TestCase
         $this->assertNotNull($authMode);
         $this->assertNotEmpty($authMode['options'] ?? []);
 
-        $manualFields = $fields->filter(fn (array $field): bool => ($field['channel'] ?? null) === 'manual_token')->pluck('key')->all();
-        $this->assertContains('existing_token', $manualFields);
-        $this->assertContains('token_expires_at', $manualFields);
+        $tokenModeFields = $fields->filter(fn (array $field): bool => ($field['channel'] ?? null) === 'token_modes')->pluck('key')->all();
+        $this->assertContains('existing_token', $tokenModeFields);
+        $this->assertContains('token_expires_at', $tokenModeFields);
     }
 
     public function test_pending_providers_remain_catalog_visible_without_live_adapter(): void

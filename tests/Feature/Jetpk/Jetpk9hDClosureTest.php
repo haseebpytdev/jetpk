@@ -109,7 +109,7 @@ class Jetpk9hDClosureTest extends TestCase
         $admin = $this->platformAdmin();
         $this->actingAs($admin)
             ->get(route('admin.api-settings.create'))
-            ->assertRedirect('/admin/dashboard/api-connections');
+            ->assertRedirect('/admin/dashboard/integrations');
 
         $html = $this->adminApiSettingsCreateHtml($admin);
         $this->assertStringContainsString('Sabre', $html);
@@ -126,7 +126,7 @@ class Jetpk9hDClosureTest extends TestCase
         $instance = app(SupplierConnectionController::class);
         $cards = $method->invoke($instance, []);
         $keys = array_column($cards, 'key');
-        foreach (['sabre', 'pia_ndc', 'airblue', 'iati', 'duffel', 'airsial', 'al_haider'] as $required) {
+        foreach (['sabre', 'pia_ndc', 'airblue', 'iati', 'one_api', 'duffel', 'airsial', 'al_haider'] as $required) {
             $this->assertContains($required, $keys);
         }
     }
@@ -180,8 +180,8 @@ class Jetpk9hDClosureTest extends TestCase
     {
         $admin = $this->platformAdmin();
         $routes = [
-            'admin.settings.payments.index' => '/admin/dashboard/settings',
-            'admin.promo-codes.index' => '/admin/dashboard/cms',
+            'admin.settings.payments.index' => '/admin/dashboard/integrations?provider=abhipay',
+            'admin.promo-codes.index' => '/admin/dashboard/settings/promo-codes',
             'admin.markups' => '/admin/dashboard/markups',
             'admin.cms-pages.index' => '/admin/dashboard/cms/pages',
             'admin.users.index' => '/admin/dashboard/users',

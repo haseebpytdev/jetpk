@@ -62,10 +62,10 @@ class ApiConnectionsHubTest extends TestCase
         $this->assertNull($navigation->firstWhere('key', 'api-settings'));
         $this->assertSame(0, $navigation->where('label', 'API Connections')->count());
 
-        $integrations = $navigation->firstWhere('key', 'integrations');
+        $integrations = $navigation->firstWhere('key', 'api-modules');
         $this->assertNotNull($integrations);
         $this->assertSame('/integrations', $integrations['href']);
         $this->assertSame('dashboard', $integrations['target']);
-        $this->assertSame(1, $navigation->where('key', 'integrations')->count());
+        $this->assertSame(1, $navigation->where('key', 'api-modules')->count());
     }
 }
