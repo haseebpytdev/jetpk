@@ -3,6 +3,14 @@
 ## Main Instruction
 Work precisely. Use the smallest safe change. Do not rewrite unrelated code.
 
+## Supplier API canonical mapping
+- **PIA NDC = Hitit / Crane 20.1.**
+- **AirBlue NDC/API = Zapways only.**
+- Never describe Hitit, Crane, Crane 20.1, or Crane NDC as an AirBlue channel.
+- Treat legacy AirBlue `CRANE_NDC` configuration/UI labels as historical misclassification pending a separate audited migration; do not use them as architectural truth.
+- Keep supplier credentials and secrets out of docs, logs, commits, screenshots, and prompts.
+- Read `docs/supplier-api-canonical-mapping.md` before supplier/API work involving PIA, AirBlue, Hitit/Crane, or Zapways.
+
 ## Before Editing
 - **Read and obey `docs/PRODUCTION_DEPLOYMENT_SAFETY.md`** before modifying files
   (no blind namespace, deployment workflow, defensive coding, verification commands).
