@@ -131,7 +131,7 @@ const MODULE_FILTERS = [
 ] as const;
 
 function currentChannel(credentials: Record<string, string>, row?: WorkspaceConnectionRow): string {
-  return credentials.api_channel || row?.advanced?.values?.api_channel || "crane_ndc";
+  return credentials.api_channel || row?.advanced?.values?.api_channel || "zapways_ota";
 }
 
 function isFieldVisible(field: FieldMeta, credentials: Record<string, string>, row?: WorkspaceConnectionRow): boolean {

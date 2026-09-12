@@ -24,9 +24,15 @@ class AirBlueConfigResolver
      */
     public function resolve(SupplierConnection $connection): array
     {
-        return $this->apiChannel($connection) === AirBlueApiChannel::ZapwaysOta
-            ? $this->resolveOta($connection)
-            : $this->resolveNdc($connection);
+        if ($this->apiChannel($connection)->isDeprecated()) {
+            throw new AirBlueValidationException(
+                'deprecated_channel',
+                422,
+                'AirBlue Crane NDC is no longer supported. Use PIA NDC (pia_ndc) for Hitit Crane NDC 20.1 or configure AirBlue Zapways OTA credentials.',
+            );
+        }
+
+        return $this->resolveOta($connection);
     }
 
     /**
@@ -49,6 +55,12 @@ class AirBlueConfigResolver
      */
     public function resolveNdc(SupplierConnection $connection): array
     {
+        throw new AirBlueValidationException(
+            'deprecated_channel',
+            422,
+            'AirBlue Crane NDC is no longer supported. Use PIA NDC (pia_ndc) for Hitit Crane NDC 20.1.',
+        );
+
         $credentials = is_array($connection->credentials) ? $connection->credentials : [];
         $username = trim((string) ($credentials['username'] ?? ''));
         $password = trim((string) ($credentials['password'] ?? ''));
@@ -71,10 +83,6 @@ class AirBlueConfigResolver
                 422,
                 'AirBlue Crane NDC agency ID, agency name, and owner code are required.',
             );
-        }
-
-        if ($endpoint === '') {
-            $endpoint = (string) config('suppliers.airblue.default_ndc_base_url', '');
         }
 
         if ($endpoint === '') {
@@ -169,11 +177,6 @@ class AirBlueConfigResolver
             'carrier_code' => 'PA',
             'currency' => strtoupper(trim((string) ($credentials['currency'] ?? '')) ?: 'PKR'),
         ];
-    }
-
-    public function defaultNdcBaseUrl(): string
-    {
-        return (string) config('suppliers.airblue.default_ndc_base_url', '');
     }
 
     public function defaultOtaBaseUrl(bool $isTest): string

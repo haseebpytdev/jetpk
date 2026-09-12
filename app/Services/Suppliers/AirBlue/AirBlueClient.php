@@ -2,7 +2,6 @@
 
 namespace App\Services\Suppliers\AirBlue;
 
-use App\Enums\AirBlueApiChannel;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueAuthException;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueProviderException;
@@ -15,7 +14,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Central SOAP/XML HTTP client for AirBlue (Crane NDC 20.1 and Zapways OTA v2.06).
+ * Central SOAP/XML HTTP client for AirBlue Zapways OTA v2.06.
  */
 class AirBlueClient
 {
@@ -36,11 +35,9 @@ class AirBlueClient
         string $requestXml,
         array $diagnosticContext = [],
     ): array {
-        $channel = $this->configResolver->apiChannel($connection);
+        $this->configResolver->resolve($connection);
 
-        return $channel === AirBlueApiChannel::ZapwaysOta
-            ? $this->callOta($connection, $operation, $requestXml, $diagnosticContext)
-            : $this->callNdc($connection, $operation, $requestXml, $diagnosticContext);
+        return $this->callOta($connection, $operation, $requestXml, $diagnosticContext);
     }
 
     /**

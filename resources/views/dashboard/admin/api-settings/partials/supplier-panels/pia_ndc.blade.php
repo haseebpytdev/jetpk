@@ -9,8 +9,8 @@
         </div>
         <div class="jp-field jp-field--full">
             <label class="form-label" for="pia-ndc-base-url">SOAP endpoint URL</label>
-            <input id="pia-ndc-base-url" type="url" name="base_url" class="form-control" value="{{ old('base_url', $connection->base_url) }}" required data-pia-ndc-base-url placeholder="https://.../CraneNDCService" @disabled(! $isPiaNdc)>
-            <p class="form-hint">PIA NDC SOAP endpoint from Hitit/PIA credentials pack.</p>
+            <input id="pia-ndc-base-url" type="url" name="base_url" class="form-control" value="{{ old('base_url', $connection->base_url) }}" required data-pia-ndc-base-url placeholder="{{ config('suppliers.pia_ndc.default_ndc_base_url') }}" @disabled(! $isPiaNdc)>
+            <p class="form-hint">PIA Hitit Crane NDC 20.1 SOAP endpoint (WSDL: {{ config('suppliers.pia_ndc.default_ndc_wsdl') }}).</p>
         </div>
     </div>
 </div>

@@ -85,13 +85,9 @@ class SupplierConnectionJsonManagementTest extends TestCase
         $airblue = collect($list->json('providers') ?? $list->json('data.providers'))
             ->firstWhere('key', SupplierProvider::Airblue->value);
         $this->assertIsArray($airblue);
-        $channel = collect($airblue['credentialFields'])->firstWhere('key', 'api_channel');
-        $this->assertSame('select', $channel['type']);
-        $this->assertNotEmpty($channel['options']);
-        $this->assertTrue($channel['required']);
-        $username = collect($airblue['credentialFields'])->firstWhere('key', 'username');
-        $this->assertSame('crane_ndc', $username['channel']);
-        $this->assertArrayNotHasKey('secret', $channel);
+        $this->assertNull(collect($airblue['credentialFields'])->firstWhere('key', 'api_channel'));
+        $clientId = collect($airblue['credentialFields'])->firstWhere('key', 'client_id');
+        $this->assertSame('zapways_ota', $clientId['channel']);
 
         $create = $this->actingAs($admin)->postJson('/admin/api-settings?format=json', [
             'provider' => SupplierProvider::Duffel->value,

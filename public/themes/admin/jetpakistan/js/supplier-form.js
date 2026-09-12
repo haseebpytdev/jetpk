@@ -150,20 +150,12 @@
 
         function syncAirblueBaseUrl() {
             var envSelect = document.querySelector('[data-airblue-environment]');
-            var channelSelect = document.querySelector('[data-airblue-channel]');
             var baseInput = document.querySelector('[data-airblue-base-url]');
-            var wsdlHint = document.querySelector('[data-airblue-wsdl-hint]');
             if (!envSelect || !baseInput) return;
-            var channel = channelSelect ? channelSelect.value : 'crane_ndc';
             var isLive = envSelect.value === 'live';
-            var url = channel === 'zapways_ota'
-                ? (isLive ? boot.airblueOtaLiveUrl : boot.airblueOtaCertUrl)
-                : boot.airblueNdcUrl;
+            var url = isLive ? boot.airblueOtaLiveUrl : boot.airblueOtaCertUrl;
             if (!isEdit || baseInput.value.trim() === '') {
                 baseInput.value = url;
-            }
-            if (wsdlHint) {
-                wsdlHint.classList.toggle('jp-is-hidden', channel !== 'crane_ndc');
             }
         }
 
@@ -176,7 +168,7 @@
                 var meta = fields[key] || {};
                 if (provider === 'airblue' && key === 'api_channel') return;
                 if (provider === 'airblue' && meta.channel) {
-                    var activeChannel = (document.querySelector('[data-airblue-channel]') || {}).value || 'crane_ndc';
+                    var activeChannel = (document.querySelector('[data-airblue-channel]') || {}).value || 'zapways_ota';
                     if (meta.channel !== activeChannel) return;
                 }
                 var state = providerStates[key] || {};

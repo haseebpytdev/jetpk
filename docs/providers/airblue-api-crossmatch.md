@@ -1,5 +1,7 @@
 # AirBlue API crossmatch — Crane NDC vs Zapways OTA
 
+> **DEPRECATED — DO NOT USE AS CURRENT ARCHITECTURE.** Canonical mapping: **PIA NDC = Hitit Crane NDC 20.1** (`pia_ndc`); **AirBlue = Zapways only** (`airblue`). Retained for historical crossmatch evidence only.
+
 **Provider code:** `airblue`  
 **Airline:** AirBlue / PA  
 **Last updated:** 2026-06-23

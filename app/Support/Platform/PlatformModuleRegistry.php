@@ -816,7 +816,7 @@ final class PlatformModuleRegistry
             self::mod(
                 'airblue_supplier',
                 'AirBlue supplier',
-                'AirBlue Crane NDC 20.1 and Zapways OTA v2.06 integration.',
+                'AirBlue Zapways OTA v2.06 integration.',
                 'supplier_sabre',
                 'high',
                 configHints: ['AIRBLUE_TIMEOUT_SECONDS', 'AIRBLUE_OTA_BASE_URL'],

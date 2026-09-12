@@ -59,7 +59,7 @@ final class IntegrationRegistry
             SupplierProvider::Iati->value => ['IATI', 'IA', ['search', 'book'], null, IntegrationCategory::Flights],
             SupplierProvider::PiaNdc->value => ['PIA NDC / Hitit', 'PK', ['search', 'book', 'ndc'], null, IntegrationCategory::Flights],
             SupplierProvider::OneApi->value => ['One API (FlyJinnah / Air Arabia)', '1A', ['search', 'book'], null, IntegrationCategory::Flights],
-            SupplierProvider::Airblue->value => ['Airblue', 'AB', ['search', 'book'], null, IntegrationCategory::Flights],
+            SupplierProvider::Airblue->value => ['AirBlue / Zapways', 'AB', ['search', 'book'], null, IntegrationCategory::Flights],
             SupplierProvider::Duffel->value => ['Duffel', 'DF', ['search', 'book'], 'https://duffel.com/docs', IntegrationCategory::Flights],
             SupplierProvider::AlHaider->value => ['Al-Haider', 'AH', ['groups', 'umrah'], null, IntegrationCategory::Groups],
             SupplierProvider::AirlineDirect->value => ['Airline Direct', 'AD', ['direct'], null, IntegrationCategory::Flights],

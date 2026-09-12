@@ -89,22 +89,21 @@ class StoreSupplierConnectionRequest extends FormRequest
             }
 
             if ($provider === SupplierProvider::Airblue->value) {
-                $channel = strtolower(trim((string) ($credentials['api_channel'] ?? 'crane_ndc')));
-                if ($channel === 'zapways_ota') {
+                $channel = strtolower(trim((string) ($credentials['api_channel'] ?? 'zapways_ota')));
+                if ($channel === 'crane_ndc') {
+                    $validator->errors()->add(
+                        'credentials.api_channel',
+                        'AirBlue Crane NDC is no longer supported. Use PIA NDC (pia_ndc) for Hitit Crane NDC 20.1 or configure Zapways OTA credentials.',
+                    );
+                } else {
                     foreach (['client_id', 'client_key', 'agent_type', 'agent_id', 'agent_password'] as $field) {
                         if (! in_array($field, $keys, true)) {
                             $validator->errors()->add('credentials.'.$field, 'This field is required for AirBlue Zapways OTA.');
                         }
                     }
-                } else {
-                    foreach (['username', 'password', 'agency_id', 'agency_name', 'owner_code'] as $field) {
-                        if (! in_array($field, $keys, true)) {
-                            $validator->errors()->add('credentials.'.$field, 'This field is required for AirBlue Crane NDC.');
-                        }
-                    }
                 }
                 if (trim((string) $this->input('base_url', '')) === '') {
-                    $validator->errors()->add('base_url', 'AirBlue base URL is required.');
+                    $validator->errors()->add('base_url', 'AirBlue Zapways base URL is required.');
                 }
             }
 

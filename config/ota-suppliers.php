@@ -27,15 +27,16 @@ return [
             'notes' => 'PIA Hitit Crane NDC 20.1: air shopping, option PNR, ticket preview, ticketing, cancel, void, reissue.',
         ],
         'airblue' => [
-            'name' => 'AirBlue',
-            'type' => 'Crane NDC 20.1 + Zapways OTA v2.06',
+            'name' => 'AirBlue / Zapways',
+            'type' => 'Zapways API / NDC',
             'status' => 'not_configured',
             'environment' => 'sandbox',
             'required_credentials' => [
-                'API channel (Crane NDC or Zapways OTA)',
-                'Channel-specific credentials and base URL',
+                'Zapways client ID and client key',
+                'Agent type, agent ID, and agent password',
+                'Zapways OTA base URL',
             ],
-            'notes' => 'AirBlue PA: Crane NDC lifecycle or Zapways OTA search/book/ticket/read/cancel per connection channel.',
+            'notes' => 'AirBlue PA via Zapways OTA: search, book, ticket, read, cancel. Hitit Crane NDC belongs to PIA NDC (pia_ndc).',
         ],
         'iati' => [
             'name' => 'IATI',

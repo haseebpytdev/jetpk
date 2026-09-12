@@ -511,13 +511,13 @@ Read-only SSH-safe report aligned with **`sabre:prod-gap-audit`**. No HTTP, DB, 
 
 ## `app/Services/Suppliers/AirBlue/`
 
-Dual-channel AirBlue (PA): **`crane_ndc`** (Hitit Crane NDC 20.1) and **`zapways_ota`** (Zapways OTA v2.06). Connection field **`credentials.api_channel`**. Booking meta **`airblue_context`**.
+AirBlue (PA) is **Zapways OTA only** (`credentials.api_channel=zapways_ota`). Hitit Crane NDC 20.1 belongs to **`pia_ndc`**. Legacy `crane_ndc` AirBlue rows fail closed at runtime. Booking meta **`airblue_context`**.
 
 | File | Role | Key APIs |
 |------|------|----------|
-| `AirBlueClient.php` | Routes NDC vs OTA SOAP calls + `air-blue` log. | `call`, `callNdc`, `callOta` |
-| `AirBlueConfigResolver.php` | Channel-aware endpoint/credentials. | `resolve`, `resolveNdc`, `resolveOta`, `apiChannel` |
-| `AirBlueXmlBuilder.php` / `AirBlueXmlParser.php` / `AirBlueResponseNormalizer.php` | Crane NDC 20.1 stack. | search/book/ticket/cancel normalizers |
+| `AirBlueClient.php` | Zapways OTA SOAP calls + `air-blue` log. | `call`, `callOta` |
+| `AirBlueConfigResolver.php` | Zapways endpoint/credentials; rejects deprecated Crane channel. | `resolve`, `resolveOta`, `apiChannel` |
+| `AirBlueXmlBuilder.php` / `AirBlueXmlParser.php` / `AirBlueResponseNormalizer.php` | Legacy Crane stack (deprecated; use `PiaNdc/*`). | — |
 | `AirBlueOtaXmlBuilder.php` / `AirBlueOtaXmlParser.php` / `AirBlueOtaResponseNormalizer.php` | Zapways OTA stack. | `AirLowFareSearch`, book/retrieve normalizers |
 | `AirBlueFlightSearchService.php` | Channel branch search. | `search` |
 | `AirBlueBookingService.php` | NDC `DoOrderCreate` (+ OTA path when channel=ota). | `createSupplierBooking` |

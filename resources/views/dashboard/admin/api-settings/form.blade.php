@@ -35,7 +35,7 @@
     $iatiEnv = IatiSupplierConnectionNormalizer::normalizeEnvironment(old('environment', $connection->environment?->value ?? 'sandbox'));
     $piaNdcEnv = PiaNdcSupplierConnectionNormalizer::normalizeEnvironment(old('environment', $connection->environment?->value ?? 'sandbox'));
     $airblueEnv = AirBlueSupplierConnectionNormalizer::normalizeEnvironment(old('environment', $connection->environment?->value ?? 'sandbox'));
-    $airblueChannel = old('credentials.api_channel', data_get($connection->credentials, 'api_channel', 'crane_ndc'));
+    $airblueChannel = old('credentials.api_channel', data_get($connection->credentials, 'api_channel', 'zapways_ota'));
     $iatiBaseUrl = IatiSupplierConnectionNormalizer::flightBaseUrlForEnvironment($iatiEnv);
     $sabreBaseUrl = SabreSupplierConnectionNormalizer::baseUrlForEnvironment($sabreEnv);
     $sabreMasked = $sabreMaskedSummary ?? [];
@@ -219,7 +219,6 @@
                 defaultIatiName: @json($defaultIatiConnectionName),
                 defaultPiaNdcName: @json($defaultPiaNdcConnectionName ?? 'PIA NDC / OTA'),
                 defaultAirBlueName: @json($defaultAirBlueConnectionName ?? 'AirBlue / OTA'),
-                airblueNdcUrl: @json(config('suppliers.airblue.default_ndc_base_url')),
                 airblueOtaCertUrl: @json(config('suppliers.airblue.default_ota_qa_base_url')),
                 airblueOtaLiveUrl: @json(config('suppliers.airblue.default_ota_base_url')),
                 sabreCertUrl: @json(SabreSupplierConnectionNormalizer::CERT_BASE_URL),

@@ -174,7 +174,7 @@ final class PlatformModuleGate
             'iati_supplier' => 'Filters IATI search, fare confirmation, booking, and ticketing.',
             'pia_ndc_supplier' => 'Filters PIA NDC search, option PNR, ticketing, cancel, and void.',
             'one_api_supplier' => 'Filters One API (FlyJinnah / Air Arabia) search, price, ancillaries, and booking.',
-            'airblue_supplier' => 'Filters AirBlue Crane NDC and Zapways OTA search, booking, ticketing, and cancel.',
+            'airblue_supplier' => 'Filters AirBlue Zapways OTA search, booking, ticketing, and cancel.',
             default => null,
         };
     }

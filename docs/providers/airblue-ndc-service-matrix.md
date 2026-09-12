@@ -1,5 +1,7 @@
 # AirBlue Crane NDC 20.1 service matrix
 
+> **DEPRECATED — DO NOT USE AS CURRENT ARCHITECTURE.** Hitit Crane NDC 20.1 is owned by **PIA NDC** (`pia_ndc`). See `docs/providers/pia-ndc-20.1.md`. Retained for historical certification evidence.
+
 **Endpoint:** `https://app.crane.aero/cranendc/v20.1/CraneNDCService`  
 **WSDL:** `https://app.crane.aero/cranendc/v20.1/CraneNDCService?wsdl`
 

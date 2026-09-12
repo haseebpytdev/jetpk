@@ -67,6 +67,10 @@ class PiaNdcConfigResolver
         }
 
         if ($endpoint === '') {
+            $endpoint = (string) config('suppliers.pia_ndc.default_ndc_base_url', '');
+        }
+
+        if ($endpoint === '') {
             throw new PiaNdcValidationException(
                 'missing_endpoint',
                 422,

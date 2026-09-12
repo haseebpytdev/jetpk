@@ -419,6 +419,14 @@ return [
         'branded_fares_selection_enabled' => (bool) env('IATI_BRANDED_FARES_SELECTION_ENABLED', true),
     ],
     'pia_ndc' => [
+        'default_ndc_base_url' => env(
+            'PIA_NDC_BASE_URL',
+            env('AIRBLUE_NDC_ENDPOINT', 'https://app.crane.aero/cranendc/v20.1/CraneNDCService')
+        ),
+        'default_ndc_wsdl' => env(
+            'PIA_NDC_WSDL',
+            env('AIRBLUE_NDC_WSDL', 'https://app.crane.aero/cranendc/v20.1/CraneNDCService?wsdl')
+        ),
         'timeout_seconds' => (int) env('PIA_NDC_TIMEOUT_SECONDS', 60),
         'connect_timeout_seconds' => (int) env('PIA_NDC_CONNECT_TIMEOUT_SECONDS', 10),
         'checkout_offer_price_enabled' => (bool) env('PIA_NDC_CHECKOUT_OFFER_PRICE_ENABLED', true),
@@ -448,25 +456,8 @@ return [
         'connect_timeout_seconds' => (int) env('AIRBLUE_CONNECT_TIMEOUT_SECONDS', 10),
         'username_header' => env('AIRBLUE_USERNAME_HEADER', 'username'),
         'password_header' => env('AIRBLUE_PASSWORD_HEADER', 'password'),
-        'default_ndc_base_url' => 'https://app.crane.aero/cranendc/v20.1/CraneNDCService',
-        'default_ndc_wsdl' => 'https://app.crane.aero/cranendc/v20.1/CraneNDCService?wsdl',
         'default_ota_base_url' => env('AIRBLUE_OTA_BASE_URL', 'https://ota3.zapways.com/v2.0/OTAAPI.asmx'),
         'default_ota_qa_base_url' => 'https://ota.qa.zapways.com/v2.0/OTAAPI.asmx',
-        'ndc_operations' => [
-            'air_shopping' => ['soap_action' => 'doAirShopping'],
-            'offer_price' => ['soap_action' => 'doOfferPrice'],
-            'order_create' => ['soap_action' => 'doOrderCreate'],
-            'order_retrieve' => ['soap_action' => 'doOrderRetrieve'],
-            'ticket_preview' => ['soap_action' => 'doTicketPreview'],
-            'order_change' => ['soap_action' => 'doOrderChange'],
-            'cancel_preview' => ['soap_action' => 'doOrderCancelPreview'],
-            'cancel_commit' => ['soap_action' => 'doOrderCancelCommit'],
-            'void_ticket' => ['soap_action' => 'doVoidTicket'],
-            'seat_availability' => ['soap_action' => 'doSeatAvailability'],
-            'baggage_service_list' => ['soap_action' => 'doBaggageServiceList'],
-            'add_ancillary' => ['soap_action' => 'doAddAncillary'],
-            'sell_ancillary' => ['soap_action' => 'doSellAncillary'],
-        ],
         'ota_operations' => [
             'air_low_fare_search' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirLowFareSearch'],
             'air_book' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirBook'],

@@ -135,9 +135,14 @@ class UpdateSupplierConnectionRequest extends StoreSupplierConnectionRequest
                     ? $this->route('supplierConnection')->credentials
                     : [];
                 $channel = strtolower(trim((string) (
-                    SupplierCredentialFormPresenter::effectiveValue('api_channel', $credentials, $existingCredentials) ?: 'crane_ndc'
+                    SupplierCredentialFormPresenter::effectiveValue('api_channel', $credentials, $existingCredentials) ?: 'zapways_ota'
                 )));
-                if ($channel === 'zapways_ota') {
+                if ($channel === 'crane_ndc') {
+                    $validator->errors()->add(
+                        'credentials.api_channel',
+                        'AirBlue Crane NDC is no longer supported. Use PIA NDC (pia_ndc) for Hitit Crane NDC 20.1 or migrate this connection to Zapways OTA.',
+                    );
+                } else {
                     foreach (['client_id', 'client_key', 'agent_type', 'agent_id'] as $field) {
                         if (SupplierCredentialFormPresenter::effectiveValue($field, $credentials, $existingCredentials) === '') {
                             $validator->errors()->add('credentials.'.$field, 'This field is required for AirBlue Zapways OTA.');
@@ -146,18 +151,9 @@ class UpdateSupplierConnectionRequest extends StoreSupplierConnectionRequest
                     if (SupplierCredentialFormPresenter::effectiveValue('agent_password', $credentials, $existingCredentials) === '') {
                         $validator->errors()->add('credentials.agent_password', 'AirBlue agent password is required.');
                     }
-                } else {
-                    foreach (['username', 'agency_id', 'agency_name', 'owner_code'] as $field) {
-                        if (SupplierCredentialFormPresenter::effectiveValue($field, $credentials, $existingCredentials) === '') {
-                            $validator->errors()->add('credentials.'.$field, 'This field is required for AirBlue Crane NDC.');
-                        }
-                    }
-                    if (SupplierCredentialFormPresenter::effectiveValue('password', $credentials, $existingCredentials) === '') {
-                        $validator->errors()->add('credentials.password', 'AirBlue password is required.');
-                    }
                 }
                 if (trim((string) $this->input('base_url', '')) === '' && trim((string) ($this->route('supplierConnection')?->base_url ?? '')) === '') {
-                    $validator->errors()->add('base_url', 'AirBlue base URL is required.');
+                    $validator->errors()->add('base_url', 'AirBlue Zapways base URL is required.');
                 }
 
                 return;

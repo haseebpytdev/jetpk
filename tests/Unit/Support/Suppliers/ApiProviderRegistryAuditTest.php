@@ -36,16 +36,15 @@ class ApiProviderRegistryAuditTest extends TestCase
         $this->assertContains(SupplierProvider::AlHaider->value, $installed);
     }
 
-    public function test_airblue_channel_fields_are_metadata_driven(): void
+    public function test_airblue_credential_fields_are_zapways_only(): void
     {
         $fields = collect(SupplierProviderFieldCatalog::fieldsFor(SupplierProvider::Airblue->value));
-        $channelField = $fields->firstWhere('key', 'api_channel');
-        $this->assertNotNull($channelField);
-        $this->assertNotEmpty($channelField['options'] ?? []);
+        $this->assertNull($fields->firstWhere('key', 'api_channel'));
 
         $channelScoped = $fields->filter(fn (array $field): bool => isset($field['channel']))->pluck('channel')->unique()->values()->all();
-        $this->assertContains('crane_ndc', $channelScoped);
         $this->assertContains('zapways_ota', $channelScoped);
+        $this->assertNotContains('crane_ndc', $channelScoped);
+        $this->assertNotNull($fields->firstWhere('key', 'client_id'));
     }
 
     public function test_al_haider_manual_token_fields_are_metadata_driven(): void
