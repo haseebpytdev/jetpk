@@ -2,7 +2,8 @@
 
 **Phase:** JP-CANONICAL-RECONCILIATION-AND-REPO-HYGIENE-CLOSE  
 **Branch:** `phase/jp-master-unfinished-closure-10`  
-**Status:** PASS (P0), PARTIAL (P2 hygiene — tracked legacy dirs retained with rationale)
+**Status:** PASS (P0), PARTIAL (P2 — docs-only evidence head after deploy)  
+**FINAL_EVIDENCE_HEAD:** `bac3d060c2124ba0e49ec0f825b510e3646ccfc9`
 
 ## Objective
 
