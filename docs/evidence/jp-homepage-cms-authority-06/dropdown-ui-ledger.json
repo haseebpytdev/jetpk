@@ -1,0 +1,136 @@
+{
+  "scan_scope": {
+    "worktree": "tmp/worktrees/jp-homepage-cms-authority-06",
+    "files": [
+      "dashboard/features/cms/components/homepage-settings-panel.tsx",
+      "frontend/features/auth/components/AgentRegistrationForm.tsx",
+      "frontend/features/auth/components/CustomerRegistrationForm.tsx",
+      "frontend/features/flight-results/components/ResultsFilterPanel.tsx",
+      "frontend/features/flight-results/components/MobileFilterDrawer.tsx",
+      "frontend/features/flight-results/components/SortControl.tsx"
+    ],
+    "scanned_at": "2026-09-09"
+  },
+  "summary_counts": {
+    "total_entries": 15,
+    "dropdown_or_select_entries": 7,
+    "native_select": 4,
+    "select_field_wrapper": 3,
+    "modern_custom_controls": 8,
+    "modernized_true": 11,
+    "modernized_false": 4,
+    "by_surface": {
+      "cms_homepage": 5,
+      "agent_registration": 1,
+      "customer_registration": 1,
+      "flight_results_filters": 8
+    }
+  },
+  "entries": [
+    {
+      "surface": "cms_homepage",
+      "control_type": "native_select",
+      "location": "dashboard/features/cms/components/homepage-settings-panel.tsx — hero.focal_point",
+      "modernized": false,
+      "justification": "Inline native <select> for hero image focal point (left/center/right); not routed through local SelectField helper."
+    },
+    {
+      "surface": "cms_homepage",
+      "control_type": "native_select",
+      "location": "dashboard/features/cms/components/homepage-settings-panel.tsx — hero.overlay_strength",
+      "modernized": false,
+      "justification": "Inline native <select> for overlay strength (light/medium/strong); not routed through local SelectField helper."
+    },
+    {
+      "surface": "cms_homepage",
+      "control_type": "SelectField",
+      "location": "dashboard/features/cms/components/homepage-settings-panel.tsx — featured_deals.items[].resolution_mode",
+      "modernized": true,
+      "justification": "Featured deal resolution mode uses local SelectField wrapper (auto cheapest vs exact inventory)."
+    },
+    {
+      "surface": "cms_homepage",
+      "control_type": "SelectField",
+      "location": "dashboard/features/cms/components/homepage-settings-panel.tsx — featured_deals.items[].inventory_public_id",
+      "modernized": true,
+      "justification": "Exact-inventory picker uses SelectField bound to loadFeaturedDealInventory() rows with rich option labels."
+    },
+    {
+      "surface": "cms_homepage",
+      "control_type": "SelectField",
+      "location": "dashboard/features/cms/components/homepage-settings-panel.tsx — featured_deals.items[].auto_filter",
+      "modernized": true,
+      "justification": "Auto-cheapest criteria filter uses SelectField (airline only, destination only, airline+destination, legacy infer)."
+    },
+    {
+      "surface": "agent_registration",
+      "control_type": "native_select",
+      "location": "frontend/features/auth/components/AgentRegistrationForm.tsx — business_type",
+      "modernized": false,
+      "justification": "Inline native <select> with fieldClass tokens. A shared styled Select wrapper exists at frontend/components/ui/FormControls.tsx but is not imported or used in this form."
+    },
+    {
+      "surface": "customer_registration",
+      "control_type": "none",
+      "location": "frontend/features/auth/components/CustomerRegistrationForm.tsx",
+      "modernized": true,
+      "justification": "No select or dropdown controls; registration uses text inputs, PasswordField, and checkbox only."
+    },
+    {
+      "surface": "flight_results_filters",
+      "control_type": "text_input",
+      "location": "frontend/features/flight-results/components/ResultsFilterPanel.tsx — filters.flight_number",
+      "modernized": true,
+      "justification": "Flight-number filter is a search text input, not a native select."
+    },
+    {
+      "surface": "flight_results_filters",
+      "control_type": "checkbox_group",
+      "location": "frontend/features/flight-results/components/ResultsFilterPanel.tsx — FacetChoice (stops, airlines, departure/arrival windows, refundable)",
+      "modernized": true,
+      "justification": "Multi-select facets use styled checkbox FacetChoice rows with counts; no native <select>."
+    },
+    {
+      "surface": "flight_results_filters",
+      "control_type": "dual_range_slider",
+      "location": "frontend/features/flight-results/components/ResultsFilterPanel.tsx — PriceRange",
+      "modernized": true,
+      "justification": "Price filter uses debounced dual-thumb range inputs instead of dropdown buckets."
+    },
+    {
+      "surface": "flight_results_filters",
+      "control_type": "radio_group",
+      "location": "frontend/features/flight-results/components/ResultsFilterPanel.tsx — FacetChoice multiple=false (cabin, baggage, fare_family, duration_bucket, layover_airport)",
+      "modernized": true,
+      "justification": "Single-select facets use radio-style FacetChoice controls, not native <select>."
+    },
+    {
+      "surface": "flight_results_filters",
+      "control_type": "checkbox",
+      "location": "frontend/features/flight-results/components/ResultsFilterPanel.tsx — filters.bookable_only",
+      "modernized": true,
+      "justification": "Bookable-only toggle is a single checkbox."
+    },
+    {
+      "surface": "flight_results_filters",
+      "control_type": "drawer_shell",
+      "location": "frontend/features/flight-results/components/MobileFilterDrawer.tsx",
+      "modernized": true,
+      "justification": "Mobile filter surface reuses ResultsFilterPanel inside Drawer; no additional native selects."
+    },
+    {
+      "surface": "flight_results_filters",
+      "control_type": "native_select",
+      "location": "frontend/features/flight-results/components/SortControl.tsx — sort",
+      "modernized": false,
+      "justification": "Results toolbar sort uses inline native <select>. ResultsSortTabs (button tablist) exists as a modern alternative but is not wired into ResultsToolbar."
+    },
+    {
+      "surface": "flight_results_filters",
+      "control_type": "tab_group",
+      "location": "frontend/features/flight-results/components/ResultsSortTabs.tsx — sort (unused in toolbar)",
+      "modernized": true,
+      "justification": "Modern sort tablist component available for desktop; currently unused — production toolbar still mounts SortControl native select."
+    }
+  ]
+}

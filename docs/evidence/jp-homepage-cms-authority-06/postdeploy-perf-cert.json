@@ -1,0 +1,370 @@
+{
+  "captured_at": "2026-09-09T21:09:16.920Z",
+  "public_build_id": "vkC0lfkEH9Gfj7CHfwcuO",
+  "return_paired": {
+    "n": 30,
+    "samples": [
+      {
+        "sample_id": "return-00",
+        "wall_ms": 91602,
+        "supplier_wait_ms": 500,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-01",
+        "wall_ms": 91171,
+        "supplier_wait_ms": 565,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-02",
+        "wall_ms": 91233,
+        "supplier_wait_ms": 1643,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-03",
+        "wall_ms": 91147,
+        "supplier_wait_ms": 522,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-04",
+        "wall_ms": 91250,
+        "supplier_wait_ms": 764,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-05",
+        "wall_ms": 91209,
+        "supplier_wait_ms": 1058,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-06",
+        "wall_ms": 91160,
+        "supplier_wait_ms": 1684,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-07",
+        "wall_ms": 91676,
+        "supplier_wait_ms": 683,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-08",
+        "wall_ms": 91059,
+        "supplier_wait_ms": 861,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-09",
+        "wall_ms": 91222,
+        "supplier_wait_ms": 800,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-10",
+        "wall_ms": 91103,
+        "supplier_wait_ms": 550,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-11",
+        "wall_ms": 91143,
+        "supplier_wait_ms": 937,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-12",
+        "wall_ms": 92223,
+        "supplier_wait_ms": 570,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-13",
+        "wall_ms": 91186,
+        "supplier_wait_ms": 1134,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-14",
+        "wall_ms": 91252,
+        "supplier_wait_ms": 836,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-15",
+        "wall_ms": 91179,
+        "supplier_wait_ms": 701,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-16",
+        "wall_ms": 91154,
+        "supplier_wait_ms": 697,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-17",
+        "wall_ms": 91149,
+        "supplier_wait_ms": 832,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-18",
+        "wall_ms": 91272,
+        "supplier_wait_ms": 726,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-19",
+        "wall_ms": 92120,
+        "supplier_wait_ms": 910,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-20",
+        "wall_ms": 91141,
+        "supplier_wait_ms": 1204,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-21",
+        "wall_ms": 91363,
+        "supplier_wait_ms": 622,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-22",
+        "wall_ms": 91161,
+        "supplier_wait_ms": 935,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-23",
+        "wall_ms": 91122,
+        "supplier_wait_ms": 989,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-24",
+        "wall_ms": 91257,
+        "supplier_wait_ms": 848,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-25",
+        "wall_ms": 91087,
+        "supplier_wait_ms": 932,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-26",
+        "wall_ms": 91223,
+        "supplier_wait_ms": 934,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-27",
+        "wall_ms": 91153,
+        "supplier_wait_ms": 782,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-28",
+        "wall_ms": 91221,
+        "supplier_wait_ms": 794,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      },
+      {
+        "sample_id": "return-29",
+        "wall_ms": 91229,
+        "supplier_wait_ms": 748,
+        "post_supplier_to_usable_ms": null,
+        "duplicate_search": 0,
+        "valid": true
+      }
+    ],
+    "p50_ms": 91186,
+    "p95_ms": 92120,
+    "post_supplier_p95_ms": null
+  },
+  "soft_nav": {
+    "n": 20,
+    "samples": [
+      {
+        "route": "home_support",
+        "attempt": 0,
+        "app_ms": 2871
+      },
+      {
+        "route": "support_home",
+        "attempt": 1,
+        "app_ms": 1854
+      },
+      {
+        "route": "home_login",
+        "attempt": 2,
+        "app_ms": 3545
+      },
+      {
+        "route": "login_register",
+        "attempt": 3,
+        "app_ms": 2322
+      },
+      {
+        "route": "home_groups",
+        "attempt": 4,
+        "app_ms": 3511
+      },
+      {
+        "route": "home_support",
+        "attempt": 5,
+        "app_ms": 4340
+      },
+      {
+        "route": "support_home",
+        "attempt": 6,
+        "app_ms": 1680
+      },
+      {
+        "route": "home_login",
+        "attempt": 7,
+        "app_ms": 3526
+      },
+      {
+        "route": "login_register",
+        "attempt": 8,
+        "app_ms": 2595
+      },
+      {
+        "route": "home_groups",
+        "attempt": 9,
+        "app_ms": 2942
+      },
+      {
+        "route": "home_support",
+        "attempt": 10,
+        "app_ms": 4348
+      },
+      {
+        "route": "support_home",
+        "attempt": 11,
+        "app_ms": 2549
+      },
+      {
+        "route": "home_login",
+        "attempt": 12,
+        "app_ms": 3084
+      },
+      {
+        "route": "login_register",
+        "attempt": 13,
+        "app_ms": 2083
+      },
+      {
+        "route": "home_groups",
+        "attempt": 14,
+        "app_ms": 2867
+      },
+      {
+        "route": "home_support",
+        "attempt": 15,
+        "app_ms": 2798
+      },
+      {
+        "route": "support_home",
+        "attempt": 16,
+        "app_ms": 1898
+      },
+      {
+        "route": "home_login",
+        "attempt": 17,
+        "app_ms": 3422
+      },
+      {
+        "route": "login_register",
+        "attempt": 18,
+        "app_ms": 2588
+      },
+      {
+        "route": "home_groups",
+        "attempt": 19,
+        "app_ms": 3246
+      }
+    ],
+    "worst_app_p95_ms": 4340
+  },
+  "gates": {
+    "RETURN_PAIRED": {
+      "pass": false,
+      "post_supplier_p95_ms": null,
+      "duplicates": 0
+    },
+    "SOFT_NAV": {
+      "pass": false,
+      "worst_app_p95_ms": 4340
+    }
+  },
+  "result": "PARTIAL"
+}

@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CmsMediaPickerDialog } from "@/features/cms/components/cms-media-picker-dialog";
+import { CmsActionNotice } from "@/features/cms/components/cms-action-notice";
 import {
   attachPageSettingsAsset,
   beginPageSettingsPreview,
+  loadFeaturedDealInventory,
   loadPageSettings,
   publishPageSettings,
   refreshHomepageRouteFares,
@@ -53,6 +55,9 @@ type DestinationItem = {
 
 type DealItem = {
   id?: string;
+  resolution_mode?: "exact_inventory" | "auto_cheapest_by_criteria" | string;
+  inventory_public_id?: string;
+  auto_filter?: "airline_only" | "destination_only" | "airline_destination" | string;
   airline?: string;
   from?: string;
   to?: string;
@@ -63,6 +68,35 @@ type DealItem = {
   enabled?: string | boolean;
   image_asset_key?: string;
   image_alt?: string;
+};
+
+type InventoryPickerRow = {
+  public_id: string;
+  airline: string;
+  origin: string;
+  destination: string;
+  departure_date: string;
+  available_seats: number;
+  current_price: number;
+  price_label?: string;
+  status: string;
+};
+
+type ResolvedFeaturedDeal = {
+  cms_slot_id?: string;
+  inventory_id?: number;
+  public_id?: string;
+  airline?: string;
+  from?: string;
+  to?: string;
+  price_label?: string;
+  href?: string;
+  resolution_rule?: string;
+  resolution_mode?: string;
+  match_reason?: string;
+  fallback_used?: boolean | string;
+  available_seats?: number;
+  availability?: string;
 };
 
 type SectionMeta = {
@@ -100,19 +134,6 @@ type HomepageContent = {
   feature_board?: SectionMeta & { items?: FeatureBoardItem[] };
   support_cta?: SupportCta;
   [key: string]: unknown;
-};
-
-type ResolvedFeaturedDeal = {
-  cms_slot_id?: string;
-  inventory_id?: number;
-  public_id?: string;
-  airline?: string;
-  from?: string;
-  to?: string;
-  price_label?: string;
-  href?: string;
-  resolution_rule?: string;
-  availability?: string;
 };
 
 type AssetMap = Record<string, { id?: number; url?: string; alt?: string }>;
@@ -268,6 +289,38 @@ function Field({
   );
 }
 
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: Array<{ value: string; label: string }>;
+  disabled?: boolean;
+}) {
+  return (
+    <label className="block text-xs">
+      {label}
+      <select
+        className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1.5 text-sm disabled:opacity-60"
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        {options.map((option) => (
+          <option key={option.value || "__empty"} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function EnabledToggle({ checked, onChange, id, label = "Enabled" }: { checked: boolean; onChange: (v: boolean) => void; id?: string; label?: string }) {
   return (
     <label className="flex items-center justify-between gap-3 text-xs" htmlFor={id}>
@@ -391,6 +444,8 @@ export function HomepageSettingsPanel() {
   const [previewReady, setPreviewReady] = useState(false);
   const [previewNonce, setPreviewNonce] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [inventoryRows, setInventoryRows] = useState<InventoryPickerRow[]>([]);
+  const [inventoryLoading, setInventoryLoading] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const activeHash = useMemo(
@@ -440,6 +495,17 @@ export function HomepageSettingsPanel() {
     void reloadHome();
   }, []);
 
+  useEffect(() => {
+    if (activeSection !== "featured_deals") return;
+    setInventoryLoading(true);
+    void loadFeaturedDealInventory().then((result) => {
+      setInventoryLoading(false);
+      if (!result.ok) return;
+      const payload = ("data" in result ? result.data : result) as { items?: InventoryPickerRow[] };
+      setInventoryRows(Array.isArray(payload.items) ? payload.items : []);
+    });
+  }, [activeSection]);
+
   const hero = content.hero ?? {};
   const routes = content.routes?.items ?? [];
   const destinations = content.destinations?.items ?? [];
@@ -473,10 +539,10 @@ export function HomepageSettingsPanel() {
         setBusy(false);
         return;
       }
-      setSuccess("Homepage published. Public production content updated.");
+      setSuccess("Homepage published successfully. Live production content has been updated.");
       setPreviewNonce((n) => n + 1);
     } else {
-      setSuccess("Homepage draft saved. Public production content unchanged until Publish.");
+      setSuccess("Homepage draft saved. Public production content is unchanged until you publish.");
     }
     setBusy(false);
     await reloadHome();
@@ -485,6 +551,7 @@ export function HomepageSettingsPanel() {
   async function previewDraft() {
     setBusy(true);
     setError(null);
+    setSuccess(null);
     const saved = await savePageSettings("home", content);
     if (!saved.ok) {
       setError(saved.message ?? "Save failed before preview");
@@ -1155,44 +1222,111 @@ export function HomepageSettingsPanel() {
             }
           />
           <p className="text-[11px] text-jp-muted">
-            Target origin/destination and optional preferred airline. Commercial fare, inventory, and detail URL resolve from live group inventory on save and publish.
+            Choose exact inventory or auto-cheapest criteria. Commercial price, inventory, and detail URL always resolve from live group inventory on save and publish.
           </p>
+          {inventoryLoading ? <p className="text-[11px] text-jp-muted">Loading eligible inventory…</p> : null}
           {deals.map((raw, index) => {
             const item = ensureDealId(raw);
             const assetKey = item.image_asset_key || featuredDealAssetKey(item.id!);
             const asset = assets[assetKey];
             const hasCms = Boolean(asset?.url || item.image_asset_key);
             const resolved = resolvedFeaturedDeals.find((row) => row.cms_slot_id === item.id);
+            const resolutionMode = item.resolution_mode === "exact_inventory" ? "exact_inventory" : "auto_cheapest_by_criteria";
+            const autoFilter = item.auto_filter ?? "";
             return (
               <div key={item.id ?? index} className="rounded-lg border border-jp-border p-3">
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <Field
-                    label="Preferred airline (optional)"
-                    value={item.airline ?? ""}
+                  <SelectField
+                    label="Resolution mode"
+                    value={resolutionMode}
                     onChange={(v) => {
                       const items = [...deals];
-                      items[index] = { ...item, airline: v };
+                      items[index] = {
+                        ...item,
+                        resolution_mode: v,
+                        inventory_public_id: v === "exact_inventory" ? item.inventory_public_id ?? "" : "",
+                      };
                       patchDeals(items);
                     }}
+                    options={[
+                      { value: "auto_cheapest_by_criteria", label: "Auto cheapest by criteria" },
+                      { value: "exact_inventory", label: "Exact inventory (public ID)" },
+                    ]}
                   />
-                  <Field
-                    label="Origin"
-                    value={item.from ?? ""}
-                    onChange={(v) => {
-                      const items = [...deals];
-                      items[index] = { ...item, from: v.toUpperCase() };
-                      patchDeals(items);
-                    }}
-                  />
-                  <Field
-                    label="Destination"
-                    value={item.to ?? ""}
-                    onChange={(v) => {
-                      const items = [...deals];
-                      items[index] = { ...item, to: v.toUpperCase() };
-                      patchDeals(items);
-                    }}
-                  />
+                  {resolutionMode === "exact_inventory" ? (
+                    <SelectField
+                      label="Inventory"
+                      value={item.inventory_public_id ?? ""}
+                      disabled={inventoryLoading}
+                      onChange={(v) => {
+                        const items = [...deals];
+                        const row = inventoryRows.find((candidate) => candidate.public_id === v);
+                        items[index] = {
+                          ...item,
+                          inventory_public_id: v,
+                          airline: row?.airline ?? item.airline,
+                          from: row?.origin ?? item.from,
+                          to: row?.destination ?? item.to,
+                        };
+                        patchDeals(items);
+                      }}
+                      options={[
+                        {
+                          value: "",
+                          label: inventoryLoading ? "Loading eligible inventory…" : "Select eligible inventory",
+                        },
+                        ...inventoryRows.map((row) => ({
+                          value: row.public_id,
+                          label: `${row.public_id} · ${row.airline} · ${row.origin}→${row.destination} · ${row.price_label ?? row.current_price} · ${row.available_seats} seats · ${row.status}`,
+                        })),
+                      ]}
+                    />
+                  ) : (
+                    <>
+                      <SelectField
+                        label="Auto filter"
+                        value={autoFilter}
+                        onChange={(v) => {
+                          const items = [...deals];
+                          items[index] = { ...item, auto_filter: v };
+                          patchDeals(items);
+                        }}
+                        options={[
+                          { value: "", label: "Infer from fields (legacy compatible)" },
+                          { value: "airline_only", label: "Airline only" },
+                          { value: "destination_only", label: "Destination only" },
+                          { value: "airline_destination", label: "Airline + destination" },
+                        ]}
+                      />
+                      <Field
+                        label="Preferred airline (optional)"
+                        value={item.airline ?? ""}
+                        onChange={(v) => {
+                          const items = [...deals];
+                          items[index] = { ...item, airline: v };
+                          patchDeals(items);
+                        }}
+                      />
+                      <Field
+                        label="Origin (optional)"
+                        value={item.from ?? ""}
+                        onChange={(v) => {
+                          const items = [...deals];
+                          items[index] = { ...item, from: v.toUpperCase() };
+                          patchDeals(items);
+                        }}
+                      />
+                      <Field
+                        label="Destination (optional)"
+                        value={item.to ?? ""}
+                        onChange={(v) => {
+                          const items = [...deals];
+                          items[index] = { ...item, to: v.toUpperCase() };
+                          patchDeals(items);
+                        }}
+                      />
+                    </>
+                  )}
                   <Field
                     label="Title"
                     value={item.title ?? ""}
@@ -1246,10 +1380,14 @@ export function HomepageSettingsPanel() {
                   <p className="font-medium text-jp-text">Resolved commercial preview (read-only)</p>
                   {resolved ? (
                     <dl className="mt-2 grid gap-1 text-jp-muted">
-                      <div>Inventory: {resolved.public_id ?? resolved.inventory_id ?? "—"}</div>
+                      <div>Resolution mode: {resolved.resolution_mode ?? resolved.resolution_rule ?? "—"}</div>
+                      <div>Match reason: {resolved.match_reason ?? "—"}</div>
+                      <div>Fallback used: {resolved.fallback_used === true || resolved.fallback_used === "1" ? "Yes" : "No"}</div>
+                      <div>Resolved public ID: {resolved.public_id ?? resolved.inventory_id ?? "—"}</div>
                       <div>Sector: {resolved.from ?? "—"} → {resolved.to ?? "—"}</div>
                       <div>Airline: {resolved.airline ?? "—"}</div>
-                      <div>Price: {resolved.price_label ?? "—"}</div>
+                      <div>Current price: {resolved.price_label ?? "—"}</div>
+                      <div>Available seats: {resolved.available_seats ?? "—"}</div>
                       <div>Detail URL: {resolved.href ?? "—"}</div>
                       <div>Rule: {resolved.resolution_rule ?? "—"}</div>
                     </dl>
@@ -1319,7 +1457,7 @@ export function HomepageSettingsPanel() {
             onClick={() =>
               patchDeals([
                 ...deals,
-                { id: newId("deal"), airline: "", from: "", to: "", title: "", enabled: "1" },
+                { id: newId("deal"), resolution_mode: "auto_cheapest_by_criteria", airline: "", from: "", to: "", title: "", enabled: "1" },
               ])
             }
           >
@@ -1540,8 +1678,14 @@ export function HomepageSettingsPanel() {
           {formSource ? ` (${formSource.replaceAll("_", " ")})` : ""}.
         </p>
       </div>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      {success ? <p className="text-sm text-emerald-700">{success}</p> : null}
+      {error ? <CmsActionNotice tone="error" message={error} /> : null}
+      {success ? (
+        <CmsActionNotice
+          tone="success"
+          message={success}
+          testId={success.toLowerCase().includes("published") ? "cms-publish-success" : "cms-action-success"}
+        />
+      ) : null}
 
       {/* Mobile workspace tabs */}
       <div className="flex gap-2 lg:hidden">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CmsActionNotice } from "@/features/cms/components/cms-action-notice";
 import { useRouter } from "next/navigation";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { loadOrganizationProfile, updateOrganizationBrandingMedia, updateOrganizationProfile } from "@/services/operational-api";
@@ -35,6 +36,9 @@ export function OrganizationProfileForm() {
   const [form, setForm] = useState<OrgForm>(empty);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
+  const [headerLogoHeight, setHeaderLogoHeight] = useState(36);
+  const [headerLogoHeightMin, setHeaderLogoHeightMin] = useState(24);
+  const [headerLogoHeightMax, setHeaderLogoHeightMax] = useState(72);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [faviconFile, setFaviconFile] = useState<File | null>(null);
   const [mediaError, setMediaError] = useState<string | null>(null);
@@ -70,6 +74,9 @@ export function OrganizationProfileForm() {
       });
       setLogoUrl(typeof org.logo_url === "string" ? org.logo_url : null);
       setFaviconUrl(typeof org.favicon_url === "string" ? org.favicon_url : null);
+      setHeaderLogoHeight(Number(org.header_logo_height ?? org.header_logo_height_default ?? 36));
+      setHeaderLogoHeightMin(Number(org.header_logo_height_min ?? 24));
+      setHeaderLogoHeightMax(Number(org.header_logo_height_max ?? 72));
     });
   }, [isLive]);
 
@@ -94,8 +101,9 @@ export function OrganizationProfileForm() {
         Company identity is separate from the signed-in Admin profile. Logo and favicon use the existing branding media store.
       </p>
       {loading ? <p className="text-sm text-jp-muted">Loading organization…</p> : null}
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      {success ? <p className="text-sm text-emerald-700">{success}</p> : null}
+      {error ? <CmsActionNotice tone="error" message={error} testId="company-profile-error" /> : null}
+      {success ? <CmsActionNotice tone="success" message={success} testId="company-profile-success" /> : null}
+      {mediaError ? <CmsActionNotice tone="error" message={mediaError} testId="company-branding-error" /> : null}
       {logoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={logoUrl} alt="Organization logo" className="h-12 w-auto" />
@@ -106,6 +114,19 @@ export function OrganizationProfileForm() {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={faviconUrl} alt="Favicon" className="h-8 w-8" />
       ) : null}
+      <label className="block text-xs font-medium text-jp-muted">
+        Public header logo height ({headerLogoHeight}px)
+        <input
+          type="range"
+          min={headerLogoHeightMin}
+          max={headerLogoHeightMax}
+          value={headerLogoHeight}
+          disabled={!isLive}
+          onChange={(e) => setHeaderLogoHeight(Number(e.target.value))}
+          className="mt-2 block w-full"
+          data-testid="company-header-logo-height"
+        />
+      </label>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block text-xs font-medium text-jp-muted">
           Replace company logo
@@ -130,7 +151,6 @@ export function OrganizationProfileForm() {
           />
         </label>
       </div>
-      {mediaError ? <p className="text-sm text-red-600">{mediaError}</p> : null}
       <button
         type="button"
         className="min-h-11 rounded-xl border border-jp-border px-4 text-sm disabled:opacity-60"
@@ -151,6 +171,7 @@ export function OrganizationProfileForm() {
           const formData = new FormData();
           if (logoFile) formData.append("logo", logoFile);
           if (faviconFile) formData.append("favicon", faviconFile);
+          formData.append("header_logo_height", String(headerLogoHeight));
           const result = await updateOrganizationBrandingMedia(formData);
           setMediaBusy(false);
           if (!result.ok) {
@@ -200,7 +221,10 @@ export function OrganizationProfileForm() {
           setSaving(true);
           setError(null);
           setSuccess(null);
-          const result = await updateOrganizationProfile(form);
+          const result = await updateOrganizationProfile({
+            ...form,
+            header_logo_height: headerLogoHeight,
+          });
           setSaving(false);
           if (!result.ok) {
             setError(result.message ?? "Save failed");

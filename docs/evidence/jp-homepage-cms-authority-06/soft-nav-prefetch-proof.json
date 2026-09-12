@@ -1,0 +1,697 @@
+{
+  "captured_at": "2026-09-10T19:32:07.985Z",
+  "base": "https://jetpakistan.pk",
+  "early_click_no_prefetch_wait": [
+    {
+      "sample": 0,
+      "wait_prefetch_ms": 0,
+      "PREFETCH_TRIGGERED": false,
+      "PREFETCH_RSC_COUNT_BEFORE_CLICK": 0,
+      "PREFETCH_COMPLETED_BEFORE_CLICK": false,
+      "CLICK_REUSED_PREFETCH": false,
+      "SECOND_RSC_AFTER_CLICK": 5,
+      "RSC_CACHE_STATUS": "STALE",
+      "CLICK_TO_USABLE_MS": 26118,
+      "ROUTER_WAIT_MS": 16290,
+      "events": [
+        {
+          "t": 1789068679032,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/about-us?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068692770,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/register?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "STALE",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068693235,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/login?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "STALE",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068693262,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/_next/static/chunks/app/(auth)/login/page-8eadc181fdb4a350.js"
+        },
+        {
+          "t": 1789068693262,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/contact?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068693433,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/faq?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068693442,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/groups?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "no-cache, private",
+          "age": null,
+          "vary": "Accept-Encoding",
+          "nextCache": null,
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068693443,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&_rsc=1p-R_iEY6bj0jY31",
+          "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": null,
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068693456,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/support?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068693467,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/privacy?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068702388,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/about-us?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "STALE",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068702422,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/terms?_rsc=ZmCQ44b92m4mXe_R"
+        }
+      ]
+    },
+    {
+      "sample": 1,
+      "wait_prefetch_ms": 0,
+      "PREFETCH_TRIGGERED": false,
+      "PREFETCH_RSC_COUNT_BEFORE_CLICK": 0,
+      "PREFETCH_COMPLETED_BEFORE_CLICK": false,
+      "CLICK_REUSED_PREFETCH": false,
+      "SECOND_RSC_AFTER_CLICK": 4,
+      "RSC_CACHE_STATUS": "HIT",
+      "CLICK_TO_USABLE_MS": 2064,
+      "ROUTER_WAIT_MS": 1955,
+      "events": [
+        {
+          "t": 1789068705701,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/login?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "HIT",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068705718,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/_next/static/chunks/app/(auth)/login/page-8eadc181fdb4a350.js"
+        },
+        {
+          "t": 1789068705896,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/register?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "HIT",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068706010,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/flights/results?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": null,
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068706164,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/groups?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "no-cache, private",
+          "age": null,
+          "vary": "Accept-Encoding",
+          "nextCache": null,
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068706414,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/_next/static/chunks/app/(auth)/login/page-8eadc181fdb4a350.js",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "age": null,
+          "vary": "Accept-Encoding",
+          "nextCache": null,
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068706599,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/agent/register?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068706601,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/lookup-booking?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068706601,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/about-us?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068706601,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/sitemap?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068706602,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/support?_rsc=nmyFLQq3sV5huFjw"
+        }
+      ]
+    },
+    {
+      "sample": 2,
+      "wait_prefetch_ms": 0,
+      "PREFETCH_TRIGGERED": false,
+      "PREFETCH_RSC_COUNT_BEFORE_CLICK": 0,
+      "PREFETCH_COMPLETED_BEFORE_CLICK": false,
+      "CLICK_REUSED_PREFETCH": false,
+      "SECOND_RSC_AFTER_CLICK": 4,
+      "RSC_CACHE_STATUS": "HIT",
+      "CLICK_TO_USABLE_MS": 1385,
+      "ROUTER_WAIT_MS": 1365,
+      "events": [
+        {
+          "t": 1789068708074,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/register?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "HIT",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068708079,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/_next/static/chunks/app/(auth)/login/page-8eadc181fdb4a350.js"
+        },
+        {
+          "t": 1789068708082,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/login?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068708082,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/_next/static/chunks/app/(auth)/login/page-8eadc181fdb4a350.js",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "age": null,
+          "vary": "Accept-Encoding",
+          "nextCache": null,
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068708082,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/register?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068708435,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/flights/results?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": null,
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068708496,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/groups?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "no-cache, private",
+          "age": null,
+          "vary": "Accept-Encoding",
+          "nextCache": null,
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068709196,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/agent/register?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068709196,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/lookup-booking?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068709196,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/about-us?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068709196,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/sitemap?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068709196,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/support?_rsc=nmyFLQq3sV5huFjw"
+        }
+      ]
+    }
+  ],
+  "after_idle_prefetch_wait": [
+    {
+      "sample": 3,
+      "wait_prefetch_ms": 4500,
+      "PREFETCH_TRIGGERED": true,
+      "PREFETCH_RSC_COUNT_BEFORE_CLICK": 1,
+      "PREFETCH_COMPLETED_BEFORE_CLICK": true,
+      "CLICK_REUSED_PREFETCH": false,
+      "SECOND_RSC_AFTER_CLICK": 0,
+      "RSC_CACHE_STATUS": null,
+      "CLICK_TO_USABLE_MS": 284,
+      "ROUTER_WAIT_MS": 252,
+      "events": [
+        {
+          "t": 1789068713520,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/contact?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "STALE",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068713601,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/faq?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068713814,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/faq?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "HIT",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068713966,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/support?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068714148,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/support?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "STALE",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068714329,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/privacy?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068714533,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/privacy?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "STALE",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068714693,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/terms?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068714951,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/terms?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "STALE",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068715327,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/agent/register?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068715327,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/lookup-booking?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068715327,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/sitemap?_rsc=nmyFLQq3sV5huFjw"
+        }
+      ]
+    },
+    {
+      "sample": 4,
+      "wait_prefetch_ms": 4500,
+      "PREFETCH_TRIGGERED": true,
+      "PREFETCH_RSC_COUNT_BEFORE_CLICK": 1,
+      "PREFETCH_COMPLETED_BEFORE_CLICK": true,
+      "CLICK_REUSED_PREFETCH": false,
+      "SECOND_RSC_AFTER_CLICK": 0,
+      "RSC_CACHE_STATUS": null,
+      "CLICK_TO_USABLE_MS": 704,
+      "ROUTER_WAIT_MS": 647,
+      "events": [
+        {
+          "t": 1789068720217,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/support?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "HIT",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068720342,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/privacy?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068720361,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/privacy?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "STALE",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068720365,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/privacy?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068720553,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/privacy?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "HIT",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068720712,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/terms?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068720713,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/terms?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "STALE",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068720715,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/terms?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068720927,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/terms?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "HIT",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068722002,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/agent/register?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068722002,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/lookup-booking?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068722002,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/sitemap?_rsc=nmyFLQq3sV5huFjw"
+        }
+      ]
+    },
+    {
+      "sample": 5,
+      "wait_prefetch_ms": 4500,
+      "PREFETCH_TRIGGERED": true,
+      "PREFETCH_RSC_COUNT_BEFORE_CLICK": 3,
+      "PREFETCH_COMPLETED_BEFORE_CLICK": true,
+      "CLICK_REUSED_PREFETCH": false,
+      "SECOND_RSC_AFTER_CLICK": 1,
+      "RSC_CACHE_STATUS": "HIT",
+      "CLICK_TO_USABLE_MS": 317,
+      "ROUTER_WAIT_MS": 216,
+      "events": [
+        {
+          "t": 1789068726851,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/support?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "HIT",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068727001,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/privacy?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068727017,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/privacy?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "HIT",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068727024,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/privacy?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068727208,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/privacy?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "HIT",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068727363,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/terms?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068727385,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/terms?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "HIT",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        },
+        {
+          "t": 1789068727387,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/terms?_rsc=ZmCQ44b92m4mXe_R"
+        },
+        {
+          "t": 1789068727890,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/agent/register?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068727890,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/lookup-booking?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068727891,
+          "kind": "req",
+          "method": "GET",
+          "u": "https://jetpakistan.pk/sitemap?_rsc=nmyFLQq3sV5huFjw"
+        },
+        {
+          "t": 1789068727900,
+          "kind": "res",
+          "status": 200,
+          "u": "https://jetpakistan.pk/terms?_rsc=ZmCQ44b92m4mXe_R",
+          "cacheControl": "s-maxage=60, stale-while-revalidate=31535940",
+          "age": null,
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "nextCache": "HIT",
+          "serverTiming": null,
+          "fromServiceWorker": false
+        }
+      ]
+    }
+  ],
+  "PREFETCH_HIT_RATE_BEFORE": 0,
+  "PREFETCH_HIT_RATE_AFTER_WAIT": 0,
+  "WHY_PREFETCH_HIT_ZERO": "Click occurs before PublicRoutePrefetch idle queue (2500ms+) completes; no warm RSC at click",
+  "EARLY_USABLE_P95": 26118,
+  "WARMED_USABLE_P95": 704
+}

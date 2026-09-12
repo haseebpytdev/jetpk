@@ -58,15 +58,6 @@ export function SiteHeader({ session, branding = null, aiEnabled = false }: Site
               ) : (
                 <>
                   <LinkButton
-                    href="/register"
-                    prefetch
-                    variant="secondary"
-                    className="inline-flex min-h-jp-button items-center justify-center rounded-jp-pill border-transparent bg-transparent px-3 text-jp-text hover:bg-jp-primary-soft"
-                    data-testid="header-register-cta"
-                  >
-                    Register
-                  </LinkButton>
-                  <LinkButton
                     href="/login"
                     prefetch
                     variant="secondary"

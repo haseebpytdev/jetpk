@@ -269,6 +269,14 @@ export function pageSettingsRefreshHomeFaresPath(): string {
   return laravelPortalPath("admin", "/page-settings/home/refresh-fares?format=json");
 }
 
+export function pageSettingsFeaturedDealInventoryPath(query?: string): string {
+  const params = new URLSearchParams({ format: "json" });
+  if (query?.trim()) {
+    params.set("q", query.trim());
+  }
+  return laravelPortalPath("admin", `/page-settings/home/featured-deal-inventory?${params.toString()}`);
+}
+
 export function groupBookingVerifyPaymentPath(groupBookingId: string): string {
   return laravelPortalPath(
     "admin",

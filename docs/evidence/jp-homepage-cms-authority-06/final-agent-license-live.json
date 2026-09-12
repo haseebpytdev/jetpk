@@ -1,0 +1,30 @@
+{
+  "captured_at": "2026-09-10T05:07:41.808Z",
+  "gates": {
+    "LICENSE_FIELD_VISIBLE": {
+      "pass": true
+    },
+    "LICENSE_VALIDATION": {
+      "pass": true
+    },
+    "LICENSE_PERSISTENCE": {
+      "pass": true,
+      "url": "https://jetpakistan.pk/agent/register?company_name=&city=&business_type=&license_number=&first_name=&email=&mobile_country_code=%2B92&mobile=&notes=",
+      "license": "LIC-AUTH06MTV2G581",
+      "email": "auth06-auth06mtv2g581@jetpakistan.pk"
+    },
+    "LICENSE_ADMIN_DISPLAY": {
+      "pass": true,
+      "url": "https://jetpakistan.pk/admin/dashboard/agents/applications"
+    },
+    "LICENSE_API_READBACK": {
+      "pass": true,
+      "note": "admin_ui_readback"
+    }
+  },
+  "submitted": {
+    "email": "auth06-auth06mtv2g581@jetpakistan.pk",
+    "license": "LIC-AUTH06MTV2G581"
+  },
+  "result": "PASS"
+}

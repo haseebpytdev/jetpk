@@ -40,6 +40,7 @@ class StoreAgentApplicationRequest extends FormRequest
             'email',
             'mobile_country_code',
             'mobile',
+            'license_number',
             'notes',
             'terms',
         ];
@@ -95,6 +96,7 @@ class StoreAgentApplicationRequest extends FormRequest
             'company_name' => trim((string) ($input['company_name'] ?? '')),
             'business_type' => trim((string) ($input['business_type'] ?? '')),
             'city' => trim((string) ($input['city'] ?? '')),
+            'license_number' => trim((string) ($input['license_number'] ?? '')),
             'country' => trim((string) ($input['country'] ?? 'Pakistan')) ?: 'Pakistan',
             'office_address' => trim((string) ($input['office_address'] ?? 'To be shared during onboarding')) ?: 'To be shared during onboarding',
             'notes' => trim((string) ($input['notes'] ?? '')),
@@ -111,6 +113,7 @@ class StoreAgentApplicationRequest extends FormRequest
             'company_name' => ['required', 'string', 'max:255', 'regex:/^[\pL\pN\s\-\.&\',()\/+#]+$/u'],
             'city' => ['required', 'string', 'max:120', 'regex:/^[A-Za-z\s\-]+$/'],
             'business_type' => ['required', 'string', 'max:100'],
+            'license_number' => ['required', 'string', 'max:80'],
             'first_name' => ['required', 'string', 'max:100', 'regex:/^[A-Za-z ]+$/'],
             'last_name' => ['nullable', 'string', 'max:100'],
             'email' => [
@@ -160,6 +163,8 @@ class StoreAgentApplicationRequest extends FormRequest
             'company_name.required' => self::COMPANY_NAME_FORMAT_MESSAGE,
             'company_name.regex' => self::COMPANY_NAME_FORMAT_MESSAGE,
             'business_type.required' => 'Select a business type.',
+            'license_number.required' => 'Enter your travel agency license number.',
+            'license_number.max' => 'License number must not exceed 80 characters.',
             'city.regex' => self::CITY_FORMAT_MESSAGE,
             'first_name.regex' => self::NAME_LETTERS_MESSAGE,
             'email.email' => 'Please provide a valid email address.',

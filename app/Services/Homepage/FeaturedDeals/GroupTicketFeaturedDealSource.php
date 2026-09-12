@@ -85,6 +85,10 @@ final class GroupTicketFeaturedDealSource implements HomepageFeaturedDealSource
                 'media_source' => $image !== null ? 'cms' : 'none',
                 'availability' => 'available',
                 'resolution_rule' => (string) $row['rule'],
+                'resolution_mode' => (string) ($row['resolution_mode'] ?? ''),
+                'match_reason' => (string) ($row['match_reason'] ?? ''),
+                'fallback_used' => (bool) ($row['fallback_used'] ?? false),
+                'available_seats' => (int) ($row['available_seats'] ?? 0),
                 'cms_slot_id' => trim((string) ($editorial['id'] ?? '')),
                 'href' => GroupTicketingNextFrontend::detailPath($inventory),
             ];

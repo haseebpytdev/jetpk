@@ -8,4 +8,5 @@ playwright-report/
 .visual-audit/
 .evidence/
 tsconfig.tsbuildinfo
+tsconfig.application.tsbuildinfo
 .playwright-report/

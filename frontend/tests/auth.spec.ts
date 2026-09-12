@@ -49,16 +49,18 @@ test.describe("JP-FE-04 authentication shell", () => {
   });
 
   test("mobile login form remains usable", async ({ page }) => {
+    await mockCsrf(page);
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/login");
-    await expect(page.getByRole("button", { name: /sign in/i })).toBeVisible();
-    const box = await page.getByRole("button", { name: /sign in/i }).boundingBox();
+    const signInButton = page.getByRole("button", { name: /^sign in$/i });
+    await expect(signInButton).toBeEnabled();
+    const box = await signInButton.boundingBox();
     expect(box?.width ?? 0).toBeGreaterThan(200);
   });
 
   test("public shell shows login link when logged out", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("link", { name: /log in \/ sign up/i }).first()).toBeVisible();
+    await expect(page.getByRole("banner").getByRole("link", { name: /^login$/i })).toBeVisible();
   });
 });
 

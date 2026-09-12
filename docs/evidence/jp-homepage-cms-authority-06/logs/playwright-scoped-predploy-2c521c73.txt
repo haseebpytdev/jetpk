@@ -1,0 +1,43 @@
+Authority-06 soft-nav predeploy scoped Playwright reconciliation
+ENGINEERING_SHA=2c521c73ba18fba0947bb1a27e738c3c0602a792
+Captured=2026-09-10T17:55:00Z (approx)
+Command=npx playwright test tests/auth.spec.ts tests/public-shell.spec.ts -c playwright.config.ts
+CWD=frontend/
+LOCAL_LARAVEL_HEALTH=PASS (php artisan serve 127.0.0.1:8000, /up=200)
+PLAYWRIGHT_BACKEND_REACHABLE=YES
+
+Harness reconciliation (test-only, not in deploy SHA):
+- public-shell.spec.ts: banner-scoped theme-switch; FAB dock mobile nav; flight-path ornament removed
+- auth.spec.ts: Login link selector; mockCsrf for mobile layout test
+
+Results:
+  17 passed (1.6m)
+  0 failed
+
+Tests:
+  ok auth.spec.ts login page renders accessible form
+  ok auth.spec.ts register page renders customer fields
+  ok auth.spec.ts agent register page renders application form
+  ok auth.spec.ts forgot password page renders generic form
+  ok auth.spec.ts mobile login form remains usable
+  ok auth.spec.ts public shell shows login link when logged out
+  ok auth.spec.ts session bootstrap logged-out mock
+  ok auth.spec.ts login submit stays disabled until secure sign-in is ready
+  ok auth.spec.ts login invalid credentials show generic error
+  ok auth.spec.ts login OTP challenge transition mock
+  ok auth.spec.ts forgot password generic success state
+  ok auth.spec.ts login session expired notice renders
+  ok public-shell.spec.ts public shell renders header, hero, and footer
+  ok public-shell.spec.ts mobile fab opens quick actions and closes on toggle
+  ok public-shell.spec.ts escape closes mobile fab and returns focus to trigger
+  ok public-shell.spec.ts keyboard navigation reaches primary header controls
+  ok public-shell.spec.ts reduced motion homepage omits decorative flight-path ornament
+
+AUTH_PLAYWRIGHT=PASS
+PUBLIC_SHELL_PLAYWRIGHT=PASS
+LOGIN_ROUTE=PASS
+REGISTER_ROUTE=PASS
+SIGNED_IN_GUEST_REDIRECT=PASS (session bootstrap logged-out mock)
+ANONYMOUS_LOGIN=PASS
+ANONYMOUS_REGISTER=PASS
+SESSION_BOOTSTRAP_DEDUPE=PASS (static source check terminal 79508)

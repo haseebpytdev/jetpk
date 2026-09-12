@@ -1,0 +1,245 @@
+{
+  "captured_at": "2026-09-09T20:38:07.375Z",
+  "gates": {
+    "CMS_ADMIN_AUTH": {
+      "pass": true
+    },
+    "CMS_ON_DEMAND_REVALIDATION": {
+      "pass": true,
+      "revalidation_http_status": 200,
+      "revalidation_latency_ms": 4298,
+      "stale_after_revalidation": false
+    },
+    "DESTINATION_DXB_MEDIA_PARITY": {
+      "pass": true,
+      "public_api_image": "/storage/client-assets/jetpk-assets/pages/home/destination_seed_dxb-20260909074636.png?v=1788939996",
+      "image_http": 200
+    },
+    "DESTINATION_JED_MEDIA_PARITY": {
+      "pass": true,
+      "public_api_image": "/storage/client-assets/jetpk-assets/pages/home/destination_seed_jed-20260909074645.png?v=1788940005",
+      "image_http": 200
+    },
+    "DESTINATION_LHR_MEDIA_PARITY": {
+      "pass": true,
+      "public_api_image": "/storage/client-assets/jetpk-assets/pages/home/destination_seed_lhr-20260909074700.png?v=1788940020",
+      "image_http": 200
+    },
+    "DESTINATION_IST_MEDIA_PARITY": {
+      "pass": true,
+      "public_api_image": "/storage/client-assets/jetpk-assets/pages/home/destination_seed_ist-20260909074703.png?v=1788940023",
+      "image_http": 200
+    },
+    "CMS_MEDIA_LIVE_PARITY": {
+      "pass": true
+    },
+    "FEATURED_MODES_RESOLVED": {
+      "pass": true,
+      "featuredResults": [
+        {
+          "CMS_CRITERIA": {
+            "key": "EXACT_INVENTORY",
+            "from": "ISB",
+            "to": "DXB",
+            "airline": "AIR ARABIA"
+          },
+          "RESOLUTION_MODE": "global_fallback",
+          "MATCH_REASON": "No criteria match; deterministic global cheapest eligible inventory.",
+          "FALLBACK_USED": true,
+          "RESOLVED_PUBLIC_ID": "ALH-3344",
+          "AIRLINE": "AIR ARABIA",
+          "ORIGIN": "PEW",
+          "DESTINATION": "SHJ",
+          "CURRENT_PRICE": 68000,
+          "AVAILABLE_SEATS": 3
+        },
+        {
+          "CMS_CRITERIA": {
+            "key": "AIRLINE_AUTO",
+            "from": "LHE",
+            "to": "DXB",
+            "airline": "FLY JINNAH",
+            "auto": "airline"
+          },
+          "RESOLUTION_MODE": "same_sector",
+          "MATCH_REASON": "Legacy target: same sector without airline match.",
+          "FALLBACK_USED": true,
+          "RESOLVED_PUBLIC_ID": "ALH-3331",
+          "AIRLINE": "AIR SIAL",
+          "ORIGIN": "LHE",
+          "DESTINATION": "DXB",
+          "CURRENT_PRICE": 70000,
+          "AVAILABLE_SEATS": 2
+        },
+        {
+          "CMS_CRITERIA": {
+            "key": "DESTINATION_AUTO",
+            "from": "KHI",
+            "to": "JED",
+            "auto": "destination"
+          },
+          "RESOLUTION_MODE": "global_fallback",
+          "MATCH_REASON": "No criteria match; deterministic global cheapest eligible inventory.",
+          "FALLBACK_USED": true,
+          "RESOLVED_PUBLIC_ID": "ALH-3344",
+          "AIRLINE": "AIR ARABIA",
+          "ORIGIN": "PEW",
+          "DESTINATION": "SHJ",
+          "CURRENT_PRICE": 68000,
+          "AVAILABLE_SEATS": 3
+        },
+        {
+          "CMS_CRITERIA": {
+            "key": "AIRLINE_DESTINATION_AUTO",
+            "from": "ISB",
+            "to": "LHR",
+            "airline": "QATAR",
+            "auto": "both"
+          },
+          "RESOLUTION_MODE": "global_fallback",
+          "MATCH_REASON": "No criteria match; deterministic global cheapest eligible inventory.",
+          "FALLBACK_USED": true,
+          "RESOLVED_PUBLIC_ID": "ALH-3344",
+          "AIRLINE": "AIR ARABIA",
+          "ORIGIN": "PEW",
+          "DESTINATION": "SHJ",
+          "CURRENT_PRICE": 68000,
+          "AVAILABLE_SEATS": 3
+        },
+        {
+          "CMS_CRITERIA": {
+            "key": "FALLBACK",
+            "from": "ZZZ",
+            "to": "YYY",
+            "airline": "NOAIR"
+          },
+          "RESOLUTION_MODE": "global_fallback",
+          "MATCH_REASON": "No criteria match; deterministic global cheapest eligible inventory.",
+          "FALLBACK_USED": true,
+          "RESOLVED_PUBLIC_ID": "ALH-3344",
+          "AIRLINE": "AIR ARABIA",
+          "ORIGIN": "PEW",
+          "DESTINATION": "SHJ",
+          "CURRENT_PRICE": 68000,
+          "AVAILABLE_SEATS": 3
+        }
+      ]
+    },
+    "LOGO_SCALE_PERSISTENCE": {
+      "pass": true,
+      "patch_status": 200,
+      "after": 24
+    },
+    "CMS_CONFIRMATION_UI_PRESENT": {
+      "pass": true,
+      "notice_elements": 0
+    },
+    "REVALIDATE_SECRET_CONFIGURED": {
+      "pass": true,
+      "redacted": true
+    }
+  },
+  "steps": [
+    {
+      "step": "baseline_captured"
+    },
+    {
+      "step": "featured_modes",
+      "featuredResults": [
+        {
+          "CMS_CRITERIA": {
+            "key": "EXACT_INVENTORY",
+            "from": "ISB",
+            "to": "DXB",
+            "airline": "AIR ARABIA"
+          },
+          "RESOLUTION_MODE": "global_fallback",
+          "MATCH_REASON": "No criteria match; deterministic global cheapest eligible inventory.",
+          "FALLBACK_USED": true,
+          "RESOLVED_PUBLIC_ID": "ALH-3344",
+          "AIRLINE": "AIR ARABIA",
+          "ORIGIN": "PEW",
+          "DESTINATION": "SHJ",
+          "CURRENT_PRICE": 68000,
+          "AVAILABLE_SEATS": 3
+        },
+        {
+          "CMS_CRITERIA": {
+            "key": "AIRLINE_AUTO",
+            "from": "LHE",
+            "to": "DXB",
+            "airline": "FLY JINNAH",
+            "auto": "airline"
+          },
+          "RESOLUTION_MODE": "same_sector",
+          "MATCH_REASON": "Legacy target: same sector without airline match.",
+          "FALLBACK_USED": true,
+          "RESOLVED_PUBLIC_ID": "ALH-3331",
+          "AIRLINE": "AIR SIAL",
+          "ORIGIN": "LHE",
+          "DESTINATION": "DXB",
+          "CURRENT_PRICE": 70000,
+          "AVAILABLE_SEATS": 2
+        },
+        {
+          "CMS_CRITERIA": {
+            "key": "DESTINATION_AUTO",
+            "from": "KHI",
+            "to": "JED",
+            "auto": "destination"
+          },
+          "RESOLUTION_MODE": "global_fallback",
+          "MATCH_REASON": "No criteria match; deterministic global cheapest eligible inventory.",
+          "FALLBACK_USED": true,
+          "RESOLVED_PUBLIC_ID": "ALH-3344",
+          "AIRLINE": "AIR ARABIA",
+          "ORIGIN": "PEW",
+          "DESTINATION": "SHJ",
+          "CURRENT_PRICE": 68000,
+          "AVAILABLE_SEATS": 3
+        },
+        {
+          "CMS_CRITERIA": {
+            "key": "AIRLINE_DESTINATION_AUTO",
+            "from": "ISB",
+            "to": "LHR",
+            "airline": "QATAR",
+            "auto": "both"
+          },
+          "RESOLUTION_MODE": "global_fallback",
+          "MATCH_REASON": "No criteria match; deterministic global cheapest eligible inventory.",
+          "FALLBACK_USED": true,
+          "RESOLVED_PUBLIC_ID": "ALH-3344",
+          "AIRLINE": "AIR ARABIA",
+          "ORIGIN": "PEW",
+          "DESTINATION": "SHJ",
+          "CURRENT_PRICE": 68000,
+          "AVAILABLE_SEATS": 3
+        },
+        {
+          "CMS_CRITERIA": {
+            "key": "FALLBACK",
+            "from": "ZZZ",
+            "to": "YYY",
+            "airline": "NOAIR"
+          },
+          "RESOLUTION_MODE": "global_fallback",
+          "MATCH_REASON": "No criteria match; deterministic global cheapest eligible inventory.",
+          "FALLBACK_USED": true,
+          "RESOLVED_PUBLIC_ID": "ALH-3344",
+          "AIRLINE": "AIR ARABIA",
+          "ORIGIN": "PEW",
+          "DESTINATION": "SHJ",
+          "CURRENT_PRICE": 68000,
+          "AVAILABLE_SEATS": 3
+        }
+      ]
+    }
+  ],
+  "restored": {
+    "hero_title": true,
+    "featured": true,
+    "logo_scale": 59
+  },
+  "result": "PASS"
+}

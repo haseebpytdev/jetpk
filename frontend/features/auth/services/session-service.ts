@@ -43,6 +43,8 @@ export function mapBootstrapToPublicSession(bootstrap: SessionBootstrap): Public
   };
 }
 
+let browserBootstrapInflight: Promise<SessionBootstrap> | null = null;
+
 export async function fetchSessionBootstrap(cookieHeader?: string): Promise<SessionBootstrap> {
   const headers: HeadersInit = {
     Accept: "application/json",
@@ -86,18 +88,22 @@ export async function fetchSessionBootstrap(cookieHeader?: string): Promise<Sess
     }
   }
 
-  // Browser soft-nav handoff must not wait unboundedly on session lock (R6H: ~14s POST_CLICK tails).
-  const result = await laravelJsonFetch<SessionBootstrap>("/api/public/auth/session", {
-    method: "GET",
-    headers,
-    signal: AbortSignal.timeout(2500),
-  });
-
-  if (!result.ok) {
-    return { authenticated: false };
+  // Browser soft-nav: dedupe PublicShell + GuestAuthRedirect concurrent bootstrap.
+  if (!browserBootstrapInflight) {
+    browserBootstrapInflight = (async () => {
+      const result = await laravelJsonFetch<SessionBootstrap>("/api/public/auth/session", {
+        method: "GET",
+        headers,
+        signal: AbortSignal.timeout(2500),
+      });
+      if (!result.ok) return { authenticated: false };
+      return result.data;
+    })().finally(() => {
+      browserBootstrapInflight = null;
+    });
   }
 
-  return result.data;
+  return browserBootstrapInflight;
 }
 export async function fetchSessionBootstrapFromCookies(
   cookies: Array<{ name: string; value: string }>,

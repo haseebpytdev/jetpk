@@ -1,0 +1,48 @@
+Authority-06 soft-nav R2 predeploy scoped Playwright
+ENGINEERING_SHA=8c50fc61967e51c5b576375b55ae7701d122c121
+Captured=2026-09-10T22:22:00Z
+Command=npx playwright test tests/auth.spec.ts tests/public-shell.spec.ts -c playwright.config.ts
+CWD=frontend/
+LOCAL_LARAVEL_HEALTH=PASS (php artisan serve 127.0.0.1:8000)
+PLAYWRIGHT_BACKEND_REACHABLE=YES
+RESULT=17 passed, 0 failed
+[WebServer] 
+[WebServer] > jetpk-public-frontend@0.1.0 start:smoke
+[WebServer] > node scripts/start-smoke.mjs
+[WebServer] 
+[WebServer]    G�� Next.js 15.5.22
+[WebServer]    - Local:        http://127.0.0.1:3002
+[WebServer]    - Network:      http://127.0.0.1:3002
+[WebServer] 
+[WebServer]  G�� Starting...
+[WebServer]  G�� Ready in 4.7s
+
+Running 17 tests using 1 worker
+
+node.exe : (node:15704) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At C:\Program Files\nodejs\npx.ps1:29 char:3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:15704) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] GǦ tests\auth.spec.ts:15:7 GǦ JP-FE-04 authentication shell GǦ login page renders accessible form (4.4s)
+  ok  2 [chromium] GǦ tests\auth.spec.ts:24:7 GǦ JP-FE-04 authentication shell GǦ register page renders customer fields (2.5s)
+  ok  3 [chromium] GǦ tests\auth.spec.ts:39:7 GǦ JP-FE-04 authentication shell GǦ agent register page renders application form (2.4s)
+  ok  4 [chromium] GǦ tests\auth.spec.ts:45:7 GǦ JP-FE-04 authentication shell GǦ forgot password page renders generic form (5.7s)
+  ok  5 [chromium] GǦ tests\auth.spec.ts:51:7 GǦ JP-FE-04 authentication shell GǦ mobile login form remains usable (2.8s)
+  ok  6 [chromium] GǦ tests\auth.spec.ts:61:7 GǦ JP-FE-04 authentication shell GǦ public shell shows login link when logged out (7.6s)
+  ok  7 [chromium] GǦ tests\auth.spec.ts:68:7 GǦ JP-FE-04 Laravel auth API mocks GǦ session bootstrap logged-out mock (3.5s)
+  ok  8 [chromium] GǦ tests\auth.spec.ts:81:7 GǦ JP-FE-04 Laravel auth API mocks GǦ login submit stays disabled until secure sign-in is ready (3.3s)
+  ok  9 [chromium] GǦ tests\auth.spec.ts:101:7 GǦ JP-FE-04 Laravel auth API mocks GǦ login invalid credentials show generic error (2.2s)
+  ok 10 [chromium] GǦ tests\auth.spec.ts:125:7 GǦ JP-FE-04 Laravel auth API mocks GǦ login OTP challenge transition mock (8.7s)
+  ok 11 [chromium] GǦ tests\auth.spec.ts:158:7 GǦ JP-FE-04 Laravel auth API mocks GǦ forgot password generic success state (5.8s)
+  ok 12 [chromium] GǦ tests\auth.spec.ts:177:7 GǦ JP-FE-04 Laravel auth API mocks GǦ login session expired notice renders (2.1s)
+  ok 13 [chromium] GǦ tests\public-shell.spec.ts:7:5 GǦ public shell renders header, hero, and footer (3.5s)
+  ok 14 [chromium] GǦ tests\public-shell.spec.ts:32:5 GǦ mobile fab opens quick actions and closes on toggle (3.5s)
+  ok 15 [chromium] GǦ tests\public-shell.spec.ts:47:5 GǦ escape closes mobile fab and returns focus to trigger (3.2s)
+  ok 16 [chromium] GǦ tests\public-shell.spec.ts:60:5 GǦ keyboard navigation reaches primary header controls (5.7s)
+  ok 17 [chromium] GǦ tests\public-shell.spec.ts:71:5 GǦ reduced motion homepage omits decorative flight-path ornament (2.6s)
+
+  17 passed (1.9m)
