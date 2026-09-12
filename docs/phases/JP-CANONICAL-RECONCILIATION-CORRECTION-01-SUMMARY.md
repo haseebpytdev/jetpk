@@ -2,7 +2,7 @@
 
 **Branch:** `phase/jp-master-unfinished-closure-10`  
 **CORRECTIVE_ENGINEERING_SHA:** `a7ea9fcfee6068f28a3735c53ad4aa105a93abf2`  
-**FINAL_EVIDENCE_HEAD:** (set by evidence commit)  
+**FINAL_EVIDENCE_HEAD:** `3cb256ba56f3be95fda0776af4596b0402b5fb20`  
 **Status:** PASS
 
 Surgical revert of unintentionally promoted Auth-C experiment (`f5c8a9b9`). Certified `(auth)` layout restored per `8c50fc61`. Public-only protected deploy to production. No mail/Sabre or Gmail scope reopened.
