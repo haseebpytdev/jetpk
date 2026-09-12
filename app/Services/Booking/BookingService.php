@@ -145,7 +145,9 @@ class BookingService
                 ->computeEffectiveDeadline($booking);
             $booking->save();
 
-            $this->changeStatus($booking, BookingStatus::Pending, $actor, 'Booking request submitted');
+            $this->changeStatus($booking, BookingStatus::Pending, $actor, 'Booking request submitted', [
+                'suppress_status_notification' => true,
+            ]);
         });
 
         $booking = $booking->fresh();
@@ -199,14 +201,14 @@ class BookingService
         ?string $note = null,
         ?array $context = null,
     ): Booking {
-        DB::transaction(function () use ($booking, $to, $actor, $note, $context): void {
-            $booking->refresh();
-            $from = $booking->status;
+        $booking->refresh();
+        $from = $booking->status;
 
-            if ($from === $to) {
-                return;
-            }
+        if ($from === $to) {
+            return $booking;
+        }
 
+        DB::transaction(function () use ($booking, $to, $actor, $note, $context, $from): void {
             $allowed = $this->getAllowedStatusTransitions($booking, $actor);
             if (! $actor?->isPlatformAdmin() && ! in_array($to, $allowed, true)) {
                 throw new InvalidArgumentException('Invalid status transition from '.$from->value.' to '.$to->value.'.');
@@ -234,10 +236,16 @@ class BookingService
             app(LedgerEventRecorder::class)->recordMarkupRevenueForBooking($booking, $actor);
         }
 
+        $suppressStatusNotification = ($context['suppress_status_notification'] ?? false) === true;
+
         if ($to === BookingStatus::Expired) {
             $this->communicationService->sendBookingExpired($booking);
-        } else {
-            $this->communicationService->sendBookingStatusChanged($booking, str_replace('_', ' ', $to->value));
+        } elseif (! $suppressStatusNotification) {
+            $this->communicationService->sendBookingStatusChanged(
+                $booking,
+                str_replace('_', ' ', $to->value),
+                str_replace('_', ' ', $from->value),
+            );
             if ($to === BookingStatus::Confirmed) {
                 $this->communicationService->sendBookingConfirmed($booking);
             }

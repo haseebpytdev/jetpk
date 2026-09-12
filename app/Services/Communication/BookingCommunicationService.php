@@ -14,8 +14,11 @@ use App\Models\BookingPayment;
 use App\Models\CommunicationLog;
 use App\Models\User;
 use App\Services\Customer\GuestBookingAccessService;
+use App\Support\Bookings\BookingPaymentEligibility;
 use App\Support\Bookings\SabreHostErrorClassifier;
+use App\Support\Emails\EmailOperationalSubjectFormatter;
 use App\Support\Security\SensitiveDataRedactor;
+use App\Support\Url\PublicActionUrl;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -415,7 +418,7 @@ class BookingCommunicationService
         $this->sendBookingStatusChanged($booking, 'cancelled');
     }
 
-    public function sendBookingStatusChanged(Booking $booking, string $statusLabel): void
+    public function sendBookingStatusChanged(Booking $booking, string $statusLabel, ?string $previousStatus = null): void
     {
         $booking = $booking->fresh(['agency.agencySetting', 'contact', 'customer']);
         $event = ($booking->status->value === 'cancelled')
@@ -428,7 +431,7 @@ class BookingCommunicationService
             ? fn (Booking $b): Mailable => new BookingUniversalNotification($this->bookingEmailPayloadFactory->customerManualReviewRequired($b))
             : ($event === BookingCommunicationEvent::BookingCancelled
             ? fn (Booking $b): Mailable => new BookingUniversalNotification($this->bookingEmailPayloadFactory->customerCancellationUpdate($b, $statusLabel))
-            : fn (Booking $b): Mailable => new BookingUniversalNotification($this->bookingEmailPayloadFactory->statusChanged($b, $statusLabel)));
+            : fn (Booking $b): Mailable => new BookingUniversalNotification($this->bookingEmailPayloadFactory->statusChanged($b, $statusLabel, $previousStatus)));
 
         $this->sendEmailForBooking(
             $booking,
@@ -436,13 +439,16 @@ class BookingCommunicationService
             $payloadFactory,
             [
                 'status_label' => $statusLabel,
+                'previous_status' => $previousStatus,
                 'recipient_bucket' => 'booking_customer',
             ]
         );
         $this->notifyOperational($booking, OtaNotificationEvent::BookingStatusChanged, [
             'booking_reference' => $booking->reference_code,
             'status_label' => $statusLabel,
-        ]);
+            'previous_status' => $previousStatus,
+            'universal_email' => $this->bookingEmailPayloadFactory->adminStatusChangedAlert($booking, $statusLabel, $previousStatus),
+        ], null, EmailOperationalSubjectFormatter::adminBookingStatusChanged($booking, $previousStatus, $statusLabel));
 
         if ($this->isManualReviewStatus($booking, $statusLabel)) {
             $this->notifyManualReviewRequired($booking, null, $this->manualReviewReasonFromStatusLabel($statusLabel));
@@ -485,8 +491,12 @@ class BookingCommunicationService
      */
     public function sendPaymentReminder(Booking $booking, string $stage = 'first'): bool
     {
-        $booking = $booking->fresh(['agency.agencySetting', 'contact', 'customer']);
+        $booking = $booking->fresh(['agency.agencySetting', 'contact', 'customer', 'fareBreakdown']);
         $stage = $stage === 'final' ? 'final' : 'first';
+
+        if (! BookingPaymentEligibility::allowsPayment($booking)) {
+            return false;
+        }
 
         if ($this->paymentReminderAlreadyLogged($booking, $stage)) {
             return false;
@@ -951,10 +961,17 @@ class BookingCommunicationService
     {
         return match ($event) {
             OtaNotificationEvent::BookingRequestReceived => $this->bookingEmailPayloadFactory->adminNewBookingAlert($booking),
+            OtaNotificationEvent::BookingStatusChanged => $this->bookingEmailPayloadFactory->adminStatusChangedAlert(
+                $booking,
+                str_replace('_', ' ', (string) $booking->status->value),
+            ),
             OtaNotificationEvent::SupplierBookingCreated => $this->bookingEmailPayloadFactory->pnrCreated($booking),
             OtaNotificationEvent::TicketIssued => $this->bookingEmailPayloadFactory->ticketIssued($booking),
             OtaNotificationEvent::BookingManualReviewRequired => $this->bookingEmailPayloadFactory->staffReviewRequired($booking),
-            default => $this->bookingEmailPayloadFactory->adminNewBookingAlert($booking),
+            default => $this->bookingEmailPayloadFactory->adminStatusChangedAlert(
+                $booking,
+                str_replace('_', ' ', (string) $booking->status->value),
+            ),
         };
     }
 
@@ -1459,11 +1476,7 @@ class BookingCommunicationService
             return null;
         }
 
-        try {
-            return route('admin.bookings.show', $booking, absolute: true);
-        } catch (Throwable) {
-            return null;
-        }
+        return PublicActionUrl::route('admin.bookings.show', $booking, absolute: true);
     }
 
     protected function buildAdminNewBookingFallbackBody(Booking $booking, ?string $adminUrl): string

@@ -13,7 +13,10 @@ use App\Models\User;
 use App\Services\Agencies\AgencyBrandingService;
 use App\Services\Communication\AgencyMessageTemplateSeeder;
 use App\Services\Communication\OtaNotificationService;
+use App\Support\Agents\AgentApplicationNotificationPayload;
+use App\Support\Emails\EmailOperationalSubjectFormatter;
 use App\Support\References\CompactReferenceGenerator;
+use App\Support\Url\PublicActionUrl;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
@@ -78,15 +81,16 @@ class AgentApplicationOnboardingService
         $supportEmail = (string) ($platformAgency->agencySetting?->support_email ?? config('mail.from.address', ''));
         $supportPhone = (string) ($platformAgency->agencySetting?->support_phone ?? '');
 
+        $notificationPayload = array_merge(
+            AgentApplicationNotificationPayload::fromApplication($application),
+            ['information_required' => $note ?: 'Please contact our team with the requested details.'],
+        );
+
         $this->notificationService->send(
             agency: $platformAgency,
             eventKey: OtaNotificationEvent::AgentApplicationNeedsMoreInfo->value,
-            payload: [
-                'applicant_name' => trim($application->first_name.' '.$application->last_name),
-                'company_name' => (string) $application->company_name,
-                'information_required' => $note ?: 'Please contact our team with the requested details.',
-            ],
-            fallbackSubject: 'Agent application — additional information required',
+            payload: $notificationPayload,
+            fallbackSubject: EmailOperationalSubjectFormatter::agentApplication($application, 'Application — more information required'),
             fallbackBody: implode("\n\n", array_filter([
                 'Thank you for your interest in partnering with us.',
                 $note ? 'We need the following information before we can continue reviewing your application:'."\n".$note : 'We need additional information before we can continue reviewing your application.',
@@ -105,15 +109,16 @@ class AgentApplicationOnboardingService
     {
         $platformAgency = $this->platformNotificationAgency($agency);
 
+        $notificationPayload = array_merge(
+            AgentApplicationNotificationPayload::fromApplication($application, 'pending'),
+            ['rejection_reason' => $reason ?: ''],
+        );
+
         $this->notificationService->send(
             agency: $platformAgency,
             eventKey: OtaNotificationEvent::AgentApplicationRejected->value,
-            payload: [
-                'applicant_name' => trim($application->first_name.' '.$application->last_name),
-                'company_name' => (string) $application->company_name,
-                'rejection_reason' => $reason ?: '',
-            ],
-            fallbackSubject: 'Agent application update',
+            payload: $notificationPayload,
+            fallbackSubject: EmailOperationalSubjectFormatter::agentApplication($application, 'Application update'),
             fallbackBody: implode("\n\n", array_filter([
                 'Thank you for your interest in partnering with us.',
                 'After careful review, we are unable to approve your agent application at this time.',
@@ -219,19 +224,21 @@ class AgentApplicationOnboardingService
     protected function sendApprovalNotification(Agency $agency, AgentApplication $application, User $user): void
     {
         $platformAgency = $this->platformNotificationAgency($agency);
-        $loginUrl = route('login');
-
-        $this->notificationService->send(
-            agency: $platformAgency,
-            eventKey: OtaNotificationEvent::AgentApplicationApproved->value,
-            payload: [
-                'applicant_name' => trim($application->first_name.' '.$application->last_name),
-                'company_name' => (string) $application->company_name,
+        $loginUrl = PublicActionUrl::route('login', absolute: true);
+        $notificationPayload = array_merge(
+            AgentApplicationNotificationPayload::fromApplication($application, 'pending'),
+            [
                 'login_email' => $user->email,
                 'username' => (string) ($user->username ?? ''),
                 'dashboard_url' => $loginUrl,
             ],
-            fallbackSubject: 'Agent application approved',
+        );
+
+        $this->notificationService->send(
+            agency: $platformAgency,
+            eventKey: OtaNotificationEvent::AgentApplicationApproved->value,
+            payload: $notificationPayload,
+            fallbackSubject: EmailOperationalSubjectFormatter::agentApplication($application, 'Application approved'),
             fallbackBody: implode("\n\n", array_filter([
                 'Your agent application has been approved.',
                 'Sign in email: '.$user->email,

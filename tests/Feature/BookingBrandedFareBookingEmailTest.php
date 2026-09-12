@@ -33,12 +33,12 @@ class BookingBrandedFareBookingEmailTest extends TestCase
         $this->assertStringContainsString('FREEDOM', $html);
         $this->assertStringContainsString('FL', $html);
         $this->assertStringContainsString('30 KG', $html);
-        $this->assertStringContainsString('Approx. PKR 90,062', $html);
+        $this->assertSame('Approx. PKR 90,062', $payload['payment']['estimated_selected_fare'] ?? null);
         $this->assertStringContainsString('economy', $html);
         $this->assertStringContainsString('VOWFL/V', $html);
         $this->assertStringContainsString(FlightOfferDisplayPresenter::SELECTED_FARE_VALIDATION_NOTE, $html);
         $this->assertStringContainsString(FlightOfferDisplayPresenter::SELECTED_FARE_PAYABLE_DISCLAIMER, $html);
-        $this->assertStringContainsString('Estimated selected fare', $html);
+        $this->assertStringContainsString('Selected fare (needs confirmation)', $html);
         $this->assertStringContainsString('Estimated amount due', $html);
         $this->assertStringContainsString('Base fare (search)', $html);
         $this->assertStringNotContainsString('>Total</td>', $html);
@@ -61,8 +61,23 @@ class BookingBrandedFareBookingEmailTest extends TestCase
         $this->assertArrayNotHasKey('balance_due', $payload['payment']);
         $this->assertStringContainsString('Estimated amount due', $html);
         $this->assertStringContainsString('Final payable', $html);
-        $this->assertStringContainsString('Pending validation', $html);
+        $this->assertSame('Awaiting fare validation', $payload['payment']['final_payable_status'] ?? null);
+        $this->assertStringContainsString('Awaiting fare validation', $html);
+        $this->assertStringNotContainsString('Pending validation', $html);
         $this->assertStringNotContainsString('>Balance due</td>', $html);
+    }
+
+    #[Test]
+    public function validated_branded_booking_email_shows_authoritative_final_payable_not_pending_validation(): void
+    {
+        $booking = $this->bookingWithFareContext(branded: true, validated: true);
+        $payload = app(BookingEmailPayloadFactory::class)->adminNewBookingAlert($booking);
+        $html = $this->renderUniversalNotificationHtml($payload);
+
+        $this->assertSame('Validated', $payload['payment']['fare_validation_status'] ?? null);
+        $this->assertStringContainsString('73,241', (string) ($payload['payment']['final_payable_status'] ?? ''));
+        $this->assertStringNotContainsString('Pending validation', $html);
+        $this->assertStringNotContainsString('Awaiting fare validation', $html);
     }
 
     #[Test]
@@ -89,7 +104,6 @@ class BookingBrandedFareBookingEmailTest extends TestCase
         $mail = new BookingRequestReceivedMail($booking);
 
         $this->assertStringContainsString('FREEDOM (FL)', $mail->htmlBody);
-        $this->assertStringContainsString('Approx. PKR 90,062', $mail->htmlBody);
         $this->assertStringContainsString('30 KG', $mail->htmlBody);
         $this->assertStringNotContainsString('80,190.00', $mail->htmlBody);
     }
@@ -120,7 +134,7 @@ class BookingBrandedFareBookingEmailTest extends TestCase
         });
     }
 
-    protected function bookingWithFareContext(bool $branded): Booking
+    protected function bookingWithFareContext(bool $branded, bool $validated = false): Booking
     {
         if (! $this->app->runningUnitTests() || Agency::query()->where('slug', config('ota.default_agency_slug'))->doesntExist()) {
             $this->seed(OtaFoundationSeeder::class);
@@ -132,15 +146,21 @@ class BookingBrandedFareBookingEmailTest extends TestCase
             $meta['selected_fare_family_option'] = [
                 'name' => 'FREEDOM',
                 'brand_code' => 'FL',
-                'displayed_price' => 90062,
+                'displayed_price' => $validated ? 73241 : 90062,
                 'displayed_currency' => 'PKR',
-                'price_display' => 'Approx. PKR 90,062',
-                'price_is_approximate' => true,
+                'price_display' => $validated ? 'PKR 73,241' : 'Approx. PKR 90,062',
+                'price_is_approximate' => ! $validated,
+                'authoritative_after_revalidation' => $validated,
                 'baggage_summary' => '30 KG',
                 'cabin' => 'economy',
                 'booking_class' => 'V',
                 'fare_basis' => 'VOWFL/V',
             ];
+            if ($validated) {
+                $meta['offer_validation_status'] = 'valid';
+                $meta['offer_validated_at'] = now()->toIso8601String();
+                $meta['validated_offer_snapshot'] = ['segments' => []];
+            }
         }
 
         $booking = Booking::factory()->create([
@@ -162,12 +182,12 @@ class BookingBrandedFareBookingEmailTest extends TestCase
 
         BookingFareBreakdown::query()->create([
             'booking_id' => $booking->id,
-            'base_fare' => 70000,
-            'taxes' => 10190,
+            'base_fare' => $validated ? 65000 : 70000,
+            'taxes' => $validated ? 8241 : 10190,
             'fees' => 0,
             'markup' => 0,
             'discount' => 0,
-            'total' => 80190,
+            'total' => $validated ? 73241 : 80190,
             'currency' => 'PKR',
             'breakdown' => [],
         ]);

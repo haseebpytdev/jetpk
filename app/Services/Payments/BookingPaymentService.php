@@ -15,6 +15,7 @@ use App\Services\Finance\Ledger\LedgerEventRecorder;
 use App\Services\Promos\PromoCodeService;
 use App\Services\Suppliers\PiaNdc\Exceptions\PiaNdcValidationException;
 use App\Services\Suppliers\PiaNdc\PiaNdcBookingStatusRefreshService;
+use App\Support\Bookings\BookingPaymentEligibility;
 use App\Support\Payments\BookingPayableResolver;
 use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
 use App\Support\Platform\PlatformModuleEnforcer;
@@ -295,6 +296,12 @@ class BookingPaymentService
     protected function assertManualPaymentAllowed(Booking $booking, User $actor, array $data): void
     {
         $booking->refresh();
+        $adminOverride = (bool) ($data['admin_override'] ?? false);
+        $canOverride = $actor->isPlatformAdmin();
+        if ((! $adminOverride || ! $canOverride) && ! BookingPaymentEligibility::allowsPayment($booking)) {
+            throw new InvalidArgumentException(BookingPaymentEligibility::denialMessage($booking) ?? 'Payment is not currently available for this booking.');
+        }
+
         $bookingTotal = BookingPayableResolver::customerPayableTotal($booking);
         $verifiedTotal = (float) $booking->payments()
             ->where('status', BookingPaymentStatus::Verified)
@@ -310,8 +317,6 @@ class BookingPaymentService
             throw new InvalidArgumentException('Payment amount must be greater than zero.');
         }
 
-        $adminOverride = (bool) ($data['admin_override'] ?? false);
-        $canOverride = $actor->isPlatformAdmin();
         if (! $adminOverride || ! $canOverride) {
             if ($balance <= 0) {
                 throw new InvalidArgumentException('No payment balance is due on this booking.');

@@ -26,6 +26,7 @@ class CompactReferenceGenerator
         'support_tickets.ticket_reference',
         'agent_wallet_transactions.reference',
         'ledger_transactions.transaction_ref',
+        'agent_applications.application_reference',
     ];
 
     public function generate(int $length = 8, ?string $startsWith = null): string
@@ -80,6 +81,22 @@ class CompactReferenceGenerator
         $pattern = '/^[A-Z2-9]{'.$length.'}$/';
 
         return preg_match($pattern, $value) === 1;
+    }
+
+    public static function sanitizePrefix(string $value, int $maxLength = 6): string
+    {
+        $prefix = '';
+        foreach (str_split(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $value) ?? '')) as $char) {
+            if (str_contains(self::ALPHABET, $char)) {
+                $prefix .= $char;
+            }
+        }
+
+        if ($prefix === '') {
+            return 'APP';
+        }
+
+        return substr($prefix, 0, max(1, $maxLength));
     }
 
     private function assertAllowedTarget(string $table, string $column): void

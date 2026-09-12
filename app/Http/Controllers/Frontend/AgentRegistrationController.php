@@ -11,8 +11,10 @@ use App\Models\AgentApplication;
 use App\Models\User;
 use App\Services\Client\ClientPageRenderer;
 use App\Services\Communication\OtaNotificationService;
+use App\Support\Agents\AgentApplicationNotificationPayload;
 use App\Support\Auth\PublicAuthRedirectAllowlist;
 use App\Support\Client\ClientPageKeys;
+use App\Support\Emails\EmailOperationalSubjectFormatter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -136,7 +138,7 @@ class AgentRegistrationController extends Controller
                 ->with('status', $message);
         }
 
-        AgentApplication::query()->create([
+        $application = AgentApplication::query()->create([
             ...$validated,
             'status' => 'pending',
         ]);
@@ -145,21 +147,14 @@ class AgentRegistrationController extends Controller
             ?? Agency::query()->first();
         if ($agency !== null) {
             try {
+                $notificationPayload = AgentApplicationNotificationPayload::fromApplication($application);
                 $this->notificationService->send(
                     agency: $agency,
                     eventKey: OtaNotificationEvent::AgentApplicationSubmitted->value,
-                    payload: [
-                        'applicant_name' => trim($validated['first_name'].' '.$validated['last_name']),
-                        'company_name' => $validated['company_name'],
-                        'city' => $validated['city'],
-                    ],
-                    fallbackSubject: 'New agent application received',
+                    payload: $notificationPayload,
+                    fallbackSubject: EmailOperationalSubjectFormatter::adminAgentApplication($application, 'New Agent Application'),
                     fallbackBody: 'A new agent application was submitted and is pending review.',
-                    templateVariables: [
-                        'applicant_name' => trim($validated['first_name'].' '.$validated['last_name']),
-                        'company_name' => $validated['company_name'],
-                        'city' => $validated['city'],
-                    ],
+                    templateVariables: $notificationPayload,
                     recipientContext: ['applicant_email' => $email],
                 );
             } catch (\Throwable $e) {

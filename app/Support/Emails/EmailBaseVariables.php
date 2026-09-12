@@ -6,6 +6,7 @@ use App\Models\Agency;
 use App\Models\Booking;
 use App\Support\Branding\BrandDisplayResolver;
 use App\Support\Branding\CompanyEmailProfileResolver;
+use App\Support\Url\PublicActionUrl;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Throwable;
@@ -221,13 +222,15 @@ class EmailBaseVariables
         }
 
         if (trim((string) ($variables['booking_url'] ?? '')) === '' && trim((string) ($variables['manage_booking_url'] ?? '')) !== '') {
-            $variables['booking_url'] = (string) $variables['manage_booking_url'];
+            $variables['booking_url'] = PublicActionUrl::sanitize((string) $variables['manage_booking_url'])
+                ?? (string) $variables['manage_booking_url'];
         }
-        if (trim((string) ($variables['login_url'] ?? '')) === '' && \Illuminate\Support\Facades\Route::has('login')) {
-            try {
-                $variables['login_url'] = route('login', absolute: true);
-            } catch (\Throwable) {
-            }
+        if (trim((string) ($variables['admin_booking_url'] ?? '')) !== '') {
+            $variables['admin_booking_url'] = PublicActionUrl::sanitize((string) $variables['admin_booking_url'])
+                ?? (string) $variables['admin_booking_url'];
+        }
+        if (trim((string) ($variables['login_url'] ?? '')) === '' && Route::has('login')) {
+            $variables['login_url'] = PublicActionUrl::route('login', absolute: true);
         }
 
         return EmailPlaceholderFallbacks::applyVariableAliases($variables);
@@ -336,11 +339,7 @@ class EmailBaseVariables
             return null;
         }
 
-        try {
-            return route('customer.bookings.show', ['booking' => $reference], absolute: true);
-        } catch (Throwable) {
-            return null;
-        }
+        return PublicActionUrl::route('customer.bookings.show', ['booking' => $reference], absolute: true);
     }
 
     protected static function manageBookingUrl(Booking $booking): string
@@ -351,11 +350,11 @@ class EmailBaseVariables
         }
 
         if ($booking->customer_id !== null && Route::has('customer.bookings.index')) {
-            return route('customer.bookings.index', absolute: true);
+            return PublicActionUrl::route('customer.bookings.index', absolute: true);
         }
 
         if (Route::has('booking.lookup')) {
-            return route('booking.lookup', absolute: true);
+            return PublicActionUrl::route('booking.lookup', absolute: true);
         }
 
         return '';
@@ -367,6 +366,6 @@ class EmailBaseVariables
             return '';
         }
 
-        return route('admin.bookings.show', $booking, absolute: true);
+        return PublicActionUrl::route('admin.bookings.show', $booking, absolute: true);
     }
 }

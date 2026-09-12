@@ -19,6 +19,7 @@ use App\Services\Promos\PromoCodeService;
 use App\Services\Suppliers\PiaNdc\Exceptions\PiaNdcValidationException;
 use App\Services\Suppliers\PiaNdc\PiaNdcBookingStatusRefreshService;
 use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
+use App\Support\Bookings\BookingPaymentEligibility;
 use App\Support\Payments\BookingPayableResolver;
 use App\Support\Payments\PaymentGatewayPayloadRedactor;
 use App\Support\References\CompactReferenceGenerator;
@@ -75,7 +76,7 @@ class PaymentTransactionService
 
     public function canOfferAbhiPayOnPublicReview(Booking $booking): bool
     {
-        if ($booking->status === BookingStatus::Cancelled) {
+        if (! BookingPaymentEligibility::allowsPayment($booking)) {
             return false;
         }
 
@@ -175,6 +176,10 @@ class PaymentTransactionService
 
     public function canStartAbhiPayForBooking(Booking $booking): bool
     {
+        if (! BookingPaymentEligibility::allowsPayment($booking)) {
+            return false;
+        }
+
         if ($blocked = $this->piaNdcOnlinePaymentBlockedReason($booking)) {
             return false;
         }
@@ -189,6 +194,10 @@ class PaymentTransactionService
 
     public function abhiPayStartBlockedMessage(Booking $booking): ?string
     {
+        if ($denial = BookingPaymentEligibility::denialMessage($booking)) {
+            return $denial;
+        }
+
         return $this->piaNdcOnlinePaymentBlockedReason($booking);
     }
 
@@ -244,6 +253,10 @@ class PaymentTransactionService
 
         if ($blocked = $this->piaNdcOnlinePaymentBlockedReason($booking)) {
             throw new InvalidArgumentException($blocked);
+        }
+
+        if ($denial = BookingPaymentEligibility::denialMessage($booking)) {
+            throw new InvalidArgumentException($denial);
         }
 
         $amount = $this->payableAmountForBooking($booking);

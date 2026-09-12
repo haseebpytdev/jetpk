@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\References\CompactReferenceGenerator;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,6 +32,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class AgentApplication extends Model
 {
+    protected static function booted(): void
+    {
+        static::creating(function (AgentApplication $application): void {
+            $prefix = self::referencePrefix((string) $application->company_name);
+            $application->application_reference = app(CompactReferenceGenerator::class)
+                ->generateUnique('agent_applications', 'application_reference', 12, $prefix);
+        });
+    }
+
     protected function casts(): array
     {
         return [
@@ -44,5 +54,10 @@ class AgentApplication extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    private static function referencePrefix(string $companyName): string
+    {
+        return CompactReferenceGenerator::sanitizePrefix($companyName);
     }
 }

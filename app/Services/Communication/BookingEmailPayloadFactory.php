@@ -6,11 +6,15 @@ use App\Models\Agency;
 use App\Models\Booking;
 use App\Models\BookingPayment;
 use App\Support\Bookings\BookingItineraryOverviewPresenter;
+use App\Support\Bookings\BookingPaymentEligibility;
 use App\Support\Bookings\SupplierOperationalStatus;
 use App\Support\Branding\CompanyEmailProfileResolver;
 use App\Support\Emails\EmailBaseVariables;
+use App\Support\Emails\EmailOperationalSubjectFormatter;
+use App\Support\Emails\EmailRecipientRoleSubjectTagger;
 use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use App\Support\Security\SensitiveDataRedactor;
+use App\Support\Url\PublicActionUrl;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Throwable;
@@ -869,13 +873,42 @@ class BookingEmailPayloadFactory
         return $this->basePayload(
             $booking,
             'admin_new_booking_alert',
-            'New customer booking - '.$booking->reference_code,
+            EmailOperationalSubjectFormatter::adminBookingNew($booking),
             'New customer booking',
             'New booking',
             'info',
             'A new customer booking request has been received.',
             $this->bookingRequestNotes($booking, ['Review passenger, payment, and supplier readiness details in the admin console.']),
             ['recipient_type' => 'admin', 'admin_booking_url' => $this->adminBookingUrl($booking)]
+        );
+    }
+
+    public function adminStatusChangedAlert(Booking $booking, string $statusLabel, ?string $previousStatus = null): array
+    {
+        $booking = $this->preparedBooking($booking);
+        $label = $this->headline($statusLabel);
+        $transitionNote = $previousStatus !== null && trim($previousStatus) !== ''
+            ? 'Status changed from '.$this->headline($previousStatus).' to '.$label.'.'
+            : 'Current status: '.$label.'.';
+
+        return $this->basePayload(
+            $booking,
+            'admin_booking_status_changed',
+            EmailOperationalSubjectFormatter::adminBookingStatusChanged($booking, $previousStatus, $statusLabel),
+            'Booking status updated',
+            $label,
+            $booking->status->value === 'cancelled' ? 'danger' : 'info',
+            'The booking status has been updated.',
+            array_values(array_filter([
+                $transitionNote,
+                'Review passenger, payment, and supplier readiness details in the admin console.',
+            ])),
+            [
+                'recipient_type' => 'admin',
+                'admin_booking_url' => $this->adminBookingUrl($booking),
+                'previous_status' => $previousStatus,
+                'new_status' => $statusLabel,
+            ],
         );
     }
 
@@ -997,20 +1030,24 @@ class BookingEmailPayloadFactory
         return $this->finalizeAgencyPaymentPayload($payload, $payment, 'Could not be verified');
     }
 
-    public function statusChanged(Booking $booking, string $statusLabel): array
+    public function statusChanged(Booking $booking, string $statusLabel, ?string $previousStatus = null): array
     {
         $booking = $this->preparedBooking($booking);
         $label = $this->headline($statusLabel);
+        $notes = ['If you did not expect this change, please contact support with your booking reference.'];
+        if ($previousStatus !== null && trim($previousStatus) !== '') {
+            $notes[] = 'Previous status: '.$this->headline($previousStatus).' → '.$label.'.';
+        }
 
         return $this->basePayload(
             $booking,
             $booking->status->value === 'cancelled' ? 'booking_cancelled' : 'booking_status_changed',
-            'Booking status update - '.$booking->reference_code,
+            EmailOperationalSubjectFormatter::customerBooking('Booking status update', $booking),
             'Booking status updated',
             $label,
             $booking->status->value === 'cancelled' ? 'danger' : 'info',
             'Your booking status has been updated.',
-            ['If you did not expect this change, please contact support with your booking reference.']
+            $notes,
         );
     }
 
@@ -1135,6 +1172,11 @@ class BookingEmailPayloadFactory
             $payload['selected_fare_family'] = $selectedFareFamily;
         }
 
+        $recipientType = (string) ($admin['recipient_type'] ?? 'customer');
+        if ($recipientType !== 'customer') {
+            $payload['subject'] = EmailRecipientRoleSubjectTagger::apply((string) $payload['subject'], $recipientType);
+        }
+
         return $payload;
     }
 
@@ -1246,14 +1288,24 @@ class BookingEmailPayloadFactory
         ];
 
         if ($selectedFareFamily !== null) {
-            $estimatedFareDisplay = $selectedFareFamily['estimated_fare_display'] ?? null;
+            $eligibility = BookingPaymentEligibility::evaluate($booking);
+            $meta = is_array($booking->meta) ? $booking->meta : [];
+            $intent = is_array($meta['selected_fare_family_option'] ?? null) ? $meta['selected_fare_family_option'] : [];
+            $estimatedFareDisplay = $selectedFareFamily['estimated_fare_display']
+                ?? (is_string($intent['price_display'] ?? null) ? trim((string) $intent['price_display']) : null);
             $payment['has_selected_fare_family'] = true;
+            $payment['fare_validation_status'] = $eligibility['validation_label'];
             $payment['estimated_selected_fare'] = $estimatedFareDisplay;
             $payment['estimated_selected_fare_label'] = $selectedFareFamily['estimated_fare_label'] ?? 'Estimated selected fare';
-            $payment['estimated_amount_due'] = $estimatedFareDisplay;
-            $payment['estimated_amount_due_label'] = 'Estimated amount due';
+            $payment['estimated_amount_due'] = $eligibility['has_authoritative_payable']
+                ? ($eligibility['final_payable_amount'] ?? $estimatedFareDisplay)
+                : $estimatedFareDisplay;
+            $payment['estimated_amount_due_label'] = $eligibility['has_authoritative_payable']
+                ? 'Amount due'
+                : 'Estimated amount due';
             $payment['payable_disclaimer'] = $selectedFareFamily['payable_disclaimer'] ?? FlightOfferDisplayPresenter::SELECTED_FARE_PAYABLE_DISCLAIMER;
-            $payment['final_payable_status'] = 'Pending validation';
+            $payment['final_payable_status'] = $eligibility['final_payable_status'];
+            $payment['payment_state_label'] = $eligibility['payment_state_label'];
             if ($total > 0) {
                 $payment['base_fare_total'] = number_format($total, 2).' '.$currency;
             }
@@ -1462,11 +1514,11 @@ class BookingEmailPayloadFactory
         }
 
         if ($booking->customer_id !== null && Route::has('customer.bookings.index')) {
-            return [['label' => 'My bookings', 'url' => route('customer.bookings.index', absolute: true)]];
+            return [['label' => 'My bookings', 'url' => PublicActionUrl::route('customer.bookings.index', absolute: true)]];
         }
 
         if (Route::has('booking.lookup')) {
-            return [['label' => 'Look up booking', 'url' => route('booking.lookup', absolute: true)]];
+            return [['label' => 'Look up booking', 'url' => PublicActionUrl::route('booking.lookup', absolute: true)]];
         }
 
         return [];
@@ -1508,11 +1560,7 @@ class BookingEmailPayloadFactory
             return null;
         }
 
-        try {
-            return route('admin.bookings.show', $booking, absolute: true);
-        } catch (Throwable) {
-            return null;
-        }
+        return PublicActionUrl::route('admin.bookings.show', $booking, absolute: true);
     }
 
     protected function headline(string $value): string

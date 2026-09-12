@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Support\Branding\CompanyEmailProfile;
 use App\Support\Branding\CompanyEmailProfileResolver;
 use App\Support\FlightSearch\FlightOfferDisplayPresenter;
+use App\Support\Url\PublicActionUrl;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
@@ -441,14 +442,14 @@ class CustomerFacingEmailRenderer
 
         if ($booking->customer_id !== null && Route::has('customer.bookings.index')) {
             return [
-                'url' => route('customer.bookings.index', absolute: true),
+                'url' => PublicActionUrl::route('customer.bookings.index', absolute: true),
                 'label' => 'My bookings',
             ];
         }
 
         if (Route::has('booking.lookup')) {
             return [
-                'url' => route('booking.lookup', absolute: true),
+                'url' => PublicActionUrl::route('booking.lookup', absolute: true),
                 'label' => 'Look up booking',
             ];
         }

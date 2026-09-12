@@ -2,6 +2,7 @@
 
 namespace App\Support\Emails;
 
+use App\Support\Url\PublicActionUrl;
 use Illuminate\Support\Facades\Route;
 use Throwable;
 
@@ -119,7 +120,7 @@ final class EmailContextualCtaResolver
             return null;
         }
         try {
-            return route($name, $parameters, absolute: true);
+            return PublicActionUrl::route($name, $parameters, absolute: true);
         } catch (Throwable) {
             return null;
         }
@@ -133,7 +134,7 @@ final class EmailContextualCtaResolver
             }
             $value = trim($candidate);
             if ($value !== '' && $value !== '#') {
-                return $value;
+                return PublicActionUrl::sanitize($value) ?? $value;
             }
         }
 

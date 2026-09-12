@@ -5,6 +5,7 @@ namespace App\Support\Emails;
 use App\Models\Agency;
 use App\Models\User;
 use App\Support\Branding\CompanyEmailProfileResolver;
+use App\Support\Url\PublicActionUrl;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -325,7 +326,7 @@ class AuthEmailRenderer
     {
         if (Route::has('login')) {
             return [
-                'url' => route('login', absolute: true),
+                'url' => PublicActionUrl::route('login', absolute: true),
                 'label' => 'Sign in to your account',
             ];
         }
