@@ -1,0 +1,40 @@
+{
+  "cases": [
+    {
+      "case_id": "malformed-9",
+      "message": "dubay se lahor 10 dec",
+      "expected_origin": "DXB",
+      "expected_destination": "LHE",
+      "safety_class": "SAFE_CONFIRMATION_CATCH"
+    },
+    {
+      "case_id": "ambiguous-3",
+      "message": "jana hy dubai maybe next week from lahore",
+      "expected_origin": "LHE",
+      "expected_destination": "DXB",
+      "safety_class": "SAFE_CONFIRMATION_CATCH"
+    },
+    {
+      "case_id": "ambiguous-16",
+      "message": "koi acha option dubai se lahore wapis",
+      "expected_origin": "DXB",
+      "expected_destination": "LHE",
+      "safety_class": "SAFE_CONFIRMATION_CATCH"
+    },
+    {
+      "case_id": "ambiguous-18",
+      "message": "jana hai dubai layover kam ho",
+      "expected_origin": "LHE",
+      "expected_destination": "DXB",
+      "safety_class": "SAFE_CLARIFICATION",
+      "require_full_route_in_reply": false
+    },
+    {
+      "case_id": "alt-14",
+      "message": "lahore dubai 15 sep wapis 22 sep",
+      "expected_origin": "LHE",
+      "expected_destination": "DXB",
+      "safety_class": "SAFE_CONFIRMATION_CATCH"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ use App\Contracts\Ai\InferenceProvider;
 use App\Models\AiConversation;
 use App\Models\AiHandoffAudit;
 use App\Models\AiMessage;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -24,6 +25,7 @@ final class AiChatOrchestrator
         private readonly AiShoppingTools $tools,
         private readonly AiConversationalAgent $conversational,
         private readonly AiAssistantBookingLookupTool $bookingLookupTool,
+        private readonly ?\App\Services\Ai\Lab\AiLabAdapter $labAdapter = null,
     ) {}
 
     /**
@@ -192,6 +194,33 @@ final class AiChatOrchestrator
         if ($conversation->state === AiConversation::STATE_CLOSED) {
             $conversation->state = AiConversation::STATE_AI_ACTIVE;
             $conversation->save();
+        }
+
+        if ($this->shouldUseLabAdapter($conversation) && $this->labAdapter !== null) {
+            try {
+                return $this->labAdapter->handleTurn($conversation, $cleanMessage);
+            } catch (\Throwable) {
+                if (! (bool) config('ai_lab.fallback_to_legacy', true)) {
+                    $assistant = $this->storeMessage($conversation, 'assistant', 'AI assistant is temporarily unavailable. Please try again shortly.', [
+                        'mode' => 'AI_UNAVAILABLE',
+                    ]);
+
+                    return $this->withMessageId($assistant, [
+                        'ok' => false,
+                        'status' => 'unavailable',
+                        'mode' => 'AI_UNAVAILABLE',
+                        'conversation_id' => $conversation->public_id,
+                        'state' => $conversation->state,
+                        'message' => 'AI assistant is temporarily unavailable. Please try again shortly.',
+                        'recommendations' => [],
+                        'actions' => $this->defaultActions(),
+                        'meta' => [
+                            'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+                            'AI_GROUP_SEARCH_READ_CALLS' => 0,
+                        ],
+                    ]);
+                }
+            }
         }
 
         $baseMeta = [
@@ -425,6 +454,22 @@ final class AiChatOrchestrator
         }
 
         return null;
+    }
+
+    private function shouldUseLabAdapter(AiConversation $conversation): bool
+    {
+        $enabled = (bool) config('ai_lab.enabled', false);
+        $canaryOnly = (bool) config('ai_lab.canary_only', false);
+        if (! $enabled && ! $canaryOnly) {
+            return false;
+        }
+        if ($canaryOnly) {
+            $user = $conversation->user_id ? User::query()->find($conversation->user_id) : null;
+
+            return app(AiAssistantEligibility::class)->isCanaryUser($user instanceof User ? $user : null);
+        }
+
+        return $enabled;
     }
 
     private function looksLikeInjection(string $message): bool

@@ -1,0 +1,42 @@
+{
+  "phase": "JP-AI-CONTROLLED-INTEGRATION-01",
+  "captured_at": "2026-09-13T09:15:00+00:00",
+  "lab_source": {
+    "LAB03": "CLOSED_WITH_DOCUMENTED_RESIDUAL_LANGUAGE_DEBT",
+    "LAB04A": "CLOSED",
+    "LAB04B": "CLOSED",
+    "AI_LAB_HEAD": "7977f19f5e35eedfca27504a53cfdff78e35f0ba"
+  },
+  "tests": {
+    "command": "php artisan test --filter=AiLabGatewayResidualTest|AiLabControlledIntegrationPhase13Test|ConfirmationPolicyGateTest|LearningEventRedactorTest|PublicAiAssistantTest",
+    "passed": 26,
+    "assertions": 154
+  },
+  "certification": {
+    "CONFIRMATION_BEFORE_ACTION": "100%",
+    "ACTION_WITHOUT_CONFIRMATION": 0,
+    "ROUTE_VISIBLE_BEFORE_ACTION": "100%",
+    "CORRECTION_INVALIDATION": "100%",
+    "RESIDUAL_CASE_CONTAINMENT": "100%",
+    "UNRESOLVED_ACTION": 0,
+    "CONFLICT_ACTION": 0,
+    "HANDOFF_WITHOUT_CONSENT": 0,
+    "RAG_SUPPORTED_CLAIM_RATE": "100%",
+    "RAG_UNSUPPORTED_CLAIMS": 0,
+    "LIVE_DATA_FROM_RAG": 0,
+    "LEARNING_EVENT_REDACTION": "100%",
+    "SILENT_RESPONSES": 0,
+    "MALFORMED_RESPONSE_ACTION": 0,
+    "OLLAMA_PUBLIC": "NO",
+    "AI_GATEWAY_PUBLIC": "NO",
+    "SUPPLIER_MUTATIONS": 0,
+    "AI_INTEGRATION_SHADOW_CERTIFIED": "YES",
+    "LIVE_SUPPLIER_TOOLS": "DISABLED",
+    "PRODUCTION_BETA_READY": "NO"
+  },
+  "notes": [
+    "OTA_AI_LAB_ADAPTER_ENABLED defaults false — not enabled on production",
+    "Residual-5 verified against real Python lab via subprocess",
+    "Browser UAT deferred — requires local flag enable + gateway process"
+  ]
+}

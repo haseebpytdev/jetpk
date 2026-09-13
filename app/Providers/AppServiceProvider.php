@@ -100,6 +100,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(ClientRedirectResolver::class);
         $this->app->singleton(\App\Support\Sabre\Scenario\SabreGdsScenarioCorrelationRegistry::class);
 
+        $this->app->singleton(\App\Contracts\Ai\Lab\AiLabConsultantGateway::class, \App\Services\Ai\Lab\HttpAiLabConsultantGateway::class);
+        $this->app->singleton(\App\Services\Ai\Lab\AiLabAdapter::class);
+
         $this->app->singleton(InferenceProvider::class, function (): InferenceProvider {
             $mode = strtolower((string) config('ota.ai_assistant.mode', 'off'));
             $legacyOn = (bool) config('ota.ai_assistant.enabled', false);
