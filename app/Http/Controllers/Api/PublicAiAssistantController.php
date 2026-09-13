@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Contracts\Ai\Lab\AiLabConsultantGateway;
 use App\Http\Controllers\Controller;
 use App\Models\AiConversation;
 use App\Services\Ai\AiAssistantEligibility;
 use App\Services\Ai\AiChatOrchestrator;
+use App\Services\Ai\Lab\AiLabFaultInjectionContext;
+use App\Services\Ai\Lab\AiLabGatewayUrlResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -63,17 +66,34 @@ class PublicAiAssistantController extends Controller
         return $this->withVisitorCookie(response()->json($payload), $resolved);
     }
 
-    public function health(): JsonResponse
-    {
+    public function health(
+        Request $request,
+        AiLabConsultantGateway $labGateway,
+        AiLabGatewayUrlResolver $urlResolver,
+    ): JsonResponse {
         try {
             $base = $this->orchestrator->healthPayload();
             $status = $this->eligibility->statusPayload();
 
-            return response()->json(array_merge($base, [
+            $payload = array_merge($base, [
                 'enabled' => $this->eligibility->isRuntimeOn(),
                 'assistant_mode' => $status['mode'],
                 'status' => $status,
-            ]));
+            ]);
+
+            if ($this->eligibility->isEligibleRequest($request)) {
+                $resolved = $urlResolver->resolve();
+                $host = is_string($resolved) ? (string) parse_url($resolved, PHP_URL_HOST) : null;
+                $port = is_string($resolved) ? (string) parse_url($resolved, PHP_URL_PORT) : null;
+                $payload['ai_lab_gateway'] = [
+                    'healthy' => $labGateway->isHealthy(),
+                    'resolved_host' => $host,
+                    'resolved_port' => $port,
+                    'fault_mode' => AiLabFaultInjectionContext::mode(),
+                ];
+            }
+
+            return response()->json($payload);
         } catch (\Throwable) {
             return response()->json([
                 'ok' => true,

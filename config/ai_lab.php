@@ -36,4 +36,7 @@ return [
 
     /** When gateway fails, return safe unavailable — do not fall back to live supplier tools. */
     'fallback_to_legacy' => filter_var(env('OTA_AI_LAB_FALLBACK_LEGACY', false), FILTER_VALIDATE_BOOL),
+
+    /** Shared secret for authorized internal-canary HTTP fault injection (harness only). */
+    'canary_fault_token' => env('OTA_AI_LAB_CANARY_FAULT_TOKEN', ''),
 ];

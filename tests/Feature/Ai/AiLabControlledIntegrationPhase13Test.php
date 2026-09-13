@@ -260,7 +260,9 @@ class AiLabControlledIntegrationPhase13Test extends TestCase
     public function test_localhost_gateway_enforcement(): void
     {
         config(['ai_lab.gateway_url' => 'http://example.com:8765']);
-        $gateway = new \App\Services\Ai\Lab\HttpAiLabConsultantGateway;
+        $gateway = new \App\Services\Ai\Lab\HttpAiLabConsultantGateway(
+            new \App\Services\Ai\Lab\AiLabGatewayUrlResolver,
+        );
 
         $this->assertFalse($gateway->isHealthy());
     }

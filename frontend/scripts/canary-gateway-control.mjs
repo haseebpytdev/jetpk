@@ -1,12 +1,17 @@
 /**
- * Controlled production gateway stop/start for canary resilience UAT (case 28).
- * Requires SSH key access to JetPakistan production.
+ * DEPRECATED — do not use for canary UAT.
+ * Case 28+ resilience uses request-scoped fault headers via canary-matrix-helpers.mjs.
+ * This script previously stopped jetpk-ai-lab-gateway globally and caused cross-case outages.
  */
 import { spawnSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 
 const action = process.argv[2];
+if (action === "stop") {
+  console.error("DEPRECATED: global gateway stop disabled. Use SIMULATE_GATEWAY_DOWN fault headers.");
+  process.exit(2);
+}
 const sshKey = path.join(os.homedir(), ".ssh", "jetpk_contabo_2026_v2");
 const host = "root@185.215.166.176";
 const service = "jetpk-ai-lab-gateway.service";

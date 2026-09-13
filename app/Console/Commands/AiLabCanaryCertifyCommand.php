@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\AiConversation;
 use App\Models\User;
 use App\Services\Ai\AiChatOrchestrator;
+use App\Services\Ai\Lab\AiLabFaultInjectionContext;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -333,12 +334,13 @@ class AiLabCanaryCertifyCommand extends Command
         $results = [];
         $failed = 0;
 
-        // Malformed gateway response — unreachable port
+        // Malformed gateway response — unreachable port via request-scoped fault injection
         $conversation = $this->newAdminConversation($admin);
-        $originalUrl = config('ai_lab.gateway_url');
-        config(['ai_lab.gateway_url' => 'http://127.0.0.1:1']);
         try {
-            $payload = $orchestrator->handleChat($conversation, 'LHE to DXB tomorrow');
+            $payload = AiLabFaultInjectionContext::using(
+                AiLabFaultInjectionContext::MODE_SIMULATE_GATEWAY_DOWN,
+                fn () => $orchestrator->handleChat($conversation, 'LHE to DXB tomorrow')
+            );
             $message = (string) ($payload['message'] ?? '');
             $safe = $message !== '';
             $noLabAction = ! (bool) data_get($payload, 'meta.shadow_flight_search');
@@ -353,8 +355,6 @@ class AiLabCanaryCertifyCommand extends Command
         } catch (\Throwable $e) {
             $results['gateway_unreachable'] = ['ok' => false, 'error' => $e->getMessage()];
             $failed++;
-        } finally {
-            config(['ai_lab.gateway_url' => $originalUrl]);
         }
 
         // Health endpoint still up

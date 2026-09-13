@@ -13,10 +13,18 @@ use Illuminate\Support\Facades\Log;
  */
 final class HttpAiLabConsultantGateway implements AiLabConsultantGateway
 {
+    public function __construct(
+        private readonly AiLabGatewayUrlResolver $urlResolver,
+    ) {}
+
     public function isHealthy(): bool
     {
-        $url = $this->gatewayUrl();
+        $url = $this->urlResolver->resolve();
         if ($url === null) {
+            return false;
+        }
+
+        if ($this->urlResolver->isOllamaDownSimulation() || $this->urlResolver->isMalformedSimulation()) {
             return false;
         }
 
@@ -31,7 +39,15 @@ final class HttpAiLabConsultantGateway implements AiLabConsultantGateway
 
     public function turn(ConsultantTurnRequest $request): ConsultantTurnResponse
     {
-        $url = $this->gatewayUrl();
+        if ($this->urlResolver->isMalformedSimulation()) {
+            throw new \RuntimeException('AI lab gateway returned malformed JSON.');
+        }
+
+        if ($this->urlResolver->isOllamaDownSimulation()) {
+            throw new \RuntimeException('AI lab gateway returned HTTP 503');
+        }
+
+        $url = $this->urlResolver->resolve();
         if ($url === null) {
             throw new \RuntimeException('AI lab gateway URL is not localhost-safe.');
         }
@@ -56,30 +72,11 @@ final class HttpAiLabConsultantGateway implements AiLabConsultantGateway
         } catch (\Throwable $e) {
             Log::warning('ai.lab.gateway_turn_failed', [
                 'message' => $e->getMessage(),
+                'resolved_gateway_url' => $url,
+                'fault_mode' => AiLabFaultInjectionContext::mode(),
             ]);
 
             throw $e;
         }
-    }
-
-    private function gatewayUrl(): ?string
-    {
-        $raw = rtrim((string) config('ai_lab.gateway_url', ''), '/');
-        if ($raw === '') {
-            return null;
-        }
-
-        if ((bool) config('ai_lab.require_localhost', true) && ! $this->isLocalhostUrl($raw)) {
-            return null;
-        }
-
-        return $raw;
-    }
-
-    private function isLocalhostUrl(string $url): bool
-    {
-        $host = parse_url($url, PHP_URL_HOST);
-
-        return in_array($host, ['127.0.0.1', 'localhost', '::1'], true);
     }
 }
