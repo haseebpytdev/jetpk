@@ -195,6 +195,18 @@ return [
                     'default' => '2.0',
                     'help' => 'Wire protocol version. Existing connections without this field default to 2.0.',
                 ],
+                'certification_status' => [
+                    'label' => 'Supplier Certification Status',
+                    'type' => 'select',
+                    'required' => false,
+                    'channel' => 'zapways_ota',
+                    'options' => [
+                        'pending' => 'Pending supplier certification',
+                        'certified' => 'Supplier certified',
+                    ],
+                    'default' => 'pending',
+                    'help' => 'Controls whether this Zapways connection may participate in normal/public AirBlue search. Supplier health does not imply certification.',
+                ],
                 'service_version' => [
                     'label' => 'Service Version',
                     'type' => 'text',

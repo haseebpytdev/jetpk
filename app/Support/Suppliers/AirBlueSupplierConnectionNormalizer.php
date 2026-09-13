@@ -51,6 +51,10 @@ final class AirBlueSupplierConnectionNormalizer
             $credentials['protocol_version'] = $protocol->value;
         }
 
+        if ($protocol->isV3() && ! array_key_exists('certification_status', $credentials) && ! array_key_exists('search_certified', $credentials)) {
+            $credentials['certification_status'] = 'pending';
+        }
+
         $baseUrl = trim((string) ($payload['base_url'] ?? $existing?->base_url ?? ''));
         if ($baseUrl === '') {
             $protocolConfig = (array) config('suppliers.airblue.protocol_versions.'.$protocol->value, []);
