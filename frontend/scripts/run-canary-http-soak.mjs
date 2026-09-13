@@ -109,7 +109,11 @@ async function main() {
     if (result.status === 419) {
       csrf = await fetchCsrfToken(page);
     }
-    await page.waitForTimeout(1500);
+    if (i > 0 && i % 8 === 0) {
+      await page.waitForTimeout(65_000);
+    } else {
+      await page.waitForTimeout(Number(process.env.JP_CANARY_HTTP_SOAK_PACE_MS ?? 8000));
+    }
   }
 
   const faultRecovery = {};

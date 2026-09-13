@@ -35,7 +35,9 @@ final class LearningQueueWriter
         $driver = (string) config('ai_lab.learning_driver', 'jsonl');
         if ($driver === 'jsonl') {
             $path = 'ai-lab/learning/events.jsonl';
-            Storage::disk('local')->append($path, json_encode($event, JSON_UNESCAPED_UNICODE));
+            $disk = Storage::disk('local');
+            $disk->makeDirectory(dirname($path));
+            $disk->append($path, json_encode($event, JSON_UNESCAPED_UNICODE));
         }
     }
 }
