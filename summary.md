@@ -39,6 +39,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 ## Changelog (high level)
 
+| 2026-09-13 | JP-AIRBLUE-ZAPWAYS-02 | Zapways contract alignment: ota4/otatest4 endpoints, env-aware Target=Test/Production, AirBook supplier PTC fare breakdowns, CHD/INF BirthDate/docs, redaction/diagnostics. |
 | 2026-09-13 | JP-AIRBLUE-ZAPWAYS-01 | AirBlue runtime Zapways-only: removed Crane execution branches, added `AirBluePassengerPayloadBuilder`, expanded OTA tests/fixtures, fail-closed ancillary/void/preview. |
 | 2026-09-06 | JP10 AUTH_LOGIN_EMAIL_PATH | One Admin login sends one security mail via `AuthEmailRenderer` + modern 620px layout; new-device facts fold in; `notifyNewDeviceLogin` audit-only; CTA/logo rewrite `127.0.0.1:8088`; hide empty Booking snapshot. |
 | 2026-09-05 | JP-FINAL-CLOSURE-06 | Email QA: support CTA uses `admin.support.tickets.show`; canonical PK-211 itinerary for booking/ticket samples; booking plain-text facts; agent application single block. Traveler residual decomposed, no Traveler code change. |
@@ -517,7 +518,7 @@ AirBlue (PA) is **Zapways OTA only** (`credentials.api_channel=zapways_ota`). Hi
 | File | Role | Key APIs |
 |------|------|----------|
 | `AirBlueClient.php` | Zapways OTA SOAP calls + `air-blue` log. | `call`, `callOta` |
-| `AirBlueConfigResolver.php` | Zapways endpoint/credentials; rejects deprecated Crane channel. | `resolve`, `resolveOta`, `apiChannel` |
+| `AirBlueConfigResolver.php` | Zapways endpoint/credentials; env-aware `service_target`; rejects deprecated Crane channel. | `resolve`, `resolveOta`, `resolveServiceTarget`, `apiChannel` |
 | `AirBluePassengerPayloadBuilder.php` | Passenger/contact payloads for Zapways `AirBook`. | `buildPassengersFromBooking`, `buildContactFromBooking` |
 | `AirBlueXmlBuilder.php` / `AirBlueXmlParser.php` / `AirBlueResponseNormalizer.php` | Legacy Crane stack (deprecated; use `PiaNdc/*`). | — |
 | `AirBlueOtaXmlBuilder.php` / `AirBlueOtaXmlParser.php` / `AirBlueOtaResponseNormalizer.php` | Zapways OTA stack. | `AirLowFareSearch`, book/retrieve/ticket/cancel |

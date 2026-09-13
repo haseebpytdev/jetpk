@@ -143,6 +143,7 @@ class AirBlueOtaXmlParser
                 'arrival_datetime' => $segmentNode->attributes?->getNamedItem('ArrivalDateTime')?->nodeValue,
                 'flight_number' => $segmentNode->attributes?->getNamedItem('FlightNumber')?->nodeValue,
                 'rbd' => $segmentNode->attributes?->getNamedItem('ResBookDesigCode')?->nodeValue,
+                'fare_basis' => $this->firstText($xpath, './/*[local-name()="FareBasis"]/@Code', $segmentNode),
                 'departure_airport' => $this->firstText($xpath, './/*[local-name()="DepartureAirport"]/@LocationCode', $segmentNode),
                 'arrival_airport' => $this->firstText($xpath, './/*[local-name()="ArrivalAirport"]/@LocationCode', $segmentNode),
                 'marketing_carrier' => $this->firstText($xpath, './/*[local-name()="MarketingAirline"]/@Code', $segmentNode),
@@ -193,11 +194,21 @@ class AirBlueOtaXmlParser
             $qty = $this->firstText($xpath, './/*[local-name()="PassengerTypeQuantity"]/@Quantity', $node);
             $total = $this->firstText($xpath, './/*[local-name()="TotalFare"]/@Amount', $node);
             $currency = $this->firstText($xpath, './/*[local-name()="TotalFare"]/@CurrencyCode', $node);
+            $base = $this->firstText($xpath, './/*[local-name()="PassengerFare"]/*[local-name()="BaseFare"]/@Amount', $node);
+            $baseCurrency = $this->firstText($xpath, './/*[local-name()="PassengerFare"]/*[local-name()="BaseFare"]/@CurrencyCode', $node);
+            $taxes = $this->firstText($xpath, './/*[local-name()="PassengerFare"]/*[local-name()="Taxes"]/@Amount', $node);
+            $taxCurrency = $this->firstText($xpath, './/*[local-name()="PassengerFare"]/*[local-name()="Taxes"]/@CurrencyCode', $node);
+            $fareBasis = $this->firstText($xpath, './/*[local-name()="FareBasisCodes"]/*[local-name()="FareBasisCode"]', $node);
             $breakdowns[] = [
                 'ptc' => $ptc,
                 'quantity' => $qty !== '' ? (int) $qty : 1,
+                'base' => $base !== '' ? (float) $base : 0.0,
+                'base_currency' => $baseCurrency !== '' ? $baseCurrency : ($currency !== '' ? $currency : 'PKR'),
+                'taxes' => $taxes !== '' ? (float) $taxes : 0.0,
+                'tax_currency' => $taxCurrency !== '' ? $taxCurrency : ($currency !== '' ? $currency : 'PKR'),
                 'total' => $total !== '' ? (float) $total : 0.0,
                 'currency' => $currency !== '' ? $currency : 'PKR',
+                'fare_basis' => $fareBasis !== '' ? $fareBasis : null,
             ];
         }
 

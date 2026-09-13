@@ -10,8 +10,8 @@
         </div>
         <div class="jp-field jp-field--full">
             <label class="form-label" for="airblue-base-url">Zapways endpoint URL</label>
-            <input id="airblue-base-url" type="url" name="base_url" class="form-control" value="{{ old('base_url', $connection->base_url) }}" required data-airblue-base-url placeholder="https://ota3.zapways.com/v2.0/OTAAPI.asmx" @disabled(! $isAirblue)>
-            <p class="form-hint">AirBlue inventory via Zapways API / NDC (cert uses ota.qa.zapways.com).</p>
+            <input id="airblue-base-url" type="url" name="base_url" class="form-control" value="{{ old('base_url', $connection->base_url) }}" required data-airblue-base-url placeholder="https://ota4.zapways.com/v2.0/OTAAPI.asmx" @disabled(! $isAirblue)>
+            <p class="form-hint">AirBlue inventory via Zapways API / NDC (cert uses otatest4.zapways.com; Target=Test).</p>
         </div>
     </div>
 </div>

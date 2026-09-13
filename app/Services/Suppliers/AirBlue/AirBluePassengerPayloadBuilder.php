@@ -32,6 +32,8 @@ class AirBluePassengerPayloadBuilder
                     'Passenger gender is required before creating an AirBlue order.',
                 ),
             };
+            $birthdate = $passenger->date_of_birth?->format('Y-m-d') ?? trim((string) ($passenger->date_of_birth ?? ''));
+            $passportExpiry = $passenger->passport_expiry_date?->format('Y-m-d') ?? trim((string) ($passenger->passport_expiry_date ?? ''));
             $passengers[] = [
                 'pax_id' => 'PAX-'.$ptc.$idx,
                 'ptc' => $ptc,
@@ -39,7 +41,11 @@ class AirBluePassengerPayloadBuilder
                 'given_name' => (string) ($passenger->first_name ?? ''),
                 'surname' => (string) ($passenger->last_name ?? ''),
                 'gender' => $gender,
-                'birthdate' => (string) ($passenger->date_of_birth ?? ''),
+                'birthdate' => $birthdate,
+                'nationality' => strtoupper(trim((string) ($passenger->nationality ?? ''))),
+                'document_number' => trim((string) ($passenger->passport_number ?? '')),
+                'document_issuing_country' => strtoupper(trim((string) ($passenger->passport_issuing_country ?? ''))),
+                'document_expiry' => $passportExpiry,
                 'contact_info_ref_id' => 'Contact-1',
             ];
         }

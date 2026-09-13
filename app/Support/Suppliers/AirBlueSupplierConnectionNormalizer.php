@@ -55,7 +55,8 @@ final class AirBlueSupplierConnectionNormalizer
                 $credentials[$key] = $existingCredentials[$key];
             }
         }
-        foreach (['service_target' => 'Production', 'service_version' => '1.04'] as $key => $default) {
+        $defaultTarget = $isTest ? 'Test' : 'Production';
+        foreach (['service_target' => $defaultTarget, 'service_version' => '1.04'] as $key => $default) {
             if (trim((string) ($credentials[$key] ?? '')) === '') {
                 $credentials[$key] = trim((string) ($existingCredentials[$key] ?? '')) ?: $default;
             }

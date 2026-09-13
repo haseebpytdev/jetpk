@@ -230,8 +230,8 @@ class AirBlueClient
         $ops = (array) config('suppliers.airblue.ota_operations.'.$operation, []);
         if ($operation === 'read') {
             return (bool) ($config['is_test'] ?? false)
-                ? (string) ($ops['soap_action_test'] ?? 'https://ota.qa.zapways.com/Read')
-                : (string) ($ops['soap_action_live'] ?? 'https://ota.zapways.com/Read');
+                ? (string) ($ops['soap_action_test'] ?? 'https://otatest4.zapways.com/Read')
+                : (string) ($ops['soap_action_live'] ?? 'https://ota4.zapways.com/Read');
         }
 
         return (string) ($ops['soap_action'] ?? $operation);
@@ -277,9 +277,12 @@ class AirBlueClient
 
     private function sanitizeXml(string $xml): string
     {
-        $redacted = preg_replace('/(<(?:[\w]+:)?(?:EmailAddressText|GivenName|Surname|Birthdate|PhoneNumber|DocID|MessagePassword|Email)>)[^<]+(<\/)/i', '$1[REDACTED]$2', $xml);
+        $redacted = preg_replace('/(<(?:[\w]+:)?(?:EmailAddressText|GivenName|Surname|Birthdate|BirthDate|PhoneNumber|DocID|MessagePassword|Email)>)[^<]+(<\/)/i', '$1[REDACTED]$2', $xml);
         $redacted = is_string($redacted) ? preg_replace('/(MessagePassword=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
         $redacted = is_string($redacted) ? preg_replace('/(ERSP_UserID=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
+        $redacted = is_string($redacted) ? preg_replace('/(BirthDate=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
+        $redacted = is_string($redacted) ? preg_replace('/(DocID=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
+        $redacted = is_string($redacted) ? preg_replace('/(\bID=")(?![0-9]{1,3}")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
         $redacted = is_string($redacted) ? preg_replace('/(<ota:Email>)[^<]+(<\/ota:Email>)/i', '$1[REDACTED]$2', $redacted) : $xml;
         $redacted = is_string($redacted) ? preg_replace('/(PhoneNumber=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
 

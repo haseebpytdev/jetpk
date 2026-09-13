@@ -32,4 +32,19 @@ XML;
         $this->assertStringNotContainsString('JOHN', $redacted);
         $this->assertStringContainsString('[REDACTED]', $redacted);
     }
+
+    public function test_sanitize_xml_redacts_birthdate_and_document_attributes(): void
+    {
+        $client = app(AirBlueClient::class);
+        $method = (new ReflectionClass($client))->getMethod('sanitizeXml');
+        $method->setAccessible(true);
+
+        $xml = '<ota:AirTraveler BirthDate="2015-06-01"><ota:Document DocID="AB1234567"/></ota:AirTraveler>';
+
+        $redacted = $method->invoke($client, $xml);
+
+        $this->assertStringNotContainsString('2015-06-01', $redacted);
+        $this->assertStringNotContainsString('AB1234567', $redacted);
+        $this->assertStringContainsString('[REDACTED]', $redacted);
+    }
 }

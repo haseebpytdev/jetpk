@@ -22,6 +22,19 @@
                 <Taxes Amount="2500.00" CurrencyCode="PKR"/>
                 <TotalFare Amount="14500.00" CurrencyCode="PKR"/>
               </ItinTotalFare>
+              <PTC_FareBreakdowns>
+                <PTC_FareBreakdown>
+                  <PassengerTypeQuantity Code="ADT" Quantity="1"/>
+                  <PassengerFare>
+                    <BaseFare Amount="12000.00" CurrencyCode="PKR"/>
+                    <Taxes Amount="2500.00" CurrencyCode="PKR"/>
+                    <TotalFare Amount="14500.00" CurrencyCode="PKR"/>
+                    <FareBasisCodes>
+                      <FareBasisCode>YOW</FareBasisCode>
+                    </FareBasisCodes>
+                  </PassengerFare>
+                </PTC_FareBreakdown>
+              </PTC_FareBreakdowns>
             </AirItineraryPricingInfo>
           </PricedItinerary>
         </PricedItineraries>

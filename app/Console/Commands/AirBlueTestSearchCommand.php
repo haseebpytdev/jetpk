@@ -3,8 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Data\FlightSearchRequestData;
+use App\Enums\SupplierEnvironment;
 use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
+use App\Services\Suppliers\AirBlue\AirBlueConfigResolver;
 use App\Services\Suppliers\AirBlue\AirBlueFlightSearchService;
 use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Console\Command;
@@ -25,7 +27,7 @@ class AirBlueTestSearchCommand extends Command
 
     protected $description = 'Run AirBlue test search and save sanitized fixture';
 
-    public function handle(AirBlueFlightSearchService $searchService): int
+    public function handle(AirBlueFlightSearchService $searchService, AirBlueConfigResolver $configResolver): int
     {
         $connection = $this->resolveConnection();
         if ($connection === null) {
@@ -33,6 +35,20 @@ class AirBlueTestSearchCommand extends Command
 
             return self::FAILURE;
         }
+
+        if ($connection->environment === SupplierEnvironment::Live) {
+            $this->error('Refusing live AirBlue search. Configure a sandbox/demo test connection.');
+
+            return self::FAILURE;
+        }
+
+        $config = $configResolver->resolveOta($connection);
+        $this->line('connection_id='.$connection->id);
+        $this->line('environment='.($config['environment'] ?? ''));
+        $this->line('endpoint='.($config['endpoint_url'] ?? ''));
+        $this->line('service_target='.($config['service_target'] ?? ''));
+        $this->line('service_version='.($config['service_version'] ?? ''));
+        $startedAt = microtime(true);
 
         $date = (string) ($this->option('date') ?: now()->addMonth()->format('Y-m-d'));
         $return = $this->option('return');
@@ -53,9 +69,13 @@ class AirBlueTestSearchCommand extends Command
         $request = FlightSearchRequestData::fromArray($criteria);
         $result = $searchService->search($request, $connection);
 
+        $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
         $this->line('offers_count='.count($result->offers));
+        $this->line('duration_ms='.$durationMs);
+        $this->line('correlation_id='.($result->meta['correlation_id'] ?? ''));
         if (isset($result->meta['error_code'])) {
             $this->error('error_code='.$result->meta['error_code']);
+            $this->line('http_status='.($result->meta['http_status'] ?? ''));
 
             return self::FAILURE;
         }

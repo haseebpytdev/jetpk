@@ -21,6 +21,12 @@ class AirBlueOtaXmlParserTest extends TestCase
         $this->assertCount(1, $itineraries);
         $this->assertSame('PA', $itineraries[0]['segments'][0]['marketing_carrier']);
         $this->assertSame(14500.0, $itineraries[0]['total_fare']['total']);
+        $breakdowns = $itineraries[0]['fare_breakdowns'];
+        $this->assertCount(1, $breakdowns);
+        $this->assertSame('ADT', $breakdowns[0]['ptc']);
+        $this->assertSame(12000.0, $breakdowns[0]['base']);
+        $this->assertSame(2500.0, $breakdowns[0]['taxes']);
+        $this->assertSame('YOW', $breakdowns[0]['fare_basis']);
     }
 
     public function test_rejects_empty_xml(): void

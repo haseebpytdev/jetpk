@@ -36,13 +36,23 @@ class AirBlueDiagnosticService
                 'healthy' => true,
                 'api_channel' => $config['api_channel'] ?? null,
                 'environment' => $config['environment'],
+                'is_test' => (bool) ($config['is_test'] ?? false),
                 'endpoint_url' => $config['endpoint_url'],
+                'service_target' => $config['service_target'] ?? null,
+                'service_version' => $config['service_version'] ?? null,
                 'credential_fields_present' => [
                     'client_id' => ($config['client_id'] ?? '') !== '',
                     'client_key' => ($config['client_key'] ?? '') !== '',
                     'agent_type' => ($config['agent_type'] ?? '') !== '',
                     'agent_id' => ($config['agent_id'] ?? '') !== '',
                     'agent_password' => ($config['agent_password'] ?? '') !== '',
+                ],
+                'credential_field_lengths' => [
+                    'client_id' => strlen((string) ($config['client_id'] ?? '')),
+                    'client_key' => strlen((string) ($config['client_key'] ?? '')),
+                    'agent_type' => strlen((string) ($config['agent_type'] ?? '')),
+                    'agent_id' => strlen((string) ($config['agent_id'] ?? '')),
+                    'agent_password' => strlen((string) ($config['agent_password'] ?? '')),
                 ],
             ];
         } catch (AirBlueException $exception) {

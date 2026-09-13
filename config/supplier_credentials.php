@@ -180,8 +180,8 @@ return [
                     'type' => 'text',
                     'required' => false,
                     'channel' => 'zapways_ota',
-                    'placeholder' => 'Production',
-                    'default' => 'Production',
+                    'placeholder' => 'Test (cert) or Production (live)',
+                    'help' => 'Defaults to Test for cert/sandbox and Production for live when left blank.',
                 ],
                 'service_version' => [
                     'label' => 'Service Version',

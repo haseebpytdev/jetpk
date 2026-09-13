@@ -135,7 +135,7 @@ class AirBlueConfigResolver
             'agent_type' => $agentType,
             'agent_id' => $agentId,
             'agent_password' => $agentPassword,
-            'service_target' => trim((string) ($credentials['service_target'] ?? '')) ?: 'Production',
+            'service_target' => $this->resolveServiceTarget($connection, $credentials),
             'service_version' => trim((string) ($credentials['service_version'] ?? '')) ?: '1.04',
             'tls_cert_path' => trim((string) ($credentials['tls_cert_path'] ?? '')),
             'carrier_code' => 'PA',
@@ -155,5 +155,18 @@ class AirBlueConfigResolver
         $env = $connection->environment;
 
         return in_array($env, [SupplierEnvironment::Demo, SupplierEnvironment::Sandbox], true);
+    }
+
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
+    public function resolveServiceTarget(SupplierConnection $connection, array $credentials): string
+    {
+        $explicit = trim((string) ($credentials['service_target'] ?? ''));
+        if ($explicit !== '') {
+            return $explicit;
+        }
+
+        return $this->isTestEnvironment($connection) ? 'Test' : 'Production';
     }
 }

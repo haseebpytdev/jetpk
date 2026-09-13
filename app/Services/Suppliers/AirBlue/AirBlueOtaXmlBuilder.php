@@ -100,6 +100,8 @@ XML;
             }
         }
 
+        $priceInfoXml = $this->priceInfoXml($itineraries);
+
         $travelersXml = '';
         $rph = 1;
         foreach ($passengers as $passenger) {
@@ -129,11 +131,44 @@ XML;
                         </ota:OriginDestinationOption>
                     </ota:OriginDestinationOptions>
                 </ota:AirItinerary>
+                {$priceInfoXml}
                 <ota:TravelerInfo>
                     {$travelersXml}
                 </ota:TravelerInfo>
             </ota:OTA_AirBookRQ>
         </zap:AirBook>
+    </soapenv:Body>
+</soapenv:Envelope>
+XML;
+    }
+
+    /**
+     * @param  array<string, mixed>  $config
+     * @param  array<string, mixed>  $modifyContext
+     */
+    public function buildAirBookModifyRequest(array $config, array $modifyContext): string
+    {
+        $pnr = htmlspecialchars(trim((string) ($modifyContext['pnr'] ?? '')), ENT_XML1);
+        $instance = htmlspecialchars(trim((string) ($modifyContext['instance'] ?? '')), ENT_XML1);
+        if ($pnr === '' || $instance === '') {
+            throw new AirBlueValidationException('missing_modify_context', 422, 'AirBlue OTA modify requires PNR and instance.');
+        }
+
+        $pos = $this->posBlock($config);
+        $echoToken = htmlspecialchars((string) Str::uuid(), ENT_XML1);
+        $target = htmlspecialchars((string) $config['service_target'], ENT_XML1);
+        $version = htmlspecialchars((string) $config['service_version'], ENT_XML1);
+
+        return <<<XML
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:zap="http://zapways.com/air/ota/2.0" xmlns:ota="http://www.opentravel.org/OTA/2003/05">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <zap:AirBookModify>
+            <ota:OTA_AirBookModifyRQ EchoToken="{$echoToken}" Target="{$target}" Version="{$version}">
+                {$pos}
+                <ota:UniqueID ID="{$pnr}" Instance="{$instance}" Type="14"/>
+            </ota:OTA_AirBookModifyRQ>
+        </zap:AirBookModify>
     </soapenv:Body>
 </soapenv:Envelope>
 XML;
@@ -268,6 +303,93 @@ XML;
     }
 
     /**
+     * @param  list<array<string, mixed>>  $itineraries
+     */
+    private function priceInfoXml(array $itineraries): string
+    {
+        $breakdownXml = '';
+        $totalBase = 0.0;
+        $totalTaxes = 0.0;
+        $totalAmount = 0.0;
+        $currency = 'PKR';
+
+        foreach ($itineraries as $itinerary) {
+            if (! is_array($itinerary)) {
+                continue;
+            }
+            $fare = is_array($itinerary['total_fare'] ?? null) ? $itinerary['total_fare'] : [];
+            $totalBase += (float) ($fare['base'] ?? 0);
+            $totalTaxes += (float) ($fare['taxes'] ?? 0) + (float) ($fare['fees'] ?? 0);
+            $totalAmount += (float) ($fare['total'] ?? 0);
+            $currency = (string) ($fare['currency'] ?? $currency);
+
+            foreach (is_array($itinerary['fare_breakdowns'] ?? null) ? $itinerary['fare_breakdowns'] : [] as $breakdown) {
+                if (! is_array($breakdown)) {
+                    continue;
+                }
+                $breakdownXml .= $this->ptcFareBreakdownXml($breakdown);
+            }
+        }
+
+        if ($breakdownXml === '') {
+            throw new AirBlueValidationException(
+                'missing_fare_breakdowns',
+                422,
+                'AirBlue OTA booking requires supplier PTC fare breakdowns from the selected search offer.',
+            );
+        }
+
+        $base = htmlspecialchars(number_format($totalBase, 2, '.', ''), ENT_XML1);
+        $taxes = htmlspecialchars(number_format($totalTaxes, 2, '.', ''), ENT_XML1);
+        $total = htmlspecialchars(number_format($totalAmount, 2, '.', ''), ENT_XML1);
+        $currencyAttr = htmlspecialchars($currency, ENT_XML1);
+
+        return <<<XML
+                <ota:PriceInfo>
+                    <ota:ItinTotalFare>
+                        <ota:BaseFare Amount="{$base}" CurrencyCode="{$currencyAttr}"/>
+                        <ota:Taxes Amount="{$taxes}" CurrencyCode="{$currencyAttr}"/>
+                        <ota:TotalFare Amount="{$total}" CurrencyCode="{$currencyAttr}"/>
+                    </ota:ItinTotalFare>
+                    <ota:PTC_FareBreakdowns>
+{$breakdownXml}
+                    </ota:PTC_FareBreakdowns>
+                </ota:PriceInfo>
+XML;
+    }
+
+    /**
+     * @param  array<string, mixed>  $breakdown
+     */
+    private function ptcFareBreakdownXml(array $breakdown): string
+    {
+        $ptc = htmlspecialchars((string) ($breakdown['ptc'] ?? 'ADT'), ENT_XML1);
+        $qty = max(1, (int) ($breakdown['quantity'] ?? 1));
+        $currency = htmlspecialchars((string) ($breakdown['currency'] ?? 'PKR'), ENT_XML1);
+        $baseCurrency = htmlspecialchars((string) ($breakdown['base_currency'] ?? $breakdown['currency'] ?? 'PKR'), ENT_XML1);
+        $taxCurrency = htmlspecialchars((string) ($breakdown['tax_currency'] ?? $breakdown['currency'] ?? 'PKR'), ENT_XML1);
+        $base = htmlspecialchars(number_format((float) ($breakdown['base'] ?? 0), 2, '.', ''), ENT_XML1);
+        $taxes = htmlspecialchars(number_format((float) ($breakdown['taxes'] ?? 0), 2, '.', ''), ENT_XML1);
+        $total = htmlspecialchars(number_format((float) ($breakdown['total'] ?? 0), 2, '.', ''), ENT_XML1);
+        $fareBasis = trim((string) ($breakdown['fare_basis'] ?? ''));
+        $fareBasisXml = $fareBasis !== ''
+            ? '<ota:FareBasisCodes><ota:FareBasisCode>'.htmlspecialchars($fareBasis, ENT_XML1).'</ota:FareBasisCode></ota:FareBasisCodes>'
+            : '';
+
+        return <<<XML
+                        <ota:PTC_FareBreakdown>
+                            <ota:PassengerTypeQuantity Code="{$ptc}" Quantity="{$qty}"/>
+                            <ota:PassengerFare>
+                                <ota:BaseFare Amount="{$base}" CurrencyCode="{$baseCurrency}"/>
+                                <ota:Taxes Amount="{$taxes}" CurrencyCode="{$taxCurrency}"/>
+                                <ota:TotalFare Amount="{$total}" CurrencyCode="{$currency}"/>
+                                {$fareBasisXml}
+                            </ota:PassengerFare>
+                        </ota:PTC_FareBreakdown>
+XML;
+    }
+
+    /**
      * @param  array<string, mixed>  $passenger
      * @param  array<string, mixed>  $contact
      */
@@ -275,23 +397,66 @@ XML;
     {
         $given = htmlspecialchars((string) ($passenger['given_name'] ?? ''), ENT_XML1);
         $surname = htmlspecialchars((string) ($passenger['surname'] ?? ''), ENT_XML1);
-        $ptc = htmlspecialchars((string) ($passenger['ptc'] ?? 'ADT'), ENT_XML1);
+        $ptc = strtoupper((string) ($passenger['ptc'] ?? 'ADT'));
+        $ptcAttr = htmlspecialchars($ptc, ENT_XML1);
         $email = htmlspecialchars((string) ($contact['email'] ?? ''), ENT_XML1);
         $phone = htmlspecialchars((string) ($contact['phone_number'] ?? ''), ENT_XML1);
+        $birthdate = trim((string) ($passenger['birthdate'] ?? ''));
+        $gender = strtoupper(trim((string) ($passenger['gender'] ?? '')));
+
+        if (in_array($ptc, ['CHD', 'INF'], true) && $birthdate === '') {
+            throw new AirBlueValidationException(
+                'missing_birthdate',
+                422,
+                'AirBlue OTA booking requires birth date for child and infant passengers.',
+            );
+        }
+
+        $attrs = ' PassengerTypeCode="'.$ptcAttr.'"';
+        if ($birthdate !== '') {
+            $attrs .= ' BirthDate="'.htmlspecialchars($birthdate, ENT_XML1).'"';
+        }
+        if (in_array($gender, ['M', 'F'], true)) {
+            $attrs .= ' Gender="'.htmlspecialchars($gender, ENT_XML1).'"';
+        }
 
         $emailXml = $email !== '' ? "<ota:Email>{$email}</ota:Email>" : '';
         $phoneXml = $phone !== '' ? '<ota:Telephone PhoneNumber="'.$phone.'"/>' : '';
+        $documentXml = $this->travelerDocumentXml($passenger);
 
         return <<<XML
-                    <ota:AirTraveler PassengerTypeCode="{$ptc}">
+                    <ota:AirTraveler{$attrs}>
                         <ota:PersonName>
                             <ota:GivenName>{$given}</ota:GivenName>
                             <ota:Surname>{$surname}</ota:Surname>
                         </ota:PersonName>
+                        {$documentXml}
                         {$phoneXml}
                         {$emailXml}
                         <ota:TravelerRefNumber RPH="{$rph}"/>
                     </ota:AirTraveler>
+XML;
+    }
+
+    /**
+     * @param  array<string, mixed>  $passenger
+     */
+    private function travelerDocumentXml(array $passenger): string
+    {
+        $docId = trim((string) ($passenger['document_number'] ?? $passenger['passport_number'] ?? ''));
+        if ($docId === '') {
+            return '';
+        }
+
+        $docIdAttr = htmlspecialchars($docId, ENT_XML1);
+        $docType = htmlspecialchars(trim((string) ($passenger['document_type'] ?? '2')), ENT_XML1);
+        $issueCountry = htmlspecialchars(strtoupper(trim((string) ($passenger['document_issuing_country'] ?? $passenger['passport_issuing_country'] ?? $passenger['nationality'] ?? ''))), ENT_XML1);
+        $expireDate = trim((string) ($passenger['document_expiry'] ?? $passenger['passport_expiry_date'] ?? ''));
+        $expireAttr = $expireDate !== '' ? ' ExpireDate="'.htmlspecialchars($expireDate, ENT_XML1).'"' : '';
+        $issueAttr = $issueCountry !== '' ? ' DocIssueCountry="'.$issueCountry.'"' : '';
+
+        return <<<XML
+                        <ota:Document DocID="{$docIdAttr}" DocType="{$docType}"{$issueAttr}{$expireAttr}/>
 XML;
     }
 

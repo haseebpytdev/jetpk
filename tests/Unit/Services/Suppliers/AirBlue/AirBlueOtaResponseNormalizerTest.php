@@ -31,5 +31,8 @@ class AirBlueOtaResponseNormalizerTest extends TestCase
         $this->assertSame('ISB', $offers[0]->destination);
         $this->assertSame(14500.0, $offers[0]->fare_breakdown->supplier_total);
         $this->assertSame('zapways_ota', $offers[0]->raw_payload['provider_context']['api_channel']);
+        $context = $offers[0]->raw_payload['provider_context'];
+        $this->assertNotEmpty($context['priced_itineraries'][0]['fare_breakdowns']);
+        $this->assertSame(12000.0, $context['priced_itineraries'][0]['fare_breakdowns'][0]['base']);
     }
 }
