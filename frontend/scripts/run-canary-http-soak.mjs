@@ -54,7 +54,7 @@ function classify(body, status) {
   const message = String(body.message ?? "");
   if (status === 429 || body.status === "rate_limited") return "AI_UNAVAILABLE";
   if (/temporarily unavailable|try again shortly/i.test(message)) return "AI_UNAVAILABLE";
-  if (/127\.0\.0\.1:1|:1\b/.test(JSON.stringify(body))) return "WRONG_GATEWAY_URL";
+  if (/127\.0\.0\.1:1(?:\/|$|\s|"|')/.test(JSON.stringify(body))) return "WRONG_GATEWAY_URL";
   if (!message.trim()) return "EMPTY_RESPONSE";
   if (/connection refused|ECONNREFUSED/i.test(message)) return "CONNECTION_REFUSED";
   return "SUCCESS";
