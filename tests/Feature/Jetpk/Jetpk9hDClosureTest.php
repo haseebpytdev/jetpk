@@ -82,6 +82,12 @@ class Jetpk9hDClosureTest extends TestCase
         }
     }
 
+    public function test_auth_and_booking_lookup_media_schema_keys(): void
+    {
+        $this->assertSame(['auth_illustration'], ClientPageMediaSchema::assetKeysFor('login'));
+        $this->assertSame(['booking_lookup_hero'], ClientPageMediaSchema::assetKeysFor('booking-lookup'));
+    }
+
     public function test_page_settings_home_editor_includes_feature_board_trust_routes_panels(): void
     {
         $admin = $this->platformAdmin();

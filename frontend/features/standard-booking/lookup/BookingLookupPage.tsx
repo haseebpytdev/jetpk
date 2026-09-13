@@ -12,6 +12,8 @@ import {
   TurnstileWidget,
   useTurnstileToken,
 } from "@/features/security/turnstile";
+import type { PageMediaImage } from "@/features/auth/services/auth-page-media";
+import { AUTH_ILLUSTRATION_FALLBACK } from "@/features/auth/constants/auth-media";
 import { submitBookingLookup } from "./booking-lookup-service";
 
 const fieldClass =
@@ -24,9 +26,13 @@ const LOOKUP_TRUST_CHIPS = [
   { label: "Fast access" },
 ];
 
-const LOOKUP_HERO_IMAGE = "/images/auth/auth-illustration.svg";
+type BookingLookupPageProps = {
+  heroImage?: PageMediaImage;
+};
 
-export function BookingLookupPage() {
+export function BookingLookupPage({ heroImage }: BookingLookupPageProps) {
+  const heroSrc = heroImage?.url ?? AUTH_ILLUSTRATION_FALLBACK;
+  const heroAlt = heroImage?.alt ?? "";
   const errorSummaryId = useId();
   const bookingReferenceRef = useRef<HTMLInputElement>(null);
   const [bookingReference, setBookingReference] = useState("");
@@ -123,9 +129,9 @@ export function BookingLookupPage() {
       <section className="relative overflow-hidden border-b border-jp-border bg-jp-page">
         <div className="absolute inset-0">
           <ImageSlot
-            src={LOOKUP_HERO_IMAGE}
-            alt=""
-            decorative
+            src={heroSrc}
+            alt={heroAlt}
+            decorative={heroAlt === ""}
             width={1440}
             height={420}
             className="!max-w-none h-full w-full !rounded-none"

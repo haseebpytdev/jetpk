@@ -103,7 +103,7 @@ Route::prefix('api/public/content')->group(function (): void {
     Route::get('/site-contact', [PublicContentApiController::class, 'siteContact'])->name('api.public.content.site-contact');
     Route::get('/support/categories', [PublicContentApiController::class, 'supportCategories'])->name('api.public.content.support-categories');
     Route::get('/pages/{pageKey}', [PublicContentApiController::class, 'managedPage'])
-        ->where('pageKey', 'about|support|faq|terms|privacy|global|group-search')
+        ->where('pageKey', 'about|support|faq|terms|privacy|global|group-search|login|booking-lookup')
         ->name('api.public.content.managed-page');
     Route::get('/cms/{slug}', [PublicContentApiController::class, 'cmsPage'])->name('api.public.content.cms-page');
     Route::get('/custom/{slug}', [PublicContentApiController::class, 'customPage'])->name('api.public.content.custom-page');

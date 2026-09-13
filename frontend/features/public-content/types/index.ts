@@ -143,6 +143,11 @@ export type ContactFormResponse =
   | { ok: true; ticket_reference: string }
   | { ok: false; message: string; fieldErrors?: Record<string, string[]>; status?: number };
 
+export type LaravelPageMediaImage = {
+  url: string;
+  alt?: string;
+};
+
 export type LaravelManagedPageResponse = {
   page_key: string;
   source: "cms" | "empty";
@@ -150,4 +155,5 @@ export type LaravelManagedPageResponse = {
   seo: PublicSeo;
   contact?: ContactDetails;
   sections_order?: string[];
+  media?: Record<string, LaravelPageMediaImage>;
 };

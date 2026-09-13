@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { AuthCsrfBootstrap } from "@/features/auth/components/AuthCsrfBootstrap";
+import { AuthMediaProvider } from "@/features/auth/components/AuthMediaProvider";
+import { getAuthIllustrationMedia } from "@/features/auth/services/auth-page-media";
 import type { PublicSession } from "@/types/session";
 
 /**
@@ -12,11 +14,15 @@ import type { PublicSession } from "@/types/session";
  */
 const ANONYMOUS_SESSION: PublicSession = { status: "anonymous" };
 
-export default function AuthGroupLayout({ children }: { children: ReactNode }) {
+export const revalidate = 300;
+
+export default async function AuthGroupLayout({ children }: { children: ReactNode }) {
+  const illustration = await getAuthIllustrationMedia();
+
   return (
     <PublicShell session={ANONYMOUS_SESSION}>
       <AuthCsrfBootstrap />
-      {children}
+      <AuthMediaProvider illustration={illustration}>{children}</AuthMediaProvider>
     </PublicShell>
   );
 }

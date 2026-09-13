@@ -16,6 +16,8 @@
         'benefits' => 'Benefits',
         'branding' => 'Branding',
         'announcement' => 'Announcement',
+        'auth' => 'Auth illustration',
+        'lookup_hero' => 'Lookup hero',
     ];
 @endphp
 @if ($mediaGroups === [])

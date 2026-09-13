@@ -56,6 +56,12 @@ final class ClientPageMediaSchema
                 $imageField('destination_3', 'Destination card 3', 'destinations', '3:4', 'Third popular destination card'),
                 $imageField('destination_4', 'Destination card 4', 'destinations', '3:4', 'Fourth popular destination card'),
             ],
+            ClientPageKeys::LOGIN => [
+                $imageField('auth_illustration', 'Auth illustration', 'auth', '2:1', 'Shared login/register/recovery side-panel illustration'),
+            ],
+            ClientPageKeys::BOOKING_LOOKUP => [
+                $imageField('booking_lookup_hero', 'Lookup hero background', 'lookup_hero', '21:9', 'Booking lookup page hero band'),
+            ],
         ];
     }
 

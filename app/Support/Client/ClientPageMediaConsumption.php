@@ -121,6 +121,24 @@ final class ClientPageMediaConsumption
                 'owner' => 'Branding',
                 'status' => 'duplicate',
             ],
+            [
+                'page_key' => ClientPageKeys::LOGIN,
+                'asset_key' => 'auth_illustration',
+                'blade' => 'frontend/features/auth/components/AuthIllustrationPanel.tsx',
+                'element' => 'AuthIllustrationPanel ImageSlot',
+                'collection' => 'Auth',
+                'owner' => 'Page Settings',
+                'status' => 'used',
+            ],
+            [
+                'page_key' => ClientPageKeys::BOOKING_LOOKUP,
+                'asset_key' => 'booking_lookup_hero',
+                'blade' => 'frontend/features/standard-booking/lookup/BookingLookupPage.tsx',
+                'element' => 'BookingLookupPage hero ImageSlot',
+                'collection' => 'Booking Lookup',
+                'owner' => 'Page Settings',
+                'status' => 'used',
+            ],
         ];
     }
 

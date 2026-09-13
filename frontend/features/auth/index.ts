@@ -1,5 +1,8 @@
 export { AuthPageShell } from "./components/AuthPageShell";
 export { AuthIllustrationPanel } from "./components/AuthIllustrationPanel";
+export { AuthMediaProvider, useAuthIllustration } from "./components/AuthMediaProvider";
+export { getAuthIllustrationMedia } from "./services/auth-page-media";
+export { AUTH_ILLUSTRATION_FALLBACK } from "./constants/auth-media";
 export { AuthFormPanel } from "./components/AuthFormPanel";
 export { AuthBrandHeader } from "./components/AuthBrandHeader";
 export { AuthBenefits } from "./components/AuthBenefits";

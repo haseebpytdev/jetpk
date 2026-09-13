@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AuthShell } from "@/features/auth";
+import { AuthMediaProvider, AuthShell, getAuthIllustrationMedia } from "@/features/auth";
 
 type VerifyEmailPageProps = {
   searchParams: Promise<{
@@ -53,11 +53,15 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
+export const revalidate = 300;
+
 export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
   const params = await searchParams;
   const state = resolveVerifyState(params);
+  const illustration = await getAuthIllustrationMedia();
 
   return (
+    <AuthMediaProvider illustration={illustration}>
     <AuthShell
       title={state.title}
       description={state.description}
@@ -92,5 +96,6 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
         )}
       </div>
     </AuthShell>
+    </AuthMediaProvider>
   );
 }

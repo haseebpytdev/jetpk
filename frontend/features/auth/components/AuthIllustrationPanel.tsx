@@ -1,9 +1,8 @@
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import type { AuthBenefitItem } from "../config/auth-benefits";
+import { useAuthIllustration } from "./AuthMediaProvider";
 import { AuthBenefits } from "./AuthBenefits";
 import { AuthBrandHeader } from "./AuthBrandHeader";
-
-const AUTH_ILLUSTRATION = "/images/auth/auth-illustration.svg";
 
 type AuthIllustrationPanelProps = {
   eyebrow?: string;
@@ -20,6 +19,8 @@ export function AuthIllustrationPanel({
   description,
   benefits,
 }: AuthIllustrationPanelProps) {
+  const illustration = useAuthIllustration();
+
   return (
     <div
       className="flex h-full flex-col rounded-jp-lg border border-jp-border bg-jp-surface-muted p-jp-lg lg:p-jp-xl"
@@ -28,9 +29,9 @@ export function AuthIllustrationPanel({
       <AuthBrandHeader eyebrow={eyebrow} headline={headline} headlineHighlight={headlineHighlight} description={description} />
       <div className="mt-jp-lg overflow-hidden rounded-jp-md">
         <ImageSlot
-          src={AUTH_ILLUSTRATION}
-          alt=""
-          decorative
+          src={illustration.url}
+          alt={illustration.alt}
+          decorative={illustration.alt === ""}
           width={640}
           height={320}
           className="!max-w-none w-full"

@@ -14,6 +14,7 @@ use App\Services\Client\ClientPageRenderer;
 use App\Services\Client\ClientPageSeoResolver;
 use App\Support\Client\ClientManagedPageReservedSlugs;
 use App\Support\Client\ClientPageKeys;
+use App\Support\Client\ClientPageMediaSchema;
 use App\Support\Client\ClientSafeHtmlSanitizer;
 use App\Support\Client\ReservedPublicPath;
 use App\Support\Branding\JetpkCompanyBrandingResolver;
@@ -44,7 +45,7 @@ final class PublicContentApiPresenter
         $content = $this->pageRenderer->viewModel($pageKey);
         $published = is_array($content['content'] ?? null) ? $content['content'] : [];
 
-        return [
+        $payload = [
             'page_key' => $pageKey,
             'source' => $published === [] ? 'empty' : 'cms',
             'content' => $published,
@@ -52,6 +53,13 @@ final class PublicContentApiPresenter
             'contact' => $content['contact'] ?? $this->contactResolver->contact(),
             'sections_order' => $content['sectionsOrder'] ?? [],
         ];
+
+        $media = $this->mediaForPage($pageKey);
+        if ($media !== []) {
+            $payload['media'] = $media;
+        }
+
+        return $payload;
     }
 
     /**
@@ -136,6 +144,46 @@ final class PublicContentApiPresenter
             ClientPageKeys::PRIVACY,
             ClientPageKeys::GLOBAL,
             ClientPageKeys::GROUP_SEARCH,
+            ClientPageKeys::LOGIN,
+            ClientPageKeys::BOOKING_LOOKUP,
+        ];
+    }
+
+    /**
+     * @return array<string, array{url: string, alt: string}>
+     */
+    private function mediaForPage(string $pageKey): array
+    {
+        $media = [];
+
+        foreach (ClientPageMediaSchema::assetKeysFor($pageKey) as $assetKey) {
+            $presented = $this->presentPageMediaAsset($pageKey, $assetKey);
+            if ($presented !== null) {
+                $media[$assetKey] = $presented;
+            }
+        }
+
+        return $media;
+    }
+
+    /**
+     * @return array{url: string, alt: string}|null
+     */
+    private function presentPageMediaAsset(string $pageKey, string $assetKey): ?array
+    {
+        $url = $this->contentResolver->assetUrl($pageKey, $assetKey);
+        if ($url === null || trim($url) === '') {
+            return null;
+        }
+
+        $normalized = PublicMediaUrl::normalize($url);
+        if ($normalized === null || $normalized === '') {
+            return null;
+        }
+
+        return [
+            'url' => $normalized,
+            'alt' => '',
         ];
     }
 

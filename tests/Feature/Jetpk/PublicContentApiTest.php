@@ -2,14 +2,20 @@
 
 namespace Tests\Feature\Jetpk;
 
+use App\Enums\AccountType;
 use App\Enums\ClientPageSettingStatus;
 use App\Enums\SupportTicketCategory;
+use App\Models\ClientPageAsset;
 use App\Models\ClientPageSetting;
 use App\Models\CmsPage;
 use App\Models\SupportTicket;
+use App\Models\User;
 use App\Support\Client\ClientPageKeys;
 use Database\Seeders\OtaFoundationSeeder;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\Support\JetpkHomepageFixture;
 use Tests\TestCase;
 
@@ -55,6 +61,60 @@ class PublicContentApiTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('source', 'empty')
             ->assertJsonPath('content', []);
+    }
+
+    public function test_managed_page_json_exposes_auth_and_lookup_media_keys(): void
+    {
+        $this->makeJetpkProfile();
+
+        $this->getJson(route('api.public.content.managed-page', ['pageKey' => 'login']))
+            ->assertOk()
+            ->assertJsonPath('page_key', 'login')
+            ->assertJsonMissingPath('media.auth_illustration.url');
+
+        $this->getJson(route('api.public.content.managed-page', ['pageKey' => 'booking-lookup']))
+            ->assertOk()
+            ->assertJsonPath('page_key', 'booking-lookup')
+            ->assertJsonMissingPath('media.booking_lookup_hero.url');
+    }
+
+    public function test_managed_page_json_includes_uploaded_auth_and_lookup_media(): void
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        Storage::fake('public');
+
+        $profile = $this->makeJetpkProfile();
+        $admin = User::factory()->create([
+            'account_type' => AccountType::PlatformAdmin,
+            'current_agency_id' => null,
+        ]);
+
+        $this->actingAs($admin)->post('/admin/page-settings/login/assets?format=json', [
+            'asset_key' => 'auth_illustration',
+            'file' => UploadedFile::fake()->image('auth-illustration.jpg', 640, 320),
+            'alt_text' => 'Auth illustration',
+        ])->assertOk()->assertJsonPath('ok', true);
+
+        $this->actingAs($admin)->post('/admin/page-settings/booking-lookup/assets?format=json', [
+            'asset_key' => 'booking_lookup_hero',
+            'file' => UploadedFile::fake()->image('lookup-hero.jpg', 1200, 514),
+            'alt_text' => 'Lookup hero',
+        ])->assertOk()->assertJsonPath('ok', true);
+
+        $this->assertNotNull(ClientPageAsset::query()->where('page_key', ClientPageKeys::LOGIN)->where('asset_key', 'auth_illustration')->first());
+        $this->assertNotNull(ClientPageAsset::query()->where('page_key', ClientPageKeys::BOOKING_LOOKUP)->where('asset_key', 'booking_lookup_hero')->first());
+
+        $authUrl = $this->getJson(route('api.public.content.managed-page', ['pageKey' => 'login']))
+            ->assertOk()
+            ->json('media.auth_illustration.url');
+        $this->assertIsString($authUrl);
+        $this->assertStringContainsString('auth_illustration', $authUrl);
+
+        $lookupUrl = $this->getJson(route('api.public.content.managed-page', ['pageKey' => 'booking-lookup']))
+            ->assertOk()
+            ->json('media.booking_lookup_hero.url');
+        $this->assertIsString($lookupUrl);
+        $this->assertStringContainsString('booking_lookup_hero', $lookupUrl);
     }
 
     public function test_site_contact_json_uses_global_contact_resolver(): void

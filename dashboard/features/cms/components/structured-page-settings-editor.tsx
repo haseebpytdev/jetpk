@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CmsMediaPickerDialog } from "@/features/cms/components/cms-media-picker-dialog";
 import { CmsHtmlBlockBuilder } from "@/features/cms/components/cms-html-block-builder";
+import { mediaSectionKeysForPage, mediaSectionLabel, resolvePageMediaAssetKey } from "@/features/cms/lib/page-media-asset-keys";
 import { attachPageSettingsAsset, uploadPageSettingsAsset } from "@/services/operational-api";
 
 type SectionDef = { key: string; label: string; fields: string[] };
@@ -232,7 +233,7 @@ export function StructuredPageSettingsEditor({
   const [mobilePane, setMobilePane] = useState<"editor" | "preview">("editor");
   const seo = asObject(content.seo);
 
-  const mediaSectionKeys = useMemo(() => new Set(["hero", "support_cta", "seo"]), []);
+  const mediaSectionKeys = useMemo(() => new Set(mediaSectionKeysForPage(pageKey)), [pageKey]);
 
   const heroSection = useMemo(() => sections.find((s) => s.key === "hero") ?? null, [sections]);
   const contentSections = useMemo(
@@ -381,7 +382,7 @@ export function StructuredPageSettingsEditor({
             {Array.from(mediaSectionKeys)
               .filter((key) => key === "seo" || sections.some((s) => s.key === key) || key === "hero")
               .map((key) => {
-                const label = key === "seo" ? "SEO" : sections.find((s) => s.key === key)?.label ?? key;
+                const label = mediaSectionLabel(key, sections);
                 return (
                   <button
                     key={key}
@@ -501,7 +502,7 @@ export function StructuredPageSettingsEditor({
         onUploadFile={async (file) => {
           if (!pickerSection) return;
           const formData = new FormData();
-          formData.set("asset_key", pickerSection === "hero" ? "hero_background" : `${pickerSection}_image`);
+          formData.set("asset_key", resolvePageMediaAssetKey(pageKey, pickerSection));
           formData.set("file", file);
           formData.set("alt_text", file.name);
           const result = await uploadPageSettingsAsset(pageKey, formData);
@@ -509,7 +510,7 @@ export function StructuredPageSettingsEditor({
         }}
         onSelect={(item) => {
           if (!pickerSection) return;
-          const assetKey = pickerSection === "hero" ? "hero_background" : `${pickerSection}_image`;
+          const assetKey = resolvePageMediaAssetKey(pageKey, pickerSection);
           void attachPageSettingsAsset(pageKey, {
             asset_key: assetKey,
             agency_media_id: item.id,
