@@ -1,4 +1,4 @@
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:zap="http://zapways.com/air/ota/3.0" xmlns:ota="http://www.opentravel.org/OTA/2003/05">
+﻿<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:zap="http://zapways.com/air/ota/3.0" xmlns:ota="http://www.opentravel.org/OTA/2003/05">
     <soapenv:Header/>
     <soapenv:Body>
         <zap:AirAncillaryItems>

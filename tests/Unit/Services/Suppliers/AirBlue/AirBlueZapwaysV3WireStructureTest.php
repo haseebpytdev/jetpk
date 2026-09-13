@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services\Suppliers\AirBlue;
 
 use App\Enums\AirBlueZapwaysProtocolVersion;
+use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierEnvironment;
 use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
@@ -277,12 +278,9 @@ class AirBlueZapwaysV3WireStructureTest extends TestCase
         $this->assertSame('https://ota.zapways.com/Read', $live);
     }
 
-    public function test_uncertified_v3_does_not_displace_certified_v2(): void
+    public function test_uncertified_v3_does_not_displace_legacy_v2(): void
     {
-        $v2 = $this->makeConnection([
-            'id' => 1,
-            'last_test_status' => 'air_shopping_success',
-        ]);
+        $v2 = $this->makeConnection(['id' => 1]);
         $v3 = $this->makeConnection([
             'id' => 2,
             'credentials' => $this->credentials([
@@ -293,29 +291,25 @@ class AirBlueZapwaysV3WireStructureTest extends TestCase
 
         $deduped = app(AirBlueConnectionSearchPolicy::class)->dedupeForSearch(collect([$v2, $v3]));
 
-        $this->assertCount(1, $deduped);
-        $this->assertSame(1, (int) $deduped->first()->id);
+        $this->assertCount(1, $deduped->filter(fn ($c) => $c->provider === SupplierProvider::Airblue));
+        $this->assertSame(1, (int) $deduped->firstWhere('provider', SupplierProvider::Airblue)->id);
     }
 
-    public function test_certified_v3_can_be_selected_over_certified_v2(): void
+    public function test_certified_v3_can_be_selected_over_legacy_v2(): void
     {
-        $v2 = $this->makeConnection([
-            'id' => 1,
-            'last_test_status' => 'air_shopping_success',
-        ]);
+        $v2 = $this->makeConnection(['id' => 1]);
         $v3 = $this->makeConnection([
             'id' => 2,
-            'last_test_status' => 'air_shopping_success',
             'credentials' => $this->credentials([
                 'protocol_version' => '3.0',
-                'search_certified' => true,
+                'certification_status' => 'certified',
             ]),
         ]);
 
         $deduped = app(AirBlueConnectionSearchPolicy::class)->dedupeForSearch(collect([$v2, $v3]));
 
-        $this->assertCount(1, $deduped);
-        $this->assertSame(2, (int) $deduped->first()->id);
+        $this->assertCount(1, $deduped->filter(fn ($c) => $c->provider === SupplierProvider::Airblue));
+        $this->assertSame(2, (int) $deduped->firstWhere('provider', SupplierProvider::Airblue)->id);
     }
 
     public function test_generated_seat_map_matches_fixture_structure(): void
@@ -378,6 +372,8 @@ class AirBlueZapwaysV3WireStructureTest extends TestCase
         $connection = new SupplierConnection([
             'provider' => SupplierProvider::Airblue,
             'environment' => SupplierEnvironment::Sandbox,
+            'status' => SupplierConnectionStatus::Active,
+            'is_active' => true,
             'credentials' => $this->credentials(),
             ...$attributes,
         ]);

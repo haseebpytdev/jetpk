@@ -468,8 +468,11 @@ XML;
             if ($itemCode === '' || $travelerRph === '' || $flightRph === '') {
                 throw new AirBlueValidationException('invalid_item_modify', 422, 'Ancillary modify requires item code, traveler RPH, and flight RPH.');
             }
-            $countAttr = $itemCount === 0 ? ' ItemCount="0"' : '';
-            $requests .= '<ota:SpecialServiceRequest ItemCode="'.$itemCode.'" TravelerRefNumberRPHList="'.$travelerRph.'" FlightRefNumberRPHList="'.$flightRph.'"'.$countAttr.'/>';
+            $attrs = ' ItemCode="'.$itemCode.'" TravelerRefNumberRPHList="'.$travelerRph.'" FlightRefNumberRPHList="'.$flightRph.'"';
+            if ($itemCount === 0) {
+                $attrs .= ' ItemCount="0"';
+            }
+            $requests .= '<ota:SpecialServiceRequest'.$attrs.'/>';
         }
 
         if ($requests === '') {

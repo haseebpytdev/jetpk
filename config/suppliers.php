@@ -480,12 +480,17 @@ return [
                 'default_qa_base_url' => env('AIRBLUE_OTA_V3_QA_BASE_URL', 'https://otatest4.zapways.com/v3.0/OTAAPI.asmx'),
                 'live_enabled' => (bool) env('AIRBLUE_OTA_V3_LIVE_ENABLED', false),
                 'ota_operations' => [
-                    // v3 SOAPActions are not inferred from namespace. Only Read is supplier-documented.
-                    // Other operations remain null until Zapways documents them or ops configures overrides.
+                    'air_low_fare_search' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_AIR_LOW_FARE_SEARCH')],
+                    'air_book' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_AIR_BOOK')],
+                    'air_demand_ticket' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_AIR_DEMAND_TICKET')],
                     'read' => [
-                        'soap_action_live' => 'https://ota.zapways.com/Read',
-                        'soap_action_test' => 'https://ota.qa.zapways.com/Read',
+                        'soap_action_test' => env('AIRBLUE_OTA_V3_SOAP_ACTION_READ_TEST', 'https://ota.qa.zapways.com/Read'),
+                        'soap_action_live' => env('AIRBLUE_OTA_V3_SOAP_ACTION_READ_LIVE', 'https://ota.zapways.com/Read'),
                     ],
+                    'cancel' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_CANCEL')],
+                    'air_book_modify' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_AIR_BOOK_MODIFY')],
+                    'air_seat_map' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_AIR_SEAT_MAP')],
+                    'air_ancillary_items' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_AIR_ANCILLARY_ITEMS')],
                 ],
             ],
         ],
