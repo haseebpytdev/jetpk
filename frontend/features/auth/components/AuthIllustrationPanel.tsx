@@ -1,3 +1,5 @@
+"use client";
+
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import type { AuthBenefitItem } from "../config/auth-benefits";
 import { useAuthIllustration } from "./AuthMediaProvider";
