@@ -237,12 +237,21 @@ class AirBlueClient
         $operationConfig = is_array($ops[$operation] ?? null) ? $ops[$operation] : [];
 
         if ($operation === 'read') {
-            return (bool) ($config['is_test'] ?? false)
-                ? (string) ($operationConfig['soap_action_test'] ?? 'https://otatest4.zapways.com/Read')
-                : (string) ($operationConfig['soap_action_live'] ?? 'https://ota4.zapways.com/Read');
+            $soapAction = trim((bool) ($config['is_test'] ?? false)
+                ? (string) ($operationConfig['soap_action_test'] ?? '')
+                : (string) ($operationConfig['soap_action_live'] ?? ''));
+            if ($soapAction === '') {
+                throw new AirBlueValidationException(
+                    'missing_soap_action',
+                    422,
+                    sprintf('SOAPAction for AirBlue operation "%s" on protocol %s is not configured.', $operation, $protocol->value),
+                );
+            }
+
+            return $soapAction;
         }
 
-        $soapAction = (string) ($operationConfig['soap_action'] ?? '');
+        $soapAction = trim((string) ($operationConfig['soap_action'] ?? ''));
         if ($soapAction === '') {
             throw new AirBlueValidationException(
                 'missing_soap_action',

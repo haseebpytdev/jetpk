@@ -4,6 +4,7 @@ namespace Tests\Unit\Services\Suppliers\AirBlue;
 
 use App\Data\FlightSearchRequestData;
 use App\Enums\AirBlueZapwaysProtocolVersion;
+use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierEnvironment;
 use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
@@ -272,7 +273,10 @@ class AirBlueZapwaysV3ProtocolTest extends TestCase
         $v2 = $this->makeConnection(['id' => 1]);
         $v3 = $this->makeConnection([
             'id' => 2,
-            'credentials' => $this->credentials(['protocol_version' => '3.0']),
+            'credentials' => $this->credentials([
+                'protocol_version' => '3.0',
+                'certification_status' => 'certified',
+            ]),
         ]);
 
         $deduped = app(AirBlueConnectionSearchPolicy::class)->dedupeForSearch(collect([$v2, $v3]));
@@ -300,15 +304,37 @@ class AirBlueZapwaysV3ProtocolTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function test_v3_soap_actions_use_v3_namespace(): void
+    public function test_v3_soap_actions_fail_closed_when_not_configured(): void
     {
+        $client = app(AirBlueClient::class);
+        $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
+        $method->setAccessible(true);
+
+        try {
+            $method->invoke($client, 'air_seat_map', ['is_test' => true, 'protocol_version' => '3.0']);
+            $this->fail('Expected missing_soap_action for unconfigured v3 air_seat_map');
+        } catch (AirBlueValidationException $exception) {
+            $this->assertSame('missing_soap_action', $exception->normalizedCode);
+        }
+    }
+
+    public function test_v3_soap_actions_resolve_configured_value_exactly(): void
+    {
+        $versions = (array) config('suppliers.airblue.protocol_versions');
+        $v3 = is_array($versions['3.0'] ?? null) ? $versions['3.0'] : [];
+        $operations = is_array($v3['ota_operations'] ?? null) ? $v3['ota_operations'] : [];
+        $operations['air_seat_map'] = ['soap_action' => 'https://supplier.example/AirSeatMap'];
+        $v3['ota_operations'] = $operations;
+        $versions['3.0'] = $v3;
+        config(['suppliers.airblue.protocol_versions' => $versions]);
+
         $client = app(AirBlueClient::class);
         $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
         $method->setAccessible(true);
 
         $action = $method->invoke($client, 'air_seat_map', ['is_test' => true, 'protocol_version' => '3.0']);
 
-        $this->assertSame('http://zapways.com/air/ota/3.0/AirSeatMap', $action);
+        $this->assertSame('https://supplier.example/AirSeatMap', $action);
     }
 
     public function test_v2_ancillary_service_is_not_supported(): void
@@ -365,6 +391,8 @@ class AirBlueZapwaysV3ProtocolTest extends TestCase
         $connection = new SupplierConnection([
             'provider' => SupplierProvider::Airblue,
             'environment' => SupplierEnvironment::Sandbox,
+            'status' => SupplierConnectionStatus::Active,
+            'is_active' => true,
             'credentials' => $this->credentials(),
             ...$attributes,
         ]);

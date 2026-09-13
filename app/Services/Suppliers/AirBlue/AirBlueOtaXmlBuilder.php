@@ -127,27 +127,43 @@ XML
      */
     public function buildAirBookModifyRequest(array $config, array $modifyContext): string
     {
-        $pnr = htmlspecialchars(trim((string) ($modifyContext['pnr'] ?? '')), ENT_XML1);
-        $instance = htmlspecialchars(trim((string) ($modifyContext['instance'] ?? '')), ENT_XML1);
-        if ($pnr === '' || $instance === '') {
-            throw new AirBlueValidationException('missing_modify_context', 422, 'AirBlue OTA modify requires PNR and instance.');
+        $pnr = trim((string) ($modifyContext['pnr'] ?? ''));
+        $instance = trim((string) ($modifyContext['instance'] ?? ''));
+        if ($pnr === '') {
+            throw new AirBlueValidationException('missing_modify_context', 422, 'AirBlue OTA modify requires PNR.');
         }
 
-        $modificationType = htmlspecialchars(trim((string) ($modifyContext['modification_type'] ?? '5')), ENT_XML1);
+        $modificationType = trim((string) ($modifyContext['modification_type'] ?? '5'));
+        if ($modificationType !== '5') {
+            throw new AirBlueValidationException(
+                'unsupported_modification_type',
+                422,
+                sprintf('AirBlue OTA modify type "%s" is not implemented for Zapways v3 wire contract.', $modificationType),
+            );
+        }
+
+        if ($instance === '') {
+            throw new AirBlueValidationException('missing_modify_context', 422, 'AirBlue OTA seat/ancillary modify requires instance.');
+        }
+
+        $specialReqDetails = $this->seatModifyXml($modifyContext).$this->ancillaryModifyXml($modifyContext);
         $body = $this->posBlock($config)
-            .'<ota:UniqueID ID="'.$pnr.'" Instance="'.$instance.'" Type="14"/>';
-
-        if ($modificationType === '5') {
-            $body .= $this->seatModifyXml($modifyContext);
-            $body .= $this->ancillaryModifyXml($modifyContext);
-        }
+            .'<ota:AirBookModifyRQ ModificationType="'.htmlspecialchars($modificationType, ENT_XML1).'">'
+            .'<ota:TravelerInfo>'
+            .'<ota:SpecialReqDetails>'
+            .$specialReqDetails
+            .'</ota:SpecialReqDetails>'
+            .'</ota:TravelerInfo>'
+            .'</ota:AirBookModifyRQ>'
+            .'<ota:AirReservation>'
+            .$this->bookingReferenceIdXml($pnr, $instance)
+            .'</ota:AirReservation>';
 
         return $this->envelope(
             $config,
             'AirBookModify',
             'airBookModifyRQ',
             $body,
-            ['ModificationType' => $modificationType],
         );
     }
 
@@ -156,17 +172,11 @@ XML
      */
     public function buildReadRequest(array $config, string $pnr, string $instance): string
     {
-        $pnr = htmlspecialchars(trim($pnr), ENT_XML1);
-        $instance = htmlspecialchars(trim($instance), ENT_XML1);
-
         return $this->envelope(
             $config,
             'Read',
             'readRQ',
-            <<<XML
-                {$this->posBlock($config)}
-                <ota:UniqueID ID="{$pnr}" Instance="{$instance}" Type="14"/>
-XML
+            $this->posBlock($config).$this->uniqueIdXml($pnr, $instance),
         );
     }
 
@@ -180,21 +190,17 @@ XML
         string $instance,
         array $paymentContext = [],
     ): string {
-        $pnr = htmlspecialchars(trim($pnr), ENT_XML1);
-        $instance = htmlspecialchars(trim($instance), ENT_XML1);
         $paymentXml = $this->paymentInfoXml($config, $paymentContext);
 
         return $this->envelope(
             $config,
             'AirDemandTicket',
             'airDemandTicketRQ',
-            <<<XML
-                {$this->posBlock($config)}
-                <ota:DemandTicketDetail>
-                    <ota:BookingReferenceID ID="{$pnr}" Instance="{$instance}"/>
-                    {$paymentXml}
-                </ota:DemandTicketDetail>
-XML
+            $this->posBlock($config)
+            .'<ota:DemandTicketDetail>'
+            .$this->bookingReferenceIdXml($pnr, $instance)
+            .$paymentXml
+            .'</ota:DemandTicketDetail>',
         );
     }
 
@@ -203,17 +209,11 @@ XML
      */
     public function buildCancelRequest(array $config, string $pnr, string $instance): string
     {
-        $pnr = htmlspecialchars(trim($pnr), ENT_XML1);
-        $instance = htmlspecialchars(trim($instance), ENT_XML1);
-
         return $this->envelope(
             $config,
             'Cancel',
             'cancelRQ',
-            <<<XML
-                {$this->posBlock($config)}
-                <ota:UniqueID ID="{$pnr}" Instance="{$instance}" Type="14"/>
-XML
+            $this->posBlock($config).$this->uniqueIdXml($pnr, $instance),
         );
     }
 
@@ -225,21 +225,18 @@ XML
     {
         $this->assertV3Only($config, 'AirSeatMap');
 
-        $pnr = htmlspecialchars(trim((string) ($seatMapContext['pnr'] ?? '')), ENT_XML1);
+        $pnr = trim((string) ($seatMapContext['pnr'] ?? ''));
         $instance = trim((string) ($seatMapContext['instance'] ?? ''));
-        $instanceXml = $instance !== ''
-            ? ' Instance="'.htmlspecialchars($instance, ENT_XML1).'"'
-            : '';
 
-        $segmentsXml = '';
+        $seatMapRequestsXml = '';
         foreach (is_array($seatMapContext['flight_segments'] ?? null) ? $seatMapContext['flight_segments'] : [] as $segment) {
             if (! is_array($segment)) {
                 continue;
             }
-            $segmentsXml .= $this->flightSegmentInfoXml($segment);
+            $seatMapRequestsXml .= '<ota:SeatMapRequest>'.$this->flightSegmentInfoXml($segment).'</ota:SeatMapRequest>';
         }
 
-        if ($segmentsXml === '') {
+        if ($seatMapRequestsXml === '') {
             throw new AirBlueValidationException('missing_seat_map_segments', 422, 'AirBlue seat map requires at least one flight segment.');
         }
 
@@ -247,11 +244,11 @@ XML
             $config,
             'AirSeatMap',
             'airSeatMapRQ',
-            <<<XML
-                {$this->posBlock($config)}
-                <ota:BookingReferenceID ID="{$pnr}"{$instanceXml}/>
-                {$segmentsXml}
-XML
+            $this->posBlock($config)
+            .'<ota:SeatMapRequests>'
+            .$seatMapRequestsXml
+            .'</ota:SeatMapRequests>'
+            .$this->bookingReferenceIdXml($pnr, $instance),
         );
     }
 
@@ -263,18 +260,18 @@ XML
     {
         $this->assertV3Only($config, 'AirAncillaryItems');
 
-        $pnr = htmlspecialchars(trim((string) ($ancillaryContext['pnr'] ?? '')), ENT_XML1);
-        $instance = htmlspecialchars(trim((string) ($ancillaryContext['instance'] ?? '')), ENT_XML1);
+        $pnr = trim((string) ($ancillaryContext['pnr'] ?? ''));
+        $instance = trim((string) ($ancillaryContext['instance'] ?? ''));
 
-        $segmentsXml = '';
+        $ancillaryRequestsXml = '';
         foreach (is_array($ancillaryContext['flight_segments'] ?? null) ? $ancillaryContext['flight_segments'] : [] as $segment) {
             if (! is_array($segment)) {
                 continue;
             }
-            $segmentsXml .= $this->flightSegmentInfoXml($segment);
+            $ancillaryRequestsXml .= '<ota:AncillaryItemRequest>'.$this->flightSegmentInfoXml($segment).'</ota:AncillaryItemRequest>';
         }
 
-        if ($segmentsXml === '') {
+        if ($ancillaryRequestsXml === '') {
             throw new AirBlueValidationException('missing_ancillary_segments', 422, 'AirBlue ancillary items require at least one flight segment.');
         }
 
@@ -282,11 +279,11 @@ XML
             $config,
             'AirAncillaryItems',
             'airAncillaryItemsRQ',
-            <<<XML
-                {$this->posBlock($config)}
-                <ota:BookingReferenceID ID="{$pnr}" Instance="{$instance}"/>
-                {$segmentsXml}
-XML
+            $this->posBlock($config)
+            .'<ota:AncillaryItemRequests>'
+            .$ancillaryRequestsXml
+            .'</ota:AncillaryItemRequests>'
+            .$this->bookingReferenceIdXml($pnr, $instance),
         );
     }
 
@@ -432,7 +429,7 @@ XML;
      */
     private function seatModifyXml(array $modifyContext): string
     {
-        $xml = '';
+        $requests = '';
         foreach (is_array($modifyContext['seat_changes'] ?? null) ? $modifyContext['seat_changes'] : [] as $change) {
             if (! is_array($change)) {
                 continue;
@@ -444,14 +441,14 @@ XML;
             if ($row === '' || $seat === '' || $travelerRph === '' || $flightRph === '') {
                 throw new AirBlueValidationException('invalid_seat_modify', 422, 'Seat modify requires row, seat number, traveler RPH, and flight RPH.');
             }
-            $xml .= <<<XML
-                <ota:SeatRequests>
-                    <ota:SeatRequest SeatNumber="{$seat}" RowNumber="{$row}" TravelerRefNumberRPHList="{$travelerRph}" FlightRefNumberRPHList="{$flightRph}"/>
-                </ota:SeatRequests>
-XML;
+            $requests .= '<ota:SeatRequest SeatNumber="'.$seat.'" RowNumber="'.$row.'" TravelerRefNumberRPHList="'.$travelerRph.'" FlightRefNumberRPHList="'.$flightRph.'"/>';
         }
 
-        return $xml;
+        if ($requests === '') {
+            return '';
+        }
+
+        return '<ota:SeatRequests>'.$requests.'</ota:SeatRequests>';
     }
 
     /**
@@ -459,7 +456,7 @@ XML;
      */
     private function ancillaryModifyXml(array $modifyContext): string
     {
-        $xml = '';
+        $requests = '';
         foreach (is_array($modifyContext['item_changes'] ?? null) ? $modifyContext['item_changes'] : [] as $change) {
             if (! is_array($change)) {
                 continue;
@@ -471,15 +468,41 @@ XML;
             if ($itemCode === '' || $travelerRph === '' || $flightRph === '') {
                 throw new AirBlueValidationException('invalid_item_modify', 422, 'Ancillary modify requires item code, traveler RPH, and flight RPH.');
             }
-            $countAttr = $itemCount === 0 ? ' ItemCount="0"' : '';
-            $xml .= <<<XML
-                <ota:SpecialServiceRequests>
-                    <ota:SpecialServiceRequest ItemCode="{$itemCode}" TravelerRefNumberRPHList="{$travelerRph}" FlightRefNumberRPHList="{$flightRph}"{$countAttr}/>
-                </ota:SpecialServiceRequests>
-XML;
+            $attrs = ' ItemCode="'.$itemCode.'" TravelerRefNumberRPHList="'.$travelerRph.'" FlightRefNumberRPHList="'.$flightRph.'"';
+            if ($itemCount === 0) {
+                $attrs .= ' ItemCount="0"';
+            }
+            $requests .= '<ota:SpecialServiceRequest'.$attrs.'/>';
         }
 
-        return $xml;
+        if ($requests === '') {
+            return '';
+        }
+
+        return '<ota:SpecialServiceRequests>'.$requests.'</ota:SpecialServiceRequests>';
+    }
+
+    private function optionalInstanceAttribute(string $instance): string
+    {
+        $instance = trim($instance);
+
+        return $instance !== '' ? ' Instance="'.htmlspecialchars($instance, ENT_XML1).'"' : '';
+    }
+
+    private function uniqueIdXml(string $pnr, string $instance): string
+    {
+        $pnr = htmlspecialchars(trim($pnr), ENT_XML1);
+        $instanceAttr = $this->optionalInstanceAttribute($instance);
+
+        return '<ota:UniqueID ID="'.$pnr.'"'.$instanceAttr.' Type="14"/>';
+    }
+
+    private function bookingReferenceIdXml(string $pnr, string $instance): string
+    {
+        $pnr = htmlspecialchars(trim($pnr), ENT_XML1);
+        $instanceAttr = $this->optionalInstanceAttribute($instance);
+
+        return '<ota:BookingReferenceID ID="'.$pnr.'"'.$instanceAttr.'/>';
     }
 
     /**

@@ -8,7 +8,10 @@ use App\Models\SupplierConnection;
 use Illuminate\Support\Collection;
 
 /**
- * Prevents duplicate AirBlue PA offers when v2 and v3 Zapways connections are both active.
+ * Gates and dedupes AirBlue Zapways connections for normal/public flight search.
+ *
+ * Supplier health proves connectivity only — never certification. v3 requires explicit
+ * certification before participating in public search.
  */
 class AirBlueConnectionSearchPolicy
 {
@@ -22,19 +25,82 @@ class AirBlueConnectionSearchPolicy
             fn (SupplierConnection $connection): bool => $connection->provider === SupplierProvider::Airblue,
         );
 
-        if ($airblue->count() <= 1) {
+        if ($airblue->isEmpty()) {
             return $connections;
         }
 
-        $preferredId = $this->selectPreferredConnectionId($airblue);
+        $eligible = $airblue->filter(
+            fn (SupplierConnection $connection): bool => $this->isEligibleForPublicSearch($connection),
+        );
+
+        if ($eligible->isEmpty()) {
+            return $connections->reject(
+                fn (SupplierConnection $connection): bool => $connection->provider === SupplierProvider::Airblue,
+            )->values();
+        }
+
+        if ($eligible->count() === 1) {
+            $winnerId = (int) $eligible->first()->id;
+
+            return $connections->reject(
+                fn (SupplierConnection $connection): bool => $connection->provider === SupplierProvider::Airblue
+                    && (int) $connection->id !== $winnerId,
+            )->values();
+        }
+
+        $preferredId = $this->selectPreferredConnectionId($eligible);
         if ($preferredId === null) {
-            return $connections;
+            return $connections->reject(
+                fn (SupplierConnection $connection): bool => $connection->provider === SupplierProvider::Airblue,
+            )->values();
         }
 
         return $connections->reject(
             fn (SupplierConnection $connection): bool => $connection->provider === SupplierProvider::Airblue
                 && (int) $connection->id !== $preferredId,
         )->values();
+    }
+
+    public function isEligibleForPublicSearch(SupplierConnection $connection): bool
+    {
+        if ($connection->provider !== SupplierProvider::Airblue) {
+            return true;
+        }
+
+        if (! $connection->isEligibleForSupplierSearch()) {
+            return false;
+        }
+
+        $credentials = is_array($connection->credentials) ? $connection->credentials : [];
+        $protocol = AirBlueZapwaysProtocolVersion::fromCredentials($credentials);
+
+        return $this->isCertifiedForPublicSearch($protocol, $credentials);
+    }
+
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
+    private function isCertifiedForPublicSearch(AirBlueZapwaysProtocolVersion $protocol, array $credentials): bool
+    {
+        if (array_key_exists('search_certified', $credentials)) {
+            return filter_var($credentials['search_certified'], FILTER_VALIDATE_BOOLEAN);
+        }
+
+        $status = strtolower(trim((string) ($credentials['certification_status'] ?? '')));
+
+        if ($protocol->isV3()) {
+            return $status === 'certified';
+        }
+
+        if ($status === 'pending') {
+            return false;
+        }
+
+        if ($status === 'certified') {
+            return true;
+        }
+
+        return true;
     }
 
     /**
@@ -57,8 +123,8 @@ class AirBlueConnectionSearchPolicy
     private function connectionSearchRank(SupplierConnection $connection): int
     {
         $credentials = is_array($connection->credentials) ? $connection->credentials : [];
-        $explicitPriority = (int) ($credentials['search_priority'] ?? 0);
         $protocol = AirBlueZapwaysProtocolVersion::fromCredentials($credentials);
+        $explicitPriority = (int) ($credentials['search_priority'] ?? 0);
 
         return ($explicitPriority * 1000) + $protocol->searchPriority() + (int) $connection->id;
     }
