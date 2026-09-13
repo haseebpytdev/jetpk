@@ -1,0 +1,414 @@
+{
+  "generatedAt": "2026-09-13T06:45:00.000Z",
+  "phase": "JETPAKISTAN-MEDIA-MANIFEST-SEMANTIC-CLOSURE-02",
+  "branch": "phase/jp-master-unfinished-closure-10",
+  "baseline": {
+    "CURRENT_RAW_COUNT": 84,
+    "CURRENT_DEDUPED_COUNT": 41,
+    "sourceManifest": "docs/audits/JP-MEDIA-OWNER-ACTION-LIST.json"
+  },
+  "summary": {
+    "SEMANTIC_RECORDS_REVIEWED": 41,
+    "FALSE_POSITIVES_REMOVED": 41,
+    "GENUINE_MEDIA_SLOTS": 8,
+    "APPROVED_EXISTING": 12,
+    "CMS_EXISTING": 3,
+    "CMS_MISSING": 0,
+    "PLACEHOLDER_REPLACE": 0,
+    "GENERIC_FALLBACK_REPLACE": 0,
+    "BROKEN_REPLACE": 1,
+    "NEW_ASSET_REQUIRED": 0,
+    "OPTIONAL_ENHANCEMENT": 1,
+    "BRAND_AUTHORITY": 2,
+    "DYNAMIC_RUNTIME": 5,
+    "DECORATIVE": 0,
+    "NOT_MEDIA_FALSE_POSITIVE": 33,
+    "OWNER_ACTION_P0": 1,
+    "OWNER_ACTION_P1": 0,
+    "OWNER_ACTION_P2": 1,
+    "OWNER_ACTION_TOTAL": 2,
+    "FALSE_POSITIVE_IN_FINAL_OWNER_LIST": 0,
+    "NON_IMAGE_URL_IN_FINAL_OWNER_LIST": 0,
+    "DUPLICATE_OWNER_ASSET": 0,
+    "UNKNOWN_MEDIA_CLASSIFICATION": 0,
+    "STATUS": "PASS"
+  },
+  "methodology": {
+    "sourceInspection": "Each of the 41 deduped JP-MEDIA-OWNER-ACTION-LIST records was opened at the cited file:line and classified by actual markup context (img/src, CSS background, preload, href, route, anchor, resolver).",
+    "productionVerification": "https://jetpakistan.pk/ checked via Playwright (desktop 1280 and mobile 390). Image HTTP status, natural dimensions, and visible context verified.",
+    "excludedByPolicy": [
+      "links and routes",
+      "anchor IDs",
+      "mailto/tel/download URLs",
+      "airline/supplier runtime logos",
+      "approved brand logos",
+      "closed FAB/responsive/icon work"
+    ]
+  },
+  "ownerAction": {
+    "P0": [
+      {
+        "id": "JP-FINAL-001",
+        "page": "Homepage",
+        "section": "Popular routes — card 1",
+        "sourceComponent": "frontend homepage routes section (CMS asset route_seed_khi_dxb)",
+        "currentAsset": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_seed_khi_dxb-20260910194137.png",
+        "reason": "Production image returns HTTP 200 but decodes as 1×1 px — visible route card renders blank/stretched. Broken upload.",
+        "recommendedSubject": "Karachi–Dubai (or Lahore–Dubai per card label) route photography — aircraft, skyline, or route mood shot",
+        "aspectRatio": "4:3",
+        "minSourceResolution": "1536×1024",
+        "desktopCrop": "Route card thumbnail, ~228×171 CSS box, object-cover",
+        "mobileCrop": "Same card in horizontal carousel, full card width",
+        "formatRecommendation": "WebP or PNG",
+        "cmsKeyOrDestination": "CMS → Page Settings → Homepage → Routes → item id `seed_khi_dxb` / asset key `route_seed_khi_dxb`",
+        "priority": "P0",
+        "productionUrl": "https://jetpakistan.pk/ (# routes section \"Where Pakistan is flying.\")",
+        "classification": "BROKEN_REPLACE"
+      }
+    ],
+    "P1": [],
+    "P2": [
+      {
+        "id": "JP-FINAL-002",
+        "page": "Homepage",
+        "section": "Hero — mobile",
+        "sourceComponent": "resources/views/themes/frontend/jetpakistan/sections/hero.blade.php + ClientPageMediaSchema hero_background_mobile",
+        "currentAsset": "Falls back to desktop hero_background (2048×768) on mobile",
+        "reason": "Dedicated mobile hero slot is empty. Desktop asset works but is not optimized for 4:5 mobile LCP crop.",
+        "recommendedSubject": "Portrait-cropped Pakistan travel hero — same brand look as desktop hero",
+        "aspectRatio": "4:5",
+        "minSourceResolution": "1200×1500",
+        "desktopCrop": "Not used on desktop",
+        "mobileCrop": "Full-width hero above search, object-cover",
+        "formatRecommendation": "WebP/AVIF",
+        "cmsKeyOrDestination": "CMS → Page Settings → Homepage → hero_background_mobile",
+        "priority": "P2",
+        "productionUrl": "https://jetpakistan.pk/ (mobile viewport)",
+        "classification": "OPTIONAL_ENHANCEMENT"
+      }
+    ]
+  },
+  "inspectedNoOwnerAction": {
+    "description": "Records and slots reviewed that require NO owner create/upload/replace action.",
+    "falsePositivesFromPriorManifest": [
+      {
+        "id": "JP-MEDIA-001",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Download link href on booking documents card",
+        "sourceFile": "resources/views/components/bookings/detail-documents-card.blade.php:80"
+      },
+      {
+        "id": "JP-MEDIA-002",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Support route() link href",
+        "sourceFile": "resources/views/components/bookings/detail-help-card.blade.php:12"
+      },
+      {
+        "id": "JP-MEDIA-003",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Login URL link href",
+        "sourceFile": "resources/views/components/bookings/detail-payment-card.blade.php:125"
+      },
+      {
+        "id": "JP-MEDIA-004",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Dashboard action card link href",
+        "sourceFile": "resources/views/components/dashboard/overview/action-card.blade.php:32"
+      },
+      {
+        "id": "JP-MEDIA-005",
+        "classification": "CMS_EXISTING",
+        "reason": "Destination card CSS background from CMS $image prop when set; generic SVG fallback otherwise",
+        "sourceFile": "resources/views/components/jp/dest-card.blade.php:7"
+      },
+      {
+        "id": "JP-MEDIA-006",
+        "classification": "CMS_EXISTING",
+        "reason": "Group card CSS background from CMS $image prop",
+        "sourceFile": "resources/views/components/jp/group-card.blade.php:6"
+      },
+      {
+        "id": "JP-MEDIA-007",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Route card link href",
+        "sourceFile": "resources/views/components/jp/route-card.blade.php:4"
+      },
+      {
+        "id": "JP-MEDIA-008",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Admin breadcrumb route() link",
+        "sourceFile": "resources/views/dashboard/admin/group-ticketing/categories/index.blade.php:8"
+      },
+      {
+        "id": "JP-MEDIA-009",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Admin form route() link",
+        "sourceFile": "resources/views/dashboard/admin/group-ticketing/tiles/form.blade.php:8"
+      },
+      {
+        "id": "JP-MEDIA-010",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Admin dashboard card route link",
+        "sourceFile": "resources/views/dashboard/admin/index.blade.php:278"
+      },
+      {
+        "id": "JP-MEDIA-011",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Customer portal route() link",
+        "sourceFile": "resources/views/dashboard/customer/partials/default-traveler-card.blade.php:44"
+      },
+      {
+        "id": "JP-MEDIA-012",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Email support mailto: link",
+        "sourceFile": "resources/views/emails/themes/jetpakistan/partials/support-card.blade.php:28"
+      },
+      {
+        "id": "JP-MEDIA-013",
+        "classification": "DYNAMIC_RUNTIME",
+        "reason": "Checkout summary airline logo img — supplier runtime",
+        "sourceFile": "resources/views/frontend/checkout/partials/summary-card.blade.php:39"
+      },
+      {
+        "id": "JP-MEDIA-014",
+        "classification": "DYNAMIC_RUNTIME",
+        "reason": "Group confirmation airline logo img",
+        "sourceFile": "resources/views/frontend/group-ticketing/confirmation.blade.php:88"
+      },
+      {
+        "id": "JP-MEDIA-015",
+        "classification": "DYNAMIC_RUNTIME",
+        "reason": "Group result card airline logo img",
+        "sourceFile": "resources/views/frontend/group-ticketing/partials/result-card.blade.php:9"
+      },
+      {
+        "id": "JP-MEDIA-016",
+        "classification": "DYNAMIC_RUNTIME",
+        "reason": "Group result row airline logo img",
+        "sourceFile": "resources/views/frontend/group-ticketing/partials/result-row.blade.php:12"
+      },
+      {
+        "id": "JP-MEDIA-017",
+        "classification": "DYNAMIC_RUNTIME",
+        "reason": "Group review airline logo img",
+        "sourceFile": "resources/views/frontend/group-ticketing/review.blade.php:31"
+      },
+      {
+        "id": "JP-MEDIA-018",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Group search client_route() link",
+        "sourceFile": "resources/views/frontend/group-ticketing/search.blade.php:98"
+      },
+      {
+        "id": "JP-MEDIA-019",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Group show client_route() link",
+        "sourceFile": "resources/views/frontend/group-ticketing/show.blade.php:16"
+      },
+      {
+        "id": "JP-MEDIA-020",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "In-page anchor #ota-flight-search for scroll target",
+        "sourceFile": "resources/views/frontend/partials/ota-hero-flight-search.blade.php:1946"
+      },
+      {
+        "id": "JP-MEDIA-021",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Group hero client_route() link",
+        "sourceFile": "resources/views/frontend/partials/ota-hero-group-search.blade.php:72"
+      },
+      {
+        "id": "JP-MEDIA-022",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Legacy tournest tab anchor #hotels (template not mounted on production homepage)",
+        "sourceFile": "resources/views/frontend/partials/tournest-home-main.blade.php:56"
+      },
+      {
+        "id": "JP-MEDIA-023",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Umrah package card client_route() link",
+        "sourceFile": "resources/views/frontend/umrah-groups/partials/package-card.blade.php:45"
+      },
+      {
+        "id": "JP-MEDIA-024",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Admin sidebar submenu anchor #sidebar-group-ticketing-submenu",
+        "sourceFile": "resources/views/layouts/partials/dashboard-sidebar-admin.blade.php:427"
+      },
+      {
+        "id": "JP-MEDIA-025",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Preview context card route() link",
+        "sourceFile": "resources/views/preview/client/partials/context-card.blade.php:15"
+      },
+      {
+        "id": "JP-MEDIA-026",
+        "classification": "CMS_EXISTING",
+        "reason": "Admin CMS preview img of already-uploaded destination asset",
+        "sourceFile": "resources/views/themes/admin/jetpakistan/page-settings/partials/home-destinations-manager.blade.php:107"
+      },
+      {
+        "id": "JP-MEDIA-027",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Portal traveler card route() link",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/components/portal/default-traveler-card.blade.php:72"
+      },
+      {
+        "id": "JP-MEDIA-028",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "About page resolveDestination() CTA URL",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/frontend/about.blade.php:82"
+      },
+      {
+        "id": "JP-MEDIA-029",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Agent landing resolveDestination() hero CTA URL",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/frontend/agent-registration/landing.blade.php:30"
+      },
+      {
+        "id": "JP-MEDIA-030",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Agent landing resolveDestination() CTA URL",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/frontend/agent-registration/landing.blade.php:75"
+      },
+      {
+        "id": "JP-MEDIA-031",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Card payment page theme URL link",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/frontend/booking/card-payment.blade.php:9"
+      },
+      {
+        "id": "JP-MEDIA-032",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Booking lookup resolveDestination() CTA URL",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/frontend/booking/lookup.blade.php:74"
+      },
+      {
+        "id": "JP-MEDIA-033",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "WhatsApp support $waUrl link href",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/frontend/booking/partials/jp-support-card.blade.php:54"
+      },
+      {
+        "id": "JP-MEDIA-034",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "FAQ resolveDestination() CTA URL",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/frontend/faq.blade.php:39"
+      },
+      {
+        "id": "JP-MEDIA-035",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Support page resolveDestination() FAQ teaser URL",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/frontend/support.blade.php:60"
+      },
+      {
+        "id": "JP-MEDIA-036",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Mobile drawer resolveDestination() nav URL",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/partials/drawer.blade.php:14"
+      },
+      {
+        "id": "JP-MEDIA-037",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Header announcement resolveDestination() URL",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/partials/header.blade.php:12"
+      },
+      {
+        "id": "JP-MEDIA-038",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Destinations section CTA link href ($ctaUrl)",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/sections/destinations.blade.php:28"
+      },
+      {
+        "id": "JP-MEDIA-039",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Hero LCP <link rel=preload as=image> for CMS hero — not an owner gap (hero uploaded on production)",
+        "sourceFile": "resources/views/themes/frontend/jetpakistan/sections/hero.blade.php:32"
+      },
+      {
+        "id": "JP-MEDIA-040",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Staff dashboard client_route() card link",
+        "sourceFile": "resources/views/themes/staff/jetpakistan/index.blade.php:67"
+      },
+      {
+        "id": "JP-MEDIA-041",
+        "classification": "NOT_MEDIA_FALSE_POSITIVE",
+        "reason": "Featured fares in-page anchor #ota-home-hero",
+        "sourceFile": "resources/views/ui/site/v2/partials/featured-fares.blade.php:146"
+      }
+    ],
+    "productionApprovedSlots": [
+      {
+        "slot": "hero_background",
+        "classification": "APPROVED_EXISTING",
+        "productionUrl": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/hero_background-20260909082131.png",
+        "natural": "2048×768",
+        "httpStatus": 200
+      },
+      {
+        "slot": "support_cta_background",
+        "classification": "APPROVED_EXISTING",
+        "productionUrl": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/support_cta_background-20260909081705.png",
+        "natural": "1672×941",
+        "httpStatus": 200
+      },
+      {
+        "slot": "destination_seed_dxb",
+        "classification": "APPROVED_EXISTING",
+        "natural": "1448×1086",
+        "httpStatus": 200
+      },
+      {
+        "slot": "destination_seed_jed",
+        "classification": "APPROVED_EXISTING",
+        "natural": "1448×1086",
+        "httpStatus": 200
+      },
+      {
+        "slot": "destination_seed_lhr",
+        "classification": "APPROVED_EXISTING",
+        "natural": "1448×1086",
+        "httpStatus": 200
+      },
+      {
+        "slot": "destination_seed_ist",
+        "classification": "APPROVED_EXISTING",
+        "natural": "1448×1086",
+        "httpStatus": 200
+      },
+      {
+        "slot": "route_seed_lhe_jed",
+        "classification": "APPROVED_EXISTING",
+        "natural": "1536×1024",
+        "httpStatus": 200
+      },
+      {
+        "slot": "route_seed_isb_lhr",
+        "classification": "APPROVED_EXISTING",
+        "natural": "1536×1024",
+        "httpStatus": 200
+      },
+      {
+        "slot": "route_seed_khi_ruh",
+        "classification": "APPROVED_EXISTING",
+        "natural": "1536×1024",
+        "httpStatus": 200
+      },
+      {
+        "slot": "featured_deal (×2)",
+        "classification": "APPROVED_EXISTING",
+        "natural": "1448×1086",
+        "httpStatus": 200
+      },
+      {
+        "slot": "brand_logo",
+        "classification": "BRAND_AUTHORITY",
+        "productionUrl": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+        "natural": "400×85",
+        "httpStatus": 200
+      }
+    ]
+  },
+  "rootCause": "Prior audit script (frontend/scripts/audit-jp-media-requirements.mjs) matched any href= attribute inside files whose path contained hero/destination/group keywords, classifying navigation URLs as GENERATED_ASSET_NEEDED."
+}
