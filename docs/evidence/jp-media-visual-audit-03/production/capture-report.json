@@ -1,0 +1,962 @@
+[
+  {
+    "id": "home",
+    "url": "https://jetpakistan.pk/",
+    "label": "Homepage",
+    "viewport": "desktop",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\desktop\\home.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/",
+    "authIllustrationVisible": false,
+    "authIllustrationSrc": null,
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/hero_background-20260909082131.png?v=1788942092",
+        "alt": "JetPakistan flights",
+        "natural": "2048x768",
+        "displayed": "1280x568",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_seed_khi_dxb-20260910194137.png?v=1789069297",
+        "alt": "Lahore to Dubai Flights",
+        "natural": "1x1",
+        "displayed": "264x198",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_seed_lhe_jed-20260909074410.png?v=1788939850",
+        "alt": "LHE to JED",
+        "natural": "1536x1024",
+        "displayed": "264x198",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_seed_isb_lhr-20260909074543.png?v=1788939943",
+        "alt": "ISB to LHR",
+        "natural": "1536x1024",
+        "displayed": "264x198",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_seed_khi_ruh-20260909074554.png?v=1788939954",
+        "alt": "KHI to RUH",
+        "natural": "1536x1024",
+        "displayed": "264x198",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/destination_seed_dxb-20260909074636.png?v=1788939996",
+        "alt": "Dubai",
+        "natural": "1448x1086",
+        "displayed": "264x198",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/destination_seed_jed-20260909074645.png?v=1788940005",
+        "alt": "Jeddah",
+        "natural": "1448x1086",
+        "displayed": "264x198",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/destination_seed_lhr-20260909074700.png?v=1788940020",
+        "alt": "London",
+        "natural": "1448x1086",
+        "displayed": "264x198",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/destination_seed_ist-20260909074703.png?v=1788940023",
+        "alt": "Istanbul",
+        "natural": "1448x1086",
+        "displayed": "264x198",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/featured_deal_closure05_uat_slot-20260909080049.png?v=1788940849",
+        "alt": "LYP",
+        "natural": "1448x1086",
+        "displayed": "264x149",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/featured_deal_64fc959f_83a3_489c_85d6_5038164dce38-20260909080129.png?v=1788940889",
+        "alt": "ISB",
+        "natural": "1448x1086",
+        "displayed": "264x149",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/support_cta_background-20260909081705.png?v=1788941825",
+        "alt": "",
+        "natural": "1672x941",
+        "displayed": "254x143",
+        "status": 200,
+        "testId": null
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "login",
+    "url": "https://jetpakistan.pk/login",
+    "label": "Login",
+    "viewport": "desktop",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\desktop\\login.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/login",
+    "authIllustrationVisible": true,
+    "authIllustrationSrc": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "481x240",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "register",
+    "url": "https://jetpakistan.pk/register",
+    "label": "Register",
+    "viewport": "desktop",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\desktop\\register.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/register",
+    "authIllustrationVisible": true,
+    "authIllustrationSrc": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "481x240",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "forgot-password",
+    "url": "https://jetpakistan.pk/forgot-password",
+    "label": "Forgot password",
+    "viewport": "desktop",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\desktop\\forgot-password.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/forgot-password",
+    "authIllustrationVisible": true,
+    "authIllustrationSrc": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "481x240",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "login-otp",
+    "url": "https://jetpakistan.pk/login/otp",
+    "label": "Login OTP",
+    "viewport": "desktop",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\desktop\\login-otp.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/login",
+    "authIllustrationVisible": true,
+    "authIllustrationSrc": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "481x240",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "agent-register",
+    "url": "https://jetpakistan.pk/agent/register",
+    "label": "Agent register",
+    "viewport": "desktop",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\desktop\\agent-register.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/agent/register",
+    "authIllustrationVisible": true,
+    "authIllustrationSrc": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "481x240",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "lookup-booking",
+    "url": "https://jetpakistan.pk/lookup-booking",
+    "label": "Booking lookup",
+    "viewport": "desktop",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\desktop\\lookup-booking.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/lookup-booking",
+    "authIllustrationVisible": false,
+    "authIllustrationSrc": null,
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "1280x187",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "support",
+    "url": "https://jetpakistan.pk/support",
+    "label": "Support",
+    "viewport": "desktop",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\desktop\\support.png",
+    "title": "Support & contact ΓÇö JetPakistan | JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/support",
+    "authIllustrationVisible": false,
+    "authIllustrationSrc": null,
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "groups-search",
+    "url": "https://jetpakistan.pk/groups/search",
+    "label": "Groups search",
+    "viewport": "desktop",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\desktop\\groups-search.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/groups/search",
+    "authIllustrationVisible": false,
+    "authIllustrationSrc": null,
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "verify-email",
+    "url": "https://jetpakistan.pk/verify-email",
+    "label": "Verify email",
+    "viewport": "desktop",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\desktop\\verify-email.png",
+    "title": "Verify Email | JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/verify-email",
+    "authIllustrationVisible": true,
+    "authIllustrationSrc": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "481x240",
+        "status": 200,
+        "testId": "image-slot"
+      }
+    ]
+  },
+  {
+    "id": "not-found",
+    "url": "https://jetpakistan.pk/this-page-does-not-exist-jp-audit",
+    "label": "404",
+    "viewport": "desktop",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\desktop\\not-found.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/access-denied?reason=not-found",
+    "authIllustrationVisible": false,
+    "authIllustrationSrc": null,
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "access-denied",
+    "url": "https://jetpakistan.pk/access-denied?reason=not-found",
+    "label": "Access denied",
+    "viewport": "desktop",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\desktop\\access-denied.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/access-denied?reason=not-found",
+    "authIllustrationVisible": false,
+    "authIllustrationSrc": null,
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "home",
+    "url": "https://jetpakistan.pk/",
+    "label": "Homepage",
+    "viewport": "mobile",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\mobile\\home.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/",
+    "authIllustrationVisible": false,
+    "authIllustrationSrc": null,
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/hero_background-20260909082131.png?v=1788942092",
+        "alt": "JetPakistan flights",
+        "natural": "2048x768",
+        "displayed": "390x1180",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_seed_khi_dxb-20260910194137.png?v=1789069297",
+        "alt": "Lahore to Dubai Flights",
+        "natural": "1x1",
+        "displayed": "253x190",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_seed_lhe_jed-20260909074410.png?v=1788939850",
+        "alt": "LHE to JED",
+        "natural": "1536x1024",
+        "displayed": "253x190",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_seed_isb_lhr-20260909074543.png?v=1788939943",
+        "alt": "ISB to LHR",
+        "natural": "0x0",
+        "displayed": "253x190",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/route_seed_khi_ruh-20260909074554.png?v=1788939954",
+        "alt": "KHI to RUH",
+        "natural": "0x0",
+        "displayed": "253x190",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/destination_seed_dxb-20260909074636.png?v=1788939996",
+        "alt": "Dubai",
+        "natural": "1448x1086",
+        "displayed": "253x190",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/destination_seed_jed-20260909074645.png?v=1788940005",
+        "alt": "Jeddah",
+        "natural": "1448x1086",
+        "displayed": "253x190",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/destination_seed_lhr-20260909074700.png?v=1788940020",
+        "alt": "London",
+        "natural": "0x0",
+        "displayed": "253x190",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/destination_seed_ist-20260909074703.png?v=1788940023",
+        "alt": "Istanbul",
+        "natural": "0x0",
+        "displayed": "253x190",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/featured_deal_closure05_uat_slot-20260909080049.png?v=1788940849",
+        "alt": "LYP",
+        "natural": "1448x1086",
+        "displayed": "253x143",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/featured_deal_64fc959f_83a3_489c_85d6_5038164dce38-20260909080129.png?v=1788940889",
+        "alt": "ISB",
+        "natural": "1448x1086",
+        "displayed": "253x143",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "108x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "login",
+    "url": "https://jetpakistan.pk/login",
+    "label": "Login",
+    "viewport": "mobile",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\mobile\\login.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/login",
+    "authIllustrationVisible": true,
+    "authIllustrationSrc": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "303x151",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "register",
+    "url": "https://jetpakistan.pk/register",
+    "label": "Register",
+    "viewport": "mobile",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\mobile\\register.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/register",
+    "authIllustrationVisible": true,
+    "authIllustrationSrc": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "303x151",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "forgot-password",
+    "url": "https://jetpakistan.pk/forgot-password",
+    "label": "Forgot password",
+    "viewport": "mobile",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\mobile\\forgot-password.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/forgot-password",
+    "authIllustrationVisible": true,
+    "authIllustrationSrc": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "303x151",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "login-otp",
+    "url": "https://jetpakistan.pk/login/otp",
+    "label": "Login OTP",
+    "viewport": "mobile",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\mobile\\login-otp.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/login",
+    "authIllustrationVisible": true,
+    "authIllustrationSrc": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "303x151",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "agent-register",
+    "url": "https://jetpakistan.pk/agent/register",
+    "label": "Agent register",
+    "viewport": "mobile",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\mobile\\agent-register.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/agent/register",
+    "authIllustrationVisible": true,
+    "authIllustrationSrc": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "303x151",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "lookup-booking",
+    "url": "https://jetpakistan.pk/lookup-booking",
+    "label": "Booking lookup",
+    "viewport": "mobile",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\mobile\\lookup-booking.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/lookup-booking",
+    "authIllustrationVisible": false,
+    "authIllustrationSrc": null,
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "390x232",
+        "status": 200,
+        "testId": "image-slot"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "support",
+    "url": "https://jetpakistan.pk/support",
+    "label": "Support",
+    "viewport": "mobile",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\mobile\\support.png",
+    "title": "Support & contact ΓÇö JetPakistan | JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/support",
+    "authIllustrationVisible": false,
+    "authIllustrationSrc": null,
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "groups-search",
+    "url": "https://jetpakistan.pk/groups/search",
+    "label": "Groups search",
+    "viewport": "mobile",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\mobile\\groups-search.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/groups/search",
+    "authIllustrationVisible": false,
+    "authIllustrationSrc": null,
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "verify-email",
+    "url": "https://jetpakistan.pk/verify-email",
+    "label": "Verify email",
+    "viewport": "mobile",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\mobile\\verify-email.png",
+    "title": "Verify Email | JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/verify-email",
+    "authIllustrationVisible": true,
+    "authIllustrationSrc": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/images/auth/auth-illustration.svg",
+        "alt": "",
+        "natural": "200x150",
+        "displayed": "303x151",
+        "status": 200,
+        "testId": "image-slot"
+      }
+    ]
+  },
+  {
+    "id": "not-found",
+    "url": "https://jetpakistan.pk/this-page-does-not-exist-jp-audit",
+    "label": "404",
+    "viewport": "mobile",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\mobile\\not-found.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/access-denied?reason=not-found",
+    "authIllustrationVisible": false,
+    "authIllustrationSrc": null,
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  },
+  {
+    "id": "access-denied",
+    "url": "https://jetpakistan.pk/access-denied?reason=not-found",
+    "label": "Access denied",
+    "viewport": "mobile",
+    "screenshot": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-media-visual-audit-03\\production\\mobile\\access-denied.png",
+    "title": "JetPakistan",
+    "finalUrl": "https://jetpakistan.pk/access-denied?reason=not-found",
+    "authIllustrationVisible": false,
+    "authIllustrationSrc": null,
+    "images": [
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      },
+      {
+        "src": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png?v=1789013509",
+        "alt": "JetPakistan",
+        "natural": "400x85",
+        "displayed": "169x36",
+        "status": 200,
+        "testId": "jetpakistan-header-logo"
+      }
+    ]
+  }
+]
