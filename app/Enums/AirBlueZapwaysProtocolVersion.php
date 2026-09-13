@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use App\Services\Suppliers\AirBlue\Exceptions\AirBlueValidationException;
+
 /**
  * Zapways OTA wire protocol version (distinct from document revision and RQ Version attribute).
  */
@@ -18,6 +20,14 @@ enum AirBlueZapwaysProtocolVersion: string
         }
         if ($raw === '3' || $raw === '3.0' || $raw === 'v3') {
             return self::V3;
+        }
+
+        if ($raw !== '') {
+            throw new AirBlueValidationException(
+                'invalid_protocol_version',
+                422,
+                sprintf('Unsupported AirBlue Zapways protocol version "%s". Use 2.0 or 3.0.', $credentials['protocol_version'] ?? $raw),
+            );
         }
 
         return self::V2;

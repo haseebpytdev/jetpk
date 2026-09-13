@@ -30,9 +30,30 @@ Two logical `SupplierConnection` rows may coexist:
 
 Both use `provider=airblue`, `api_channel=zapways_ota`. They may share the same JetPakistan TLS certificate/key paths. Credentials are not assumed interchangeable until issued by Zapways.
 
-Search fan-out dedupes to one active AirBlue connection per search (prefers v3, then `search_priority`).
+Search fan-out dedupes to one active AirBlue connection per search. **Uncertified v3 cannot displace certified v2.** Among certified candidates, ranking uses `search_priority`, then protocol version, then connection id. Certification is inferred from `search_certified`, `certification_status`, or healthy `last_test_status` (`air_shopping_success`, `ready_for_review`, `success`).
 
 Booking/ticketing always follow the offer's stored `protocol_version` and `supplier_connection_id`. Cross-protocol booking is fail-closed.
+
+## v3 SOAPAction policy
+
+v3 SOAPActions are **not** inferred from the XML namespace. Only **Read** is supplier-documented:
+
+| Environment | SOAPAction |
+| --- | --- |
+| TEST | `https://ota.qa.zapways.com/Read` |
+| LIVE | `https://ota.zapways.com/Read` |
+
+v2 Read continues to use the historically established `ota4` / `otatest4` hosts. Other v3 operations default to unresolved (`null`) until Zapways documents them or ops configures per-operation overrides in `config/suppliers.php`. Real calls without a configured SOAPAction fail closed with `missing_soap_action`.
+
+## v3 request shapes (authoritative)
+
+| Operation | Required hierarchy |
+| --- | --- |
+| AirSeatMap | `airSeatMapRQ` → POS → `SeatMapRequests/SeatMapRequest/FlightSegmentInfo` → `BookingReferenceID` |
+| AirAncillaryItems | `airAncillaryItemsRQ` → POS → `AncillaryItemRequests/AncillaryItemRequest/FlightSegmentInfo` → `BookingReferenceID` |
+| AirBookModify type 5 | `airBookModifyRQ` → POS → `AirBookModifyRQ@ModificationType=5/TravelerInfo/SpecialReqDetails/{SeatRequests,SpecialServiceRequests}` → `AirReservation/BookingReferenceID` |
+
+Read and Cancel: `Instance` attribute is optional — omit when blank. Exchange cancel requires instance.
 
 ## TLS identity
 

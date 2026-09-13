@@ -57,9 +57,35 @@ class AirBlueConnectionSearchPolicy
     private function connectionSearchRank(SupplierConnection $connection): int
     {
         $credentials = is_array($connection->credentials) ? $connection->credentials : [];
-        $explicitPriority = (int) ($credentials['search_priority'] ?? 0);
         $protocol = AirBlueZapwaysProtocolVersion::fromCredentials($credentials);
+        $certified = $this->isSearchCertified($connection, $credentials);
 
-        return ($explicitPriority * 1000) + $protocol->searchPriority() + (int) $connection->id;
+        if (! $certified) {
+            return (int) $connection->id;
+        }
+
+        $explicitPriority = (int) ($credentials['search_priority'] ?? 0);
+
+        return 10_000 + ($explicitPriority * 1000) + $protocol->searchPriority() + (int) $connection->id;
+    }
+
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
+    private function isSearchCertified(SupplierConnection $connection, array $credentials): bool
+    {
+        if (array_key_exists('search_certified', $credentials)) {
+            return filter_var($credentials['search_certified'], FILTER_VALIDATE_BOOLEAN);
+        }
+
+        $status = strtolower(trim((string) ($credentials['certification_status'] ?? '')));
+        if ($status === 'certified') {
+            return true;
+        }
+        if ($status === 'pending') {
+            return false;
+        }
+
+        return $connection->supplierHealthHealthy();
     }
 }

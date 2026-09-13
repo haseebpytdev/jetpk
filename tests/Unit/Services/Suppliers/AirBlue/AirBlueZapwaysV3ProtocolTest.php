@@ -222,10 +222,14 @@ class AirBlueZapwaysV3ProtocolTest extends TestCase
             ],
         ]);
 
-        $this->assertStringContainsString('ModificationType="5"', $xml);
-        $this->assertStringContainsString('SeatRequest', $xml);
-        $this->assertStringContainsString('SpecialServiceRequest', $xml);
-        $this->assertStringContainsString('ItemCount="0"', $xml);
+        $document = new \DOMDocument;
+        $document->loadXML($xml);
+        $xpath = new \DOMXPath($document);
+
+        $this->assertSame(1, $xpath->query('//*[local-name()="AirBookModifyRQ"][@ModificationType="5"]')->length);
+        $this->assertSame(1, $xpath->query('//*[local-name()="SpecialReqDetails"]/*[local-name()="SeatRequests"]/*[local-name()="SeatRequest"]')->length);
+        $this->assertSame(1, $xpath->query('//*[local-name()="SpecialServiceRequest"][@ItemCount="0"]')->length);
+        $this->assertSame(1, $xpath->query('//*[local-name()="AirReservation"]/*[local-name()="BookingReferenceID"]')->length);
     }
 
     public function test_read_transaction_history_and_negative_values(): void
@@ -267,18 +271,24 @@ class AirBlueZapwaysV3ProtocolTest extends TestCase
         app(AirBlueProtocolGuard::class)->assertCompatible($connection, ['protocol_version' => '3.0'], 'booking');
     }
 
-    public function test_dual_connection_search_prefers_v3(): void
+    public function test_dual_connection_search_prefers_certified_v2_over_pending_v3(): void
     {
-        $v2 = $this->makeConnection(['id' => 1]);
+        $v2 = $this->makeConnection([
+            'id' => 1,
+            'last_test_status' => 'air_shopping_success',
+        ]);
         $v3 = $this->makeConnection([
             'id' => 2,
-            'credentials' => $this->credentials(['protocol_version' => '3.0']),
+            'credentials' => $this->credentials([
+                'protocol_version' => '3.0',
+                'certification_status' => 'pending',
+            ]),
         ]);
 
         $deduped = app(AirBlueConnectionSearchPolicy::class)->dedupeForSearch(collect([$v2, $v3]));
 
         $this->assertCount(1, $deduped);
-        $this->assertSame(2, (int) $deduped->first()->id);
+        $this->assertSame(1, (int) $deduped->first()->id);
     }
 
     public function test_v3_seat_selection_gate_blocks_ticketing_without_seats(): void
@@ -300,15 +310,17 @@ class AirBlueZapwaysV3ProtocolTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function test_v3_soap_actions_use_v3_namespace(): void
+    public function test_v3_read_soap_action_uses_documented_hosts(): void
     {
         $client = app(AirBlueClient::class);
         $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
         $method->setAccessible(true);
 
-        $action = $method->invoke($client, 'air_seat_map', ['is_test' => true, 'protocol_version' => '3.0']);
+        $test = $method->invoke($client, 'read', ['is_test' => true, 'protocol_version' => '3.0']);
+        $live = $method->invoke($client, 'read', ['is_test' => false, 'protocol_version' => '3.0']);
 
-        $this->assertSame('http://zapways.com/air/ota/3.0/AirSeatMap', $action);
+        $this->assertSame('https://ota.qa.zapways.com/Read', $test);
+        $this->assertSame('https://ota.zapways.com/Read', $live);
     }
 
     public function test_v2_ancillary_service_is_not_supported(): void
