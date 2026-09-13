@@ -21,8 +21,8 @@ const env = {
 };
 
 const result = spawnSync(
-  "npx",
-  ["playwright", "test", "--config=playwright.production-canary.config.ts"],
+  "node",
+  [path.resolve(__dirname, "run-canary-browser-matrix.mjs")],
   { cwd: path.resolve(__dirname, ".."), env, stdio: "inherit", shell: true }
 );
 

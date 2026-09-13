@@ -1,0 +1,198 @@
+{
+  "phase": "JP-AI-PRODUCTION-CANARY-HTTP-GATEWAY-01",
+  "source": "browser-matrix-report.jsonl",
+  "generated_at": "2026-09-13T19:50:52.702Z",
+  "TOTAL": 30,
+  "PASS": 5,
+  "FAIL": 25,
+  "NOT_RUN": 0,
+  "PASSED_CASE_IDS": [
+    "19-handoff-accept",
+    "25-prompt-injection",
+    "28-gateway-unavailable",
+    "29-ollama-unavailable",
+    "30-malformed-gateway"
+  ],
+  "FAILED_CASE_IDS": [
+    "01-english-flight",
+    "02-roman-urdu",
+    "03-mixed",
+    "04-missing-date",
+    "05-missing-trip-type",
+    "06-missing-passengers",
+    "07-return-flight",
+    "08-positive-confirmation",
+    "09-negative-confirmation",
+    "10-correction-after-recap",
+    "11-conflicting-airports",
+    "12-unresolved-route",
+    "13-residual-1",
+    "14-residual-2",
+    "15-residual-3",
+    "16-residual-4",
+    "17-residual-5",
+    "18-visa-unsupported",
+    "20-handoff-decline",
+    "21-rag-approved",
+    "22-rag-no-source",
+    "23-rag-expired",
+    "24-rag-conflict",
+    "26-live-fare",
+    "27-pnr-status"
+  ],
+  "unique_case_ids": 30,
+  "duplicate_case_ids": [],
+  "arithmetic_ok": true,
+  "cases": [
+    {
+      "case_id": "01-english-flight",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "02-roman-urdu",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "03-mixed",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "04-missing-date",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "05-missing-trip-type",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "06-missing-passengers",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "07-return-flight",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "08-positive-confirmation",
+      "pass_fail": "FAIL",
+      "failure_class": "AI_BEHAVIOR"
+    },
+    {
+      "case_id": "09-negative-confirmation",
+      "pass_fail": "FAIL",
+      "failure_class": "AI_BEHAVIOR"
+    },
+    {
+      "case_id": "10-correction-after-recap",
+      "pass_fail": "FAIL",
+      "failure_class": "AI_BEHAVIOR"
+    },
+    {
+      "case_id": "11-conflicting-airports",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "12-unresolved-route",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "13-residual-1",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "14-residual-2",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "15-residual-3",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "16-residual-4",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "17-residual-5",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "18-visa-unsupported",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "19-handoff-accept",
+      "pass_fail": "PASS",
+      "failure_class": null
+    },
+    {
+      "case_id": "20-handoff-decline",
+      "pass_fail": "FAIL",
+      "failure_class": "AI_BEHAVIOR"
+    },
+    {
+      "case_id": "21-rag-approved",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "22-rag-no-source",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "23-rag-expired",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "24-rag-conflict",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "25-prompt-injection",
+      "pass_fail": "PASS",
+      "failure_class": null
+    },
+    {
+      "case_id": "26-live-fare",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "27-pnr-status",
+      "pass_fail": "FAIL",
+      "failure_class": "INFRASTRUCTURE"
+    },
+    {
+      "case_id": "28-gateway-unavailable",
+      "pass_fail": "PASS",
+      "failure_class": null
+    },
+    {
+      "case_id": "29-ollama-unavailable",
+      "pass_fail": "PASS",
+      "failure_class": null
+    },
+    {
+      "case_id": "30-malformed-gateway",
+      "pass_fail": "PASS",
+      "failure_class": null
+    }
+  ]
+}
