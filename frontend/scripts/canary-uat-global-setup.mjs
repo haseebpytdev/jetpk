@@ -68,6 +68,25 @@ export default async function globalSetup() {
   await page.goto(`${baseUrl}${dest}`, { waitUntil: "domcontentloaded", timeout: 120_000 });
   await page.waitForSelector("[data-testid='dashboard-portal-label']", { timeout: 120_000 });
 
+  await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded", timeout: 120_000 });
+  await page.waitForFunction(
+    async (base) => {
+      const response = await fetch(`${base}/laravel/api/public/content/config`, {
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      });
+      if (!response.ok) return false;
+      const json = await response.json();
+      return json.ai_assistant_enabled === true;
+    },
+    baseUrl,
+    { timeout: 120_000 },
+  );
+  await page.goto(`${baseUrl}/#ask-jetpakistan`, { waitUntil: "domcontentloaded", timeout: 120_000 });
+  await page.waitForSelector('[data-testid="ask-jetpakistan-fab"], [data-testid="ask-jetpakistan-panel"]', {
+    timeout: 120_000,
+  });
+
   await context.storageState({ path: storagePath });
   await browser.close();
 

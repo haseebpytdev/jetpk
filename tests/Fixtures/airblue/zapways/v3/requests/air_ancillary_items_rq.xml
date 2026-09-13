@@ -1,0 +1,24 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:zap="http://zapways.com/air/ota/3.0" xmlns:ota="http://www.opentravel.org/OTA/2003/05">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <zap:AirAncillaryItems>
+            <ota:airAncillaryItemsRQ EchoToken="SANITIZED" Target="Test" Version="1.04">
+                <ota:POS>
+                    <ota:Source ERSP_UserID="CLIENT/KEY">
+                        <ota:RequestorID Type="5" ID="AGENT" MessagePassword="REDACTED"/>
+                    </ota:Source>
+                </ota:POS>
+                <ota:AncillaryItemRequests>
+                    <ota:AncillaryItemRequest>
+                        <ota:FlightSegmentInfo DepartureDateTime="2026-10-15T08:00:00" FlightNumber="401" ResBookDesigCode="Y" FareType="PUBLISHED" CabinClass="ECONOMY">
+                            <ota:DepartureAirport LocationCode="KHI"/>
+                            <ota:ArrivalAirport LocationCode="ISB"/>
+                            <ota:OperatingAirline Code="PA" FlightNumber="401"/>
+                        </ota:FlightSegmentInfo>
+                    </ota:AncillaryItemRequest>
+                </ota:AncillaryItemRequests>
+                <ota:BookingReferenceID ID="ABC123" Instance="INST1"/>
+            </ota:airAncillaryItemsRQ>
+        </zap:AirAncillaryItems>
+    </soapenv:Body>
+</soapenv:Envelope>

@@ -17,6 +17,7 @@ export default defineConfig({
   globalSetup: "./scripts/canary-uat-global-setup.mjs",
   workers: 1,
   retries: 0,
+  maxFailures: 0,
   fullyParallel: false,
   reporter: [["list"], ["json", { outputFile: "test-results/jp-ai-canary-matrix.json" }]],
   timeout: 180_000,

@@ -21,13 +21,38 @@ export function appendCaseResult(result: CaseResult) {
   fs.appendFileSync(reportPath, JSON.stringify(result) + "\n", "utf8");
 }
 
+async function waitForCanaryAiEnabled(page: Page) {
+  await page.waitForFunction(
+    async (base) => {
+      const response = await fetch(`${base}/laravel/api/public/content/config`, {
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      });
+      if (!response.ok) return false;
+      const json = await response.json();
+      return json.ai_assistant_enabled === true;
+    },
+    BASE,
+    { timeout: 90_000 },
+  );
+}
+
 export async function openAskPanel(page: Page) {
-  await page.goto(`${BASE}/`, { waitUntil: "networkidle", timeout: 120_000 });
+  await page.goto(`${BASE}/admin/dashboard`, { waitUntil: "domcontentloaded", timeout: 120_000 });
+  await waitForCanaryAiEnabled(page);
+  await page.goto(`${BASE}/#ask-jetpakistan`, { waitUntil: "domcontentloaded", timeout: 120_000 });
+
+  const panel = page.getByTestId("ask-jetpakistan-panel");
   const fab = page.getByTestId("ask-jetpakistan-fab");
-  await fab.scrollIntoViewIfNeeded();
-  await expect(fab).toBeVisible({ timeout: 60_000 });
+
+  await expect(fab.or(panel)).toBeVisible({ timeout: 90_000 });
+
+  if (await panel.isVisible().catch(() => false)) {
+    return;
+  }
+
   await fab.click({ timeout: 30_000 });
-  await expect(page.getByTestId("ask-jetpakistan-panel")).toBeVisible({ timeout: 30_000 });
+  await expect(panel).toBeVisible({ timeout: 30_000 });
 }
 
 export async function clearConversation(page: Page) {
@@ -59,7 +84,7 @@ export async function captureCase(
   caseId: string,
   inputs: string[],
   assertFn: (text: string, lastStatus: number) => void,
-) {
+): Promise<boolean> {
   fs.mkdirSync(evidenceDir, { recursive: true });
   let lastStatus = 0;
   let visible = "";
@@ -80,6 +105,7 @@ export async function captureCase(
       http_status: lastStatus,
       pass: true,
     });
+    return true;
   } catch (error) {
     await page.screenshot({ path: path.join(evidenceDir, `${caseId}-fail.png`), fullPage: false }).catch(() => {});
     appendCaseResult({
@@ -90,7 +116,7 @@ export async function captureCase(
       pass: false,
       notes: error instanceof Error ? error.message : String(error),
     });
-    throw error;
+    return false;
   }
 }
 
