@@ -59,7 +59,8 @@ class AirBlueOtaXmlBuilderTest extends TestCase
         $builder = new AirBlueOtaXmlBuilder;
         $xml = $builder->buildReadRequest($this->baseConfig('Test'), 'ABC123', 'INST1');
 
-        $this->assertStringContainsString('OTA_ReadRQ', $xml);
+        $this->assertStringContainsString('readRQ', $xml);
+        $this->assertStringContainsString('xmlns:zap="http://zapways.com/air/ota/2.0"', $xml);
         $this->assertStringContainsString('ID="ABC123"', $xml);
         $this->assertStringContainsString('Instance="INST1"', $xml);
         $this->assertStringContainsString('Target="Test"', $xml);
@@ -70,13 +71,17 @@ class AirBlueOtaXmlBuilderTest extends TestCase
         $builder = new AirBlueOtaXmlBuilder;
         $config = $this->baseConfig('Test');
 
-        $ticketXml = $builder->buildAirDemandTicketRequest($config, 'PNR1', 'INST1');
+        $ticketXml = $builder->buildAirDemandTicketRequest($config, 'PNR1', 'INST1', [
+            'amount' => 14500.00,
+            'currency' => 'PKR',
+            'payment_type' => 'Cash',
+        ]);
         $cancelXml = $builder->buildCancelRequest($config, 'PNR1', 'INST1');
         $modifyXml = $builder->buildAirBookModifyRequest($config, ['pnr' => 'PNR1', 'instance' => 'INST1']);
 
-        $this->assertStringContainsString('OTA_AirDemandTicketRQ', $ticketXml);
-        $this->assertStringContainsString('OTA_CancelRQ', $cancelXml);
-        $this->assertStringContainsString('OTA_AirBookModifyRQ', $modifyXml);
+        $this->assertStringContainsString('airDemandTicketRQ', $ticketXml);
+        $this->assertStringContainsString('cancelRQ', $cancelXml);
+        $this->assertStringContainsString('airBookModifyRQ', $modifyXml);
         $this->assertStringContainsString('Version="1.04"', $ticketXml);
     }
 
@@ -192,6 +197,7 @@ class AirBlueOtaXmlBuilderTest extends TestCase
                 'surname' => 'DOE',
                 'gender' => 'M',
                 'document_number' => 'AB1234567',
+                'nationality' => 'PK',
                 'document_issuing_country' => 'PK',
                 'document_expiry' => '2030-12-31',
             ]],
@@ -201,6 +207,28 @@ class AirBlueOtaXmlBuilderTest extends TestCase
         $this->assertStringContainsString('DocID="AB1234567"', $xml);
         $this->assertStringContainsString('DocIssueCountry="PK"', $xml);
         $this->assertStringContainsString('ExpireDate="2030-12-31"', $xml);
+        $this->assertStringContainsString('DocHolderNationality="PK"', $xml);
+    }
+
+    public function test_air_demand_ticket_requires_payment_info(): void
+    {
+        $this->expectException(AirBlueValidationException::class);
+
+        (new AirBlueOtaXmlBuilder)->buildAirDemandTicketRequest($this->baseConfig('Test'), 'PNR1', 'INST1');
+    }
+
+    public function test_air_demand_ticket_includes_payment_info(): void
+    {
+        $xml = (new AirBlueOtaXmlBuilder)->buildAirDemandTicketRequest(
+            $this->baseConfig('Test'),
+            'PNR1',
+            'INST1',
+            ['amount' => 14500.00, 'currency' => 'PKR', 'payment_type' => 'Cash'],
+        );
+
+        $this->assertStringContainsString('PaymentInfo', $xml);
+        $this->assertStringContainsString('Amount="14500.00"', $xml);
+        $this->assertStringContainsString('CurrencyCode="PKR"', $xml);
     }
 
     /**

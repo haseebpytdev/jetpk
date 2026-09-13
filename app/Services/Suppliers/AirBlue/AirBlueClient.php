@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Central SOAP/XML HTTP client for AirBlue Zapways OTA v2.06.
+ * Central SOAP/XML HTTP client for AirBlue Zapways OTA (v2.0 and v3.0).
  */
 class AirBlueClient
 {
@@ -215,10 +215,13 @@ class AirBlueClient
             return $client;
         }
 
+        $keyPath = trim((string) ($config['tls_key_path'] ?? ''));
+        $sslKey = ($keyPath !== '' && is_file($keyPath)) ? $keyPath : $certPath;
+
         return $client->withOptions([
             'verify' => true,
             'cert' => $certPath,
-            'ssl_key' => $certPath,
+            'ssl_key' => $sslKey,
         ]);
     }
 
@@ -227,14 +230,28 @@ class AirBlueClient
      */
     private function resolveOtaSoapAction(string $operation, array $config): string
     {
-        $ops = (array) config('suppliers.airblue.ota_operations.'.$operation, []);
+        $protocol = \App\Enums\AirBlueZapwaysProtocolVersion::fromCredentials([
+            'protocol_version' => (string) ($config['protocol_version'] ?? '2.0'),
+        ]);
+        $ops = $this->configResolver->protocolOperationsConfig($protocol);
+        $operationConfig = is_array($ops[$operation] ?? null) ? $ops[$operation] : [];
+
         if ($operation === 'read') {
             return (bool) ($config['is_test'] ?? false)
-                ? (string) ($ops['soap_action_test'] ?? 'https://otatest4.zapways.com/Read')
-                : (string) ($ops['soap_action_live'] ?? 'https://ota4.zapways.com/Read');
+                ? (string) ($operationConfig['soap_action_test'] ?? 'https://otatest4.zapways.com/Read')
+                : (string) ($operationConfig['soap_action_live'] ?? 'https://ota4.zapways.com/Read');
         }
 
-        return (string) ($ops['soap_action'] ?? $operation);
+        $soapAction = (string) ($operationConfig['soap_action'] ?? '');
+        if ($soapAction === '') {
+            throw new AirBlueValidationException(
+                'missing_soap_action',
+                422,
+                sprintf('SOAPAction for AirBlue operation "%s" on protocol %s is not configured.', $operation, $protocol->value),
+            );
+        }
+
+        return $soapAction;
     }
 
     /**
@@ -261,6 +278,7 @@ class AirBlueClient
             'supplier_connection_id' => $connection->id,
             'provider' => 'airblue',
             'api_channel' => $config['api_channel'] ?? null,
+            'protocol_version' => $config['protocol_version'] ?? null,
             'environment' => $config['environment'] ?? null,
             'operation' => $operation,
             'endpoint' => $config['endpoint_url'] ?? null,

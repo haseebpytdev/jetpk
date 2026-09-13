@@ -35,11 +35,15 @@ class AirBlueDiagnosticService
             return [
                 'healthy' => true,
                 'api_channel' => $config['api_channel'] ?? null,
+                'protocol_version' => $config['protocol_version'] ?? null,
+                'namespace' => $config['namespace'] ?? null,
                 'environment' => $config['environment'],
                 'is_test' => (bool) ($config['is_test'] ?? false),
                 'endpoint_url' => $config['endpoint_url'],
                 'service_target' => $config['service_target'] ?? null,
                 'service_version' => $config['service_version'] ?? null,
+                'tls_cert_path_present' => ($config['tls_cert_path'] ?? '') !== '',
+                'tls_key_path_present' => ($config['tls_key_path'] ?? '') !== '',
                 'credential_fields_present' => [
                     'client_id' => ($config['client_id'] ?? '') !== '',
                     'client_key' => ($config['client_key'] ?? '') !== '',

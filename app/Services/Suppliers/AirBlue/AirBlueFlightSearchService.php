@@ -76,6 +76,7 @@ class AirBlueFlightSearchService
                 'connection_id' => $connection->id,
                 'correlation_id' => $correlationId,
                 'api_channel' => AirBlueApiChannel::ZapwaysOta->value,
+                'protocol_version' => $config['protocol_version'] ?? null,
             ],
         );
     }

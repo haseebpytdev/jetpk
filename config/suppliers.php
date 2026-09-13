@@ -456,6 +456,45 @@ return [
         'connect_timeout_seconds' => (int) env('AIRBLUE_CONNECT_TIMEOUT_SECONDS', 10),
         'username_header' => env('AIRBLUE_USERNAME_HEADER', 'username'),
         'password_header' => env('AIRBLUE_PASSWORD_HEADER', 'password'),
+        'default_protocol_version' => '2.0',
+        'protocol_versions' => [
+            '2.0' => [
+                'namespace' => 'http://zapways.com/air/ota/2.0',
+                'default_base_url' => env('AIRBLUE_OTA_BASE_URL', 'https://ota4.zapways.com/v2.0/OTAAPI.asmx'),
+                'default_qa_base_url' => env('AIRBLUE_OTA_QA_BASE_URL', 'https://otatest4.zapways.com/v2.0/OTAAPI.asmx'),
+                'ota_operations' => [
+                    'air_low_fare_search' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirLowFareSearch'],
+                    'air_book' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirBook'],
+                    'air_demand_ticket' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirDemandTicket'],
+                    'read' => [
+                        'soap_action_live' => 'https://ota4.zapways.com/Read',
+                        'soap_action_test' => 'https://otatest4.zapways.com/Read',
+                    ],
+                    'cancel' => ['soap_action' => 'http://zapways.com/air/ota/2.0/Cancel'],
+                    'air_book_modify' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirBookModify'],
+                ],
+            ],
+            '3.0' => [
+                'namespace' => 'http://zapways.com/air/ota/3.0',
+                'default_base_url' => env('AIRBLUE_OTA_V3_BASE_URL', 'https://ota4.zapways.com/v3.0/OTAAPI.asmx'),
+                'default_qa_base_url' => env('AIRBLUE_OTA_V3_QA_BASE_URL', 'https://otatest4.zapways.com/v3.0/OTAAPI.asmx'),
+                'live_enabled' => (bool) env('AIRBLUE_OTA_V3_LIVE_ENABLED', false),
+                'ota_operations' => [
+                    'air_low_fare_search' => ['soap_action' => 'http://zapways.com/air/ota/3.0/AirLowFareSearch'],
+                    'air_book' => ['soap_action' => 'http://zapways.com/air/ota/3.0/AirBook'],
+                    'air_demand_ticket' => ['soap_action' => 'http://zapways.com/air/ota/3.0/AirDemandTicket'],
+                    'read' => [
+                        'soap_action_live' => 'https://ota4.zapways.com/Read',
+                        'soap_action_test' => 'https://otatest4.zapways.com/Read',
+                    ],
+                    'cancel' => ['soap_action' => 'http://zapways.com/air/ota/3.0/Cancel'],
+                    'air_book_modify' => ['soap_action' => 'http://zapways.com/air/ota/3.0/AirBookModify'],
+                    'air_seat_map' => ['soap_action' => 'http://zapways.com/air/ota/3.0/AirSeatMap'],
+                    'air_ancillary_items' => ['soap_action' => 'http://zapways.com/air/ota/3.0/AirAncillaryItems'],
+                ],
+            ],
+        ],
+        // Backward-compatible aliases for legacy config readers.
         'default_ota_base_url' => env('AIRBLUE_OTA_BASE_URL', 'https://ota4.zapways.com/v2.0/OTAAPI.asmx'),
         'default_ota_qa_base_url' => env('AIRBLUE_OTA_QA_BASE_URL', 'https://otatest4.zapways.com/v2.0/OTAAPI.asmx'),
         'ota_operations' => [

@@ -6,6 +6,7 @@ use App\Data\BaggageAllowanceData;
 use App\Data\FareBreakdownData;
 use App\Data\NormalizedFlightOfferData;
 use App\Enums\AirBlueApiChannel;
+use App\Enums\AirBlueZapwaysProtocolVersion;
 use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
 
@@ -60,6 +61,7 @@ class AirBlueOtaResponseNormalizer
             'last_ticketing_date' => null,
             'provider_context' => array_merge($existingContext, [
                 'api_channel' => AirBlueApiChannel::ZapwaysOta->value,
+                'protocol_version' => (string) ($existingContext['protocol_version'] ?? AirBlueZapwaysProtocolVersion::V2->value),
                 'pnr' => $pnr,
                 'instance' => trim((string) ($booking['instance'] ?? $parsed['instance'] ?? '')),
             ]),
@@ -86,10 +88,14 @@ class AirBlueOtaResponseNormalizer
 
         return array_filter([
             'api_channel' => AirBlueApiChannel::ZapwaysOta->value,
+            'protocol_version' => (string) ($existing['protocol_version'] ?? AirBlueZapwaysProtocolVersion::V2->value),
             'pnr' => trim((string) ($booking['pnr'] ?? $parsed['pnr'] ?? $existing['pnr'] ?? '')),
             'instance' => trim((string) ($booking['instance'] ?? $parsed['instance'] ?? $existing['instance'] ?? '')),
             'ticketing_status' => $ticketNumbers !== [] ? 'ticketed' : ($existing['ticketing_status'] ?? 'pending_ticketing'),
             'ticket_numbers' => $ticketNumbers !== [] ? $ticketNumbers : null,
+            'seats' => is_array($parsed['seats'] ?? null) ? $parsed['seats'] : null,
+            'items' => is_array($parsed['items'] ?? null) ? $parsed['items'] : null,
+            'transaction_history' => is_array($parsed['transaction_history'] ?? null) ? $parsed['transaction_history'] : null,
         ], fn ($v) => $v !== null && $v !== '');
     }
 
@@ -109,12 +115,15 @@ class AirBlueOtaResponseNormalizer
             }
         }
 
+        $paymentSuccessOnly = (bool) ($parsed['payment_success_only'] ?? false);
+
         return [
-            'ticketing_status' => $ticketNumbers !== [] ? 'ticketed' : 'failed',
+            'ticketing_status' => $ticketNumbers !== [] ? 'ticketed' : ($paymentSuccessOnly ? 'paid' : 'failed'),
             'ticket_numbers' => $ticketNumbers,
             'provider_context' => array_merge($existing, [
                 'api_channel' => AirBlueApiChannel::ZapwaysOta->value,
-                'ticketing_status' => $ticketNumbers !== [] ? 'ticketed' : ($existing['ticketing_status'] ?? 'pending_ticketing'),
+                'protocol_version' => (string) ($existing['protocol_version'] ?? AirBlueZapwaysProtocolVersion::V2->value),
+                'ticketing_status' => $ticketNumbers !== [] ? 'ticketed' : ($paymentSuccessOnly ? 'paid' : ($existing['ticketing_status'] ?? 'pending_ticketing')),
                 'ticket_numbers' => $ticketNumbers,
             ]),
         ];
@@ -128,9 +137,13 @@ class AirBlueOtaResponseNormalizer
     {
         unset($parsedResponse);
 
+        $parsed = is_array($parsedResponse['parsed'] ?? null) ? $parsedResponse['parsed'] : [];
+
         return [
             'cancellation_status' => 'cancelled',
             'api_channel' => AirBlueApiChannel::ZapwaysOta->value,
+            'held_seats_removed' => is_array($parsed['seats'] ?? null) ? $parsed['seats'] === [] : true,
+            'held_items_removed' => is_array($parsed['items'] ?? null) ? $parsed['items'] === [] : true,
         ];
     }
 
@@ -200,6 +213,8 @@ class AirBlueOtaResponseNormalizer
                     'carrier' => strtoupper((string) ($seg['marketing_carrier'] ?? 'PA')),
                     'flight_number' => (string) ($seg['flight_number'] ?? ''),
                     'rbd' => (string) ($seg['rbd'] ?? ''),
+                    'fare_type' => (string) ($seg['fare_type'] ?? ''),
+                    'cabin_class' => (string) ($seg['cabin_class'] ?? ''),
                 ];
             }
         }
@@ -213,8 +228,13 @@ class AirBlueOtaResponseNormalizer
         $carrier = strtoupper((string) ($first['carrier'] ?? 'PA'));
         $offerRef = 'airblue-ota-'.substr(sha1(json_encode($group).$correlationId), 0, 16);
 
+        $credentials = is_array($connection->credentials) ? $connection->credentials : [];
+        $protocolVersion = AirBlueZapwaysProtocolVersion::fromCredentials($credentials)->value;
+
         $providerContext = [
             'api_channel' => AirBlueApiChannel::ZapwaysOta->value,
+            'protocol_version' => $protocolVersion,
+            'supplier_connection_id' => $connection->id,
             'correlation_id' => $correlationId,
             'priced_itineraries' => $group,
             'offer_ref_key' => $offerRef,

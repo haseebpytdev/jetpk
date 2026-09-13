@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <AirLowFareSearchResponse xmlns="http://zapways.com/air/ota/3.0">
+      <OTA_AirLowFareSearchRS xmlns="http://www.opentravel.org/OTA/2003/05" Version="1.04">
+        <PricedItineraries>
+          <PricedItinerary OriginDestinationRefNumber="1">
+            <AirItinerary>
+              <OriginDestinationOptions>
+                <OriginDestinationOption>
+                  <FlightSegment DepartureDateTime="2026-10-15T08:00:00" ArrivalDateTime="2026-10-15T10:00:00" FlightNumber="401" ResBookDesigCode="Y" FareType="PUBLISHED" CabinClass="ECONOMY" RPH="1">
+                    <DepartureAirport LocationCode="KHI"/>
+                    <ArrivalAirport LocationCode="ISB"/>
+                    <MarketingAirline Code="PA"/>
+                  </FlightSegment>
+                </OriginDestinationOption>
+              </OriginDestinationOptions>
+            </AirItinerary>
+            <AirItineraryPricingInfo>
+              <ItinTotalFare>
+                <BaseFare Amount="12000.00" CurrencyCode="PKR"/>
+                <Taxes Amount="2500.00" CurrencyCode="PKR"/>
+                <TotalFare Amount="14500.00" CurrencyCode="PKR"/>
+              </ItinTotalFare>
+              <PTC_FareBreakdowns>
+                <PTC_FareBreakdown>
+                  <PassengerTypeQuantity Code="ADT" Quantity="1"/>
+                  <PassengerFare>
+                    <BaseFare Amount="12000.00" CurrencyCode="PKR"/>
+                    <Taxes Amount="2500.00" CurrencyCode="PKR"/>
+                    <TotalFare Amount="14500.00" CurrencyCode="PKR"/>
+                    <FareBasisCodes>
+                      <FareBasisCode>YOW</FareBasisCode>
+                    </FareBasisCodes>
+                  </PassengerFare>
+                </PTC_FareBreakdown>
+              </PTC_FareBreakdowns>
+            </AirItineraryPricingInfo>
+          </PricedItinerary>
+        </PricedItineraries>
+      </OTA_AirLowFareSearchRS>
+    </AirLowFareSearchResponse>
+  </soap:Body>
+</soap:Envelope>

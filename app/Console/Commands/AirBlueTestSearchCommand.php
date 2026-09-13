@@ -44,8 +44,10 @@ class AirBlueTestSearchCommand extends Command
 
         $config = $configResolver->resolveOta($connection);
         $this->line('connection_id='.$connection->id);
+        $this->line('protocol_version='.($config['protocol_version'] ?? '2.0'));
         $this->line('environment='.($config['environment'] ?? ''));
         $this->line('endpoint='.($config['endpoint_url'] ?? ''));
+        $this->line('namespace='.($config['namespace'] ?? ''));
         $this->line('service_target='.($config['service_target'] ?? ''));
         $this->line('service_version='.($config['service_version'] ?? ''));
         $startedAt = microtime(true);

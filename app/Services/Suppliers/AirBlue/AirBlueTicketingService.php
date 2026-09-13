@@ -19,6 +19,8 @@ class AirBlueTicketingService
         private readonly AirBlueConfigResolver $configResolver,
         private readonly AirBlueOtaXmlBuilder $otaXmlBuilder,
         private readonly AirBlueOtaResponseNormalizer $otaNormalizer,
+        private readonly AirBlueProtocolGuard $protocolGuard,
+        private readonly AirBlueSeatSelectionGate $seatSelectionGate,
     ) {}
 
     public function issueTickets(Booking $booking, SupplierConnection $connection, User $actor): TicketingResultData
@@ -88,8 +90,13 @@ class AirBlueTicketingService
         }
 
         try {
+            $this->protocolGuard->assertCompatible($connection, $context, 'ticketing');
             $config = $this->configResolver->resolveOta($connection);
-            $xml = $this->otaXmlBuilder->buildAirDemandTicketRequest($config, $pnr, $instance);
+            $this->seatSelectionGate->assertSeatSelectionSatisfied($config, $context, [
+                'seats' => is_array($context['seats'] ?? null) ? $context['seats'] : [],
+            ]);
+            $paymentContext = $this->resolvePaymentContext($context, $config);
+            $xml = $this->otaXmlBuilder->buildAirDemandTicketRequest($config, $pnr, $instance, $paymentContext);
             $response = $this->client->callOta($connection, 'air_demand_ticket', $xml, [
                 'booking_id' => $booking->id,
                 'request_context' => 'air_demand_ticket',
@@ -99,9 +106,11 @@ class AirBlueTicketingService
             $ticketNumbers = is_array($normalized['ticket_numbers'] ?? null) ? $normalized['ticket_numbers'] : [];
             $tickets = array_map(fn (string $num) => ['ticket_number' => $num], $ticketNumbers);
 
+            $status = (string) ($normalized['ticketing_status'] ?? 'failed');
+
             return new TicketingResultData(
-                success: ($normalized['ticketing_status'] ?? '') === 'ticketed',
-                status: (string) ($normalized['ticketing_status'] ?? 'failed'),
+                success: in_array($status, ['ticketed', 'paid'], true),
+                status: $status,
                 provider: SupplierProvider::Airblue->value,
                 tickets: $tickets,
                 safe_summary: ['pnr' => $pnr],
@@ -128,5 +137,30 @@ class AirBlueTicketingService
                 $exception,
             );
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     * @param  array<string, mixed>  $config
+     * @return array<string, mixed>
+     */
+    private function resolvePaymentContext(array $context, array $config): array
+    {
+        $amount = $context['supplier_payable_amount'] ?? $context['payment_amount'] ?? null;
+        if ($amount === null || $amount === '') {
+            throw new AirBlueTicketingException(
+                'missing_payment_amount',
+                422,
+                'Ticketing failed, admin review required.',
+                ['reason' => 'supplier_payable_amount_required'],
+            );
+        }
+
+        return [
+            'amount' => $amount,
+            'currency' => $context['payment_currency'] ?? $config['currency'] ?? 'PKR',
+            'payment_type' => $context['payment_type'] ?? 'Cash',
+            'ticketing_mode' => $context['ticketing_mode'] ?? 'ticket',
+        ];
     }
 }

@@ -26,6 +26,7 @@ class AirBlueBookingService
         private readonly AirBluePassengerPayloadBuilder $passengerPayloadBuilder,
         private readonly AirBlueOtaXmlBuilder $otaXmlBuilder,
         private readonly AirBlueOtaResponseNormalizer $otaNormalizer,
+        private readonly AirBlueProtocolGuard $protocolGuard,
         private readonly SupplierDiagnosticLogger $diagnosticLogger,
     ) {}
 
@@ -51,6 +52,7 @@ class AirBlueBookingService
         }
 
         try {
+            $this->protocolGuard->assertCompatible($connection, $providerContext, 'booking');
             $passengers = $this->passengerPayloadBuilder->buildPassengersFromBooking($booking);
             $contact = $this->passengerPayloadBuilder->buildContactFromBooking($booking);
             $config = $this->configResolver->resolveOta($connection);

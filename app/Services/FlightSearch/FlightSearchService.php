@@ -21,6 +21,7 @@ use App\Support\Platform\PlatformModuleEnforcer;
 use App\Support\Pricing\IatiFarePricingResolver;
 use App\Support\Pricing\PublicCustomerPricing;
 use App\Support\Sabre\SabreSandboxQaConnectionPin;
+use App\Services\Suppliers\AirBlue\AirBlueConnectionSearchPolicy;
 use App\Support\Suppliers\SabreChannelGateResolver;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
 use App\Support\Suppliers\SupplierPublicRoutingGuard;
@@ -44,6 +45,7 @@ class FlightSearchService
         protected DirectFlightsOfferFilter $directFlightsOfferFilter,
         protected FlightSearchSupplierResultCache $supplierResultCache,
         protected FlightSearchCriteriaCacheKey $criteriaCacheKey,
+        protected AirBlueConnectionSearchPolicy $airBlueConnectionSearchPolicy,
     ) {}
 
     /**
@@ -83,6 +85,7 @@ class FlightSearchService
                 })
                 ->orderBy('id')
                 ->get();
+            $connections = $this->airBlueConnectionSearchPolicy->dedupeForSearch($connections);
             if ($perf !== null) {
                 $perf->recordPhpCpu((microtime(true) - $registryStarted) * 1000);
                 $perf->mark('T6_PROVIDER_REGISTRY_READY');

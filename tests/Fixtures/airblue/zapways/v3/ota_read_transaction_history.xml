@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <ReadResponse xmlns="http://zapways.com/air/ota/3.0">
+      <OTA_ReadRS xmlns="http://www.opentravel.org/OTA/2003/05" Version="1.04">
+        <BookingReferenceID ID="ABC123" Instance="INST1"/>
+        <ItinTotalFare>
+          <TotalFare Amount="14500.00" CurrencyCode="PKR" FareAmountType="Original"/>
+          <TotalFare Amount="1500.00" CurrencyCode="PKR" FareAmountType="Additional_Collection"/>
+          <TotalFare Amount="-500.00" CurrencyCode="PKR" FareAmountType="Refund"/>
+        </ItinTotalFare>
+        <SeatRequests>
+          <SeatRequest SeatNumber="A" RowNumber="12" Status="Held" TravelerRefNumberRPHList="1" FlightRefNumberRPHList="1"/>
+        </SeatRequests>
+        <SpecialServiceRequests>
+          <SpecialServiceRequest ItemCode="XBAG20" ItemCount="1" Status="Held" TravelerRefNumberRPHList="1" FlightRefNumberRPHList="1"/>
+        </SpecialServiceRequests>
+      </OTA_ReadRS>
+    </ReadResponse>
+  </soap:Body>
+</soap:Envelope>

@@ -3,6 +3,7 @@
 namespace App\Support\Suppliers;
 
 use App\Enums\AirBlueApiChannel;
+use App\Enums\AirBlueZapwaysProtocolVersion;
 use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
 
@@ -16,11 +17,13 @@ final class AirBlueSupplierConnectionNormalizer
         return strtolower(trim($environment)) === 'live' ? 'live' : 'sandbox';
     }
 
-    public static function defaultConnectionName(?string $agencyName): string
+    public static function defaultConnectionName(?string $agencyName, ?string $protocolVersion = null): string
     {
         $name = trim((string) $agencyName);
+        $protocol = trim((string) ($protocolVersion ?? AirBlueZapwaysProtocolVersion::V2->value));
+        $suffix = $protocol === AirBlueZapwaysProtocolVersion::V3->value ? 'v3' : 'v2';
 
-        return $name !== '' ? 'AirBlue / Zapways / '.$name : 'AirBlue / Zapways';
+        return $name !== '' ? 'AirBlue / Zapways '.$suffix.' / '.$name : 'AirBlue / Zapways '.$suffix;
     }
 
     /**
@@ -41,15 +44,23 @@ final class AirBlueSupplierConnectionNormalizer
         $existingCredentials = ($existing !== null && is_array($existing->credentials)) ? $existing->credentials : [];
         $credentials['api_channel'] = AirBlueApiChannel::ZapwaysOta->value;
 
+        $protocol = AirBlueZapwaysProtocolVersion::fromCredentials(
+            array_merge($existingCredentials, $credentials),
+        );
+        if (trim((string) ($credentials['protocol_version'] ?? '')) === '') {
+            $credentials['protocol_version'] = $protocol->value;
+        }
+
         $baseUrl = trim((string) ($payload['base_url'] ?? $existing?->base_url ?? ''));
         if ($baseUrl === '') {
+            $protocolConfig = (array) config('suppliers.airblue.protocol_versions.'.$protocol->value, []);
             $baseUrl = $isTest
-                ? (string) config('suppliers.airblue.default_ota_qa_base_url', '')
-                : (string) config('suppliers.airblue.default_ota_base_url', '');
+                ? (string) ($protocolConfig['default_qa_base_url'] ?? config('suppliers.airblue.default_ota_qa_base_url', ''))
+                : (string) ($protocolConfig['default_base_url'] ?? config('suppliers.airblue.default_ota_base_url', ''));
         }
         $payload['base_url'] = $baseUrl;
 
-        foreach (['client_id', 'client_key', 'agent_type', 'agent_id', 'agent_password'] as $key) {
+        foreach (['client_id', 'client_key', 'agent_type', 'agent_id', 'agent_password', 'tls_cert_path', 'tls_key_path'] as $key) {
             $incoming = trim((string) ($credentials[$key] ?? ''));
             if ($incoming === '' && isset($existingCredentials[$key])) {
                 $credentials[$key] = $existingCredentials[$key];
