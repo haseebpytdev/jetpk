@@ -3,7 +3,6 @@
 namespace App\Services\Suppliers\AirBlue;
 
 use App\Data\TicketingResultData;
-use App\Enums\AirBlueApiChannel;
 use App\Enums\SupplierProvider;
 use App\Models\Booking;
 use App\Models\SupplierBooking;
@@ -18,11 +17,8 @@ class AirBlueTicketingService
     public function __construct(
         private readonly AirBlueClient $client,
         private readonly AirBlueConfigResolver $configResolver,
-        private readonly AirBlueXmlBuilder $xmlBuilder,
         private readonly AirBlueOtaXmlBuilder $otaXmlBuilder,
-        private readonly AirBlueResponseNormalizer $normalizer,
         private readonly AirBlueOtaResponseNormalizer $otaNormalizer,
-        private readonly AirBlueTicketPreviewService $ticketPreviewService,
     ) {}
 
     public function issueTickets(Booking $booking, SupplierConnection $connection, User $actor): TicketingResultData
@@ -42,72 +38,7 @@ class AirBlueTicketingService
         $meta = is_array($booking->meta) ? $booking->meta : [];
         $context = is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [];
 
-        if ($this->configResolver->apiChannel($connection) === AirBlueApiChannel::ZapwaysOta) {
-            return $this->issueTicketsOta($booking, $connection, $context);
-        }
-
-        $orderId = trim((string) ($context['order_id'] ?? $booking->supplier_reference ?? ''));
-        $ownerCode = trim((string) ($context['owner_code'] ?? ''));
-        if ($orderId === '' || $ownerCode === '') {
-            return new TicketingResultData(
-                success: false,
-                status: 'failed',
-                provider: SupplierProvider::Airblue->value,
-                error_code: 'missing_order_context',
-                error_message: 'Ticketing failed, admin review required.',
-            );
-        }
-
-        try {
-            $preview = is_array($context['ticket_preview'] ?? null)
-                ? $context['ticket_preview']
-                : $this->ticketPreviewService->preview($booking, $connection);
-
-            $config = $this->configResolver->resolve($connection);
-            $payment = [
-                'amount' => (float) ($preview['amount'] ?? 0),
-                'currency' => (string) ($preview['currency'] ?? $config['currency']),
-                'ticket_id' => (string) ($context['mco_ticket_id'] ?? '4000012043'),
-            ];
-            $xml = $this->xmlBuilder->buildTicketingOrderChangeRequest($config, $orderId, $ownerCode, $payment);
-            $response = $this->client->call($connection, 'order_change', $xml, [
-                'booking_id' => $booking->id,
-                'request_context' => 'ticketing',
-            ]);
-            $normalized = $this->normalizer->normalizeTicketingResponse($response, $context);
-            $this->persistTicketing($booking, $normalized);
-            $ticketNumbers = is_array($normalized['ticket_numbers'] ?? null) ? $normalized['ticket_numbers'] : [];
-            $tickets = array_map(fn (string $num) => ['ticket_number' => $num], $ticketNumbers);
-
-            return new TicketingResultData(
-                success: ($normalized['ticketing_status'] ?? '') === 'ticketed',
-                status: (string) ($normalized['ticketing_status'] ?? 'failed'),
-                provider: SupplierProvider::Airblue->value,
-                tickets: $tickets,
-                safe_summary: ['order_id' => $orderId],
-            );
-        } catch (AirBlueException $exception) {
-            return new TicketingResultData(
-                success: false,
-                status: 'failed',
-                provider: SupplierProvider::Airblue->value,
-                error_code: $exception->normalizedCode,
-                error_message: $exception->safeMessage,
-            );
-        } catch (\Throwable $exception) {
-            Log::channel('air-blue')->warning('airblue.ticketing.unexpected', [
-                'booking_id' => $booking->id,
-                'exception' => $exception::class,
-            ]);
-
-            throw new AirBlueTicketingException(
-                'ticketing_unexpected',
-                500,
-                'Ticketing failed, admin review required.',
-                ['booking_id' => $booking->id],
-                $exception,
-            );
-        }
+        return $this->issueTicketsOta($booking, $connection, $context);
     }
 
     /**
@@ -159,7 +90,7 @@ class AirBlueTicketingService
         try {
             $config = $this->configResolver->resolveOta($connection);
             $xml = $this->otaXmlBuilder->buildAirDemandTicketRequest($config, $pnr, $instance);
-            $response = $this->client->call($connection, 'air_demand_ticket', $xml, [
+            $response = $this->client->callOta($connection, 'air_demand_ticket', $xml, [
                 'booking_id' => $booking->id,
                 'request_context' => 'air_demand_ticket',
             ]);

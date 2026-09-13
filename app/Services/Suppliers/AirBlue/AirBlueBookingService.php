@@ -3,7 +3,6 @@
 namespace App\Services\Suppliers\AirBlue;
 
 use App\Data\SupplierBookingResultData;
-use App\Enums\AirBlueApiChannel;
 use App\Enums\SupplierProvider;
 use App\Models\Booking;
 use App\Models\SupplierBooking;
@@ -17,16 +16,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * AirBlue booking orchestrator: DoOrderCreate option PNR with duplicate guards.
+ * AirBlue Zapways OTA booking orchestrator with duplicate guards.
  */
 class AirBlueBookingService
 {
     public function __construct(
         private readonly AirBlueClient $client,
         private readonly AirBlueConfigResolver $configResolver,
-        private readonly AirBlueXmlBuilder $xmlBuilder,
+        private readonly AirBluePassengerPayloadBuilder $passengerPayloadBuilder,
         private readonly AirBlueOtaXmlBuilder $otaXmlBuilder,
-        private readonly AirBlueResponseNormalizer $normalizer,
         private readonly AirBlueOtaResponseNormalizer $otaNormalizer,
         private readonly SupplierDiagnosticLogger $diagnosticLogger,
     ) {}
@@ -43,37 +41,26 @@ class AirBlueBookingService
 
         $booking->loadMissing(['passengers', 'contact', 'supplierBookings']);
         $meta = is_array($booking->meta) ? $booking->meta : [];
-        $piaContext = is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [];
+        $airblueContext = is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [];
         $providerContext = $this->resolveProviderContext($booking, $meta);
-        $existingOrderId = trim((string) ($piaContext['order_id'] ?? $booking->supplier_reference ?? ''));
-        $existingPnr = trim((string) ($piaContext['pnr'] ?? $booking->pnr ?? ''));
+        $existingOrderId = trim((string) ($airblueContext['order_id'] ?? $booking->supplier_reference ?? ''));
+        $existingPnr = trim((string) ($airblueContext['pnr'] ?? $booking->pnr ?? ''));
 
         if ($existingOrderId !== '' || $existingPnr !== '') {
             return $this->failure('duplicate_booking_guard', 'This booking already has a AirBlue order.', $connection);
         }
 
         try {
-            $passengers = $this->xmlBuilder->buildPassengersFromBooking($booking);
-            $contact = $this->xmlBuilder->buildContactFromBooking($booking);
-            if ($this->configResolver->apiChannel($connection) === AirBlueApiChannel::ZapwaysOta) {
-                $config = $this->configResolver->resolveOta($connection);
-                $xml = $this->otaXmlBuilder->buildAirBookRequest($config, $providerContext, $passengers, $contact);
-                $response = $this->client->call($connection, 'air_book', $xml, [
-                    'request_context' => 'air_book',
-                    'booking_id' => $booking->id,
-                    'user_id' => $actor->id,
-                ]);
-                $normalized = $this->otaNormalizer->normalizeBookingResponse($response, $providerContext);
-            } else {
-                $config = $this->configResolver->resolveNdc($connection);
-                $xml = $this->xmlBuilder->buildOrderCreateRequest($config, $providerContext, $passengers, $contact);
-                $response = $this->client->call($connection, 'order_create', $xml, [
-                    'request_context' => 'order_create',
-                    'booking_id' => $booking->id,
-                    'user_id' => $actor->id,
-                ]);
-                $normalized = $this->normalizer->normalizeBookingResponse($response, $providerContext);
-            }
+            $passengers = $this->passengerPayloadBuilder->buildPassengersFromBooking($booking);
+            $contact = $this->passengerPayloadBuilder->buildContactFromBooking($booking);
+            $config = $this->configResolver->resolveOta($connection);
+            $xml = $this->otaXmlBuilder->buildAirBookRequest($config, $providerContext, $passengers, $contact);
+            $response = $this->client->callOta($connection, 'air_book', $xml, [
+                'request_context' => 'air_book',
+                'booking_id' => $booking->id,
+                'user_id' => $actor->id,
+            ]);
+            $normalized = $this->otaNormalizer->normalizeBookingResponse($response, $providerContext);
             $this->persistBookingState($booking, $connection, $normalized, $actor);
 
             return new SupplierBookingResultData(
@@ -126,13 +113,13 @@ class AirBlueBookingService
     {
         DB::transaction(function () use ($booking, $connection, $normalized, $actor): void {
             $meta = is_array($booking->meta) ? $booking->meta : [];
-            $piaContext = array_merge(
+            $airblueContext = array_merge(
                 is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [],
                 is_array($normalized['provider_context'] ?? null) ? $normalized['provider_context'] : [],
             );
             $meta['supplier_provider'] = SupplierProvider::Airblue->value;
             $meta['supplier_connection_id'] = $connection->id;
-            $meta['airblue_context'] = $piaContext;
+            $meta['airblue_context'] = $airblueContext;
             $booking->meta = $meta;
             $booking->supplier_reference = (string) ($normalized['pnr'] ?? $booking->supplier_reference);
             $booking->save();
@@ -143,7 +130,7 @@ class AirBlueBookingService
                     'supplier_connection_id' => $connection->id,
                     'provider_reference' => (string) ($normalized['provider_booking_reference'] ?? ''),
                     'status' => 'confirmed',
-                    'meta' => ['airblue_context' => $piaContext],
+                    'meta' => ['airblue_context' => $airblueContext],
                 ],
             );
 

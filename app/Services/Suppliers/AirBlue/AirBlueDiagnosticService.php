@@ -32,18 +32,19 @@ class AirBlueDiagnosticService
                 ],
             );
 
-            $result = [
+            return [
                 'healthy' => true,
                 'api_channel' => $config['api_channel'] ?? null,
                 'environment' => $config['environment'],
                 'endpoint_url' => $config['endpoint_url'],
+                'credential_fields_present' => [
+                    'client_id' => ($config['client_id'] ?? '') !== '',
+                    'client_key' => ($config['client_key'] ?? '') !== '',
+                    'agent_type' => ($config['agent_type'] ?? '') !== '',
+                    'agent_id' => ($config['agent_id'] ?? '') !== '',
+                    'agent_password' => ($config['agent_password'] ?? '') !== '',
+                ],
             ];
-            if (($config['api_channel'] ?? '') === 'crane_ndc') {
-                $result['agency_id'] = $config['agency_id'] ?? null;
-                $result['owner_code'] = $config['owner_code'] ?? null;
-            }
-
-            return $result;
         } catch (AirBlueException $exception) {
             $this->diagnosticLogger->log(
                 connection: $connection,

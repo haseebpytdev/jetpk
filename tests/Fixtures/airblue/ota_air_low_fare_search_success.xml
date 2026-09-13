@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <AirLowFareSearchResponse xmlns="http://zapways.com/air/ota/2.0">
+      <OTA_AirLowFareSearchRS xmlns="http://www.opentravel.org/OTA/2003/05" Version="1.04">
+        <PricedItineraries>
+          <PricedItinerary OriginDestinationRefNumber="1">
+            <AirItinerary>
+              <OriginDestinationOptions>
+                <OriginDestinationOption>
+                  <FlightSegment DepartureDateTime="2026-10-15T08:00:00" ArrivalDateTime="2026-10-15T10:00:00" FlightNumber="401" ResBookDesigCode="Y">
+                    <DepartureAirport LocationCode="KHI"/>
+                    <ArrivalAirport LocationCode="ISB"/>
+                    <MarketingAirline Code="PA"/>
+                  </FlightSegment>
+                </OriginDestinationOption>
+              </OriginDestinationOptions>
+            </AirItinerary>
+            <AirItineraryPricingInfo>
+              <ItinTotalFare>
+                <BaseFare Amount="12000.00" CurrencyCode="PKR"/>
+                <Taxes Amount="2500.00" CurrencyCode="PKR"/>
+                <TotalFare Amount="14500.00" CurrencyCode="PKR"/>
+              </ItinTotalFare>
+            </AirItineraryPricingInfo>
+          </PricedItinerary>
+        </PricedItineraries>
+      </OTA_AirLowFareSearchRS>
+    </AirLowFareSearchResponse>
+  </soap:Body>
+</soap:Envelope>

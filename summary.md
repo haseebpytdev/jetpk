@@ -39,6 +39,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 ## Changelog (high level)
 
+| 2026-09-13 | JP-AIRBLUE-ZAPWAYS-01 | AirBlue runtime Zapways-only: removed Crane execution branches, added `AirBluePassengerPayloadBuilder`, expanded OTA tests/fixtures, fail-closed ancillary/void/preview. |
 | 2026-09-06 | JP10 AUTH_LOGIN_EMAIL_PATH | One Admin login sends one security mail via `AuthEmailRenderer` + modern 620px layout; new-device facts fold in; `notifyNewDeviceLogin` audit-only; CTA/logo rewrite `127.0.0.1:8088`; hide empty Booking snapshot. |
 | 2026-09-05 | JP-FINAL-CLOSURE-06 | Email QA: support CTA uses `admin.support.tickets.show`; canonical PK-211 itinerary for booking/ticket samples; booking plain-text facts; agent application single block. Traveler residual decomposed, no Traveler code change. |
 | 2026-09-03 | JP-APP-PERF-CLOSURE-01 traveler | Book Now handoff no longer window.stop()/strips prefetch; prefetch /booking/passengers during revalidation. |
@@ -517,12 +518,13 @@ AirBlue (PA) is **Zapways OTA only** (`credentials.api_channel=zapways_ota`). Hi
 |------|------|----------|
 | `AirBlueClient.php` | Zapways OTA SOAP calls + `air-blue` log. | `call`, `callOta` |
 | `AirBlueConfigResolver.php` | Zapways endpoint/credentials; rejects deprecated Crane channel. | `resolve`, `resolveOta`, `apiChannel` |
+| `AirBluePassengerPayloadBuilder.php` | Passenger/contact payloads for Zapways `AirBook`. | `buildPassengersFromBooking`, `buildContactFromBooking` |
 | `AirBlueXmlBuilder.php` / `AirBlueXmlParser.php` / `AirBlueResponseNormalizer.php` | Legacy Crane stack (deprecated; use `PiaNdc/*`). | — |
-| `AirBlueOtaXmlBuilder.php` / `AirBlueOtaXmlParser.php` / `AirBlueOtaResponseNormalizer.php` | Zapways OTA stack. | `AirLowFareSearch`, book/retrieve normalizers |
-| `AirBlueFlightSearchService.php` | Channel branch search. | `search` |
-| `AirBlueBookingService.php` | NDC `DoOrderCreate` (+ OTA path when channel=ota). | `createSupplierBooking` |
-| `AirBlueRetrieveService.php` | Retrieve/sync `airblue_context`. | `retrieveAndSync` |
-| `AirBlueAncillaryService.php` | NDC ancillary probe (seat/baggage samples). | `isSupported`, `logUnavailable` |
+| `AirBlueOtaXmlBuilder.php` / `AirBlueOtaXmlParser.php` / `AirBlueOtaResponseNormalizer.php` | Zapways OTA stack. | `AirLowFareSearch`, book/retrieve/ticket/cancel |
+| `AirBlueFlightSearchService.php` | Zapways-only search. | `search` |
+| `AirBlueBookingService.php` | Zapways `AirBook` with duplicate guards. | `createSupplierBooking` |
+| `AirBlueRetrieveService.php` | Zapways `Read` + sync `airblue_context`. | `retrieveAndSync` |
+| `AirBlueAncillaryService.php` | Fail-closed (no Zapways ancillary API). | `isSupported`, `logUnavailable` |
 | `Adapters/AirBlueFlightSupplierAdapter.php` | `FlightSupplierInterface`. | `search`, `validateOffer` |
 | `BookingAdapters/AirBlueSupplierBookingAdapter.php` | `SupplierBookingInterface`. | `createSupplierBooking` |
 | `TicketingAdapters/AirBlueSupplierTicketingAdapter.php` | `SupplierTicketingInterface`. | `issueTickets` |

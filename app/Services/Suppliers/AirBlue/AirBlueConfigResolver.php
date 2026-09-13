@@ -53,6 +53,11 @@ class AirBlueConfigResolver
      *     password_header: string
      * }
      */
+    /**
+     * @deprecated AirBlue Crane NDC is retired; detection only via {@see resolve()}.
+     *
+     * @return array<string, mixed>
+     */
     public function resolveNdc(SupplierConnection $connection): array
     {
         throw new AirBlueValidationException(
@@ -60,55 +65,6 @@ class AirBlueConfigResolver
             422,
             'AirBlue Crane NDC is no longer supported. Use PIA NDC (pia_ndc) for Hitit Crane NDC 20.1.',
         );
-
-        $credentials = is_array($connection->credentials) ? $connection->credentials : [];
-        $username = trim((string) ($credentials['username'] ?? ''));
-        $password = trim((string) ($credentials['password'] ?? ''));
-        $agencyId = trim((string) ($credentials['agency_id'] ?? ''));
-        $agencyName = trim((string) ($credentials['agency_name'] ?? ''));
-        $ownerCode = trim((string) ($credentials['owner_code'] ?? ''));
-        $endpoint = trim((string) ($connection->base_url ?? ''));
-
-        if ($username === '' || $password === '') {
-            throw new AirBlueValidationException(
-                'missing_credentials',
-                422,
-                'AirBlue Crane NDC username and password are required.',
-            );
-        }
-
-        if ($agencyId === '' || $agencyName === '' || $ownerCode === '') {
-            throw new AirBlueValidationException(
-                'missing_agency_fields',
-                422,
-                'AirBlue Crane NDC agency ID, agency name, and owner code are required.',
-            );
-        }
-
-        if ($endpoint === '') {
-            throw new AirBlueValidationException(
-                'missing_endpoint',
-                422,
-                'AirBlue Crane NDC base URL is required. Configure the endpoint in API settings.',
-            );
-        }
-
-        return [
-            'api_channel' => AirBlueApiChannel::CraneNdc->value,
-            'environment' => $connection->environment?->value ?? 'sandbox',
-            'is_test' => $this->isTestEnvironment($connection),
-            'endpoint_url' => rtrim($endpoint, '/'),
-            'username' => $username,
-            'password' => $password,
-            'agency_id' => $agencyId,
-            'agency_name' => $agencyName,
-            'owner_code' => $ownerCode,
-            'carrier_code' => trim((string) ($credentials['carrier_code'] ?? '')) ?: 'PA',
-            'currency' => strtoupper(trim((string) ($credentials['currency'] ?? '')) ?: 'PKR'),
-            'language_code' => strtoupper(trim((string) ($credentials['language_code'] ?? '')) ?: 'EN'),
-            'username_header' => (string) config('suppliers.airblue.username_header', 'username'),
-            'password_header' => (string) config('suppliers.airblue.password_header', 'password'),
-        ];
     }
 
     /**
@@ -131,6 +87,14 @@ class AirBlueConfigResolver
      */
     public function resolveOta(SupplierConnection $connection): array
     {
+        if ($this->apiChannel($connection)->isDeprecated()) {
+            throw new AirBlueValidationException(
+                'deprecated_channel',
+                422,
+                'AirBlue Crane NDC is no longer supported. Use PIA NDC (pia_ndc) for Hitit Crane NDC 20.1 or configure AirBlue Zapways OTA credentials.',
+            );
+        }
+
         $credentials = is_array($connection->credentials) ? $connection->credentials : [];
         $clientId = trim((string) ($credentials['client_id'] ?? ''));
         $clientKey = trim((string) ($credentials['client_key'] ?? ''));

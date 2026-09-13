@@ -18,6 +18,7 @@ class GlobalSupplierSyntheticPassengerGuardTest extends TestCase
         'app/Services/Suppliers/Iati/IatiPassengerNormalizer.php',
         'app/Services/Suppliers/Sabre/Booking/SabreBookingPayloadBuilder.php',
         'app/Services/Suppliers/PiaNdc/PiaNdcXmlBuilder.php',
+        'app/Services/Suppliers/AirBlue/AirBluePassengerPayloadBuilder.php',
         'app/Services/Suppliers/AirBlue/AirBlueXmlBuilder.php',
         'app/Services/Suppliers/Duffel/DuffelOrderRequestBuilder.php',
         'app/Services/Suppliers/OneApi/Booking/OneApiBookingService.php',

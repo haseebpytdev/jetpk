@@ -2,7 +2,6 @@
 
 namespace App\Services\Suppliers\AirBlue;
 
-use App\Enums\AirBlueApiChannel;
 use App\Enums\SupplierProvider;
 use App\Models\Booking;
 use App\Models\SupplierConnection;
@@ -14,9 +13,7 @@ class AirBlueRetrieveService
     public function __construct(
         private readonly AirBlueClient $client,
         private readonly AirBlueConfigResolver $configResolver,
-        private readonly AirBlueXmlBuilder $xmlBuilder,
         private readonly AirBlueOtaXmlBuilder $otaXmlBuilder,
-        private readonly AirBlueResponseNormalizer $normalizer,
         private readonly AirBlueOtaResponseNormalizer $otaNormalizer,
     ) {}
 
@@ -28,44 +25,7 @@ class AirBlueRetrieveService
         $meta = is_array($booking->meta) ? $booking->meta : [];
         $context = is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [];
 
-        if ($this->configResolver->apiChannel($connection) === AirBlueApiChannel::ZapwaysOta) {
-            return $this->retrieveOta($booking, $connection, $context);
-        }
-
-        return $this->retrieveNdc($booking, $connection, $context);
-    }
-
-    /**
-     * @param  array<string, mixed>  $context
-     * @return array<string, mixed>
-     */
-    private function retrieveNdc(Booking $booking, SupplierConnection $connection, array $context): array
-    {
-        $orderId = trim((string) ($context['order_id'] ?? $booking->supplier_reference ?? ''));
-        $ownerCode = trim((string) ($context['owner_code'] ?? ''));
-        if ($orderId === '' || $ownerCode === '') {
-            return ['synced' => false, 'reason' => 'missing_order_context'];
-        }
-
-        try {
-            $config = $this->configResolver->resolveNdc($connection);
-            $xml = $this->xmlBuilder->buildOrderRetrieveRequest($config, $orderId, $ownerCode);
-            $response = $this->client->call($connection, 'order_retrieve', $xml, [
-                'booking_id' => $booking->id,
-                'request_context' => 'retrieve',
-            ]);
-            $normalized = $this->normalizer->normalizeRetrieveResponse($response, $context);
-            $this->mergeSync($booking, $normalized);
-
-            return ['synced' => true, 'data' => $normalized];
-        } catch (AirBlueException $exception) {
-            Log::channel('air-blue')->warning('airblue.retrieve.failed', [
-                'booking_id' => $booking->id,
-                'error_code' => $exception->normalizedCode,
-            ]);
-
-            return ['synced' => false, 'reason' => $exception->normalizedCode];
-        }
+        return $this->retrieveOta($booking, $connection, $context);
     }
 
     /**
@@ -83,7 +43,7 @@ class AirBlueRetrieveService
         try {
             $config = $this->configResolver->resolveOta($connection);
             $xml = $this->otaXmlBuilder->buildReadRequest($config, $pnr, $instance);
-            $response = $this->client->call($connection, 'read', $xml, [
+            $response = $this->client->callOta($connection, 'read', $xml, [
                 'booking_id' => $booking->id,
                 'request_context' => 'read',
             ]);

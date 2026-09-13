@@ -6,6 +6,7 @@ use App\Models\SupplierConnection;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueAuthException;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueProviderException;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueUnavailableException;
+use App\Services\Suppliers\AirBlue\Exceptions\AirBlueValidationException;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueXmlException;
 use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Http\Client\ConnectionException;
@@ -20,7 +21,6 @@ class AirBlueClient
 {
     public function __construct(
         private readonly AirBlueConfigResolver $configResolver,
-        private readonly AirBlueXmlParser $ndcXmlParser,
         private readonly AirBlueOtaXmlParser $otaXmlParser,
         private readonly AirBlueCorrelationContext $correlationContext,
     ) {}
@@ -41,6 +41,8 @@ class AirBlueClient
     }
 
     /**
+     * @deprecated AirBlue Crane NDC is retired.
+     *
      * @param  array<string, mixed>  $diagnosticContext
      * @return array<string, mixed>
      */
@@ -50,45 +52,10 @@ class AirBlueClient
         string $requestXml,
         array $diagnosticContext = [],
     ): array {
-        $config = $this->configResolver->resolveNdc($connection);
-        $correlationId = (string) ($diagnosticContext['correlation_id'] ?? $this->correlationContext->newCorrelationId());
-        $soapAction = (string) config('suppliers.airblue.ndc_operations.'.$operation.'.soap_action', $operation);
-        $startedAt = microtime(true);
-
-        try {
-            $response = $this->baseHttpClient()
-                ->withHeaders([
-                    'Content-Type' => 'text/xml; charset=utf-8',
-                    'SOAPAction' => $soapAction,
-                    $config['username_header'] => $config['username'],
-                    $config['password_header'] => $config['password'],
-                    'X-Correlation-ID' => $correlationId,
-                ])
-                ->withBody($requestXml, 'text/xml; charset=utf-8')
-                ->post($config['endpoint_url']);
-        } catch (ConnectionException $exception) {
-            $this->logCall($connection, $config, $operation, $correlationId, $startedAt, null, $requestXml, null, 'failed', 'supplier_transport_failed', $diagnosticContext);
-
-            throw new AirBlueUnavailableException(
-                'supplier_transport_failed',
-                503,
-                'Provider temporarily unavailable.',
-                ['correlation_id' => $correlationId],
-                $exception,
-            );
-        }
-
-        return $this->finalizeResponse(
-            $response->status(),
-            (string) $response->body(),
-            $connection,
-            $config,
-            $operation,
-            $correlationId,
-            $startedAt,
-            $requestXml,
-            $diagnosticContext,
-            $this->ndcXmlParser,
+        throw new AirBlueValidationException(
+            'deprecated_channel',
+            422,
+            'AirBlue Crane NDC is no longer supported. Use PIA NDC (pia_ndc) for Hitit Crane NDC 20.1.',
         );
     }
 
@@ -140,7 +107,6 @@ class AirBlueClient
             $startedAt,
             $requestXml,
             $diagnosticContext,
-            $this->otaXmlParser,
         );
     }
 
@@ -159,7 +125,6 @@ class AirBlueClient
         float $startedAt,
         string $requestXml,
         array $diagnosticContext,
-        AirBlueXmlParser|AirBlueOtaXmlParser $parser,
     ): array {
         $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
 
@@ -186,7 +151,7 @@ class AirBlueClient
         }
 
         try {
-            $parsed = $parser->parse($body);
+            $parsed = $this->otaXmlParser->parse($body);
         } catch (AirBlueXmlException $exception) {
             $this->logCall($connection, $config, $operation, $correlationId, $startedAt, $status, $requestXml, $body, 'failed', $exception->normalizedCode, $diagnosticContext);
 
@@ -312,8 +277,11 @@ class AirBlueClient
 
     private function sanitizeXml(string $xml): string
     {
-        $redacted = preg_replace('/(<(?:EmailAddressText|GivenName|Surname|Birthdate|PhoneNumber|DocID|MessagePassword)>)[^<]+(<\/)/i', '$1[REDACTED]$2', $xml);
+        $redacted = preg_replace('/(<(?:[\w]+:)?(?:EmailAddressText|GivenName|Surname|Birthdate|PhoneNumber|DocID|MessagePassword|Email)>)[^<]+(<\/)/i', '$1[REDACTED]$2', $xml);
         $redacted = is_string($redacted) ? preg_replace('/(MessagePassword=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
+        $redacted = is_string($redacted) ? preg_replace('/(ERSP_UserID=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
+        $redacted = is_string($redacted) ? preg_replace('/(<ota:Email>)[^<]+(<\/ota:Email>)/i', '$1[REDACTED]$2', $redacted) : $xml;
+        $redacted = is_string($redacted) ? preg_replace('/(PhoneNumber=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
 
         return is_string($redacted) ? $redacted : $xml;
     }

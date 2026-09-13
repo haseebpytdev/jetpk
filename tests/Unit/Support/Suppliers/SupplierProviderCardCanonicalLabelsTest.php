@@ -84,6 +84,24 @@ class SupplierProviderCardCanonicalLabelsTest extends TestCase
         $this->assertSame('crane_ndc', $connection->credentials['api_channel']);
     }
 
+    public function test_airblue_resolve_ota_rejects_legacy_crane_channel(): void
+    {
+        $connection = $this->makeConnection(SupplierProvider::Airblue, [
+            'credentials' => [
+                'api_channel' => 'crane_ndc',
+                'client_id' => 'client',
+                'client_key' => 'key',
+                'agent_type' => '5',
+                'agent_id' => 'agent',
+                'agent_password' => 'secret',
+            ],
+        ]);
+
+        $this->expectException(AirBlueValidationException::class);
+
+        app(AirBlueConfigResolver::class)->resolveOta($connection);
+    }
+
     public function test_airblue_config_resolver_resolves_zapways_configuration(): void
     {
         $connection = $this->makeConnection(SupplierProvider::Airblue, [
