@@ -21,6 +21,7 @@ final class AiLabAdapter
         private readonly MockHandoffConsentGate $handoffGate,
         private readonly LearningQueueWriter $learningQueue,
         private readonly LabResponseNormalizer $normalizer,
+        private readonly AiLabObservability $observability,
     ) {}
 
     /**
@@ -50,11 +51,14 @@ final class AiLabAdapter
             authenticatedUserId: $conversation->user_id ? (string) $conversation->user_id : null,
         );
 
+        $started = hrtime(true);
         try {
             $response = $this->gateway->turn($request);
         } catch (\Throwable) {
+            $this->observability->record('gateway_error', ['status' => 'unavailable']);
             throw new \RuntimeException('AI lab gateway unavailable');
         }
+        $gatewayMs = (int) ((hrtime(true) - $started) / 1_000_000);
 
         $allowedKinds = ['NONE', 'SHADOW_FLIGHT_SEARCH', 'MOCK_HANDOFF', 'RAG_ANSWER'];
         if ($response->actionKind() !== 'NONE' && ! in_array($response->actionKind(), $allowedKinds, true)) {
@@ -131,6 +135,14 @@ final class AiLabAdapter
         if (is_array($response->learningEvent)) {
             $this->learningQueue->enqueue($response->learningEvent);
         }
+
+        $this->observability->record('turn_complete', [
+            'status' => $response->status,
+            'mode' => $response->mode,
+            'action_kind' => $response->actionKind(),
+            'gateway_ms' => $gatewayMs,
+            'dialog_state' => $response->labState['dialog_state'] ?? null,
+        ]);
 
         $assistant = $this->storeMessage($conversation, $response, $recommendations, $meta);
 

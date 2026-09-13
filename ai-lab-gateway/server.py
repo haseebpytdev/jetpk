@@ -20,8 +20,10 @@ sys.path.insert(0, LAB_ROOT)
 from app.pipeline import run_consultant_turn  # noqa: E402
 from app.policy.handoff import detect_unsupported_intent  # noqa: E402
 from app.rag.pipeline import answer_policy_question  # noqa: E402
+from app.rag.grounding import is_live_data_question  # noqa: E402
 from app.state import TravelConversationState  # noqa: E402
 from app.learning.enqueue import build_learning_event  # noqa: E402
+from app.learning.queue_schema import FailureCategory  # noqa: E402
 
 POLICY_MARKERS = (
     "baggage", "booking", "payment", "refund process", "cancellation",
@@ -33,6 +35,8 @@ def is_policy_question(message: str) -> bool:
     lower = message.lower()
     if detect_unsupported_intent(message):
         return False
+    if is_live_data_question(message):
+        return True
     if any(m in lower for m in POLICY_MARKERS):
         return True
     return False
@@ -72,6 +76,18 @@ def build_action(state: TravelConversationState) -> dict[str, Any]:
     return {"kind": "NONE", "payload": {}}
 
 
+def map_failure_category(code: str | None) -> FailureCategory | None:
+    if code is None:
+        return None
+    mapping = {
+        "RAG_NO_SOURCE": FailureCategory.RAG_NO_SOURCE,
+        "RAG_CONFLICT": FailureCategory.RAG_CONFLICT,
+        "LIVE_DATA_FROM_RAG": FailureCategory.RAG_NO_SOURCE,
+        "RAG_INJECTION": FailureCategory.OTHER,
+    }
+    return mapping.get(code)
+
+
 def handle_rag_turn(message: str, conversation_id: str, prior: TravelConversationState | None) -> dict[str, Any]:
     rag = answer_policy_question(message)
     action = {"kind": "RAG_ANSWER" if rag.get("grounded") and not rag.get("no_source") else "NONE", "payload": {}}
@@ -90,7 +106,7 @@ def handle_rag_turn(message: str, conversation_id: str, prior: TravelConversatio
     learning = build_learning_event(
         TravelConversationState.model_validate(lab_state),
         conversation_id=conversation_id,
-        failure_category=failure,
+        failure_category=map_failure_category(failure),
     )
 
     return {

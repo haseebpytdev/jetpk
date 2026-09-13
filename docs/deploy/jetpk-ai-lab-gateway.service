@@ -1,0 +1,17 @@
+[Unit]
+Description=JetPakistan AI Lab Gateway (localhost only)
+After=network.target
+
+[Service]
+Type=simple
+User=pkjetp
+Group=pkjetp
+WorkingDirectory=/home/pkjetp/ai-lab-gateway
+Environment=OTA_AI_LAB_REPO_PATH=/home/pkjetp/ai-lab
+Environment=OTA_AI_LAB_GATEWAY_PORT=8765
+ExecStart=/home/pkjetp/ai-lab/.venv/bin/python /home/pkjetp/ai-lab-gateway/server.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
