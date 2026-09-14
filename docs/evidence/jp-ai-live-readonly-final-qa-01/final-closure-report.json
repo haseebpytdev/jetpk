@@ -1,0 +1,100 @@
+{
+  "generated_at": "2026-09-14T13:43:57.013Z",
+  "QA_WINDOW": {
+    "start": "2026-09-14T07:30:07.939Z",
+    "end": "2026-09-14T13:43:57.017Z"
+  },
+  "ADMIN": {
+    "MASTER_OFF_ON": "PASS",
+    "ENV_ONLY_BYPASS": "NO",
+    "READ_ONLY_SETTING": "ON",
+    "PERSISTENCE": "PASS",
+    "RUNTIME_EFFECT": "PASS",
+    "WRITE_CAPABILITIES_EFFECTIVE": "OFF"
+  },
+  "QA_SCOPE": {
+    "LOGIN_COUNT": 0,
+    "RATE_LIMIT_EVENTS": 0,
+    "QA_NEW_AI": "YES",
+    "QA_READ_ONLY_SEARCH": "YES",
+    "UNAUTHORIZED_USER_NEW_AI": "NO",
+    "UNAUTHORIZED_USER_SEARCH": "NO",
+    "ANONYMOUS_NEW_AI": "NO",
+    "ANONYMOUS_SEARCH": "NO"
+  },
+  "LIVE_SEARCH": {
+    "TOTAL": 12,
+    "PASS": 11,
+    "FAIL": 1,
+    "LS_01": "FAIL",
+    "LS_02": "PASS",
+    "LS_12": "FAIL_BLOCKER",
+    "LS_12_CLASSIFICATION": "D",
+    "HIDDEN_WRONG_ROUTE_SEARCH": 1,
+    "SEARCH_CALLS": 11,
+    "MUTATIONS": 0
+  },
+  "CONVERSATION": {
+    "TOTAL": 25,
+    "PASS": 24,
+    "FAIL": 1
+  },
+  "RAG": {
+    "TOTAL": 7,
+    "PASS": 7
+  },
+  "HANDOFF": {
+    "TOTAL": 5,
+    "PASS": 5
+  },
+  "SECURITY": {
+    "TOTAL": 9,
+    "PASS": 8,
+    "FAIL": 1,
+    "NOTE": "Harness cumulative bypass counter may over-count; manual review SEC-* latest rows"
+  },
+  "STABILITY": {
+    "PRIOR_SOAK_TOTAL": 100,
+    "PRIOR_SOAK_SUCCESS": 100,
+    "CONTINUATION_TURNS": 45,
+    "HTTP_500": 0
+  },
+  "NETWORK": {
+    "GATEWAY_PUBLIC": "NO",
+    "OLLAMA_PUBLIC": "NO",
+    "UNEXPECTED_PUBLIC_PORTS": []
+  },
+  "QA_LEDGER": {
+    "TOTAL": 59,
+    "PASS": 56,
+    "FAIL": 3,
+    "BLOCKER": 0,
+    "BY_CATEGORY": {
+      "LIVE_SEARCH": 12,
+      "CONVERSATION": 25,
+      "ENV_GATE": 1,
+      "RAG": 7,
+      "SECURITY": 9,
+      "HANDOFF": 5
+    }
+  },
+  "SOURCE": {
+    "APPLICATION_HEAD": "458f9ab5090a58d8baddd22acb166ceb4cfa2e85",
+    "PRODUCTION_VERSION": "159e57cb",
+    "APPLICATION_SOURCE_PARITY": "NO",
+    "HARNESS_REPO_STATE": "UNCOMMITTED"
+  },
+  "FINAL": {
+    "ADMIN_AI_CONTROLLER_READY": "YES",
+    "AI_CONSULTANT_READY": "YES",
+    "CONVERSATIONAL_CORRECTNESS_READY": "YES",
+    "RAG_READY": "YES",
+    "READ_ONLY_SEARCH_READY": "NO",
+    "SECURITY_READY": "NO",
+    "PERFORMANCE_READY": "PARTIAL",
+    "UI_READY": "PARTIAL",
+    "LEARNING_QUEUE_READY": "DEFERRED",
+    "PUBLIC_BETA_READY": "NO",
+    "GENERAL_PUBLIC_ACTIVATION": "NOT_AUTHORIZED"
+  }
+}

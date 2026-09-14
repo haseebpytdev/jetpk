@@ -1,0 +1,26 @@
+{
+  "phase": "LS-MATRIX-FOCUSED",
+  "started_at": "2026-09-14T11:49:57.804Z",
+  "results": {
+    "LS-01": {
+      "pass": false,
+      "error": "Error: FAB not available (FAB_UNAVAILABLE); eligible=true config=true"
+    },
+    "LS-02": {
+      "pass": true,
+      "error": null,
+      "visible": "LHE to DXB 22 Dec\n\nWould you like a one-way or return ticket?\n\nSearch Flights\nTalk to Support\n\none way\n\nHow many passengers will be travelling?\n\nSearch Flights\nTalk to Support\n\n1 adult\n\nLahore (LHE) → Dubai (DXB), 22 Dec, one-way, 1 adult. Confirm?\n\nSearch Flights\nTalk to Support\n\nyes\n\nHere are 5 live options for LHE → DXB (read-only — no hold or booking was made).\n\nLHE → DXB 203\n\nLive search result\n\nread-only\nlive-search\nView & Book\nLHE → DXB SV737+SV558\n\nLive search result\n\nread-only\nlive-search\nView & Book\nLHE → DXB SV737+SV562\n\nLive search result\n\nread-only\nlive-search\nView & Book\nLHE → DXB SV737+SV564\n\nLive search result\n\nread-only\nlive-search\nView & Book\nLHE → DXB SV737+SV596\n\nLive search result\n\nread-only\nlive-search\nView & Book\nSearch Flights\nTalk to Support"
+    },
+    "LS-12": {
+      "pass": true,
+      "error": null,
+      "visible": "dubay se lahore 15 Jan\n\nBilkul — LHE se DXB. One-way chahiye ya return?\n\nSearch Flights\nTalk to Support\n\none way\n\nHow many passengers will be travelling?\n\nSearch Flights\nTalk to Support\n\n1 adult\n\nLahore (LHE) → Dubai (DXB), 15 Jan, one-way, 1 adult. Confirm?\n\nSearch Flights\nTalk to Support\n\nyes\n\nHere are 5 live options for LHE → DXB (read-only — no hold or booking was made).\n\nLHE → DXB GF765+GF510\n\nLive search result\n\nread-only\nlive-search\nView & Book\nLHE → DXB GF765+GF500\n\nLive search result\n\nread-only\nlive-search\nView & Book\nLHE → DXB GF765+GF512\n\nLive search result\n\nread-only\nlive-search\nView & Book\nLHE → DXB SV735+SV598\n\nLive search result\n\nread-only\nlive-search\nView & Book\nLHE → DXB SV739+SV588\n\nLive search result\n\nread-only\nlive-search\nView & Book\nSearch Flights\nTalk to Support"
+    }
+  },
+  "ls12": {
+    "classification": "D",
+    "hidden_wrong_route_search": 1,
+    "parsed": "LHE->DXB"
+  },
+  "completed_at": "2026-09-14T12:12:36.868Z"
+}

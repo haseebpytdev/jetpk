@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Load JP-DASH-03 QA passwords from env or Windows Credential Manager.
  * Never logs or returns passwords to stdout.
  */

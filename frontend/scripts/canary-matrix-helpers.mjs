@@ -1,5 +1,5 @@
 /**
- * JP-AI-PRODUCTION-CANARY-01 — shared browser matrix helpers (single authenticated context).
+ * JP-AI-PRODUCTION-CANARY-01 â shared browser matrix helpers (single authenticated context).
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -65,24 +65,25 @@ export async function fetchCsrfToken(page) {
 }
 
 export async function postLogin(page, email, password) {
-  let csrf = await fetchCsrfToken(page);
-  let response = await page.request.post(`${BASE}/laravel/login`, {
+  const loginOpts = {
     headers: {
       Accept: "application/json",
       "X-Requested-With": "XMLHttpRequest",
-      "X-XSRF-TOKEN": csrf,
     },
     form: { login: email, password, remember: "1", client_slug: "jetpk" },
+    maxRedirects: 0,
+    failOnStatusCode: false,
+  };
+  let csrf = await fetchCsrfToken(page);
+  let response = await page.request.post(`${BASE}/laravel/login`, {
+    ...loginOpts,
+    headers: { ...loginOpts.headers, "X-XSRF-TOKEN": csrf },
   });
   if (response.status() === 419) {
     csrf = await fetchCsrfToken(page);
     response = await page.request.post(`${BASE}/laravel/login`, {
-      headers: {
-        Accept: "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-        "X-XSRF-TOKEN": csrf,
-      },
-      form: { login: email, password, remember: "1", client_slug: "jetpk" },
+      ...loginOpts,
+      headers: { ...loginOpts.headers, "X-XSRF-TOKEN": csrf },
     });
   }
   return response;
@@ -241,9 +242,15 @@ export async function clearConversation(page) {
   if ((await panel.count()) === 0) {
     await openAskPanel(page);
   }
-  await page.getByRole("button", { name: "Chat options" }).click({ timeout: 15_000 });
-  await page.getByRole("menuitem", { name: "Clear conversation" }).click({ timeout: 15_000 });
-  await page.waitForTimeout(1200);
+  try {
+    await page.getByRole("button", { name: "Chat options" }).click({ timeout: 15_000 });
+    await page.getByRole("menuitem", { name: "Clear conversation" }).click({ timeout: 15_000 });
+    await page.waitForTimeout(1200);
+  } catch {
+    await page.reload({ waitUntil: "domcontentloaded", timeout: 120_000 }).catch(() => {});
+    await openAskPanel(page).catch(() => {});
+    await page.waitForTimeout(1500);
+  }
 }
 
 export async function withCanaryFaultMode(page, faultMode, fn) {
@@ -278,6 +285,14 @@ export async function sendMessage(page, text, options = {}) {
     const input = page
       .locator('[data-testid="ask-jetpakistan-panel"] input[type="text"], [data-testid="ask-jetpakistan-panel"] input')
       .first();
+    await input.waitFor({ state: "visible", timeout: 60_000 });
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector('[data-testid="ask-jetpakistan-panel"] input[type="text"], [data-testid="ask-jetpakistan-panel"] input');
+        return el && !el.disabled && el.getAttribute("aria-busy") !== "true";
+      },
+      { timeout: Number(options.inputReadyTimeoutMs ?? 120_000) },
+    );
     const priorText = await page.getByTestId("ask-jetpakistan-messages").innerText().catch(() => "");
     const priorLen = priorText.length;
     await input.fill(text);
