@@ -3,13 +3,13 @@ Allow: /
 
 # Authenticated, operational and technical surfaces are not search landing pages.
 # These rules guide crawlers; authorization remains enforced by the application.
-Disallow: /admin/
+Disallow: /admin
 Disallow: /agent/dashboard
-Disallow: /staff/
-Disallow: /customer/
-Disallow: /dashboard/
-Disallow: /api/
-Disallow: /dev/
-Disallow: /ui/
+Disallow: /staff
+Disallow: /customer
+Disallow: /dashboard
+Disallow: /api
+Disallow: /dev
+Disallow: /ui
 
 Sitemap: https://jetpakistan.pk/sitemap.xml
