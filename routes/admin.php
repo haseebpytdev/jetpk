@@ -246,6 +246,14 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/settings/ai-assistant', [\App\Http\Controllers\Admin\AiAssistantStatusController::class, 'show'])->name('settings.ai-assistant.show');
     Route::patch('/settings/ai-assistant', [\App\Http\Controllers\Admin\AiAssistantStatusController::class, 'update'])->name('settings.ai-assistant.update');
 
+    Route::get('/customer-queries', [\App\Http\Controllers\Admin\CustomerQueryController::class, 'index'])->name('customer-queries.index');
+    Route::get('/customer-queries/{customerQuery}', [\App\Http\Controllers\Admin\CustomerQueryController::class, 'show'])->name('customer-queries.show');
+    Route::patch('/customer-queries/{customerQuery}/status', [\App\Http\Controllers\Admin\CustomerQueryController::class, 'updateStatus'])->name('customer-queries.status');
+
+    Route::get('/customer-queries', [\App\Http\Controllers\Admin\CustomerQueryController::class, 'index'])->name('customer-queries.index');
+    Route::get('/customer-queries/{customerQuery}', [\App\Http\Controllers\Admin\CustomerQueryController::class, 'show'])->name('customer-queries.show');
+    Route::patch('/customer-queries/{customerQuery}/status', [\App\Http\Controllers\Admin\CustomerQueryController::class, 'updateStatus'])->name('customer-queries.status');
+
     Route::get('/settings/payments', [BackOfficeLegacyViewRedirectController::class, 'adminIntegrationsAbhiPay'])->name('settings.payments.index');
     Route::patch('/settings/payments/abhipay', [AgencyPaymentSettingsController::class, 'updateAbhiPay'])->name('settings.payments.abhipay.update');
     Route::post('/settings/payments/abhipay/test', [AgencyPaymentSettingsController::class, 'testAbhiPay'])

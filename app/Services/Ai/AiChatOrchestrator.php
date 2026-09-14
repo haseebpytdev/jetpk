@@ -25,6 +25,7 @@ final class AiChatOrchestrator
         private readonly AiShoppingTools $tools,
         private readonly AiConversationalAgent $conversational,
         private readonly AiAssistantBookingLookupTool $bookingLookupTool,
+        private readonly CustomerQueryLeadService $leadService,
         private readonly ?\App\Services\Ai\Lab\AiLabAdapter $labAdapter = null,
     ) {}
 
@@ -45,14 +46,19 @@ final class AiChatOrchestrator
         }
 
         if ($conversation === null && $createIfMissing && ($publicId === null || $publicId === '')) {
-            $conversation = AiConversation::query()->create([
-                'channel' => 'web',
-                'visitor_token_hash' => $hash,
-                'user_id' => $request->user()?->id,
-                'state' => AiConversation::STATE_AI_ACTIVE,
-                'shopping_state' => [],
-            ]);
-            $setCookie = true;
+            $openQuery = $this->leadService->findRecentOpenQuery($hash, $request->user());
+            if ($openQuery?->conversation !== null) {
+                $conversation = $openQuery->conversation;
+            } else {
+                $conversation = AiConversation::query()->create([
+                    'channel' => 'web',
+                    'visitor_token_hash' => $hash,
+                    'user_id' => $request->user()?->id,
+                    'state' => AiConversation::STATE_AI_ACTIVE,
+                    'shopping_state' => [],
+                ]);
+                $setCookie = true;
+            }
         } elseif ($conversation === null && $createIfMissing) {
             // Unknown/foreign public_id: start a fresh owned conversation (do not leak existence).
             $conversation = AiConversation::query()->create([
@@ -196,9 +202,47 @@ final class AiChatOrchestrator
             $conversation->save();
         }
 
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        if ($state['lead_capture_pending'] ?? false) {
+            $assistant = $this->storeMessage($conversation, 'assistant', 'Please share your name, email and contact number using the form below so we can continue.', [
+                'mode' => 'LEAD_CAPTURE',
+            ]);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'lead_capture_required',
+                'mode' => 'LEAD_CAPTURE',
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => 'Please share your name, email and contact number using the form below so we can continue.',
+                'lead_capture' => [
+                    'required' => true,
+                    'fields' => ['name', 'email', 'phone', 'contact_consent'],
+                ],
+                'recommendations' => [],
+                'actions' => [],
+                'meta' => ['lead_capture_pending' => true],
+            ]);
+        }
+
+        $leadPrompt = $this->leadService->leadCapturePromptPayload($conversation, $cleanMessage);
+        if (is_array($leadPrompt)) {
+            $assistant = $this->storeMessage($conversation, 'assistant', (string) $leadPrompt['message'], [
+                'mode' => 'LEAD_CAPTURE',
+            ]);
+
+            return $this->withMessageId($assistant, $leadPrompt);
+        }
+
         if ($this->shouldUseLabAdapter($conversation) && $this->labAdapter !== null) {
             try {
-                return $this->labAdapter->handleTurn($conversation, $cleanMessage);
+                $labResponse = $this->labAdapter->handleTurn($conversation, $cleanMessage);
+                $searchRecord = is_array($labResponse['meta'] ?? null)
+                    ? ($labResponse['meta']['search_record'] ?? null)
+                    : null;
+                $this->syncLeadFromConversation($conversation, is_array($searchRecord) ? $searchRecord : null);
+
+                return $labResponse;
             } catch (\Throwable) {
                 if (! (bool) config('ai_lab.fallback_to_legacy', true)) {
                     $assistant = $this->storeMessage($conversation, 'assistant', 'AI assistant is temporarily unavailable. Please try again shortly.', [
@@ -271,6 +315,8 @@ final class AiChatOrchestrator
             $conversation->shopping_state = $state;
         }
         $conversation->save();
+        $this->syncLeadFromConversation($conversation);
+        $this->syncLeadFromConversation($conversation);
 
         $meta = array_merge([
             'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
@@ -809,5 +855,28 @@ final class AiChatOrchestrator
             ['label' => 'Manage Booking', 'href' => '/lookup-booking'],
             ['label' => 'Talk to Support', 'action' => 'handoff'],
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $searchRecord
+     */
+    private function syncLeadFromConversation(AiConversation $conversation, ?array $searchRecord = null): void
+    {
+        $query = $this->leadService->findRecentOpenQuery(
+            $conversation->visitor_token_hash,
+            $conversation->user,
+        );
+        if ($query === null) {
+            return;
+        }
+
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        if ($state !== []) {
+            $this->leadService->syncFromTravelState($query, $state);
+        }
+
+        if (is_array($searchRecord)) {
+            $this->leadService->linkSearchEvent($query, $searchRecord);
+        }
     }
 }

@@ -65,6 +65,12 @@ Route::post('/api/public/share/group', [PublicShareLinkController::class, 'creat
 Route::get('/api/public/ai/health', [PublicAiAssistantController::class, 'health'])
     ->middleware('throttle:60,1')
     ->name('api.public.ai.health');
+Route::post('/api/public/ai/lead', [PublicAiAssistantController::class, 'submitLead'])
+    ->middleware('throttle:20,1')
+    ->name('api.public.ai.lead');
+Route::post('/api/public/ai/lead', [PublicAiAssistantController::class, 'submitLead'])
+    ->middleware('throttle:20,1')
+    ->name('api.public.ai.lead');
 Route::post('/api/public/ai/chat', [PublicAiAssistantController::class, 'chat'])
     ->middleware(['throttle:60,1', 'ai.lab.canary.fault'])
     ->name('api.public.ai.chat');

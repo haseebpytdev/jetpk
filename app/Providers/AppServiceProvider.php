@@ -200,6 +200,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(StaffProfile::class, StaffProfilePolicy::class);
         Gate::policy(SavedTraveler::class, SavedTravelerPolicy::class);
         Gate::policy(SupportTicket::class, SupportTicketPolicy::class);
+        Gate::policy(\App\Models\CustomerQuery::class, \App\Policies\CustomerQueryPolicy::class);
+        Gate::policy(\App\Models\CustomerQuery::class, \App\Policies\CustomerQueryPolicy::class);
         Gate::policy(MarkupRule::class, MarkupRulePolicy::class);
         Gate::policy(HomepageFeaturedFare::class, HomepageFeaturedFarePolicy::class);
         Gate::policy(PromoCode::class, PromoCodePolicy::class);

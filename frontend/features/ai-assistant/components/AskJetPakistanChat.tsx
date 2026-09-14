@@ -155,6 +155,18 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   const [error, setError] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [leadCaptureRequired, setLeadCaptureRequired] = useState(false);
+  const [leadName, setLeadName] = useState("");
+  const [leadEmail, setLeadEmail] = useState("");
+  const [leadPhone, setLeadPhone] = useState("");
+  const [leadConsent, setLeadConsent] = useState(false);
+  const [leadErrors, setLeadErrors] = useState<Record<string, string>>({});
+  const [leadCaptureRequired, setLeadCaptureRequired] = useState(false);
+  const [leadName, setLeadName] = useState("");
+  const [leadEmail, setLeadEmail] = useState("");
+  const [leadPhone, setLeadPhone] = useState("");
+  const [leadConsent, setLeadConsent] = useState(false);
+  const [leadErrors, setLeadErrors] = useState<Record<string, string>>({});
 
   const lastPollId = useRef(0);
 
@@ -338,6 +350,10 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
       lastPollId.current = Math.max(lastPollId.current, json.message_id);
     }
 
+    if (json.status === "lead_capture_required" || json.mode === "LEAD_CAPTURE") {
+      setLeadCaptureRequired(true);
+    }
+
     setMessages((previous) => {
       if (previous.some((message) => message.id === serverId)) {
         return previous;
@@ -365,6 +381,80 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
         },
       ];
     });
+  };
+
+  const submitLead = async () => {
+    if (!conversationId || busy) return;
+
+    setBusy(true);
+    setLeadErrors({});
+    setError(null);
+
+    try {
+      const { response, json } = await postAi("/api/public/ai/lead", {
+        conversation_id: conversationId,
+        name: leadName,
+        email: leadEmail,
+        phone: leadPhone,
+        contact_consent: leadConsent,
+      });
+
+      if (!response.ok) {
+        const errors =
+          typeof json.errors === "object" && json.errors !== null
+            ? (json.errors as Record<string, string>)
+            : {};
+        setLeadErrors(errors);
+        if (typeof json.message === "string") {
+          setError(json.message);
+        }
+        return;
+      }
+
+      setLeadCaptureRequired(false);
+      appendAssistant(json);
+    } catch {
+      setError("Could not save your contact details. Please retry.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submitLead = async () => {
+    if (!conversationId || busy) return;
+
+    setBusy(true);
+    setLeadErrors({});
+    setError(null);
+
+    try {
+      const { response, json } = await postAi("/api/public/ai/lead", {
+        conversation_id: conversationId,
+        name: leadName,
+        email: leadEmail,
+        phone: leadPhone,
+        contact_consent: leadConsent,
+      });
+
+      if (!response.ok) {
+        const errors =
+          typeof json.errors === "object" && json.errors !== null
+            ? (json.errors as Record<string, string>)
+            : {};
+        setLeadErrors(errors);
+        if (typeof json.message === "string") {
+          setError(json.message);
+        }
+        return;
+      }
+
+      setLeadCaptureRequired(false);
+      appendAssistant(json);
+    } catch {
+      setError("Could not save your contact details. Please retry.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const send = async (text: string) => {
@@ -692,6 +782,58 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
           </div>
 
           <footer className={styles.composer}>
+            {leadCaptureRequired ? (
+              <div className={styles.leadCapture} data-testid="ask-jetpakistan-lead-capture">
+                <label className={styles.leadLabel} htmlFor="lead-name">Name</label>
+                <input
+                  id="lead-name"
+                  className={styles.input}
+                  value={leadName}
+                  onChange={(event) => setLeadName(event.target.value)}
+                  autoComplete="name"
+                  disabled={busy}
+                />
+                {leadErrors.name ? <p className={styles.leadError}>{leadErrors.name}</p> : null}
+                <label className={styles.leadLabel} htmlFor="lead-email">Email</label>
+                <input
+                  id="lead-email"
+                  className={styles.input}
+                  type="email"
+                  value={leadEmail}
+                  onChange={(event) => setLeadEmail(event.target.value)}
+                  autoComplete="email"
+                  disabled={busy}
+                />
+                {leadErrors.email ? <p className={styles.leadError}>{leadErrors.email}</p> : null}
+                <label className={styles.leadLabel} htmlFor="lead-phone">Contact number</label>
+                <input
+                  id="lead-phone"
+                  className={styles.input}
+                  type="tel"
+                  value={leadPhone}
+                  onChange={(event) => setLeadPhone(event.target.value)}
+                  autoComplete="tel"
+                  disabled={busy}
+                />
+                {leadErrors.phone ? <p className={styles.leadError}>{leadErrors.phone}</p> : null}
+                <label className={styles.leadConsent}>
+                  <input
+                    type="checkbox"
+                    checked={leadConsent}
+                    onChange={(event) => setLeadConsent(event.target.checked)}
+                    disabled={busy}
+                  />
+                  I agree JetPakistan may contact me about this travel inquiry.
+                </label>
+                {leadErrors.contact_consent ? (
+                  <p className={styles.leadError}>{leadErrors.contact_consent}</p>
+                ) : null}
+                <button type="button" className={styles.sendButton} onClick={() => void submitLead()} disabled={busy}>
+                  Continue
+                </button>
+              </div>
+            ) : null}
+
             <form className={styles.inputBar} onSubmit={onSubmit}>
               <input
                 ref={inputRef}
@@ -702,7 +844,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
                 aria-label="Message Ask JetPakistan"
                 autoComplete="off"
                 maxLength={1200}
-                disabled={busy}
+                disabled={busy || leadCaptureRequired}
               />
 
               <button

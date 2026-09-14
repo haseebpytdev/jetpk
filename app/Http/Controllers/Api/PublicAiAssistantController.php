@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AiConversation;
 use App\Services\Ai\AiAssistantEligibility;
 use App\Services\Ai\AiChatOrchestrator;
+use App\Services\Ai\CustomerQueryLeadService;
 use App\Services\Ai\Lab\AiLabFaultInjectionContext;
 use App\Services\Ai\Lab\AiLabGatewayUrlResolver;
 use Illuminate\Http\JsonResponse;
@@ -179,6 +180,68 @@ class PublicAiAssistantController extends Controller
             'state' => $conversation->state,
             'message' => 'Started a new conversation.',
         ]), array_merge($resolved, ['set_cookie' => true, 'conversation' => $conversation]));
+    }
+
+    public function submitLead(Request $request, CustomerQueryLeadService $leadService): JsonResponse
+    {
+        if (! $this->eligibility->isEligibleRequest($request)) {
+            return $this->unavailable();
+        }
+
+        $data = $request->validate([
+            'conversation_id' => ['required', 'uuid'],
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'string', 'email', 'max:191'],
+            'phone' => ['required', 'string', 'max:40'],
+            'phone_country' => ['nullable', 'string', 'max:8'],
+            'contact_consent' => ['required', 'boolean'],
+        ]);
+
+        $resolved = $this->orchestrator->resolveConversation($request, $data['conversation_id'], false);
+        $conversation = $resolved['conversation'] ?? null;
+        if ($conversation === null) {
+            return $this->withVisitorCookie(response()->json([
+                'ok' => false,
+                'status' => 'forbidden',
+                'message' => 'Conversation not found.',
+            ], 403), $resolved);
+        }
+
+        $result = $leadService->createFromPayload(
+            $conversation,
+            $data,
+            $resolved['visitor_hash'] ?? $this->orchestrator->hashVisitor($resolved['visitor_raw']),
+            $request->user(),
+            $request->header('CF-IPCountry') ?: null,
+        );
+
+        if (! ($result['ok'] ?? false)) {
+            return $this->withVisitorCookie(response()->json([
+                'ok' => false,
+                'status' => 'validation_error',
+                'errors' => $result['errors'] ?? [],
+            ], 422), $resolved);
+        }
+
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        $pendingMessage = (string) ($state['lead_pending_message'] ?? '');
+        unset($state['lead_capture_pending'], $state['lead_pending_message']);
+        $conversation->shopping_state = $state;
+        $conversation->save();
+
+        $followUp = $pendingMessage !== ''
+            ? $this->orchestrator->handleChat($conversation, $pendingMessage)
+            : [
+                'ok' => true,
+                'status' => 'lead_saved',
+                'conversation_id' => $conversation->public_id,
+                'message' => 'Thank you. How can I help with your travel request?',
+            ];
+
+        $followUp['query_reference'] = $result['query']->query_reference;
+        $followUp['status'] = $followUp['status'] ?? 'lead_saved';
+
+        return $this->withVisitorCookie(response()->json($followUp), $resolved);
     }
 
     public function requestHandoff(Request $request): JsonResponse
