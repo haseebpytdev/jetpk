@@ -278,31 +278,58 @@ export async function sendMessage(page, text, options = {}) {
     const input = page
       .locator('[data-testid="ask-jetpakistan-panel"] input[type="text"], [data-testid="ask-jetpakistan-panel"] input')
       .first();
+    const priorText = await page.getByTestId("ask-jetpakistan-messages").innerText().catch(() => "");
+    const priorLen = priorText.length;
     await input.fill(text);
     const responsePromise = page.waitForResponse(
       (res) => res.url().includes("/api/public/ai/chat") && res.request().method() === "POST",
       { timeout: 90_000 },
     );
+    const started = Date.now();
     await page.getByRole("button", { name: /send/i }).click();
     const response = await responsePromise;
-    await page.waitForFunction(
-      () => {
-        const el = document.querySelector('[data-testid="ask-jetpakistan-messages"]');
-        return el && el.textContent && el.textContent.trim().length > 10;
-      },
-      { timeout: 30_000 },
-    ).catch(() => page.waitForTimeout(1500));
-    const messages = await page.getByTestId("ask-jetpakistan-messages").innerText();
     let payload = {};
     try {
       payload = await response.json();
     } catch {
       payload = {};
     }
+    const apiMessage = String(payload.message ?? "").trim();
+    const timeoutMs = Number(options.responseTimeoutMs ?? 45_000);
+
+    await page
+      .waitForFunction(
+        ({ snippet, minLen, apiLen }) => {
+          const el = document.querySelector('[data-testid="ask-jetpakistan-messages"]');
+          if (!el) return false;
+          const text = el.textContent ?? "";
+          if (text.length <= minLen) return false;
+          if (apiLen > 0 && snippet) {
+            const probe = snippet.slice(0, Math.min(24, snippet.length));
+            return probe.length > 0 && text.includes(probe);
+          }
+          return text.length > minLen + 8;
+        },
+        { snippet: apiMessage, minLen: priorLen, apiLen: apiMessage.length },
+        { timeout: timeoutMs },
+      )
+      .catch(async () => {
+        await page.waitForFunction(
+          () => {
+            const busy = document.querySelector('[data-testid="ask-jetpakistan-panel"] [aria-busy="true"]');
+            return !busy;
+          },
+          { timeout: 5000 },
+        ).catch(() => {});
+        await page.waitForTimeout(1200);
+      });
+
+    const messages = await page.getByTestId("ask-jetpakistan-messages").innerText();
     return {
       status: response.status(),
       body: messages,
       payload,
+      latency_ms: Date.now() - started,
     };
   };
 
