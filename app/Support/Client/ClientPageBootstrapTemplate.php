@@ -107,7 +107,7 @@ final class ClientPageBootstrapTemplate
             'phone_e164' => '+923111222427',
             'email' => 'ota@jetpakistan.pk',
             'whatsapp' => '923111222427',
-            'website' => 'https://www.jetpakistan.com',
+            'website' => 'https://jetpakistan.pk',
             'office' => 'Office No. 220, 2nd Floor, Century Tower, Kalma Chowk, Gulberg III, Lahore',
             'hours' => '24/7',
             'company_legal_name' => 'JetPakistan',

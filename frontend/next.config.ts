@@ -10,6 +10,15 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   outputFileTracingRoot: path.join(__dirname),
+  async redirects() {
+    return [
+      {
+        source: "/contact",
+        destination: "/about-us",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

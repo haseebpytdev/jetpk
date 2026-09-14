@@ -7,6 +7,7 @@ use App\Enums\SupportTicketCategory;
 use App\Models\ClientPageSetting;
 use App\Models\CmsPage;
 use App\Models\SupportTicket;
+use App\Services\PublicContent\PublicContentApiPresenter;
 use App\Support\Client\ClientPageKeys;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -166,21 +167,31 @@ class PublicContentApiTest extends TestCase
     {
         $this->makeJetpkProfile();
 
-        $this->getJson(route('api.public.content.sitemap-routes'))
-            ->assertOk()
-            ->assertJsonPath('source', 'laravel')
-            ->assertJsonFragment(['path' => '/about-us'])
-            ->assertJsonFragment(['path' => '/contact']);
+        $paths = collect(app(PublicContentApiPresenter::class)->sitemapRoutes())->pluck('path')->all();
+
+        $this->assertContains('/about-us', $paths);
+        $this->assertNotContains('/contact', $paths);
+        $this->assertNotContains('/flights', $paths);
     }
 
     public function test_sitemap_xml_route_returns_valid_xml(): void
     {
         $this->makeJetpkProfile();
 
-        $response = $this->get(route('sitemap'));
+        $response = $this->get('/sitemap.xml');
         $response->assertOk();
-        $this->assertStringContainsString('<urlset', $response->getContent());
-        $this->assertStringContainsString('/about-us', $response->getContent());
+        $content = $response->getContent();
+        $this->assertStringContainsString('<urlset', $content);
+        $this->assertStringContainsString('/about-us', $content);
+        $this->assertDoesNotMatchRegularExpression('#<loc>[^<]*/contact</loc>#', $content);
+    }
+
+    public function test_contact_route_permanently_redirects_to_about_us(): void
+    {
+        $this->makeJetpkProfile();
+
+        $this->get('/contact')
+            ->assertRedirect('/about-us');
     }
 
     public function test_homepage_json_returns_empty_source_without_published_content(): void

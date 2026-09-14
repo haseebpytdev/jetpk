@@ -251,5 +251,8 @@ class FrontendRoutesTest extends TestCase
 
         $this->get('/flights')
             ->assertRedirect('/');
+
+        $this->get('/contact')
+            ->assertRedirect('/about-us');
     }
 }

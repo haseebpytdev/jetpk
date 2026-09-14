@@ -29,11 +29,25 @@ final class ClientGlobalContactResolver
             'phone_e164' => trim((string) ($merged['phone_e164'] ?? '')),
             'email' => trim((string) ($merged['email'] ?? '')),
             'whatsapp' => trim((string) ($merged['whatsapp'] ?? '')),
-            'website' => trim((string) ($merged['website'] ?? '')),
+            'website' => $this->normalizePublicWebsite((string) ($merged['website'] ?? '')),
             'office' => trim((string) ($merged['office'] ?? '')),
             'hours' => trim((string) ($merged['hours'] ?? '')),
             'company_legal_name' => trim((string) ($merged['company_legal_name'] ?? '')),
         ];
+    }
+
+    private function normalizePublicWebsite(string $website): string
+    {
+        $website = trim($website);
+        if ($website === '') {
+            return '';
+        }
+
+        return (string) preg_replace(
+            '#^https?://(www\.)?jetpakistan\.com/?$#i',
+            'https://jetpakistan.pk',
+            $website
+        );
     }
 
     /**

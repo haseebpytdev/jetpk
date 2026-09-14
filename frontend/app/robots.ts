@@ -4,6 +4,8 @@ import { appConfig } from "@/lib/config";
 const disallowPrivate = [
   "/customer",
   "/agent",
+  "/admin",
+  "/staff",
   "/dashboard",
   "/booking",
   "/flights/results",
@@ -15,7 +17,9 @@ const disallowPrivate = [
   "/reset-password",
   "/verify-email",
   "/forgot-password",
+  "/api",
   "/dev",
+  "/ui",
   "/laravel",
   "/testdash",
 ];

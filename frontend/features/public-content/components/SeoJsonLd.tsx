@@ -8,7 +8,7 @@ type SeoJsonLdProps = {
 
 export function SeoJsonLd({ config, contact }: SeoJsonLdProps) {
   const resolvedContact = contact ?? config?.contact;
-  const appUrl = config?.app_url ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://www.jetpakistan.com";
+  const appUrl = config?.app_url ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://jetpakistan.pk";
 
   const organization = {
     "@context": "https://schema.org",
