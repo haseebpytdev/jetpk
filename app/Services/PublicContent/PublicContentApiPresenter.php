@@ -165,6 +165,9 @@ final class PublicContentApiPresenter
     }
 
     /**
+     * Return canonical, indexable public URLs only. Redirect aliases such as
+     * /contact and /flights deliberately stay out of the sitemap.
+     *
      * @return list<array{path: string, lastmod?: string}>
      */
     public function sitemapRoutes(): array
@@ -172,22 +175,24 @@ final class PublicContentApiPresenter
         $routes = [
             ['path' => '/'],
             ['path' => '/about-us'],
-            ['path' => '/contact'],
             ['path' => '/support'],
             ['path' => '/faq'],
             ['path' => '/terms'],
             ['path' => '/privacy'],
-            ['path' => '/lookup-booking'],
-            ['path' => '/groups/search'],
         ];
 
         CmsPage::query()
             ->active()
             ->orderBy('slug')
             ->get(['slug', 'updated_at'])
-            ->each(function (CmsPage $page): void {
+            ->each(function (CmsPage $page) use (&$routes): void {
+                $slug = trim((string) $page->slug, " /\t\n\r\0\x0B");
+                if ($slug === '') {
+                    return;
+                }
+
                 $routes[] = [
-                    'path' => '/pages/'.$page->slug,
+                    'path' => '/pages/'.$slug,
                     'lastmod' => $page->updated_at?->toAtomString(),
                 ];
             });
@@ -196,7 +201,7 @@ final class PublicContentApiPresenter
             ->where('enabled', true)
             ->orderBy('slug')
             ->get(['slug', 'updated_at'])
-            ->each(function (ClientPage $page): void {
+            ->each(function (ClientPage $page) use (&$routes): void {
                 $slug = ClientManagedPageReservedSlugs::normalize((string) $page->slug);
                 if ($slug === '' || ReservedPublicPath::isReservedFirstSegment($slug)) {
                     return;
@@ -213,7 +218,10 @@ final class PublicContentApiPresenter
                 ];
             });
 
-        return $routes;
+        return collect($routes)
+            ->unique('path')
+            ->values()
+            ->all();
     }
 
     /**
