@@ -3,11 +3,8 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
-use App\Models\ClientPage;
-use App\Models\CmsPage;
 use App\Services\PublicContent\PublicContentApiPresenter;
-use App\Support\Client\ClientManagedPageReservedSlugs;
-use App\Support\Client\ReservedPublicPath;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 /**
@@ -19,10 +16,10 @@ class PublicSitemapController extends Controller
         private readonly PublicContentApiPresenter $presenter,
     ) {}
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $routes = $this->presenter->sitemapRoutes();
-        $base = rtrim((string) config('app.url'), '/');
+        $base = rtrim($request->getSchemeAndHttpHost(), '/');
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
@@ -35,15 +32,18 @@ class PublicSitemapController extends Controller
 
             $loc = $base.'/'.ltrim($path, '/');
             $xml .= '  <url>'."\n";
-            $xml .= '    <loc>'.htmlspecialchars($loc, ENT_XML1).'</loc>'."\n";
+            $xml .= '    <loc>'.htmlspecialchars($loc, ENT_XML1 | ENT_QUOTES, 'UTF-8').'</loc>'."\n";
             if (! empty($route['lastmod'])) {
-                $xml .= '    <lastmod>'.htmlspecialchars((string) $route['lastmod'], ENT_XML1).'</lastmod>'."\n";
+                $xml .= '    <lastmod>'.htmlspecialchars((string) $route['lastmod'], ENT_XML1 | ENT_QUOTES, 'UTF-8').'</lastmod>'."\n";
             }
             $xml .= '  </url>'."\n";
         }
 
         $xml .= '</urlset>';
 
-        return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+        return response($xml, 200, [
+            'Content-Type' => 'application/xml; charset=UTF-8',
+            'Cache-Control' => 'public, max-age=900',
+        ]);
     }
 }
