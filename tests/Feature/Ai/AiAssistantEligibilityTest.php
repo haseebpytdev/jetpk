@@ -15,7 +15,10 @@ class AiAssistantEligibilityTest extends TestCase
 
     public function test_off_denies_everyone(): void
     {
-        config(['ota.ai_assistant.mode' => 'off']);
+        config([
+            'ota.ai_assistant.mode' => 'off',
+            'ota.ai_assistant.hard_allow.master' => false,
+        ]);
         $e = app(AiAssistantEligibility::class);
         $this->assertFalse($e->isEligible(null));
         $this->assertSame('off', $e->mode());
@@ -23,7 +26,18 @@ class AiAssistantEligibilityTest extends TestCase
 
     public function test_internal_canary_allows_support_staff_and_platform_admin(): void
     {
-        config(['ota.ai_assistant.mode' => 'internal_canary']);
+        config([
+            'ota.ai_assistant.mode' => 'internal_canary',
+            'ota.ai_assistant.hard_allow.master' => true,
+            'ota.ai_assistant.hard_allow.internal_canary' => true,
+            'ai_lab.hard_allow.lab_adapter' => true,
+        ]);
+        $admin = User::factory()->create(['account_type' => AccountType::PlatformAdmin]);
+        app(\App\Services\Ai\AiAssistantSettingsService::class)->update($admin, [
+            'master_enabled' => true,
+            'internal_canary_enabled' => true,
+            'lab_adapter_enabled' => true,
+        ]);
         $e = app(AiAssistantEligibility::class);
 
         $staff = User::factory()->create([
@@ -45,7 +59,17 @@ class AiAssistantEligibilityTest extends TestCase
 
     public function test_chat_denied_for_anonymous_in_canary_mode(): void
     {
-        config(['ota.ai_assistant.mode' => 'internal_canary', 'ota.ai_assistant.enabled' => false]);
+        config([
+            'ota.ai_assistant.mode' => 'internal_canary',
+            'ota.ai_assistant.enabled' => false,
+            'ota.ai_assistant.hard_allow.master' => true,
+            'ota.ai_assistant.hard_allow.internal_canary' => true,
+        ]);
+        $admin = User::factory()->create(['account_type' => AccountType::PlatformAdmin]);
+        app(\App\Services\Ai\AiAssistantSettingsService::class)->update($admin, [
+            'master_enabled' => true,
+            'internal_canary_enabled' => true,
+        ]);
         $this->postJson('/api/public/ai/chat', ['message' => 'LHE to DXB tomorrow'])
             ->assertStatus(503)
             ->assertJsonPath('status', 'unavailable');

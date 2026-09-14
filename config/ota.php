@@ -310,6 +310,27 @@ return [
     /** Local AI travel assistant (JP-AI-ASSIST). Disabled until capacity-approved runtime is healthy. */
     'ai_assistant' => [
         /**
+         * Infrastructure hard ceilings — admin DB settings cannot exceed these.
+         * EFFECTIVE = hard_allow ∧ admin_setting ∧ user_eligibility.
+         */
+        'hard_allow' => [
+            'master' => filter_var(
+                env('OTA_AI_ASSISTANT_HARD_ALLOW', in_array(
+                    strtolower((string) env('OTA_AI_ASSISTANT_MODE', 'off')),
+                    ['internal_canary', 'public'],
+                    true
+                ) || filter_var(env('OTA_AI_ASSISTANT_ENABLED', false), FILTER_VALIDATE_BOOL)),
+                FILTER_VALIDATE_BOOL
+            ),
+            'internal_canary' => filter_var(
+                env('OTA_AI_CANARY_HARD_ALLOW', strtolower((string) env('OTA_AI_ASSISTANT_MODE', 'off')) === 'internal_canary'),
+                FILTER_VALIDATE_BOOL
+            ),
+            'human_handoff' => filter_var(env('OTA_AI_HANDOFF_HARD_ALLOW', true), FILTER_VALIDATE_BOOL),
+            'flight_search_read_only' => filter_var(env('OTA_AI_FLIGHT_SEARCH_READ_ONLY_HARD_ALLOW', false), FILTER_VALIDATE_BOOL),
+            'public' => filter_var(env('OTA_AI_PUBLIC_HARD_ALLOW', false), FILTER_VALIDATE_BOOL),
+        ],
+        /**
          * Audience mode (server authoritative):
          * off | internal_canary | public
          * Prefer mode over legacy enabled when set.

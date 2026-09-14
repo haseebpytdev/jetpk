@@ -5,6 +5,20 @@
  * Separate from ota.ai_assistant.gateway_url (LocalLlama :3921).
  */
 return [
+    /**
+     * Infrastructure hard ceilings for lab adapter capabilities.
+     * Admin DB settings cannot exceed these values.
+     */
+    'hard_allow' => [
+        'lab_adapter' => filter_var(
+            env('OTA_AI_LAB_ADAPTER_HARD_ALLOW', filter_var(env('OTA_AI_LAB_ADAPTER_ENABLED', false), FILTER_VALIDATE_BOOL)
+                || filter_var(env('OTA_AI_LAB_CANARY_ONLY', false), FILTER_VALIDATE_BOOL)),
+            FILTER_VALIDATE_BOOL
+        ),
+        'rag' => filter_var(env('OTA_AI_LAB_RAG_HARD_ALLOW', filter_var(env('OTA_AI_LAB_RAG_ENABLED', true), FILTER_VALIDATE_BOOL)), FILTER_VALIDATE_BOOL),
+        'learning_queue' => filter_var(env('OTA_AI_LAB_LEARNING_HARD_ALLOW', filter_var(env('OTA_AI_LAB_LEARNING_ENABLED', true), FILTER_VALIDATE_BOOL)), FILTER_VALIDATE_BOOL),
+    ],
+
     /** Master switch — default off; shadow integration only when enabled. */
     'enabled' => filter_var(env('OTA_AI_LAB_ADAPTER_ENABLED', false), FILTER_VALIDATE_BOOL),
 

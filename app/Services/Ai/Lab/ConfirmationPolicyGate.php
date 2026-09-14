@@ -11,6 +11,7 @@ final class ConfirmationPolicyGate
 {
     private const ALLOWED_ACTIONS = [
         'SHADOW_FLIGHT_SEARCH',
+        'FLIGHT_SEARCH_READ_ONLY',
         'MOCK_HANDOFF',
         'RAG_ANSWER',
     ];
@@ -34,7 +35,7 @@ final class ConfirmationPolicyGate
             return ['allowed' => true, 'reason' => null];
         }
 
-        // SHADOW_FLIGHT_SEARCH requires explicit confirmation + matching snapshot in response state.
+        // Flight search actions require explicit confirmation + matching snapshot in response state.
         $newState = $response->labState;
         if (($newState['tool_executed'] ?? false) !== true) {
             return ['allowed' => false, 'reason' => 'confirmation_required'];

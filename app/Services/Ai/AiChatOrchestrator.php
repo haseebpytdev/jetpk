@@ -458,18 +458,23 @@ final class AiChatOrchestrator
 
     private function shouldUseLabAdapter(AiConversation $conversation): bool
     {
-        $enabled = (bool) config('ai_lab.enabled', false);
-        $canaryOnly = (bool) config('ai_lab.canary_only', false);
-        if (! $enabled && ! $canaryOnly) {
+        $effective = app(AiAssistantSettingsService::class)->effective();
+        if (! ($effective['lab_adapter_enabled'] ?? false)) {
             return false;
         }
-        if ($canaryOnly) {
+
+        $mode = app(AiAssistantEligibility::class)->mode();
+        if ($mode === AiAssistantEligibility::MODE_INTERNAL_CANARY) {
             $user = $conversation->user_id ? User::query()->find($conversation->user_id) : null;
 
             return app(AiAssistantEligibility::class)->isCanaryUser($user instanceof User ? $user : null);
         }
 
-        return $enabled;
+        if ($mode === AiAssistantEligibility::MODE_PUBLIC) {
+            return true;
+        }
+
+        return false;
     }
 
     private function looksLikeInjection(string $message): bool
