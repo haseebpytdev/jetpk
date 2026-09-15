@@ -15,6 +15,7 @@ use App\Support\Client\Homepage\JetpkHomepageContextDiagnostic;
 use App\Support\Client\Homepage\HomepageSectionOrderResolver;
 use App\Support\Client\ClientPageKeys;
 use App\Services\Client\ClientPageContentResolver;
+use App\Services\Client\ClientPageSeoResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -89,6 +90,11 @@ class HomeController extends Controller
             $homepageContent = app(ClientPageContentResolver::class)->contentFor(ClientPageKeys::HOME);
             $viewData['homepageOrderedSections'] = app(HomepageSectionOrderResolver::class)
                 ->orderedSections($homepageContent);
+            $viewData['seo'] = app(ClientPageSeoResolver::class)->forPage(
+                ClientPageKeys::HOME,
+                'JetPakistan | Affordable Flights, Umrah Packages & Tours',
+                'Search and compare domestic and international flights from Pakistan, explore Umrah packages, and plan travel with JetPakistan.',
+            );
 
             return view(client_view('frontend.home', 'frontend'), $viewData);
         }

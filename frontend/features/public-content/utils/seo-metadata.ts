@@ -42,7 +42,9 @@ export function publicSeoToMetadata(seo: PublicSeo, fallbackPath?: string): Meta
   const ogImage = seo.og_image?.trim();
 
   return {
-    title: seo.title,
+    title: {
+      absolute: seo.title,
+    },
     description: seo.description,
     robots: seo.robots,
     alternates: canonical ? { canonical } : undefined,

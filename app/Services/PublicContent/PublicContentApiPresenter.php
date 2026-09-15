@@ -151,20 +151,26 @@ final class PublicContentApiPresenter
                 'privacy' => '/privacy',
             ],
             'support_path' => '/support',
-            'contact_path' => '/contact',
+            'contact_path' => '/about-us',
             'booking_lookup_path' => '/lookup-booking',
             'groups_path' => '/groups/search',
             'social_links' => $this->normalizeSocialLinks($social),
-            'default_seo' => [
-                'title' => 'JetPakistan',
-                'description' => 'Book flights, hotels, and travel services with JetPakistan.',
-                'robots' => 'index,follow',
-            ],
+            'default_seo' => array_intersect_key(
+                $this->seoResolver->forPage(
+                    ClientPageKeys::HOME,
+                    'JetPakistan | Affordable Flights, Umrah Packages & Tours',
+                    'Search and compare domestic and international flights from Pakistan, explore Umrah packages, and plan travel with JetPakistan.',
+                ),
+                array_flip(['title', 'description', 'robots']),
+            ),
             'source' => 'laravel',
         ];
     }
 
     /**
+     * Return canonical, indexable public URLs only. Redirect aliases such as
+     * /contact and /flights deliberately stay out of the sitemap.
+     *
      * @return list<array{path: string, lastmod?: string}>
      */
     public function sitemapRoutes(): array
@@ -172,48 +178,59 @@ final class PublicContentApiPresenter
         $routes = [
             ['path' => '/'],
             ['path' => '/about-us'],
-            ['path' => '/contact'],
             ['path' => '/support'],
             ['path' => '/faq'],
             ['path' => '/terms'],
             ['path' => '/privacy'],
-            ['path' => '/lookup-booking'],
-            ['path' => '/groups/search'],
         ];
 
         CmsPage::query()
             ->active()
             ->orderBy('slug')
             ->get(['slug', 'updated_at'])
-            ->each(function (CmsPage $page): void {
-                $routes[] = [
-                    'path' => '/pages/'.$page->slug,
-                    'lastmod' => $page->updated_at?->toAtomString(),
-                ];
-            });
-
-        ClientPage::query()
-            ->where('enabled', true)
-            ->orderBy('slug')
-            ->get(['slug', 'updated_at'])
-            ->each(function (ClientPage $page): void {
-                $slug = ClientManagedPageReservedSlugs::normalize((string) $page->slug);
-                if ($slug === '' || ReservedPublicPath::isReservedFirstSegment($slug)) {
-                    return;
-                }
-
-                $pageKey = ClientPageKeys::customKey($slug);
-                if ($this->contentResolver->contentFor($pageKey) === []) {
+            ->each(function (CmsPage $page) use (&$routes): void {
+                $slug = trim((string) $page->slug, " /\t\n\r\0\x0B");
+                if ($slug === '') {
                     return;
                 }
 
                 $routes[] = [
-                    'path' => '/'.$slug,
+                    'path' => '/pages/'.$slug,
                     'lastmod' => $page->updated_at?->toAtomString(),
                 ];
             });
 
-        return $routes;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('client_pages')) {
+                ClientPage::query()
+                    ->where('enabled', true)
+                    ->orderBy('slug')
+                    ->get(['slug', 'updated_at'])
+                    ->each(function (ClientPage $page) use (&$routes): void {
+                        $slug = ClientManagedPageReservedSlugs::normalize((string) $page->slug);
+                        if ($slug === '' || ReservedPublicPath::isReservedFirstSegment($slug)) {
+                            return;
+                        }
+
+                        $pageKey = ClientPageKeys::customKey($slug);
+                        if ($this->contentResolver->contentFor($pageKey) === []) {
+                            return;
+                        }
+
+                        $routes[] = [
+                            'path' => '/'.$slug,
+                            'lastmod' => $page->updated_at?->toAtomString(),
+                        ];
+                    });
+            }
+        } catch (\Illuminate\Database\QueryException) {
+            // Partial sqlite test databases may not include client_pages yet.
+        }
+
+        return collect($routes)
+            ->unique('path')
+            ->values()
+            ->all();
     }
 
     /**

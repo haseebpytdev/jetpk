@@ -82,7 +82,7 @@ export const primaryNavigation: NavItem[] = [
     label: "Support",
     items: [
       { label: "Help Center", href: "/support", description: "Browse help articles" },
-      { label: "Contact Us", href: "/contact", description: "Reach our support team" },
+      { label: "Contact Us", href: "/about-us", description: "Reach our support team" },
       { label: "FAQs", href: "/faq", description: "Common booking questions" },
     ],
   },
@@ -108,7 +108,7 @@ export const footerColumns: FooterColumn[] = [
     title: "Support",
     links: [
       { label: "Help Center", href: "/support" },
-      { label: "Contact Us", href: "/contact" },
+      { label: "Contact Us", href: "/about-us" },
       { label: "FAQ", href: "/faq" },
       { label: "Manage Booking", href: "/lookup-booking" },
     ],

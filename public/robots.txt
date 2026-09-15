@@ -1,8 +1,15 @@
 User-agent: *
-Disallow: /customer
-Disallow: /agent
-Disallow: /dashboard
-Disallow: /booking
-Disallow: /testdash
+Allow: /
 
-Sitemap: https://www.jetpakistan.com/sitemap.xml
+# Authenticated, operational and technical surfaces are not search landing pages.
+# These rules guide crawlers; authorization remains enforced by the application.
+Disallow: /admin
+Disallow: /agent/dashboard
+Disallow: /staff
+Disallow: /customer
+Disallow: /dashboard
+Disallow: /api
+Disallow: /dev
+Disallow: /ui
+
+Sitemap: https://jetpakistan.pk/sitemap.xml

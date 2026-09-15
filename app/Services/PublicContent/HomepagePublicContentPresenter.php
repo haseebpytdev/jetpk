@@ -3,6 +3,7 @@
 namespace App\Services\PublicContent;
 
 use App\Services\Client\ClientPageContentResolver;
+use App\Services\Client\ClientPageSeoResolver;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\JetpkHomepageSectionData;
 
@@ -14,6 +15,7 @@ final class HomepagePublicContentPresenter
     public function __construct(
         private readonly JetpkHomepageSectionData $homepage,
         private readonly ClientPageContentResolver $contentResolver,
+        private readonly ClientPageSeoResolver $seoResolver,
     ) {}
 
     /**
@@ -26,6 +28,11 @@ final class HomepagePublicContentPresenter
 
         return [
             'source' => $hasCms ? 'cms' : 'empty',
+            'seo' => $this->seoResolver->forPage(
+                ClientPageKeys::HOME,
+                'JetPakistan | Affordable Flights, Umrah Packages & Tours',
+                'Search and compare domestic and international flights from Pakistan, explore Umrah packages, and plan travel with JetPakistan.',
+            ),
             'hero' => $this->presentHero($hasCms),
             'trust_chips' => $this->presentTrustChips($hasCms),
             'routes' => $this->presentSection('routes', fn (): array => $this->homepage->routesForDisplay()),

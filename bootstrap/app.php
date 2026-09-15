@@ -19,6 +19,7 @@ use App\Http\Middleware\EnsureAgentAdmin;
 use App\Http\Middleware\EnsureAgentPermission;
 use App\Http\Middleware\EnsureCustomerEmailVerifiedForPortal;
 use App\Http\Middleware\EnsureDeveloperControlPanelAccess;
+use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\EnsureGoogleOnboardingComplete;
 use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsurePlatformModuleRouteEnabled;
@@ -173,6 +174,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(UiVersionRoutePrefixMiddleware::class);
+        $middleware->prepend(ForceHttps::class);
         $middleware->append(SecurityHeaders::class);
         $middleware->appendToGroup('web', [
             ProtectClientUiPreview::class,

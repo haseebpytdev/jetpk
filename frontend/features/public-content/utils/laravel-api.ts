@@ -142,8 +142,13 @@ export async function submitSupportOrContactForm(payload: ContactFormPayload): P
 }
 
 export function mergeContactDetails(primary: ContactDetails | null | undefined): ContactDetails {
+  const normalize = (contact: ContactDetails): ContactDetails => ({
+    ...contact,
+    website: normalizePublicWebsite(contact.website ?? ""),
+  });
+
   if (!primary) {
-    return allowContentFixtures() ? SITE_CONTACT_FIXTURE : {
+    return allowContentFixtures() ? normalize(SITE_CONTACT_FIXTURE) : {
       phone: "",
       phone_e164: "",
       email: "",
@@ -156,11 +161,20 @@ export function mergeContactDetails(primary: ContactDetails | null | undefined):
   }
 
   if (!allowContentFixtures()) {
-    return primary;
+    return normalize(primary);
   }
 
-  return {
+  return normalize({
     ...SITE_CONTACT_FIXTURE,
     ...Object.fromEntries(Object.entries(primary).filter(([, value]) => value !== "")),
-  } as ContactDetails;
+  } as ContactDetails);
+}
+
+function normalizePublicWebsite(website: string): string {
+  const trimmed = website.trim();
+  if (trimmed === "") {
+    return "";
+  }
+
+  return trimmed.replace(/^https?:\/\/(www\.)?jetpakistan\.com\/?$/i, "https://jetpakistan.pk");
 }

@@ -3,9 +3,70 @@
     $jpAssetVersion = 58; // JETPK-SEARCH-UI-VERTICAL-COMPACTNESS-HEIGHT-ONLY-SCALING-FIX
     $jpBrandName = client_branding()->companyName();
     $jpFavicon = client_branding()->faviconUrl();
+    $jpLogo = client_branding()->logoUrl();
+    $jpSeo = is_array($seo ?? null) ? $seo : [];
     $pageTitle = trim($__env->yieldContent('title'));
-    $documentTitle = $pageTitle !== '' ? $pageTitle : $jpBrandName;
+    $seoTitle = trim((string) ($jpSeo['title'] ?? ''));
+    $documentTitle = $pageTitle !== '' ? $pageTitle : ($seoTitle !== '' ? $seoTitle : $jpBrandName);
     $jpBodyClass = trim($__env->yieldContent('jp_body_class'));
+
+    $jpMetaDescription = trim((string) ($jpSeo['description'] ?? ''));
+    $jpRobots = trim((string) ($jpSeo['robots'] ?? 'index,follow'));
+    $jpCanonical = trim((string) ($jpSeo['canonical'] ?? ''));
+    if ($jpCanonical === '') {
+        $jpCanonical = url()->current();
+    } elseif (str_starts_with($jpCanonical, '/')) {
+        $jpCanonical = url($jpCanonical);
+    }
+
+    $jpSeoPageKey = $pageKey ?? (request()->routeIs('home') ? \App\Support\Client\ClientPageKeys::HOME : null);
+    $jpIsDraftPreview = is_string($jpSeoPageKey)
+        ? app(\App\Services\Client\ClientPageContentResolver::class)->isDraftPreview($jpSeoPageKey)
+        : false;
+    if ($jpIsDraftPreview) {
+        $jpRobots = 'noindex,nofollow';
+    }
+
+    $jpOgTitle = trim((string) ($jpSeo['og_title'] ?? $documentTitle));
+    $jpOgDescription = trim((string) ($jpSeo['og_description'] ?? $jpMetaDescription));
+    $jpOgImage = trim((string) ($jpSeo['og_image'] ?? ''));
+    if ($jpOgImage === '' && $jpLogo) {
+        $jpOgImage = $jpLogo;
+    }
+
+    $jpSchemaGraph = [];
+    if ($jpSeo !== [] && ! $jpIsDraftPreview) {
+        $jpOrganization = [
+            '@type' => 'Organization',
+            '@id' => rtrim($jpCanonical, '/').'#organization',
+            'name' => $jpBrandName,
+            'url' => request()->routeIs('home') ? $jpCanonical : url('/'),
+        ];
+        if ($jpLogo) {
+            $jpOrganization['logo'] = $jpLogo;
+        }
+
+        if (request()->routeIs('home')) {
+            $jpSchemaGraph[] = $jpOrganization;
+            $jpSchemaGraph[] = [
+                '@type' => 'WebSite',
+                '@id' => rtrim($jpCanonical, '/').'#website',
+                'url' => $jpCanonical,
+                'name' => $jpBrandName,
+                'description' => $jpMetaDescription,
+                'publisher' => ['@id' => rtrim($jpCanonical, '/').'#organization'],
+            ];
+        } else {
+            $jpSchemaGraph[] = [
+                '@type' => 'WebPage',
+                '@id' => $jpCanonical.'#webpage',
+                'url' => $jpCanonical,
+                'name' => $documentTitle,
+                'description' => $jpMetaDescription,
+            ];
+        }
+    }
+    $jpGoogleSiteVerification = trim((string) config('services.google.site_verification', ''));
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="day">
@@ -14,6 +75,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{{ $documentTitle }}</title>
+@if ($jpSeo !== [])
+  @if ($jpMetaDescription !== '')
+<meta name="description" content="{{ $jpMetaDescription }}">
+  @endif
+<meta name="robots" content="{{ $jpRobots }}">
+  @if (! $jpIsDraftPreview)
+<link rel="canonical" href="{{ $jpCanonical }}">
+<meta property="og:type" content="{{ request()->routeIs('home') ? 'website' : 'article' }}">
+<meta property="og:site_name" content="{{ $jpBrandName }}">
+<meta property="og:title" content="{{ $jpOgTitle }}">
+    @if ($jpOgDescription !== '')
+<meta property="og:description" content="{{ $jpOgDescription }}">
+    @endif
+<meta property="og:url" content="{{ $jpCanonical }}">
+    @if ($jpOgImage !== '')
+<meta property="og:image" content="{{ $jpOgImage }}">
+    @endif
+<meta name="twitter:card" content="{{ $jpOgImage !== '' ? 'summary_large_image' : 'summary' }}">
+<meta name="twitter:title" content="{{ $jpOgTitle }}">
+    @if ($jpOgDescription !== '')
+<meta name="twitter:description" content="{{ $jpOgDescription }}">
+    @endif
+    @if ($jpOgImage !== '')
+<meta name="twitter:image" content="{{ $jpOgImage }}">
+    @endif
+  @endif
+@endif
+@if ($jpGoogleSiteVerification !== '')
+<meta name="google-site-verification" content="{{ $jpGoogleSiteVerification }}">
+@endif
+@if ($jpSchemaGraph !== [])
+<script type="application/ld+json">{!! json_encode(['@context' => 'https://schema.org', '@graph' => $jpSchemaGraph], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+@endif
 @stack('head-meta')
 @stack('head')
 @if($jpFavicon)
