@@ -16,7 +16,7 @@ export const CmsPageService = {
     try {
       const response = await fetchWithTimeout(laravelApiPath(`/api/public/content/cms/${encodeURIComponent(slug)}`), {
         headers: { Accept: "application/json" },
-        next: { revalidate: 60 },
+        next: { revalidate: 60, tags: ["public-cms", `public-cms-${slug}`] },
       });
       if (response.status === 404) return null;
       if (!response.ok) return null;

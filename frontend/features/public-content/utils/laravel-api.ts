@@ -54,7 +54,7 @@ export async function fetchManagedPage(pageKey: string): Promise<LaravelManagedP
   try {
     const response = await fetchWithTimeout(laravelApiPath(`/api/public/content/pages/${pageKey}`), {
       headers: { Accept: "application/json" },
-      next: { revalidate: 60 },
+      next: { revalidate: 60, tags: ["public-seo", `public-seo-${pageKey}`] },
     });
     if (!response.ok) return null;
     return (await response.json()) as LaravelManagedPageResponse;

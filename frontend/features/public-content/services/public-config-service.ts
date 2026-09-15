@@ -33,7 +33,7 @@ export const PublicConfigService = {
     try {
       const response = await fetchWithTimeout(laravelApiPath("/api/public/content/config"), {
         headers: { Accept: "application/json" },
-        next: { revalidate: 300 },
+        next: { revalidate: 300, tags: ["public-config"] },
       });
       if (!response.ok) return null;
       return (await response.json()) as PublicConfig;

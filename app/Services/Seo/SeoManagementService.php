@@ -37,6 +37,7 @@ final class SeoManagementService
         private readonly ClientGlobalContactResolver $contactResolver,
         private readonly SeoCanonicalValidator $canonicalValidator,
         private readonly SeoVerificationResolver $verificationResolver,
+        private readonly NextPublicCacheRevalidator $nextCache,
     ) {}
 
     /**
@@ -142,7 +143,10 @@ final class SeoManagementService
     {
         abort_unless(SeoManagedPageCatalog::isManagedPageKey($pageKey), 404);
 
-        return $this->contentResolver->publish($this->requireProfile(), $pageKey, $userId);
+        $published = $this->contentResolver->publish($this->requireProfile(), $pageKey, $userId);
+        $this->nextCache->revalidateManagedPage($pageKey);
+
+        return $published;
     }
 
     /**
@@ -177,7 +181,10 @@ final class SeoManagementService
 
     public function publishGlobal(?int $userId = null): ?ClientPageSetting
     {
-        return $this->contentResolver->publish($this->requireProfile(), ClientPageKeys::GLOBAL, $userId);
+        $published = $this->contentResolver->publish($this->requireProfile(), ClientPageKeys::GLOBAL, $userId);
+        $this->nextCache->revalidateGlobal();
+
+        return $published;
     }
 
     /**
@@ -199,7 +206,10 @@ final class SeoManagementService
             'updated_by' => $userId,
         ]);
 
-        return $cmsPage->fresh() ?? $cmsPage;
+        $fresh = $cmsPage->fresh() ?? $cmsPage;
+        $this->nextCache->revalidateCmsPage((string) $fresh->slug);
+
+        return $fresh;
     }
 
     /**
@@ -229,7 +239,10 @@ final class SeoManagementService
         $profile = $this->requireProfile();
         abort_unless((int) $clientPage->client_profile_id === (int) $profile->id, 403);
 
-        return $this->contentResolver->publish($profile, $clientPage->pageKey(), $userId);
+        $published = $this->contentResolver->publish($profile, $clientPage->pageKey(), $userId);
+        $this->nextCache->revalidateCustomPage((string) $clientPage->slug);
+
+        return $published;
     }
 
     /**
