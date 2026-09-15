@@ -12,6 +12,7 @@ const disallowPrivate = [
   "/flights/return-options",
   "/flights/fare-selection",
   "/lookup-booking",
+  "/groups/search",
   "/access-denied",
   "/login/otp",
   "/reset-password",

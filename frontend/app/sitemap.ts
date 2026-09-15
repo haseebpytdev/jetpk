@@ -10,6 +10,14 @@ type SitemapRoute = {
   lastmod?: string;
 };
 
+/** Non-indexable or redirect-alias paths that must never appear in sitemap.xml. */
+const EXCLUDED_SITEMAP_PATHS = new Set([
+  "/contact",
+  "/flights",
+  "/lookup-booking",
+  "/groups/search",
+]);
+
 async function fetchSitemapRoutes(): Promise<SitemapRoute[]> {
   try {
     const response = await fetchWithTimeout(laravelApiPath("/api/public/content/sitemap-routes"), {
@@ -39,8 +47,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ];
   }
 
-  return routes.map((route) => ({
-    url: `${base}/${route.path.replace(/^\//, "")}`,
-    lastModified: route.lastmod ? new Date(route.lastmod) : undefined,
-  }));
+  return routes
+    .filter((route) => !EXCLUDED_SITEMAP_PATHS.has(route.path.replace(/\/$/, "") || "/"))
+    .map((route) => ({
+      url: `${base}/${route.path.replace(/^\//, "")}`,
+      lastModified: route.lastmod ? new Date(route.lastmod) : undefined,
+    }));
 }

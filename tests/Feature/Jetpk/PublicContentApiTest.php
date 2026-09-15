@@ -173,6 +173,19 @@ class PublicContentApiTest extends TestCase
         $this->assertContains('/about-us', $paths);
         $this->assertNotContains('/contact', $paths);
         $this->assertNotContains('/flights', $paths);
+        $this->assertNotContains('/lookup-booking', $paths);
+        $this->assertNotContains('/groups/search', $paths);
+
+        $apiPaths = collect($this->getJson(route('api.public.content.sitemap-routes'))
+            ->assertOk()
+            ->assertJsonPath('source', 'laravel')
+            ->json('routes'))
+            ->pluck('path')
+            ->all();
+
+        $this->assertNotContains('/contact', $apiPaths);
+        $this->assertNotContains('/lookup-booking', $apiPaths);
+        $this->assertNotContains('/groups/search', $apiPaths);
     }
 
     public function test_sitemap_xml_route_returns_valid_xml(): void
@@ -185,6 +198,9 @@ class PublicContentApiTest extends TestCase
         $this->assertStringContainsString('<urlset', $content);
         $this->assertStringContainsString('/about-us', $content);
         $this->assertDoesNotMatchRegularExpression('#<loc>[^<]*/contact</loc>#', $content);
+        $this->assertDoesNotMatchRegularExpression('#<loc>[^<]*/lookup-booking</loc>#', $content);
+        $this->assertDoesNotMatchRegularExpression('#<loc>[^<]*/groups/search</loc>#', $content);
+        $this->assertDoesNotMatchRegularExpression('#<loc>[^<]*/flights</loc>#', $content);
     }
 
     public function test_contact_route_permanently_redirects_to_about_us(): void
