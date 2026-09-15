@@ -188,16 +188,7 @@ class PublicAiAssistantController extends Controller
             return $this->unavailable();
         }
 
-        $data = $request->validate([
-            'conversation_id' => ['required', 'uuid'],
-            'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'string', 'email', 'max:191'],
-            'phone' => ['required', 'string', 'max:40'],
-            'phone_country' => ['nullable', 'string', 'max:8'],
-            'contact_consent' => ['required', 'boolean'],
-        ]);
-
-        $resolved = $this->orchestrator->resolveConversation($request, $data['conversation_id'], false);
+        $resolved = $this->orchestrator->resolveConversation($request, $request->input('conversation_id'), false);
         $conversation = $resolved['conversation'] ?? null;
         if ($conversation === null) {
             return $this->withVisitorCookie(response()->json([
@@ -206,6 +197,25 @@ class PublicAiAssistantController extends Controller
                 'message' => 'Conversation not found.',
             ], 403), $resolved);
         }
+
+        $requiredFields = $leadService->requiredLeadFields($request->user());
+        $rules = [
+            'conversation_id' => ['required', 'uuid'],
+            'phone_country' => ['nullable', 'string', 'max:8'],
+        ];
+        foreach ($requiredFields as $field) {
+            if ($field === 'contact_consent') {
+                $rules['contact_consent'] = ['required', 'boolean'];
+            } elseif ($field === 'name') {
+                $rules['name'] = ['required', 'string', 'max:120'];
+            } elseif ($field === 'email') {
+                $rules['email'] = ['required', 'string', 'email', 'max:191'];
+            } elseif ($field === 'phone') {
+                $rules['phone'] = ['required', 'string', 'max:40'];
+            }
+        }
+
+        $data = $request->validate($rules);
 
         $result = $leadService->createFromPayload(
             $conversation,

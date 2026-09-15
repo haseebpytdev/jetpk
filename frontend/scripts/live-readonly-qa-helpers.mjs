@@ -136,10 +136,63 @@ export async function waitForChatInputReady(page, timeoutMs = 180_000) {
   );
 }
 
+const SYNTHETIC_QA_LEAD = {
+  name: "UAT Lead QA",
+  email: "uat-lead-qa@jetpakistan.pk",
+  phone: "+923001234567",
+};
+
 function normalizeConfirmationStep(msg) {
   if (/^(yes|ji|haan|okay|correct)(\s+confirm)?$/i.test(msg.trim())) return "yes";
   if (/^(haan|ji)\s+confirm$/i.test(msg.trim())) return "haan";
   return msg;
+}
+
+export async function completeLeadCaptureIfNeeded(page, options = {}) {
+  const panel = page.locator('[data-testid="ask-jetpakistan-panel"]');
+  const leadCapture = panel.locator('[data-testid="ask-jetpakistan-lead-capture"]');
+  if (!(await leadCapture.isVisible().catch(() => false))) {
+    return { completed: false, reason: "NO_LEAD_GATE" };
+  }
+
+  const lead = options.lead ?? SYNTHETIC_QA_LEAD;
+  const nameInput = panel.locator("#lead-name");
+  if (await nameInput.isVisible().catch(() => false)) {
+    await nameInput.fill(lead.name);
+  }
+  const emailInput = panel.locator("#lead-email");
+  if (await emailInput.isVisible().catch(() => false)) {
+    await emailInput.fill(lead.email);
+  }
+  const phoneInput = panel.locator("#lead-phone");
+  if (await phoneInput.isVisible().catch(() => false)) {
+    await phoneInput.fill(lead.phone);
+  }
+  const consent = panel.locator('[data-testid="ask-jetpakistan-lead-capture"] input[type="checkbox"]').first();
+  if (await consent.isVisible().catch(() => false) && !(await consent.isChecked())) {
+    await consent.check();
+  }
+
+  const responsePromise = page.waitForResponse(
+    (res) => res.url().includes("/api/public/ai/lead") && res.request().method() === "POST",
+    { timeout: Number(options.leadTimeoutMs ?? 120_000) },
+  );
+  await panel.getByRole("button", { name: /continue/i }).click();
+  const response = await responsePromise;
+  let payload = {};
+  try {
+    payload = await response.json();
+  } catch {
+    payload = {};
+  }
+  await page.waitForTimeout(1500);
+
+  return {
+    completed: true,
+    status: response.status(),
+    payload,
+    reason: response.ok() ? "LEAD_SUBMITTED" : "LEAD_SUBMIT_FAILED",
+  };
 }
 
 export async function runConfirmedLiveSearch(page, caseId, steps, expectRoute) {
@@ -159,6 +212,14 @@ export async function runConfirmedLiveSearch(page, caseId, steps, expectRoute) {
       lastPayload = result.payload ?? {};
       visible = result.body;
       if (result.status >= 500) throw new Error(`HTTP_${result.status}`);
+      if (result.payload?.status === "lead_capture_required" || result.payload?.mode === "LEAD_CAPTURE") {
+        const lead = await completeLeadCaptureIfNeeded(page, options);
+        if (!lead.completed || lead.status >= 400) {
+          throw new Error(lead.reason ?? "LEAD_CAPTURE_FAILED");
+        }
+        lastPayload = lead.payload ?? lastPayload;
+        visible = await page.getByTestId("ask-jetpakistan-messages").innerText().catch(() => visible);
+      }
     }
     const meta = lastPayload.meta ?? {};
     if (meta.dialog_state === "AWAITING_CONFIRMATION") {

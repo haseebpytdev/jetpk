@@ -204,28 +204,19 @@ final class AiChatOrchestrator
 
         $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
         if ($state['lead_capture_pending'] ?? false) {
-            $assistant = $this->storeMessage($conversation, 'assistant', 'Please share your name, email and contact number using the form below so we can continue.', [
+            $resume = $this->leadService->resumeLeadCapturePayload($conversation);
+            $assistant = $this->storeMessage($conversation, 'assistant', (string) $resume['message'], [
                 'mode' => 'LEAD_CAPTURE',
             ]);
 
-            return $this->withMessageId($assistant, [
-                'ok' => true,
-                'status' => 'lead_capture_required',
-                'mode' => 'LEAD_CAPTURE',
-                'conversation_id' => $conversation->public_id,
-                'state' => $conversation->state,
-                'message' => 'Please share your name, email and contact number using the form below so we can continue.',
-                'lead_capture' => [
-                    'required' => true,
-                    'fields' => ['name', 'email', 'phone', 'contact_consent'],
-                ],
-                'recommendations' => [],
-                'actions' => [],
-                'meta' => ['lead_capture_pending' => true],
-            ]);
+            return $this->withMessageId($assistant, $resume);
         }
 
-        $leadPrompt = $this->leadService->leadCapturePromptPayload($conversation, $cleanMessage);
+        $leadPrompt = $this->leadService->leadCapturePromptPayload(
+            $conversation,
+            $cleanMessage,
+            $this->resolveAuthenticatedUser($conversation),
+        );
         if (is_array($leadPrompt)) {
             $assistant = $this->storeMessage($conversation, 'assistant', (string) $leadPrompt['message'], [
                 'mode' => 'LEAD_CAPTURE',
@@ -860,11 +851,27 @@ final class AiChatOrchestrator
     /**
      * @param  array<string, mixed>|null  $searchRecord
      */
+    private function resolveAuthenticatedUser(AiConversation $conversation): ?User
+    {
+        if ($conversation->relationLoaded('user')) {
+            return $conversation->user;
+        }
+
+        if ($conversation->user_id) {
+            return $conversation->user()->first();
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $searchRecord
+     */
     private function syncLeadFromConversation(AiConversation $conversation, ?array $searchRecord = null): void
     {
         $query = $this->leadService->findRecentOpenQuery(
             $conversation->visitor_token_hash,
-            $conversation->user,
+            $this->resolveAuthenticatedUser($conversation),
         );
         if ($query === null) {
             return;
