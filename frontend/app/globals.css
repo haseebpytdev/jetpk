@@ -25,8 +25,13 @@ html {
 }
 
 body {
-  @apply bg-jp-page text-jp-text font-sans antialiased;
+  @apply overflow-x-hidden bg-jp-page text-jp-text font-sans antialiased;
   font-feature-settings: "tnum" 1;
+}
+
+.jp-page {
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .tabular-nums {

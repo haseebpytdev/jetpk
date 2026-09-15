@@ -11,6 +11,11 @@ class ForceHttps
     public function handle(Request $request, Closure $next): Response
     {
         if (app()->environment('production') && ! $request->secure()) {
+            $canonical = rtrim((string) config('app.url'), '/');
+            if ($canonical !== '') {
+                return redirect()->to($canonical.$request->getRequestUri(), 308);
+            }
+
             return redirect()->secure($request->getRequestUri(), 308);
         }
 
