@@ -195,7 +195,7 @@ export async function completeLeadCaptureIfNeeded(page, options = {}) {
   };
 }
 
-export async function runConfirmedLiveSearch(page, caseId, steps, expectRoute) {
+export async function runConfirmedLiveSearch(page, caseId, steps, expectRoute, options = {}) {
   const started = Date.now();
   let pass = false;
   let error = null;
