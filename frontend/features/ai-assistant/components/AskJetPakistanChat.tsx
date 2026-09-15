@@ -161,12 +161,6 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   const [leadPhone, setLeadPhone] = useState("");
   const [leadConsent, setLeadConsent] = useState(false);
   const [leadErrors, setLeadErrors] = useState<Record<string, string>>({});
-  const [leadCaptureRequired, setLeadCaptureRequired] = useState(false);
-  const [leadName, setLeadName] = useState("");
-  const [leadEmail, setLeadEmail] = useState("");
-  const [leadPhone, setLeadPhone] = useState("");
-  const [leadConsent, setLeadConsent] = useState(false);
-  const [leadErrors, setLeadErrors] = useState<Record<string, string>>({});
 
   const lastPollId = useRef(0);
 
@@ -381,43 +375,6 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
         },
       ];
     });
-  };
-
-  const submitLead = async () => {
-    if (!conversationId || busy) return;
-
-    setBusy(true);
-    setLeadErrors({});
-    setError(null);
-
-    try {
-      const { response, json } = await postAi("/api/public/ai/lead", {
-        conversation_id: conversationId,
-        name: leadName,
-        email: leadEmail,
-        phone: leadPhone,
-        contact_consent: leadConsent,
-      });
-
-      if (!response.ok) {
-        const errors =
-          typeof json.errors === "object" && json.errors !== null
-            ? (json.errors as Record<string, string>)
-            : {};
-        setLeadErrors(errors);
-        if (typeof json.message === "string") {
-          setError(json.message);
-        }
-        return;
-      }
-
-      setLeadCaptureRequired(false);
-      appendAssistant(json);
-    } catch {
-      setError("Could not save your contact details. Please retry.");
-    } finally {
-      setBusy(false);
-    }
   };
 
   const submitLead = async () => {
