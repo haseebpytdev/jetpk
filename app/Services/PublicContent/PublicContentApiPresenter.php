@@ -155,11 +155,14 @@ final class PublicContentApiPresenter
             'booking_lookup_path' => '/lookup-booking',
             'groups_path' => '/groups/search',
             'social_links' => $this->normalizeSocialLinks($social),
-            'default_seo' => [
-                'title' => 'JetPakistan',
-                'description' => 'Book flights, hotels, and travel services with JetPakistan.',
-                'robots' => 'index,follow',
-            ],
+            'default_seo' => array_intersect_key(
+                $this->seoResolver->forPage(
+                    ClientPageKeys::HOME,
+                    'JetPakistan | Affordable Flights, Umrah Packages & Tours',
+                    'Search and compare domestic and international flights from Pakistan, explore Umrah packages, and plan travel with JetPakistan.',
+                ),
+                array_flip(['title', 'description', 'robots']),
+            ),
             'source' => 'laravel',
         ];
     }

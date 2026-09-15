@@ -155,6 +155,7 @@ class PublicContentApiTest extends TestCase
         $this->getJson(route('api.public.content.config'))
             ->assertOk()
             ->assertJsonPath('source', 'laravel')
+            ->assertJsonPath('default_seo.title', 'JetPakistan | Affordable Flights, Umrah Packages & Tours')
             ->assertJsonStructure([
                 'brand_name',
                 'domain',
@@ -201,6 +202,7 @@ class PublicContentApiTest extends TestCase
         $this->getJson(route('api.public.content.homepage'))
             ->assertOk()
             ->assertJsonPath('source', 'empty')
+            ->assertJsonPath('seo.title', 'JetPakistan | Affordable Flights, Umrah Packages & Tours')
             ->assertJsonPath('routes.enabled', false)
             ->assertJsonPath('destinations.enabled', false);
     }
@@ -208,11 +210,17 @@ class PublicContentApiTest extends TestCase
     public function test_homepage_json_returns_published_sections_only(): void
     {
         $profile = $this->makeJetpkProfile();
-        $this->seedPublishedHome($profile, $this->representativeThreeCardHomeContent());
+        $this->seedPublishedHome($profile, array_merge($this->representativeThreeCardHomeContent(), [
+            'seo' => [
+                'title' => 'CMS Homepage SEO Title',
+                'description' => 'CMS homepage SEO description.',
+            ],
+        ]));
 
         $this->getJson(route('api.public.content.homepage'))
             ->assertOk()
             ->assertJsonPath('source', 'cms')
+            ->assertJsonPath('seo.title', 'CMS Homepage SEO Title')
             ->assertJsonPath('hero.headline', 'Custom headline preserved')
             ->assertJsonPath('routes.enabled', true)
             ->assertJsonPath('why_book.enabled', false)
