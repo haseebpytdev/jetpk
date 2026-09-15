@@ -18,41 +18,52 @@ final class ClientPageSeoResolver
      */
     public function forPage(string $pageKey, string $fallbackTitle = '', string $fallbackDescription = '', ?string $canonical = null): array
     {
-        $pageSeo = is_array($this->contentResolver->contentFor($pageKey)['seo'] ?? null)
-            ? $this->contentResolver->contentFor($pageKey)['seo']
-            : [];
-        $globalSeo = is_array($this->contentResolver->contentFor(ClientPageKeys::GLOBAL)['seo'] ?? null)
-            ? $this->contentResolver->contentFor(ClientPageKeys::GLOBAL)['seo']
-            : [];
+        $pageContent = $this->contentResolver->contentFor($pageKey);
+        $pageSeo = is_array($pageContent['seo'] ?? null) ? $pageContent['seo'] : [];
+        $globalContent = $this->contentResolver->contentFor(ClientPageKeys::GLOBAL);
+        $globalSeo = is_array($globalContent['seo'] ?? null) ? $globalContent['seo'] : [];
 
-        $title = trim((string) ($pageSeo['title'] ?? ''));
-        if ($title === '') {
-            $title = trim((string) ($globalSeo['title'] ?? ''));
-        }
-        if ($title === '') {
-            $title = $fallbackTitle;
-        }
-
-        $description = trim((string) ($pageSeo['description'] ?? ''));
-        if ($description === '') {
-            $description = trim((string) ($globalSeo['description'] ?? ''));
-        }
-        if ($description === '') {
-            $description = $fallbackDescription;
+        $pageTitle = trim((string) ($pageSeo['title'] ?? ''));
+        $globalTitle = trim((string) ($globalSeo['title'] ?? ''));
+        $title = $pageTitle !== '' ? $pageTitle : ($globalTitle !== '' ? $globalTitle : $fallbackTitle);
+        if ($pageTitle === '' && $globalTitle === '' && $title !== '') {
+            $suffix = trim((string) ($globalSeo['title_suffix'] ?? ''));
+            if ($suffix !== '' && ! str_contains($title, $suffix)) {
+                $title = rtrim($title).' | '.$suffix;
+            }
         }
 
-        $ogImage = trim((string) ($pageSeo['og_image'] ?? ''));
-        if ($ogImage === '') {
-            $ogImage = trim((string) ($globalSeo['og_image'] ?? ''));
+        $pageDescription = trim((string) ($pageSeo['description'] ?? ''));
+        $description = $pageDescription !== ''
+            ? $pageDescription
+            : (trim((string) ($globalSeo['description'] ?? '')) ?: $fallbackDescription);
+
+        $pageOgImage = trim((string) ($pageSeo['og_image'] ?? ''));
+        $globalOgImage = trim((string) ($globalSeo['og_image'] ?? ''));
+        $ogImage = $pageOgImage !== '' ? $pageOgImage : $globalOgImage;
+
+        $pageOgTitle = trim((string) ($pageSeo['og_title'] ?? ''));
+        $globalOgTitle = trim((string) ($globalSeo['og_title'] ?? ''));
+        $ogTitle = $pageOgTitle !== '' ? $pageOgTitle : ($globalOgTitle !== '' ? $globalOgTitle : $title);
+
+        $pageOgDescription = trim((string) ($pageSeo['og_description'] ?? ''));
+        $globalOgDescription = trim((string) ($globalSeo['og_description'] ?? ''));
+        $ogDescription = $pageOgDescription !== ''
+            ? $pageOgDescription
+            : ($globalOgDescription !== '' ? $globalOgDescription : $description);
+
+        $resolvedCanonical = trim((string) ($pageSeo['canonical'] ?? ''));
+        if ($resolvedCanonical === '' && $canonical !== null) {
+            $resolvedCanonical = trim($canonical);
         }
 
         return [
             'title' => $title,
             'description' => $description,
-            'canonical' => $canonical ?? '',
+            'canonical' => $resolvedCanonical,
             'robots' => trim((string) ($pageSeo['robots'] ?? $globalSeo['robots'] ?? 'index,follow')),
-            'og_title' => trim((string) ($pageSeo['og_title'] ?? $title)),
-            'og_description' => trim((string) ($pageSeo['og_description'] ?? $description)),
+            'og_title' => $ogTitle,
+            'og_description' => $ogDescription,
             'og_image' => $ogImage !== '' ? $ogImage : null,
         ];
     }

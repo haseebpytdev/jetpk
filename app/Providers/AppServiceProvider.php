@@ -40,6 +40,7 @@ use App\Policies\BookingPolicy;
 use App\Policies\BookingRefundPolicy;
 use App\Policies\ClientPageSettingsPolicy;
 use App\Policies\CmsPagePolicy;
+use App\Policies\SeoManagementPolicy;
 use App\Policies\CommunicationLogPolicy;
 use App\Policies\HomepageFeaturedFarePolicy;
 use App\Policies\MarkupRulePolicy;
@@ -154,6 +155,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('commission.statement', [AgentCommissionPolicy::class, 'statement']);
         Gate::define('platform.admin', [PlatformAdminPolicy::class, 'accessAdminTools']);
         Gate::define('client.page-settings.manage', [ClientPageSettingsPolicy::class, 'manage']);
+        Gate::define('seo.manage', [SeoManagementPolicy::class, 'manage']);
 
         Blade::anonymousComponentPath(
             resource_path('views/themes/admin/jetpakistan/components'),

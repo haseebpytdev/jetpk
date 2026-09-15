@@ -77,6 +77,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 'web',
                 'auth',
                 'agency.context',
+                'account.type:platform_admin,staff',
+            ])->group(base_path('routes/admin-seo.php'));
+
+            Route::middleware([
+                'web',
+                'auth',
+                'agency.context',
                 'account.type:staff',
             ])->group(base_path('routes/staff.php'));
 

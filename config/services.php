@@ -42,6 +42,10 @@ return [
         'site_verification' => env('GOOGLE_SITE_VERIFICATION'),
     ],
 
+    'bing' => [
+        'site_verification' => env('BING_SITE_VERIFICATION'),
+    ],
+
     'facebook' => [
         'client_id' => env('FACEBOOK_CLIENT_ID'),
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),

@@ -62,6 +62,7 @@
             <div class="col-md-6">
                 <label class="jp-label">SEO title</label>
                 <input type="text" name="seo_title" class="jp-control" value="{{ old('seo_title', $cmsPage->seo_title) }}" maxlength="180">
+                <div class="form-hint">Manage SEO centrally in <a href="{{ route('admin.seo.pages.edit', ['sourceType' => 'cms', 'sourceId' => $cmsPage->id ?: 0]) }}" @if(!$cmsPage->exists) aria-disabled="true" @endif>SEO Management</a>.</div>
             </div>
             <div class="col-md-6">
                 <label class="jp-label">SEO meta description</label>

@@ -138,6 +138,12 @@
                     </a>
                 @endif
                 @if (current_client_slug())
+                    @can('seo.manage')
+                    <a href="{{ client_route('admin.seo.overview') }}" class="jp-navlink @if(request()->routeIs('admin.seo.*')) is-active @endif">
+                        <span class="jp-navlink__ic" aria-hidden="true">◆</span>
+                        <span class="jp-navlink__txt">SEO Management</span>
+                    </a>
+                    @endcan
                     <a href="{{ client_route('admin.page-settings.index') }}" class="jp-navlink @if(request()->routeIs('admin.page-settings.*', 'client.parity.admin.page-settings.*')) is-active @endif">
                         <span class="jp-navlink__ic" aria-hidden="true">▤</span>
                         <span class="jp-navlink__txt">Page settings</span>

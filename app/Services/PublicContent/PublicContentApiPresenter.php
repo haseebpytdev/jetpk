@@ -10,6 +10,8 @@ use App\Services\Client\ClientGlobalContactResolver;
 use App\Services\Client\ClientPageContentResolver;
 use App\Services\Client\ClientPageRenderer;
 use App\Services\Client\ClientPageSeoResolver;
+use App\Services\Seo\SeoVerificationResolver;
+use App\Support\Seo\SeoSitemapEligibility;
 use App\Support\Client\ClientManagedPageReservedSlugs;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\ClientSafeHtmlSanitizer;
@@ -26,6 +28,8 @@ final class PublicContentApiPresenter
         private readonly ClientGlobalContactResolver $contactResolver,
         private readonly AboutUsContentPresenter $cmsContentPresenter,
         private readonly ClientPageContentResolver $contentResolver,
+        private readonly SeoVerificationResolver $verificationResolver,
+        private readonly SeoSitemapEligibility $sitemapEligibility,
     ) {}
 
     /**
@@ -163,6 +167,10 @@ final class PublicContentApiPresenter
                 ),
                 array_flip(['title', 'description', 'robots']),
             ),
+            'site_verification' => [
+                'google' => $this->verificationResolver->googleToken(),
+                'bing' => $this->verificationResolver->bingToken(),
+            ],
             'source' => 'laravel',
         ];
     }
@@ -175,20 +183,30 @@ final class PublicContentApiPresenter
      */
     public function sitemapRoutes(): array
     {
-        $routes = [
+        $routes = [];
+
+        foreach ([
             ['path' => '/'],
             ['path' => '/about-us'],
             ['path' => '/support'],
             ['path' => '/faq'],
             ['path' => '/terms'],
             ['path' => '/privacy'],
-        ];
+        ] as $route) {
+            if ($this->sitemapEligibility->isManagedPathEligible($route['path'])) {
+                $routes[] = $route;
+            }
+        }
 
         CmsPage::query()
             ->active()
             ->orderBy('slug')
-            ->get(['slug', 'updated_at'])
+            ->get(['slug', 'updated_at', 'robots', 'status'])
             ->each(function (CmsPage $page) use (&$routes): void {
+                if (! $this->sitemapEligibility->isCmsPageEligible($page)) {
+                    return;
+                }
+
                 $slug = trim((string) $page->slug, " /\t\n\r\0\x0B");
                 if ($slug === '') {
                     return;
@@ -209,6 +227,10 @@ final class PublicContentApiPresenter
                     ->each(function (ClientPage $page) use (&$routes): void {
                         $slug = ClientManagedPageReservedSlugs::normalize((string) $page->slug);
                         if ($slug === '' || ReservedPublicPath::isReservedFirstSegment($slug)) {
+                            return;
+                        }
+
+                        if (! $this->sitemapEligibility->isCustomPageEligible($page)) {
                             return;
                         }
 

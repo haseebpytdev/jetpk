@@ -22,6 +22,7 @@
 
 <div class="jp-card">
     <h2 class="jp-card__title">Default SEO</h2>
+    <div class="jp-alert jp-alert--info small">Global SEO defaults are managed in <a href="{{ route('admin.seo.global') }}">SEO Management → Global SEO</a>.</div>
     <label class="jp-label">Title</label>
     <input aria-label="Title" class="jp-input" name="content[seo][title]" value="{{ data_get($content, 'seo.title') }}">
     <label class="jp-label">Description</label>
