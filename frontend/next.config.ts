@@ -26,8 +26,10 @@ const nextConfig: NextConfig = {
         destination: "/dev/jetpk-theme-lab",
       },
       {
+        // OLS on :8088 routes bare /booking/* to the public Next shell (308), so the
+        // Next → Laravel rewrite must hit Laravel's front controller explicitly.
         source: "/laravel/:path*",
-        destination: `${laravelProxyTarget}/:path*`,
+        destination: `${laravelProxyTarget}/index.php/:path*`,
       },
     ];
   },
