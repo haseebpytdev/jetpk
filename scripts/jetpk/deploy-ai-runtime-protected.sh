@@ -36,7 +36,10 @@ RUNTIME_FILES=(
   app/Providers/AppServiceProvider.php
   app/Http/Controllers/Api/PublicAiAssistantController.php
   app/Services/Ai/AiChatOrchestrator.php
+  app/Services/Ai/Lab/FlightSearchReadOnlyExecutor.php
+  app/Services/FlightSearch/FlightSearchService.php
   app/Services/PublicContent/PublicContentApiPresenter.php
+  app/Enums/SupplierProvider.php
   bootstrap/providers.php
   bootstrap/app.php
   config/ota.php
@@ -82,7 +85,8 @@ fi
 
 APP="${APP}" PHP="${PHP}" bash "${APP}/scripts/verify-ai-runtime-after-seo-activate.sh"
 
+DEPLOYED_SHA="$(git -C "${REPO}" rev-parse "${AUTHORIZED_SHA}")"
 echo "PROTECTED_DEPLOY_TEST=PASS"
-echo "AUTHORIZED_SHA=$(git rev-parse "${AUTHORIZED_SHA}")"
+echo "AUTHORIZED_SHA=${DEPLOYED_SHA}"
 echo "RELEASE_PATH=${REL}"
 echo "BACKUP_PATH=${BACKUP}"

@@ -77,8 +77,21 @@ class FlightSearchService
             $connections = collect();
         } else {
             $registryStarted = microtime(true);
+            $flightProviders = array_map(
+                static fn (SupplierProvider $provider): string => $provider->value,
+                [
+                    SupplierProvider::Sabre,
+                    SupplierProvider::PiaNdc,
+                    SupplierProvider::Airblue,
+                    SupplierProvider::AirlineDirect,
+                    SupplierProvider::Duffel,
+                    SupplierProvider::Iati,
+                    SupplierProvider::OneApi,
+                ],
+            );
             $connections = SupplierConnection::query()
                 ->where('agency_id', $agency->id)
+                ->whereIn('provider', $flightProviders)
                 ->where(function ($query): void {
                     $query->where('is_active', true)
                         ->orWhere('status', SupplierConnectionStatus::Active->value);
