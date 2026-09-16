@@ -61,6 +61,11 @@ body {
     bottom: max(6.75rem, calc(env(safe-area-inset-bottom) + 5.5rem));
   }
 
+  /* Keep result/search content clear of the dock footprint on the right. */
+  .jp-fab-content-clear {
+    padding-right: max(4.75rem, calc(env(safe-area-inset-right) + 3.75rem)) !important;
+  }
+
   html[data-jp-ask-open="1"] .jp-public-fab-dock {
     visibility: hidden;
     pointer-events: none;

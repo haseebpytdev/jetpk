@@ -93,7 +93,7 @@ export function ReturnForm({
             density="compact"
             className="sm:col-span-2 xl:col-span-1"
           />
-          <PrimaryButton type="submit" className="w-full shrink-0 xl:mb-0.5 xl:w-auto xl:min-w-[9.5rem]" disabled={disabled}>
+          <PrimaryButton type="submit" className="w-full shrink-0 max-lg:mr-[4.5rem] xl:mb-0.5 xl:mr-0 xl:w-auto xl:min-w-[9.5rem]" disabled={disabled}>
             {disabled ? "Searching…" : "Search Flights"}
           </PrimaryButton>
         </div>
@@ -145,7 +145,7 @@ export function ReturnForm({
 
       <SearchOptionsBar options={options} onChange={onOptionsChange} />
       <SearchFormErrors errors={errors} />
-      <PrimaryButton type="submit" className="w-full sm:w-auto" disabled={disabled}>
+      <PrimaryButton type="submit" className="w-full max-lg:mr-[4.5rem] sm:w-auto lg:mr-0" disabled={disabled}>
         {disabled ? "Searching…" : "Search Flights"}
       </PrimaryButton>
     </form>

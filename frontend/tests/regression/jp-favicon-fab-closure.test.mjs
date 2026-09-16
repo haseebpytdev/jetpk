@@ -42,10 +42,17 @@ check(
   /jp-public-fab-dock--base[\s\S]*?safe-area-inset-bottom/.test(globals),
 );
 check("globals.css defines .jp-public-fab-dock--lift", globals.includes(".jp-public-fab-dock--lift"));
+check("globals.css defines .jp-fab-content-clear", globals.includes(".jp-fab-content-clear"));
 check(
   "globals.css hides dock while Ask panel open",
   /data-jp-ask-open="1"[\s\S]*?\.jp-public-fab-dock/.test(globals),
 );
+
+const resultsPage = read("features/flight-results/components/FlightResultsPage.tsx");
+check("FlightResultsPage uses jp-fab-content-clear", resultsPage.includes("jp-fab-content-clear"));
+
+const returnForm = read("features/search/components/ReturnForm.tsx");
+check("ReturnForm Search CTA reserves FAB margin on mobile", /max-lg:mr-\[4\.5rem\]/.test(returnForm));
 
 const dock = read("components/navigation/PublicFloatingActionDock.tsx");
 check('dock uses class jp-public-fab-dock', dock.includes("jp-public-fab-dock"));
