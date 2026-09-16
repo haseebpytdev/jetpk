@@ -89,19 +89,21 @@ copy_tree "${REL}/app/Services/Seo" "${APP}/app/Services/Seo"
 copy_tree "${REL}/resources/views/dashboard/admin/seo" "${APP}/resources/views/dashboard/admin/seo"
 
 # SEO-owned individual files.
-for f in \
-  app/Http/Controllers/Admin/SeoManagementController.php \
-  app/Policies/SeoManagementPolicy.php \
-  routes/admin-seo.php \
-  app/Services/Client/ClientPageSeoResolver.php \
-  config/services.php \
-  resources/views/dashboard/admin/cms-pages/form.blade.php \
-  resources/views/themes/admin/jetpakistan/page-settings/partials/global-sections.blade.php \
-  resources/views/themes/admin/jetpakistan/partials/sidebar.blade.php \
-  frontend/app/(public)/layout.tsx \
-  frontend/features/public-content/components/SiteVerificationMeta.tsx \
-  frontend/features/public-content/utils/laravel-api.ts \
-  frontend/app/api/internal/revalidate/seo/route.ts; do
+SEO_FILES=(
+  app/Http/Controllers/Admin/SeoManagementController.php
+  app/Policies/SeoManagementPolicy.php
+  routes/admin-seo.php
+  app/Services/Client/ClientPageSeoResolver.php
+  config/services.php
+  resources/views/dashboard/admin/cms-pages/form.blade.php
+  resources/views/themes/admin/jetpakistan/page-settings/partials/global-sections.blade.php
+  resources/views/themes/admin/jetpakistan/partials/sidebar.blade.php
+  'frontend/app/(public)/layout.tsx'
+  frontend/features/public-content/components/SiteVerificationMeta.tsx
+  frontend/features/public-content/utils/laravel-api.ts
+  frontend/app/api/internal/revalidate/seo/route.ts
+)
+for f in "${SEO_FILES[@]}"; do
   copy_file "${REL}/${f}" "${APP}/${f}"
 done
 
@@ -125,11 +127,13 @@ if [[ "${SKIP_POST_DEPLOY:-0}" != "1" && -d "${REL}/frontend" ]]; then
     cp -a "${ENV_BACKUP}" "${APP}/frontend/.env.production.local.bak-seo-activate"
   fi
 
-  for f in \
-    frontend/app/(public)/layout.tsx \
-    frontend/features/public-content/components/SiteVerificationMeta.tsx \
-    frontend/features/public-content/utils/laravel-api.ts \
-    frontend/app/api/internal/revalidate/seo/route.ts; do
+  FRONTEND_FILES=(
+    'frontend/app/(public)/layout.tsx'
+    frontend/features/public-content/components/SiteVerificationMeta.tsx
+    frontend/features/public-content/utils/laravel-api.ts
+    frontend/app/api/internal/revalidate/seo/route.ts
+  )
+  for f in "${FRONTEND_FILES[@]}"; do
     copy_file "${REL}/${f}" "${APP}/${f}"
   done
 
