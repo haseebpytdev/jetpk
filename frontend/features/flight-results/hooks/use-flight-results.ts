@@ -131,39 +131,39 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       setData((current) => {
         merged = mode === "merge" ? mergeProgressiveResults(current, payload) : payload;
         dataRef.current = merged;
-        // Progressive first paint: mount a couple of usable cards immediately, then
-        // commit the full page in a transition so DATA→first useful stays snappy.
+        // Progressive first paint: mount one usable card immediately, then
+        // commit the full page so DATA→first useful stays snappy.
         if (
           mode === "replace" &&
           previousVisible === 0 &&
-          (merged.paired_options?.length ?? 0) > 2
+          (merged.paired_options?.length ?? 0) > 1
         ) {
           return {
             ...merged,
-            paired_options: (merged.paired_options ?? []).slice(0, 2),
+            paired_options: (merged.paired_options ?? []).slice(0, 1),
           };
         }
         if (
           mode === "replace" &&
           previousVisible === 0 &&
-          (merged.outbound_options?.length ?? 0) > 2 &&
+          (merged.outbound_options?.length ?? 0) > 1 &&
           (merged.paired_options?.length ?? 0) === 0
         ) {
           return {
             ...merged,
-            outbound_options: (merged.outbound_options ?? []).slice(0, 2),
+            outbound_options: (merged.outbound_options ?? []).slice(0, 1),
           };
         }
         if (
           mode === "replace" &&
           previousVisible === 0 &&
-          (merged.offers?.length ?? 0) > 2 &&
+          (merged.offers?.length ?? 0) > 1 &&
           (merged.paired_options?.length ?? 0) === 0 &&
           (merged.outbound_options?.length ?? 0) === 0
         ) {
           return {
             ...merged,
-            offers: (merged.offers ?? []).slice(0, 2),
+            offers: (merged.offers ?? []).slice(0, 1),
           };
         }
         return merged;
@@ -171,7 +171,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       if (
         mode === "replace" &&
         previousVisible === 0 &&
-        countVisibleResults(merged) > 2
+        countVisibleResults(merged) > 1
       ) {
         queueMicrotask(() => {
           if (dataRef.current === merged || dataRef.current?.search_id === merged.search_id) {

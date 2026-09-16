@@ -282,7 +282,14 @@ class FlightController extends Controller
         );
 
         if (! ($refresh['success'] ?? false)
-            && ($refresh['status'] ?? '') === 'search_refresh_required') {
+            && in_array((string) ($refresh['status'] ?? ''), ['search_refresh_required', 'failed'], true)
+            && in_array((string) ($refresh['block_code'] ?? ''), [
+                'selected_offer_revalidation_required',
+                'selected_offer_revalidation_failed',
+            ], true)) {
+            // Live revalidation can return HTTP 200 with schedule+pricing but blank
+            // fare overlay (common on return/pair). One search-refresh rematch keeps
+            // Book Now → traveler unblocked without creating a PNR.
             $refresh = $this->refreshSelectedOfferViaSearch($agency, $searchId, $offerId, $offer, $criteria, $payload);
         }
 

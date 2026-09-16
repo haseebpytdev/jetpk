@@ -125,6 +125,34 @@ final class SabreGdsRevalidationAggregateFareBasisCompletenessAndUsableLinkageDe
         $this->assertSame('scenario_revalidation_success', $evidence['revalidation_diagnostics']['scenario_reason_code_selected'] ?? null);
     }
 
+    public function test_blank_candidate_fare_overlay_waiver_when_unique_linkage_ready(): void
+    {
+        $normalized = $this->aggregates->normalize($this->productionLinkageCounts(), [
+            'selected_fare_basis_complete' => true,
+            'draft_fare_basis_complete' => true,
+            'candidate_fare_basis_complete' => false,
+            'fare_basis_presence_by_candidate' => [
+                '1' => ['complete' => false, 'per_segment_present' => [false, false]],
+            ],
+        ]);
+
+        $this->assertTrue($normalized['overall_fare_basis_complete']);
+        $this->assertTrue($normalized['fare_basis_complete']);
+        $this->assertTrue($normalized['usable_fare_linkage']);
+    }
+
+    public function test_blank_candidate_waiver_does_not_apply_when_selected_incomplete(): void
+    {
+        $normalized = $this->aggregates->normalize($this->productionLinkageCounts(), [
+            'selected_fare_basis_complete' => false,
+            'draft_fare_basis_complete' => true,
+            'candidate_fare_basis_complete' => false,
+        ]);
+
+        $this->assertFalse($normalized['overall_fare_basis_complete']);
+        $this->assertFalse($normalized['usable_fare_linkage']);
+    }
+
     public function test_ambiguity_produces_usable_false(): void
     {
         $normalized = $this->aggregates->normalize(array_merge($this->productionLinkageCounts(), [

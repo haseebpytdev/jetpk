@@ -119,6 +119,13 @@ final class SabreGdsRevalidationLinkageAggregateContract
     {
         $uniqueUsable = (int) ($linkageDiagnostics['unique_usable_linkage_match_count'] ?? 0);
 
+        // Return/pair GIR often matches schedule+pricing while omitting fare overlay.
+        // When selected/draft fare basis are known and linkage is uniquely usable,
+        // blank candidate presence must not hard-fail Book Now → traveler.
+        if ($this->allowsBlankCandidateFareBasisOverlay($scoped, $linkageDiagnostics)) {
+            return true;
+        }
+
         if ($scoped['selected_fare_basis_complete'] === false
             || $scoped['draft_fare_basis_complete'] === false
             || $scoped['candidate_fare_basis_complete'] === false) {
@@ -172,6 +179,24 @@ final class SabreGdsRevalidationLinkageAggregateContract
             : [];
 
         return ($presenceByCandidate[$ordinal]['complete'] ?? false) === true;
+    }
+
+    /**
+     * @param  array{selected_fare_basis_complete: ?bool, draft_fare_basis_complete: ?bool, candidate_fare_basis_complete: ?bool}  $scoped
+     * @param  array<string, mixed>  $linkageDiagnostics
+     */
+    private function allowsBlankCandidateFareBasisOverlay(array $scoped, array $linkageDiagnostics): bool
+    {
+        return $scoped['selected_fare_basis_complete'] === true
+            && $scoped['draft_fare_basis_complete'] === true
+            && $scoped['candidate_fare_basis_complete'] === false
+            && (int) ($linkageDiagnostics['unique_usable_linkage_match_count'] ?? 0) === 1
+            && (int) ($linkageDiagnostics['ambiguous_linkage_match_count'] ?? 0) === 0
+            && (int) ($linkageDiagnostics['exact_segment_signature_match_count'] ?? 0) >= 1
+            && (int) ($linkageDiagnostics['exact_itinerary_match_count'] ?? 0) >= 1
+            && (int) ($linkageDiagnostics['pricing_compatible_match_count'] ?? 0) >= 1
+            && (int) ($linkageDiagnostics['fare_basis_compatible_match_count'] ?? 0) >= 1
+            && (int) ($linkageDiagnostics['booking_class_compatible_match_count'] ?? 0) >= 1;
     }
 
     /**

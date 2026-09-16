@@ -73,6 +73,57 @@ class SabreRevalidationBfmApplicationWarningAndResponseLinkageCorrectionPhaseTes
         $this->assertTrue(app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->hasBlockingMessages($diagnostics));
     }
 
+    public function test_blank_candidate_fare_overlay_still_links_when_schedule_and_pricing_match(): void
+    {
+        $draft = $this->qrConnectingDraft();
+        $itinerary = $this->matchingItinerary('blank-overlay', 520.83);
+        unset($itinerary['pricingInformation'][0]['fare']['passengerInfoList']);
+
+        $response = [
+            'groupedItineraryResponse' => array_merge($this->descriptorTables(), [
+                'itineraryGroups' => [[
+                    'itineraries' => [$itinerary],
+                ]],
+            ]),
+        ];
+
+        $linker = app(SabreGdsRevalidationResponseCandidateLinker::class);
+        $analysis = $linker->analyze($response, $linker->buildSelectedContextFromDraft($draft));
+
+        $this->assertSame(1, $analysis['exact_segment_signature_match_count']);
+        $this->assertSame(1, $analysis['pricing_compatible_match_count']);
+        $this->assertSame(1, $analysis['booking_class_compatible_match_count']);
+        $this->assertSame(1, $analysis['fare_basis_compatible_match_count']);
+        $this->assertSame(1, $analysis['unique_usable_linkage_match_count']);
+        $this->assertTrue($analysis['usable_fare_linkage']);
+        $this->assertArrayNotHasKey('linkage_failure_reason_code', $analysis);
+    }
+
+    public function test_non_empty_wrong_booking_class_still_fails_closed(): void
+    {
+        $draft = $this->qrConnectingDraft();
+        $response = [
+            'groupedItineraryResponse' => array_merge($this->descriptorTables(), [
+                'itineraryGroups' => [[
+                    'itineraries' => [
+                        $this->matchingItinerary('wrong-rbd', 520.83, 'Y', 'SLOW1', 'SLOW2'),
+                    ],
+                ]],
+            ]),
+        ];
+
+        $linker = app(SabreGdsRevalidationResponseCandidateLinker::class);
+        $analysis = $linker->analyze($response, $linker->buildSelectedContextFromDraft($draft));
+
+        $this->assertSame(1, $analysis['exact_segment_signature_match_count']);
+        $this->assertSame(0, $analysis['booking_class_compatible_match_count']);
+        $this->assertSame(0, $analysis['unique_usable_linkage_match_count']);
+        $this->assertSame(
+            SabreGdsRevalidationResponseCandidateLinker::REASON_BOOKING_CLASS_INCOMPATIBLE,
+            $analysis['linkage_failure_reason_code'] ?? null,
+        );
+    }
+
     public function test_unique_exact_candidate_linkage_selects_non_zero_ordinal(): void
     {
         $response = $this->multiCandidateResponse();

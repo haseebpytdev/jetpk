@@ -937,6 +937,20 @@ final class SabreGdsRevalidationResponseCandidateLinker
         if ($expected === [] || in_array('', $expected, true)) {
             return true;
         }
+
+        // Blank candidate overlay = unknown (Sabre returned schedule/pricing without
+        // per-segment RBD/fare/cabin). Treat as compatible; non-empty mismatches still fail.
+        $actualHasValue = false;
+        foreach ($actual as $value) {
+            if (strtoupper(trim((string) $value)) !== '') {
+                $actualHasValue = true;
+                break;
+            }
+        }
+        if (! $actualHasValue) {
+            return true;
+        }
+
         if (count($actual) !== count($expected)) {
             return false;
         }
