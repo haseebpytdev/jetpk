@@ -1182,7 +1182,7 @@ class BookingController extends Controller
             ],
             'checkoutProtection' => $draft['checkout_protection'] ?? null,
             'checkoutCountries' => CountryList::forSelect(),
-            'checkoutPhoneDialCodes' => $this->checkoutPhoneDialCodes(),
+            'checkoutPhoneDialCodes' => $this->wantsBookingJson($request) ? [] : $this->checkoutPhoneDialCodes(),
             'checkoutContactPhone' => $this->checkoutContactPhoneParts($request, $draft),
             'checkoutContactPrefill' => $this->checkoutContactPrefillForCheckout($request),
             'agentBookingMode' => $channelContext['agent_booking_mode'],
@@ -1194,12 +1194,15 @@ class BookingController extends Controller
             'refreshSearchUrl' => $this->resolveRefreshSearchUrl($criteria),
             'selectedFareEstimateDriftDetected' => $selectedFareEstimateDriftDetected,
             'checkoutFareBreakdown' => $checkoutFareBreakdown,
-            'returnSplitSummary' => $this->buildReturnSplitCheckoutSummary(
-                $draft,
-                $criteria,
-                is_array($offer) ? $offer : null,
-                $effectiveFlightId,
-            ),
+            // Next standard booking does not consume return_split on passengers GET.
+            'returnSplitSummary' => $this->wantsBookingJson($request)
+                ? null
+                : $this->buildReturnSplitCheckoutSummary(
+                    $draft,
+                    $criteria,
+                    is_array($offer) ? $offer : null,
+                    $effectiveFlightId,
+                ),
         ];
 
         if ($this->wantsBookingJson($request)) {

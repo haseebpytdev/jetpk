@@ -38,11 +38,18 @@ final class CountryList
      */
     public static function forSelect(): array
     {
-        return array_map(static fn (array $country): array => [
+        static $mapped = null;
+        if ($mapped !== null) {
+            return $mapped;
+        }
+
+        $mapped = array_map(static fn (array $country): array => [
             'code' => $country['alpha2'],
             'name' => $country['name'],
             'alpha3' => $country['alpha3'],
         ], self::all());
+
+        return $mapped;
     }
 
     /** @return list<string> */
