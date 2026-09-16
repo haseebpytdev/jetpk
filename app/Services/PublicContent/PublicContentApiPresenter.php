@@ -3,24 +3,23 @@
 namespace App\Services\PublicContent;
 
 use App\Enums\SupportTicketCategory;
-use App\Models\Agency;
 use App\Models\ClientPage;
 use App\Models\CmsPage;
 use App\Services\Agencies\AboutUsContentPresenter;
-use App\Services\Cms\CmsPageContentSanitizer;
 use App\Services\Client\ClientGlobalContactResolver;
 use App\Services\Client\ClientPageContentResolver;
 use App\Services\Client\ClientPageRenderer;
 use App\Services\Client\ClientPageSeoResolver;
+use App\Models\User;
+use App\Services\Ai\AiAssistantEligibility;
+use App\Services\Seo\SeoVerificationResolver;
+use App\Support\Seo\SeoSitemapEligibility;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Support\Client\ClientManagedPageReservedSlugs;
 use App\Support\Client\ClientPageKeys;
-use App\Support\Client\ClientPageMediaSchema;
 use App\Support\Client\ClientSafeHtmlSanitizer;
 use App\Support\Client\ReservedPublicPath;
-use App\Support\Branding\JetpkCompanyBrandingResolver;
-use App\Support\Media\PublicMediaUrl;
-use App\Services\Ai\AiAssistantEligibility;
-use Illuminate\Http\Request;
 
 /**
  * Shapes Laravel-managed public content for the Next.js public frontend.
@@ -32,8 +31,9 @@ final class PublicContentApiPresenter
         private readonly ClientPageSeoResolver $seoResolver,
         private readonly ClientGlobalContactResolver $contactResolver,
         private readonly AboutUsContentPresenter $cmsContentPresenter,
-        private readonly CmsPageContentSanitizer $cmsPageSanitizer,
         private readonly ClientPageContentResolver $contentResolver,
+        private readonly SeoVerificationResolver $verificationResolver,
+        private readonly SeoSitemapEligibility $sitemapEligibility,
         private readonly AiAssistantEligibility $aiEligibility,
     ) {}
 
@@ -45,7 +45,7 @@ final class PublicContentApiPresenter
         $content = $this->pageRenderer->viewModel($pageKey);
         $published = is_array($content['content'] ?? null) ? $content['content'] : [];
 
-        $payload = [
+        return [
             'page_key' => $pageKey,
             'source' => $published === [] ? 'empty' : 'cms',
             'content' => $published,
@@ -53,13 +53,6 @@ final class PublicContentApiPresenter
             'contact' => $content['contact'] ?? $this->contactResolver->contact(),
             'sections_order' => $content['sectionsOrder'] ?? [],
         ];
-
-        $media = $this->mediaForPage($pageKey);
-        if ($media !== []) {
-            $payload['media'] = $media;
-        }
-
-        return $payload;
     }
 
     /**
@@ -99,7 +92,9 @@ final class PublicContentApiPresenter
             'slug' => $page->slug,
             'title' => $page->title,
             'subtitle' => $page->excerpt ?? '',
-            'body_html' => $this->cmsPageSanitizer->formatForPublicDisplay($page->content),
+            'body_html' => ClientSafeHtmlSanitizer::sanitize(
+                $this->cmsContentPresenter->formatHtmlOverrideForDisplay($page->content),
+            ),
             'seo' => [
                 'title' => $metaTitle,
                 'description' => $metaDescription,
@@ -143,47 +138,6 @@ final class PublicContentApiPresenter
             ClientPageKeys::TERMS,
             ClientPageKeys::PRIVACY,
             ClientPageKeys::GLOBAL,
-            ClientPageKeys::GROUP_SEARCH,
-            ClientPageKeys::LOGIN,
-            ClientPageKeys::BOOKING_LOOKUP,
-        ];
-    }
-
-    /**
-     * @return array<string, array{url: string, alt: string}>
-     */
-    private function mediaForPage(string $pageKey): array
-    {
-        $media = [];
-
-        foreach (ClientPageMediaSchema::assetKeysFor($pageKey) as $assetKey) {
-            $presented = $this->presentPageMediaAsset($pageKey, $assetKey);
-            if ($presented !== null) {
-                $media[$assetKey] = $presented;
-            }
-        }
-
-        return $media;
-    }
-
-    /**
-     * @return array{url: string, alt: string}|null
-     */
-    private function presentPageMediaAsset(string $pageKey, string $assetKey): ?array
-    {
-        $url = $this->contentResolver->assetUrl($pageKey, $assetKey);
-        if ($url === null || trim($url) === '') {
-            return null;
-        }
-
-        $normalized = PublicMediaUrl::normalize($url);
-        if ($normalized === null || $normalized === '') {
-            return null;
-        }
-
-        return [
-            'url' => $normalized,
-            'alt' => '',
         ];
     }
 
@@ -195,92 +149,124 @@ final class PublicContentApiPresenter
         $contact = $this->contactResolver->contact();
         $global = $this->contentFor(ClientPageKeys::GLOBAL);
         $social = is_array($global['social'] ?? null) ? $global['social'] : [];
-        $branding = app(JetpkCompanyBrandingResolver::class);
-        $aiEnabled = $request instanceof Request
-            ? $this->aiEligibility->isEligibleRequest($request)
+        $user = $request instanceof Request ? $request->user() : null;
+        if (! $user instanceof User) {
+            $user = Auth::user();
+        }
+        $aiEnabled = $user instanceof User
+            ? $this->aiEligibility->isEligible($user)
             : false;
 
         return [
             'brand_name' => (string) config('ota-brand.name', 'JetPakistan'),
             'domain' => (string) config('client.canonical_client.domain', 'jetpakistan.pk'),
             'app_url' => rtrim((string) config('app.url'), '/'),
-            'logo_url' => PublicMediaUrl::normalize($branding->logoUrl()),
-            'favicon_url' => PublicMediaUrl::normalize($branding->faviconUrl()),
-            'header_logo_height' => $branding->headerLogoHeight(),
             'contact' => $contact,
             'legal_paths' => [
                 'terms' => '/terms',
                 'privacy' => '/privacy',
             ],
             'support_path' => '/support',
-            'contact_path' => '/contact',
+            'contact_path' => '/about-us',
             'booking_lookup_path' => '/lookup-booking',
             'groups_path' => '/groups/search',
             'social_links' => $this->normalizeSocialLinks($social),
-            'commerce_gates' => app(\App\Services\Commerce\CommerceCheckoutSettingsService::class)->gates(
-                Agency::query()->where('slug', (string) config('ota.default_agency_slug', 'asif-travels'))->value('id')
+            'default_seo' => array_intersect_key(
+                $this->seoResolver->forPage(
+                    ClientPageKeys::HOME,
+                    'JetPakistan | Affordable Flights, Umrah Packages & Tours',
+                    'Search and compare domestic and international flights from Pakistan, explore Umrah packages, and plan travel with JetPakistan.',
+                ),
+                array_flip(['title', 'description', 'robots']),
             ),
+            'site_verification' => [
+                'google' => $this->verificationResolver->googleToken(),
+                'bing' => $this->verificationResolver->bingToken(),
+            ],
             'ai_assistant_enabled' => $aiEnabled,
             'ai_assistant_mode' => $this->aiEligibility->mode(),
-            'default_seo' => [
-                'title' => 'JetPakistan',
-                'description' => 'Book flights, hotels, and travel services with JetPakistan.',
-                'robots' => 'index,follow',
-            ],
             'source' => 'laravel',
         ];
     }
 
     /**
+     * Return canonical, indexable public URLs only. Redirect aliases such as
+     * /contact and /flights deliberately stay out of the sitemap.
+     *
      * @return list<array{path: string, lastmod?: string}>
      */
     public function sitemapRoutes(): array
     {
-        $routes = [
+        $routes = [];
+
+        foreach ([
             ['path' => '/'],
             ['path' => '/about-us'],
-            ['path' => '/contact'],
             ['path' => '/support'],
             ['path' => '/faq'],
             ['path' => '/terms'],
             ['path' => '/privacy'],
-            ['path' => '/lookup-booking'],
-            ['path' => '/groups/search'],
-        ];
+        ] as $route) {
+            if ($this->sitemapEligibility->isManagedPathEligible($route['path'])) {
+                $routes[] = $route;
+            }
+        }
 
         CmsPage::query()
             ->active()
             ->orderBy('slug')
-            ->get(['slug', 'updated_at'])
-            ->each(function (CmsPage $page): void {
-                $routes[] = [
-                    'path' => '/pages/'.$page->slug,
-                    'lastmod' => $page->updated_at?->toAtomString(),
-                ];
-            });
-
-        ClientPage::query()
-            ->where('enabled', true)
-            ->orderBy('slug')
-            ->get(['slug', 'updated_at'])
-            ->each(function (ClientPage $page): void {
-                $slug = ClientManagedPageReservedSlugs::normalize((string) $page->slug);
-                if ($slug === '' || ReservedPublicPath::isReservedFirstSegment($slug)) {
+            ->get(['slug', 'updated_at', 'robots', 'status'])
+            ->each(function (CmsPage $page) use (&$routes): void {
+                if (! $this->sitemapEligibility->isCmsPageEligible($page)) {
                     return;
                 }
 
-                $pageKey = ClientPageKeys::customKey($slug);
-                if ($this->contentResolver->contentFor($pageKey) === []) {
+                $slug = trim((string) $page->slug, " /\t\n\r\0\x0B");
+                if ($slug === '') {
                     return;
                 }
 
                 $routes[] = [
-                    'path' => '/'.$slug,
+                    'path' => '/pages/'.$slug,
                     'lastmod' => $page->updated_at?->toAtomString(),
                 ];
             });
 
-        return $routes;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('client_pages')) {
+                ClientPage::query()
+                    ->where('enabled', true)
+                    ->orderBy('slug')
+                    ->get(['slug', 'updated_at'])
+                    ->each(function (ClientPage $page) use (&$routes): void {
+                        $slug = ClientManagedPageReservedSlugs::normalize((string) $page->slug);
+                        if ($slug === '' || ReservedPublicPath::isReservedFirstSegment($slug)) {
+                            return;
+                        }
+
+                        if (! $this->sitemapEligibility->isCustomPageEligible($page)) {
+                            return;
+                        }
+
+                        $pageKey = ClientPageKeys::customKey($slug);
+                        if ($this->contentResolver->contentFor($pageKey) === []) {
+                            return;
+                        }
+
+                        $routes[] = [
+                            'path' => '/'.$slug,
+                            'lastmod' => $page->updated_at?->toAtomString(),
+                        ];
+                    });
+            }
+        } catch (\Illuminate\Database\QueryException) {
+            // Partial sqlite test databases may not include client_pages yet.
+        }
+
+        return collect($routes)
+            ->unique('path')
+            ->values()
+            ->all();
     }
 
     /**
