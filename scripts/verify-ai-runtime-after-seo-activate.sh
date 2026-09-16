@@ -36,11 +36,10 @@ if [ "$health_code" != "200" ]; then
   fail "gateway_health_$health_code"
 fi
 
-if grep -q 'ai.lab.canary.fault' "$APP/bootstrap/app.php" 2>/dev/null; then
-  echo "MIDDLEWARE_ALIAS=present"
-else
-  echo "MIDDLEWARE_ALIAS=missing"
+if ! grep -q 'ai.lab.canary.fault' "$APP/bootstrap/app.php" 2>/dev/null; then
+  fail "missing_canary_fault_middleware_alias"
 fi
+echo "MIDDLEWARE_ALIAS=present"
 
 echo "AI_RUNTIME_VERIFY=PASS"
 echo "$probe"

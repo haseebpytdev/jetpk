@@ -70,4 +70,27 @@ Local fixture tests (no production mutation):
 
 ```bash
 bash scripts/jetpk/test-runtime-ownership-gate.sh
+bash scripts/jetpk/test-seo-activate-ai-runtime-guard.sh
+```
+
+## SEO activation (allowlist only)
+
+SEO Phase 2 activation must never bulk-copy `app/` or `bootstrap/`. Use:
+
+```bash
+REL=/home/pkjetp/releases/<release-dir> \
+SHA=<authorized-sha> \
+bash scripts/jetpk/deploy-seo-phase2-activate-allowlist.sh
+```
+
+Post-activate gate (fail-closed):
+
+```bash
+APP=/home/pkjetp/jetpk_app bash scripts/verify-ai-runtime-after-seo-activate.sh
+```
+
+## Protected AI runtime deploy
+
+```bash
+AUTHORIZED_SHA=<full-sha> bash scripts/jetpk/deploy-ai-runtime-protected.sh
 ```
