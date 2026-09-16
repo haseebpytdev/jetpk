@@ -289,9 +289,7 @@ export async function clearConversation(page) {
       return { ok: res.ok, status: res.status, json };
     };
 
-    await fetchJson(`${base}/laravel/api/public/content/csrf-token`, {
-      method: "GET",
-    });
+    await fetchJson(`${base}/laravel/api/public/content/csrf-token`, { method: "GET" });
     const cookies = document.cookie.split(";").map((c) => c.trim());
     const xsrfRaw = cookies.find((c) => c.startsWith("XSRF-TOKEN="));
     const xsrf = xsrfRaw ? decodeURIComponent(xsrfRaw.split("=").slice(1).join("=")) : "";
@@ -330,9 +328,15 @@ export async function clearConversation(page) {
       await page.getByRole("button", { name: "Chat options" }).click({ timeout: 15_000 });
       await page.getByRole("menuitem", { name: "Clear conversation" }).click({ timeout: 15_000 });
     } catch {
-      await page.reload({ waitUntil: "domcontentloaded", timeout: 120_000 }).catch(() => {});
-      await openAskPanel(page).catch(() => {});
+      /* fall through to reload */
     }
+  }
+
+  await page.goto(`${BASE}/#ask-jetpakistan`, { waitUntil: "domcontentloaded", timeout: 120_000 });
+  await waitForConfigHydration(page, 60_000).catch(() => {});
+  const panelAfter = page.getByTestId("ask-jetpakistan-panel");
+  if (!(await panelAfter.isVisible().catch(() => false))) {
+    await openAskPanel(page);
   }
 
   await page.waitForFunction(
@@ -343,7 +347,7 @@ export async function clearConversation(page) {
     { timeout: 15_000 },
   ).catch(() => {});
 
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(1000);
 }
 
 export async function withCanaryFaultMode(page, faultMode, fn) {

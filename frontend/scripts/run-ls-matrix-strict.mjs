@@ -7,14 +7,21 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadQaPasswordFromVault } from "../../dashboard/scripts/jp-dash-03-acceptance/credential-vault.mjs";
-import { getStoragePath } from "../../dashboard/scripts/jp-dash-03-acceptance/auth-storage.mjs";
+import {
+  ensureStorageDir,
+  getStoragePath,
+  storageStateExists,
+} from "../../dashboard/scripts/jp-dash-03-acceptance/auth-storage.mjs";
 import {
   ADMIN_EMAIL,
+  BASE,
   evidenceDir,
   loginAdmin,
   recordCase,
   resetReport,
   runConfirmedLiveSearch,
+  openAskPanel,
+  sessionPreflight,
 } from "./live-readonly-qa-helpers.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -38,7 +45,7 @@ const LIVE_CASES = [
 function classifyStability(error) {
   const msg = String(error ?? "");
   if (/HTTP_5\d\d/.test(msg)) return "HTTP_500";
-  if (/FAB_UNAVAILABLE/.test(msg)) return "FAB_UNAVAILABLE";
+  if (/FAB_UNAVAILABLE|FAB not available/i.test(msg)) return "FAB_UNAVAILABLE";
   if (/AI assistant is temporarily unavailable|AI_UNAVAILABLE/i.test(msg)) return "AI_UNAVAILABLE";
   if (/COLLECTING_STALL/.test(msg)) return "COLLECTING_STALL";
   if (/STATE|ROUTE_SLOT_MISMATCH|ROUTE_VISIBLE_MISMATCH|RECAP_ROUTE_MISMATCH/.test(msg)) return "STATE_LOSS";
@@ -96,19 +103,27 @@ async function main() {
   };
 
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext(
-    fs.existsSync(getStoragePath("admin")) ? { storageState: getStoragePath("admin") } : {},
-  );
+  const storagePath = getStoragePath("admin");
+  if (!storageStateExists("admin")) {
+    const bootstrap = await browser.newContext();
+    const bootstrapPage = await bootstrap.newPage();
+    await loginAdmin(bootstrapPage);
+    ensureStorageDir("admin");
+    await bootstrap.storageState({ path: storagePath });
+    await bootstrap.close();
+  }
+
+  const context = await browser.newContext({ storageState: storagePath });
   const page = await context.newPage();
 
   try {
-    if (!fs.existsSync(getStoragePath("admin"))) {
-      await loginAdmin(page);
-    } else {
-      await page.goto("https://jetpakistan.pk/#ask-jetpakistan", {
-        waitUntil: "domcontentloaded",
-        timeout: 120_000,
-      });
+    await page.goto(`${BASE}/#ask-jetpakistan`, { waitUntil: "domcontentloaded", timeout: 120_000 });
+    await openAskPanel(page);
+    const preflight = await sessionPreflight(page);
+    if (!preflight.canary_eligible || !preflight.fab_visible) {
+      throw new Error(
+        `PREFLIGHT_FAIL eligible=${preflight.canary_eligible} fab=${preflight.fab_visible} config=${preflight.config_ai_enabled}`,
+      );
     }
 
     for (const c of LIVE_CASES) {

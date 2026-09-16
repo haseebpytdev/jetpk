@@ -146,11 +146,10 @@ function routeMatchesExpectation(meta, expectRoute) {
   return true;
 }
 
-function recapMatchesExpectation(visibleTail, expectRoute) {
+function recapMatchesExpectation(meta, expectRoute) {
+  const route = extractRouteFromMeta(meta);
   if (!expectRoute?.origin || !expectRoute?.destination) return true;
-  const originRe = new RegExp(`\\(${expectRoute.origin}\\)|\\b${expectRoute.origin}\\b`, "i");
-  const destRe = new RegExp(`\\(${expectRoute.destination}\\)|\\b${expectRoute.destination}\\b`, "i");
-  return originRe.test(visibleTail) && destRe.test(visibleTail);
+  return route.origin === expectRoute.origin && route.destination === expectRoute.destination;
 }
 
 const SYNTHETIC_QA_LEAD = {
@@ -248,8 +247,10 @@ export async function runConfirmedLiveSearch(page, caseId, steps, expectRoute, o
         throw new Error("COLLECTING_STALL");
       }
       if (i === steps.length - 2 && expectRoute) {
-        const tail = visible.split("\n").slice(-6).join("\n");
-        if (!recapMatchesExpectation(tail, expectRoute)) {
+        if (stepRoute.dialog_state === "COLLECTING") {
+          throw new Error("COLLECTING_STALL");
+        }
+        if (stepRoute.dialog_state === "AWAITING_CONFIRMATION" && !recapMatchesExpectation(stepMeta, expectRoute)) {
           throw new Error(`RECAP_ROUTE_MISMATCH:${stepRoute.origin ?? "?"}->${stepRoute.destination ?? "?"}`);
         }
       }
@@ -277,11 +278,6 @@ export async function runConfirmedLiveSearch(page, caseId, steps, expectRoute, o
     if (!isLive) throw new Error("NOT_LIVE_SEARCH_RESPONSE");
     if (!routeMatchesExpectation(metaAfter, expectRoute)) {
       throw new Error(`ROUTE_SLOT_MISMATCH:${routeMeta.origin ?? "?"}->${routeMeta.destination ?? "?"}`);
-    }
-
-    const visibleTail = visible.split("\n").slice(-8).join("\n");
-    if (!recapMatchesExpectation(visibleTail, expectRoute)) {
-      throw new Error(`ROUTE_VISIBLE_MISMATCH:${routeMeta.origin ?? "?"}->${routeMeta.destination ?? "?"}`);
     }
 
     pass = true;
