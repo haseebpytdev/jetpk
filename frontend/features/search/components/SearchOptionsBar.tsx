@@ -46,7 +46,13 @@ export function SearchOptionsBar({
   const update = (patch: Partial<SearchOptions>) => onChange({ ...options, ...patch });
 
   return (
-    <div className={cn(compact ? "flex flex-wrap gap-x-4 gap-y-1 text-jp-xs" : "flex flex-wrap gap-x-5 gap-y-2", className)}>
+    <div
+      className={cn(
+        compact ? "flex flex-wrap gap-x-4 gap-y-1 text-jp-xs" : "flex flex-wrap gap-x-5 gap-y-2",
+        "max-lg:pr-[4.5rem]",
+        className,
+      )}
+    >
       <OptionToggle
         id="search-direct-only"
         label="Direct Flights Only"

@@ -35,7 +35,9 @@ export function PublicFloatingActionDock({
     pathname.startsWith("/flights/results") ||
     pathname.startsWith("/flights/return") ||
     pathname.startsWith("/flights/details");
-  const liftFab = liftForCheckoutSticky || liftForFlightCta;
+  // Keep homepage search options / primary CTA clear of the dock.
+  const liftForHomeSearch = pathname === "/";
+  const liftFab = liftForCheckoutSticky || liftForFlightCta || liftForHomeSearch;
 
   useEffect(() => {
     const details = detailsRef.current;
