@@ -12,18 +12,34 @@ export type SearchFreshness = {
 };
 
 export type FlightSegmentDisplay = {
+  segment_number?: number;
   origin?: string;
   destination?: string;
   origin_airport_code?: string;
   destination_airport_code?: string;
+  origin_city?: string;
+  destination_city?: string;
   departure_time_display?: string;
+  departure_date_display?: string;
   arrival_time_display?: string;
+  arrival_date_display?: string;
   arrival_day_offset_display?: string;
+  arrival_day_offset?: string;
   duration_display?: string;
   flight_number?: string;
   marketing_carrier_code?: string;
+  airline_code?: string;
+  airline_name?: string;
+  airline_logo_url?: string | null;
   operating_carrier_code?: string;
+  operating_airline_code?: string;
+  operating_airline_name?: string;
   cabin?: string;
+  cabin_display?: string;
+  booking_class?: string;
+  aircraft_display?: string | null;
+  terminal_departure?: string | null;
+  terminal_arrival?: string | null;
   layover_after_display?: string;
 };
 
@@ -34,15 +50,24 @@ export type FareFamilyOption = {
   brand_name?: string;
   price_display?: string;
   displayed_price?: number | null;
+  cabin?: string | null;
   baggage?: string;
+  cabin_baggage?: string | null;
+  checked_baggage?: string | null;
+  carry_on_summary?: string | null;
+  check_in_summary?: string | null;
   refund_rule?: string;
   change_rule?: string;
   meal?: string;
   seat_selection?: string;
   is_synthetic_default?: boolean;
+  /** Truthful base-offer card when supplier has no branded fare catalog. Not a Sabre brand qualifier. */
+  is_base_offer_fare?: boolean;
   is_grouped_offer_option?: boolean;
   source_offer_id?: string;
+  selection_key_authoritative?: boolean;
   can_select?: boolean;
+  selectable?: boolean;
 };
 
 export type FlightOffer = {
@@ -57,10 +82,18 @@ export type FlightOffer = {
   departure_time?: string;
   arrival_time?: string;
   arrival_day_offset_display?: string;
+  arrival_day_offset?: string;
+  departure_city?: string;
+  arrival_city?: string;
+  departure_airport_code?: string;
+  arrival_airport_code?: string;
   duration?: string;
   stops?: number;
   stops_label_display?: string;
+  stops_display?: string;
   layover_summary_display?: string[];
+  /** Laravel presentation field alias for layover_summary_display. */
+  layover_summary?: string[];
   baggage?: string;
   refundable?: boolean;
   currency?: string;
@@ -94,9 +127,12 @@ export type FlightOffer = {
   layovers_display?: Array<{
     airport_code?: string;
     city?: string;
+    airport_city?: string;
     duration_display?: string;
+    duration_minutes?: number | null;
     overnight?: boolean;
     terminal_change?: boolean;
+    label?: string;
   }>;
   baggage_checked_display?: string | null;
   baggage_cabin_display?: string | null;
@@ -109,8 +145,37 @@ export type FlightOffer = {
   final_customer_price?: number;
 };
 
+export type PairedReturnOption = {
+  combo_id: string;
+  offer_id?: string;
+  outbound_key?: string;
+  return_key?: string;
+  outbound_journey?: Record<string, unknown>;
+  return_journey?: Record<string, unknown>;
+  total_amount?: number | null;
+  total_display?: string;
+  fare_family?: string;
+  cabin?: string;
+  baggage?: string;
+  refundable?: boolean;
+  can_book?: boolean;
+  airline_name?: string;
+  airline_code?: string;
+  airline_logo_url?: string | null;
+  pairing_authority?: string;
+  supplier_source_label?: string;
+  supplier_provider?: string;
+  provider?: string;
+  select_url?: string;
+  branded_fares_display_options?: FareFamilyOption[];
+  fare_family_options_display?: FareFamilyOption[];
+  has_branded_fares?: boolean;
+  has_fare_choice_options?: boolean;
+};
+
 export type OutboundOption = {
   outbound_key: string;
+  supplier_source_label?: string;
   journey_display?: {
     departure_time_display?: string;
     arrival_time_display?: string;
@@ -130,6 +195,10 @@ export type OutboundOption = {
   from_total_display?: string;
   combo_count?: number;
   select_return_url?: string;
+  branded_fares_display_options?: FareFamilyOption[];
+  fare_family_options_display?: FareFamilyOption[];
+  has_branded_fares?: boolean;
+  has_fare_choice_options?: boolean;
 };
 
 export type ResultsFilterMeta = {
@@ -149,7 +218,7 @@ export type ResultsFilterMeta = {
 
 export type FlightResultsDataResponse = {
   search_id: string;
-  flow?: "return_split_outbound";
+  flow?: "return_split_outbound" | "return_pair";
   page: number;
   per_page: number;
   total: number;
@@ -157,6 +226,8 @@ export type FlightResultsDataResponse = {
   filters?: ResultsFilterMeta;
   offers?: FlightOffer[];
   outbound_options?: OutboundOption[];
+  paired_options?: PairedReturnOption[];
+  pairing_authority?: "SUPPLIER_RETURNED" | "SUPPLIER_VALIDATED" | "UNAVAILABLE";
   warnings?: string[];
   empty_message?: string;
   search_freshness?: SearchFreshness;
@@ -168,6 +239,7 @@ export type ReturnOptionsDataResponse = {
   flow: "return_split_return";
   search_id: string;
   outbound_key: string;
+  status?: string;
   outbound_journey?: Record<string, unknown>;
   outbound_meta?: Record<string, unknown>;
   cheapest_total?: number;
@@ -176,6 +248,7 @@ export type ReturnOptionsDataResponse = {
   per_page: number;
   total: number;
   has_more: boolean;
+  empty_message?: string;
   search_freshness?: SearchFreshness;
 };
 
@@ -209,6 +282,7 @@ export type RevalidateOfferResponse = {
   status?: string;
   message?: string;
   passengers_url?: string;
+  selected_fare_option_id?: string | null;
   requires_fare_change_acceptance?: boolean;
   offer_freshness?: Record<string, unknown>;
   search_freshness?: SearchFreshness;
@@ -238,12 +312,15 @@ export type ActiveResultsFilters = {
   fare_family?: string;
   bookable_only?: string;
   operating_airline?: string;
+  flight_number?: string;
 };
 
 export type ResultsPageStatus =
   | "idle"
   | "initializing"
   | "loading"
+  | "searching"
+  | "partial"
   | "ready"
   | "empty"
   | "expired"

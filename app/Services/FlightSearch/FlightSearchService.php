@@ -554,6 +554,10 @@ class FlightSearchService
 
     protected function shouldSkipSupplierConnection(SupplierConnection $connection): bool
     {
+        if (! $this->isFlightSearchProvider($connection->provider)) {
+            return true;
+        }
+
         if (! $connection->isEligibleForSupplierSearch()) {
             return true;
         }
@@ -567,6 +571,10 @@ class FlightSearchService
 
     protected function resolveConnectionSkipReason(SupplierConnection $connection): string
     {
+        if (! $this->isFlightSearchProvider($connection->provider)) {
+            return 'non_flight_provider';
+        }
+
         if (! $connection->isEligibleForSupplierSearch()) {
             return 'connection_inactive';
         }
@@ -586,6 +594,25 @@ class FlightSearchService
         return $moduleKey === null
             ? 'provider_module_unknown'
             : 'provider_module_disabled:'.$moduleKey;
+    }
+
+    /**
+     * Non-flight modules (e.g. smtp, google_oauth) share SupplierConnection rows and must never enter search fan-out.
+     */
+    protected function isFlightSearchProvider(SupplierProvider $provider): bool
+    {
+        return match ($provider) {
+            SupplierProvider::Sabre,
+            SupplierProvider::PiaNdc,
+            SupplierProvider::Airblue,
+            SupplierProvider::AirlineDirect,
+            SupplierProvider::Duffel,
+            SupplierProvider::Iati,
+            SupplierProvider::OneApi,
+            SupplierProvider::Amadeus,
+            SupplierProvider::Travelport => true,
+            default => false,
+        };
     }
 
     /**

@@ -1,5 +1,5 @@
+import { AirlineLogoMark } from "@/components/ui/AirlineLogoMark";
 import { cn } from "@/lib/cn";
-import Image from "next/image";
 
 type AirlineIdentityProps = {
   code?: string;
@@ -10,41 +10,35 @@ type AirlineIdentityProps = {
 };
 
 const SIZE_MAP = {
-  sm: { box: "h-8 w-8", text: "text-xs", img: 32 },
-  md: { box: "h-10 w-10", text: "text-sm", img: 40 },
-  lg: { box: "h-12 w-12", text: "text-base", img: 48 },
+  sm: { px: 32, text: "text-xs" },
+  md: { px: 40, text: "text-sm" },
+  lg: { px: 48, text: "text-base" },
 } as const;
 
+/**
+ * Airline row identity. Logo stage is square, transparent, radius 0 (no tile/border).
+ */
 export function AirlineIdentity({ code, name, logoUrl, size = "md", className }: AirlineIdentityProps) {
   const sizing = SIZE_MAP[size];
-  const initials = (code ?? name ?? "?").slice(0, 2).toUpperCase();
-  const alt = name ? `${name} logo` : code ? `${code} airline logo` : "Airline";
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <div
-        className={cn(
-          "relative flex shrink-0 items-center justify-center overflow-hidden rounded-jp-sm border border-jp-border bg-jp-surface-muted",
-          sizing.box,
-        )}
-        aria-hidden={Boolean(logoUrl)}
-      >
-        {logoUrl ? (
-          <Image
-            src={logoUrl}
-            alt={alt}
-            width={sizing.img}
-            height={sizing.img}
-            className="h-full w-full object-contain p-0.5"
-            unoptimized
-          />
-        ) : (
-          <span className={cn("font-semibold text-jp-text-muted", sizing.text)}>{initials}</span>
-        )}
-      </div>
+    <div className={cn("flex items-center gap-2.5", className)}>
+      <AirlineLogoMark
+        code={code}
+        name={name}
+        logoUrl={logoUrl}
+        size={sizing.px}
+        decorative
+      />
       <div className="min-w-0">
-        {name ? <p className="truncate text-sm font-medium text-jp-text">{name}</p> : null}
-        {code ? <p className="text-xs text-jp-text-muted">{code}</p> : null}
+        {name ? (
+          <p className="truncate text-sm font-semibold leading-tight text-jp-text" title={name}>
+            {name}
+          </p>
+        ) : null}
+        {code ? (
+          <p className="mt-0.5 text-[11px] font-medium tracking-wide text-jp-text-muted">{code}</p>
+        ) : null}
       </div>
     </div>
   );

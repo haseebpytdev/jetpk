@@ -2,7 +2,9 @@
 
 import { cn } from "@/lib/cn";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import Link from "next/link";
 
 type DropdownProps = {
   trigger: (props: {
@@ -10,24 +12,35 @@ type DropdownProps = {
     expanded: boolean;
     onToggle: () => void;
     onKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+    triggerRef: (node: HTMLButtonElement | null) => void;
   }) => ReactNode;
   children: ReactNode;
   align?: "start" | "end";
+  placement?: "bottom" | "top";
   className?: string;
   panelClassName?: string;
+  portal?: boolean;
+  panelTestId?: string;
 };
 
 export function Dropdown({
   trigger,
   children,
   align = "start",
+  placement = "bottom",
   className,
   panelClassName,
+  portal = false,
+  panelTestId,
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>(() =>
+    portal ? { position: "fixed", top: 0, left: 0, zIndex: 60, visibility: "hidden" } : {},
+  );
   const id = useId();
   const panelId = `${id}-panel`;
   const rootRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
   useEscapeKey(open, () => {
@@ -37,25 +50,114 @@ export function Dropdown({
 
   useEffect(() => {
     if (!open) return;
-
     const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
+      const target = event.target as Node;
+      if (rootRef.current?.contains(target) || panelRef.current?.contains(target)) return;
+      setOpen(false);
     };
-
     document.addEventListener("mousedown", handlePointerDown);
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [open]);
 
-  const handleToggle = () => setOpen((value) => !value);
+  useLayoutEffect(() => {
+    if (!open || !portal) return;
+    const updatePosition = () => updatePortalPosition();
+    // Layout effect + rAF remasure keeps footer drop-up panels viewport-clamped.
+    updatePosition();
+    const raf1 = window.requestAnimationFrame(() => {
+      updatePosition();
+      window.requestAnimationFrame(updatePosition);
+    });
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.cancelAnimationFrame(raf1);
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [align, open, placement, portal]);
 
+  const updatePortalPosition = () => {
+    const rect = rootRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const panelHeight = panelRef.current?.offsetHeight ?? 0;
+    const panelWidth = panelRef.current?.offsetWidth ?? 216;
+    const gap = 8;
+    const viewportPad = 16;
+    const maxRight = window.innerWidth - viewportPad;
+    const preferredLeft = align === "end" ? rect.right - panelWidth : rect.left;
+    const left = Math.min(Math.max(viewportPad, preferredLeft), Math.max(viewportPad, maxRight - panelWidth));
+
+    if (placement === "top") {
+      // Keep the drop-up panel inside the viewport even if the trigger is near/below the fold.
+      const desiredBottom = Math.min(rect.top - gap, window.innerHeight - viewportPad);
+      const top = Math.max(viewportPad, desiredBottom - panelHeight);
+      setPanelStyle({
+        position: "fixed",
+        top,
+        left,
+        right: "auto",
+        zIndex: 60,
+        visibility: "visible",
+        maxHeight: `min(16rem, ${Math.max(80, desiredBottom - viewportPad)}px)`,
+        maxWidth: `min(16rem, ${window.innerWidth - viewportPad * 2}px)`,
+      });
+      return;
+    }
+
+    setPanelStyle({
+      position: "fixed",
+      top: rect.bottom + gap,
+      left,
+      right: "auto",
+      zIndex: 60,
+      visibility: "visible",
+      maxHeight: `min(16rem, ${Math.max(80, window.innerHeight - rect.bottom - viewportPad - gap)}px)`,
+      maxWidth: `min(16rem, ${window.innerWidth - viewportPad * 2}px)`,
+    });
+  };
+
+  const handleToggle = () => {
+    setOpen((value) => {
+      const next = !value;
+      if (next && portal) requestAnimationFrame(() => updatePortalPosition());
+      return next;
+    });
+  };
+
+  const openKey = placement === "top" ? "ArrowUp" : "ArrowDown";
   const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+    if (event.key === openKey || event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       setOpen(true);
+      if (portal) requestAnimationFrame(() => updatePortalPosition());
     }
   };
+
+  const panel = open ? (
+    <div
+      ref={panelRef}
+      id={panelId}
+      role="menu"
+      data-testid={panelTestId}
+      data-placement={placement}
+      style={portal ? panelStyle : undefined}
+      className={cn(
+        "min-w-[12rem] overflow-y-auto rounded-jp-md border border-jp-border bg-jp-surface p-1.5 shadow-jp-md",
+        portal
+          ? undefined
+          : cn(
+              "absolute z-50",
+              placement === "top" ? "bottom-full mb-2" : "top-full mt-2",
+              align === "end" ? "right-0" : "left-0",
+            ),
+        !portal && placement === "top" && "max-h-[min(16rem,calc(100vh-6rem))]",
+        panelClassName,
+      )}
+    >
+      {children}
+    </div>
+  ) : null;
 
   return (
     <div ref={rootRef} className={cn("relative", className)}>
@@ -64,20 +166,11 @@ export function Dropdown({
         expanded: open,
         onToggle: handleToggle,
         onKeyDown: handleKeyDown,
+        triggerRef: (node) => {
+          triggerRef.current = node;
+        },
       })}
-      {open ? (
-        <div
-          id={panelId}
-          role="menu"
-          className={cn(
-            "absolute z-50 mt-2 min-w-[12rem] rounded-jp-md border border-jp-border bg-jp-surface p-2 shadow-jp-md",
-            align === "end" ? "right-0" : "left-0",
-            panelClassName,
-          )}
-        >
-          {children}
-        </div>
-      ) : null}
+      {portal && typeof document !== "undefined" ? createPortal(panel, document.body) : panel}
     </div>
   );
 }
@@ -119,14 +212,15 @@ export function DropdownLinkItem({
   onNavigate?: () => void;
 }) {
   return (
-    <a
+    <Link
       href={href}
+      prefetch
       role="menuitem"
       className="block rounded-jp-sm px-3 py-2 text-jp-sm text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
       onClick={onNavigate}
     >
       <span className="block font-medium">{children}</span>
       {description ? <span className="mt-0.5 block text-jp-xs text-jp-muted">{description}</span> : null}
-    </a>
+    </Link>
   );
 }

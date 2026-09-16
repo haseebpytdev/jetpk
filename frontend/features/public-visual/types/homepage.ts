@@ -4,7 +4,10 @@ export type HomepageHeroContent = {
   headlineHighlight: string;
   subtitle: string;
   searchVisible: boolean;
+  focalPoint?: "left" | "center" | "right" | string;
+  overlayStrength?: string;
   image: { url: string; alt: string } | null;
+  imageMobile?: { url: string; alt: string } | null;
 };
 
 export type HomepageTrustChip = {
@@ -29,8 +32,10 @@ export type HomepageDestinationCard = {
   country?: string;
   text?: string;
   image: string | null;
+  imageAlt?: string;
   priceLabel: string;
   href: string | null;
+  winningOrigin?: string | null;
 };
 
 export type HomepageFeaturedDeal = {
@@ -45,6 +50,7 @@ export type HomepageFeaturedDeal = {
   priceLabel: string;
   image?: string | null;
   imageAlt?: string;
+  href?: string | null;
 };
 
 export type HomepageWhyCard = {

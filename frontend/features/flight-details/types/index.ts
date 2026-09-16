@@ -30,6 +30,8 @@ export type PriceBreakdownContract = {
   currency?: string | null;
   passenger_pricing?: Record<string, unknown>[] | null;
   price_note?: string | null;
+  component_breakdown_available?: boolean | null;
+  component_breakdown_unavailable?: boolean | null;
 };
 
 export type FareRulesContract = {
@@ -39,6 +41,9 @@ export type FareRulesContract = {
   change_rule?: string | null;
   refund_rule?: string | null;
   penalty?: string | null;
+  no_show?: string | null;
+  before_departure?: string | null;
+  after_departure?: string | null;
   fare_basis?: string | null;
   booking_class?: string | null;
   cabin?: string | null;
@@ -50,8 +55,11 @@ export type LayoverDisplay = {
   airport_code?: string;
   city?: string;
   duration_display?: string;
+  duration_minutes?: number | null;
   overnight?: boolean;
   terminal_change?: boolean;
+  /** Connection layover vs destination stay between outbound arrival and return departure. */
+  kind?: "connection" | "destination_stay";
 };
 
 export type ReturnComboDetails = {
@@ -97,14 +105,20 @@ export type RevalidationState =
   | "timeout"
   | "error";
 
+export type FlightDetailsLegMode = "one_way" | "outbound_confirm" | "return_confirm" | "pair";
+
 export type FlightDetailsContext = {
   searchId: string;
   offerId: string;
   fareOptionKey?: string;
   outboundKey?: string;
+  outboundFareOptionKey?: string;
   comboId?: string;
   initialOffer?: FlightOffer;
   initialFareOptions?: FareFamilyOption[];
+  intent?: "details" | "booking";
+  /** Segmented outbound fare confirm → return list; return/pair → checkout. */
+  legMode?: FlightDetailsLegMode;
 };
 
 export type { FareFamilyOption, FlightOffer };

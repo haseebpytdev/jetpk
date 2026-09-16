@@ -2,8 +2,9 @@ import { BENEFIT_FIXTURES } from "@/features/home/fixtures/benefits";
 import { DESTINATION_FIXTURES } from "@/features/home/fixtures/destinations";
 import { INSPIRATION_FIXTURES, VALUE_PROPOSITION_FIXTURES } from "@/features/home/fixtures/inspiration";
 import { FEATURED_OFFER_FIXTURES } from "@/features/home/fixtures/offers";
+import { laravelApiPath } from "@/services/flight-search";
 import { allowContentFixtures, resolveContentSource } from "@/features/public-content/utils/content-policy";
-import { fetchWithTimeout, publicContentFetchUrl } from "@/features/public-content/utils/laravel-api";
+import { fetchWithTimeout } from "@/features/public-content/utils/laravel-api";
 import { approvedHeroMedia } from "@/lib/homepage-media";
 import type {
   HomepageContent,
@@ -48,19 +49,26 @@ function emptyHero(): HomepageHeroContent {
     subtitle: "",
     searchVisible: true,
     image: null,
+    imageMobile: null,
   };
 }
 
 function mapHero(remote?: Record<string, unknown>): HomepageHeroContent {
   const image = remote?.image as { url?: string; alt?: string } | null | undefined;
+  const imageMobile = remote?.image_mobile as { url?: string; alt?: string } | null | undefined;
   return {
     eyebrow: String(remote?.eyebrow ?? ""),
     headline: String(remote?.headline ?? ""),
     headlineHighlight: String(remote?.headline_highlight ?? ""),
     subtitle: String(remote?.subtitle ?? ""),
     searchVisible: remote?.search_visible !== false,
+    focalPoint: String(remote?.focal_point ?? "center"),
+    overlayStrength: String(remote?.overlay_strength ?? "medium"),
     image: image?.url
       ? { url: image.url, alt: String(image.alt ?? "JetPakistan flights") }
+      : null,
+    imageMobile: imageMobile?.url
+      ? { url: imageMobile.url, alt: String(imageMobile.alt ?? "JetPakistan flights") }
       : null,
   };
 }
@@ -76,7 +84,7 @@ function mapSectionHeader(section?: RemoteSection) {
   };
 }
 
-function mapRoutes(items: Array<Record<string, unknown>> = []): HomepageRouteCard[] {
+export function mapRoutes(items: Array<Record<string, unknown>> = []): HomepageRouteCard[] {
   return items.map((item, index) => ({
     id: String(item.id ?? `route-${index}`),
     from: String(item.from ?? ""),
@@ -89,20 +97,22 @@ function mapRoutes(items: Array<Record<string, unknown>> = []): HomepageRouteCar
   }));
 }
 
-function mapDestinations(items: Array<Record<string, unknown>> = []): HomepageDestinationCard[] {
+export function mapDestinations(items: Array<Record<string, unknown>> = []): HomepageDestinationCard[] {
   return items.map((item, index) => ({
     id: String(item.id ?? item.code ?? `dest-${index}`),
     code: String(item.code ?? ""),
     title: String(item.title ?? ""),
     country: item.country ? String(item.country) : undefined,
-    text: item.text ? String(item.text) : undefined,
+    text: item.text ? String(item.text) : item.subtitle ? String(item.subtitle) : undefined,
     image: item.image ? String(item.image) : null,
+    imageAlt: item.image_alt ? String(item.image_alt) : undefined,
     priceLabel: String(item.price_label ?? ""),
     href: item.href ? String(item.href) : item.link ? String(item.link) : null,
+    winningOrigin: item.winning_origin ? String(item.winning_origin) : null,
   }));
 }
 
-function mapFeaturedDeals(items: Array<Record<string, unknown>> = []): HomepageFeaturedDeal[] {
+export function mapFeaturedDeals(items: Array<Record<string, unknown>> = []): HomepageFeaturedDeal[] {
   return items.map((item, index) => ({
     id: String(item.id ?? `deal-${index}`),
     airline: String(item.airline ?? ""),
@@ -115,6 +125,7 @@ function mapFeaturedDeals(items: Array<Record<string, unknown>> = []): HomepageF
     priceLabel: String(item.price_label ?? ""),
     image: item.image ? String(item.image) : null,
     imageAlt: item.image_alt ? String(item.image_alt) : undefined,
+    href: item.href ? String(item.href) : null,
   }));
 }
 
@@ -128,20 +139,54 @@ function mapWhyCards(cards: Array<Record<string, unknown>> = []): HomepageWhyCar
   }));
 }
 
-function mapSupportCta(remote?: Record<string, unknown>): HomepageSupportCta {
+function decodeCmsText(value: unknown): string {
+  const text = String(value ?? "");
+  return text.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex: string) =>
+    String.fromCharCode(Number.parseInt(hex, 16)),
+  );
+}
+
+export function mapSupportCta(remote?: Record<string, unknown>): HomepageSupportCta {
   return {
     enabled: remote?.enabled === true,
-    eyebrow: String(remote?.eyebrow ?? ""),
-    title: String(remote?.title ?? ""),
-    subtitle: String(remote?.subtitle ?? ""),
+    eyebrow: decodeCmsText(remote?.eyebrow ?? ""),
+    title: decodeCmsText(remote?.title ?? ""),
+    subtitle: decodeCmsText(remote?.subtitle ?? ""),
     callEnabled: remote?.call_enabled !== false,
     callLabel: String(remote?.call_label ?? "Call support"),
-    callHref: remote?.call_href ? String(remote.call_href) : null,
+    callHref: sanitizePublicActionHref(remote?.call_href ? String(remote.call_href) : null),
     chatEnabled: remote?.chat_enabled !== false,
     chatLabel: String(remote?.chat_label ?? "Get support"),
-    chatHref: remote?.chat_href ? String(remote.chat_href) : null,
+    chatHref: sanitizePublicActionHref(remote?.chat_href ? String(remote.chat_href) : null),
     image: remote?.image ? String(remote.image) : null,
   };
+}
+
+function sanitizePublicActionHref(href: string | null): string | null {
+  if (!href) return null;
+  const trimmed = href.trim();
+  if (trimmed === "" || trimmed === "#") return null;
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith("javascript:")) return null;
+  if (lower.startsWith("tel:") || lower.startsWith("mailto:") || trimmed.startsWith("/")) {
+    return trimmed;
+  }
+  try {
+    const url = new URL(trimmed);
+    const host = url.hostname.toLowerCase();
+    const isPrivate =
+      host === "127.0.0.1" || host === "localhost" || host.endsWith(".local");
+    if (isPrivate) {
+      const path = url.pathname || "/";
+      if (path.toLowerCase().startsWith("/tel:") || path.toLowerCase().startsWith("/mailto:")) {
+        return path.slice(1) + url.search + url.hash;
+      }
+      return path + url.search + url.hash;
+    }
+    return trimmed;
+  } catch {
+    return trimmed.startsWith("/") ? trimmed : `/${trimmed.replace(/^\/+/, "")}`;
+  }
 }
 
 function mapTrustChips(chips: Array<{ label?: string }> = []): HomepageTrustChip[] {
@@ -288,15 +333,50 @@ function mapRemote(remote: RemoteHomepage): HomepageContent {
   };
 }
 
+function resolveHomepageApiUrl(): string {
+  if (typeof window !== "undefined") {
+    return laravelApiPath("/api/public/content/homepage");
+  }
+
+  const laravelBase = (
+    process.env.LARAVEL_URL ??
+    process.env.NEXT_PUBLIC_LARAVEL_URL ??
+    "http://127.0.0.1:8000"
+  ).replace(/\/$/, "");
+
+  return `${laravelBase}/api/public/content/homepage`;
+}
+
 export const HomepageContentService = {
   heroFallbackImage: HERO_FALLBACK_IMAGE,
   heroFallbackAlt: HERO_FALLBACK_ALT,
 
-  async getHomepage(): Promise<HomepageContent> {
+  async getHomepage(options?: {
+    preview?: boolean;
+    headers?: Record<string, string>;
+    previewToken?: string | null;
+  }): Promise<HomepageContent> {
     try {
-      const response = await fetchWithTimeout(publicContentFetchUrl("/api/public/content/homepage"), {
-        headers: { Accept: "application/json" },
-        next: { revalidate: 120, tags: ["public-homepage"] },
+      const params = new URLSearchParams();
+      if (options?.preview) {
+        params.set("jp_preview", "1");
+      }
+      const token = options?.previewToken?.trim();
+      if (token) {
+        params.set("jp_preview_token", token);
+      }
+      const query = params.toString();
+      const url = `${resolveHomepageApiUrl()}${query ? `?${query}` : ""}`;
+
+      const response = await fetchWithTimeout(url, {
+        headers: {
+          Accept: "application/json",
+          ...(options?.headers ?? {}),
+        },
+        // Preview must stay fresh; published homepage CMS can short-revalidate.
+        ...(options?.preview
+          ? { cache: "no-store" as const, next: { tags: ["homepage-cms"] } }
+          : { next: { revalidate: 120, tags: ["homepage-cms"] } }),
       });
 
       if (!response.ok) {

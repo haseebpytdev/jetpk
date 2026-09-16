@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
 import { OrderSummary } from "@/features/booking-layout";
@@ -15,16 +15,16 @@ import { FareRulesAccordion } from "@/features/flight-details/components/FareRul
 import {
   OfferExpiredState,
   OfferUnavailableState,
-  RevalidationPanel,
   SupplierTimeoutState,
 } from "@/features/flight-details/components/OfferStatePanels";
+import { FareProcessingTransition } from "@/features/flight-details/components/FareProcessingTransition";
 import { PriceBreakdown } from "@/features/flight-details/components/PriceBreakdown";
-import { ReturnJourneyDetails } from "@/features/flight-details/components/ReturnJourneyDetails";
-import { RouteTimeline } from "@/features/flight-details/components/RouteTimeline";
 import { SegmentDetails } from "@/features/flight-details/components/SegmentDetails";
 import { useFlightDetails } from "@/features/flight-details/hooks/use-flight-details";
 import { useRevalidation } from "@/features/flight-details/hooks/use-revalidation";
 import type { FlightDetailsContext } from "@/features/flight-details/types";
+import { buildFareRouteLabel } from "@/features/flight-details/utils/route-label";
+import { toAuthoritativeFareOptionKey } from "@/features/flight-details/utils/base-offer-fare";
 
 export function FareSelectionPage() {
   const router = useRouter();
@@ -53,6 +53,35 @@ export function FareSelectionPage() {
   const isInquiry = details.data?.multicity_inquiry_only ?? offer?.multicity_inquiry_only;
   const canContinue = offer?.can_book && !isInquiry;
 
+  // Explicit selected fare (or URL fare key) → background authoritative revalidation while user reviews.
+  useEffect(() => {
+    if (!context || !offer || isInquiry) return;
+    const fareKey = toAuthoritativeFareOptionKey(
+      details.selectedFareKey || context.fareOptionKey,
+      details.fareOptions,
+    );
+    revalidation.warmStartRevalidation({
+      searchId: context.searchId,
+      offerId: offer.offer_id,
+      fareOptionKey: fareKey,
+      selectUrl: offer.select_url,
+      supplierProvider: offer.supplier_provider ?? offer.provider,
+      isReturnCombo: Boolean(context.comboId),
+      comboId: context.comboId,
+      outboundKey: context.outboundKey,
+      outboundFareOptionKey: context.outboundFareOptionKey,
+      returnFareOptionKey: fareKey,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- warm on fare identity only
+  }, [
+    context?.searchId,
+    offer?.offer_id,
+    details.selectedFareKey,
+    context?.fareOptionKey,
+    context?.comboId,
+    isInquiry,
+  ]);
+
   const showRevalidationError =
     revalidation.state === "unavailable" ||
     revalidation.state === "expired" ||
@@ -61,15 +90,23 @@ export function FareSelectionPage() {
 
   const handleContinue = () => {
     if (!offer || !context) return;
+    // Same fare identity as warmStartRevalidation — mismatched keys force a
+    // second revalidate-offer POST (DUP rematch≥2 / fetch P95 pollution).
+    const fareKey = toAuthoritativeFareOptionKey(
+      details.selectedFareKey || context.fareOptionKey,
+      details.fareOptions,
+    );
     void revalidation.continueToPassengers({
       searchId: context.searchId,
       offerId: offer.offer_id,
-      fareOptionKey: details.selectedFareKey,
+      fareOptionKey: fareKey,
       selectUrl: offer.select_url,
       supplierProvider: offer.supplier_provider ?? offer.provider,
       isReturnCombo: Boolean(context.comboId),
       comboId: context.comboId,
       outboundKey: context.outboundKey,
+      outboundFareOptionKey: context.outboundFareOptionKey,
+      returnFareOptionKey: fareKey,
     });
   };
 
@@ -100,7 +137,7 @@ export function FareSelectionPage() {
 
       <header className="mb-jp-xl">
         <p className="text-jp-sm text-jp-muted">Home › Flights › Fare Selection</p>
-        <h1 className="mt-jp-sm font-display text-jp-h2 font-bold text-jp-text">
+        <h1 className="mt-jp-sm font-sans text-jp-h2 font-bold text-jp-text">
           Choose Your <span className="text-jp-brand">Fare</span>
         </h1>
         <p className="mt-jp-xs text-jp-body text-jp-muted">
@@ -108,7 +145,7 @@ export function FareSelectionPage() {
         </p>
       </header>
 
-      <div className="grid gap-jp-xl lg:grid-cols-[minmax(0,1fr)_minmax(280px,330px)]">
+            <div className="grid gap-jp-xl lg:grid-cols-[minmax(0,1fr)_minmax(300px,360px)]">
         <div className="space-y-jp-lg">
           {details.loadState === "loading" ? <ResultSkeleton count={3} /> : null}
           {details.loadState === "error" ? (
@@ -132,9 +169,28 @@ export function FareSelectionPage() {
                 />
               ) : null}
 
-              <ReturnJourneyDetails returnCombo={details.data?.return_combo} />
-              <RouteTimeline segments={segments} layovers={offer.layovers_display} />
-              <SegmentDetails segments={segments} />
+              <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5" aria-labelledby="fare-selection-journey-heading">
+                <h2 id="fare-selection-journey-heading" className="mb-3 text-sm font-semibold text-jp-text">
+                  Journey details
+                </h2>
+                <SegmentDetails
+                  segments={segments}
+                  layovers={offer.layovers_display}
+                  airlineLogoUrl={offer.airline_logo_url}
+                  journeyBoundaryIndexes={
+                    details.data?.return_combo
+                      ? [
+                          Math.max(
+                            0,
+                            (Array.isArray((details.data.return_combo.outbound_journey as { segments?: unknown[] } | null)?.segments)
+                              ? ((details.data.return_combo.outbound_journey as { segments?: unknown[] }).segments?.length ?? 1)
+                              : Math.max(1, Math.floor(segments.length / 2))) - 1,
+                          ),
+                        ]
+                      : []
+                  }
+                />
+              </section>
 
               <FareFamilyDetails
                 options={details.fareOptions}
@@ -148,6 +204,7 @@ export function FareSelectionPage() {
                 summaryDisplay={offer.baggage_summary_display ?? offer.baggage}
                 checkedDisplay={offer.baggage_checked_display}
                 cabinDisplay={offer.baggage_cabin_display}
+                routeLabel={buildFareRouteLabel(offer)}
               />
 
               <FareRulesAccordion
@@ -155,17 +212,20 @@ export function FareSelectionPage() {
                 refundRule={offer.refund_rule}
                 changeRule={offer.change_rule}
                 refundable={offer.refundable}
+                routeLabel={buildFareRouteLabel(offer)}
               />
 
               <PriceBreakdown offer={offer} breakdown={fallback?.fare_breakdown} />
 
               {revalidation.state === "loading" ? (
-                <RevalidationPanel message="Confirming fare with the airline…" />
+                <FareProcessingTransition
+                  phase={revalidation.uiPhase ?? "VALIDATING_FARE"}
+                />
               ) : null}
               {revalidation.state === "unavailable" ? (
                 <OfferUnavailableState
-                  title="Fare unavailable"
-                  message={revalidation.message ?? "This fare is no longer available."}
+                  title="This fare is no longer available"
+                  message={revalidation.message ?? "Choose another flight or start a fresh search."}
                   onNewSearch={() => router.push("/")}
                 />
               ) : null}

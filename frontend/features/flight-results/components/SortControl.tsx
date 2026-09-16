@@ -9,16 +9,14 @@ type SortControlProps = {
 
 export function SortControl({ value, onChange }: SortControlProps) {
   return (
-    <label className="flex items-center gap-2 text-sm text-jp-text">
-      <span className="sr-only">Sort results by</span>
-      <span aria-hidden="true" className="text-jp-text-muted">
-        Sort
-      </span>
+    <label className="flex items-center gap-2 text-sm text-jp-text" data-testid="sort-control-label">
+      <span className="text-jp-text-muted">Sort</span>
       <select
-        className="rounded-jp-md border border-jp-border bg-jp-surface px-2 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
+        className="min-w-[10.5rem] rounded-jp-md border border-jp-border bg-jp-surface px-2.5 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
         value={value}
         onChange={(event) => onChange(event.target.value as UiSortKey)}
         data-testid="sort-control"
+        aria-label="Sort results"
       >
         {SORT_CONTROLS.map((option) => (
           <option key={option.key} value={option.key}>

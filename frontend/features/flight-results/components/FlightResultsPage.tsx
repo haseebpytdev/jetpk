@@ -1,82 +1,204 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FlightDetailsDrawer, type FlightDetailsContext } from "@/features/flight-details";
+import type { FlightDetailsContext } from "@/features/flight-details";
 import { buildSearchSummaryFromParams, useFlightResults } from "../hooks/use-flight-results";
-import { useOfferSelection } from "../hooks/use-offer-selection";
 import { parseFiltersFromSearchParams } from "../utils/filters";
 import { parseUiSort, type UiSortKey } from "../utils/sorting";
+import {
+  buildFreshResultsSearchParams,
+  clearResultsLeftForCheckout,
+  didLeaveResultsForCheckout,
+  markResultsSnapshot,
+  RESULTS_AUTHORITY_REUSE_MS,
+  resultsSnapshotAgeMs,
+  shouldRefreshStaleResultsSnapshot,
+} from "../utils/checkout-nav";
 import { EmptyResultsState } from "./EmptyResultsState";
 import { ExpiredSearchState } from "./ExpiredSearchState";
 import { NearbyDateStrip } from "./NearbyDateStrip";
 import { FlightResultCard } from "./FlightResultCard";
 import { LoadMoreControl } from "./LoadMoreControl";
 import { MobileFilterDrawer } from "./MobileFilterDrawer";
-import { ModifySearchPanel } from "./ModifySearchPanel";
 import { OutboundOptionCard } from "./OutboundOptionCard";
+import { PairReturnCard, pairedOptionToOffer } from "./PairReturnCard";
 import { PartialResultsNotice } from "./PartialResultsNotice";
 import { ResultSkeleton } from "./ResultSkeleton";
 import { ResultsFilterPanel } from "./ResultsFilterPanel";
-import { ResultsSortTabs } from "./ResultsSortTabs";
 import { ResultsToolbar } from "./ResultsToolbar";
+import { ReturnViewSelector } from "./ReturnViewSelector";
 import { SearchErrorState } from "./SearchErrorState";
 import { SearchProgress } from "./SearchProgress";
 import { ResultsHeroBand } from "./ResultsHeroBand";
 import { SearchSummaryBar } from "./SearchSummaryBar";
+
+/** First useful paint: mount a short visible window before remaining cards. */
+const INITIAL_VISIBLE_CARDS = 4;
+
+const FlightDetailsDrawer = dynamic(
+  () => import("@/features/flight-details").then((mod) => mod.FlightDetailsDrawer),
+  { ssr: false },
+);
+
+// Modify-search widget is closed by default — keep it out of the results critical chunk.
+const SearchModule = dynamic(
+  () => import("@/features/search").then((mod) => mod.SearchModule),
+  { ssr: false },
+);
 
 export function FlightResultsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params = useMemo(() => new URLSearchParams(searchParams.toString()), [searchParams]);
   const searchId = params.get("search_id");
+  const tripType = params.get("trip_type");
+  const viewParam = params.get("view");
+  const isReturn = tripType === "round_trip";
+  // JP-NEXT-PERF-02B: local override avoids App Router remount on Pair↔Segmented.
+  const [viewOverride, setViewOverride] = useState<"pair" | "segmented" | null>(null);
+  const effectiveViewParam = viewOverride ?? viewParam;
+  // Authoritative only after user choice (or explicit URL). Do not invent Pair before modal.
+  const resolvedView: "pair" | "segmented" | null = !isReturn
+    ? null
+    : effectiveViewParam === "segmented"
+      ? "segmented"
+      : effectiveViewParam === "pair"
+        ? "pair"
+        : null;
+  const awaitingReturnViewChoice = isReturn && resolvedView === null;
   const [sort, setSort] = useState<UiSortKey>(() => parseUiSort(params.get("sort")));
   const [filters, setFilters] = useState(() => parseFiltersFromSearchParams(params));
-  const [modifyOpen, setModifyOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [detailsContext, setDetailsContext] = useState<FlightDetailsContext | null>(null);
+  const [resultsStaleLocked, setResultsStaleLocked] = useState(false);
+  const [visiblePaintBudget, setVisiblePaintBudget] = useState(INITIAL_VISIBLE_CARDS);
   const detailsTriggerRef = useRef<HTMLElement | null>(null);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const freshSearchInFlight = useRef(false);
+  const defaultSortSynced = useRef(false);
 
   const summary = useMemo(() => buildSearchSummaryFromParams(params), [params]);
+
+  // Warm CSRF off the Book Now critical path (fare validate no longer waits cold CSRF).
+  useEffect(() => {
+    void import("@/features/auth/utils/laravel-auth-api").then((m) => {
+      void m.ensureLaravelCsrfToken();
+    });
+  }, []);
+
+  // Persist sort default only — return view waits for ReturnViewSelector (no wrong-view flash).
+  useEffect(() => {
+    if (defaultSortSynced.current) return;
+    if (params.get("sort")) {
+      defaultSortSynced.current = true;
+      return;
+    }
+    defaultSortSynced.current = true;
+    const next = new URLSearchParams(params);
+    next.set("sort", "cheapest");
+    const liveId =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("search_id")
+        : null;
+    if (liveId && !next.get("search_id")) {
+      next.set("search_id", liveId);
+    }
+    router.replace(`/flights/results?${next.toString()}`, { scroll: false });
+  }, [params, router]);
 
   const results = useFlightResults({
     searchId,
     searchParams: params,
     sort,
     filters,
+    view: resolvedView,
   });
 
-  const selection = useOfferSelection(results.resolvedSearchId ?? searchId ?? "");
+  const startFreshSearchFromCheckoutReturn = useCallback(() => {
+    if (freshSearchInFlight.current) return;
+    freshSearchInFlight.current = true;
+    setResultsStaleLocked(true);
+    setDetailsContext(null);
+    setViewOverride(null);
+    clearResultsLeftForCheckout();
+    const next = buildFreshResultsSearchParams(params);
+    router.replace(`/flights/results?${next.toString()}`, { scroll: false });
+    window.setTimeout(() => {
+      freshSearchInFlight.current = false;
+    }, 1500);
+  }, [params, router]);
 
-  const handleSelectOffer = useCallback(
-    (offer: import("../types").FlightOffer, fareOptionKey: string) => {
-      const branded = offer.branded_fares_display_options ?? offer.fare_family_options_display ?? [];
-      const hasBranded = branded.length > 1 || (offer.has_branded_fares && branded.length > 0);
-      const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
-      if (hasBranded && resolvedSearchId) {
-        const query = new URLSearchParams({
-          search_id: resolvedSearchId,
-          offer_id: offer.offer_id,
-          fare_option_key: fareOptionKey,
-        });
-        router.push(`/flights/fare-selection?${query.toString()}`);
-        return;
+  useEffect(() => {
+    if (results.status === "ready" || results.status === "empty") {
+      markResultsSnapshot(results.resolvedSearchId ?? searchId);
+    }
+  }, [results.status, results.resolvedSearchId, searchId]);
+
+  useLayoutEffect(() => {
+    const tryRefresh = (event: PageTransitionEvent, treatAsBackNavigation = false) => {
+      if (shouldRefreshStaleResultsSnapshot(event, Date.now(), { treatAsBackNavigation })) {
+        startFreshSearchFromCheckoutReturn();
       }
-      void selection.selectOffer(offer, fareOptionKey);
-    },
-    [results.resolvedSearchId, router, searchId, selection],
-  );
+    };
+
+    if (didLeaveResultsForCheckout()) {
+      tryRefresh({ persisted: false } as PageTransitionEvent, true);
+    }
+
+    const onPageShow = (event: PageTransitionEvent) => tryRefresh(event);
+    const onPopState = () => tryRefresh({ persisted: false } as PageTransitionEvent, true);
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("popstate", onPopState);
+    const onVisibility = () => {
+      if (document.visibilityState !== "visible") return;
+      const age = resultsSnapshotAgeMs();
+      if (age !== null && age > RESULTS_AUTHORITY_REUSE_MS) {
+        startFreshSearchFromCheckoutReturn();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("popstate", onPopState);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [startFreshSearchFromCheckoutReturn]);
+
+  useEffect(() => {
+    if (results.resolvedSearchId && results.status !== "idle" && results.status !== "initializing") {
+      setResultsStaleLocked(false);
+    }
+  }, [results.resolvedSearchId, results.status]);
 
   const syncUrl = useCallback(
-    (nextFilters: typeof filters, nextSort: UiSortKey) => {
+    (
+      nextFilters: typeof filters,
+      nextSort: UiSortKey,
+      extra?: Record<string, string | null>,
+      liveSearchId?: string | null,
+    ) => {
       const next = new URLSearchParams(params);
-      next.set("sort", nextSort);
+      // history.replaceState may have added search_id outside Next navigation —
+      // never drop it when switching Pair/Segmented or sorting.
+      const authoritativeSearchId =
+        liveSearchId ||
+        next.get("search_id") ||
+        (typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("search_id")
+          : null);
+      if (authoritativeSearchId) {
+        next.set("search_id", authoritativeSearchId);
+      }
+      // Persist Laravel-authoritative sort keys in the URL.
+      next.set("sort", nextSort === "lowest_price" ? "cheapest" : nextSort);
       [
         "airline",
         "stops",
         "refundable",
-        "cabin",
+        "cabin_filter",
         "baggage",
         "departure_window",
         "arrival_window",
@@ -88,10 +210,23 @@ export function FlightResultsPage() {
         "fare_family",
         "bookable_only",
         "operating_airline",
+        "flight_number",
       ].forEach((key) => next.delete(key));
+      // Never delete search criteria `cabin` — only sync facet `cabin_filter`.
       Object.entries(nextFilters).forEach(([key, value]) => {
-        if (value) next.set(key, value);
+        if (!value) return;
+        if (key === "cabin") {
+          next.set("cabin_filter", value);
+          return;
+        }
+        next.set(key, value);
       });
+      if (extra) {
+        Object.entries(extra).forEach(([key, value]) => {
+          if (value === null) next.delete(key);
+          else next.set(key, value);
+        });
+      }
       router.replace(`/flights/results?${next.toString()}`, { scroll: false });
     },
     [params, router],
@@ -99,21 +234,74 @@ export function FlightResultsPage() {
 
   const handleFiltersChange = (next: typeof filters) => {
     setFilters(next);
-    syncUrl(next, sort);
+    syncUrl(next, sort, undefined, results.resolvedSearchId);
   };
 
   const handleSortChange = (next: UiSortKey) => {
     setSort(next);
-    syncUrl(filters, next);
+    syncUrl(filters, next, undefined, results.resolvedSearchId);
   };
 
   const handleClearFilters = () => {
     setFilters({});
-    syncUrl({}, sort);
+    syncUrl({}, sort, undefined, results.resolvedSearchId);
   };
 
+  const setReturnView = useCallback(
+    (view: "pair" | "segmented") => {
+      // Local presentation switch: update URL without App Router remount/loading.tsx.
+      setViewOverride(view);
+      setVisiblePaintBudget(INITIAL_VISIBLE_CARDS);
+      try {
+        const next = new URLSearchParams(
+          typeof window !== "undefined" ? window.location.search : params.toString(),
+        );
+        const authoritativeSearchId =
+          results.resolvedSearchId ||
+          next.get("search_id") ||
+          searchId ||
+          null;
+        if (authoritativeSearchId) next.set("search_id", authoritativeSearchId);
+        next.set("view", view);
+        next.delete("outbound_key");
+        next.delete("combo_id");
+        next.delete("fare_option_key");
+        window.history.replaceState(null, "", `/flights/results?${next.toString()}`);
+      } catch {
+        syncUrl(filters, sort, { view, outbound_key: null, combo_id: null, fare_option_key: null }, results.resolvedSearchId);
+      }
+    },
+    [filters, params, results.resolvedSearchId, searchId, sort, syncUrl],
+  );
+
+  // First useful cards first; expand remaining after paint (no fare accuracy compromise).
+  useEffect(() => {
+    const total = results.isReturnPair
+      ? results.pairedOptions.length
+      : results.isReturnSplit
+        ? results.outboundOptions.length
+        : results.offers.length;
+    if (total <= INITIAL_VISIBLE_CARDS) {
+      setVisiblePaintBudget(total || INITIAL_VISIBLE_CARDS);
+      return;
+    }
+    setVisiblePaintBudget(INITIAL_VISIBLE_CARDS);
+    const raf = window.requestAnimationFrame(() => {
+      startTransition(() => setVisiblePaintBudget(total));
+    });
+    return () => window.cancelAnimationFrame(raf);
+  }, [
+    results.isReturnPair,
+    results.isReturnSplit,
+    results.offers.length,
+    results.outboundOptions.length,
+    results.pairedOptions.length,
+    resolvedView,
+  ]);
+
   const openDetails = useCallback(
-    (offer: import("../types").FlightOffer, fareOptionKey: string) => {
+    (offer: import("../types").FlightOffer, fareOptionKey: string, intent: "details" | "booking") => {
+      if (resultsStaleLocked) return;
       const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
       if (!resolvedSearchId) return;
       setDetailsContext({
@@ -122,9 +310,60 @@ export function FlightResultsPage() {
         fareOptionKey,
         initialOffer: offer,
         initialFareOptions: offer.branded_fares_display_options ?? offer.fare_family_options_display,
+        intent,
+        legMode: "one_way",
       });
     },
-    [results.resolvedSearchId, searchId],
+    [results.resolvedSearchId, resultsStaleLocked, searchId],
+  );
+
+  const openOutboundFareConfirmation = useCallback(
+    (
+      option: import("../types").OutboundOption,
+      offer: import("../types").FlightOffer,
+      fareOptionKey: string,
+      intent: "details" | "booking",
+    ) => {
+      if (resultsStaleLocked) return;
+      const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
+      if (!resolvedSearchId) return;
+      setDetailsContext({
+        searchId: resolvedSearchId,
+        offerId: option.outbound_key,
+        outboundKey: option.outbound_key,
+        fareOptionKey,
+        initialOffer: offer,
+        initialFareOptions: offer.branded_fares_display_options ?? offer.fare_family_options_display,
+        intent,
+        legMode: "outbound_confirm",
+      });
+    },
+    [results.resolvedSearchId, resultsStaleLocked, searchId],
+  );
+
+  const openPairFareConfirmation = useCallback(
+    (
+      pair: import("../types").PairedReturnOption,
+      fareOptionKey?: string,
+      intent: "details" | "booking" = "booking",
+    ) => {
+      if (resultsStaleLocked) return;
+      const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
+      if (!resolvedSearchId) return;
+      const seededOffer = pairedOptionToOffer(pair);
+      setDetailsContext({
+        searchId: resolvedSearchId,
+        offerId: pair.offer_id ?? pair.combo_id,
+        comboId: pair.combo_id,
+        outboundKey: pair.outbound_key,
+        fareOptionKey,
+        initialOffer: seededOffer,
+        initialFareOptions: seededOffer.branded_fares_display_options ?? seededOffer.fare_family_options_display,
+        intent,
+        legMode: "pair",
+      });
+    },
+    [results.resolvedSearchId, resultsStaleLocked, searchId],
   );
 
   const closeDetails = useCallback(() => {
@@ -132,8 +371,26 @@ export function FlightResultsPage() {
     detailsTriggerRef.current?.focus();
   }, []);
 
-  const shownCount = results.isReturnSplit ? results.outboundOptions.length : results.offers.length;
-  const isLoading = results.status === "loading" || results.status === "initializing";
+  const shownCount = results.isReturnPair
+    ? results.pairedOptions.length
+    : results.isReturnSplit
+      ? results.outboundOptions.length
+      : results.offers.length;
+  const isBootstrapping =
+    results.status === "idle" || results.status === "loading" || results.status === "initializing";
+  const isSearchingMask =
+    (results.status === "searching" || results.status === "loading" || isBootstrapping) &&
+    shownCount === 0;
+  // Never show prior cards beside a fatal error/failed banner (stale mix blocker).
+  const showResultsList =
+    !resultsStaleLocked &&
+    results.status !== "error" &&
+    results.status !== "failed" &&
+    results.status !== "expired" &&
+    (results.status === "ready" ||
+      results.status === "partial" ||
+      (shownCount > 0 && results.status !== "empty" && results.status !== "loading"));
+  const isLoading = isBootstrapping && shownCount === 0;
 
   return (
     <div className="w-full">
@@ -141,125 +398,234 @@ export function FlightResultsPage() {
 
       <div className="relative">
         <ResultsHeroBand />
-        <div className="relative z-10 mx-auto -mt-14 max-w-7xl px-4 sm:-mt-16 sm:px-6 lg:px-8">
-          <SearchSummaryBar summary={summary} onModifyClick={() => setModifyOpen(true)} />
+        <div className="relative z-10 mx-auto max-w-7xl px-4 pb-1 pt-3 sm:px-6 lg:px-8">
+          <SearchSummaryBar summary={summary} onModifyClick={() => setEditOpen((open) => !open)} />
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-7xl space-y-4 px-4 pb-6 pt-4 sm:px-6 lg:px-8">
-
-      {results.freshness?.expires_display ? (
-        <p className="text-xs text-jp-text-muted" data-testid="search-expiry">
-          {results.freshness.expires_display}
-        </p>
-      ) : null}
-
-      <PartialResultsNotice warnings={results.data?.warnings} />
-
-      {results.status === "ready" && !results.isReturnSplit ? (
-        <NearbyDateStrip searchId={results.resolvedSearchId ?? ""} hidden={results.isReturnSplit} />
-      ) : null}
-
-      <ResultsToolbar
-        sort={sort}
-        onSortChange={handleSortChange}
-        filters={filters}
-        onOpenFilters={() => setFiltersOpen(true)}
-        filterButtonRef={filterButtonRef}
-        total={results.total}
-      />
-
-      <ResultsSortTabs value={sort} onChange={handleSortChange} className="hidden sm:flex" />
-
-      <div className="grid gap-6 lg:grid-cols-[minmax(14rem,16rem)_1fr]">
-        <div className="hidden lg:block">
-          <ResultsFilterPanel
-            facets={results.data?.filters}
-            filters={filters}
-            onChange={handleFiltersChange}
-            onClearAll={handleClearFilters}
-          />
-        </div>
-
-        <div className="min-w-0 space-y-4">
-          {isLoading ? (
-            <>
-              <SearchProgress message={results.message || "Loading results…"} />
-              <ResultSkeleton />
-            </>
-          ) : null}
-
-          {results.status === "error" || results.status === "failed" ? (
-            <SearchErrorState message={results.message} onRetry={results.retry} />
-          ) : null}
-
-          {results.status === "expired" ? (
-            <ExpiredSearchState message={results.message} onNewSearch={() => setModifyOpen(true)} />
-          ) : null}
-
-          {results.status === "empty" ? (
-            <EmptyResultsState message={results.message} onNewSearch={() => setModifyOpen(true)} />
-          ) : null}
-
-          {results.status === "ready" ? (
-            <div role="list" className="space-y-4" aria-label="Flight results">
-              {results.isReturnSplit
-                ? results.outboundOptions.map((option) => (
-                    <div key={option.outbound_key} role="listitem">
-                      <OutboundOptionCard option={option} searchId={results.resolvedSearchId ?? ""} />
-                    </div>
-                  ))
-                : results.offers.map((offer) => (
-                    <div key={offer.offer_id} role="listitem">
-                      <FlightResultCard
-                        offer={offer}
-                        searchId={results.resolvedSearchId ?? ""}
-                        selecting={selection.selectingId === offer.offer_id}
-                        onSelect={handleSelectOffer}
-                        onOpenDetails={openDetails}
-                      />
-                    </div>
-                  ))}
-            </div>
-          ) : null}
-
-          {selection.error ? (
-            <p className="text-sm text-red-700" role="alert">
-              {selection.error}
-            </p>
-          ) : null}
-
-          {results.status === "ready" ? (
-            <LoadMoreControl
-              hasMore={results.hasMore}
-              loading={results.isLoadingMore}
-              onLoadMore={results.loadMore}
-              total={results.total}
-              shown={shownCount}
+      <div className="mx-auto w-full max-w-7xl space-y-2.5 px-4 pb-24 pt-2.5 sm:px-6 sm:pb-10 lg:px-8 xl:pb-6">
+        {editOpen ? (
+          <div data-testid="inline-edit-search">
+            <SearchModule
+              variant="results"
+              layout="compact"
+              initialParams={params}
+              onSubmitted={() => setEditOpen(false)}
             />
-          ) : null}
+          </div>
+        ) : null}
+
+        {isReturn && !awaitingReturnViewChoice ? (
+          <div className="flex flex-wrap items-center gap-2 text-sm" data-testid="return-view-switch">
+            <span className="text-jp-text-muted">View:</span>
+            <button
+              type="button"
+              className={`rounded-jp-md px-2 py-1 ${resolvedView === "pair" ? "bg-jp-primary text-white" : "border border-jp-border"}`}
+              onClick={() => setReturnView("pair")}
+            >
+              Pair
+            </button>
+            <button
+              type="button"
+              className={`rounded-jp-md px-2 py-1 ${resolvedView === "segmented" ? "bg-jp-primary text-white" : "border border-jp-border"}`}
+              onClick={() => setReturnView("segmented")}
+            >
+              Segmented
+            </button>
+          </div>
+        ) : null}
+
+        {(results.status === "ready" || results.status === "partial") &&
+        results.message &&
+        !results.searchStillActive ? (
+          <div
+            className="rounded-jp-md border border-jp-border bg-jp-surface-muted px-3 py-2 text-sm text-jp-text-muted"
+            data-testid="results-soft-warning"
+            role="status"
+          >
+            {results.message}
+          </div>
+        ) : null}
+
+        {results.isReturnSplit ? (
+          <ol className="flex gap-3 text-xs font-medium text-jp-text-muted" data-testid="segmented-progress">
+            <li className="text-jp-primary">1. Outbound</li>
+            <li>2. Return</li>
+            <li>3. Fare &amp; Travelers</li>
+          </ol>
+        ) : null}
+
+        {results.freshness?.expires_display ? (
+          <p className="text-xs text-jp-text-muted" data-testid="search-expiry">
+            {results.freshness.expires_display}
+          </p>
+        ) : null}
+
+        <PartialResultsNotice
+          warnings={
+            // Soft inventory path already explains partial supplier failure — do not also
+            // surface fatal "could not complete" pipeline warnings (STALE_RESULTS_ERROR_MIX).
+            (results.status === "ready" || results.status === "partial") && results.message
+              ? (results.data?.warnings ?? []).filter(
+                  (w) =>
+                    !/could not complete|unable to (load|complete)|search failed|please try again/i.test(
+                      w,
+                    ),
+                )
+              : results.data?.warnings
+          }
+        />
+
+        {results.status === "ready" && !results.isReturnSplit ? (
+          <NearbyDateStrip searchId={results.resolvedSearchId ?? ""} hidden={results.isReturnSplit} />
+        ) : null}
+
+        <ResultsToolbar
+          sort={sort}
+          onSortChange={handleSortChange}
+          filters={filters}
+          onOpenFilters={() => setFiltersOpen(true)}
+          filterButtonRef={filterButtonRef}
+          total={results.total}
+          status={results.status}
+          loadingMessage={results.message}
+          searchStillActive={results.searchStillActive}
+        />
+
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,14.5rem)_minmax(0,1fr)]">
+          <div className="hidden min-w-0 max-w-full lg:block">
+            <ResultsFilterPanel
+              facets={results.data?.filters}
+              filters={filters}
+              onChange={handleFiltersChange}
+              onClearAll={handleClearFilters}
+              loading={isLoading || isSearchingMask}
+            />
+          </div>
+
+          <div className="min-w-0 space-y-3">
+            {awaitingReturnViewChoice ? (
+              <SearchProgress
+                message={results.message || "Searching airlines… choose how you want to view return flights."}
+                summary={summary}
+              />
+            ) : null}
+
+            {!awaitingReturnViewChoice && (isSearchingMask || resultsStaleLocked) ? (
+              <>
+                <SearchProgress
+                  message={
+                    resultsStaleLocked
+                      ? "Refreshing latest fares…"
+                      : results.message || "Searching flights…"
+                  }
+                  summary={summary}
+                />
+                <ResultSkeleton />
+              </>
+            ) : null}
+
+            {results.searchStillActive && shownCount > 0 ? (
+              <SearchProgress
+                compact
+                message={results.message || "Checking for more options…"}
+              />
+            ) : null}
+
+            {results.status === "error" || results.status === "failed" ? (
+              <SearchErrorState message={results.message} onRetry={results.retry} />
+            ) : null}
+
+            {results.status === "expired" ? (
+              <ExpiredSearchState message={results.message} onNewSearch={() => setEditOpen(true)} />
+            ) : null}
+
+            {results.status === "empty" && results.isReturnPair ? (
+              <div className="rounded-jp-card border border-jp-border bg-jp-surface p-6" data-testid="pair-empty">
+                <p className="font-medium text-jp-text">No paired return options are currently available.</p>
+                <button
+                  type="button"
+                  className="mt-3 rounded-jp-md bg-jp-primary px-3 py-2 text-sm font-semibold text-white"
+                  onClick={() => setReturnView("segmented")}
+                >
+                  Switch to Segmented View
+                </button>
+              </div>
+            ) : null}
+
+            {results.status === "empty" && !results.isReturnPair ? (
+              <EmptyResultsState message={results.message} onNewSearch={() => setEditOpen(true)} />
+            ) : null}
+
+            {!awaitingReturnViewChoice && showResultsList ? (
+              <div role="list" className="space-y-3" aria-label="Flight results">
+                {results.isReturnPair
+                  ? results.pairedOptions.slice(0, visiblePaintBudget).map((option) => (
+                      <div key={option.combo_id} role="listitem">
+                        <PairReturnCard
+                          option={option}
+                          searchId={results.resolvedSearchId ?? searchId ?? ""}
+                          searchParams={params}
+                          onDetails={openPairFareConfirmation}
+                          onSelect={openPairFareConfirmation}
+                        />
+                      </div>
+                    ))
+                  : results.isReturnSplit
+                    ? results.outboundOptions.slice(0, visiblePaintBudget).map((option) => (
+                        <div key={option.outbound_key} role="listitem">
+                          <OutboundOptionCard
+                            option={option}
+                            searchId={results.resolvedSearchId ?? ""}
+                            searchParams={params}
+                            onOpenDetails={openOutboundFareConfirmation}
+                          />
+                        </div>
+                      ))
+                    : results.offers.slice(0, visiblePaintBudget).map((offer) => (
+                        <div key={offer.offer_id} role="listitem">
+                          <FlightResultCard
+                            offer={offer}
+                            searchId={results.resolvedSearchId ?? ""}
+                            searchParams={params}
+                            onOpenDetails={openDetails}
+                          />
+                        </div>
+                      ))}
+              </div>
+            ) : null}
+
+            {results.status === "ready" ? (
+              <LoadMoreControl
+                hasMore={results.hasMore}
+                loading={results.isLoadingMore}
+                onLoadMore={results.loadMore}
+                total={results.total}
+                shown={shownCount}
+              />
+            ) : null}
+          </div>
         </div>
-      </div>
 
-      <MobileFilterDrawer
-        open={filtersOpen}
-        onClose={() => setFiltersOpen(false)}
-        facets={results.data?.filters}
-        filters={filters}
-        onChange={handleFiltersChange}
-        onClearAll={handleClearFilters}
-        triggerRef={filterButtonRef}
-      />
+        <MobileFilterDrawer
+          open={filtersOpen}
+          onClose={() => setFiltersOpen(false)}
+          facets={results.data?.filters}
+          filters={filters}
+          onChange={handleFiltersChange}
+          onClearAll={handleClearFilters}
+          triggerRef={filterButtonRef}
+        />
 
-      <ModifySearchPanel open={modifyOpen} onClose={() => setModifyOpen(false)} />
+        <ReturnViewSelector open={awaitingReturnViewChoice} onSelect={setReturnView} />
 
-      <FlightDetailsDrawer
-        open={detailsContext !== null}
-        context={detailsContext}
-        onClose={closeDetails}
-        triggerRef={detailsTriggerRef}
-        onNewSearch={() => setModifyOpen(true)}
-      />
+        <FlightDetailsDrawer
+          open={detailsContext !== null}
+          context={detailsContext}
+          onClose={closeDetails}
+          triggerRef={detailsTriggerRef}
+          onNewSearch={() => setEditOpen(true)}
+        />
       </div>
     </div>
   );

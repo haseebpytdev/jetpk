@@ -1,24 +1,22 @@
 "use client";
 
-import { cn } from "@/lib/cn";
+import { resolveAuthoritativeFareOptionKey } from "@/features/flight-details/utils/fare-option-key";
 import { useMemo, useState } from "react";
-import type { FlightOffer } from "../types";
+import type { FareFamilyOption, FlightOffer } from "../types";
 import { AirlineIdentity } from "./AirlineIdentity";
-import { BaggageSummary } from "./BaggageSummary";
-import { BrandedFareCarousel } from "./BrandedFareCarousel";
 import { FareBadge } from "./FareBadge";
-import { FlightSegmentSummary } from "./FlightSegmentSummary";
-import { PriceBlock } from "./PriceBlock";
+import { FlightResultActions } from "./FlightResultActions";
 import { MulticityInquiryActions } from "./MulticityInquiryActions";
-import { StopsAndLayover } from "./StopsAndLayover";
+import { ResultShareActions } from "./ResultShareActions";
+import { SupplierSourceBadge } from "./SupplierSourceBadge";
 import { TimeRouteBlock } from "./TimeRouteBlock";
+import { formatWholePkr } from "../utils/price";
 
 type FlightResultCardProps = {
   offer: FlightOffer;
   searchId: string;
-  selecting?: boolean;
-  onSelect: (offer: FlightOffer, fareOptionKey: string) => void;
-  onOpenDetails?: (offer: FlightOffer, fareOptionKey: string) => void;
+  searchParams?: URLSearchParams;
+  onOpenDetails?: (offer: FlightOffer, fareOptionKey: string, intent: "details" | "booking") => void;
 };
 
 function extractViaCodes(offer: FlightOffer): string[] {
@@ -36,7 +34,7 @@ function extractViaCodes(offer: FlightOffer): string[] {
   return codes;
 }
 
-function resolveFareOptions(offer: FlightOffer) {
+function resolveFareOptions(offer: FlightOffer): FareFamilyOption[] {
   const branded = offer.branded_fares_display_options ?? offer.fare_family_options_display ?? [];
   if (branded.length > 0) return branded;
   if (offer.has_fare_choice_options || offer.has_branded_fares) {
@@ -45,63 +43,70 @@ function resolveFareOptions(offer: FlightOffer) {
   return [];
 }
 
-export function FlightResultCard({ offer, searchId, selecting, onSelect, onOpenDetails }: FlightResultCardProps) {
+function resolveLayoverSummary(offer: FlightOffer): string[] | undefined {
+  const display = offer.layover_summary_display;
+  if (Array.isArray(display) && display.length > 0) return display;
+  const legacy = offer.layover_summary;
+  if (Array.isArray(legacy) && legacy.length > 0) return legacy;
+  return undefined;
+}
+
+export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails }: FlightResultCardProps) {
   const fareOptions = useMemo(() => resolveFareOptions(offer), [offer]);
-  const hasBranded = fareOptions.length > 1 || (offer.has_branded_fares && fareOptions.length > 0);
-  const [selectedFareKey, setSelectedFareKey] = useState(
-    () => fareOptions[0]?.option_key ?? offer.offer_id,
-  );
-  const [bookingKey, setBookingKey] = useState<string | null>(null);
+  const [selectedFareKey, setSelectedFareKey] = useState(() => fareOptions[0]?.option_key ?? "");
+  const [bookingOptionKey, setBookingOptionKey] = useState<string | null>(null);
 
-  const selectedOption = fareOptions.find((item) => item.option_key === selectedFareKey);
+  const selectedOption = fareOptions.find((item) => item.option_key === selectedFareKey) ?? fareOptions[0];
+  const effectiveFareKey = selectedOption?.option_key ?? selectedFareKey;
   const displayAmount = selectedOption?.displayed_price ?? offer.displayed_price;
-  const displayPrice = selectedOption?.price_display ?? offer.price_display;
+  const displayPrice = formatWholePkr(displayAmount ?? offer.final_customer_price);
   const viaCodes = extractViaCodes(offer);
-
-  const handleBook = (fareOptionKey: string) => {
-    setBookingKey(fareOptionKey);
-    onSelect(offer, fareOptionKey);
-  };
+  const layoverSummary = resolveLayoverSummary(offer);
 
   const firstSegment = offer.segments?.[0];
   const lastSegment = offer.segments?.[offer.segments.length - 1];
 
+  const openWithSelectedFare = (intent: "details" | "booking") => {
+    const fareKeyForDetails = resolveAuthoritativeFareOptionKey(effectiveFareKey, fareOptions) ?? "";
+    setBookingOptionKey(intent === "booking" ? effectiveFareKey || null : null);
+    onOpenDetails?.(offer, fareKeyForDetails, intent);
+  };
+
   return (
     <article
-      className="rounded-jp-card border border-jp-border bg-jp-surface p-4 shadow-jp-card sm:p-5"
+      className="overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface p-3 shadow-jp-card transition-all hover:border-jp-primary/30 hover:shadow-md focus-within:border-jp-primary/40 sm:px-4"
       data-testid="flight-result-card"
+      data-selected-fare-key={effectiveFareKey || undefined}
       aria-label={`${offer.airline_name ?? offer.airline_code ?? "Flight"} ${offer.departure_time ?? ""} to ${offer.arrival_time ?? ""}`}
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 flex-1 space-y-3">
-          <AirlineIdentity
-            code={offer.airline_code}
-            name={offer.airline_name}
-            logoUrl={offer.airline_logo_url}
-            size="lg"
+      <div className="grid items-stretch gap-3 lg:grid-cols-[minmax(8rem,0.85fr)_minmax(0,2fr)_minmax(10.5rem,0.95fr)] lg:items-center lg:gap-4 xl:grid-cols-[minmax(10.5rem,1fr)_minmax(20rem,2.35fr)_minmax(12.5rem,0.95fr)]">
+        <div className="min-w-0 lg:pr-1">
+          <AirlineIdentity code={offer.airline_code} name={offer.airline_name} logoUrl={offer.airline_logo_url} size="md" />
+          {offer.operating_airline_name && offer.operating_airline_name !== offer.airline_name ? (
+            <p className="mt-0.5 truncate text-[11px] text-jp-text-muted">Operated by {offer.operating_airline_name}</p>
+          ) : null}
+        </div>
+
+        <div className="min-w-0 space-y-2">
+          <TimeRouteBlock
+            departureTime={firstSegment?.departure_time_display ?? offer.departure_time}
+            arrivalTime={lastSegment?.arrival_time_display ?? offer.arrival_time}
+            arrivalDayOffset={offer.arrival_day_offset_display ?? offer.arrival_day_offset}
+            departureDate={firstSegment?.departure_date_display}
+            arrivalDate={lastSegment?.arrival_date_display}
+            originCode={firstSegment?.origin_airport_code ?? firstSegment?.origin ?? offer.departure_airport_code}
+            destinationCode={lastSegment?.destination_airport_code ?? lastSegment?.destination ?? offer.arrival_airport_code}
+            duration={offer.duration ?? offer.segments?.map((segment) => segment.duration_display).filter(Boolean).join(" + ")}
+            stops={offer.stops ?? 0}
+            stopsLabel={offer.stops_label_display ?? offer.stops_display}
+            viaCodes={viaCodes}
+            layoverSummary={layoverSummary}
+            layovers={offer.layovers_display}
           />
-          {offer.segments && offer.segments.length > 0 ? (
-            <FlightSegmentSummary segments={offer.segments} />
-          ) : (
-            <TimeRouteBlock
-              departureTime={offer.departure_time}
-              arrivalTime={offer.arrival_time}
-              arrivalDayOffset={offer.arrival_day_offset_display}
-              originCode={firstSegment?.origin_airport_code ?? firstSegment?.origin}
-              destinationCode={lastSegment?.destination_airport_code ?? lastSegment?.destination}
-              duration={offer.duration}
-            />
-          )}
-          <div className="flex flex-wrap items-center gap-3">
-            <StopsAndLayover
-              stops={offer.stops ?? 0}
-              stopsLabel={offer.stops_label_display}
-              layoverSummary={offer.layover_summary_display}
-              viaCodes={viaCodes}
-            />
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
             <FareBadge refundable={offer.refundable} seatsLeft={offer.seats_left} />
+            <SupplierSourceBadge label={offer.supplier_source_label} />
           </div>
-          <BaggageSummary offer={offer} />
           {offer.multicity_inquiry_only ? (
             <MulticityInquiryActions
               searchId={searchId}
@@ -115,38 +120,33 @@ export function FlightResultCard({ offer, searchId, selecting, onSelect, onOpenD
           ) : null}
         </div>
 
-        <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
-          <button
-            type="button"
-            className="rounded-jp-md border border-jp-border px-3 py-2 text-sm font-medium text-jp-text hover:border-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
-            data-testid="flight-details-trigger"
-            aria-label={`View details for ${offer.airline_name ?? "flight"}`}
-            onClick={() => onOpenDetails?.(offer, selectedFareKey)}
-          >
-            Details
-          </button>
-          {!hasBranded ? (
-            <PriceBlock
-              amount={displayAmount}
-              priceDisplay={displayPrice}
-              disabled={!offer.can_book || offer.multicity_inquiry_only}
-              loading={selecting}
-              onSelect={() => handleBook(selectedFareKey)}
+        <div className="flex min-w-0 flex-wrap items-end justify-between gap-3 border-t border-jp-border-soft pt-3 lg:h-full lg:min-w-[10.5rem] lg:flex-col lg:items-end lg:justify-center lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0 xl:min-w-[12.5rem] xl:pl-4">
+          <div className="min-w-0 text-left sm:text-right">
+            <p className="text-[11px] uppercase tracking-wide text-jp-text-muted">
+              {fareOptions.length > 1 && !selectedOption ? "From" : "Total fare"}
+            </p>
+            <p className="text-lg font-bold leading-tight text-jp-text break-words" data-testid="result-price-display">
+              {displayPrice ?? "Price unavailable"}
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <ResultShareActions
+              offer={offer}
+              searchParams={searchParams}
+              displayAmount={displayAmount ?? offer.final_customer_price}
             />
-          ) : null}
+            <FlightResultActions
+              onDetails={() => openWithSelectedFare("details")}
+              onBook={() => openWithSelectedFare("booking")}
+              canBook={Boolean(offer.can_book) && !offer.multicity_inquiry_only}
+              booking={bookingOptionKey !== null}
+              detailsTestId="flight-details-trigger"
+              bookTestId="book-now-trigger"
+              detailsAriaLabel={`View details for ${offer.airline_name ?? "flight"}`}
+            />
+          </div>
         </div>
       </div>
-
-      {hasBranded ? (
-        <BrandedFareCarousel
-          options={fareOptions}
-          selectedKey={selectedFareKey}
-          onSelect={setSelectedFareKey}
-          onBook={handleBook}
-          bookingOptionKey={bookingKey}
-          disabled={!offer.can_book}
-        />
-      ) : null}
     </article>
   );
 }

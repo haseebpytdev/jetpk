@@ -1,0 +1,206 @@
+/**
+ * Book Now → Traveler timing marks (browser-only).
+ * Emits CustomEvent `jp-book-now-timing` and stores last breakdown on window.
+ */
+export type BookNowTimingMark =
+  | "T0_click"
+  | "T1_handler"
+  | "T2_revalidate_start"
+  | "T3_revalidate_response"
+  /** First revalidation payload classified (fare change vs auto). */
+  | "T3A_payload_classified"
+  /** Fare-change decision known (requires user Accept). */
+  | "T3B_fare_change_decision"
+  /** Fare-change modal requested (state → fare_change). */
+  | "T3C_fare_modal_requested"
+  /** Fare-change modal visible in UI. */
+  | "T3D_fare_modal_visible"
+  /** Accept new fare clicked (user/harness). */
+  | "T3E_fare_accept_clicked"
+  /** Accept handler entered. */
+  | "T3F_fare_accept_handler"
+  /** Accept processing complete (ready to navigate). */
+  | "T3G_fare_accept_complete"
+  | "T4_draft_prep_start"
+  | "T4A_checkout_prep_start"
+  | "T4B_checkout_prep_done"
+  | "T4C_passengers_url_ready"
+  | "T5_draft_prep_done"
+  | "T5_router_push"
+  | "T6_nav_start"
+  | "T7_passenger_route"
+  | "T8_shell_visible"
+  | "T9_field_enabled";
+
+export type PassengersServerTiming = {
+  correlation_id?: string;
+  total_ms?: number | null;
+  session_hydrate_ms?: number | null;
+  offer_resolve_ms?: number | null;
+  passenger_contact_load_ms?: number | null;
+  S0_ms?: number | null;
+  S7_ms?: number | null;
+  S8_ms?: number | null;
+};
+
+export type ClientHydrationTiming = {
+  N0_page_start_ms?: number | null;
+  N1_fetch_start_ms?: number | null;
+  N2_fetch_end_ms?: number | null;
+  N3_form_render_ms?: number | null;
+  N4_hydration_settled_ms?: number | null;
+};
+
+type TimingSession = {
+  id: string;
+  t0: number;
+  /** Wall-clock ms at T0 — survives hard navigation when performance.now() resets. */
+  t0Wall?: number;
+  marks: Partial<Record<BookNowTimingMark, number>>;
+  deltasMs: Record<string, number | null>;
+  meta?: Record<string, unknown>;
+  serverTiming?: PassengersServerTiming;
+  clientHydration?: ClientHydrationTiming;
+};
+
+declare global {
+  interface Window {
+    __jpBookNowTiming?: TimingSession;
+    __jpBookNowTimingLog?: TimingSession[];
+    __jpPassengersPrime?: { key: string; promise: Promise<unknown>; source?: string };
+    __jpTravelerBoot?: { marks: Record<string, number>; meta?: Record<string, unknown> };
+  }
+}
+
+function ensureSession(reset = false): TimingSession | null {
+  if (typeof window === "undefined") return null;
+  if (!reset && window.__jpBookNowTiming) return window.__jpBookNowTiming;
+  const session: TimingSession = {
+    id: `bn-${Date.now().toString(36)}`,
+    t0: performance.now(),
+    t0Wall: Date.now(),
+    marks: {},
+    deltasMs: {},
+  };
+  window.__jpBookNowTiming = session;
+  return session;
+}
+
+export function startBookNowTiming(meta?: Record<string, unknown>): string | null {
+  const session = ensureSession(true);
+  if (!session) return null;
+  session.meta = meta;
+  session.t0Wall = Date.now();
+  markBookNowTiming("T0_click");
+  return session.id;
+}
+
+/** Restore timing session after Traveler mount (hard-nav or soft-nav remount). */
+export function restoreBookNowTimingFromStorage(): TimingSession | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem("jp-book-now-timing");
+    if (!raw) return null;
+    sessionStorage.removeItem("jp-book-now-timing");
+    const parsed = JSON.parse(raw) as TimingSession;
+    if (!parsed?.id || typeof parsed.t0 !== "number") return null;
+    // Prefer wall-clock rebase so T8/T9 from_T0 remain continuous across hard nav
+    // (performance.now() resets on full document load).
+    const nowPerf = performance.now();
+    const elapsedWall =
+      typeof parsed.t0Wall === "number" && Number.isFinite(parsed.t0Wall)
+        ? Math.max(0, Date.now() - parsed.t0Wall)
+        : typeof parsed.deltasMs?.T7_passenger_route_from_T0 === "number"
+          ? parsed.deltasMs.T7_passenger_route_from_T0
+          : typeof parsed.deltasMs?.T6_nav_start_from_T0 === "number"
+            ? parsed.deltasMs.T6_nav_start_from_T0
+            : 0;
+    const session: TimingSession = {
+      ...parsed,
+      t0: nowPerf - elapsedWall,
+      t0Wall: parsed.t0Wall ?? Date.now() - elapsedWall,
+      marks: { ...(parsed.marks ?? {}) },
+      deltasMs: { ...(parsed.deltasMs ?? {}) },
+    };
+    window.__jpBookNowTiming = session;
+    return session;
+  } catch {
+    return null;
+  }
+}
+
+export function markBookNowTiming(mark: BookNowTimingMark, meta?: Record<string, unknown>): void {
+  if (typeof window === "undefined") return;
+  const session = ensureSession(false);
+  if (!session) return;
+  // Keep earliest critical marks (loading.tsx / second accept revalidate must not erase T3).
+  const firstWins: BookNowTimingMark[] = [
+    "T3_revalidate_response",
+    "T3A_payload_classified",
+    "T3B_fare_change_decision",
+    "T3C_fare_modal_requested",
+    "T3D_fare_modal_visible",
+    "T3E_fare_accept_clicked",
+    "T8_shell_visible",
+    "T9_field_enabled",
+  ];
+  if (firstWins.includes(mark) && session.marks[mark] != null) {
+    if (meta) session.meta = { ...(session.meta ?? {}), ...meta };
+    return;
+  }
+  const now = performance.now();
+  session.marks[mark] = now;
+  if (meta) session.meta = { ...(session.meta ?? {}), ...meta };
+  const fromT0 = Math.round(now - session.t0);
+  session.deltasMs[`${mark}_from_T0`] = fromT0;
+  try {
+    window.dispatchEvent(new CustomEvent("jp-book-now-timing", { detail: { mark, fromT0, session } }));
+  } catch {
+    /* ignore */
+  }
+  if (mark === "T9_field_enabled" || mark === "T8_shell_visible") {
+    window.__jpBookNowTimingLog = [...(window.__jpBookNowTimingLog ?? []), { ...session, marks: { ...session.marks } }];
+  }
+}
+
+export function bookNowTimingSnapshot(): TimingSession | null {
+  if (typeof window === "undefined") return null;
+  return window.__jpBookNowTiming
+    ? {
+        ...window.__jpBookNowTiming,
+        marks: { ...window.__jpBookNowTiming.marks },
+        serverTiming: window.__jpBookNowTiming.serverTiming
+          ? { ...window.__jpBookNowTiming.serverTiming }
+          : undefined,
+        clientHydration: window.__jpBookNowTiming.clientHydration
+          ? { ...window.__jpBookNowTiming.clientHydration }
+          : undefined,
+      }
+    : null;
+}
+
+/** Attach non-PII Laravel passengers Server-Timing / X-JP-Passengers-Timing. */
+export function attachPassengersServerTiming(timing: PassengersServerTiming): void {
+  if (typeof window === "undefined") return;
+  const session = ensureSession(false);
+  if (!session) return;
+  session.serverTiming = { ...(session.serverTiming ?? {}), ...timing };
+  session.meta = {
+    ...(session.meta ?? {}),
+    server_passengers_total_ms: timing.total_ms ?? null,
+    session_hydrate_ms: timing.session_hydrate_ms ?? null,
+    offer_resolve_ms: timing.offer_resolve_ms ?? null,
+  };
+}
+
+export function markClientHydration(
+  key: keyof ClientHydrationTiming,
+  fromT0?: number,
+): void {
+  if (typeof window === "undefined") return;
+  const session = ensureSession(false);
+  if (!session) return;
+  const value =
+    typeof fromT0 === "number" ? fromT0 : Math.round(performance.now() - session.t0);
+  session.clientHydration = { ...(session.clientHydration ?? {}), [key]: value };
+}

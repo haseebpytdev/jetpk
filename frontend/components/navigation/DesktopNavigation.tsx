@@ -2,18 +2,22 @@
 
 import { Badge } from "@/components/ui/Badge";
 import { Dropdown, DropdownLinkItem } from "@/components/ui/Dropdown";
-import { primaryNavigation } from "@/lib/navigation";
+import { primaryNavigationForSession } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
+import type { PublicSession } from "@/types/session";
 import type { NavItem } from "@/types/navigation";
+import Link from "next/link";
 
 type DesktopNavigationProps = {
   className?: string;
+  session?: PublicSession;
 };
 
-export function DesktopNavigation({ className }: DesktopNavigationProps) {
+export function DesktopNavigation({ className, session }: DesktopNavigationProps) {
+  const items = primaryNavigationForSession(session);
   return (
     <nav aria-label="Primary" className={cn("hidden items-center gap-1 lg:flex", className)}>
-      {primaryNavigation.map((item) => (
+      {items.map((item) => (
         <DesktopNavItem key={item.label} item={item} />
       ))}
     </nav>
@@ -23,13 +27,14 @@ export function DesktopNavigation({ className }: DesktopNavigationProps) {
 function DesktopNavItem({ item }: { item: NavItem }) {
   if (item.type === "link") {
     return (
-      <a
+      <Link
         href={item.href}
-        className="inline-flex items-center gap-2 rounded-jp-md px-3 py-2 text-jp-sm font-medium text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
+        prefetch
+        className="inline-flex items-center gap-2 rounded-jp-md px-3 py-2 text-jp-sm font-semibold tracking-[-0.01em] text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
       >
         <span>{item.label}</span>
         {item.badge ? <Badge variant="new">{item.badge}</Badge> : null}
-      </a>
+      </Link>
     );
   }
 
@@ -37,15 +42,16 @@ function DesktopNavItem({ item }: { item: NavItem }) {
     <Dropdown
       align="start"
       panelClassName="min-w-[15rem]"
-      trigger={({ id, expanded, onToggle, onKeyDown }) => (
+      trigger={({ id, expanded, onToggle, onKeyDown, triggerRef }) => (
         <button
           type="button"
+          ref={triggerRef}
           aria-haspopup="menu"
           aria-expanded={expanded}
           aria-controls={id}
           onClick={onToggle}
           onKeyDown={onKeyDown}
-          className="inline-flex items-center gap-1.5 rounded-jp-md px-3 py-2 text-jp-sm font-medium text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
+          className="inline-flex items-center gap-1.5 rounded-jp-md px-3 py-2 text-jp-sm font-semibold tracking-[-0.01em] text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
         >
           <span>{item.label}</span>
           <ChevronDownIcon className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")} />

@@ -5,8 +5,10 @@ import { SectionContainer } from "@/components/layout/SectionContainer";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { ScrollReveal } from "@/features/motion";
 import { resolveOfferMedia } from "@/lib/homepage-media";
+import Link from "next/link";
 import type { HomepageFeaturedDeal, HomepageSectionHeader } from "../types/homepage";
 import { PublicSectionHeader } from "../components/PublicSectionHeader";
+import { FullCardRail, fullCardArticleClass } from "../components/FullCardRail";
 
 type FeaturedOffersSectionProps = HomepageSectionHeader & {
   items: HomepageFeaturedDeal[];
@@ -25,7 +27,7 @@ export function FeaturedOffersSection({
 
   return (
     <ScrollReveal as="section">
-      <SectionContainer className="bg-jp-surface-muted/40">
+      <SectionContainer className="!py-8 sm:!py-10 bg-jp-surface-muted/40">
         <PageContainer>
           <PublicSectionHeader
             eyebrow={eyebrow}
@@ -35,46 +37,64 @@ export function FeaturedOffersSection({
             ctaUrl={ctaUrl}
           />
 
-          <div className="mt-jp-lg grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <FullCardRail
+            itemCount={items.length}
+            ariaLabel="Group ticketing deals"
+            prevLabel="Scroll deals left"
+            nextLabel="Scroll deals right"
+          >
             {items.map((offer, index) => {
               const media = resolveOfferMedia(offer, index);
-
-              return (
-              <ScrollReveal key={offer.id} as="article" staggerIndex={index + 1}>
-                <article className="flex min-h-[18rem] flex-col overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card">
+              const cardInner = (
+                <>
                   <div className="relative aspect-[16/9] bg-jp-surface-muted">
                     <ImageSlot
                       src={media.image}
                       alt={media.imageAlt}
                       width={480}
                       height={270}
-                      sizes="(max-width: 768px) 100vw, 33vw"
+                      sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, (max-width: 1000px) 33vw, 25vw"
                       className="!max-w-none h-full w-full !rounded-none"
                       fallbackLabel={offer.from}
+                      brandedFallback
                     />
                   </div>
-                  <div className="flex flex-1 flex-col p-jp-lg">
+                  <div className="flex flex-1 flex-col p-jp-md">
                     {offer.airline ? (
                       <p className="text-jp-xs uppercase tracking-wide text-jp-muted">{offer.airline}</p>
                     ) : null}
-                    <h3 className="mt-2 font-display text-jp-h3 font-bold text-jp-text">
+                    <h3 className="mt-2 font-sans text-jp-md font-semibold text-jp-text">
                       {offer.from}
                       {offer.to ? (
                         <>
                           <span className="sr-only"> — </span>
-                          <span className="mt-1 block text-jp-md font-medium text-jp-muted">{offer.to}</span>
+                          <span className="mt-1 block text-jp-sm font-medium text-jp-muted">{offer.to}</span>
                         </>
                       ) : null}
                     </h3>
                     {offer.priceLabel ? (
-                      <p className="mt-4 text-jp-sm font-semibold text-jp-primary">{offer.priceLabel}</p>
+                      <p className="mt-3 text-jp-sm font-semibold text-jp-primary">{offer.priceLabel}</p>
                     ) : null}
                   </div>
+                </>
+              );
+
+              return (
+                <article key={offer.id} className={fullCardArticleClass} data-testid="featured-offer-card">
+                  {offer.href ? (
+                    <Link
+                      href={offer.href}
+                      className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
+                    >
+                      {cardInner}
+                    </Link>
+                  ) : (
+                    cardInner
+                  )}
                 </article>
-              </ScrollReveal>
               );
             })}
-          </div>
+          </FullCardRail>
         </PageContainer>
       </SectionContainer>
     </ScrollReveal>

@@ -3,10 +3,15 @@
 namespace App\Services\FlightSearch;
 
 use App\Services\Suppliers\Sabre\SabreFlightSearchNormalizer;
+use App\Services\TravelData\AirlineBrandingService;
+use App\Support\FlightSearch\AirlineDisplayNameResolver;
+use App\Support\FlightSearch\AtomicFlightSearchFileStore;
+use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use App\Support\FlightSearch\FlightSearchCriteriaCacheKey;
 use App\Support\FlightSearch\ItineraryFareConsolidator;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
 use App\Support\FlightSearch\SabreOfferFreshness;
+use App\Support\FlightSearch\SearchPerfTrace;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -21,6 +26,51 @@ class FlightSearchResultStore
 
     public const PAYLOAD_SCHEMA_VERSION = 'v1';
 
+    public const SEARCH_STATUS_QUEUED = 'queued';
+
+    public const SEARCH_STATUS_SEARCHING = 'searching';
+
+    public const SEARCH_STATUS_PARTIAL = 'partial';
+
+    public const SEARCH_STATUS_READY = 'ready';
+
+    public const SEARCH_STATUS_EMPTY = 'empty';
+
+    public const SEARCH_STATUS_FAILED = 'failed';
+
+    protected function atomic(): AtomicFlightSearchFileStore
+    {
+        return app(AtomicFlightSearchFileStore::class);
+    }
+
+    /**
+     * @return array<string, float|int|bool|string|null>
+     */
+    public function lastStoreOperationMetrics(): array
+    {
+        return AtomicFlightSearchFileStore::lastOperationMetrics();
+    }
+
+    protected function storeGet(string $cacheKey): ?array
+    {
+        $hit = $this->atomic()->get($cacheKey);
+        if (is_array($hit)) {
+            return $hit;
+        }
+
+        // Bridge: payloads still under Laravel file cache during cutover remain readable.
+        $legacy = Cache::get($cacheKey);
+
+        return is_array($legacy) ? $legacy : null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function storePut(string $cacheKey, array $payload): void
+    {
+        $this->atomic()->put($cacheKey, $payload, self::TTL_SECONDS);
+    }
     /**
      * @param  list<array<string, mixed>>  $offers
      * @param  list<string>  $warnings
@@ -30,16 +80,219 @@ class FlightSearchResultStore
     public function store(array $criteria, array $offers, array $warnings, array $meta = []): string
     {
         $searchId = (string) Str::uuid();
-        $trimmedOffers = array_slice($offers, 0, self::MAX_STORED_OFFERS);
-        $normalizer = app(SabreFlightSearchNormalizer::class);
-        foreach ($trimmedOffers as $idx => $row) {
+        $status = $offers === []
+            ? self::SEARCH_STATUS_EMPTY
+            : self::SEARCH_STATUS_READY;
+        $this->writePayload($searchId, $criteria, $offers, $warnings, array_merge($meta, [
+            'search_status' => $meta['search_status'] ?? $status,
+        ]));
+
+        return $searchId;
+    }
+
+    /**
+     * Allocate a search_id immediately so the results shell can poll while suppliers run.
+     *
+     * @param  array<string, mixed>  $criteria
+     * @param  array<string, mixed>  $meta
+     */
+    public function beginSearch(array $criteria, array $meta = []): string
+    {
+        $searchId = (string) Str::uuid();
+        $this->writePayload($searchId, $criteria, [], [], array_merge($meta, [
+            'search_status' => self::SEARCH_STATUS_SEARCHING,
+        ]), null, true);
+
+        return $searchId;
+    }
+
+    /**
+     * Replace offers for an in-flight progressive search (same search_id).
+     *
+     * @param  list<array<string, mixed>>  $offers
+     * @param  list<string>  $warnings
+     * @param  array<string, mixed>  $meta
+     */
+    public function publishProgress(
+        string $searchId,
+        array $criteria,
+        array $offers,
+        array $warnings,
+        string $status,
+        array $meta = [],
+    ): bool {
+        $searchId = trim($searchId);
+        if ($searchId === '') {
+            return false;
+        }
+
+        $existing = $this->storeGet($this->key($searchId));
+        if (! is_array($existing)) {
+            return false;
+        }
+
+        $mergedMeta = array_merge(
+            array_intersect_key($existing, array_flip([
+                'criteria_cache_context',
+                'criteria_cache',
+                'mixed_carrier_filter',
+                'multicity_diagnostics',
+            ])),
+            $meta,
+            ['search_status' => $status],
+        );
+
+        // Fold live search_perf into the single atomic put (avoid second write that
+        // competed with poll reads under the old exclusive file-cache flock).
+        if (app()->bound(SearchPerfTrace::class)) {
+            $mergedMeta['search_perf'] = app(SearchPerfTrace::class)->publicMeta();
+            $mergedMeta['search_perf_id'] = app(SearchPerfTrace::class)->id();
+        }
+
+        $this->writePayload($searchId, $criteria, $offers, $warnings, $mergedMeta, is_array($existing) ? $existing : null);
+
+        return true;
+    }
+
+    public function markFailed(string $searchId, string $message = ''): bool
+    {
+        $searchId = trim($searchId);
+        if ($searchId === '') {
+            return false;
+        }
+
+        $existing = $this->storeGet($this->key($searchId));
+        if (! is_array($existing)) {
+            return false;
+        }
+
+        $criteria = is_array($existing['criteria'] ?? null) ? $existing['criteria'] : [];
+        $offers = is_array($existing['offers'] ?? null) ? $existing['offers'] : [];
+        $warnings = is_array($existing['warnings'] ?? null) ? $existing['warnings'] : [];
+        if ($message !== '') {
+            $warnings[] = $message;
+        }
+
+        return $this->publishProgress(
+            $searchId,
+            $criteria,
+            $offers,
+            $warnings,
+            self::SEARCH_STATUS_FAILED,
+            ['search_error' => $message !== '' ? $message : 'search_failed'],
+        );
+    }
+
+    /**
+     * Resolve progressive/search pipeline status from a cached payload.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    public function resolveSearchStatus(array $payload): string
+    {
+        $explicit = strtolower(trim((string) ($payload['search_status'] ?? '')));
+        if (in_array($explicit, [
+            self::SEARCH_STATUS_QUEUED,
+            self::SEARCH_STATUS_SEARCHING,
+            self::SEARCH_STATUS_PARTIAL,
+            self::SEARCH_STATUS_READY,
+            self::SEARCH_STATUS_EMPTY,
+            self::SEARCH_STATUS_FAILED,
+        ], true)) {
+            return $explicit;
+        }
+
+        $offers = is_array($payload['offers'] ?? null) ? $payload['offers'] : [];
+
+        return $offers === [] ? self::SEARCH_STATUS_EMPTY : self::SEARCH_STATUS_READY;
+    }
+
+    /**
+     * Stable offer identity for progressive merge / dedupe.
+     *
+     * @param  array<string, mixed>  $offer
+     */
+    public function offerIdentityKey(array $offer): string
+    {
+        $id = trim((string) ($offer['offer_id'] ?? $offer['id'] ?? ''));
+        if ($id !== '') {
+            return strtolower($id);
+        }
+
+        $provider = strtolower(trim((string) ($offer['supplier_provider'] ?? '')));
+        $raw = trim((string) ($offer['raw_reference'] ?? $offer['supplier_offer_id'] ?? ''));
+
+        return $provider.'|'.$raw.'|'.md5(json_encode([
+            $offer['flight_number'] ?? null,
+            $offer['depart_at'] ?? null,
+            $offer['final_customer_price'] ?? null,
+        ]) ?: '');
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $existing
+     * @param  list<array<string, mixed>>  $incoming
+     * @return list<array<string, mixed>>
+     */
+    public function mergeOffersByIdentity(array $existing, array $incoming): array
+    {
+        $byKey = [];
+        foreach ($existing as $row) {
             if (! is_array($row)) {
                 continue;
             }
-            if (strcasecmp((string) ($row['supplier_provider'] ?? ''), 'sabre') === 0) {
-                $trimmedOffers[$idx] = $normalizer->ensureSabreBookingContextOnCachedOffer($row);
+            $byKey[$this->offerIdentityKey($row)] = $row;
+        }
+        foreach ($incoming as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $byKey[$this->offerIdentityKey($row)] = $row;
+        }
+
+        return array_values($byKey);
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $offers
+     * @param  list<string>  $warnings
+     * @param  array<string, mixed>  $criteria
+     * @param  array<string, mixed>  $meta
+     * @param  array<string, mixed>|null  $existingPayload
+     */
+    protected function writePayload(
+        string $searchId,
+        array $criteria,
+        array $offers,
+        array $warnings,
+        array $meta = [],
+        ?array $existingPayload = null,
+        bool $lightweightInit = false,
+    ): void {
+        $trimmedOffers = array_slice($offers, 0, self::MAX_STORED_OFFERS);
+        $searchStatus = strtolower(trim((string) ($meta['search_status'] ?? self::SEARCH_STATUS_READY)));
+        // Progressive partials: skip Sabre booking-context enrich so first paint
+        // is not delayed by checkout-only booking-context work.
+        $deferBookingContext = in_array($searchStatus, [
+            self::SEARCH_STATUS_PARTIAL,
+            self::SEARCH_STATUS_SEARCHING,
+            self::SEARCH_STATUS_QUEUED,
+        ], true);
+        if (! $lightweightInit && $trimmedOffers !== [] && ! $deferBookingContext) {
+            $normalizer = app(SabreFlightSearchNormalizer::class);
+            foreach ($trimmedOffers as $idx => $row) {
+                if (! is_array($row)) {
+                    continue;
+                }
+                if (strcasecmp((string) ($row['supplier_provider'] ?? ''), 'sabre') === 0) {
+                    $trimmedOffers[$idx] = $normalizer->ensureSabreBookingContextOnCachedOffer($row);
+                }
             }
         }
+
+        $createdAt = is_array($existingPayload) && isset($existingPayload['created_at'])
+            ? (string) $existingPayload['created_at']
+            : now()->toIso8601String();
 
         $payload = [
             'schema_version' => self::PAYLOAD_SCHEMA_VERSION,
@@ -47,30 +300,150 @@ class FlightSearchResultStore
             'criteria' => $criteria,
             'offers' => $trimmedOffers,
             'warnings' => array_values(array_unique($warnings)),
-            'created_at' => now()->toIso8601String(),
+            'created_at' => $createdAt,
+            'updated_at' => now()->toIso8601String(),
+            'search_status' => (string) ($meta['search_status'] ?? self::SEARCH_STATUS_READY),
+            // Wall-clock ms for correlating browser R0 with worker T0 (no PII).
+            'search_t0_unix_ms' => is_array($existingPayload) && isset($existingPayload['search_t0_unix_ms'])
+                ? (int) $existingPayload['search_t0_unix_ms']
+                : (int) round(microtime(true) * 1000),
         ];
         if ($meta !== []) {
             $payload = array_merge($payload, $meta);
+            $payload['search_status'] = (string) ($meta['search_status'] ?? $payload['search_status']);
         }
 
-        $cacheDescribe = app(FlightSearchCriteriaCacheKey::class)->build(
-            $criteria,
-            is_array($meta['criteria_cache_context'] ?? null) ? $meta['criteria_cache_context'] : [],
-        );
-        $payload['criteria_cache_fingerprint'] = $cacheDescribe['fingerprint'];
-        $payload['criteria_cache_summary'] = $cacheDescribe['summary'];
-        if (is_array($meta['criteria_cache'] ?? null)) {
-            $payload['criteria_cache'] = $meta['criteria_cache'];
+        $comboCountForMark = 0;
+        if (! $lightweightInit) {
+            $cacheDescribe = app(FlightSearchCriteriaCacheKey::class)->build(
+                $criteria,
+                is_array($meta['criteria_cache_context'] ?? null) ? $meta['criteria_cache_context'] : [],
+            );
+            $payload['criteria_cache_fingerprint'] = $cacheDescribe['fingerprint'];
+            $payload['criteria_cache_summary'] = $cacheDescribe['summary'];
+            if (is_array($meta['criteria_cache'] ?? null)) {
+                $payload['criteria_cache'] = $meta['criteria_cache'];
+            }
+
+            $splitService = app(ReturnSplitComboService::class);
+            if ($splitService->isEnabled() && (string) ($criteria['trip_type'] ?? '') === 'round_trip') {
+                $pairStarted = microtime(true);
+                $returnSplit = $splitService->safeBuildIndexForStore($criteria, $trimmedOffers, $searchId);
+                $pairingMs = (microtime(true) - $pairStarted) * 1000;
+                $payload['return_split'] = $returnSplit;
+                $comboCountForMark = (int) ($returnSplit['combo_count'] ?? 0);
+
+                // Never wipe previously pollable pairs on interim progressive writes.
+                // A later snapshot can temporarily fail precompute / change combo_count
+                // and previously hid pairs from polls for multi-second stretches.
+                $priorPairs = is_array($existingPayload['return_pair_options'] ?? null)
+                    ? $existingPayload['return_pair_options']
+                    : [];
+                $priorPairComboCount = (int) ($existingPayload['return_pair_options_combo_count'] ?? 0);
+                $allowPairRetention = $trimmedOffers !== []
+                    && ! in_array($searchStatus, [self::SEARCH_STATUS_EMPTY, self::SEARCH_STATUS_FAILED], true);
+
+                // REG-04: precompute pair presentation once on write so polls do not
+                // rebuild FlightOfferDisplayPresenter work under POLL_PAIR_MERGE_MS (~3s).
+                if ($comboCountForMark > 0) {
+                    try {
+                        $airlineNameMap = AirlineDisplayNameResolver::mapForCodes(
+                            AirlineDisplayNameResolver::collectCodesFromOffers($trimmedOffers)
+                        );
+                        $airlineLogos = app(AirlineBrandingService::class)->mapLogosForOffers($trimmedOffers);
+                        $iataCodes = [];
+                        foreach ($trimmedOffers as $offRow) {
+                            if (is_array($offRow)) {
+                                $iataCodes = array_merge($iataCodes, FlightOfferDisplayPresenter::collectIataCodes($offRow));
+                            }
+                        }
+                        $cityMap = FlightOfferDisplayPresenter::airportCityMap($iataCodes);
+                        $payload['return_pair_options'] = $splitService->buildPairedComboOptions(
+                            $returnSplit,
+                            $trimmedOffers,
+                            $criteria,
+                            $airlineLogos,
+                            $cityMap,
+                            $airlineNameMap,
+                        );
+                        $payload['return_pair_options_combo_count'] = $comboCountForMark;
+                    } catch (\Throwable $e) {
+                        Log::warning('flight_search.return_pair_options_precompute_failed', [
+                            'search_id' => $searchId,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+
+                $newPairs = is_array($payload['return_pair_options'] ?? null) ? $payload['return_pair_options'] : [];
+                if ($newPairs === [] && $allowPairRetention && $priorPairs !== []) {
+                    $payload['return_pair_options'] = $priorPairs;
+                    $payload['return_pair_options_combo_count'] = $priorPairComboCount > 0
+                        ? $priorPairComboCount
+                        : count($priorPairs);
+                    Log::notice('flight_search.return_pair_options_retained', [
+                        'search_id' => $searchId,
+                        'prior_count' => count($priorPairs),
+                        'combo_count' => $comboCountForMark,
+                        'search_status' => $searchStatus,
+                    ]);
+                }
+
+                if (app()->bound(SearchPerfTrace::class)) {
+                    $perf = app(SearchPerfTrace::class);
+                    if ($comboCountForMark > 0 || (is_array($payload['return_pair_options'] ?? null) && $payload['return_pair_options'] !== [])) {
+                        $perf->recordFirstValidPair($pairingMs);
+                    }
+                    if ($trimmedOffers !== []) {
+                        $perf->recordFirstValidOutbound();
+                    }
+                }
+            } elseif ($trimmedOffers !== [] && app()->bound(SearchPerfTrace::class)) {
+                app(SearchPerfTrace::class)->recordFirstValidOutbound();
+            }
+        } elseif (is_array($meta['criteria_cache_context'] ?? null)) {
+            // Fingerprint still required for progressive cache-key continuity; avoid split index on empty init.
+            $cacheDescribe = app(FlightSearchCriteriaCacheKey::class)->build(
+                $criteria,
+                $meta['criteria_cache_context'],
+            );
+            $payload['criteria_cache_fingerprint'] = $cacheDescribe['fingerprint'];
+            $payload['criteria_cache_summary'] = $cacheDescribe['summary'];
         }
 
-        $splitService = app(ReturnSplitComboService::class);
-        if ($splitService->isEnabled() && (string) ($criteria['trip_type'] ?? '') === 'round_trip') {
-            $payload['return_split'] = $splitService->safeBuildIndexForStore($criteria, $trimmedOffers, $searchId);
+        if (app()->bound(SearchPerfTrace::class)) {
+            $payload['search_perf'] = app(SearchPerfTrace::class)->publicMeta();
+            $payload['search_perf_id'] = app(SearchPerfTrace::class)->id();
         }
 
-        Cache::put($this->key($searchId), $payload, self::TTL_SECONDS);
+        // Persist first, then stamp FIRST_VALID_PAIR_PERSISTED so poll clocks match
+        // rename visibility (mark-before-put inflated PAIR_AVAILABLE_TO_BROWSER by write time).
+        $this->storePut($this->key($searchId), $payload);
 
-        return $searchId;
+        // REG-05: FIRST_VALID_PAIR_PERSISTED means pollable pairs exist — not merely
+        // return_split.combo_count > 0 (precompute can fail / journeys unresolved).
+        $pollablePairCount = is_array($payload['return_pair_options'] ?? null)
+            ? count($payload['return_pair_options'])
+            : 0;
+        if ($pollablePairCount > 0 && app()->bound(SearchPerfTrace::class)) {
+            $perf = app(SearchPerfTrace::class);
+            $perf->recordFirstValidPairPersisted();
+            $searchPerf = $perf->publicMeta();
+            $searchPerf['POLLABLE_PAIR_COUNT_AT_PERSIST'] = $pollablePairCount;
+            $searchPerf['PERSISTED_VALID_PAIR_COUNT'] = $pollablePairCount;
+            $searchPerf['PERSISTED_PAIRED_OPTIONS_COUNT'] = $pollablePairCount;
+            $searchPerf['PARTIAL_SNAPSHOT_CONTAINS_RENDERABLE_PAIR'] = 'YES';
+            $searchPerf['FIRST_VALID_PAIR_PERSISTED_UNIX_MS'] = (int) round(microtime(true) * 1000);
+            $payload['search_perf'] = $searchPerf;
+            $payload['search_perf_id'] = $perf->id();
+            $this->storePut($this->key($searchId), $payload);
+        } elseif ($comboCountForMark > 0 && $pollablePairCount === 0) {
+            Log::notice('flight_search.pair_index_without_pollable_pairs', [
+                'search_id' => $searchId,
+                'combo_count' => $comboCountForMark,
+                'pollable_pair_count' => 0,
+            ]);
+        }
     }
 
     /**
@@ -83,7 +456,7 @@ class FlightSearchResultStore
             return null;
         }
 
-        $raw = Cache::get($this->key($searchId));
+        $raw = $this->storeGet($this->key($searchId));
         if (! is_array($raw)) {
             return null;
         }
@@ -190,33 +563,20 @@ class FlightSearchResultStore
     }
 
     /**
+     * Resolve an offer from an already-loaded search payload (avoids a second store read).
+     *
+     * @param  array<string, mixed>  $payload
      * @return array<string, mixed>|null
      */
-    public function findOffer(string $searchId, string $offerId): ?array
+    public function findOfferInPayload(array $payload, string $offerId): ?array
     {
         $offerId = trim($offerId);
         if ($offerId === '') {
             return null;
         }
 
-        $payload = $this->get($searchId, true);
-        if ($payload === null) {
-            return null;
-        }
-
-        foreach ($this->displayOffersFromPayload($payload) as $offer) {
-            if (! is_array($offer)) {
-                continue;
-            }
-            if ((string) ($offer['id'] ?? '') === $offerId || (string) ($offer['offer_id'] ?? '') === $offerId) {
-                if ($this->isOfferBlockedForSelection($offer)) {
-                    return null;
-                }
-
-                return $offer;
-            }
-        }
-
+        // JP-APP-PERF-CLOSURE-01: lookup by id must not run consolidator/filter over the
+        // full offer set — that was costing ~2–3s on Traveler GET (S3_offer_resolve).
         $offers = is_array($payload['offers'] ?? null) ? $payload['offers'] : [];
         foreach ($offers as $offer) {
             if (! is_array($offer)) {
@@ -231,7 +591,60 @@ class FlightSearchResultStore
             }
         }
 
+        // Return Pair cards use combo_id === Sabre offer id; presentation rows may
+        // remain after raw offers are trimmed — resolve via pair options then raw id.
+        $pairs = is_array($payload['return_pair_options'] ?? null) ? $payload['return_pair_options'] : [];
+        foreach ($pairs as $pair) {
+            if (! is_array($pair)) {
+                continue;
+            }
+            $pairId = (string) ($pair['combo_id'] ?? $pair['offer_id'] ?? $pair['id'] ?? '');
+            if ($pairId === '' || $pairId !== $offerId) {
+                continue;
+            }
+            foreach ($offers as $offer) {
+                if (! is_array($offer)) {
+                    continue;
+                }
+                if ((string) ($offer['id'] ?? '') === $pairId || (string) ($offer['offer_id'] ?? '') === $pairId) {
+                    if ($this->isOfferBlockedForSelection($offer)) {
+                        return null;
+                    }
+
+                    return $offer;
+                }
+            }
+        }
+
         return null;
+    }
+
+    /**
+     * Resolve a cached offer for checkout freshness / revalidation (includes stale search payloads).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function findOfferForCheckoutTransition(string $searchId, string $offerId): ?array
+    {
+        $payload = $this->get($searchId, false);
+        if ($payload === null) {
+            return null;
+        }
+
+        return $this->findOfferInPayload($payload, $offerId);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function findOffer(string $searchId, string $offerId): ?array
+    {
+        $payload = $this->get($searchId, true);
+        if ($payload === null) {
+            return null;
+        }
+
+        return $this->findOfferInPayload($payload, $offerId);
     }
 
     /**
@@ -247,17 +660,20 @@ class FlightSearchResultStore
     }
 
     /**
+     * Patch revalidation meta onto a cached offer.
+     *
      * @param  array<string, mixed>  $metaPatch
+     * @return array{ok: bool, offer: array<string, mixed>|null, payload: array<string, mixed>|null}
      */
-    public function patchOfferRevalidationMeta(string $searchId, string $offerId, array $metaPatch): bool
+    public function patchOfferRevalidationMeta(string $searchId, string $offerId, array $metaPatch): array
     {
         $payload = $this->get($searchId);
         if ($payload === null) {
-            return false;
+            return ['ok' => false, 'offer' => null, 'payload' => null];
         }
 
         $offers = is_array($payload['offers'] ?? null) ? $payload['offers'] : [];
-        $updated = false;
+        $updatedOffer = null;
 
         foreach ($offers as $idx => $offer) {
             if (! is_array($offer)) {
@@ -268,18 +684,18 @@ class FlightSearchResultStore
                 continue;
             }
             $offers[$idx] = array_merge($offer, $metaPatch);
-            $updated = true;
+            $updatedOffer = $offers[$idx];
             break;
         }
 
-        if (! $updated) {
-            return false;
+        if ($updatedOffer === null) {
+            return ['ok' => false, 'offer' => null, 'payload' => $payload];
         }
 
         $payload['offers'] = $offers;
-        Cache::put($this->key($searchId), $payload, self::TTL_SECONDS);
+        $this->storePut($this->key($searchId), $payload);
 
-        return true;
+        return ['ok' => true, 'offer' => $updatedOffer, 'payload' => $payload];
     }
 
     /**
@@ -317,7 +733,7 @@ class FlightSearchResultStore
         }
 
         $payload['offers'] = $offers;
-        Cache::put($this->key($searchId), $payload, self::TTL_SECONDS);
+        $this->storePut($this->key($searchId), $payload);
 
         return true;
     }
@@ -327,7 +743,9 @@ class FlightSearchResultStore
      */
     public function getReturnSplitIndex(string $searchId): ?array
     {
-        $payload = $this->get($searchId, true);
+        // Browse/list the split index without selection-freshness gating.
+        // Selection endpoints still use get($id, forSelection: true).
+        $payload = $this->get($searchId, false);
         if ($payload === null) {
             return null;
         }
@@ -366,6 +784,16 @@ class FlightSearchResultStore
             return false;
         }
 
+        return $this->returnSplitPayloadActive($payload);
+    }
+
+    /**
+     * Prefer this when the poll already loaded $payload (avoids a second Cache::get).
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    public function returnSplitPayloadActive(array $payload): bool
+    {
         $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
         if ((string) ($criteria['trip_type'] ?? '') !== 'round_trip') {
             return false;
@@ -376,7 +804,9 @@ class FlightSearchResultStore
             return false;
         }
 
-        return $splitService->indexIsUsable($this->getReturnSplitIndex($searchId));
+        $index = is_array($payload['return_split'] ?? null) ? $payload['return_split'] : null;
+
+        return $splitService->indexIsUsable($index);
     }
 
     private function key(string $searchId): string
