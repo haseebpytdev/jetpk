@@ -12,6 +12,7 @@ use App\Models\SupplierConnection;
 use App\Services\Pricing\PricingRuleService;
 use App\Support\Platform\PlatformModuleEnforcer;
 use App\Support\Bookings\SabreSelectedBrandedFareCheckoutContext;
+use App\Support\FlightSearch\SabreOfferFreshness;
 use App\Support\Pricing\IatiFarePricingResolver;
 use App\Support\Pricing\PublicCustomerPricing;
 use Illuminate\Support\Facades\Log;
@@ -53,6 +54,32 @@ class OfferValidationService
 
         if (strtolower($provider) === SupplierProvider::Sabre->value && ! $this->sabreOfferRevalidationUsesLiveSupplierCalls()) {
             return $this->validateSabreOfferCheckoutUsingCachedOffer($agency, $selectedOfferSnapshot, $searchContext, $connection);
+        }
+
+        // Book Now already ran live Sabre revalidation and stamped the cached offer.
+        // Skip a second full shop on passengers GET/hold-prep while that stamp is valid.
+        if (strtolower($provider) === SupplierProvider::Sabre->value && $this->sabreOfferRevalidationUsesLiveSupplierCalls()) {
+            $freshness = app(SabreOfferFreshness::class);
+            $searchPayload = is_array($searchContext['search_payload'] ?? null) ? $searchContext['search_payload'] : null;
+            $freshnessMeta = $freshness->buildOfferFreshnessMeta($selectedOfferSnapshot, $searchPayload);
+            if ($freshness->hasValidRecentRevalidation($freshnessMeta)) {
+                Log::info('sabre.checkout.skip_live_validation_recent_revalidation', [
+                    'search_id' => (string) ($searchContext['search_id'] ?? ''),
+                    'offer_id' => (string) ($selectedOfferSnapshot['offer_id'] ?? $selectedOfferSnapshot['id'] ?? ''),
+                    'last_revalidated_at' => $freshnessMeta['last_revalidated_at'] ?? null,
+                ]);
+
+                return $this->validateSabreOfferCheckoutUsingCachedOffer(
+                    $agency,
+                    $selectedOfferSnapshot,
+                    $searchContext,
+                    $connection,
+                    [
+                        'sabre_checkout_skip_live_validation_recent_revalidation' => true,
+                        'sabre_checkout_cache_only' => false,
+                    ],
+                );
+            }
         }
 
         $request = FlightSearchRequestData::fromArray($searchContext, $agency->id, (string) ($searchContext['source_channel'] ?? 'public_guest'));

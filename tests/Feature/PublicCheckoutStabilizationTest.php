@@ -289,6 +289,72 @@ class PublicCheckoutStabilizationTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_sabre_recent_revalidation_skips_duplicate_live_validate_offer(): void
+    {
+        Http::fake();
+        config([
+            'suppliers.sabre.booking_enabled' => true,
+            'suppliers.sabre.booking_live_call_enabled' => true,
+            'ota.offer_freshness.stale_after_seconds' => 600,
+        ]);
+        $this->seed(OtaFoundationSeeder::class);
+
+        $this->mock(SabreFlightSupplierAdapter::class, function ($mock): void {
+            $mock->shouldReceive('validateOffer')->never();
+        });
+
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $sabreConn = SupplierConnection::query()
+            ->where('agency_id', $agency->id)
+            ->where('provider', SupplierProvider::Sabre)
+            ->firstOrFail();
+        $sabreConn->update([
+            'is_active' => true,
+            'status' => SupplierConnectionStatus::Active,
+        ]);
+
+        $depart = now()->addDays(14)->toDateString();
+        $now = now()->toIso8601String();
+        $result = app(OfferValidationService::class)->validateSelectedOffer($agency, [
+            'id' => 'sabre-recent-reval',
+            'offer_id' => 'sabre-recent-reval',
+            'supplier_offer_id' => 'sabre-ref-recent',
+            'supplier_provider' => 'sabre',
+            'distribution_channel' => 'GDS',
+            'supplier_connection_id' => $sabreConn->id,
+            'airline_code' => 'EK',
+            'origin' => 'ISB',
+            'destination' => 'DXB',
+            'final_customer_price' => 119587,
+            'pricing_currency' => 'PKR',
+            'conversion_status' => 'same_currency',
+            'depart_at' => $depart.'T08:00:00Z',
+            'arrive_at' => $depart.'T14:00:00Z',
+            'stops' => 0,
+            'selected_offer_last_revalidated_at' => $now,
+            'last_revalidated_at' => $now,
+            'selected_offer_revalidation_status' => 'success',
+            'revalidation_status' => 'success',
+            'fare_breakdown' => [
+                'base_fare' => 100000,
+                'taxes' => 19587,
+                'supplier_total' => 119587,
+                'currency' => 'PKR',
+            ],
+        ], [
+            'origin' => 'ISB',
+            'destination' => 'DXB',
+            'depart_date' => $depart,
+            'trip_type' => 'round_trip',
+            'source_channel' => 'public_guest',
+            'search_id' => 'search-recent-reval',
+        ]);
+
+        $this->assertTrue($result->is_valid);
+        $this->assertTrue((bool) ($result->meta['sabre_checkout_skip_live_validation_recent_revalidation'] ?? false));
+        Http::assertNothingSent();
+    }
+
     public function test_complex_sabre_round_trip_defers_auto_pnr_in_booking_meta(): void
     {
         Http::fake();
