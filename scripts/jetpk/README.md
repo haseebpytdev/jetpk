@@ -91,7 +91,10 @@ APP=/home/pkjetp/jetpk_app bash scripts/verify-ai-runtime-after-seo-activate.sh
 
 ## Protected AI runtime deploy
 
+Protected deploy must run from a working tree checked out at `AUTHORIZED_SHA` first:
+
 ```bash
+cd /home/pkjetp/jetpk_git && git fetch origin && git checkout -f "${AUTHORIZED_SHA}"
 AUTHORIZED_SHA=<full-sha> bash scripts/jetpk/deploy-ai-runtime-protected.sh
 ```
 

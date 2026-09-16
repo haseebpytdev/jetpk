@@ -35,14 +35,15 @@ npm run build
 
 rsync -a --exclude node_modules --exclude .next "${BUILD_ROOT}/frontend/" "${APP}/frontend/"
 rsync -a "${BUILD_ROOT}/frontend/.next/" "${APP}/frontend/.next/"
-printf '%s\n' "${AUTHORIZED_SHA}" > "${APP}/frontend/.jetpk-frontend-sha"
+ARCHIVED_SHA="$(git -C "${REPO}" rev-parse "${AUTHORIZED_SHA}")"
+printf '%s\n' "${ARCHIVED_SHA}" > "${APP}/frontend/.jetpk-frontend-sha"
 
 if [[ "${FRONTEND_SKIP_RESTART}" != "1" ]]; then
   "${PM2}" restart jetpk-public-frontend
 fi
 
 FAB_HITS="$(find "${APP}/frontend/.next" -name '*.js' -exec grep -l 'ask-jetpakistan-fab' {} \; 2>/dev/null | head -3 || true)"
-echo "FRONTEND_DEPLOY_SHA=${AUTHORIZED_SHA}"
+echo "FRONTEND_DEPLOY_SHA=${ARCHIVED_SHA}"
 echo "FRONTEND_SOURCE_PARITY=PASS"
 echo "BUILD_ROOT=${BUILD_ROOT}"
 echo "FAB_BUNDLE_HITS=${FAB_HITS:-none}"
