@@ -34,12 +34,14 @@ test "$(git rev-parse HEAD)" = "$(git rev-parse "${AUTHORIZED_SHA}")"
 RUNTIME_FILES=(
   app/Providers/AiServiceProvider.php
   app/Providers/AppServiceProvider.php
+  app/Http/Controllers/Api/PublicAiAssistantController.php
   app/Services/Ai/AiChatOrchestrator.php
   app/Services/PublicContent/PublicContentApiPresenter.php
   bootstrap/providers.php
   bootstrap/app.php
   config/ota.php
   config/ai_lab.php
+  routes/web.php
   scripts/verify-ai-runtime-after-seo-activate.sh
   scripts/jetpk/deploy-seo-phase2-activate-allowlist.sh
   scripts/jetpk/test-seo-activate-ai-runtime-guard.sh
