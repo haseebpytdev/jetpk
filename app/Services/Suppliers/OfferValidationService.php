@@ -63,7 +63,7 @@ class OfferValidationService
             $searchPayload = is_array($searchContext['search_payload'] ?? null) ? $searchContext['search_payload'] : null;
             $freshnessMeta = $freshness->buildOfferFreshnessMeta($selectedOfferSnapshot, $searchPayload);
             if ($freshness->hasValidRecentRevalidation($freshnessMeta)) {
-                Log::info('sabre.checkout.skip_live_validation_recent_revalidation', [
+                Log::warning('sabre.checkout.skip_live_validation_recent_revalidation', [
                     'search_id' => (string) ($searchContext['search_id'] ?? ''),
                     'offer_id' => (string) ($selectedOfferSnapshot['offer_id'] ?? $selectedOfferSnapshot['id'] ?? ''),
                     'last_revalidated_at' => $freshnessMeta['last_revalidated_at'] ?? null,

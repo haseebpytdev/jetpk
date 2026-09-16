@@ -134,7 +134,6 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         // Progressive first paint: mount one usable card immediately, then
         // commit the full page so DATA→first useful stays snappy.
         if (
-          mode === "replace" &&
           previousVisible === 0 &&
           (merged.paired_options?.length ?? 0) > 1
         ) {
@@ -144,7 +143,6 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
           };
         }
         if (
-          mode === "replace" &&
           previousVisible === 0 &&
           (merged.outbound_options?.length ?? 0) > 1 &&
           (merged.paired_options?.length ?? 0) === 0
@@ -155,7 +153,6 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
           };
         }
         if (
-          mode === "replace" &&
           previousVisible === 0 &&
           (merged.offers?.length ?? 0) > 1 &&
           (merged.paired_options?.length ?? 0) === 0 &&
@@ -169,7 +166,6 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         return merged;
       });
       if (
-        mode === "replace" &&
         previousVisible === 0 &&
         countVisibleResults(merged) > 1
       ) {

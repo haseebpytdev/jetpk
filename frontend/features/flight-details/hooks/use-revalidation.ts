@@ -501,7 +501,7 @@ export function useRevalidation() {
    * Book Now reuses the same in-flight/fresh promise when the authority signature matches.
    */
   const warmStartRevalidation = useCallback(
-    (params: RevalidationParams) => {
+    (params: RevalidationParams & { autoHandoffOnSuccess?: boolean }) => {
       if (!providerRequiresRevalidation(params.supplierProvider)) return;
       const key = paramsCacheKey(params, false);
       const existing = warmPromiseRef.current;
@@ -518,6 +518,7 @@ export function useRevalidation() {
           searchId: params.searchId,
           existing_key: existing?.key?.slice(0, 240) ?? null,
           existing_completed: existing?.completedAt != null,
+          auto_handoff: Boolean(params.autoHandoffOnSuccess),
         });
       } catch {
         /* ignore */
@@ -599,11 +600,32 @@ export function useRevalidation() {
           pendingHandoffRef.current = result.data.passengers_url
             ? enrichReturnComboPassengersUrl(result.data.passengers_url, params)
             : null;
+          return;
+        }
+        // Booking with an explicit fare: hand off as soon as warm revalidation succeeds.
+        // Avoids waiting for a second Continue click after prevalidation already finished.
+        if (
+          params.autoHandoffOnSuccess &&
+          !inFlightRef.current &&
+          typeof result.data.passengers_url === "string" &&
+          result.data.passengers_url.trim() !== ""
+        ) {
+          const enriched = enrichReturnComboPassengersUrl(result.data.passengers_url, params);
+          pendingHandoffRef.current = enriched;
+          inFlightRef.current = true;
+          applyUiPhase(BOOK_NOW_UI_PHASE.PREPARING_TRAVELER);
+          void navigateHandoff(
+            enriched,
+            params.fareOptionKey || result.data.selected_fare_option_id || undefined,
+            params.searchId,
+          ).finally(() => {
+            inFlightRef.current = false;
+          });
         }
       });
       return;
     },
-    [extractFareChange, router],
+    [applyUiPhase, extractFareChange, navigateHandoff, router],
   );
 
   const continueToPassengers = useCallback(

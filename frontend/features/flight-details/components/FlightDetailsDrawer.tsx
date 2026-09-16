@@ -164,6 +164,8 @@ export function FlightDetailsDrawer({
       outboundKey: context.outboundKey,
       outboundFareOptionKey: context.outboundFareOptionKey,
       returnFareOptionKey: fareKey,
+      // Explicit fare (from pair card or single-option catalog) → hand off after warm success.
+      autoHandoffOnSuccess: Boolean((fareKey ?? "").trim()) || fareOptions.length <= 1,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- warm on fare identity primitives only
   }, [
