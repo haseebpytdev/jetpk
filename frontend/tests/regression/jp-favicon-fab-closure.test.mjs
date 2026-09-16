@@ -52,7 +52,10 @@ const resultsPage = read("features/flight-results/components/FlightResultsPage.t
 check("FlightResultsPage uses jp-fab-content-clear", resultsPage.includes("jp-fab-content-clear"));
 
 const returnForm = read("features/search/components/ReturnForm.tsx");
-check("ReturnForm Search CTA reserves FAB margin on mobile", /max-lg:mr-\[4\.5rem\]/.test(returnForm));
+check(
+  "ReturnForm Search CTA uses calc width to clear FAB on mobile",
+  /max-lg:w-\[calc\(100%-4\.5rem\)\]/.test(returnForm),
+);
 
 const dock = read("components/navigation/PublicFloatingActionDock.tsx");
 check('dock uses class jp-public-fab-dock', dock.includes("jp-public-fab-dock"));

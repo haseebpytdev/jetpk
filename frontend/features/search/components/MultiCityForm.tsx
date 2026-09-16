@@ -114,7 +114,7 @@ export function MultiCityForm({
         </div>
       ) : null}
 
-      <PrimaryButton type="submit" className="w-full max-lg:mr-[4.5rem] sm:w-auto lg:mr-0" disabled={disabled}>
+      <PrimaryButton type="submit" className="w-full max-lg:w-[calc(100%-4.5rem)] sm:w-auto lg:w-auto" disabled={disabled}>
         {disabled ? "Searching…" : "Search Flights"}
       </PrimaryButton>
     </form>
