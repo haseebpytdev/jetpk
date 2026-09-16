@@ -74,7 +74,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
         return;
       }
 
-      if (!response.data.ok) {
+      if (!response.data?.ok) {
         setErrorStatus("error");
         setFormError("Unable to load passenger form.");
         return;

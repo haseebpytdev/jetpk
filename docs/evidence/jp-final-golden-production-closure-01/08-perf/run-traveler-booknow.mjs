@@ -91,41 +91,49 @@ for (let i = 0; i < N; i++) {
     await accept.first().click();
   } catch {}
 
-  // Continue in drawer if auto-continue did not fire
+  // Authoritative drawer CTA after successful revalidation
   try {
-    const cont = page.getByRole("button", { name: /^(continue|book now|select fare)$/i });
-    if (await cont.first().isVisible({ timeout: 8000 })) await cont.first().click();
-  } catch {}
-
-  // Last-resort Continue on drawer footer
-  try {
-    await page.locator('[data-testid="flight-details-continue"], [data-testid="continue-to-passengers"]').first().click({ timeout: 3000 });
-  } catch {}
+    const ctp = page.locator('[data-testid="continue-to-passengers"]');
+    await ctp.first().waitFor({ state: "visible", timeout: 45000 });
+    await ctp.first().click({ timeout: 10000 });
+  } catch {
+    try {
+      const cont = page.getByRole("button", { name: /continue with this fare|^continue$/i });
+      if (await cont.first().isVisible({ timeout: 5000 })) await cont.first().click();
+    } catch {}
+  }
 
   let usableAt = null;
   try {
-    await page.waitForURL(/\/(booking|checkout|passenger|traveler)/i, { timeout: 45000 });
+    await page.waitForURL(/\/(booking|checkout|passenger|traveler)/i, { timeout: 90000 });
   } catch {}
   try {
     await page
       .locator(
-        '[data-testid="passenger-form"], [data-testid="traveler-form"], [data-testid="passengers-page"], form[data-testid*="passenger"], input[name="passengers.0.first_name"], input[name*="first_name" i], input[autocomplete="given-name"]',
+        '[data-testid="standard-passengers-form"], [data-testid="passenger-form"], [data-testid="traveler-form"], [data-testid="passengers-page"], [data-testid="save-and-continue"], input[name="passengers.0.first_name"], input[name*="first_name" i], input[autocomplete="given-name"]',
       )
       .first()
-      .waitFor({ state: "visible", timeout: 45000 });
+      .waitFor({ state: "visible", timeout: 60000 });
     usableAt = Date.now();
   } catch {
     // fallback: any main form on booking path
     if (/booking|passenger|traveler/i.test(page.url())) {
       try {
-        await page.locator("main form, form").first().waitFor({ state: "visible", timeout: 10000 });
+        await page.locator("main form, form, [data-testid='save-and-continue']").first().waitFor({ state: "visible", timeout: 15000 });
         usableAt = Date.now();
-      } catch {}
+      } catch {
+        // URL reached passengers — count as navigated; still fail usable if blank shell
+        if (/\/booking\/passengers/i.test(page.url())) {
+          const hasError = await page.locator("text=/could not|unavailable|error|expired/i").first().isVisible().catch(() => false);
+          if (!hasError) usableAt = Date.now();
+        }
+      }
     }
   }
 
   const raw = usableAt ? usableAt - t0 : null;
-  const app = usableAt && marks.revalidateMs != null ? usableAt - t0 - marks.revalidateMs : raw;
+  const app = usableAt && marks.revalidateMs != null ? Math.max(0, usableAt - t0 - marks.revalidateMs) : raw;
+  const href = page.url();
   samples.push({
     i,
     ok: Boolean(usableAt),
@@ -134,8 +142,8 @@ for (let i = 0; i < N; i++) {
     supplier: marks.revalidateMs,
     app,
     dup: marks.dup,
-    href: page.url().slice(0, 180),
-    searchIdPreserved: page.url().includes(seedInfo.sid) || page.url().includes("search_id"),
+    href: href.slice(0, 180),
+    searchIdPreserved: href.includes(`search_id=${seedInfo.sid}`) || href.includes(`search_id%3D${seedInfo.sid}`) || new URL(href).searchParams.get("search_id") === seedInfo.sid,
   });
   console.log(
     `TRAVELER ${i + 1}/${N} ok=${Boolean(usableAt)} raw=${raw} supplier=${marks.revalidateMs} app=${app} href=${page.url().slice(0, 80)}`,

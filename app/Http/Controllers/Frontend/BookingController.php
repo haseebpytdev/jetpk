@@ -127,18 +127,22 @@ class BookingController extends Controller
         $checkoutContext->persist($request);
 
         if ($checkoutContext->requiresPrefixedPassengersRedirect($request)) {
-            $queryParams = array_filter(
-                $request->query(),
-                static fn (mixed $value): bool => $value !== null && $value !== '',
-            );
+            // Next.js standard booking fetches /laravel/booking/passengers?format=json.
+            // Never bounce those JSON requests to the public HTML shell.
+            if (! $this->wantsBookingJson($request)) {
+                $queryParams = array_filter(
+                    $request->query(),
+                    static fn (mixed $value): bool => $value !== null && $value !== '',
+                );
 
-            Log::warning('booking.passengers.client_prefix_redirect', [
-                'client_slug' => $checkoutContext->resolve($request),
-                'from_path' => '/'.$request->path(),
-                'referer' => (string) $request->headers->get('referer', ''),
-            ]);
+                Log::warning('booking.passengers.client_prefix_redirect', [
+                    'client_slug' => $checkoutContext->resolve($request),
+                    'from_path' => '/'.$request->path(),
+                    'referer' => (string) $request->headers->get('referer', ''),
+                ]);
 
-            return redirect()->to($checkoutContext->passengersUrl($queryParams, $request));
+                return redirect()->to($checkoutContext->passengersUrl($queryParams, $request));
+            }
         }
 
         $this->logBookingRouteEntry($request);
