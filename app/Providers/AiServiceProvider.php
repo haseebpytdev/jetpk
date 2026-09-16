@@ -4,10 +4,12 @@ namespace App\Providers;
 
 use App\Contracts\Ai\InferenceProvider;
 use App\Contracts\Ai\Lab\AiLabConsultantGateway;
+use App\Http\Middleware\ApplyAiLabCanaryFaultHeader;
 use App\Services\Ai\Lab\AiLabAdapter;
 use App\Services\Ai\Lab\HttpAiLabConsultantGateway;
 use App\Services\Ai\LocalLlamaProvider;
 use App\Services\Ai\NullInferenceProvider;
+use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -32,6 +34,16 @@ final class AiServiceProvider extends ServiceProvider
             }
 
             return new LocalLlamaProvider;
+        });
+    }
+
+    public function boot(): void
+    {
+        $this->app->booted(function (): void {
+            $this->app->make(Router::class)->aliasMiddleware(
+                'ai.lab.canary.fault',
+                ApplyAiLabCanaryFaultHeader::class,
+            );
         });
     }
 }
