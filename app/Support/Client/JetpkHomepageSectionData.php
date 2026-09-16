@@ -5,6 +5,7 @@ namespace App\Support\Client;
 use App\Services\Client\ClientPageContentResolver;
 use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Support\Client\Homepage\JetpkHomepageHeroSizing;
+use App\Support\Client\JetpkHomepageMediaAuthorityCatalog;
 use Illuminate\Support\Str;
 
 /**
@@ -83,7 +84,7 @@ final class JetpkHomepageSectionData
             $routeId = (string) ($item['id'] ?? '');
             $fare = JetpkHomepageFareDisplay::resolve($item, $fareCache[$routeId] ?? null);
             $priceLabel = $fare['label'] ?? JetpkHomepageFareDisplay::neutralAvailabilityLabel();
-            $imageUrl = $this->routeImageUrl($item, $index);
+            $imageUrl = $this->routeImageUrl($item, $routeId);
 
             $routes[] = array_merge($item, [
                 'from' => $from,
@@ -165,9 +166,10 @@ final class JetpkHomepageSectionData
                 if ($from === '' && $to === '') {
                     continue;
                 }
-                $imageUrl = $this->dealImageUrl($item, $index);
+                $dealId = trim((string) ($item['id'] ?? ''));
+                $imageUrl = $this->dealImageUrl($item, $dealId);
                 $deals[] = [
-                    'id' => trim((string) ($item['id'] ?? '')),
+                    'id' => $dealId,
                     'airline' => trim((string) ($item['airline'] ?? '')),
                     'from' => $from,
                     'to' => $to,
@@ -276,9 +278,9 @@ final class JetpkHomepageSectionData
     /**
      * @param  array<string, mixed>  $item
      */
-    private function routeImageUrl(array $item, int $index): ?string
+    private function routeImageUrl(array $item, string $routeId): ?string
     {
-        foreach ($this->homepageMediaAssetCandidates($item, 'route', $index) as $key) {
+        foreach ($this->routeMediaAssetCandidates($item, $routeId) as $key) {
             $url = $this->assetUrl($key);
             if ($url !== null) {
                 return $url;
@@ -291,9 +293,9 @@ final class JetpkHomepageSectionData
     /**
      * @param  array<string, mixed>  $item
      */
-    private function dealImageUrl(array $item, int $index): ?string
+    private function dealImageUrl(array $item, string $dealId): ?string
     {
-        foreach ($this->homepageMediaAssetCandidates($item, 'deal', $index) as $key) {
+        foreach ($this->dealMediaAssetCandidates($item, $dealId) as $key) {
             $url = $this->assetUrl($key);
             if ($url !== null) {
                 return $url;
@@ -307,35 +309,35 @@ final class JetpkHomepageSectionData
      * @param  array<string, mixed>  $item
      * @return list<string>
      */
-    private function homepageMediaAssetCandidates(array $item, string $prefix, int $index): array
+    private function routeMediaAssetCandidates(array $item, string $routeId): array
     {
         $candidates = [];
-
         $assetKey = trim((string) ($item['image_asset_key'] ?? ''));
         if ($assetKey !== '') {
-            $candidates[] = $assetKey;
+            $candidates = array_merge($candidates, JetpkHomepageMediaAuthorityCatalog::assetKeyVariants($assetKey));
         }
 
-        $itemId = trim((string) ($item['id'] ?? ''));
-        if ($itemId !== '') {
-            $slug = Str::slug($itemId, '_');
-            $candidates[] = $prefix.'_'.$itemId;
-            if ($slug !== '') {
-                $candidates[] = $prefix.'_'.$slug;
-            }
-            if ($prefix === 'route') {
-                $candidates[] = str_replace('-', '_', $itemId);
-            }
-            if ($prefix === 'deal') {
-                $candidates[] = 'featured_deal_'.$itemId;
-                if ($slug !== '') {
-                    $candidates[] = 'featured_deal_'.$slug;
-                }
-            }
+        if ($routeId !== '') {
+            $candidates[] = JetpkHomepageAssetService::routeAssetKey($routeId);
         }
 
-        if ($prefix === 'deal') {
-            $candidates[] = 'featured_deal_'.($index + 1);
+        return array_values(array_unique(array_filter($candidates)));
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return list<string>
+     */
+    private function dealMediaAssetCandidates(array $item, string $dealId): array
+    {
+        $candidates = [];
+        $assetKey = trim((string) ($item['image_asset_key'] ?? ''));
+        if ($assetKey !== '') {
+            $candidates = array_merge($candidates, JetpkHomepageMediaAuthorityCatalog::assetKeyVariants($assetKey));
+        }
+
+        if ($dealId !== '') {
+            $candidates[] = JetpkHomepageAssetService::featuredDealAssetKey($dealId);
         }
 
         return array_values(array_unique(array_filter($candidates)));
