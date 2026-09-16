@@ -127,11 +127,58 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     (payload: FlightResultsDataResponse, mode: "replace" | "merge") => {
       const pipeline = resolvePipelineStatus(payload);
       let merged: FlightResultsDataResponse = payload;
+      const previousVisible = countVisibleResults(dataRef.current);
       setData((current) => {
         merged = mode === "merge" ? mergeProgressiveResults(current, payload) : payload;
         dataRef.current = merged;
+        // Progressive first paint: mount a couple of usable cards immediately, then
+        // commit the full page in a transition so DATA→first useful stays snappy.
+        if (
+          mode === "replace" &&
+          previousVisible === 0 &&
+          (merged.paired_options?.length ?? 0) > 2
+        ) {
+          return {
+            ...merged,
+            paired_options: merged.paired_options.slice(0, 2),
+          };
+        }
+        if (
+          mode === "replace" &&
+          previousVisible === 0 &&
+          (merged.outbound_options?.length ?? 0) > 2 &&
+          (merged.paired_options?.length ?? 0) === 0
+        ) {
+          return {
+            ...merged,
+            outbound_options: merged.outbound_options.slice(0, 2),
+          };
+        }
+        if (
+          mode === "replace" &&
+          previousVisible === 0 &&
+          (merged.offers?.length ?? 0) > 2 &&
+          (merged.paired_options?.length ?? 0) === 0 &&
+          (merged.outbound_options?.length ?? 0) === 0
+        ) {
+          return {
+            ...merged,
+            offers: merged.offers.slice(0, 2),
+          };
+        }
         return merged;
       });
+      if (
+        mode === "replace" &&
+        previousVisible === 0 &&
+        countVisibleResults(merged) > 2
+      ) {
+        queueMicrotask(() => {
+          if (dataRef.current === merged || dataRef.current?.search_id === merged.search_id) {
+            setData(merged);
+          }
+        });
+      }
       const visible = countVisibleResults(merged);
       const nextStatus = mapPipelineToPageStatus(pipeline, merged);
       const elapsed = Date.now() - searchStartedAt.current;
