@@ -14,6 +14,7 @@ import {
   probeSession,
   sendMessage,
   sessionPreflight,
+  waitForAskReady,
 } from "./canary-matrix-helpers.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -123,17 +124,33 @@ export async function probeEffectiveReadOnly(page) {
 }
 
 export async function waitForChatInputReady(page, timeoutMs = 180_000) {
-  const input = page
-    .locator('[data-testid="ask-jetpakistan-panel"] input[type="text"], [data-testid="ask-jetpakistan-panel"] input')
-    .first();
-  await input.waitFor({ state: "visible", timeout: timeoutMs });
-  await page.waitForFunction(
-    () => {
-      const el = document.querySelector('[data-testid="ask-jetpakistan-panel"] input[type="text"], [data-testid="ask-jetpakistan-panel"] input');
-      return el && !el.disabled && el.getAttribute("aria-busy") !== "true";
-    },
-    { timeout: timeoutMs },
-  );
+  await waitForAskReady(page, timeoutMs);
+}
+
+function extractRouteFromMeta(meta) {
+  const rec = meta?.search_record ?? meta?.shadow_record ?? null;
+  const slots = meta?.intent?.slots ?? {};
+  return {
+    origin: rec?.origin ?? slots.origin ?? null,
+    destination: rec?.destination ?? slots.destination ?? null,
+    dialog_state: meta?.dialog_state ?? meta?.lab_state?.dialog_state ?? null,
+    live_supplier_called: rec?.live_supplier_called === true,
+    confirmation_before_search: meta?.confirmation_before_search === true || rec?.confirmed === true,
+  };
+}
+
+function routeMatchesExpectation(meta, expectRoute) {
+  const route = extractRouteFromMeta(meta);
+  if (expectRoute?.origin && route.origin !== expectRoute.origin) return false;
+  if (expectRoute?.destination && route.destination !== expectRoute.destination) return false;
+  return true;
+}
+
+function recapMatchesExpectation(visibleTail, expectRoute) {
+  if (!expectRoute?.origin || !expectRoute?.destination) return true;
+  const originRe = new RegExp(`\\(${expectRoute.origin}\\)|\\b${expectRoute.origin}\\b`, "i");
+  const destRe = new RegExp(`\\(${expectRoute.destination}\\)|\\b${expectRoute.destination}\\b`, "i");
+  return originRe.test(visibleTail) && destRe.test(visibleTail);
 }
 
 const SYNTHETIC_QA_LEAD = {
@@ -201,10 +218,14 @@ export async function runConfirmedLiveSearch(page, caseId, steps, expectRoute, o
   let error = null;
   let lastPayload = {};
   let visible = "";
+  let firstAttemptResult = "FAIL";
+  let confirmationBeforeSearch = false;
+  let routeMeta = null;
   try {
-    await openAskPanel(page);
+    await waitForChatInputReady(page);
     await clearConversation(page);
     await waitForChatInputReady(page);
+
     for (let i = 0; i < steps.length; i++) {
       const msg = i === steps.length - 1 ? normalizeConfirmationStep(steps[i]) : steps[i];
       await waitForChatInputReady(page);
@@ -220,46 +241,76 @@ export async function runConfirmedLiveSearch(page, caseId, steps, expectRoute, o
         lastPayload = lead.payload ?? lastPayload;
         visible = await page.getByTestId("ask-jetpakistan-messages").innerText().catch(() => visible);
       }
+
+      const stepMeta = lastPayload.meta ?? {};
+      const stepRoute = extractRouteFromMeta(stepMeta);
+      if (stepRoute.dialog_state === "COLLECTING" && i === steps.length - 1) {
+        throw new Error("COLLECTING_STALL");
+      }
+      if (i === steps.length - 2 && expectRoute) {
+        const tail = visible.split("\n").slice(-6).join("\n");
+        if (!recapMatchesExpectation(tail, expectRoute)) {
+          throw new Error(`RECAP_ROUTE_MISMATCH:${stepRoute.origin ?? "?"}->${stepRoute.destination ?? "?"}`);
+        }
+      }
     }
-    const meta = lastPayload.meta ?? {};
-    if (meta.dialog_state === "AWAITING_CONFIRMATION") {
-      await waitForChatInputReady(page);
-      const retry = await sendMessage(page, "yes", { responseTimeoutMs: 180_000 });
-      lastPayload = retry.payload ?? lastPayload;
-      visible = retry.body;
-    }
+
     const metaAfter = lastPayload.meta ?? {};
+    routeMeta = extractRouteFromMeta(metaAfter);
+    if (routeMeta.dialog_state === "COLLECTING") {
+      throw new Error("COLLECTING_STALL");
+    }
+    if (routeMeta.dialog_state === "AWAITING_CONFIRMATION") {
+      throw new Error("CONFIRMATION_NOT_COMPLETED");
+    }
+
     const recs = lastPayload.recommendations ?? [];
     const searchRecord = metaAfter.search_record ?? metaAfter.shadow_record ?? null;
+    confirmationBeforeSearch =
+      routeMeta.confirmation_before_search ||
+      searchRecord?.confirmed === true ||
+      /confirm\?/i.test(visible);
     const isLive =
       /live option|searched live availability|read-only/i.test(visible) ||
-      searchRecord?.live_supplier_called === true ||
+      routeMeta.live_supplier_called === true ||
       recs.some((r) => Array.isArray(r?.labels) && r.labels.includes("live-search"));
     if (!isLive) throw new Error("NOT_LIVE_SEARCH_RESPONSE");
-    if (expectRoute?.origin && !new RegExp(expectRoute.origin, "i").test(visible)) {
-      throw new Error("ROUTE_ORIGIN_MISMATCH");
+    if (!routeMatchesExpectation(metaAfter, expectRoute)) {
+      throw new Error(`ROUTE_SLOT_MISMATCH:${routeMeta.origin ?? "?"}->${routeMeta.destination ?? "?"}`);
     }
-    if (expectRoute?.destination && !new RegExp(expectRoute.destination, "i").test(visible)) {
-      throw new Error("ROUTE_DEST_MISMATCH");
+
+    const visibleTail = visible.split("\n").slice(-8).join("\n");
+    if (!recapMatchesExpectation(visibleTail, expectRoute)) {
+      throw new Error(`ROUTE_VISIBLE_MISMATCH:${routeMeta.origin ?? "?"}->${routeMeta.destination ?? "?"}`);
     }
+
     pass = true;
+    firstAttemptResult = "PASS";
   } catch (e) {
     error = e instanceof Error ? e.message : String(e);
+    if (/FAB_UNAVAILABLE|CANARY_NOT_ELIGIBLE/i.test(error)) {
+      error = error.includes("FAB_UNAVAILABLE") ? "FAB_UNAVAILABLE" : error;
+    }
   }
   const screenshot = path.join(evidenceDir, `${caseId}${pass ? "" : "-fail"}.png`);
   await page.screenshot({ path: screenshot, fullPage: false }).catch(() => {});
   recordCase({
-    phase: "LIVE_SEARCH",
+    phase: options.phase ?? "LIVE_SEARCH",
     case_id: caseId,
     pass_fail: pass ? "PASS" : "FAIL",
+    first_attempt_result: firstAttemptResult,
+    retry_attempts: 0,
+    final_diagnostic_result: pass ? "PASS" : "FAIL",
     steps,
     expect_route: expectRoute,
     error,
     latency_ms: Date.now() - started,
     payload_meta: lastPayload?.meta ?? null,
+    route_meta: routeMeta,
+    confirmation_before_search: confirmationBeforeSearch,
     screenshot,
   });
-  return { pass, error, visible };
+  return { pass, error, visible, firstAttemptResult, routeMeta, confirmationBeforeSearch };
 }
 
 export {

@@ -237,20 +237,113 @@ export async function openAskPanel(page) {
   return preflight;
 }
 
+export async function waitForAskReady(page, timeoutMs = 120_000) {
+  const preflight = await openAskPanel(page);
+  if (!preflight.canary_eligible) {
+    throw new Error(`CANARY_NOT_ELIGIBLE mode=${preflight.probe?.assistant_mode ?? "unknown"}`);
+  }
+  if (!preflight.fab_visible) {
+    throw new Error("FAB_UNAVAILABLE");
+  }
+
+  const input = page
+    .locator('[data-testid="ask-jetpakistan-panel"] input[type="text"], [data-testid="ask-jetpakistan-panel"] input')
+    .first();
+  await input.waitFor({ state: "visible", timeout: timeoutMs });
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector(
+        '[data-testid="ask-jetpakistan-panel"] input[type="text"], [data-testid="ask-jetpakistan-panel"] input',
+      );
+      return el && !el.disabled && el.getAttribute("aria-busy") !== "true";
+    },
+    { timeout: timeoutMs },
+  );
+
+  return preflight;
+}
+
 export async function clearConversation(page) {
   const panel = page.getByTestId("ask-jetpakistan-panel");
   if ((await panel.count()) === 0) {
     await openAskPanel(page);
   }
-  try {
-    await page.getByRole("button", { name: "Chat options" }).click({ timeout: 15_000 });
-    await page.getByRole("menuitem", { name: "Clear conversation" }).click({ timeout: 15_000 });
-    await page.waitForTimeout(1200);
-  } catch {
-    await page.reload({ waitUntil: "domcontentloaded", timeout: 120_000 }).catch(() => {});
-    await openAskPanel(page).catch(() => {});
-    await page.waitForTimeout(1500);
+
+  const cleared = await page.evaluate(async (base) => {
+    const fetchJson = async (url, init) => {
+      const res = await fetch(url, {
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        ...init,
+      });
+      let json = {};
+      try {
+        json = await res.json();
+      } catch {
+        json = {};
+      }
+      return { ok: res.ok, status: res.status, json };
+    };
+
+    await fetchJson(`${base}/laravel/api/public/content/csrf-token`, {
+      method: "GET",
+    });
+    const cookies = document.cookie.split(";").map((c) => c.trim());
+    const xsrfRaw = cookies.find((c) => c.startsWith("XSRF-TOKEN="));
+    const xsrf = xsrfRaw ? decodeURIComponent(xsrfRaw.split("=").slice(1).join("=")) : "";
+
+    let conversationId = null;
+    try {
+      conversationId = sessionStorage.getItem("jp_ai_conversation_id");
+    } catch {
+      conversationId = null;
+    }
+
+    const clear = await fetchJson(`${base}/laravel/api/public/ai/clear`, {
+      method: "POST",
+      headers: xsrf ? { "X-XSRF-TOKEN": xsrf } : {},
+      body: JSON.stringify({ conversation_id: conversationId }),
+    });
+
+    const nextId =
+      typeof clear.json?.conversation_id === "string" ? clear.json.conversation_id : null;
+    try {
+      if (nextId) sessionStorage.setItem("jp_ai_conversation_id", nextId);
+      else sessionStorage.removeItem("jp_ai_conversation_id");
+    } catch {
+      /* best-effort */
+    }
+
+    return {
+      ok: clear.ok,
+      status: clear.status,
+      conversation_id: nextId,
+    };
+  }, BASE);
+
+  if (!cleared.ok) {
+    try {
+      await page.getByRole("button", { name: "Chat options" }).click({ timeout: 15_000 });
+      await page.getByRole("menuitem", { name: "Clear conversation" }).click({ timeout: 15_000 });
+    } catch {
+      await page.reload({ waitUntil: "domcontentloaded", timeout: 120_000 }).catch(() => {});
+      await openAskPanel(page).catch(() => {});
+    }
   }
+
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector('[data-testid="ask-jetpakistan-messages"]');
+      return el && (el.textContent ?? "").trim().length === 0;
+    },
+    { timeout: 15_000 },
+  ).catch(() => {});
+
+  await page.waitForTimeout(800);
 }
 
 export async function withCanaryFaultMode(page, faultMode, fn) {

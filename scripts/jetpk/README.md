@@ -94,3 +94,14 @@ APP=/home/pkjetp/jetpk_app bash scripts/verify-ai-runtime-after-seo-activate.sh
 ```bash
 AUTHORIZED_SHA=<full-sha> bash scripts/jetpk/deploy-ai-runtime-protected.sh
 ```
+
+Includes canonical public frontend build/deploy (`deploy-frontend-canonical.sh`) in order:
+backend source → frontend build → Laravel refresh → `jetpk-public-frontend` restart → AI runtime verification.
+
+Standalone frontend deploy:
+
+```bash
+AUTHORIZED_SHA=<full-sha> bash scripts/jetpk/deploy-frontend-canonical.sh
+```
+
+Use `FRONTEND_SKIP_RESTART=1` when the protected wrapper will restart PM2 after Laravel refresh.
