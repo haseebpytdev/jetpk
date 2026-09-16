@@ -29,4 +29,24 @@ check(
   /isReturnPair[\s\S]*?<PairReturnCard[\s\S]*?: results\.isReturnSplit[\s\S]*?<OutboundOptionCard/.test(page),
 );
 
+const hook = read("features/flight-results/hooks/use-flight-results.ts");
+check("use-flight-results defines representationMismatch", hook.includes("representationMismatch"));
+check(
+  "representationMismatch detects pair vs return_split_outbound",
+  hook.includes('wantsPair && flow === "return_split_outbound"'),
+);
+check(
+  "representationMismatch detects segmented vs return_pair",
+  hook.includes('wantsSegmented && flow === "return_pair"'),
+);
+check(
+  "isReturnPair gated by !representationMismatch",
+  /isReturnPair:\s*\n?\s*!representationMismatch/.test(hook) ||
+    hook.includes("!representationMismatch &&") && hook.includes("isReturnPair:"),
+);
+check(
+  "FlightResultsPage shows switching skeleton on representationMismatch",
+  page.includes("isViewRepresentationSwitching") && page.includes("Switching view"),
+);
+
 process.exit(fail ? 1 : 0);

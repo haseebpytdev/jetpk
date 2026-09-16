@@ -1,9 +1,13 @@
 ﻿START_LOCAL_HEAD=6f0412bd5bc2736b0879fba12270bd4ed6426cb5
 START_REMOTE_MAIN=27be8ece3e6e39826a7042f3712fc07fe1f7d52a
 CURRENT_CMS_CORRECTION_SHA=6f0412bd
-AHEAD_BY=4
+CLOSURE_UI_SHA=0fc67d6b17d25d9b325615ab29ee81561bc3f89d
+AHEAD_BY=5 (at 0fc67d6b commit time)
 BEHIND_BY=0
 REMOTE=jetpk
-TRACKED_MODIFIED=0
-UNTRACKED=many (tmp/, seo scripts, CMS_CONNECTION_MATRIX.md)
-RECOVERY_LINEAGE=45fd3e06 -> f0b6d3df -> e8efc724 -> 6f0412bd
+RECOVERY_LINEAGE=45fd3e06 -> f0b6d3df -> e8efc724 -> 6f0412bd -> 0fc67d6b
+
+CMS_CONF_CONTENT_GATE=
+  Production homepage hero shows [CMS-CONF-1789016764942] (DB/CMS content, not code).
+  Code deploy does NOT clear it. Post-deploy: Admin page-settings home restore/publish
+  original eyebrow/headline, then verify Laravel /api/public/content/homepage + Next /.
