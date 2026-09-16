@@ -56,8 +56,7 @@ export function PublicFloatingLayoutProvider({
   const liftFlightCta =
     pathname.startsWith("/flights/results") ||
     pathname.startsWith("/flights/return") ||
-    pathname.startsWith("/flights/details") ||
-    pathname === "/";
+    pathname.startsWith("/flights/details");
 
   const layoutState = useMemo<PublicFloatingLayoutState>(
     () => ({

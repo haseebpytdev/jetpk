@@ -207,7 +207,7 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
   return (
     <section
       className={cn(
-        "min-w-0 max-w-full overflow-visible rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card",
+        "min-w-0 max-w-full overflow-visible rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card max-lg:pr-[4.75rem]",
         layout === "compact" ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl",
         className,
       )}
