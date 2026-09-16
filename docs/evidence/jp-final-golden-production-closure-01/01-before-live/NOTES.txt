@@ -1,0 +1,14 @@
+﻿BEFORE LIVE DEFECTS (prod 27be8ece)
+- favicon.ico HTTP 200 Content-Length=0
+- CMS-CONF marker visible on homepage hero
+- route cards use static destination-*.jpg fallbacks
+- Return search shows ReturnViewSelector (Pair vs Segmented)
+- Search ID: a5e96a00-335b-46ef-b6f4-34ff3e4fe112 ISB-DXB 2026-09-20/27
+PAIR MODE DEFECT PROOF (production BEFORE)
+URL: view=pair&search_id=a5e96a00-335b-46ef-b6f4-34ff3e4fe112
+pair-return-card count: 0
+outbound-option-card count: 4
+Labels: '1 return option' / '5 return options' (segmented semantics)
+Stepper: 1. Outbound 2. Return 3. Fare & Travelers
+FAIL: PAIR_CARD_HAS_BOTH_JOURNEYS_SIMULTANEOUSLY
+FAIL: PAIR_CARD_IS_NOT_OUTBOUND_OPTION_CARD

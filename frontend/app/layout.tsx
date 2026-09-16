@@ -25,6 +25,10 @@ export const metadata: Metadata = {
     template: "%s | JetPakistan",
   },
   description: "Book flights, hotels, and travel services with JetPakistan.",
+  icons: {
+    icon: [{ url: "/favicon.ico" }],
+    shortcut: [{ url: "/favicon.ico" }],
+  },
 };
 
 export const viewport: Viewport = {

@@ -154,8 +154,8 @@ function buildResultsStates(): JpUi04aScenario[] {
     s("results", "results-branded-fare-preview", RESULTS_BASE, "light", VP.d1440, "branded", "results-branded", {
       waitForTestId: "branded-fare-carousel",
     }),
-    s("results", "results-return-pair-view-or-honest-unavailable", q({ trip_type: "return", return: "2026-09-01" }), "light", VP.d1440, "pair-view", "results-return-split", {
-      waitForTestId: "outbound-option-card",
+    s("results", "results-return-pair-view-or-honest-unavailable", q({ trip_type: "round_trip", return_date: "2026-09-01", view: "pair" }), "light", VP.d1440, "pair-view", "results-return-pair", {
+      waitForTestId: "pair-return-card",
     }),
     s("results", "results-multi-city-summary", q({ trip_type: "multi_city" }), "light", VP.d1440, "multi-city", "results-present", {
       waitForTestId: "search-summary-bar",

@@ -38,9 +38,9 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
     hero.focalPoint === "left" ? "left center" : hero.focalPoint === "right" ? "right center" : "center";
 
   return (
-    <section className="relative overflow-hidden bg-jp-page" data-testid="homepage-public-hero">
+    <section className="relative overflow-x-hidden bg-jp-page" data-testid="homepage-public-hero">
       <div className="relative min-h-[clamp(20rem,42vh,30rem)]">
-        <div className="absolute inset-0" data-testid="homepage-hero-image">
+        <div className="absolute inset-0 overflow-hidden" data-testid="homepage-hero-image">
           <picture>
             <source media="(max-width: 767px)" srcSet={mobileSrc} />
             <ImageSlot
@@ -64,11 +64,11 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
         </div>
 
         <PageContainer className="relative z-10 flex min-h-[clamp(20rem,42vh,30rem)] flex-col justify-end pb-jp-lg pt-jp-3xl">
-          <div className="max-w-3xl pb-jp-lg text-white">
+          <div className="max-w-3xl min-w-0 pb-jp-lg text-white">
             {hero.eyebrow ? (
               <p className="text-jp-sm font-semibold uppercase tracking-[0.18em] text-white/85">{hero.eyebrow}</p>
             ) : null}
-            <h1 className="mt-3 font-display text-jp-h1 font-bold leading-tight text-white">
+            <h1 className="mt-3 break-words font-display text-jp-h1 font-bold leading-[1.15] text-white">
               {headline}{" "}
               <span className="text-jp-primary-soft">{highlight}</span>
             </h1>

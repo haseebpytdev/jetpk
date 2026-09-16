@@ -58,11 +58,12 @@ test("expired search shows recovery state", async ({ page }) => {
   await expect(page.getByTestId("expired-search")).toBeVisible();
 });
 
-test("return pair view shows outbound options", async ({ page }) => {
+test("return pair view shows pair return cards", async ({ page }) => {
   const query = new URLSearchParams({
     ...Object.fromEntries(new URLSearchParams(resultsQuery())),
-    trip_type: "return",
-    return: "2026-09-01",
+    trip_type: "round_trip",
+    return_date: "2026-09-01",
+    view: "pair",
   }).toString();
   await setupJpUi04aScenario(page, {
     id: "pair-view",
@@ -72,11 +73,12 @@ test("return pair view shows outbound options", async ({ page }) => {
     viewport: { name: "1440x900", width: 1440, height: 900 },
     zoom: 1,
     state: "pair",
-    fixtureId: "results-return-split",
-    waitForTestId: "outbound-option-card",
+    fixtureId: "results-return-pair",
+    waitForTestId: "pair-return-card",
   });
   await page.goto(`/flights/results?${query}`, { waitUntil: "load" });
-  await expect(page.getByTestId("outbound-option-card")).toBeVisible();
+  await expect(page.getByTestId("pair-return-card")).toBeVisible();
+  await expect(page.getByTestId("outbound-option-card")).toHaveCount(0);
   await assertNoHorizontalOverflow(page);
 });
 

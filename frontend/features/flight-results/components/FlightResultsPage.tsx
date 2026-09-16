@@ -381,9 +381,12 @@ export function FlightResultsPage() {
   const isSearchingMask =
     (results.status === "searching" || results.status === "loading" || isBootstrapping) &&
     shownCount === 0;
+  // Cache-miss Pair↔Segmented: hide incompatible prior cards; show switching skeleton instead.
+  const isViewRepresentationSwitching = Boolean(results.representationMismatch);
   // Never show prior cards beside a fatal error/failed banner (stale mix blocker).
   const showResultsList =
     !resultsStaleLocked &&
+    !isViewRepresentationSwitching &&
     results.status !== "error" &&
     results.status !== "failed" &&
     results.status !== "expired" &&
@@ -506,13 +509,16 @@ export function FlightResultsPage() {
               />
             ) : null}
 
-            {!awaitingReturnViewChoice && (isSearchingMask || resultsStaleLocked) ? (
+            {!awaitingReturnViewChoice &&
+            (isSearchingMask || resultsStaleLocked || isViewRepresentationSwitching) ? (
               <>
                 <SearchProgress
                   message={
                     resultsStaleLocked
                       ? "Refreshing latest fares…"
-                      : results.message || "Searching flights…"
+                      : isViewRepresentationSwitching
+                        ? results.message || "Switching view…"
+                        : results.message || "Searching flights…"
                   }
                   summary={summary}
                 />

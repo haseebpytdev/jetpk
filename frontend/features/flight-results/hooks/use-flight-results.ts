@@ -519,6 +519,16 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
 
   const visibleCount = useMemo(() => countVisibleResults(data), [data]);
 
+  // Pair ↔ Segmented cache-miss: do not report the prior flow as the active card type.
+  const normalizedView = (viewKey || "").toLowerCase();
+  const wantsPair = normalizedView === "pair";
+  const wantsSegmented = normalizedView === "segmented" || normalizedView === "split";
+  const flow = data?.flow;
+  const representationMismatch =
+    Boolean(flow) &&
+    ((wantsPair && flow === "return_split_outbound") ||
+      (wantsSegmented && flow === "return_pair"));
+
   return {
     status,
     message,
@@ -527,9 +537,11 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     offers: useMemo(() => data?.offers ?? [], [data]),
     outboundOptions: useMemo(() => data?.outbound_options ?? [], [data]),
     pairedOptions: useMemo(() => data?.paired_options ?? [], [data]),
-    isReturnSplit: data?.flow === "return_split_outbound",
+    representationMismatch,
+    isReturnSplit: !representationMismatch && flow === "return_split_outbound",
     isReturnPair:
-      data?.flow === "return_pair" || (viewKey === "pair" && (data?.paired_options?.length ?? 0) > 0),
+      !representationMismatch &&
+      (flow === "return_pair" || (wantsPair && (data?.paired_options?.length ?? 0) > 0)),
     pairingAuthority: data?.pairing_authority ?? null,
     freshness: data?.search_freshness ?? null,
     page,

@@ -200,6 +200,46 @@ async function setupResultsFixture(page: Page, fixtureId: string): Promise<void>
         }],
       });
       return;
+    case "results-return-pair":
+      await routeResults(page, {
+        ...mockResultsBody({ offers: [], total: 1 }),
+        flow: "return_pair",
+        pairing_authority: "SUPPLIER_RETURNED",
+        status: "ready",
+        paired_options: [{
+          combo_id: "combo-1",
+          outbound_key: "out-1",
+          return_key: "ret-1",
+          provider: "iati",
+          supplier_provider: "iati",
+          airline_code: "EK",
+          airline_name: "Audit Airline",
+          total_amount: 180000,
+          total_display: "PKR 180,000",
+          can_book: true,
+          outbound_journey: {
+            departure_time_display: "08:30",
+            arrival_time_display: "11:45",
+            origin_airport_code: "LHE",
+            destination_airport_code: "DXB",
+            duration_display: "3h 15m",
+            stops: 0,
+            airline_code: "EK",
+            airline_name: "Audit Airline",
+          },
+          return_journey: {
+            departure_time_display: "14:00",
+            arrival_time_display: "21:00",
+            origin_airport_code: "DXB",
+            destination_airport_code: "LHE",
+            duration_display: "5h",
+            stops: 0,
+            airline_code: "EK",
+            airline_name: "Audit Airline",
+          },
+        }],
+      });
+      return;
     case "groups-search":
       await page.addInitScript(() => {
         window.__jpResetGroupSearchFacetsCache?.();
