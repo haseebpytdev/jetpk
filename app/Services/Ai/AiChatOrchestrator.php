@@ -234,7 +234,12 @@ final class AiChatOrchestrator
                 $this->syncLeadFromConversation($conversation, is_array($searchRecord) ? $searchRecord : null);
 
                 return $labResponse;
-            } catch (\Throwable) {
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('ai.lab.adapter_turn_failed', [
+                    'conversation_id' => $conversation->public_id,
+                    'message' => $e->getMessage(),
+                    'exception' => $e::class,
+                ]);
                 if (! (bool) config('ai_lab.fallback_to_legacy', true)) {
                     $assistant = $this->storeMessage($conversation, 'assistant', 'AI assistant is temporarily unavailable. Please try again shortly.', [
                         'mode' => 'AI_UNAVAILABLE',

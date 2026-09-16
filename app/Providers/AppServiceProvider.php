@@ -65,9 +65,6 @@ use App\Listeners\Auth\SendEmailVerificationNotificationBestEffort;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
-use App\Contracts\Ai\InferenceProvider;
-use App\Services\Ai\LocalLlamaProvider;
-use App\Services\Ai\NullInferenceProvider;
 use App\Support\Url\PublicActionUrl;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -99,23 +96,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(CurrentClientContext::class);
         $this->app->scoped(ClientRedirectResolver::class);
         $this->app->singleton(\App\Support\Sabre\Scenario\SabreGdsScenarioCorrelationRegistry::class);
-
-        $this->app->singleton(\App\Contracts\Ai\Lab\AiLabConsultantGateway::class, \App\Services\Ai\Lab\HttpAiLabConsultantGateway::class);
-        $this->app->singleton(\App\Services\Ai\Lab\AiLabAdapter::class);
-
-        $this->app->singleton(InferenceProvider::class, function (): InferenceProvider {
-            $mode = strtolower((string) config('ota.ai_assistant.mode', 'off'));
-            $legacyOn = (bool) config('ota.ai_assistant.enabled', false);
-            $runtimeOn = $mode === 'public' || $mode === 'internal_canary' || ($mode === 'off' && $legacyOn);
-            $conversational = (bool) config('ota.ai_assistant.conversational_enabled', true);
-            $optionalAssist = (bool) config('ota.ai_assistant.optional_llm_assist', false);
-
-            if (! $runtimeOn || (! $conversational && ! $optionalAssist)) {
-                return new NullInferenceProvider;
-            }
-
-            return new LocalLlamaProvider;
-        });
     }
 
     /**
