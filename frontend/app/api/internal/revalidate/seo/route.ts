@@ -24,7 +24,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   if (body.global) {
     revalidateTag("public-config");
     revalidatedTags.push("public-config");
-    revalidatePath("/");
+    revalidatePath("/", "layout");
     revalidatedPaths.push("/");
   }
 
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   for (const path of body.paths ?? []) {
     const normalized = path.trim();
     if (!normalized.startsWith("/")) continue;
-    revalidatePath(normalized);
+    revalidatePath(normalized, "layout");
     revalidatedPaths.push(normalized);
   }
 
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     revalidateTag(tag);
     revalidatedTags.push(tag);
     const cmsPath = `/pages/${normalized}`;
-    revalidatePath(cmsPath);
+    revalidatePath(cmsPath, "layout");
     revalidatedPaths.push(cmsPath);
   }
 

@@ -1,4 +1,4 @@
-import { laravelApiPath } from "@/services/flight-search";
+import { absoluteLaravelUrl, laravelApiPath } from "@/services/flight-search";
 import type {
   ContactDetails,
   ContactFormPayload,
@@ -12,6 +12,19 @@ import { allowContentFixtures } from "./content-policy";
 export type LaravelValidationErrors = Record<string, string[]>;
 
 const LARAVEL_FETCH_TIMEOUT_MS = 3_000;
+
+/**
+ * Server components must call Laravel directly (runtime LARAVEL_URL) because
+ * Next rewrites are baked at build time and can target the wrong loopback host.
+ */
+export function publicContentFetchUrl(apiPath: string): string {
+  const normalized = apiPath.startsWith("/") ? apiPath : `/${apiPath}`;
+  if (typeof window === "undefined") {
+    return absoluteLaravelUrl(normalized);
+  }
+
+  return laravelApiPath(normalized);
+}
 
 export async function fetchWithTimeout(input: string, init?: RequestInit): Promise<Response> {
   const controller = new AbortController();
@@ -52,7 +65,7 @@ export async function ensureLaravelCsrfToken(): Promise<string | null> {
 
 export async function fetchManagedPage(pageKey: string): Promise<LaravelManagedPageResponse | null> {
   try {
-    const response = await fetchWithTimeout(laravelApiPath(`/api/public/content/pages/${pageKey}`), {
+    const response = await fetchWithTimeout(publicContentFetchUrl(`/api/public/content/pages/${pageKey}`), {
       headers: { Accept: "application/json" },
       next: { revalidate: 60, tags: ["public-seo", `public-seo-${pageKey}`] },
     });
@@ -65,7 +78,7 @@ export async function fetchManagedPage(pageKey: string): Promise<LaravelManagedP
 
 export async function fetchSiteContactFromLaravel(): Promise<ContactDetails | null> {
   try {
-    const response = await fetchWithTimeout(laravelApiPath("/api/public/content/site-contact"), {
+    const response = await fetchWithTimeout(publicContentFetchUrl("/api/public/content/site-contact"), {
       headers: { Accept: "application/json" },
       next: { revalidate: 300 },
     });
@@ -79,7 +92,7 @@ export async function fetchSiteContactFromLaravel(): Promise<ContactDetails | nu
 
 export async function fetchSupportCategories(): Promise<SupportTicketCategoryOption[]> {
   try {
-    const response = await fetchWithTimeout(laravelApiPath("/api/public/content/support/categories"), {
+    const response = await fetchWithTimeout(publicContentFetchUrl("/api/public/content/support/categories"), {
       headers: { Accept: "application/json" },
       next: { revalidate: 3600 },
     });

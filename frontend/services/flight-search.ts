@@ -35,7 +35,11 @@ export function laravelApiPath(path: string): string {
 }
 
 export function absoluteLaravelUrl(path: string): string {
-  const base = appConfig.laravelUrl.replace(/\/$/, "");
+  const base = (
+    typeof window === "undefined"
+      ? process.env.LARAVEL_URL ?? process.env.NEXT_PUBLIC_LARAVEL_URL ?? appConfig.laravelUrl
+      : appConfig.laravelUrl
+  ).replace(/\/$/, "");
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return `${base}${normalized}`;
 }

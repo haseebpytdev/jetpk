@@ -1,5 +1,4 @@
-import { laravelApiPath } from "@/services/flight-search";
-import { fetchWithTimeout } from "../utils/laravel-api";
+import { fetchWithTimeout, publicContentFetchUrl } from "../utils/laravel-api";
 import type { CmsPublicPage, PublicSeo } from "../types";
 import { isTrustedCmsHtml } from "../utils/sanitize";
 
@@ -14,7 +13,7 @@ type LaravelCmsResponse = {
 export const CmsPageService = {
   async getBySlug(slug: string): Promise<CmsPublicPage | null> {
     try {
-      const response = await fetchWithTimeout(laravelApiPath(`/api/public/content/cms/${encodeURIComponent(slug)}`), {
+      const response = await fetchWithTimeout(publicContentFetchUrl(`/api/public/content/cms/${encodeURIComponent(slug)}`), {
         headers: { Accept: "application/json" },
         next: { revalidate: 60, tags: ["public-cms", `public-cms-${slug}`] },
       });

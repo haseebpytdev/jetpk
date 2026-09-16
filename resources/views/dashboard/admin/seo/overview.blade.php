@@ -41,7 +41,7 @@
 
     <div class="jp-card">
         <div class="jp-card__head"><h2 class="jp-card__title mb-0">Live SEO pages</h2></div>
-        <div class="table-responsive">
+        <div class="table-responsive ota-r-table-wrap">
             <table class="jp-table">
                 <thead>
                     <tr>

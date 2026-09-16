@@ -15,7 +15,7 @@
     @include('dashboard.admin.seo.partials.nav', ['seoNav' => 'pages'])
 
     <div class="jp-card">
-        <div class="table-responsive">
+        <div class="table-responsive ota-r-table-wrap">
             <table class="jp-table">
                 <thead>
                     <tr>

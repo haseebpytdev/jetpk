@@ -1,6 +1,5 @@
-import { laravelApiPath } from "@/services/flight-search";
 import type { PublicSeo } from "../types";
-import { fetchWithTimeout } from "../utils/laravel-api";
+import { fetchWithTimeout, publicContentFetchUrl } from "../utils/laravel-api";
 import { splitParagraphs } from "../utils/content-mapper";
 
 export type CustomClientPageSection = {
@@ -46,7 +45,7 @@ export const CustomPageService = {
   async getBySlug(slug: string): Promise<CustomClientPage | null> {
     try {
       const response = await fetchWithTimeout(
-        laravelApiPath(`/api/public/content/custom/${encodeURIComponent(slug)}`),
+        publicContentFetchUrl(`/api/public/content/custom/${encodeURIComponent(slug)}`),
         {
           headers: { Accept: "application/json" },
           next: { revalidate: 60 },

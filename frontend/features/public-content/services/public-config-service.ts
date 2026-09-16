@@ -1,6 +1,5 @@
-import { laravelApiPath } from "@/services/flight-search";
 import type { ContactDetails } from "../types";
-import { fetchWithTimeout } from "../utils/laravel-api";
+import { fetchWithTimeout, publicContentFetchUrl } from "../utils/laravel-api";
 
 export type PublicConfig = {
   brand_name: string;
@@ -31,7 +30,7 @@ export type PublicConfig = {
 export const PublicConfigService = {
   async getConfig(): Promise<PublicConfig | null> {
     try {
-      const response = await fetchWithTimeout(laravelApiPath("/api/public/content/config"), {
+      const response = await fetchWithTimeout(publicContentFetchUrl("/api/public/content/config"), {
         headers: { Accept: "application/json" },
         next: { revalidate: 300, tags: ["public-config"] },
       });
