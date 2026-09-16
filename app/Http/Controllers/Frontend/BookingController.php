@@ -4038,7 +4038,27 @@ class BookingController extends Controller
 
     protected function wantsBookingJson(Request $request): bool
     {
-        return $request->wantsJson() || $request->query('format') === 'json';
+        if ($request->wantsJson() || $request->query('format') === 'json') {
+            return true;
+        }
+
+        // Next.js /laravel reverse-proxy often forwards Accept as */* while keeping
+        // the XHR marker used by standard-booking-api.ts.
+        $xhr = strcasecmp((string) $request->header('X-Requested-With', ''), 'XMLHttpRequest') === 0;
+        $path = trim($request->path(), '/');
+
+        return $xhr && (
+            $path === 'booking/passengers'
+            || str_starts_with($path, 'booking/passengers')
+            || $path === 'booking/review'
+            || str_starts_with($path, 'booking/review')
+            || $path === 'booking/payment'
+            || str_starts_with($path, 'booking/payment')
+            || $path === 'booking/confirmation'
+            || str_starts_with($path, 'booking/confirmation')
+            || $path === 'booking/invoice'
+            || str_starts_with($path, 'booking/invoice')
+        );
     }
     protected function processReviewSubmit(Request $request): RedirectResponse
     {
