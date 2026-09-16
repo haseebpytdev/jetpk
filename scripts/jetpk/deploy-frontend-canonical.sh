@@ -3,7 +3,7 @@
 set -euo pipefail
 
 AUTHORIZED_SHA="${AUTHORIZED_SHA:?AUTHORIZED_SHA is required}"
-REPO="${REPO:-/home/pkjetp/jetpk_repo}"
+REPO="${REPO:-/home/pkjetp/jetpk_git}"
 APP="${APP:-/home/pkjetp/jetpk_app}"
 PM2="${PM2:-/home/pkjetp/.npm-global/lib/node_modules/pm2/bin/pm2}"
 FRONTEND_SKIP_RESTART="${FRONTEND_SKIP_RESTART:-0}"
