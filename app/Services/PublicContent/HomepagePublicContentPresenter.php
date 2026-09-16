@@ -139,8 +139,13 @@ final class HomepagePublicContentPresenter
             'cta_text' => trim((string) $this->homepage->field('featured_deals.cta_text', '')),
             'cta_url' => trim((string) $this->homepage->field('featured_deals.cta_url', '')),
             'items' => array_map(static function (array $item): array {
+                $id = trim((string) ($item['id'] ?? ''));
+                if ($id === '') {
+                    $id = md5(($item['from'] ?? '').($item['to'] ?? '').($item['airline'] ?? ''));
+                }
+
                 return [
-                    'id' => md5(($item['from'] ?? '').($item['to'] ?? '').($item['airline'] ?? '')),
+                    'id' => $id,
                     'airline' => (string) ($item['airline'] ?? ''),
                     'from' => (string) ($item['from'] ?? ''),
                     'to' => (string) ($item['to'] ?? ''),
@@ -152,6 +157,10 @@ final class HomepagePublicContentPresenter
                     'price_label' => ((int) ($item['price'] ?? 0)) > 0
                         ? 'PKR '.number_format((int) $item['price'])
                         : '',
+                    'image' => isset($item['image']) && is_string($item['image']) && $item['image'] !== ''
+                        ? $item['image']
+                        : null,
+                    'image_alt' => trim((string) ($item['image_alt'] ?? '')),
                 ];
             }, $items),
         ];

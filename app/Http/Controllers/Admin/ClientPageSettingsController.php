@@ -17,6 +17,7 @@ use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Services\Homepage\JetpkHomepageContentMergeService;
 use App\Services\Homepage\JetpkHomepageContentValidator;
 use App\Services\Homepage\JetpkHomepageRouteFareRefreshService;
+use App\Services\Seo\NextPublicCacheRevalidator;
 use App\Support\Client\ClientPageKeys;
 use App\Services\Client\CurrentClientContext;
 use Illuminate\Http\RedirectResponse;
@@ -45,6 +46,7 @@ class ClientPageSettingsController extends Controller
         private readonly JetpkHomepageRouteFareRefreshService $routeFareRefreshService,
         private readonly ClientPageSettingDefaultService $defaultService,
         private readonly ClientPageResetService $resetService,
+        private readonly NextPublicCacheRevalidator $nextCache,
     ) {}
 
     public function index(): View
@@ -177,6 +179,8 @@ class ClientPageSettingsController extends Controller
         if ($published === null) {
             return back()->withErrors(['publish' => 'No draft found to publish.']);
         }
+
+        $this->nextCache->revalidatePublishedPageSettings($pageKey);
 
         return redirect()
             ->to(client_route('admin.page-settings.edit', ['pageKey' => $pageKey]))

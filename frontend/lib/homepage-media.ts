@@ -137,7 +137,7 @@ export function resolveDestinationMedia(
 
 export function resolveOfferMedia(
   offer: { id: string; from: string; image?: string | null; imageAlt?: string },
-  index: number,
+  _index = 0,
 ): ApprovedMedia {
   if (offer.image && isPublicHomepageMediaUrl(offer.image)) {
     return {
@@ -151,7 +151,10 @@ export function resolveOfferMedia(
     return byId;
   }
 
-  return offerMediaFallbacks[index % offerMediaFallbacks.length];
+  return {
+    image: "",
+    imageAlt: offer.imageAlt ?? offer.from ?? "Featured offer",
+  };
 }
 
 export const approvedHomepageMediaInventory = {

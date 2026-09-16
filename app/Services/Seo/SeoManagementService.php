@@ -144,7 +144,7 @@ final class SeoManagementService
         abort_unless(SeoManagedPageCatalog::isManagedPageKey($pageKey), 404);
 
         $published = $this->contentResolver->publish($this->requireProfile(), $pageKey, $userId);
-        $this->nextCache->revalidateManagedPage($pageKey);
+        $this->nextCache->revalidatePublishedPageSettings($pageKey);
 
         return $published;
     }

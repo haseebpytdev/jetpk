@@ -67,6 +67,7 @@ final class JetpkHomepageSectionData
 
         $fareCache = $this->fareCacheRoutes();
         $routes = [];
+        $index = 0;
 
         foreach ($this->sortedEnabledItems($items) as $item) {
             if (! is_array($item)) {
@@ -82,6 +83,7 @@ final class JetpkHomepageSectionData
             $routeId = (string) ($item['id'] ?? '');
             $fare = JetpkHomepageFareDisplay::resolve($item, $fareCache[$routeId] ?? null);
             $priceLabel = $fare['label'] ?? JetpkHomepageFareDisplay::neutralAvailabilityLabel();
+            $imageUrl = $this->routeImageUrl($item, $index);
 
             $routes[] = array_merge($item, [
                 'from' => $from,
@@ -91,7 +93,11 @@ final class JetpkHomepageSectionData
                 'airlines' => $fare['label'] ?? JetpkHomepageFareDisplay::neutralAvailabilityLabel(),
                 'fare_source' => $fare['source'] ?? 'none',
                 'search_url' => $this->routeSearchUrl($item),
+                'image' => $imageUrl,
+                'image_alt' => trim((string) ($item['image_alt'] ?? $item['alt'] ?? '')),
             ]);
+
+            $index++;
         }
 
         return $routes;
@@ -149,6 +155,7 @@ final class JetpkHomepageSectionData
         $items = $this->field('featured_deals.items', null);
         if (is_array($items) && $items !== []) {
             $deals = [];
+            $index = 0;
             foreach ($this->sortedEnabledItems($items) as $item) {
                 if (! is_array($item)) {
                     continue;
@@ -158,7 +165,9 @@ final class JetpkHomepageSectionData
                 if ($from === '' && $to === '') {
                     continue;
                 }
+                $imageUrl = $this->dealImageUrl($item, $index);
                 $deals[] = [
+                    'id' => trim((string) ($item['id'] ?? '')),
                     'airline' => trim((string) ($item['airline'] ?? '')),
                     'from' => $from,
                     'to' => $to,
@@ -167,7 +176,10 @@ final class JetpkHomepageSectionData
                     'dur' => trim((string) ($item['dur'] ?? '')),
                     'stops' => (int) ($item['stops'] ?? 0),
                     'price' => (int) ($item['price'] ?? 0),
+                    'image' => $imageUrl,
+                    'image_alt' => trim((string) ($item['image_alt'] ?? $item['alt'] ?? '')),
                 ];
+                $index++;
             }
 
             if ($deals !== []) {
@@ -259,6 +271,74 @@ final class JetpkHomepageSectionData
         usort($filtered, static fn (array $a, array $b): int => ((int) ($a['sort_order'] ?? 0)) <=> ((int) ($b['sort_order'] ?? 0)));
 
         return $filtered;
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    private function routeImageUrl(array $item, int $index): ?string
+    {
+        foreach ($this->homepageMediaAssetCandidates($item, 'route', $index) as $key) {
+            $url = $this->assetUrl($key);
+            if ($url !== null) {
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    private function dealImageUrl(array $item, int $index): ?string
+    {
+        foreach ($this->homepageMediaAssetCandidates($item, 'deal', $index) as $key) {
+            $url = $this->assetUrl($key);
+            if ($url !== null) {
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return list<string>
+     */
+    private function homepageMediaAssetCandidates(array $item, string $prefix, int $index): array
+    {
+        $candidates = [];
+
+        $assetKey = trim((string) ($item['image_asset_key'] ?? ''));
+        if ($assetKey !== '') {
+            $candidates[] = $assetKey;
+        }
+
+        $itemId = trim((string) ($item['id'] ?? ''));
+        if ($itemId !== '') {
+            $slug = Str::slug($itemId, '_');
+            $candidates[] = $prefix.'_'.$itemId;
+            if ($slug !== '') {
+                $candidates[] = $prefix.'_'.$slug;
+            }
+            if ($prefix === 'route') {
+                $candidates[] = str_replace('-', '_', $itemId);
+            }
+            if ($prefix === 'deal') {
+                $candidates[] = 'featured_deal_'.$itemId;
+                if ($slug !== '') {
+                    $candidates[] = 'featured_deal_'.$slug;
+                }
+            }
+        }
+
+        if ($prefix === 'deal') {
+            $candidates[] = 'featured_deal_'.($index + 1);
+        }
+
+        return array_values(array_unique(array_filter($candidates)));
     }
 
     /**

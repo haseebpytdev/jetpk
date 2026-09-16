@@ -6,8 +6,13 @@ type RevalidateBody = {
   paths?: string[];
   cms_slugs?: string[];
   global?: boolean;
+  homepage?: boolean;
   sitemap?: boolean;
 };
+
+const PUBLIC_HOMEPAGE_TAG = "public-homepage";
+/** @deprecated Intentional alias until all publishers migrate — see PublicCacheTags. */
+const LEGACY_HOMEPAGE_TAG = "homepage-cms";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const expected = process.env.JETPK_NEXT_REVALIDATE_SECRET?.trim();
@@ -24,6 +29,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   if (body.global) {
     revalidateTag("public-config");
     revalidatedTags.push("public-config");
+    revalidatePath("/", "layout");
+    revalidatedPaths.push("/");
+  }
+
+  if (body.homepage) {
+    revalidateTag(PUBLIC_HOMEPAGE_TAG);
+    revalidatedTags.push(PUBLIC_HOMEPAGE_TAG);
+    revalidateTag(LEGACY_HOMEPAGE_TAG);
+    revalidatedTags.push(LEGACY_HOMEPAGE_TAG);
+    revalidateTag("public-cms");
+    revalidatedTags.push("public-cms");
     revalidatePath("/", "layout");
     revalidatedPaths.push("/");
   }

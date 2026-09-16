@@ -2,6 +2,7 @@
 
 namespace App\Services\Seo;
 
+use App\Support\Client\ClientPageKeys;
 use App\Support\Seo\SeoManagedPageCatalog;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -50,6 +51,67 @@ final class NextPublicCacheRevalidator
             'paths' => ['/'.$slug],
             'sitemap' => true,
         ]);
+    }
+
+    public function revalidateHomepage(): void
+    {
+        $this->post([
+            'homepage' => true,
+            'page_keys' => [ClientPageKeys::HOME],
+            'paths' => ['/'],
+            'sitemap' => true,
+        ]);
+    }
+
+    public function revalidatePublishedPageSettings(string $pageKey): void
+    {
+        if ($pageKey === ClientPageKeys::HOME) {
+            $this->revalidateHomepage();
+
+            return;
+        }
+
+        if (in_array($pageKey, [ClientPageKeys::GLOBAL, ClientPageKeys::FOOTER], true)) {
+            $this->revalidateGlobal();
+
+            return;
+        }
+
+        if (array_key_exists($pageKey, SeoManagedPageCatalog::MANAGED_PAGES)) {
+            $this->revalidateManagedPage($pageKey);
+
+            return;
+        }
+
+        if (ClientPageKeys::isCustom($pageKey)) {
+            $this->revalidateCustomPage(ClientPageKeys::customSlug($pageKey));
+
+            return;
+        }
+
+        $paths = self::pageSettingsPaths()[$pageKey] ?? [];
+        if ($paths === []) {
+            return;
+        }
+
+        $this->post([
+            'paths' => $paths,
+            'sitemap' => false,
+        ]);
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    private static function pageSettingsPaths(): array
+    {
+        return [
+            ClientPageKeys::GROUP_SEARCH => ['/groups/search'],
+            ClientPageKeys::LOGIN => ['/login'],
+            ClientPageKeys::REGISTER => ['/register'],
+            ClientPageKeys::BOOKING_LOOKUP => ['/lookup-booking'],
+            ClientPageKeys::AGENT_REGISTRATION => ['/agent/register'],
+        ];
     }
 
     /**

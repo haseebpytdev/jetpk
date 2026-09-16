@@ -43,4 +43,43 @@ class NextPublicCacheRevalidatorTest extends TestCase
 
         Http::assertNothingSent();
     }
+
+    public function test_homepage_publish_posts_homepage_flag(): void
+    {
+        config([
+            'jetpk_public.next_revalidate_url' => 'https://jetpakistan.pk/api/internal/revalidate/seo',
+            'jetpk_public.next_revalidate_secret' => 'test-secret',
+        ]);
+
+        Http::fake([
+            'https://jetpakistan.pk/api/internal/revalidate/seo' => Http::response(['ok' => true], 200),
+        ]);
+
+        app(NextPublicCacheRevalidator::class)->revalidateHomepage();
+
+        Http::assertSent(function ($request): bool {
+            return $request['homepage'] === true
+                && $request['page_keys'] === ['home']
+                && in_array('/', $request['paths'], true);
+        });
+    }
+
+    public function test_page_settings_about_publish_uses_managed_page_payload(): void
+    {
+        config([
+            'jetpk_public.next_revalidate_url' => 'https://jetpakistan.pk/api/internal/revalidate/seo',
+            'jetpk_public.next_revalidate_secret' => 'test-secret',
+        ]);
+
+        Http::fake([
+            'https://jetpakistan.pk/api/internal/revalidate/seo' => Http::response(['ok' => true], 200),
+        ]);
+
+        app(NextPublicCacheRevalidator::class)->revalidatePublishedPageSettings('about');
+
+        Http::assertSent(function ($request): bool {
+            return $request['page_keys'] === ['about']
+                && $request['paths'] === ['/about-us'];
+        });
+    }
 }

@@ -67,8 +67,19 @@ test("homepage content service uses photographic hero fallback", () => {
   );
   const media = readFileSync(path.join(frontendRoot, "lib/homepage-media.ts"), "utf8");
   assert.match(service, /approvedHeroMedia/);
-  assert.match(service, /publicContentFetchUrl\("\/api\/public\/content\/homepage"\)/);
-  assert.doesNotMatch(service, /laravelApiPath/);
+  assert.match(service, /\/api\/public\/content\/homepage/);
+  assert.match(service, /PUBLIC_CACHE_TAGS\.homepage/);
   assert.match(media, /hero-pakistan\.jpg/);
   assert.doesNotMatch(service, /hero-fallback\.svg/);
+});
+
+test("clash display font assets exist for golden typography", () => {
+  const fontPath = path.join(frontendRoot, "public/fonts/clash-display/ClashDisplay-Bold.woff2");
+  const cssPath = path.join(frontendRoot, "styles/clash-display.css");
+  const globals = readFileSync(path.join(frontendRoot, "app/globals.css"), "utf8");
+
+  assert.ok(existsSync(fontPath), "missing ClashDisplay-Bold.woff2");
+  assert.ok(existsSync(cssPath), "missing clash-display.css");
+  assert.match(globals, /clash-display\.css/);
+  assert.match(readFileSync(cssPath, "utf8"), /ClashDisplay-Bold\.woff2/);
 });

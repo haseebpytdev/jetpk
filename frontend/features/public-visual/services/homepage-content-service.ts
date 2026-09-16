@@ -6,6 +6,7 @@ import { laravelApiPath } from "@/services/flight-search";
 import { allowContentFixtures, resolveContentSource } from "@/features/public-content/utils/content-policy";
 import { fetchWithTimeout } from "@/features/public-content/utils/laravel-api";
 import { approvedHeroMedia } from "@/lib/homepage-media";
+import { PUBLIC_CACHE_TAGS } from "@/lib/public-cache-tags";
 import type {
   HomepageContent,
   HomepageDestinationCard,
@@ -375,8 +376,8 @@ export const HomepageContentService = {
         },
         // Preview must stay fresh; published homepage CMS can short-revalidate.
         ...(options?.preview
-          ? { cache: "no-store" as const, next: { tags: ["homepage-cms"] } }
-          : { next: { revalidate: 120, tags: ["homepage-cms"] } }),
+          ? { cache: "no-store" as const, next: { tags: [PUBLIC_CACHE_TAGS.homepage] } }
+          : { next: { revalidate: 120, tags: [PUBLIC_CACHE_TAGS.homepage] } }),
       });
 
       if (!response.ok) {
