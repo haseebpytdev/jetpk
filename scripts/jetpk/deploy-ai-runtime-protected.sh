@@ -38,6 +38,8 @@ RUNTIME_FILES=(
   app/Services/PublicContent/PublicContentApiPresenter.php
   bootstrap/providers.php
   bootstrap/app.php
+  config/ota.php
+  config/ai_lab.php
   scripts/verify-ai-runtime-after-seo-activate.sh
   scripts/jetpk/deploy-seo-phase2-activate-allowlist.sh
   scripts/jetpk/test-seo-activate-ai-runtime-guard.sh

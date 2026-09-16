@@ -4,7 +4,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
+REPO_ROOT="${REPO_ROOT:-$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel 2>/dev/null || dirname "$(dirname "${SCRIPT_DIR}")")}"
 ALLOWLIST="${SCRIPT_DIR}/deploy-seo-phase2-activate-allowlist.sh"
 VERIFY="${REPO_ROOT}/scripts/verify-ai-runtime-after-seo-activate.sh"
 
