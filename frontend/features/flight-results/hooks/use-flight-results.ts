@@ -140,7 +140,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         ) {
           return {
             ...merged,
-            paired_options: merged.paired_options.slice(0, 2),
+            paired_options: (merged.paired_options ?? []).slice(0, 2),
           };
         }
         if (
@@ -151,7 +151,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         ) {
           return {
             ...merged,
-            outbound_options: merged.outbound_options.slice(0, 2),
+            outbound_options: (merged.outbound_options ?? []).slice(0, 2),
           };
         }
         if (
@@ -163,7 +163,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         ) {
           return {
             ...merged,
-            offers: merged.offers.slice(0, 2),
+            offers: (merged.offers ?? []).slice(0, 2),
           };
         }
         return merged;
