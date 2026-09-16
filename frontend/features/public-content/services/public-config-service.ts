@@ -25,6 +25,10 @@ export type PublicConfig = {
     description: string;
     robots: string;
   };
+  site_verification?: {
+    google?: string | null;
+    bing?: string | null;
+  };
   source: "laravel";
   commerce_gates?: {
     guest_booking_enabled: boolean;
