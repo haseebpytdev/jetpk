@@ -153,19 +153,20 @@ export function FlightDetailsDrawer({
           context.initialOffer?.fare_family_options_display ??
           []);
     const fareKey = toAuthoritativeFareOptionKey(details.selectedFareKey || context.fareOptionKey, fareOptions);
+    const explicitFare = Boolean((fareKey || context.fareOptionKey || "").trim());
     revalidation.warmStartRevalidation({
       searchId: context.searchId,
       offerId: offer.offer_id,
-      fareOptionKey: fareKey,
+      fareOptionKey: fareKey || context.fareOptionKey || undefined,
       selectUrl: offer.select_url,
       supplierProvider: offer.supplier_provider ?? offer.provider,
       isReturnCombo: Boolean(context.comboId),
       comboId: context.comboId,
       outboundKey: context.outboundKey,
       outboundFareOptionKey: context.outboundFareOptionKey,
-      returnFareOptionKey: fareKey,
-      // Explicit fare (from pair card or single-option catalog) → hand off after warm success.
-      autoHandoffOnSuccess: Boolean((fareKey ?? "").trim()) || fareOptions.length <= 1,
+      returnFareOptionKey: fareKey || context.fareOptionKey || undefined,
+      // Pair/OW Book Now already chose a fare on the card — hand off after warm success.
+      autoHandoffOnSuccess: explicitFare || fareOptions.length <= 1,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- warm on fare identity primitives only
   }, [
