@@ -2540,9 +2540,16 @@ class BookingController extends Controller
         ]);
     }
 
-    protected function redirectIncompleteBrandedFareCheckoutRequest(StoreBookingPassengersRequest $request): ?RedirectResponse
+    protected function redirectIncompleteBrandedFareCheckoutRequest(StoreBookingPassengersRequest $request): RedirectResponse|JsonResponse|null
     {
         if (! FlightOfferDisplayPresenter::brandedFaresSelectionActive() || ! $request->isMethod('get')) {
+            return null;
+        }
+
+        // Next.js standard booking loads /laravel/booking/passengers?format=json after Book Now.
+        // Pair/OW passengers_url often omits fare_option_key; the JSON passengers presenter
+        // resolves the selected/default fare from the offer. Never bounce those calls to HTML.
+        if ($this->wantsBookingJson($request)) {
             return null;
         }
 
