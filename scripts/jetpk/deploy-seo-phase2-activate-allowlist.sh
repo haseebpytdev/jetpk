@@ -60,7 +60,7 @@ copy_tree() {
   local src="$1" dst="$2"
   local rel="${dst#${APP}/}"
 
-  if [[ "${rel}" == app || "${rel}" == bootstrap || "${rel}" == app/* || "${rel}" == bootstrap/* ]]; then
+  if [[ "${rel}" == app || "${rel}" == bootstrap ]]; then
     echo "SEO_ACTIVATE=FAIL reason=bulk_tree_copy_forbidden path=${rel}"
     exit 1
   fi

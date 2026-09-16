@@ -31,7 +31,7 @@ for script in "${CANDIDATES[@]}"; do
   [[ -f "${script}" ]] || continue
   base="$(basename "${script}")"
 
-  if grep -Eq 'for d in app bootstrap|copy_tree "\$REL/app" "\$APP/app"|copy_tree "\$REL/bootstrap" "\$APP/bootstrap"' "${script}"; then
+  if grep -Eq 'for d in app bootstrap|copy_tree "\$REL/app" "\$APP/app"|copy_tree "\$REL/bootstrap" "\$APP/bootstrap"|copy_tree "\$REL/\$d" "\$APP/\$d"' "${script}"; then
     if ! grep -q 'deploy-seo-phase2-activate-allowlist.sh' "${script}"; then
       fail "bulk_copy_still_present_in_${base}"
     fi
