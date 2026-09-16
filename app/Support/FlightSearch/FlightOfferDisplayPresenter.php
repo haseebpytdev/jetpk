@@ -846,6 +846,7 @@ class FlightOfferDisplayPresenter
         if ($journeys !== []) {
             $offer['journeys_display'] = $journeys;
         }
+        $offer['checkout_presentation'] = $presentation;
 
         return $offer;
     }

@@ -364,36 +364,17 @@ export function useRevalidation() {
 
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
-      markBookNowTiming("T5_router_push", { nav: "soft_push_with_hard_fallback" });
-      markBookNowTiming("T7_passenger_route", { nav: "soft_push_with_hard_fallback" });
+      markBookNowTiming("T5_router_push", { nav: "hard_assign_image_release" });
+      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_image_release" });
       persistTimingForContinuity();
       releaseImageSlots();
-
-      const softTarget = absolute.startsWith("http")
-        ? `${new URL(absolute).pathname}${new URL(absolute).search}`
-        : absolute;
-
-      // Soft push after image-slot release — hard assign only if soft nav stalls.
+      // Hard assign remains authoritative for passengers_url handoff (soft push raced
+      // fallback assign and produced hangs / destroyed contexts in 01R smoke).
       try {
-        void router.push(softTarget);
+        window.location.assign(absolute);
       } catch {
-        try {
-          window.location.assign(absolute);
-        } catch {
-          window.location.href = absolute;
-        }
-        return true;
+        window.location.href = absolute;
       }
-      window.setTimeout(() => {
-        try {
-          if (!window.location.pathname.includes("/booking/passengers")) {
-            markBookNowTiming("T5_router_push", { nav: "hard_assign_fallback" });
-            window.location.assign(absolute);
-          }
-        } catch {
-          /* ignore */
-        }
-      }, 1500);
       return true;
     }
     window.location.assign(resolved);

@@ -171,7 +171,8 @@ class FareHoldService
             ])->save();
         }
 
-        return $session->fresh();
+        // Avoid an extra SELECT after we just wrote the row.
+        return $session;
     }
 
     public function isHoldExpired(BookingHoldSession $session): bool

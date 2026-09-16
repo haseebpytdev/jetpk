@@ -1115,11 +1115,13 @@ class BookingController extends Controller
         $complexItineraryNotice = false;
         if ($offer !== null) {
             $displayOffer = FlightOfferDisplayPresenter::enrichOfferSnapshotForBooking($offer, $criteria);
-            $checkoutPresentation = FlightOfferDisplayPresenter::buildPresentation(
-                $displayOffer,
-                $criteria,
-                FlightOfferDisplayPresenter::airportCityMap(FlightOfferDisplayPresenter::collectIataCodes($displayOffer)),
-            );
+            $checkoutPresentation = is_array($displayOffer['checkout_presentation'] ?? null)
+                ? $displayOffer['checkout_presentation']
+                : FlightOfferDisplayPresenter::buildPresentation(
+                    $displayOffer,
+                    $criteria,
+                    FlightOfferDisplayPresenter::airportCityMap(FlightOfferDisplayPresenter::collectIataCodes($displayOffer)),
+                );
             $complexItineraryNotice = in_array((string) ($criteria['trip_type'] ?? 'one_way'), ['round_trip', 'multi_city'], true);
         }
 
