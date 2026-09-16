@@ -83,6 +83,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->register(AiServiceProvider::class);
+
         // Replace the session manager before the session service is resolved so JSON
         // session serialization remarsals ViewErrorBag after save() (same-request consumers).
         $this->app->singleton('session', function ($app) {
