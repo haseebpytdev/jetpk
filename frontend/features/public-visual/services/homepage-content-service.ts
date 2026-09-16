@@ -2,9 +2,8 @@ import { BENEFIT_FIXTURES } from "@/features/home/fixtures/benefits";
 import { DESTINATION_FIXTURES } from "@/features/home/fixtures/destinations";
 import { INSPIRATION_FIXTURES, VALUE_PROPOSITION_FIXTURES } from "@/features/home/fixtures/inspiration";
 import { FEATURED_OFFER_FIXTURES } from "@/features/home/fixtures/offers";
-import { laravelApiPath } from "@/services/flight-search";
 import { allowContentFixtures, resolveContentSource } from "@/features/public-content/utils/content-policy";
-import { fetchWithTimeout } from "@/features/public-content/utils/laravel-api";
+import { fetchWithTimeout, publicContentFetchUrl } from "@/features/public-content/utils/laravel-api";
 import { approvedHeroMedia } from "@/lib/homepage-media";
 import type {
   HomepageContent,
@@ -295,9 +294,9 @@ export const HomepageContentService = {
 
   async getHomepage(): Promise<HomepageContent> {
     try {
-      const response = await fetchWithTimeout(laravelApiPath("/api/public/content/homepage"), {
+      const response = await fetchWithTimeout(publicContentFetchUrl("/api/public/content/homepage"), {
         headers: { Accept: "application/json" },
-        next: { revalidate: 120 },
+        next: { revalidate: 120, tags: ["public-homepage"] },
       });
 
       if (!response.ok) {

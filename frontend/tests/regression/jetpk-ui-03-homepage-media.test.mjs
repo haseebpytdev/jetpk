@@ -67,6 +67,8 @@ test("homepage content service uses photographic hero fallback", () => {
   );
   const media = readFileSync(path.join(frontendRoot, "lib/homepage-media.ts"), "utf8");
   assert.match(service, /approvedHeroMedia/);
+  assert.match(service, /publicContentFetchUrl\("\/api\/public\/content\/homepage"\)/);
+  assert.doesNotMatch(service, /laravelApiPath/);
   assert.match(media, /hero-pakistan\.jpg/);
   assert.doesNotMatch(service, /hero-fallback\.svg/);
 });
