@@ -360,7 +360,7 @@ class SocialAuthTest extends TestCase
             PersistClientPreviewContext::SESSION_KEY => 'jetpk',
         ])
             ->get('/auth/google/callback')
-            ->assertRedirect('/jetpk/login/otp')
+            ->assertRedirect('/login/otp')
             ->assertSessionHas('status');
 
         $this->assertGuest();
@@ -468,6 +468,13 @@ class SocialAuthTest extends TestCase
 
     private function makeJetPkProfile(): ClientProfile
     {
+        config([
+            'ota_client.single_client_mode' => true,
+            'ota_client.single_client_root' => true,
+            'ota_client.slug' => 'jetpk',
+            'ota_client.auth.require_login_otp' => true,
+        ]);
+
         $profile = ClientProfile::query()->create([
             'name' => 'JetPakistan',
             'slug' => 'jetpk',
@@ -487,6 +494,11 @@ class SocialAuthTest extends TestCase
         ClientProfileBranding::query()->create([
             'client_profile_id' => $profile->id,
             'company_name' => 'JetPakistan',
+            'config' => [
+                'auth' => [
+                    'require_login_otp' => true,
+                ],
+            ],
         ]);
 
         foreach (ClientProfileConfigReader::MODULE_KEYS as $moduleKey) {
