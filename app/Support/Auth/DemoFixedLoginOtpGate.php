@@ -32,8 +32,18 @@ final class DemoFixedLoginOtpGate
         }
 
         $code = self::configuredFixedCode();
+        if ($code === null) {
+            return false;
+        }
 
-        return $code !== null;
+        // Production demo OTP skips real mail while still creating a challenge — never silent.
+        if (app()->environment('production')) {
+            Log::warning('demo fixed OTP gate is enabled in production; real OTP email may be skipped for allowlisted users', [
+                'allow_production' => (bool) config('ota_otp_demo.allow_production', false),
+            ]);
+        }
+
+        return true;
     }
 
     public static function isEmailAllowed(string $email): bool
