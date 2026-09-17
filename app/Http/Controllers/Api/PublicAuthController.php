@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\Auth\LoginOtpService;
+use App\Support\Auth\ClientLoginOtpGate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,6 +16,14 @@ class PublicAuthController extends Controller
 
     public function otpChallenge(Request $request): JsonResponse
     {
+        if (! ClientLoginOtpGate::isRequired($request)) {
+            $this->loginOtpService->clear($request);
+
+            return response()->json([
+                'has_challenge' => false,
+            ]);
+        }
+
         if (! $this->loginOtpService->hasPending($request)) {
             return response()->json([
                 'has_challenge' => false,

@@ -108,9 +108,9 @@ for (const route of softRoutes) {
         url: page.url(),
         attempt,
       };
-      // Bounded retry when soft-nav exceeds the 1500ms APP gate.
-      if (kind === "soft" && appMs != null && appMs <= 1500) break;
-      if (kind === "soft_timeout" || (appMs != null && appMs > 1500)) {
+      // Retry only genuine harness failures (timeout / missing link), never for slow APP.
+      if (kind === "soft") break;
+      if (kind === "soft_timeout" || kind === "hard_fallback") {
         await page.goto(`${PROD}${route.from}`, { waitUntil: "domcontentloaded", timeout: 120000 });
         await page.waitForTimeout(200);
         continue;

@@ -233,6 +233,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             ->name('reports.export');
     });
     Route::get('/settings', [AdminSettingsHubController::class, 'index'])->name('settings.index');
+    Route::get('/settings/login-otp', [\App\Http\Controllers\Admin\LoginOtpSettingsController::class, 'edit'])->name('settings.login-otp.edit');
+    Route::patch('/settings/login-otp', [\App\Http\Controllers\Admin\LoginOtpSettingsController::class, 'update'])->name('settings.login-otp.update');
 
     Route::get('/settings/payments', [AgencyPaymentSettingsController::class, 'index'])->name('settings.payments.index');
     Route::patch('/settings/payments/abhipay', [AgencyPaymentSettingsController::class, 'updateAbhiPay'])->name('settings.payments.abhipay.update');

@@ -151,18 +151,7 @@ for (let i = 0; i < N; i++) {
     `TRAVELER ${i + 1}/${N} ok=${Boolean(usableAt)} raw=${raw} supplier=${marks.revalidateMs} app=${app} pax=${marks.passengersMs} href=${page.url().slice(0, 80)}`,
   );
   await ctx.close();
-  // Retry intermittent post-supplier stalls at/above the 2000ms APP gate.
-  if (
-    sample.app != null &&
-    sample.app > 2000 &&
-    ((globalThis.__jpTravelerRetried ??= Object.create(null))[i] ?? 0) < 2
-  ) {
-    globalThis.__jpTravelerRetried[i] = (globalThis.__jpTravelerRetried[i] ?? 0) + 1;
-    console.log(`TRAVELER ${i + 1}/${N} RETRY outlier app=${sample.app} attempt=${globalThis.__jpTravelerRetried[i]}`);
-    i -= 1;
-    await new Promise((r) => setTimeout(r, 1500));
-    continue;
-  }
+  // Every launched sample counts — no threshold retries for slow APP.
   samples.push(sample);
   await new Promise((r) => setTimeout(r, 800));
 }

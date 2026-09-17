@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\PersistClientPreviewContext;
 use App\Services\Auth\LoginOtpService;
 use App\Services\Client\ClientRedirectResolver;
+use App\Support\Auth\ClientLoginOtpGate;
 use App\Support\Auth\PublicAuthRedirectAllowlist;
 use App\Support\Auth\PublicSessionBootstrapService;
 use Illuminate\Http\JsonResponse;
@@ -25,6 +26,10 @@ class LoginOtpController extends Controller
 
     public function create(Request $request): View|RedirectResponse
     {
+        if ($redirect = $this->rejectWhenOtpGateDisabled($request)) {
+            return $redirect;
+        }
+
         if (! $this->loginOtpService->hasPending($request)) {
             return $this->clientRedirectResolver->route('login');
         }
@@ -41,6 +46,10 @@ class LoginOtpController extends Controller
         PublicSessionBootstrapService $sessionBootstrap,
     ): RedirectResponse|JsonResponse {
         $this->primeClientSlugFromRequest($request);
+
+        if ($response = $this->rejectWhenOtpGateDisabled($request, json: $request->expectsJson())) {
+            return $response;
+        }
 
         try {
             $validated = $request->validate([
@@ -87,6 +96,10 @@ class LoginOtpController extends Controller
     {
         $this->primeClientSlugFromRequest($request);
 
+        if ($response = $this->rejectWhenOtpGateDisabled($request, json: $request->expectsJson())) {
+            return $response;
+        }
+
         try {
             $this->loginOtpService->resend($request);
         } catch (LoginOtpDeliveryException $e) {
@@ -118,6 +131,24 @@ class LoginOtpController extends Controller
         }
 
         return back()->with('status', 'A new verification code has been sent.');
+    }
+
+    private function rejectWhenOtpGateDisabled(Request $request, bool $json = false): RedirectResponse|JsonResponse|null
+    {
+        if (ClientLoginOtpGate::isRequired($request)) {
+            return null;
+        }
+
+        $this->loginOtpService->clear($request);
+
+        if ($json) {
+            return response()->json([
+                'message' => 'Login OTP is disabled. Sign in with your password.',
+                'errors' => ['otp' => ['Login OTP is disabled. Sign in with your password.']],
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        return $this->clientRedirectResolver->route('login');
     }
 
     private function primeClientSlugFromRequest(Request $request): void

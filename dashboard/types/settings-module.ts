@@ -37,6 +37,11 @@ export type GeneralSettingsValues = {
 };
 
 export type SecuritySettingsValues = {
+  requireLoginOtp?: boolean;
+  requireLoginOtpSource?: string;
+  requireLoginOtpAppliesTo?: string[];
+  loginOtpAdminPath?: string;
+  mfaPreviewNote?: string;
   mfaRequirementPolicy: string;
   privilegedRoleMfaPolicy: string;
   passwordMinLength: number;

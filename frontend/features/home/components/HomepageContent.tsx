@@ -1,4 +1,5 @@
 import {
+  DestinationsSection,
   FeaturedOffersSection,
   HomepageContentService,
   PublicHero,
@@ -18,6 +19,7 @@ export async function HomepageContent() {
         fallbackImage={HomepageContentService.heroFallbackImage}
       />
       <RoutesSection {...content.routes} />
+      <DestinationsSection {...content.destinations} />
       <FeaturedOffersSection {...content.featuredDeals} />
       <WhyJetPakistanSection {...content.whyBook} />
       <PublicSupportBanner support={content.supportCta} />

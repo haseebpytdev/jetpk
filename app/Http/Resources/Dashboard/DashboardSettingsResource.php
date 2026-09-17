@@ -57,7 +57,13 @@ final class DashboardSettingsResource
      */
     public static function security(): array
     {
+        $otp = app(\App\Services\Auth\LoginOtpSettingsService::class)->snapshot();
+
         return [
+            'requireLoginOtp' => (bool) $otp['required'],
+            'requireLoginOtpSource' => (string) $otp['source'],
+            'requireLoginOtpAppliesTo' => $otp['applies_to_roles'],
+            'loginOtpAdminPath' => '/admin/settings/login-otp',
             'mfaRequirementPolicy' => 'Platform administrators require MFA when enabled.',
             'privilegedRoleMfaPolicy' => 'Privileged roles should enable MFA.',
             'passwordMinLength' => 8,
@@ -70,6 +76,7 @@ final class DashboardSettingsResource
             'highRiskApprovalPolicy' => 'High-risk actions require elevated approval in production workflows.',
             'auditRetentionDays' => 365,
             'sessionConcurrencyPolicy' => 'Single active staff session recommended.',
+            'mfaPreviewNote' => 'MFA policy fields below are informational/preview only and do not control login OTP.',
         ];
     }
 

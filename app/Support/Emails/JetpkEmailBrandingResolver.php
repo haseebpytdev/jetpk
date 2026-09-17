@@ -5,7 +5,6 @@ namespace App\Support\Emails;
 use App\Models\ClientProfile;
 use App\Models\ClientProfileBranding;
 use App\Services\Client\ClientProfileResolver;
-use App\Services\Client\JetPakistanClientProfileProvisioner;
 
 /**
  * JetpkEmailBrandingResolver
@@ -68,8 +67,11 @@ class JetpkEmailBrandingResolver
         if (empty($brand['home_url'])) {
             $appUrl = trim((string) config('app.url', ''));
             $brand['home_url'] = static::absoluteUrl($appUrl !== '' ? $appUrl : null)
-                ?? trim((string) env('JETPK_HOME_URL', 'https://www.jetpakistan.com'));
+                ?? trim((string) env('JETPK_HOME_URL', static::canonicalPublicHomeUrl()));
         }
+
+        $brand['home_url'] = static::canonicalizePublicUrl($brand['home_url'] ?? null) ?? $brand['home_url'];
+        $brand['manage_url'] = static::canonicalizeManageUrl($brand['manage_url'] ?? null);
 
         // Normalise logo to an absolute URL (or null for text fallback).
         $brand['logo_url'] = static::absoluteUrl($brand['logo_url'] ?? null);
@@ -167,21 +169,79 @@ class JetpkEmailBrandingResolver
      */
     protected static function profileFromSeedDefaults(): array
     {
-        $previewPath = '/'.JetPakistanClientProfileProvisioner::SLUG;
-
         return static::onlyFilled([
             'brand_name'    => 'JetPakistan',
             'legal_name'    => 'JetPakistan',
             'logo_url'      => static::resolveLogoUrlFromPaths('jetpk-assets', 'logo/logo.svg'),
-            'home_url'      => static::previewHomeUrl($previewPath) ?? 'https://www.jetpakistan.com',
-            'manage_url'    => static::previewManageUrl($previewPath),
+            'home_url'      => static::canonicalPublicHomeUrl(),
+            'manage_url'    => static::canonicalManageBookingUrl(),
             'support_email' => 'ota@jetpakistan.pk',
-            'support_phone' => '+92 21 111 000 000',
+            'support_phone' => null,
             'primary_color' => '#00843D',
             'accent_color'  => '#F58220',
-            'address'       => 'Karachi, Pakistan',
+            'address'       => null,
             'footer_text'   => 'JetPakistan — your gateway to seamless travel.',
         ]);
+    }
+
+    protected static function canonicalPublicHomeUrl(): string
+    {
+        $domain = trim((string) config('client.canonical_client.domain', 'jetpakistan.pk'));
+        $domain = $domain !== '' ? $domain : 'jetpakistan.pk';
+
+        return 'https://'.ltrim($domain, '/');
+    }
+
+    protected static function canonicalManageBookingUrl(): string
+    {
+        return rtrim(static::canonicalPublicHomeUrl(), '/').'/lookup-booking';
+    }
+
+    /**
+     * Prefer dedicated-root public URLs over stale client-prefixed preview paths and forbidden hosts.
+     */
+    protected static function canonicalizePublicUrl(?string $url): ?string
+    {
+        $url = trim((string) $url);
+        if ($url === '') {
+            return null;
+        }
+
+        $canonical = static::canonicalPublicHomeUrl();
+
+        $path = parse_url($url, PHP_URL_PATH);
+        $path = is_string($path) && $path !== '' ? $path : '/';
+
+        // Forbidden / stale public hosts → canonical JetPakistan host + unprefixed path.
+        if (preg_match('#https?://(www\.)?jetpakistan\.com(/|$)#i', $url)) {
+            $path = preg_replace('#^/jetpk(?=/|$)#i', '', $path) ?: '/';
+
+            return rtrim($canonical, '/').($path === '/' ? '' : $path);
+        }
+
+        // Client-prefixed preview paths (/jetpk, /jetpk/...) → dedicated-root paths.
+        if (preg_match('#^/jetpk(?=/|$)#i', $path)) {
+            $path = preg_replace('#^/jetpk(?=/|$)#i', '', $path) ?: '/';
+
+            return rtrim($canonical, '/').($path === '/' ? '' : $path);
+        }
+
+        return $url;
+    }
+
+    protected static function canonicalizeManageUrl(?string $url): ?string
+    {
+        $url = trim((string) $url);
+        if ($url === '') {
+            return static::canonicalManageBookingUrl();
+        }
+
+        // Stale preview manage path /jetpk/lookup-booking → /lookup-booking
+        if (preg_match('#/jetpk/lookup-booking/?$#i', $url) || preg_match('#https?://(www\.)?jetpakistan\.com#i', $url)) {
+            return static::canonicalManageBookingUrl();
+        }
+
+        return static::canonicalizePublicUrl($url) ?? $url;
     }
 
     protected static function resolveLogoUrl(ClientProfile $profile, ?ClientProfileBranding $branding): ?string

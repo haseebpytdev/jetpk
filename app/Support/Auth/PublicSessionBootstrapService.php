@@ -36,14 +36,18 @@ final class PublicSessionBootstrapService
         ];
 
         if ($this->loginOtpService->hasPending($request)) {
-            return array_merge($base, [
-                'authenticated' => false,
-                'requires_otp' => true,
-                'otp_challenge' => [
-                    'masked_email' => $this->loginOtpService->maskedEmail($request),
-                    'resend_available_in' => $this->loginOtpService->resendAvailableIn($request),
-                ],
-            ]);
+            if (! ClientLoginOtpGate::isRequired($request)) {
+                $this->loginOtpService->clear($request);
+            } else {
+                return array_merge($base, [
+                    'authenticated' => false,
+                    'requires_otp' => true,
+                    'otp_challenge' => [
+                        'masked_email' => $this->loginOtpService->maskedEmail($request),
+                        'resend_available_in' => $this->loginOtpService->resendAvailableIn($request),
+                    ],
+                ]);
+            }
         }
 
         $user = Auth::user();

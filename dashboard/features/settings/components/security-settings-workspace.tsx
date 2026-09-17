@@ -79,6 +79,30 @@ export function SecuritySettingsWorkspace({ result }: Props) {
     <div className="space-y-4" data-testid="security-settings-workspace">
       <SettingsValidationSummary issues={issues} filter={result.query.validationState} />
 
+      <section className="rounded-xl border border-jp-border bg-white p-4" aria-labelledby="login-otp-authority-heading">
+        <h3 id="login-otp-authority-heading" className="text-sm font-semibold text-gray-900">
+          Login OTP (runtime authority)
+        </h3>
+        <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg border border-jp-border px-3 py-2">
+            <dt className="text-xs text-jp-muted">Require login OTP</dt>
+            <dd className="mt-1 text-sm font-medium" data-testid="security-require-login-otp">
+              {baseline.requireLoginOtp ? "Enabled" : "Disabled"}
+            </dd>
+          </div>
+          <div className="rounded-lg border border-jp-border px-3 py-2">
+            <dt className="text-xs text-jp-muted">Source</dt>
+            <dd className="mt-1 text-sm font-medium">{baseline.requireLoginOtpSource ?? "default"}</dd>
+          </div>
+        </dl>
+        <p className="mt-3 text-sm text-jp-muted">
+          {baseline.mfaPreviewNote ??
+            "MFA policy preview below does not control login OTP."}{" "}
+          Change the gate in Admin → Settings → Login OTP
+          {baseline.loginOtpAdminPath ? ` (${baseline.loginOtpAdminPath}).` : "."}
+        </p>
+      </section>
+
       <SettingsLocalPreviewForm
         fields={SECURITY_FIELDS}
         baselineValues={baseline as unknown as Record<string, unknown>}
