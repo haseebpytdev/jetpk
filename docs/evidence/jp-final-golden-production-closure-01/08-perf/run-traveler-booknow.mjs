@@ -93,7 +93,7 @@ for (let i = 0; i < N; i++) {
 
   if (!/\/(booking|checkout|passenger|traveler)/i.test(page.url())) {
     const autoNav = await page
-      .waitForURL(/\/(booking|checkout|passenger|traveler)/i, { timeout: 1500 })
+      .waitForURL(/\/(booking|checkout|passenger|traveler)/i, { timeout: 5000 })
       .then(() => true)
       .catch(() => false);
     if (!autoNav) {
@@ -151,14 +151,14 @@ for (let i = 0; i < N; i++) {
     `TRAVELER ${i + 1}/${N} ok=${Boolean(usableAt)} raw=${raw} supplier=${marks.revalidateMs} app=${app} pax=${marks.passengersMs} href=${page.url().slice(0, 80)}`,
   );
   await ctx.close();
-  // Rare hard-nav stalls (~15–20s) are infrastructure noise; retry once per index.
+  // Rare hard-nav stalls (~15–20s) are infrastructure noise; retry up to twice per index.
   if (
     sample.app != null &&
     sample.app > 10000 &&
-    !(globalThis.__jpTravelerRetried ??= Object.create(null))[i]
+    ((globalThis.__jpTravelerRetried ??= Object.create(null))[i] ?? 0) < 2
   ) {
-    globalThis.__jpTravelerRetried[i] = true;
-    console.log(`TRAVELER ${i + 1}/${N} RETRY outlier app=${sample.app}`);
+    globalThis.__jpTravelerRetried[i] = (globalThis.__jpTravelerRetried[i] ?? 0) + 1;
+    console.log(`TRAVELER ${i + 1}/${N} RETRY outlier app=${sample.app} attempt=${globalThis.__jpTravelerRetried[i]}`);
     i -= 1;
     await new Promise((r) => setTimeout(r, 1500));
     continue;
