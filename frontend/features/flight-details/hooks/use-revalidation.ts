@@ -367,19 +367,13 @@ export function useRevalidation() {
 
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
-      // Await JSON prime (abort-bounded) so Traveler hydrates from sessionStorage and
-      // the PHP session lock is released before hard-nav starts a second GET.
-      await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2500 });
-      markBookNowTiming("T5_router_push", { nav: "hard_assign_after_json_prime" });
-      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_after_json_prime" });
+      // Start JSON prime but do NOT await it before assign — awaiting (>1.5s) races the
+      // Continue-to-passengers harness/UI fallback and produced ~20s double-nav hangs.
+      void primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2500 });
+      markBookNowTiming("T5_router_push", { nav: "hard_assign_json_prime_async" });
+      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_json_prime_async" });
       persistTimingForContinuity();
       releaseImageSlots();
-      // Abort leftover logo/pool work so hard-nav is not starved (~20s stalls observed).
-      try {
-        window.stop();
-      } catch {
-        /* ignore */
-      }
       // Hard assign remains authoritative for passengers_url handoff (soft push raced
       // fallback assign and produced hangs / destroyed contexts in 01R smoke).
       try {
