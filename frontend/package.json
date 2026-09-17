@@ -35,14 +35,17 @@
     "test:jp-full-next-frontend:routes-01a": "npm run build && playwright test tests/jp-full-next-frontend-routes.spec.ts -c playwright.jp-full-next-frontend.config.ts",
     "test:jp-full-next-frontend:visual": "npm run build && playwright test tests/jp-full-next-frontend/visual-capture.spec.ts -c playwright.jp-full-next-frontend.config.ts",
     "audit:jp-full-next-frontend:visual-compare": "node scripts/compare-jp-full-next-visual.mjs",
-    "test:jp-frontend-ux-02": "npm run build && playwright test -c playwright.jp-frontend-ux-02.config.ts"
+    "test:jp-frontend-ux-02": "npm run build && playwright test -c playwright.jp-frontend-ux-02.config.ts",
+    "bundle:tesseract": "node scripts/bundle-tesseract-assets.mjs",
+    "postinstall": "node scripts/bundle-tesseract-assets.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
     "next": "^15.1.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^2.6.0",
+    "tesseract.js": "^5.1.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

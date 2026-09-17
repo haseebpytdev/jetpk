@@ -74,3 +74,4 @@ Do not wholesale restore old commits.
 | Date | Change |
 |---|---|
 | 2026-09-17 | Initial ledger from git + code/docs exploration at `4b111929` |
+| 2026-09-17 | P0 fixes committed: `742e216d` (OTP gate/admin, Destinations renderer, email canonicalize, unbiased perf harness) + `802093a8` (OTP test alignment). Live API confirms `destinations.enabled=true` with 4 items; production Next still missing section until deploy. |

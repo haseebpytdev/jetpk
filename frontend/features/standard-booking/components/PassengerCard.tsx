@@ -1,5 +1,6 @@
 import type { PassengerFormValues, TravelDocumentRequirement } from "../types";
 import { TITLES } from "../utils/passenger-form";
+import { DocumentReader } from "../document-reader";
 
 type PassengerCardProps = {
   index: number;
@@ -10,6 +11,7 @@ type PassengerCardProps = {
   nationalIdAllowed: boolean;
   fieldErrors: Record<string, string>;
   onChange: (index: number, field: keyof PassengerFormValues, value: string) => void;
+  onReplacePassenger?: (index: number, next: PassengerFormValues) => void;
 };
 
 export function PassengerCard({
@@ -21,6 +23,7 @@ export function PassengerCard({
   nationalIdAllowed,
   fieldErrors,
   onChange,
+  onReplacePassenger,
 }: PassengerCardProps) {
   const showPassport =
     documentRequirements.passport_required || passenger.document_type === "passport";
@@ -40,6 +43,7 @@ export function PassengerCard({
           </span>
         ) : null}
       </legend>
+      <p className="mt-1 text-xs text-jp-muted">Enter details exactly as shown on the passport.</p>
 
       <input type="hidden" name={`passengers[${index}][passenger_type]`} value={passenger.passenger_type} />
 
@@ -139,6 +143,14 @@ export function PassengerCard({
               <option value="national_id">National ID / CNIC</option>
             </select>
           </label>
+        ) : null}
+
+        {showPassport && onReplacePassenger ? (
+          <DocumentReader
+            passengerIndex={index}
+            passenger={passenger}
+            onApply={(next) => onReplacePassenger(index, next)}
+          />
         ) : null}
 
         {showPassport ? (

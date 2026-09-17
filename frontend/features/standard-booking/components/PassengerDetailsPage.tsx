@@ -94,6 +94,10 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     setPassengers((rows) => rows.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
   }, []);
 
+  const replacePassenger = useCallback((index: number, next: PassengerFormValues) => {
+    setPassengers((rows) => rows.map((row, i) => (i === index ? next : row)));
+  }, []);
+
   const updateContact = useCallback((field: keyof ContactFormValues, value: string | boolean) => {
     setContact((current) => ({ ...current, [field]: value }));
   }, []);
@@ -237,6 +241,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
                     nationalIdAllowed={context.document_requirements.national_id_allowed}
                     fieldErrors={fieldErrors}
                     onChange={updatePassenger}
+                    onReplacePassenger={replacePassenger}
                   />
                 );
               })}
