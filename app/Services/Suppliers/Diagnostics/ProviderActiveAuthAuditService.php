@@ -62,12 +62,29 @@ final class ProviderActiveAuthAuditService
             $credentialSource = 'env';
         }
 
+        $dbConnection = SupplierConnection::query()
+            ->where('provider', 'al_haider')
+            ->where('is_active', true)
+            ->orderByDesc('id')
+            ->first();
+        $dbCreds = is_array($dbConnection?->credentials) ? $dbConnection->credentials : [];
+        $dbTokenPresent = trim((string) ($dbCreds['existing_token'] ?? '')) !== '';
+        $dbAuthMode = trim((string) ($dbCreds['auth_mode'] ?? ''));
+
+        if ($dbConnection !== null && $dbTokenPresent) {
+            $credentialSource = 'db';
+        }
+
         $result = [
             'provider' => 'alhaider',
             'source' => $credentialSource,
             'enabled' => (bool) config('suppliers.al_haider.enabled'),
             'configured' => $this->alHaiderClient->isConfigured(),
-            'db_connection_rows' => 0,
+            'db_connection_rows' => $dbConnection !== null ? 1 : 0,
+            'db_connection_id' => $dbConnection?->id,
+            'db_auth_mode' => $dbAuthMode !== '' ? $dbAuthMode : null,
+            'db_existing_token_present' => $dbTokenPresent,
+            'db_token_expires_at' => trim((string) ($dbCreds['token_expires_at'] ?? '')) ?: null,
             'credential_source' => $credentialSource,
             'username_present' => $username !== '',
             'username_len' => strlen($username),

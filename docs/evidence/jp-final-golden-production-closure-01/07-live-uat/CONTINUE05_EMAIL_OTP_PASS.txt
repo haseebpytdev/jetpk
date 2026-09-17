@@ -1,0 +1,7 @@
+EMAIL_GMAIL_DELIVERY=PASS
+EMAIL_OTP_SIMPLIFICATION=PASS
+EMAIL_GMAIL_ANDROID=PASS
+EMAIL_OWNER_ACCEPTED=YES
+CHATGT_CONFIRMED_AT=2026-09-17T12:52:34Z
+NOTES=Owner + ChatGPT independently confirmed latest Gmail OTP: canonical JetPakistan delivery, Visit Site, Manage Booking; NO Request context; NO Web sign-in.
+AUTHORITY_SHA_AT_RECORD=94faab699babbee461303ee2eef223a37e844166

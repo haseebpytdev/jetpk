@@ -29,7 +29,7 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
           className,
         )}
       >
-        {compact ? "Account" : "Log in / Sign up"}
+        Login
       </Link>
     );
   }

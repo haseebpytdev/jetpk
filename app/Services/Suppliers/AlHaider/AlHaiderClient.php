@@ -2,6 +2,7 @@
 
 namespace App\Services\Suppliers\AlHaider;
 
+use App\Support\Suppliers\AlHaiderSupplierConnectionNormalizer;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
@@ -13,7 +14,9 @@ use Illuminate\Support\Facades\Log;
 /**
  * Read-only HTTP client for Al-Haider group flight inventory API.
  *
- * Dynamic session tokens are cached in Laravel cache with a login lock — not stored in .env.
+ * Auth authority: active SupplierConnection credentials (managed/manual token) first,
+ * then optional env static token, then cached dynamic login. Secrets stay in DB/env —
+ * never in source. Dynamic login tokens may be cached under TOKEN_CACHE_KEY.
  */
 class AlHaiderClient
 {
@@ -22,6 +25,16 @@ class AlHaiderClient
     private const TOKEN_LIMIT_BLOCK_KEY = 'alhaider:auth_token:limit_blocked';
 
     private const LOGIN_LOCK_KEY = 'alhaider:auth_token:login';
+
+    public function __construct(
+        private readonly AlHaiderConnectionAuthResolver $connectionAuthResolver,
+    ) {}
+
+    private ?string $resolvedAuthMode = null;
+
+    private ?string $connectionBaseUrl = null;
+
+    private ?int $resolvedConnectionId = null;
 
     /**
      * @param  array<string, mixed>  $filters
@@ -133,6 +146,11 @@ class AlHaiderClient
             return false;
         }
 
+        $connectionAuth = $this->connectionAuthResolver->resolveConnectionAuth();
+        if ($connectionAuth !== null && $this->connectionAuthResolver->connectionAuthIsConfigured($connectionAuth)) {
+            return true;
+        }
+
         $staticToken = trim((string) config('suppliers.al_haider.token'));
         if ($staticToken !== '') {
             return true;
@@ -151,14 +169,6 @@ class AlHaiderClient
      */
     public function probeAuthentication(): array
     {
-        if ($this->isTokenLimitBlocked()) {
-            return [
-                'http_status' => 429,
-                'reason_code' => 'supplier_auth_token_limit',
-                'token_obtained' => false,
-            ];
-        }
-
         try {
             $token = $this->resolveToken();
             $obtained = $token !== '';
@@ -222,6 +232,25 @@ class AlHaiderClient
 
             if ($exception->httpStatus !== 401) {
                 throw $exception;
+            }
+
+            // Manual / managed DB tokens fail closed — never mint a replacement via login.
+            if (in_array($this->resolvedAuthMode, [
+                AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANUAL,
+                AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANAGED,
+            ], true)) {
+                Log::warning('alhaider.auth.fail_closed_401', [
+                    'supplier' => 'alhaider',
+                    'auth_mode' => $this->resolvedAuthMode,
+                    'connection_id' => $this->resolvedConnectionId,
+                    'request_context' => $context['request_context'] ?? null,
+                ]);
+
+                throw new AlHaiderProviderException(
+                    'supplier_auth_token_rejected',
+                    401,
+                    'Token expired / rejected'
+                );
             }
 
             $this->clearTokenCache();
@@ -300,6 +329,68 @@ class AlHaiderClient
 
     private function resolveToken(bool $forceRefresh = false): string
     {
+        $this->resolvedAuthMode = null;
+        $this->connectionBaseUrl = null;
+        $this->resolvedConnectionId = null;
+
+        $connectionAuth = $this->connectionAuthResolver->resolveConnectionAuth();
+        if ($connectionAuth !== null) {
+            $this->resolvedAuthMode = $connectionAuth['mode'];
+            $this->resolvedConnectionId = (int) ($connectionAuth['connection_id'] ?? 0) ?: null;
+            if ($connectionAuth['base_url'] !== '') {
+                $this->connectionBaseUrl = $connectionAuth['base_url'];
+            }
+
+            if ($connectionAuth['mode'] === AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANUAL) {
+                if ($this->connectionAuthResolver->manualTokenExpired($connectionAuth['token_expires_at'])) {
+                    throw new AlHaiderProviderException(
+                        'supplier_auth_token_expired',
+                        401,
+                        'Token expired / rejected'
+                    );
+                }
+
+                $manualToken = trim($connectionAuth['existing_token']);
+                if ($manualToken === '') {
+                    throw new AlHaiderProviderException(
+                        'supplier_auth_token_missing',
+                        503,
+                        'Authentication required'
+                    );
+                }
+
+                return $manualToken;
+            }
+
+            if ($connectionAuth['mode'] === AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANAGED) {
+                $managedToken = trim($connectionAuth['existing_token']);
+                $expired = $this->connectionAuthResolver->manualTokenExpired($connectionAuth['token_expires_at']);
+
+                if ($managedToken !== '' && ! $expired) {
+                    return $managedToken;
+                }
+
+                if ($expired || $managedToken === '') {
+                    throw new AlHaiderProviderException(
+                        $expired ? 'supplier_auth_token_expired' : 'supplier_auth_token_missing',
+                        $expired ? 401 : 503,
+                        $expired ? 'Token expired / rejected' : 'Authentication required'
+                    );
+                }
+            }
+
+            // credentials_auto_token falls through to login using connection username/password.
+            if ($connectionAuth['mode'] === AlHaiderSupplierConnectionNormalizer::AUTH_MODE_AUTO) {
+                if ($connectionAuth['username'] === '' || $connectionAuth['password'] === '') {
+                    throw new AlHaiderProviderException(
+                        'supplier_auth_missing',
+                        401,
+                        'Al-Haider credentials are not configured.'
+                    );
+                }
+            }
+        }
+
         $staticToken = trim((string) config('suppliers.al_haider.token'));
         if ($staticToken !== '') {
             return $staticToken;
@@ -336,10 +427,22 @@ class AlHaiderClient
             'force_refresh' => $forceRefresh,
         ]);
 
-        return $this->loginWithLock();
+        return $this->loginWithLock($connectionAuth);
     }
 
-    private function loginWithLock(): string
+    /**
+     * @param  array{
+     *     mode: string,
+     *     existing_token: string,
+     *     token_expires_at: ?string,
+     *     username: string,
+     *     password: string,
+     *     auto_renew: bool,
+     *     base_url: string,
+     *     connection_id: int
+     * }|null  $connectionAuth
+     */
+    private function loginWithLock(?array $connectionAuth = null): string
     {
         $lockSeconds = max(5, (int) config('suppliers.al_haider.login_lock_seconds', 15));
         $waitSeconds = max(1, (int) config('suppliers.al_haider.login_lock_wait_seconds', 10));
@@ -381,16 +484,39 @@ class AlHaiderClient
                 return $cached;
             }
 
-            return $this->performLogin();
+            return $this->performLogin($connectionAuth);
         } finally {
             $lock->release();
         }
     }
 
-    private function performLogin(): string
+    /**
+     * @param  array{
+     *     mode: string,
+     *     existing_token: string,
+     *     token_expires_at: ?string,
+     *     username: string,
+     *     password: string,
+     *     auto_renew: bool,
+     *     base_url: string,
+     *     connection_id: int
+     * }|null  $connectionAuth
+     */
+    private function performLogin(?array $connectionAuth = null): string
     {
         $username = trim((string) config('suppliers.al_haider.username'));
         $password = trim((string) config('suppliers.al_haider.password'));
+
+        if (
+            is_array($connectionAuth)
+            && ($connectionAuth['mode'] ?? '') === AlHaiderSupplierConnectionNormalizer::AUTH_MODE_AUTO
+            && trim((string) ($connectionAuth['username'] ?? '')) !== ''
+            && trim((string) ($connectionAuth['password'] ?? '')) !== ''
+        ) {
+            $username = trim((string) $connectionAuth['username']);
+            $password = trim((string) $connectionAuth['password']);
+        }
+
         if ($username === '' || $password === '') {
             throw new AlHaiderProviderException(
                 'supplier_auth_missing',
@@ -564,7 +690,9 @@ class AlHaiderClient
 
     private function url(string $path): string
     {
-        $base = rtrim((string) config('suppliers.al_haider.default_base_url'), '/');
+        $base = $this->connectionBaseUrl !== null && $this->connectionBaseUrl !== ''
+            ? rtrim($this->connectionBaseUrl, '/')
+            : rtrim((string) config('suppliers.al_haider.default_base_url'), '/');
         $path = '/'.ltrim($path, '/');
 
         return $base.$path;
