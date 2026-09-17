@@ -34,6 +34,26 @@ class FareHoldService
         $normalized = $validation->validated_offer?->toArray() ?? [];
         $pricing = is_array($validation->meta['pricing_snapshot'] ?? null) ? $validation->meta['pricing_snapshot'] : [];
         $presented = $presentOffer($normalized, $pricing);
+
+        // Warm Book Now → Traveler path: recent live revalidation already stamped the offer.
+        // Reuse the existing hold row instead of rewriting validated_offer_snapshot on every JSON GET.
+        $skipHeavyHold = (bool) data_get($validation->meta, 'sabre_checkout_skip_live_validation_recent_revalidation');
+        if ($skipHeavyHold && $searchId !== '' && $offerId !== '') {
+            $existing = BookingHoldSession::query()
+                ->where('agency_id', $agency->id)
+                ->where('search_id', $searchId)
+                ->where('offer_id', $offerId)
+                ->orderByDesc('id')
+                ->first();
+            if ($existing instanceof BookingHoldSession) {
+                return [
+                    'hold_session' => $existing,
+                    'validation' => $validation,
+                    'presented_offer' => $presented,
+                ];
+            }
+        }
+
         $holdData = $this->refreshHoldSession(
             agency: $agency,
             booking: null,
