@@ -26,5 +26,7 @@
 @endif
 
 @if(!empty($context))
-    @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Request context', 'value' => $context, 'emailBrand' => $brand])
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 8px 0;">
+        @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Request context', 'value' => $context, 'emailBrand' => $brand])
+    </table>
 @endif

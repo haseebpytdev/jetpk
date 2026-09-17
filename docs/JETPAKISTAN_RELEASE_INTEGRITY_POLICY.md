@@ -59,10 +59,25 @@ At minimum for golden / final reconciliation closures:
 6. **Favicon / branding** — canonical JetPakistan assets; no broken logo/favicon.
 7. **OTP OFF/ON** — Admin UI persist → refresh → runtime; restore owner-intended final state (`LOGIN_OTP=OFF` unless owner directs otherwise).
 8. **Email canonical URLs** — received MIME (not source alone) uses `https://jetpakistan.pk`, correct Manage Booking `/lookup-booking`, current logo; no `www.jetpakistan.com`, `/jetpk/…`, or localhost.
-9. **CMS revalidation** — draft does not leak; publish → public API/Next/browser; restore → publish restoration.
-10. **Network clean gate** — unexplained asset failures = 0 on major routes (favicon, logo, CMS media, Tesseract, chunks, RSC).
-11. **SEO regression** — public SEO endpoints and key pages remain healthy after CMS/publish.
-12. **Safe commercial UAT boundary** — no supplier booking/ticket/cancel/refund/payment mutations for QA.
+9. **Email mobile layout (P2)** — reusable `info-row` is stacked LABEL/VALUE in one full-width `<td>` (never two-column `nowrap` + right-align that Gmail Android squeezes). Gate: `EMAIL_MOBILE_NO_OVERFLOW`, `EMAIL_MOBILE_DETAIL_ROWS`, `EMAIL_LONG_DATA` via `docs/evidence/jp-email-p2/` harness; live Gmail Android confirm before PASS.
+10. **CMS revalidation** — draft does not leak; publish → public API/Next/browser; restore → publish restoration.
+11. **Network clean gate** — unexplained asset failures = 0 on major routes (favicon, logo, CMS media, Tesseract, chunks, RSC).
+12. **SEO regression** — public SEO endpoints and key pages remain healthy after CMS/publish.
+13. **Safe commercial UAT boundary** — no supplier booking/ticket/cancel/refund/payment mutations for QA.
+
+Critical email presence assertions:
+
+- `CANONICAL_EMAIL_SHELL`
+- `EMAIL_PUBLIC_LOGO`
+- `EMAIL_PUBLIC_URLS`
+- `EMAIL_MULTIPART_MIME`
+- `EMAIL_MOBILE_NO_OVERFLOW`
+- `EMAIL_MOBILE_DETAIL_ROWS`
+- `EMAIL_LONG_DATA`
+- `EMAIL_ROLE_SUBJECTS`
+
+Historical P2 authority: `da660bf5…` (canonical shell); visual/MIME UAT: `2480ffff…`.
+
 
 ## Email delivery rule
 
