@@ -221,4 +221,51 @@ return [
         'allow_zero_payable' => filter_var(env('OTA_PROMO_ALLOW_ZERO_PAYABLE', false), FILTER_VALIDATE_BOOL),
         'allow_internal_testing_codes' => filter_var(env('OTA_PROMO_ALLOW_INTERNAL_TESTING', true), FILTER_VALIDATE_BOOL),
     ],
+
+    /** Local AI travel assistant (JP-AI-ASSIST). Disabled until capacity-approved runtime is healthy. */
+    'ai_assistant' => [
+        /**
+         * Infrastructure hard ceilings — admin DB settings cannot exceed these.
+         * EFFECTIVE = hard_allow ∧ admin_setting ∧ user_eligibility.
+         */
+        'hard_allow' => [
+            'master' => filter_var(
+                env('OTA_AI_ASSISTANT_HARD_ALLOW', in_array(
+                    strtolower((string) env('OTA_AI_ASSISTANT_MODE', 'off')),
+                    ['internal_canary', 'public'],
+                    true
+                ) || filter_var(env('OTA_AI_ASSISTANT_ENABLED', false), FILTER_VALIDATE_BOOL)),
+                FILTER_VALIDATE_BOOL
+            ),
+            'internal_canary' => filter_var(
+                env('OTA_AI_CANARY_HARD_ALLOW', strtolower((string) env('OTA_AI_ASSISTANT_MODE', 'off')) === 'internal_canary'),
+                FILTER_VALIDATE_BOOL
+            ),
+            'human_handoff' => filter_var(env('OTA_AI_HANDOFF_HARD_ALLOW', true), FILTER_VALIDATE_BOOL),
+            'flight_search_read_only' => filter_var(env('OTA_AI_FLIGHT_SEARCH_READ_ONLY_HARD_ALLOW', false), FILTER_VALIDATE_BOOL),
+            'public' => filter_var(env('OTA_AI_PUBLIC_HARD_ALLOW', false), FILTER_VALIDATE_BOOL),
+        ],
+        /**
+         * Audience mode (server authoritative):
+         * off | internal_canary | public
+         * Prefer mode over legacy enabled when set.
+         */
+        'mode' => strtolower((string) env('OTA_AI_ASSISTANT_MODE', 'off')),
+        'enabled' => filter_var(env('OTA_AI_ASSISTANT_ENABLED', false), FILTER_VALIDATE_BOOL),
+        'gateway_url' => env('OTA_AI_GATEWAY_URL', 'http://127.0.0.1:3921'),
+        'timeout_seconds' => max(3, (int) env('OTA_AI_TIMEOUT_SECONDS', 45)),
+        'anonymous_per_minute' => max(8, (int) env('OTA_AI_ANON_PER_MINUTE', 24)),
+        'max_message_chars' => max(100, (int) env('OTA_AI_MAX_MESSAGE_CHARS', 2000)),
+        'model_id' => (string) env('OTA_AI_MODEL_ID', 'local'),
+        'flight_search_enabled' => filter_var(env('OTA_AI_FLIGHT_SEARCH_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'groups_enabled' => filter_var(env('OTA_AI_GROUPS_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'knowledge_enabled' => filter_var(env('OTA_AI_KNOWLEDGE_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'human_handoff_enabled' => filter_var(env('OTA_AI_HUMAN_HANDOFF_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'max_conversation_messages' => max(10, (int) env('OTA_AI_MAX_CONVERSATION_MESSAGES', 80)),
+        'load_shed_available_mb_min' => max(256, (int) env('OTA_AI_LOAD_SHED_AVAILABLE_MB_MIN', 2000)),
+        /** Optional local LLM phrasing assist — never required for core Flight/Group authority. */
+        'optional_llm_assist' => filter_var(env('OTA_AI_OPTIONAL_LLM_ASSIST', false), FILTER_VALIDATE_BOOL),
+        /** Conversational LLM layer with approved tools; falls back to hybrid parser when unavailable. */
+        'conversational_enabled' => filter_var(env('OTA_AI_CONVERSATIONAL_ENABLED', true), FILTER_VALIDATE_BOOL),
+    ],
 ];

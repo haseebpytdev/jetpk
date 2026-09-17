@@ -12,6 +12,7 @@ use App\Http\Controllers\Developer\DevCpUiVersionsController;
 use App\Http\Controllers\Developer\DeveloperAuthController;
 use App\Http\Controllers\Developer\DeveloperPasswordController;
 use App\Http\Controllers\Developer\PlatformModuleControlController;
+use App\Http\Middleware\ApplyAiLabCanaryFaultHeader;
 use App\Http\Middleware\EnsureAccountType;
 use App\Http\Middleware\EnsureDashboardPermission;
 use App\Http\Middleware\EnsureAgencyContext;
@@ -208,6 +209,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'preview.client' => ResolvePreviewClient::class,
             'preview.client.persist' => PersistClientPreviewContext::class,
             'client.ui.preview.protect' => ProtectClientUiPreview::class,
+            'ai.lab.canary.fault' => ApplyAiLabCanaryFaultHeader::class,
         ]);
 
         $middleware->prependToPriorityList(

@@ -19,6 +19,7 @@ use App\Http\Controllers\Frontend\GuestBookingLookupController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\PublicSitemapController;
 use App\Http\Controllers\Api\PublicAuthController;
+use App\Http\Controllers\Api\PublicAiAssistantController;
 use App\Http\Controllers\Api\PublicSessionController;
 use App\Http\Controllers\Api\PublicContentApiController;
 use App\Http\Controllers\Frontend\SupportController;
@@ -65,6 +66,25 @@ Route::prefix('api/public/auth')->group(function (): void {
         ->middleware('guest')
         ->name('api.public.auth.registration-security-challenge');
 });
+
+Route::get('/api/public/ai/health', [PublicAiAssistantController::class, 'health'])
+    ->middleware('throttle:60,1')
+    ->name('api.public.ai.health');
+Route::post('/api/public/ai/lead', [PublicAiAssistantController::class, 'submitLead'])
+    ->middleware('throttle:20,1')
+    ->name('api.public.ai.lead');
+Route::post('/api/public/ai/chat', [PublicAiAssistantController::class, 'chat'])
+    ->middleware(['throttle:60,1', 'ai.lab.canary.fault'])
+    ->name('api.public.ai.chat');
+Route::get('/api/public/ai/messages', [PublicAiAssistantController::class, 'messages'])
+    ->middleware('throttle:60,1')
+    ->name('api.public.ai.messages');
+Route::post('/api/public/ai/clear', [PublicAiAssistantController::class, 'clear'])
+    ->middleware('throttle:10,1')
+    ->name('api.public.ai.clear');
+Route::post('/api/public/ai/handoff', [PublicAiAssistantController::class, 'requestHandoff'])
+    ->middleware('throttle:10,1')
+    ->name('api.public.ai.handoff');
 
 Route::get('/sitemap.xml', [PublicSitemapController::class, 'index'])->name('sitemap');
 Route::middleware('platform.module:support_system')->group(function (): void {

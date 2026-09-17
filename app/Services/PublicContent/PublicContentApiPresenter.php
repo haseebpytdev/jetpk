@@ -5,7 +5,9 @@ namespace App\Services\PublicContent;
 use App\Enums\SupportTicketCategory;
 use App\Models\ClientPage;
 use App\Models\CmsPage;
+use App\Models\User;
 use App\Services\Agencies\AboutUsContentPresenter;
+use App\Services\Ai\AiAssistantEligibility;
 use App\Services\Client\ClientGlobalContactResolver;
 use App\Services\Client\ClientPageContentResolver;
 use App\Services\Client\ClientPageRenderer;
@@ -16,6 +18,7 @@ use App\Support\Client\ClientManagedPageReservedSlugs;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\ClientSafeHtmlSanitizer;
 use App\Support\Client\ReservedPublicPath;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Shapes Laravel-managed public content for the Next.js public frontend.
@@ -30,6 +33,7 @@ final class PublicContentApiPresenter
         private readonly ClientPageContentResolver $contentResolver,
         private readonly SeoVerificationResolver $verificationResolver,
         private readonly SeoSitemapEligibility $sitemapEligibility,
+        private readonly AiAssistantEligibility $aiEligibility,
     ) {}
 
     /**
@@ -144,6 +148,10 @@ final class PublicContentApiPresenter
         $contact = $this->contactResolver->contact();
         $global = $this->contentFor(ClientPageKeys::GLOBAL);
         $social = is_array($global['social'] ?? null) ? $global['social'] : [];
+        $user = Auth::user();
+        $aiUser = $user instanceof User ? $user : null;
+        // Guests must resolve via isEligible(null) so MODE_PUBLIC enables the FAB.
+        $aiEnabled = $this->aiEligibility->isEligible($aiUser);
 
         return [
             'brand_name' => (string) config('ota-brand.name', 'JetPakistan'),
@@ -171,6 +179,8 @@ final class PublicContentApiPresenter
                 'google' => $this->verificationResolver->googleToken(),
                 'bing' => $this->verificationResolver->bingToken(),
             ],
+            'ai_assistant_enabled' => $aiEnabled,
+            'ai_assistant_mode' => $this->aiEligibility->mode(),
             'source' => 'laravel',
         ];
     }

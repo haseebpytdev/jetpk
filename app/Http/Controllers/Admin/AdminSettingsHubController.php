@@ -46,6 +46,7 @@ class AdminSettingsHubController extends Controller
             ])),
             'Operations' => array_values(array_filter([
                 $this->card('Login OTP', 'Require email OTP after password login for all roles.', 'admin.settings.login-otp.edit'),
+                $this->card('Ask JetPakistan', 'Public AI assistant gates, canary controls, and runtime health.', 'admin.settings.ai-assistant.show'),
                 $this->card('Group ticketing', 'Homepage tiles, categories, and inventory sync.', 'admin.group-ticketing.index'),
                 $this->card('Support tickets', 'Customer and agent support queue.', 'admin.support.tickets.index'),
                 $this->card('Homepage featured fares', 'Dynamic cheapest-fare route rules.', 'admin.settings.homepage-featured-fares.index'),
