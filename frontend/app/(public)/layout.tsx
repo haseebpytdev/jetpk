@@ -2,9 +2,15 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { PublicConfigService, SeoJsonLd } from "@/features/public-content";
-import { getPublicSession } from "@/services/session";
+import type { PublicSession } from "@/types/session";
 
-export const dynamic = "force-dynamic";
+/**
+ * Soft-nav / ISR: do not force-dynamic the whole public tree.
+ * PublicShell upgrades anonymous SSR session from Laravel after hydration.
+ */
+export const revalidate = 60;
+
+const ANONYMOUS_SESSION: PublicSession = { status: "anonymous" };
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await PublicConfigService.getConfig();
@@ -20,11 +26,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PublicGroupLayout({ children }: { children: ReactNode }) {
-  const session = await getPublicSession();
   const config = await PublicConfigService.getConfig();
 
   return (
-    <PublicShell session={session}>
+    <PublicShell session={ANONYMOUS_SESSION}>
       <SeoJsonLd config={config} />
       {children}
     </PublicShell>
