@@ -368,43 +368,20 @@ export function useRevalidation() {
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
       // Await prime up to 2s so sessionStorage usually has JSON before nav.
-      // Harness/UI Continue fallback must wait >=5s for auto-nav.
       await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2000 });
       persistTimingForContinuity();
       releaseImageSlots();
 
-      const softTarget = absolute.startsWith("http")
-        ? `${new URL(absolute).pathname}${new URL(absolute).search}`
-        : absolute;
-      // Soft push after image-slot release + JSON prime. Hard assign only if soft
-      // stalls — do not race them simultaneously (that caused ~20s hangs).
-      markBookNowTiming("T5_router_push", { nav: "soft_push_then_hard_fallback" });
-      markBookNowTiming("T7_passenger_route", { nav: "soft_push_then_hard_fallback" });
+      // Hard assign after prime — soft router.push + 2.5s stall fallback inflated
+      // TRAVELER APP_P95 (~2.5–4s) when results kept the SPA busy.
+      markBookNowTiming("T5_router_push", { nav: "hard_assign_after_prime" });
+      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_after_prime" });
       persistTimingForContinuity();
       try {
-        void router.push(softTarget);
+        window.location.assign(absolute);
       } catch {
-        try {
-          window.location.assign(absolute);
-        } catch {
-          window.location.href = absolute;
-        }
-        return true;
+        window.location.href = absolute;
       }
-      window.setTimeout(() => {
-        try {
-          if (!window.location.pathname.includes("/booking/passengers")) {
-            markBookNowTiming("T5_router_push", { nav: "hard_assign_fallback" });
-            window.location.assign(absolute);
-          }
-        } catch {
-          try {
-            window.location.href = absolute;
-          } catch {
-            /* ignore */
-          }
-        }
-      }, 2500);
       return true;
     }
     window.location.assign(resolved);
