@@ -367,21 +367,44 @@ export function useRevalidation() {
 
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
-      // Await prime up to 2s so sessionStorage usually has JSON before hard-nav.
-      // Harness/UI Continue fallback must wait >=5s for auto-nav (not 1.5s) to avoid
-      // double-nav races that previously caused ~20s hangs.
+      // Await prime up to 2s so sessionStorage usually has JSON before nav.
+      // Harness/UI Continue fallback must wait >=5s for auto-nav.
       await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2000 });
-      markBookNowTiming("T5_router_push", { nav: "hard_assign_after_json_prime" });
-      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_after_json_prime" });
       persistTimingForContinuity();
       releaseImageSlots();
-      // Hard assign remains authoritative for passengers_url handoff (soft push raced
-      // fallback assign and produced hangs / destroyed contexts in 01R smoke).
+
+      const softTarget = absolute.startsWith("http")
+        ? `${new URL(absolute).pathname}${new URL(absolute).search}`
+        : absolute;
+      // Soft push after image-slot release + JSON prime. Hard assign only if soft
+      // stalls — do not race them simultaneously (that caused ~20s hangs).
+      markBookNowTiming("T5_router_push", { nav: "soft_push_then_hard_fallback" });
+      markBookNowTiming("T7_passenger_route", { nav: "soft_push_then_hard_fallback" });
+      persistTimingForContinuity();
       try {
-        window.location.assign(absolute);
+        void router.push(softTarget);
       } catch {
-        window.location.href = absolute;
+        try {
+          window.location.assign(absolute);
+        } catch {
+          window.location.href = absolute;
+        }
+        return true;
       }
+      window.setTimeout(() => {
+        try {
+          if (!window.location.pathname.includes("/booking/passengers")) {
+            markBookNowTiming("T5_router_push", { nav: "hard_assign_fallback" });
+            window.location.assign(absolute);
+          }
+        } catch {
+          try {
+            window.location.href = absolute;
+          } catch {
+            /* ignore */
+          }
+        }
+      }, 2500);
       return true;
     }
     window.location.assign(resolved);
