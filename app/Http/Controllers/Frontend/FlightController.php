@@ -59,20 +59,6 @@ class FlightController extends Controller
         protected SupportTicketService $supportTicketService,
     ) {}
 
-    public function search(Request $request): View
-    {
-        return view('frontend.flights.search', [
-            'defaults' => [
-                'origin' => $request->string('from')->toString(),
-                'destination' => $request->string('to')->toString(),
-                'depart' => $request->string('depart')->toString(),
-                'return_date' => $request->string('return_date')->toString(),
-                'trip_type' => $request->string('trip_type', 'one_way')->toString(),
-            ],
-            'minDate' => now()->format('Y-m-d'),
-        ]);
-    }
-
     public function results(PublicFlightSearchRequest $request): View
     {
         $criteria = $request->criteria();

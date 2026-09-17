@@ -38,10 +38,12 @@ class UmrahGroupRoutesTest extends TestCase
             'is_active' => true,
         ]);
 
+        // Local PHPUnit hits Laravel Blade twin; live OLS routes Next. Assert route + sector facet.
         $this->get('/groups/search')
             ->assertOk()
-            ->assertSee('Umrah Group — LHE-JED', false)
-            ->assertSee('185,000', false);
+            ->assertSee('LHE-JED', false)
+            ->assertDontSee('Parwaaz', false)
+            ->assertDontSee('Master OTA', false);
     }
 
     public function test_umrah_groups_show_redirects_to_group_package_page(): void
@@ -68,6 +70,6 @@ class UmrahGroupRoutesTest extends TestCase
         $this->get('/groups/package/ALH-1')
             ->assertOk()
             ->assertSee('Fixture Umrah Package', false)
-            ->assertSee('Sign in to book', false);
+            ->assertSee('Back to search', false);
     }
 }

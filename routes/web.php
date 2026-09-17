@@ -18,7 +18,6 @@ use App\Http\Controllers\Frontend\GuestBookingCancellationController;
 use App\Http\Controllers\Frontend\GuestBookingLookupController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\PublicSitemapController;
-use App\Http\Controllers\Frontend\RequestDemoController;
 use App\Http\Controllers\Api\PublicAuthController;
 use App\Http\Controllers\Api\PublicSessionController;
 use App\Http\Controllers\Api\PublicContentApiController;
