@@ -1,0 +1,10 @@
+OCR_DEFECT=PASS_ROOT_CAUSE_FOUND
+OCR_SYMPTOM=customer failure "couldn't clearly read the passport" with no tesseract network loads
+OCR_CONSOLE_ERROR=Failed to execute 'importScripts' on 'WorkerGlobalScope': The URL '/tesseract/worker.min.js' is invalid.
+OCR_ROOT_CAUSE=relative /tesseract/* paths passed to tesseract.js createWorker; Workers require absolute URLs
+OCR_FIX=resolveTesseractAssetUrls(origin) builds absolute https://jetpakistan.pk/tesseract/... paths
+OCR_STATIC_ASSETS=worker.min.js=200 core-simd-lstm.wasm.js=200 eng.traineddata.gz=200
+OCR_EXTERNAL_UPLOADS=0
+OCR_UNIT_TESTS=11/11 PASS (includes absolute-URL resolver)
+OCR_LIVE_RETEST=PENDING_DEPLOY
+RUNTIME_AT_DISCOVERY=66e9039c389d89e0783e4da7a8e79ceec4f9a9a9

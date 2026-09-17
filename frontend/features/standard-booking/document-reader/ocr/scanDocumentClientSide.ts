@@ -23,6 +23,27 @@ const MIN_DIMENSION = 200;
 /** Self-hosted OCR assets under /tesseract (never third-party CDN at runtime). */
 const TESSERACT_ASSET_PATH = "/tesseract";
 
+/**
+ * Workers reject relative importScripts URLs. Resolve self-hosted Tesseract
+ * paths against an absolute origin (never against a deep booking pathname).
+ */
+export function resolveTesseractAssetUrls(
+  origin: string = typeof window !== "undefined" ? window.location.origin : "",
+): { workerPath: string; corePath: string; langPath: string } {
+  const base = (origin || "").trim().replace(/\/$/, "");
+  if (!/^https?:\/\//i.test(base)) {
+    throw new Error("OCR assets require an absolute site origin.");
+  }
+  return {
+    workerPath: new URL(`${TESSERACT_ASSET_PATH}/worker.min.js`, `${base}/`).href,
+    corePath: new URL(
+      `${TESSERACT_ASSET_PATH}/tesseract-core-simd-lstm.wasm.js`,
+      `${base}/`,
+    ).href,
+    langPath: new URL(`${TESSERACT_ASSET_PATH}/`, `${base}/`).href.replace(/\/$/, ""),
+  };
+}
+
 const CUSTOMER_FAILURE =
   "We couldn't clearly read the passport. Try a sharper photo with the full data page visible.";
 
@@ -278,12 +299,13 @@ export async function scanDocumentClientSide(
 
     const { createWorker } = await import("tesseract.js");
     assertNotAborted(options.signal);
+    const tessAssets = resolveTesseractAssetUrls();
 
     worker = (await withTimeout(
       createWorker("eng", 1, {
-        workerPath: `${TESSERACT_ASSET_PATH}/worker.min.js`,
-        corePath: `${TESSERACT_ASSET_PATH}/tesseract-core-simd-lstm.wasm.js`,
-        langPath: TESSERACT_ASSET_PATH,
+        workerPath: tessAssets.workerPath,
+        corePath: tessAssets.corePath,
+        langPath: tessAssets.langPath,
         gzip: true,
         logger: (message: { status?: string; progress?: number }) => {
           if (typeof message.progress === "number") {

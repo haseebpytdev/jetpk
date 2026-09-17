@@ -3,6 +3,7 @@ import test from "node:test";
 import { suggestTitleFromPassport } from "../../features/standard-booking/document-reader/titleFromPassport";
 import {
   OCR_TERMINATE_TIMEOUT_MS,
+  resolveTesseractAssetUrls,
   terminateWorkerSafely,
 } from "../../features/standard-booking/document-reader/ocr/scanDocumentClientSide";
 
@@ -67,4 +68,21 @@ test("multi-pass OCR exports preprocessPassportImageVariants", async () => {
   const mod = await import("../../features/standard-booking/document-reader/ocr/scanDocumentClientSide");
   assert.equal(typeof mod.preprocessPassportImageVariants, "function");
   assert.equal(typeof mod.preprocessPassportImage, "function");
+});
+
+test("resolveTesseractAssetUrls emits absolute self-hosted paths", () => {
+  const assets = resolveTesseractAssetUrls("https://jetpakistan.pk");
+  assert.equal(assets.workerPath, "https://jetpakistan.pk/tesseract/worker.min.js");
+  assert.equal(
+    assets.corePath,
+    "https://jetpakistan.pk/tesseract/tesseract-core-simd-lstm.wasm.js",
+  );
+  assert.equal(assets.langPath, "https://jetpakistan.pk/tesseract");
+  assert.match(assets.workerPath, /^https:\/\//);
+  assert.doesNotMatch(assets.workerPath, /^\/tesseract\//);
+});
+
+test("resolveTesseractAssetUrls rejects missing origin instead of relative paths", () => {
+  assert.throws(() => resolveTesseractAssetUrls(""), /absolute site origin/i);
+  assert.throws(() => resolveTesseractAssetUrls("/tesseract"), /absolute site origin/i);
 });
