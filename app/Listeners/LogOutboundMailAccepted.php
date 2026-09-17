@@ -54,6 +54,13 @@ final class LogOutboundMailAccepted
                 break;
             }
 
+            $dedupeKey = $messageId ?? ($from.'|'.$subject.'|'.implode(',', $toMasked).'|'.now()->format('Y-m-d H:i:s'));
+            static $loggedKeys = [];
+            if (isset($loggedKeys[$dedupeKey])) {
+                return;
+            }
+            $loggedKeys[$dedupeKey] = true;
+
             // Production LOG_LEVEL is often "warning"; use warning so SMTP acceptance is observable.
             Log::warning('Outbound mail accepted by transport.', [
                 'mailer' => (string) config('mail.default', ''),
