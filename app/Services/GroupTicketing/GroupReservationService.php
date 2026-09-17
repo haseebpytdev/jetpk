@@ -140,6 +140,10 @@ class GroupReservationService
                 'reservation_created_at' => $now,
                 'expires_at' => $expiresAt,
                 'supplier_reservation_id' => $supplierReservationId !== '' ? $supplierReservationId : null,
+                'released_at' => null,
+                'release_reason' => null,
+                'supplier_release_response' => null,
+                'supplier_release_failed_at' => null,
                 'meta' => array_merge($booking->meta ?? [], [
                     'provider_hold_status' => $providerHoldStatus,
                 ]),
