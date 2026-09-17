@@ -118,10 +118,63 @@ test("manual payment page shows only manual methods", async ({ page }) => {
   });
 
   await page.goto("/groups/booking/GRP-TEST/payment");
-  await expect(page.getByRole("heading", { name: "Manual payment" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Complete payment" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Payment method" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Booking summary" })).toBeVisible();
   await expect(page.getByText("Bank transfer")).toBeVisible();
   await expect(page.getByText("AbhiPay")).toHaveCount(0);
   await expect(page.getByLabel("Card payment")).toHaveCount(0);
+});
+
+test("group payment shows inline validation without native required tooltip path", async ({ page }) => {
+  await page.route("**/laravel/groups/booking/GRP-VAL/payment?**", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          reference: "GRP-VAL",
+          status: "payment_pending",
+          status_label: "Payment pending",
+          payment_status: "awaiting_payment",
+          payment_status_label: "Awaiting payment",
+          seat_count: 2,
+          total_amount: 198000,
+          total_formatted: "198,000",
+          currency: "PKR",
+          expires_at: new Date(Date.now() + 20 * 60 * 1000).toISOString(),
+          server_time: new Date().toISOString(),
+          hold_minutes: 25,
+          is_expired: false,
+          is_releasable: true,
+          is_payment_window_open: true,
+          contact: {},
+          passengers: [],
+          inventory: mockPackage,
+          checkout_summary: {},
+          progress: [],
+          payment_methods: [
+            { value: "bank_transfer", title: "Bank transfer", hint: "Transfer the total amount." },
+            { value: "office", title: "Pay at office / consultant", hint: "Visit our office." },
+            { value: "cash", title: "Cash deposit", hint: "Deposit cash at our office." },
+          ],
+          payment_proof_supported: true,
+          payment_reference_required: true,
+          instructions: ["Include your booking reference in the payment note."],
+          support: { support_path: "/support" },
+        }),
+      });
+      return;
+    }
+    await route.fulfill({ status: 422, contentType: "application/json", body: JSON.stringify({ message: "Validation failed" }) });
+  });
+
+  await page.goto("/groups/booking/GRP-VAL/payment");
+  await page.getByTestId("group-payment-submit").click();
+  await expect(page.getByTestId("form-error-summary")).toContainText("Enter your payment reference or transaction ID.");
+  await expect(page.getByTestId("group-payment-reference")).toHaveAttribute("aria-invalid", "true");
+  await expect(page.getByTestId("group-payment-reference")).toBeFocused();
 });
 
 test("hold countdown derives from Laravel expires_at", async ({ page }) => {

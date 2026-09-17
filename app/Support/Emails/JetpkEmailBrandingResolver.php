@@ -257,6 +257,13 @@ class JetpkEmailBrandingResolver
 
     protected static function resolveLogoUrl(ClientProfile $profile, ?ClientProfileBranding $branding): ?string
     {
+        if (function_exists('uses_jetpk_company_branding') && uses_jetpk_company_branding()) {
+            $companyLogo = jetpk_company_branding()->logoUrl();
+            if (is_string($companyLogo) && trim($companyLogo) !== '') {
+                return trim($companyLogo);
+            }
+        }
+
         $assetProfile = static::firstNonEmpty($profile->asset_profile, 'jetpk-assets');
         $logoPath = static::firstNonEmpty($branding?->logo_path, 'logo/logo.svg');
 

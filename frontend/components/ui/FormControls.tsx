@@ -1,12 +1,15 @@
 import { cn } from "@/lib/cn";
-import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import { forwardRef, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 
 const controlClass =
   "min-h-jp-control w-full rounded-jp-md border border-jp-border bg-jp-surface px-jp-control-padding-x text-jp-body text-jp-text placeholder:text-jp-muted focus-visible:outline-none focus-visible:shadow-jp-focus disabled:cursor-not-allowed disabled:opacity-60";
 
-export function TextInput({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={cn(controlClass, className)} {...props} />;
-}
+export const TextInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function TextInput(
+  { className, ...props },
+  ref,
+) {
+  return <input ref={ref} className={cn(controlClass, className)} {...props} />;
+});
 
 export function Select({ className, children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (

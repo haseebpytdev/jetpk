@@ -1,5 +1,5 @@
 /**
- * Static regression: JetPakistan favicon assets + FAB dock safe-area contract.
+ * Static regression: JetPakistan favicon authority + FAB dock safe-area contract.
  * Run: node tests/regression/jp-favicon-fab-closure.test.mjs
  */
 import { existsSync, readFileSync, statSync } from "node:fs";
@@ -17,14 +17,11 @@ function check(label, ok) {
   if (!ok) fail += 1;
 }
 
-function fileNonEmpty(absPath) {
-  return existsSync(absPath) && statSync(absPath).size > 0;
-}
-
 const faviconPaths = [
   join(root, "app/favicon.ico"),
   join(root, "public/favicon.ico"),
   join(repoRoot, "public/favicon.ico"),
+  join(repoRoot, "public/client-assets/jetpk/favicon/favicon.ico"),
 ];
 
 for (const path of faviconPaths) {
@@ -33,7 +30,20 @@ for (const path of faviconPaths) {
 }
 
 const layout = read("app/layout.tsx");
-check("layout.tsx declares metadata.icons /favicon.ico", /icons\s*:\s*\{[\s\S]*?\/favicon\.ico/.test(layout));
+check(
+  "root layout generateMetadata resolves favicon via PublicConfig",
+  /generateMetadata/.test(layout) && /resolveFaviconUrl/.test(layout) && /favicon_url/.test(layout),
+);
+check("root layout does not hard-code only static metadata.icons object", !/export const metadata:\s*Metadata/.test(layout));
+
+const publicLayout = read("app/(public)/layout.tsx");
+check("public layout generateMetadata sets icons from resolveFaviconUrl", /resolveFaviconUrl/.test(publicLayout));
+
+const resolveFavicon = read("lib/branding/resolve-favicon.ts");
+check("resolve-favicon falls back to /favicon.ico", resolveFavicon.includes('CANONICAL_JETPK_FAVICON_PATH = "/favicon.ico"'));
+
+const resolveLogo = read("lib/branding/resolve-header-logo.ts");
+check("header logo fallback uses existing logo.svg", resolveLogo.includes("/client-assets/jetpk/logo/logo.svg"));
 
 const globals = read("app/globals.css");
 check("globals.css defines .jp-public-fab-dock--base safe-area bottom", globals.includes(".jp-public-fab-dock--base"));
@@ -58,7 +68,7 @@ check(
 );
 
 const dock = read("components/navigation/PublicFloatingActionDock.tsx");
-check('dock uses class jp-public-fab-dock', dock.includes("jp-public-fab-dock"));
+check("dock uses class jp-public-fab-dock", dock.includes("jp-public-fab-dock"));
 check("dock uses safe-area-inset-right", dock.includes("safe-area-inset-right"));
 
 const sticky = read("features/booking-layout/components/MobileOrderSummary.tsx");

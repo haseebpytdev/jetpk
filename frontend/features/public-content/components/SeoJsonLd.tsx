@@ -10,12 +10,17 @@ export function SeoJsonLd({ config, contact }: SeoJsonLdProps) {
   const resolvedContact = contact ?? config?.contact;
   const appUrl = config?.app_url ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://jetpakistan.pk";
 
+  const logo =
+    config?.logo_url?.trim() ||
+    config?.favicon_url?.trim() ||
+    `${appUrl}/favicon.ico`;
+
   const organization = {
     "@context": "https://schema.org",
     "@type": "TravelAgency",
     name: config?.brand_name ?? "JetPakistan",
     url: appUrl,
-    logo: `${appUrl}/favicon.ico`,
+    logo,
     email: resolvedContact?.email,
     telephone: resolvedContact?.phone_e164 || resolvedContact?.phone,
     address: resolvedContact?.office,

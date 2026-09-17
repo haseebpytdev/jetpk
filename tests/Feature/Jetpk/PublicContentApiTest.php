@@ -159,6 +159,9 @@ class PublicContentApiTest extends TestCase
             ->assertJsonStructure([
                 'brand_name',
                 'domain',
+                'logo_url',
+                'favicon_url',
+                'header_logo_height',
                 'contact' => ['phone', 'email'],
                 'legal_paths' => ['terms', 'privacy'],
             ]);

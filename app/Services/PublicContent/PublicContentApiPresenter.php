@@ -153,10 +153,19 @@ final class PublicContentApiPresenter
         // Guests must resolve via isEligible(null) so MODE_PUBLIC enables the FAB.
         $aiEnabled = $this->aiEligibility->isEligible($aiUser);
 
+        $companyBranding = function_exists('jetpk_company_branding')
+            ? jetpk_company_branding()
+            : null;
+
         return [
-            'brand_name' => (string) config('ota-brand.name', 'JetPakistan'),
+            'brand_name' => $companyBranding !== null
+                ? $companyBranding->companyName()
+                : (string) config('ota-brand.name', 'JetPakistan'),
             'domain' => (string) config('client.canonical_client.domain', 'jetpakistan.pk'),
             'app_url' => rtrim((string) config('app.url'), '/'),
+            'logo_url' => $companyBranding?->logoUrl(),
+            'favicon_url' => $companyBranding?->faviconUrl(),
+            'header_logo_height' => $companyBranding?->headerLogoHeight(),
             'contact' => $contact,
             'legal_paths' => [
                 'terms' => '/terms',

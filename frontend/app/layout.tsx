@@ -4,6 +4,8 @@ import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { AppInteractionProviders } from "@/components/providers/AppInteractionProviders";
 import { themeBootstrapScript } from "@/lib/theme/theme-bootstrap-script";
 import { SkipLink } from "@/components/ui/SkipLink";
+import { PublicConfigService } from "@/features/public-content/services/public-config-service";
+import { resolveFaviconUrl } from "@/lib/branding/resolve-favicon";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,17 +21,23 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "JetPakistan",
-    template: "%s | JetPakistan",
-  },
-  description: "Book flights, hotels, and travel services with JetPakistan.",
-  icons: {
-    icon: [{ url: "/favicon.ico" }],
-    shortcut: [{ url: "/favicon.ico" }],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await PublicConfigService.getConfig();
+  const favicon = resolveFaviconUrl(config?.favicon_url);
+  const brandName = config?.brand_name?.trim() || "JetPakistan";
+
+  return {
+    title: {
+      default: brandName,
+      template: `%s | ${brandName}`,
+    },
+    description: "Book flights, hotels, and travel services with JetPakistan.",
+    icons: {
+      icon: [{ url: favicon }],
+      shortcut: [{ url: favicon }],
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [

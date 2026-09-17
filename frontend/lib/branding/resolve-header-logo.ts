@@ -1,5 +1,5 @@
 /** Canonical JetPakistan header logo fallback when no organization logo is configured. */
-export const CANONICAL_JETPK_HEADER_LOGO_PATH = "/client-assets/jetpk/logo/logo.png";
+export const CANONICAL_JETPK_HEADER_LOGO_PATH = "/client-assets/jetpk/logo/logo.svg";
 
 function isClientAssetsPath(pathname: string): boolean {
   return pathname.startsWith("/client-assets/") || pathname.startsWith("client-assets/");
