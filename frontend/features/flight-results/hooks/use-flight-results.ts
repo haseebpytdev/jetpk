@@ -166,7 +166,11 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         });
         try {
           performance.mark("jp-d2r-post-flush");
-          const w = window as Window & { __jpD2rCardAt?: number; __jpD2rFlushMs?: number };
+          const w = window as Window & {
+            __jpD2rDataAt?: number;
+            __jpD2rCardAt?: number;
+            __jpD2rFlushMs?: number;
+          };
           w.__jpD2rCardAt = Date.now();
           if (typeof w.__jpD2rDataAt === "number") {
             w.__jpD2rFlushMs = w.__jpD2rCardAt - w.__jpD2rDataAt;
