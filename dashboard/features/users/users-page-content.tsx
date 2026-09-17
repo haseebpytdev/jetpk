@@ -14,9 +14,11 @@ import { PageContainer, PageHeader } from "@/components/ui/page-layout";
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
   module: UsersModuleKey;
+  /** Optional portal directory scope (staff/agent/admin); ignored by shared directory loader. */
+  directoryScope?: string;
 };
 
-export async function UsersPageContent({ searchParams, module }: Props) {
+export async function UsersPageContent({ searchParams, module, directoryScope: _directoryScope }: Props) {
   const sp = await searchParams;
   const query = parseUsersQuery(sp);
 
