@@ -31,6 +31,14 @@ const CLIENT_SEARCH_DEADLINE_MS = 60_000;
 const CLIENT_SEARCH_SETTLE_MS = 90_000;
 const TERMINAL_STATUSES = new Set(["ready", "empty", "failed", "expired", "error"]);
 
+/**
+ * Module-level Pair↔Segmented representation cache + in-flight prefetch.
+ * Survives React effect cleanup/status churn that previously aborted alternate-view
+ * prefetch before cache write (Pair→Segmented paid a fresh ~1.5s loadPage).
+ */
+const representationCache = new Map<string, FlightResultsDataResponse>();
+const representationPrefetchInflight = new Map<string, Promise<FlightResultsDataResponse | null>>();
+
 function stagedSearchMessage(elapsedMs: number, tripType: string, hasResults: boolean): string {
   // Pending suppliers must never read as a failure warning.
   if (hasResults) {
@@ -97,8 +105,9 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
   const skipNextFilterRefresh = useRef(true);
   const lastViewKeyRef = useRef<string | null>(null);
   /** JP-NEXT-PERF-02B: cache Pair/Segmented representations keyed to same search_id. */
-  const viewPayloadCacheRef = useRef<Map<string, FlightResultsDataResponse>>(new Map());
+  const viewPayloadCacheRef = useRef(representationCache);
   const dataRef = useRef<FlightResultsDataResponse | null>(null);
+  const prefetchKickRef = useRef(0);
   const searchStartedAt = useRef<number>(Date.now());
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastEmptyPollMessageAt = useRef(0);
@@ -334,6 +343,10 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       const result = applyPayload(payload, shouldMerge ? "merge" : "replace");
       if (countVisibleResults(payload) > 0 || pipeline === "ready" || pipeline === "partial") {
         viewPayloadCacheRef.current.set(representationCacheKey(id, viewKey), payload);
+        // Kick alternate-view prefetch once rows exist (avoids waiting on status churn).
+        if (tripType === "round_trip") {
+          prefetchKickRef.current += 1;
+        }
       }
       setPage(targetPage);
       setIsLoadingMore(false);
@@ -415,6 +428,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       setData(null);
       dataRef.current = null;
       viewPayloadCacheRef.current.clear();
+      representationPrefetchInflight.clear();
       readyRef.current = false;
       skipNextFilterRefresh.current = true;
       lastViewKeyRef.current = viewKey;
@@ -484,8 +498,8 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     // Prefer cached Laravel payload for the other view; never clear READY → full skeleton
     // and never re-init supplier search.
     if (viewChanged) {
-      const cached = viewPayloadCacheRef.current.get(representationCacheKey(resolvedSearchId, viewKey));
-      if (cached && countVisibleResults(cached) > 0) {
+      const cacheKey = representationCacheKey(resolvedSearchId, viewKey);
+      const applyCached = (cached: FlightResultsDataResponse) => {
         dataRef.current = cached;
         setData(cached);
         const pipeline = resolvePipelineStatus(cached);
@@ -494,7 +508,6 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         setMessage("");
         setPage(1);
         readyRef.current = true;
-        // Soft revalidate in background only if search still active — no supplier search.
         if (isActiveSearchStatus(pipeline)) {
           void loadPage(resolvedSearchId, 1, false, "refresh").then((result) => {
             if (result?.shouldPoll) {
@@ -502,8 +515,32 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
             }
           });
         }
+      };
+
+      const cached = viewPayloadCacheRef.current.get(cacheKey);
+      if (cached && countVisibleResults(cached) > 0) {
+        applyCached(cached);
         return;
       }
+
+      const inflight = representationPrefetchInflight.get(cacheKey);
+      if (inflight) {
+        setStatus((current) => (current === "ready" || current === "partial" ? current : "loading"));
+        setMessage("Switching view…");
+        void inflight.then((payload) => {
+          if (payload && countVisibleResults(payload) > 0) {
+            applyCached(payload);
+            return;
+          }
+          void loadPage(resolvedSearchId, 1, false, "refresh").then((result) => {
+            if (result?.shouldPoll) {
+              schedulePoll(resolvedSearchId);
+            }
+          });
+        });
+        return;
+      }
+
       // Cache miss: keep prior cards mounted while fetching the other representation.
       setStatus((current) => (current === "ready" || current === "partial" ? current : "loading"));
       setMessage("Switching view…");
@@ -521,37 +558,53 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersKey, laravelSort, resolvedSearchId, viewKey]);
 
-  // Prefetch the alternate Return representation after first READY (same search_id).
+  // Prefetch the alternate Return representation after first usable rows (same search_id).
+  // Never abort on effect cleanup/status churn — aborted writes caused Pair→Segmented cache misses.
   useEffect(() => {
     if (!resolvedSearchId) return;
-    if (status !== "ready" && status !== "partial") return;
     if (tripType !== "round_trip") return;
+    if (!readyRef.current && status !== "ready" && status !== "partial") return;
+    if (countVisibleResults(dataRef.current) === 0) return;
+
     const current = (viewKey || "pair").toLowerCase();
     const alt = current === "segmented" || current === "split" ? "pair" : "segmented";
     const altKey = representationCacheKey(resolvedSearchId, alt);
     if (viewPayloadCacheRef.current.has(altKey)) return;
-    let cancelled = false;
-    const controller = new AbortController();
-    void (async () => {
+    if (representationPrefetchInflight.has(altKey)) return;
+
+    const searchIdAtStart = resolvedSearchId;
+    const promise = (async (): Promise<FlightResultsDataResponse | null> => {
       const response = await fetchFlightResultsData({
-        searchId: resolvedSearchId,
+        searchId: searchIdAtStart,
         page: 1,
         perPage: 12,
         sort: laravelSort,
         filters,
         view: alt,
-        signal: controller.signal,
       });
-      if (cancelled || !response.ok) return;
-      if (countVisibleResults(response.data) > 0) {
-        viewPayloadCacheRef.current.set(altKey, response.data);
-      }
-    })();
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [filters, laravelSort, representationCacheKey, resolvedSearchId, status, tripType, viewKey]);
+      if (!response.ok) return null;
+      if (countVisibleResults(response.data) === 0) return null;
+      // Drop write if a newer search replaced this one.
+      if (lastBootstrappedId.current !== searchIdAtStart) return response.data;
+      viewPayloadCacheRef.current.set(altKey, response.data);
+      return response.data;
+    })().finally(() => {
+      representationPrefetchInflight.delete(altKey);
+    });
+
+    representationPrefetchInflight.set(altKey, promise);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    filtersKey,
+    laravelSort,
+    representationCacheKey,
+    resolvedSearchId,
+    tripType,
+    viewKey,
+    status,
+    data?.paired_options?.length,
+    data?.outbound_options?.length,
+  ]);
 
   useEffect(() => () => stopPolling(), [stopPolling]);
 

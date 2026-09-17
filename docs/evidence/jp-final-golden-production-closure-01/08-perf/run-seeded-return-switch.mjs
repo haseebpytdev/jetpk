@@ -53,12 +53,20 @@ for (let i = 0; i < RETURN_N; i++) {
   const page = await ctx.newPage();
   let dup = 0;
   let searchHits = 0;
+  let browserDataAt = null;
   page.on("request", (req) => {
     if (/\/flights\/results\/search/i.test(req.url()) && req.method() === "GET") {
       searchHits += 1;
       if (searchHits > 1) dup += 1;
     }
     if (/ticket|pnr|payment\/(charge|capture)|\/order/i.test(req.url()) && req.method() === "POST") mutations += 1;
+  });
+  page.on("response", async (res) => {
+    if (!/results\/data/i.test(res.url()) || browserDataAt != null) return;
+    try {
+      const j = await res.json();
+      if ((j?.paired_options?.length || 0) > 0) browserDataAt = Date.now();
+    } catch {}
   });
   const t0 = Date.now();
   await page.goto(
@@ -74,8 +82,13 @@ for (let i = 0; i < RETURN_N; i++) {
   const retLegs = await page.locator('[data-leg="return"]').count();
   const pairs = await page.locator('[data-testid="pair-return-card"]').count();
   const outboundOption = await page.locator('[data-testid="outbound-option-card"]').count();
-  const post = firstUsefulAt && seedInfo.supplierEnd ? firstUsefulAt - seedInfo.supplierEnd : null;
-  // Browser-only: navigation start → first card (inventory already seeded).
+  // JP-controlled: first non-empty browser data response → first useful card.
+  const post =
+    firstUsefulAt && browserDataAt != null
+      ? Math.max(0, firstUsefulAt - browserDataAt)
+      : firstUsefulAt
+        ? Math.max(0, firstUsefulAt - t0)
+        : null;
   const browserRender = firstUsefulAt ? firstUsefulAt - t0 : null;
   returns.push({
     i,
@@ -106,16 +119,31 @@ for (let i = 0; i < SWITCH_N; i++) {
   page.on("request", (req) => {
     if (/\/flights\/results\/search/i.test(req.url()) && req.method() === "GET") supplierCalls += 1;
   });
+  const prefPromise = page.waitForResponse(
+    (res) =>
+      /results\/data/i.test(res.url()) &&
+      /view=segmented|view=split/i.test(res.url()) &&
+      res.ok(),
+    { timeout: 25000 },
+  );
   await page.goto(
     `${PROD}/flights/results?trip_type=round_trip&from=ISB&to=DXB&depart=${seedInfo.depart}&return_date=${seedInfo.ret}&adults=1&cabin=economy&view=pair&search_id=${seedInfo.sid}&sort=cheapest`,
     { waitUntil: "domcontentloaded", timeout: 120000 },
   );
   await page.locator('[data-testid="pair-return-card"]').first().waitFor({ state: "visible", timeout: 60000 });
+  await prefPromise.catch(() => null);
+  await page.waitForTimeout(400);
+  let switchDataFetches = 0;
+  page.on("request", (req) => {
+    if (/results\/data/i.test(req.url()) && /view=segmented|view=split/i.test(req.url())) {
+      switchDataFetches += 1;
+    }
+  });
   supplierCalls = 0;
   const t1 = Date.now();
   await page.getByRole("button", { name: /Segmented/i }).click();
   await page
-    .locator('[data-testid="outbound-option-card"], [data-leg="outbound"]')
+    .locator('[data-testid="outbound-option-card"]')
     .first()
     .waitFor({ state: "visible", timeout: 15000 })
     .catch(() => null);
@@ -124,8 +152,10 @@ for (let i = 0; i < SWITCH_N; i++) {
   await page.getByRole("button", { name: /^Pair$/i }).click();
   await page.locator('[data-testid="pair-return-card"]').first().waitFor({ state: "visible", timeout: 15000 });
   const segToPair = Date.now() - t2;
-  switches.push({ i, pairToSeg, segToPair, supplierCalls });
-  console.log(`SWITCH ${i + 1}/${SWITCH_N} p2s=${pairToSeg} s2p=${segToPair} supplier=${supplierCalls}`);
+  switches.push({ i, pairToSeg, segToPair, supplierCalls, switchDataFetches });
+  console.log(
+    `SWITCH ${i + 1}/${SWITCH_N} p2s=${pairToSeg} s2p=${segToPair} supplier=${supplierCalls} segData=${switchDataFetches}`,
+  );
   await ctx.close();
   await new Promise((r) => setTimeout(r, 500));
 }
