@@ -64,6 +64,7 @@ export function buildPassengerFormData(
   context: StandardPassengersContext,
   passengers: PassengerFormValues[],
   contact: ContactFormValues,
+  options?: { termsAccepted?: boolean },
 ): FormData {
   const formData = new FormData();
   const selection = context.selection;
@@ -104,6 +105,12 @@ export function buildPassengerFormData(
   if (contact.create_account) formData.set("create_account", "1");
   if (contact.password) formData.set("password", contact.password);
   if (contact.password_confirmation) formData.set("password_confirmation", contact.password_confirmation);
+
+  const termsVersion = context.consent?.terms_version ?? "jetpk-checkout-terms-2026-08-22";
+  formData.set("terms_version", termsVersion);
+  if (options?.termsAccepted) {
+    formData.set("terms_accepted", "1");
+  }
 
   return formData;
 }

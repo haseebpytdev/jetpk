@@ -14,7 +14,7 @@ import {
   OrderSummary,
 } from "@/features/booking-layout";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { mapFieldErrors } from "@/features/auth/utils/laravel-auth-api";
+import { mapFieldErrors, ensureLaravelCsrfToken } from "@/features/auth/utils/laravel-auth-api";
 import { fetchStandardPassengersContext, submitStandardPassengers } from "../services/standard-booking-api";
 import type { ContactFormValues, PassengerFormValues, StandardPassengersContext } from "../types";
 import {
@@ -24,6 +24,7 @@ import {
   passengerLabel,
 } from "../utils/passenger-form";
 import { isAllowedBookingNextUrl, resolveBookingNextUrl } from "../utils/allowlist";
+import { laravelApiPath } from "@/services/flight-search";
 import { BookingSessionCountdown } from "./BookingSessionCountdown";
 import {
   BookingSessionExpiredState,
@@ -49,6 +50,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [expired, setExpired] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [errorStatus, setErrorStatus] = useState<string | null>(null);
   const [errorRedirect, setErrorRedirect] = useState<string | null>(null);
   const submitLock = useRef(false);
@@ -114,12 +116,19 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     event.preventDefault();
     if (!context || submitLock.current || expired) return;
 
+    if (!termsAccepted) {
+      setFormError("Please confirm the traveler information and accept the Terms & Conditions and Privacy Policy to continue.");
+      setFieldErrors({ terms_accepted: "Required" });
+      errorSummaryRef.current?.focus();
+      return;
+    }
+
     submitLock.current = true;
     setSubmitting(true);
     setFieldErrors({});
     setFormError(null);
 
-    const formData = buildPassengerFormData(context, passengers, contact);
+    const formData = buildPassengerFormData(context, passengers, contact, { termsAccepted: true });
     const response = await submitStandardPassengers(formData);
 
     setSubmitting(false);
@@ -156,6 +165,60 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     router.push(resolved);
   };
 
+  const formHasPassengerOrContactData = useCallback(() => {
+    const passengerFilled = passengers.some((passenger) =>
+      [passenger.first_name, passenger.last_name, passenger.passport_number, passenger.date_of_birth].some(
+        (value) => value.trim() !== "",
+      ),
+    );
+    const contactFilled = [contact.email, contact.phone_number, contact.contact_name].some(
+      (value) => value.trim() !== "",
+    );
+    return passengerFilled || contactFilled;
+  }, [contact, passengers]);
+
+  const handleChangeFlight = useCallback(async () => {
+    if (!context) return;
+    if (context.change_flight && context.change_flight.safe === false) {
+      setFormError("This booking already has a supplier hold. Changing the flight requires the authorized booking lifecycle.");
+      return;
+    }
+    if (formHasPassengerOrContactData()) {
+      const confirmed = window.confirm(
+        "Changing flight may discard the traveler and contact details you have entered. Continue?",
+      );
+      if (!confirmed) return;
+    }
+
+    const abandonUrl = context.change_flight?.abandon_url ?? "/booking/abandon-selected-offer";
+    const csrf = await ensureLaravelCsrfToken();
+    try {
+      const response = await fetch(laravelApiPath(`${abandonUrl}?format=json`), {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+          ...(csrf ? { "X-XSRF-TOKEN": csrf } : {}),
+        },
+      });
+      const body = (await response.json().catch(() => null)) as {
+        ok?: boolean;
+        results_url?: string;
+        message?: string;
+      } | null;
+      if (!response.ok || !body?.ok) {
+        setFormError(body?.message ?? "Unable to change flight right now.");
+        return;
+      }
+      const next = body.results_url || context.change_flight?.results_url || context.booking_session.previous_url || "/flights/results";
+      const resolved = next.startsWith("http") ? next : next.startsWith("/") ? next : `/${next}`;
+      window.location.assign(resolved);
+    } catch {
+      setFormError("Unable to change flight right now.");
+    }
+  }, [context, formHasPassengerOrContactData]);
+
   if (loading) {
     return <BookingLoadingState message="Loading passenger form…" testId="passengers-loading" />;
   }
@@ -179,7 +242,14 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   const typeOrdinals: Record<string, number> = { adult: 0, child: 0, infant: 0 };
 
   const summarySidebar = (
-    <OrderSummary itinerary={context.itinerary} travellerTotal={context.travellers.total} />
+    <OrderSummary
+      itinerary={context.itinerary}
+      travellerTotal={context.travellers.total}
+      variant="flight-preview"
+      testId="flight-preview"
+      onChangeFlight={() => void handleChangeFlight()}
+      changeFlightDisabled={context.change_flight?.safe === false}
+    />
   );
 
   return (
@@ -211,7 +281,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
         noValidate
       >
         <BookingLayout
-          mobileSummary={<MobileOrderSummary>{summarySidebar}</MobileOrderSummary>}
+          mobileSummary={<MobileOrderSummary label="Flight preview">{summarySidebar}</MobileOrderSummary>}
           main={
             <BookingMainColumn>
               {formError || Object.keys(fieldErrors).length > 0 ? (
@@ -256,10 +326,35 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
 
               <SeatExtrasReadinessPanel message={context.seat_extras_capability.message} />
 
+              <label
+                className="flex items-start gap-3 rounded-jp-md border border-jp-border bg-jp-page/50 p-3 text-sm text-jp-text"
+                data-testid="terms-acceptance"
+              >
+                <input
+                  type="checkbox"
+                  className="mt-1 h-4 w-4 rounded border-jp-border text-jp-primary focus-visible:shadow-jp-focus"
+                  checked={termsAccepted}
+                  onChange={(event) => setTermsAccepted(event.target.checked)}
+                  data-testid="terms-acceptance-checkbox"
+                  aria-invalid={Boolean(fieldErrors.terms_accepted)}
+                />
+                <span>
+                  I confirm that the traveler and document information provided is accurate, and I agree to JetPakistan&apos;s{" "}
+                  <a href={context.consent?.terms_url ?? "/terms"} className="font-semibold text-jp-primary underline" target="_blank" rel="noreferrer">
+                    Terms &amp; Conditions
+                  </a>{" "}
+                  and{" "}
+                  <a href={context.consent?.privacy_url ?? "/privacy"} className="font-semibold text-jp-primary underline" target="_blank" rel="noreferrer">
+                    Privacy Policy
+                  </a>
+                  , including the applicable airline/supplier fare rules, change, cancellation and refund conditions.
+                </span>
+              </label>
+
               <PrimaryButton
                 type="submit"
                 className="hidden w-full sm:w-auto lg:inline-flex"
-                disabled={submitting || expired}
+                disabled={submitting || expired || !termsAccepted}
                 aria-busy={submitting}
                 data-testid="save-and-continue"
               >
@@ -274,7 +369,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
           <PrimaryButton
             type="submit"
             className="w-full"
-            disabled={submitting || expired}
+            disabled={submitting || expired || !termsAccepted}
             aria-busy={submitting}
             data-testid="save-and-continue-mobile"
           >

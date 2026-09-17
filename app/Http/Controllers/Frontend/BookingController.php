@@ -455,7 +455,14 @@ class BookingController extends Controller
                 $selectedOfferId,
                 trim((string) ($validated['fare_option_key'] ?? '')),
             );
-            $this->bookingDraft->merge(['checkout_protection' => $protection]);
+            $this->bookingDraft->merge([
+                'checkout_protection' => $protection,
+                'checkout_terms_acceptance' => $this->checkoutTermsAcceptanceRecord(
+                    $searchId,
+                    $selectedOfferId,
+                    null,
+                ),
+            ]);
 
             if (strtolower((string) $checkoutSupplier['supplier_provider']) === SupplierProvider::PiaNdc->value) {
                 $resolutionOffer = $this->offerSnapshotForBrandedFareResolution($offer, $searchId, $selectedOfferId);
@@ -602,6 +609,11 @@ class BookingController extends Controller
                             'fare_option_key' => trim((string) ($validated['fare_option_key'] ?? '')),
                             'selected_fare_family_option' => $selectedFareFamilyOption,
                             'sabre_booking_context' => $sabreBookingContext,
+                            'checkout_terms_acceptance' => $this->checkoutTermsAcceptanceRecord(
+                                $searchId,
+                                $selectedOfferId,
+                                $holdSessionId,
+                            ),
                             ...$this->sabreOfferFreshnessMetaPatchForBooking($offer, $searchId),
                             ...$this->sabreSafeRefreshContextMetaPatchForBooking($offer, $criteria, $checkoutSupplier, $selectedOfferId, $searchId, $protection, $sabreBookingContext, $validated),
                         ],
@@ -1220,6 +1232,9 @@ class BookingController extends Controller
                     is_array($offer) ? $offer : null,
                     $effectiveFlightId,
                 ),
+            'checkoutTermsVersion' => (string) config('ota_checkout_consent.terms_version'),
+            'checkoutPrivacyVersion' => (string) config('ota_checkout_consent.privacy_version'),
+            'changeFlightSafe' => $this->isPreHoldChangeFlightSafe($draft),
         ];
 
         if ($this->wantsBookingJson($request)) {
@@ -1232,6 +1247,170 @@ class BookingController extends Controller
         $this->logJetpkCheckoutPassengersRender($request, $resolvedView);
 
         return view($resolvedView, $viewData);
+    }
+
+    /**
+     * Pre-commercial abandonment: clear selected-offer draft state and start a fresh search.
+     * Does not create/cancel PNR, hold, ticket, or payment state.
+     */
+    public function abandonSelectedOffer(Request $request): RedirectResponse|JsonResponse
+    {
+        $draft = $this->bookingDraft->current();
+        if (! $this->isPreHoldChangeFlightSafe($draft)) {
+            $message = __('This booking already has a supplier hold. Changing the flight requires the authorized booking lifecycle.');
+            if ($this->wantsBookingJson($request)) {
+                return response()->json(
+                    $this->standardBookingJsonPresenter->presentError('hold_active', $message),
+                    409,
+                );
+            }
+
+            return $this->clientRedirect()->route('booking.passengers')
+                ->withErrors(['flight_id' => $message]);
+        }
+
+        $previousSearchId = trim((string) ($draft['search_id'] ?? ''));
+        $hasEmbeddedCriteria = trim((string) ($draft['search_from'] ?? '')) !== ''
+            && trim((string) ($draft['search_to'] ?? '')) !== ''
+            && trim((string) ($draft['search_depart'] ?? '')) !== '';
+        $criteria = $this->resolveCheckoutSearchCriteria(
+            $draft,
+            $hasEmbeddedCriteria ? '' : $previousSearchId,
+        );
+        $resultsQuery = $this->buildFlightsResultsQuery($criteria);
+        unset(
+            $resultsQuery['search_id'],
+            $resultsQuery['offer_id'],
+            $resultsQuery['flight_id'],
+            $resultsQuery['fare_option_key'],
+            $resultsQuery['combo_id'],
+            $resultsQuery['outbound_key'],
+        );
+        $resultsUrl = client_safe_route('flights.results', $resultsQuery);
+
+        $preserved = [
+            'search_from' => (string) ($draft['search_from'] ?? $criteria['origin'] ?? ''),
+            'search_to' => (string) ($draft['search_to'] ?? $criteria['destination'] ?? ''),
+            'search_depart' => (string) ($draft['search_depart'] ?? $criteria['depart_date'] ?? ''),
+            'trip_type' => (string) ($draft['trip_type'] ?? $criteria['trip_type'] ?? 'one_way'),
+            'return_date' => (string) ($draft['return_date'] ?? $criteria['return_date'] ?? ''),
+            'cabin' => (string) ($draft['cabin'] ?? $criteria['cabin'] ?? 'economy'),
+            'adults' => max(1, (int) ($draft['adults'] ?? $criteria['adults'] ?? 1)),
+            'children' => max(0, (int) ($draft['children'] ?? $criteria['children'] ?? 0)),
+            'infants' => max(0, (int) ($draft['infants'] ?? $criteria['infants'] ?? 0)),
+        ];
+        if (($preserved['trip_type'] ?? '') === 'round_trip' && trim((string) $preserved['return_date']) === '') {
+            unset($preserved['return_date']);
+        }
+
+        $this->bookingDraft->clear();
+        $this->bookingDraft->merge($preserved);
+
+        Log::info('checkout_change_flight_abandoned', [
+            'previous_search_id' => $previousSearchId !== '' ? $previousSearchId : null,
+            'fresh_search' => true,
+            'had_offer' => trim((string) ($draft['offer_id'] ?? $draft['flight_id'] ?? '')) !== '',
+            'had_local_hold_session' => (int) ($draft['hold_session_id'] ?? 0) > 0,
+        ]);
+
+        if ($this->wantsBookingJson($request)) {
+            return response()->json([
+                'ok' => true,
+                'status' => 'abandoned',
+                'fresh_search' => true,
+                'previous_search_id' => $previousSearchId !== '' ? $previousSearchId : null,
+                'results_url' => $resultsUrl,
+                'preserved_search' => $preserved,
+            ]);
+        }
+
+        return redirect()->to($resultsUrl);
+    }
+
+    /**
+     * Server-authoritative checkout consent evidence (never trust client legal version strings).
+     *
+     * @return array{accepted: bool, terms_version: string, privacy_version: string, accepted_at: string, booking_session_association?: string}
+     */
+    protected function checkoutTermsAcceptanceRecord(string $searchId, string $selectedOfferId, int|string|null $holdSessionId = null): array
+    {
+        $record = [
+            'accepted' => true,
+            'terms_version' => (string) config('ota_checkout_consent.terms_version'),
+            'privacy_version' => (string) config('ota_checkout_consent.privacy_version'),
+            'accepted_at' => now()->toIso8601String(),
+        ];
+
+        if ($holdSessionId !== null) {
+            $record['booking_session_association'] = substr(
+                hash('sha256', $searchId.'|'.$selectedOfferId.'|'.$holdSessionId),
+                0,
+                32,
+            );
+        }
+
+        return $record;
+    }
+
+    /**
+     * Change Flight is safe until a genuine supplier commercial state exists.
+     *
+     * @param  array<string, mixed>  $draft
+     */
+    protected function isPreHoldChangeFlightSafe(array $draft): bool
+    {
+        return ! $this->draftHasGenuineSupplierCommercialState($draft);
+    }
+
+    /**
+     * Genuine supplier commercial state (PNR / locator / confirmed remote hold), not local checkout.
+     *
+     * @param  array<string, mixed>  $draft
+     */
+    protected function draftHasGenuineSupplierCommercialState(array $draft): bool
+    {
+        $protection = is_array($draft['checkout_protection'] ?? null) ? $draft['checkout_protection'] : [];
+        $holdStatus = strtolower(trim((string) ($protection['hold_status'] ?? $draft['supplier_hold_status'] ?? '')));
+
+        if (in_array($holdStatus, ['held', 'confirmed', 'booked', 'ticketed', 'reserved'], true)) {
+            return true;
+        }
+
+        if ((bool) ($protection['supplier_hold_success'] ?? $draft['supplier_hold_success'] ?? false) === true) {
+            return true;
+        }
+
+        foreach ([
+            $draft['supplier_hold_pnr'] ?? null,
+            $draft['supplier_pnr'] ?? null,
+            $draft['pnr'] ?? null,
+            $protection['supplier_hold_pnr'] ?? null,
+            $protection['pnr'] ?? null,
+            data_get($protection, 'supplier_hold.pnr'),
+            data_get($protection, 'validated_offer_snapshot.pnr'),
+        ] as $candidate) {
+            if (is_string($candidate) && trim($candidate) !== '') {
+                return true;
+            }
+        }
+
+        foreach ([
+            $draft['supplier_hold_reference'] ?? null,
+            $draft['supplier_reference'] ?? null,
+            $draft['supplier_locator'] ?? null,
+            $draft['locator'] ?? null,
+            $protection['supplier_hold_reference'] ?? null,
+            $protection['supplier_reference'] ?? null,
+            $protection['supplier_locator'] ?? null,
+            $protection['locator'] ?? null,
+            data_get($protection, 'supplier_hold.supplier_reference'),
+        ] as $candidate) {
+            if (is_string($candidate) && trim($candidate) !== '') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function review(Request $request): View|RedirectResponse|JsonResponse

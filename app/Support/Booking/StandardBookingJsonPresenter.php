@@ -100,6 +100,19 @@ class StandardBookingJsonPresenter
             'validation_alert' => $viewData['validationAlert'] ?? null,
             'fare_estimate_drift' => (bool) ($viewData['selectedFareEstimateDriftDetected'] ?? false),
             'complex_itinerary_notice' => (bool) ($viewData['complexItineraryNotice'] ?? false),
+            'consent' => [
+                'terms_version' => (string) ($viewData['checkoutTermsVersion'] ?? config('ota_checkout_consent.terms_version')),
+                'privacy_version' => (string) ($viewData['checkoutPrivacyVersion'] ?? config('ota_checkout_consent.privacy_version')),
+                'terms_url' => '/terms',
+                'privacy_url' => '/privacy',
+                'required' => true,
+                'prechecked' => false,
+            ],
+            'change_flight' => [
+                'safe' => (bool) ($viewData['changeFlightSafe'] ?? true),
+                'results_url' => $viewData['resultsBackUrl'] ?? null,
+                'abandon_url' => '/booking/abandon-selected-offer',
+            ],
         ];
     }
 
