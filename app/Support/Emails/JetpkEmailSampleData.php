@@ -100,7 +100,7 @@ trait JetpkEmailSampleData
                     'preheaderText' => 'Use this code to verify your sign-in.',
                     'headline'      => 'Verify your sign-in',
                     'introText'     => 'Use the one-time code below to continue.',
-                    'security'      => ['otp' => '482913', 'expiry_minutes' => 10, 'context' => 'Web sign-in'],
+                    'security'      => ['otp' => '482913', 'expiry_minutes' => 10],
                 ]);
 
             case 'sign_in_success':

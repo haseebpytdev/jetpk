@@ -48,5 +48,11 @@ class LoginOtpMailRenderedMimeCanonicalTest extends TestCase
             $html
         );
         $this->assertStringContainsString('654321', $html);
+        $this->assertStringContainsString('Verify your sign-in', $html);
+        $this->assertStringContainsString('Your verification code', $html);
+        $this->assertStringContainsString('Keep this code private', $html);
+        $this->assertStringNotContainsString('Request context', $html);
+        $this->assertStringNotContainsString('Web sign-in', $html);
+        $this->assertStringNotContainsString('Request Context', $html);
     }
 }

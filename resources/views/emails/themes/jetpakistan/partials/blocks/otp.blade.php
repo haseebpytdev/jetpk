@@ -6,7 +6,6 @@
     $bgSoft = $brand['background_color'] ?? '#eef6f9';
     $code = $sec['otp'] ?? ($otpCode ?? null);
     $expiry = $sec['expiry_minutes'] ?? ($otpExpiryMinutes ?? null);
-    $context = $sec['context'] ?? null;
 @endphp
 
 @if(!empty($code))
@@ -23,10 +22,4 @@
     </table>
 @else
     @include('emails.themes.jetpakistan.partials.alert-box', ['type' => 'warning', 'title' => 'Code not available', 'message' => 'Your verification code could not be displayed. Please request a new code.'])
-@endif
-
-@if(!empty($context))
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 8px 0;">
-        @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Request context', 'value' => $context, 'emailBrand' => $brand])
-    </table>
 @endif

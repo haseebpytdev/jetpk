@@ -75,8 +75,8 @@ function inspectMetrics(page) {
       return { clipped: r.right > vw + 1 || r.left < -1 };
     });
 
-    const hasStackedRequestContext =
-      /Request context/i.test(text) && /Web sign-in/i.test(text);
+    const hasRequestContext =
+      /Request context/i.test(text) || /Web sign-in/i.test(text);
 
     return {
       overflowX,
@@ -85,7 +85,7 @@ function inspectMetrics(page) {
       brokenTables: tables.filter((t) => t.clipped).length,
       narrowValueColumn,
       rightEdgeSqueeze,
-      hasStackedRequestContext,
+      hasRequestContext,
       hasNowrap: !!body.innerHTML.includes("white-space:nowrap"),
       hasTwoTdRightAlignPattern: /white-space:nowrap[\s\S]{0,200}align=\"right\"/i.test(body.innerHTML),
     };
@@ -157,7 +157,7 @@ const summary = {
   BROKEN_TABLES: results.reduce((n, r) => n + (r.brokenTables || 0), 0),
   NARROW_VALUE_COLUMN: results.reduce((n, r) => n + (r.narrowValueColumn || 0), 0),
   RIGHT_EDGE_SQUEEZE: results.reduce((n, r) => n + (r.rightEdgeSqueeze || 0), 0),
-  OTP_STACKED_REQUEST_CONTEXT: otpRows.every((r) => r.hasStackedRequestContext !== false) ? "PASS" : "FAIL",
+  OTP_NO_REQUEST_CONTEXT: otpRows.every((r) => !r.hasRequestContext) ? "PASS" : "FAIL",
   TWO_TD_NOWRAP_REGRESSION: results.some((r) => r.hasTwoTdRightAlignPattern) ? "FAIL" : "PASS",
   LONG_DATA_LAYOUT: results.filter((r) => r.file.includes("long-data")).every((r) => !r.overflowX && !r.narrowValueColumn)
     ? "PASS"

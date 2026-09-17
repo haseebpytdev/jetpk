@@ -14,16 +14,16 @@ class JetpkEmailInfoRowStackedLayoutTest extends TestCase
     public function test_info_row_is_single_full_width_stacked_cell(): void
     {
         $html = View::make('emails.themes.jetpakistan.partials.info-row', [
-            'label' => 'Request context',
-            'value' => 'Web sign-in',
+            'label' => 'Booking reference',
+            'value' => 'JP-VERY-LONG-REFERENCE-VALUE-FOR-WRAP',
             'emailBrand' => [
                 'text_color' => '#0f2435',
                 'muted_color' => '#64748b',
             ],
         ])->render();
 
-        $this->assertStringContainsString('Request context', $html);
-        $this->assertStringContainsString('Web sign-in', $html);
+        $this->assertStringContainsString('Booking reference', $html);
+        $this->assertStringContainsString('JP-VERY-LONG-REFERENCE-VALUE-FOR-WRAP', $html);
         $this->assertStringContainsString('width="100%"', $html);
         $this->assertStringContainsString('word-break:break-word', $html);
         $this->assertStringNotContainsString('white-space:nowrap', $html);

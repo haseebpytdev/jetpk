@@ -100,7 +100,6 @@ class AuthEmailRenderer
                     'security' => [
                         'otp' => $otpCode,
                         'expiry_minutes' => $expiryMinutes,
-                        'context' => 'Web sign-in',
                     ],
                     'otpCode' => $otpCode,
                     'otpExpiryMinutes' => $expiryMinutes,

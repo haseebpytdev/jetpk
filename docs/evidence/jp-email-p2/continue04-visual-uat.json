@@ -11,7 +11,7 @@
   "BROKEN_TABLES": 0,
   "NARROW_VALUE_COLUMN": 0,
   "RIGHT_EDGE_SQUEEZE": 0,
-  "OTP_STACKED_REQUEST_CONTEXT": "PASS",
+  "OTP_NO_REQUEST_CONTEXT": "PASS",
   "TWO_TD_NOWRAP_REGRESSION": "PASS",
   "LONG_DATA_LAYOUT": "PASS",
   "results": [
@@ -25,7 +25,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": true,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -39,7 +39,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": true,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -53,7 +53,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": true,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -67,7 +67,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": true,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -81,7 +81,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": true,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -95,7 +95,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -109,7 +109,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -123,7 +123,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -137,7 +137,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -151,7 +151,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -165,7 +165,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -179,7 +179,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -193,7 +193,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -207,7 +207,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -221,7 +221,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -235,7 +235,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -249,7 +249,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -263,7 +263,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -277,7 +277,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -291,7 +291,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -305,7 +305,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -319,7 +319,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -333,7 +333,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -347,7 +347,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -361,7 +361,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -375,7 +375,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -389,7 +389,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -403,7 +403,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -417,7 +417,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -431,7 +431,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -445,7 +445,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -459,7 +459,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -473,7 +473,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -487,7 +487,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     },
@@ -501,7 +501,7 @@
       "brokenTables": 0,
       "narrowValueColumn": 0,
       "rightEdgeSqueeze": 0,
-      "hasStackedRequestContext": false,
+      "hasRequestContext": false,
       "hasNowrap": false,
       "hasTwoTdRightAlignPattern": false
     }
