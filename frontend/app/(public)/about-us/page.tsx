@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { AboutPageContent, PublicPageService, publicSeoToMetadata } from "@/features/public-content";
 
+export const revalidate = 300;
+
 export async function generateMetadata(): Promise<Metadata> {
   const page = await PublicPageService.getAboutPage();
   return publicSeoToMetadata(page.seo, "/about-us");

@@ -8,6 +8,9 @@ import {
   publicSeoToMetadata,
 } from "@/features/public-content";
 
+/** Soft-nav ISR: keep CMS support payload warm for CLIENT_SOFT transitions. */
+export const revalidate = 300;
+
 export async function generateMetadata(): Promise<Metadata> {
   const content = await SupportContentService.getSupportPage();
   return publicSeoToMetadata(content.seo, "/support");

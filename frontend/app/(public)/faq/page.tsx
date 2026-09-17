@@ -4,6 +4,8 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero, publicSeoToMetadata } from "@/features/public-content";
 
+export const revalidate = 300;
+
 export async function generateMetadata(): Promise<Metadata> {
   const page = await FaqService.getFaqPage();
   return publicSeoToMetadata(page.seo, "/faq");
