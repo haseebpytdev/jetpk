@@ -104,7 +104,7 @@ export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentR
     try {
       const parsed = await scanDocumentClientSide(source, {
         signal: controller.signal,
-        timeoutMs: 45_000,
+        timeoutMs: 90_000,
         onProgress: ({ status, progress }) => {
           setProgressText(progressLabel(status, progress));
         },

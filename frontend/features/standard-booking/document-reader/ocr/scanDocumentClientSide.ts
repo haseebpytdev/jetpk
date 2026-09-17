@@ -13,7 +13,8 @@ export type DocumentScanOptions = {
   onProgress?: (progress: { status: string; progress: number }) => void;
 };
 
-const DEFAULT_TIMEOUT_MS = 45_000;
+/** First OCR load includes ~10MB eng.traineddata; 45s was too tight after worker bootstrap. */
+const DEFAULT_TIMEOUT_MS = 90_000;
 /** Bound worker.terminate so a hung worker cannot keep the UI in Processing. */
 export const OCR_TERMINATE_TIMEOUT_MS = 2_000;
 const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
