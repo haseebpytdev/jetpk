@@ -367,8 +367,8 @@ export function useRevalidation() {
 
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
-      // Await prime up to 2s so sessionStorage usually has JSON before nav.
-      await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2000 });
+      // Short prime race: long waits were counted in TRAVELER APP and pushed P50~1.8s.
+      await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 500 });
       persistTimingForContinuity();
       releaseImageSlots();
 
