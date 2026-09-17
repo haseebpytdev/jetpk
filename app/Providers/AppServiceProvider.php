@@ -60,11 +60,13 @@ use App\Support\Branding\PlatformBrandingResolver;
 use App\Support\Branding\PublicAgencyContactResolver;
 use App\Support\Branding\SafeBrandingResolver;
 use App\Support\Ui\UiVersionResolver;
+use App\Listeners\LogOutboundMailAccepted;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -97,6 +99,7 @@ class AppServiceProvider extends ServiceProvider
         PlatformBrandingResolver::applyRuntimeConfig();
 
         Event::listen(Registered::class, SendEmailVerificationNotification::class);
+        Event::listen(MessageSent::class, LogOutboundMailAccepted::class);
 
         RateLimiter::for('lookup-booking', fn (Request $request): Limit => Limit::perMinute(20)->by($request->ip()));
         RateLimiter::for('guest-token', fn (Request $request): Limit => Limit::perMinute(15)->by($request->ip()));

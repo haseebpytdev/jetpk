@@ -27,6 +27,22 @@ final class LoginOtpMailDiagnostics
         ];
     }
 
+    public static function maskEmail(string $email): string
+    {
+        $email = trim($email);
+        if ($email === '' || ! str_contains($email, '@')) {
+            return '—';
+        }
+
+        [$local, $domain] = explode('@', $email, 2);
+        $local = (string) $local;
+        if (strlen($local) <= 2) {
+            return substr($local, 0, 1).'*@'.$domain;
+        }
+
+        return substr($local, 0, 2).str_repeat('*', max(1, strlen($local) - 3)).substr($local, -1).'@'.$domain;
+    }
+
     public static function logFailure(
         Throwable $exception,
         int $userId,

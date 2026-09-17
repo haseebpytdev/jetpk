@@ -125,6 +125,7 @@ class OtaJetpkOtpMailProbeCommand extends Command
         }
 
         try {
+            $sentUtc = now()->utc()->toIso8601String();
             Mail::to($email)->send(new LoginOtpMail(
                 user: $user,
                 brandName: $branding->companyName,
@@ -132,7 +133,10 @@ class OtaJetpkOtpMailProbeCommand extends Command
                 expiryMinutes: ClientLoginOtpGate::expiryMinutes(),
                 clientSlug: $clientSlug,
             ));
-            $this->info('Test OTP email dispatched via '.(string) config('mail.default').'.');
+            $this->info('Test OTP email handed to mailer '.(string) config('mail.default').' (dispatch ≠ inbox delivery).');
+            $this->line('SMTP_HANDOFF_UTC='.$sentUtc);
+            $this->line('SMTP_ACCEPTED=check laravel.log for "Outbound mail accepted by transport" Message-ID');
+            $this->line('GMAIL_OBSERVED=PENDING_EXTERNAL');
         } catch (\Throwable $e) {
             $this->error('Send failed: '.$e::class);
             LoginOtpMailDiagnostics::logFailure($e, $user->id, $clientSlug, $this->maskEmail($email), 'probe_send');
