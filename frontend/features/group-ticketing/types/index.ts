@@ -14,6 +14,9 @@ export type GroupFacets = {
 export type GroupSearchFacetOption = {
   value: string;
   label: string;
+  inventory_count?: number;
+  image_url?: string | null;
+  subtitle?: string | null;
 };
 
 export type GroupSearchFacetsResponse = {
