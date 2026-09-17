@@ -1,3 +1,6 @@
+/**
+ * DATA→first useful card using in-app marks (__jpD2r*) with Playwright fallback.
+ */
 import { chromium } from "../../../../frontend/node_modules/playwright/index.mjs";
 import fs from "node:fs";
 
@@ -42,56 +45,52 @@ for (let i = 0; i < N; i++) {
     serviceWorkers: "block",
   });
   const page = await ctx.newPage();
-  await page.addInitScript(() => {
-    window.__jpD2R = { dataAt: null, cardAt: null };
-    const orig = Response.prototype.json;
-    Response.prototype.json = async function (...args) {
-      const data = await orig.apply(this, args);
-      try {
-        if (
-          window.__jpD2R.dataAt == null &&
-          this.url &&
-          /results\/data/i.test(this.url) &&
-          (data?.paired_options?.length || 0) > 0
-        ) {
-          window.__jpD2R.dataAt = performance.now();
-        }
-      } catch {}
-      return data;
-    };
-    const markCard = () => {
-      if (window.__jpD2R.cardAt != null) return;
-      if (document.querySelector('[data-testid="pair-return-card"]')) {
-        window.__jpD2R.cardAt = performance.now();
-      }
-    };
-    const mo = new MutationObserver(markCard);
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-    document.addEventListener("DOMContentLoaded", markCard);
+  let networkDataAt = null;
+  page.on("response", async (res) => {
+    if (!/results\/data/i.test(res.url())) return;
+    if (networkDataAt != null) return;
+    try {
+      const j = await res.json();
+      if ((j?.paired_options?.length || 0) > 0) networkDataAt = Date.now();
+    } catch {}
   });
   await page.goto(
     `${PROD}/flights/results?trip_type=round_trip&from=ISB&to=DXB&depart=${seedInfo.depart}&return_date=${seedInfo.ret}&adults=1&cabin=economy&view=pair&search_id=${seedInfo.sid}&sort=cheapest`,
     { waitUntil: "domcontentloaded", timeout: 120000 },
   );
-  await page.waitForFunction(() => {
-    return Boolean(window.__jpD2R?.cardAt != null && window.__jpD2R?.dataAt != null);
-  }, null, { timeout: 60000 });
-  const { cardAt, dataAt } = await page.evaluate(() => ({
-    cardAt: window.__jpD2R?.cardAt ?? null,
-    dataAt: window.__jpD2R?.dataAt ?? null,
-  }));
-  const ms = dataAt != null && cardAt != null ? Math.round(cardAt - dataAt) : null;
-  samples.push({ i, ms });
-  console.log("PURE", i + 1, ms);
+  await page.locator('[data-testid="pair-return-card"]').first().waitFor({ state: "attached", timeout: 60000 });
+  const cardAt = Date.now();
+  const marks = await page.evaluate(() => {
+    const w = window;
+    return {
+      dataReceivedAt: w.__jpD2rDataReceivedAt ?? null,
+      dataAt: w.__jpD2rDataAt ?? null,
+      cardAt: w.__jpD2rCardAt ?? null,
+      flushMs: w.__jpD2rFlushMs ?? null,
+    };
+  });
+  let ms = null;
+  let source = "network_fallback";
+  if (marks.dataReceivedAt != null && marks.cardAt != null) {
+    ms = Math.max(0, marks.cardAt - marks.dataReceivedAt);
+    source = "in_app_marks";
+  } else if (marks.flushMs != null) {
+    ms = marks.flushMs;
+    source = "flush_ms";
+  } else if (networkDataAt != null) {
+    ms = Math.max(0, cardAt - networkDataAt);
+    source = "playwright_network";
+  }
+  samples.push({ i, ms, source, marks, networkDataAt, cardAt });
+  console.log(`D2R ${i + 1}/${N} ms=${ms} source=${source}`);
   await ctx.close();
-  await new Promise((r) => setTimeout(r, 300));
 }
 await browser.close();
-const warm = samples.map((s) => s.ms).filter((n) => n != null && n >= 0);
+const vals = samples.map((s) => s.ms).filter(Number.isFinite);
 const report = {
   N: samples.length,
-  DATA_TO_RENDER_P50: pct(warm, 50),
-  DATA_TO_RENDER_P95: pct(warm, 95),
+  DATA_TO_RENDER_P50: pct(vals, 50),
+  DATA_TO_RENDER_P95: pct(vals, 95),
   samples,
 };
 fs.writeFileSync("data-to-render-pure.json", JSON.stringify(report, null, 2));

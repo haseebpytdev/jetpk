@@ -155,9 +155,25 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       };
       const sliced = firstPaintSlice();
       if (sliced) {
+        try {
+          performance.mark("jp-d2r-pre-flush");
+          (window as Window & { __jpD2rDataAt?: number }).__jpD2rDataAt = Date.now();
+        } catch {
+          /* ignore */
+        }
         flushSync(() => {
           setData(sliced);
         });
+        try {
+          performance.mark("jp-d2r-post-flush");
+          const w = window as Window & { __jpD2rCardAt?: number; __jpD2rFlushMs?: number };
+          w.__jpD2rCardAt = Date.now();
+          if (typeof w.__jpD2rDataAt === "number") {
+            w.__jpD2rFlushMs = w.__jpD2rCardAt - w.__jpD2rDataAt;
+          }
+        } catch {
+          /* ignore */
+        }
         // After paint: expand full inventory on the next frame (not microtask).
         requestAnimationFrame(() => {
           if (dataRef.current?.search_id === merged.search_id) {
@@ -274,6 +290,19 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       }
 
       const payload = response.data;
+      try {
+        if (typeof window !== "undefined" && countVisibleResults(dataRef.current) === 0) {
+          const n =
+            (payload.paired_options?.length ?? 0) ||
+            (payload.outbound_options?.length ?? 0) ||
+            (payload.offers?.length ?? 0);
+          if (n > 0) {
+            (window as Window & { __jpD2rDataReceivedAt?: number }).__jpD2rDataReceivedAt = Date.now();
+          }
+        }
+      } catch {
+        /* ignore */
+      }
       const pipeline = resolvePipelineStatus(payload);
       // Empty progressive polls: skip merge/setData churn while still searching.
       // Cadence + message updates remain; first non-empty poll applies normally.
