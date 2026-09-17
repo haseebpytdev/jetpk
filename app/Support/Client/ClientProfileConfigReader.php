@@ -244,7 +244,9 @@ final class ClientProfileConfigReader
 
         if ($settings === null) {
             return [
-                'company_name' => $agency->name,
+                'company_name' => \App\Support\Branding\BrandDisplayResolver::sanitizePublicCompanyName(
+                    (string) $agency->name,
+                ),
             ];
         }
 
@@ -265,7 +267,7 @@ final class ClientProfileConfigReader
         return [
             // JetPakistan public brand must never surface internal tenancy labels
             // like the legacy "Platform Owner" agency row name.
-            'company_name' => $this->sanitizePublicCompanyName(
+            'company_name' => \App\Support\Branding\BrandDisplayResolver::sanitizePublicCompanyName(
                 $this->firstNonEmpty($settings->display_name, $agency->name),
             ),
             'domain' => $domain !== '' ? $domain : null,
@@ -356,32 +358,4 @@ final class ClientProfileConfigReader
         return '';
     }
 
-    /**
-     * Reject known internal/tenancy placeholder labels on the JetPakistan public surface.
-     */
-    private function sanitizePublicCompanyName(string $name): string
-    {
-        $trimmed = trim($name);
-        if ($trimmed === '') {
-            return 'JetPakistan';
-        }
-
-        $blocked = [
-            'platform owner',
-            'asif travels',
-            'master ota',
-            'parwaaz',
-            'yoursdomain',
-            'yd travel',
-        ];
-
-        $lower = strtolower($trimmed);
-        foreach ($blocked as $needle) {
-            if ($lower === $needle || str_contains($lower, $needle)) {
-                return 'JetPakistan';
-            }
-        }
-
-        return $trimmed;
-    }
 }

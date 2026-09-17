@@ -17,14 +17,14 @@ class BrandDisplayResolver
         if ($user?->isAgentPortalUser()) {
             $partner = trim($user->agentDisplayAgencyName());
             if ($partner !== '') {
-                return $partner;
+                return self::sanitizePublicCompanyName($partner);
             }
         }
 
         if ($settings !== null) {
             $name = trim((string) ($settings->display_name ?? ''));
             if ($name !== '') {
-                return $name;
+                return self::sanitizePublicCompanyName($name);
             }
         }
 
@@ -32,10 +32,39 @@ class BrandDisplayResolver
         $brand = config('ota-brand', []);
         $name = trim((string) ($client['agency_name'] ?? $brand['product_name'] ?? $brand['name'] ?? ''));
         if ($name !== '') {
-            return $name;
+            return self::sanitizePublicCompanyName($name);
         }
 
-        return trim((string) config('app.name', 'Travel'));
+        return self::sanitizePublicCompanyName(trim((string) config('app.name', 'Travel')));
+    }
+
+    /**
+     * Reject known internal/tenancy placeholder labels on JetPakistan public surfaces.
+     */
+    public static function sanitizePublicCompanyName(string $name): string
+    {
+        $trimmed = trim($name);
+        if ($trimmed === '') {
+            return 'JetPakistan';
+        }
+
+        $blocked = [
+            'platform owner',
+            'asif travels',
+            'master ota',
+            'parwaaz',
+            'yoursdomain',
+            'yd travel',
+        ];
+
+        $lower = strtolower($trimmed);
+        foreach ($blocked as $needle) {
+            if ($lower === $needle || str_contains($lower, $needle)) {
+                return 'JetPakistan';
+            }
+        }
+
+        return $trimmed;
     }
 
     public static function pageTitle(string $section, ?string $brandName = null): string
