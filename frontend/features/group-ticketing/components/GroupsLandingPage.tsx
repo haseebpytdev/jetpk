@@ -52,7 +52,7 @@ export function GroupsLandingPage() {
   const [searching, setSearching] = useState(false);
   const [searchPhase, setSearchPhase] = useState<"idle" | "searching" | "seats" | "departures">("idle");
 
-  const airlineValues = useMemo(() => facets.airlines.map((item) => item.value), [facets.airlines]);
+  const airlineValues = useMemo(() => [] as string[], []);
   const sectorValues = useMemo(() => facets.sectors.map((item) => item.value), [facets.sectors]);
   const categoryValues = useMemo(() => facets.categories.map((item) => item.value), [facets.categories]);
   const popularSectors = useMemo(() => facets.sectors.slice(0, 6), [facets.sectors]);
@@ -188,7 +188,7 @@ export function GroupsLandingPage() {
             <SharedGroupSearch
               values={{ airline, sector, category, travelDate }}
               facetsState={facets.state}
-              airlines={facets.airlines}
+              airlines={[]}
               sectors={facets.sectors}
               categories={facets.categories}
               dateBounds={facets.dateBounds}
