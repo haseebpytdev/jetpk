@@ -1137,18 +1137,21 @@ class BookingController extends Controller
                 'total' => $adults + $children + $infants,
             ],
         );
-        try {
-            $tracePayload = CheckoutFareBreakdownPresenter::traceAgencyChargePayload(
-                is_array($offer) ? $offer : null,
-                $checkoutFareBreakdown,
-                (string) ($draft['search_id'] ?? $searchId),
-                $effectiveFlightId,
-            );
-            Log::info('checkout_agency_charge_trace_input', $tracePayload['input']);
-            Log::info('checkout_agency_charge_trace_resolved', $tracePayload['resolved']);
-            Log::info('checkout_agency_charge_trace_markup_source', $tracePayload['markup_source']);
-        } catch (\Throwable) {
-            // Non-critical checkout pricing diagnostics.
+        // Skip agency-charge diagnostic logging on JSON passengers (Traveler APP path).
+        if (! $this->wantsBookingJson($request)) {
+            try {
+                $tracePayload = CheckoutFareBreakdownPresenter::traceAgencyChargePayload(
+                    is_array($offer) ? $offer : null,
+                    $checkoutFareBreakdown,
+                    (string) ($draft['search_id'] ?? $searchId),
+                    $effectiveFlightId,
+                );
+                Log::info('checkout_agency_charge_trace_input', $tracePayload['input']);
+                Log::info('checkout_agency_charge_trace_resolved', $tracePayload['resolved']);
+                Log::info('checkout_agency_charge_trace_markup_source', $tracePayload['markup_source']);
+            } catch (\Throwable) {
+                // Non-critical checkout pricing diagnostics.
+            }
         }
 
         $viewData = [

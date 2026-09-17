@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { initFlightSearch } from "@/services/flight-search";
 import { fetchFlightResultsData } from "../services/flight-results-api";
 import type { ActiveResultsFilters, FlightResultsDataResponse, ResultsPageStatus } from "../types";
@@ -128,52 +129,43 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       const pipeline = resolvePipelineStatus(payload);
       let merged: FlightResultsDataResponse = payload;
       const previousVisible = countVisibleResults(dataRef.current);
-      setData((current) => {
-        merged = mode === "merge" ? mergeProgressiveResults(current, payload) : payload;
-        dataRef.current = merged;
-        // Progressive first paint: mount one usable card immediately, then
-        // commit the full page so DATA→first useful stays snappy.
-        if (
-          previousVisible === 0 &&
-          (merged.paired_options?.length ?? 0) > 1
-        ) {
-          return {
-            ...merged,
-            paired_options: (merged.paired_options ?? []).slice(0, 1),
-          };
+      const current = dataRef.current;
+      merged = mode === "merge" ? mergeProgressiveResults(current, payload) : payload;
+      dataRef.current = merged;
+
+      // Progressive first paint: flush one card to the browser before expanding
+      // the full list. queueMicrotask alone was batched with the expand and
+      // never painted the single-card intermediate (DATA→RENDER P95 ~1.1s).
+      const firstPaintSlice = (): FlightResultsDataResponse | null => {
+        if (previousVisible !== 0) return null;
+        if ((merged.paired_options?.length ?? 0) > 1) {
+          return { ...merged, paired_options: (merged.paired_options ?? []).slice(0, 1) };
+        }
+        if ((merged.outbound_options?.length ?? 0) > 1 && (merged.paired_options?.length ?? 0) === 0) {
+          return { ...merged, outbound_options: (merged.outbound_options ?? []).slice(0, 1) };
         }
         if (
-          previousVisible === 0 &&
-          (merged.outbound_options?.length ?? 0) > 1 &&
-          (merged.paired_options?.length ?? 0) === 0
-        ) {
-          return {
-            ...merged,
-            outbound_options: (merged.outbound_options ?? []).slice(0, 1),
-          };
-        }
-        if (
-          previousVisible === 0 &&
           (merged.offers?.length ?? 0) > 1 &&
           (merged.paired_options?.length ?? 0) === 0 &&
           (merged.outbound_options?.length ?? 0) === 0
         ) {
-          return {
-            ...merged,
-            offers: (merged.offers ?? []).slice(0, 1),
-          };
+          return { ...merged, offers: (merged.offers ?? []).slice(0, 1) };
         }
-        return merged;
-      });
-      if (
-        previousVisible === 0 &&
-        countVisibleResults(merged) > 1
-      ) {
-        queueMicrotask(() => {
-          if (dataRef.current === merged || dataRef.current?.search_id === merged.search_id) {
+        return null;
+      };
+      const sliced = firstPaintSlice();
+      if (sliced) {
+        flushSync(() => {
+          setData(sliced);
+        });
+        // After paint: expand full inventory on the next frame (not microtask).
+        requestAnimationFrame(() => {
+          if (dataRef.current?.search_id === merged.search_id) {
             setData(merged);
           }
         });
+      } else {
+        setData(merged);
       }
       const visible = countVisibleResults(merged);
       const nextStatus = mapPipelineToPageStatus(pipeline, merged);

@@ -5,21 +5,29 @@ import type {
   StandardPassengersContext,
   StandardPassengersSubmitResponse,
 } from "../types";
+import {
+  buildPassengersFetchQuery,
+  clearPassengersContextPrime,
+  hasPassengersHandoffQuery,
+  PASSENGERS_JSON_HEADERS,
+  passengersParamsFromHandoffUrl,
+  shouldFallbackAfterEarlyResult,
+  shouldReuseEarlyPrime,
+  writePassengersContextPrime,
+} from "../utils/passengers-fetch-query";
 
-const JSON_HEADERS = {
-  Accept: "application/json",
-  "X-Requested-With": "XMLHttpRequest",
-} as const;
+const JSON_HEADERS = PASSENGERS_JSON_HEADERS;
 
 function buildQuery(params: Record<string, string | undefined>): string {
-  const search = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== "") {
-      search.set(key, value);
-    }
-  });
-  search.set("format", "json");
-  return search.toString();
+  return buildPassengersFetchQuery(params);
+}
+
+function markTravelerBoot(key: string): void {
+  if (typeof window === "undefined") return;
+  window.__jpTravelerBoot = window.__jpTravelerBoot ?? { marks: {} };
+  if (window.__jpTravelerBoot.marks[key] == null) {
+    window.__jpTravelerBoot.marks[key] = performance.now();
+  }
 }
 
 async function standardFetch<T>(
@@ -61,12 +69,116 @@ async function standardFetch<T>(
   }
 }
 
+export function clearStandardPassengersPrime(expectedKey?: string): void {
+  if (expectedKey && passengersContextPrime && passengersContextPrime.key !== expectedKey) {
+    return;
+  }
+  passengersContextPrime = null;
+  if (typeof window === "undefined") return;
+  if (!expectedKey || window.__jpPassengersPrime?.key === expectedKey) {
+    window.__jpPassengersPrime = undefined;
+  }
+  clearPassengersContextPrime(expectedKey);
+}
+
+/** Dedupe in-flight passengers GET so shell priming and page mount share one request. */
+let passengersContextPrime:
+  | {
+      key: string;
+      promise: ReturnType<typeof standardFetch<StandardPassengersContext>>;
+    }
+  | null = null;
+
+type PassengersPrimeResult = ReturnType<typeof standardFetch<StandardPassengersContext>>;
+
+function missingHandoffResult(): Awaited<PassengersPrimeResult> {
+  return {
+    ok: false,
+    status: 404,
+    message: "Booking session is missing.",
+    data: { status: "missing_session" } as Partial<StandardPassengersContext>,
+  };
+}
+
+export function primeStandardPassengersContext(params: Record<string, string | undefined>) {
+  const key = buildQuery(params);
+  markTravelerBoot("PASSENGER_REQUEST_SCHEDULED");
+  if (!hasPassengersHandoffQuery(params)) {
+    return Promise.resolve(missingHandoffResult());
+  }
+  if (passengersContextPrime?.key === key) {
+    return passengersContextPrime.promise;
+  }
+  if (typeof window !== "undefined") {
+    const early = window.__jpPassengersPrime;
+    if (shouldReuseEarlyPrime(early?.key, key) && early?.promise) {
+      markTravelerBoot("REACT_FETCH_CONSUME");
+      const reused = early.promise.then((result) => {
+        if (shouldFallbackAfterEarlyResult(result as { ok?: boolean })) {
+          clearStandardPassengersPrime(key);
+          return standardFetch<StandardPassengersContext>(`/booking/passengers?${key}`);
+        }
+        return result as Awaited<PassengersPrimeResult>;
+      }) as PassengersPrimeResult;
+      passengersContextPrime = { key, promise: reused };
+      return reused;
+    }
+  }
+  markTravelerBoot("PASSENGER_FETCH_CALLED");
+  const promise = standardFetch<StandardPassengersContext>(`/booking/passengers?${key}`);
+  passengersContextPrime = { key, promise };
+  if (typeof window !== "undefined") {
+    window.__jpPassengersPrime = { key, promise, source: "react_prime" };
+  }
+  return promise;
+}
+
 export async function fetchStandardPassengersContext(
   params: Record<string, string | undefined>,
 ) {
-  return standardFetch<StandardPassengersContext>(
-    `/booking/passengers?${buildQuery(params)}`,
-  );
+  const key = buildQuery(params);
+  try {
+    const result = await primeStandardPassengersContext(params);
+    markTravelerBoot("REACT_FETCH_CONSUME");
+    return result;
+  } finally {
+    clearStandardPassengersPrime(key);
+  }
+}
+
+/**
+ * Fire passengers JSON before hard-nav assign and persist into sessionStorage so the
+ * Traveler document can hydrate without waiting for a cold XHR after unload.
+ */
+export async function primePassengersContextBeforeHardNav(
+  handoffUrl: string,
+  options?: { timeoutMs?: number },
+): Promise<boolean> {
+  if (typeof window === "undefined" || !handoffUrl) return false;
+  const params = passengersParamsFromHandoffUrl(handoffUrl);
+  if (!hasPassengersHandoffQuery(params)) return false;
+  const key = buildQuery(params);
+  const timeoutMs = options?.timeoutMs ?? 1500;
+
+  const run = (async () => {
+    const result = await primeStandardPassengersContext(params);
+    if (result.ok && result.data && (result.data as { ok?: boolean }).ok !== false) {
+      writePassengersContextPrime(key, result.data);
+      return true;
+    }
+    return false;
+  })();
+
+  try {
+    return await Promise.race([
+      run,
+      new Promise<boolean>((resolve) => {
+        window.setTimeout(() => resolve(false), timeoutMs);
+      }),
+    ]);
+  } catch {
+    return false;
+  }
 }
 
 export async function submitStandardPassengers(formData: FormData) {

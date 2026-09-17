@@ -22,6 +22,7 @@ import {
   resolvePassengerCheckoutHandoffUrl,
   warmPassengersHardNavDocument,
 } from "../utils/handoff";
+import { primePassengersContextBeforeHardNav } from "@/features/standard-booking/services/standard-booking-api";
 import {
   AUTHORITATIVE_REVALIDATION_FRESH_MS,
   BOOK_NOW_VALIDATION_SOURCE,
@@ -80,6 +81,8 @@ function stampPassengersUrlAuthority(url: string, source: PassengersUrlAuthority
   }
   // Start document warm immediately — hard assign cannot reuse in-memory primes.
   warmPassengersHardNavDocument(url);
+  // Overlap Laravel passengers JSON with remaining UI work / image release.
+  void primePassengersContextBeforeHardNav(url, { timeoutMs: 1500 });
 }
 
 export type RevalidationParams = {
@@ -364,8 +367,11 @@ export function useRevalidation() {
 
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
-      markBookNowTiming("T5_router_push", { nav: "hard_assign_image_release" });
-      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_image_release" });
+      // Await JSON prime (bounded) so Traveler can hydrate from sessionStorage after hard nav.
+      // Soft router.push remains forbidden — hangs under logo pool contention.
+      await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 1500 });
+      markBookNowTiming("T5_router_push", { nav: "hard_assign_after_json_prime" });
+      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_after_json_prime" });
       persistTimingForContinuity();
       releaseImageSlots();
       // Hard assign remains authoritative for passengers_url handoff (soft push raced

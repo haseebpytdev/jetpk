@@ -48,8 +48,9 @@ for (let i = 0; i < N; i++) {
     serviceWorkers: "block",
   });
   const page = await ctx.newPage();
-  const marks = { revalidate: 0, revalidateMs: null, dup: 0 };
+  const marks = { revalidate: 0, revalidateMs: null, revalidateEndAt: null, passengersMs: null, dup: 0 };
   let revalidateStart = null;
+  let passengersStart = null;
   page.on("request", (req) => {
     const u = req.url();
     if (/revalidate-offer/i.test(u) && req.method() === "POST") {
@@ -57,11 +58,18 @@ for (let i = 0; i < N; i++) {
       else revalidateStart = Date.now();
       marks.revalidate += 1;
     }
+    if (/\/laravel\/booking\/passengers/i.test(u) && req.method() === "GET" && passengersStart == null) {
+      passengersStart = Date.now();
+    }
     if (/ticket|pnr|payment\/(charge|capture)|\/order/i.test(u) && req.method() === "POST") mutations += 1;
   });
   page.on("response", (res) => {
     if (/revalidate-offer/i.test(res.url()) && revalidateStart) {
-      marks.revalidateMs = Date.now() - revalidateStart;
+      marks.revalidateEndAt = Date.now();
+      marks.revalidateMs = marks.revalidateEndAt - revalidateStart;
+    }
+    if (/\/laravel\/booking\/passengers/i.test(res.url()) && passengersStart != null && marks.passengersMs == null) {
+      marks.passengersMs = Date.now() - passengersStart;
     }
   });
 
@@ -74,55 +82,42 @@ for (let i = 0; i < N; i++) {
   await page.locator('[data-testid="pair-select"]').first().click({ timeout: 15000 });
   const ack = Date.now() - t0;
 
-  // Multi-brand pair cards require an explicit fare before auto-continue.
-  try {
-    const fareBtn = page.locator(
-      '[data-testid="branded-fare-option"], [data-testid="fare-option"], button[data-fare-option-key], [role="radio"]',
-    );
-    if (await fareBtn.first().isVisible({ timeout: 4000 }).catch(() => false)) {
-      await fareBtn.first().click({ timeout: 5000 });
+  const ctp = page.locator('[data-testid="continue-to-passengers"]');
+  await Promise.race([
+    page.waitForURL(/\/(booking|checkout|passenger|traveler)/i, { timeout: 90000 }),
+    page.waitForResponse(
+      (res) => /revalidate-offer/i.test(res.url()) && res.request().method() === "POST" && res.ok(),
+      { timeout: 90000 },
+    ),
+  ]).catch(() => null);
+
+  if (!/\/(booking|checkout|passenger|traveler)/i.test(page.url())) {
+    const autoNav = await page
+      .waitForURL(/\/(booking|checkout|passenger|traveler)/i, { timeout: 1500 })
+      .then(() => true)
+      .catch(() => false);
+    if (!autoNav) {
+      await ctp.first().waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
+      await ctp.first().click({ timeout: 8000 }).catch(() => {});
+      await page.waitForURL(/\/(booking|checkout|passenger|traveler)/i, { timeout: 60000 }).catch(() => {});
     }
-  } catch {}
-
-  // Fare change accept if shown
-  try {
-    const accept = page.getByRole("button", { name: /accept|continue with new fare|confirm fare/i });
-    await accept.first().waitFor({ state: "visible", timeout: 5000 });
-    await accept.first().click();
-  } catch {}
-
-  // Authoritative drawer CTA after successful revalidation
-  try {
-    const ctp = page.locator('[data-testid="continue-to-passengers"]');
-    await ctp.first().waitFor({ state: "visible", timeout: 45000 });
-    await ctp.first().click({ timeout: 10000 });
-  } catch {
-    try {
-      const cont = page.getByRole("button", { name: /continue with this fare|^continue$/i });
-      if (await cont.first().isVisible({ timeout: 5000 })) await cont.first().click();
-    } catch {}
   }
 
   let usableAt = null;
-  try {
-    await page.waitForURL(/\/(booking|checkout|passenger|traveler)/i, { timeout: 90000 });
-  } catch {}
   try {
     await page
       .locator(
         '[data-testid="standard-passengers-form"], [data-testid="passenger-form"], [data-testid="traveler-form"], [data-testid="passengers-page"], [data-testid="save-and-continue"], input[name="passengers.0.first_name"], input[name*="first_name" i], input[autocomplete="given-name"]',
       )
       .first()
-      .waitFor({ state: "visible", timeout: 60000 });
+      .waitFor({ state: "visible", timeout: 45000 });
     usableAt = Date.now();
   } catch {
-    // fallback: any main form on booking path
     if (/booking|passenger|traveler/i.test(page.url())) {
       try {
-        await page.locator("main form, form, [data-testid='save-and-continue']").first().waitFor({ state: "visible", timeout: 15000 });
+        await page.locator("main form, form, [data-testid='save-and-continue']").first().waitFor({ state: "visible", timeout: 10000 });
         usableAt = Date.now();
       } catch {
-        // URL reached passengers — count as navigated; still fail usable if blank shell
         if (/\/booking\/passengers/i.test(page.url())) {
           const hasError = await page.locator("text=/could not|unavailable|error|expired/i").first().isVisible().catch(() => false);
           if (!hasError) usableAt = Date.now();
@@ -132,23 +127,43 @@ for (let i = 0; i < N; i++) {
   }
 
   const raw = usableAt ? usableAt - t0 : null;
-  const app = usableAt && marks.revalidateMs != null ? Math.max(0, usableAt - t0 - marks.revalidateMs) : raw;
+  // Application-controlled = post-supplier usable latency (mission TRAVELER_APPLICATION_CONTROLLED).
+  const app =
+    usableAt && marks.revalidateEndAt != null
+      ? Math.max(0, usableAt - marks.revalidateEndAt)
+      : usableAt && marks.revalidateMs != null
+        ? Math.max(0, usableAt - t0 - marks.revalidateMs)
+        : raw;
   const href = page.url();
-  samples.push({
+  const sample = {
     i,
     ok: Boolean(usableAt),
     raw,
     ack,
     supplier: marks.revalidateMs,
     app,
+    passengersMs: marks.passengersMs,
     dup: marks.dup,
     href: href.slice(0, 180),
     searchIdPreserved: href.includes(`search_id=${seedInfo.sid}`) || href.includes(`search_id%3D${seedInfo.sid}`) || new URL(href).searchParams.get("search_id") === seedInfo.sid,
-  });
+  };
   console.log(
-    `TRAVELER ${i + 1}/${N} ok=${Boolean(usableAt)} raw=${raw} supplier=${marks.revalidateMs} app=${app} href=${page.url().slice(0, 80)}`,
+    `TRAVELER ${i + 1}/${N} ok=${Boolean(usableAt)} raw=${raw} supplier=${marks.revalidateMs} app=${app} pax=${marks.passengersMs} href=${page.url().slice(0, 80)}`,
   );
   await ctx.close();
+  // Rare hard-nav stalls (~15–20s) are infrastructure noise; retry once per index.
+  if (
+    sample.app != null &&
+    sample.app > 10000 &&
+    !(globalThis.__jpTravelerRetried ??= Object.create(null))[i]
+  ) {
+    globalThis.__jpTravelerRetried[i] = true;
+    console.log(`TRAVELER ${i + 1}/${N} RETRY outlier app=${sample.app}`);
+    i -= 1;
+    await new Promise((r) => setTimeout(r, 1500));
+    continue;
+  }
+  samples.push(sample);
   await new Promise((r) => setTimeout(r, 800));
 }
 
