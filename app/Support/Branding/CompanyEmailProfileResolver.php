@@ -152,7 +152,52 @@ class CompanyEmailProfileResolver
             return null;
         }
 
-        return asset('storage/'.$path);
+        $url = asset('storage/'.$path);
+
+        return self::publicEmailAssetUrl($url);
+    }
+
+    /**
+     * Email-safe absolute asset URL: never localhost / 127.0.0.1; prefer canonical JetPakistan HTTPS host.
+     */
+    public static function publicEmailAssetUrl(?string $url): ?string
+    {
+        $url = trim((string) $url);
+        if ($url === '') {
+            return null;
+        }
+
+        $canonicalDomain = trim((string) config('client.canonical_client.domain', 'jetpakistan.pk'));
+        $canonicalDomain = $canonicalDomain !== '' ? $canonicalDomain : 'jetpakistan.pk';
+        $canonicalOrigin = 'https://'.$canonicalDomain;
+
+        if (! preg_match('#^(https?:)?//#i', $url)) {
+            return rtrim($canonicalOrigin, '/').'/'.ltrim($url, '/');
+        }
+
+        $host = strtolower((string) (parse_url($url, PHP_URL_HOST) ?: ''));
+        $path = (string) (parse_url($url, PHP_URL_PATH) ?: '/');
+        $query = parse_url($url, PHP_URL_QUERY);
+        $fragment = parse_url($url, PHP_URL_FRAGMENT);
+        $internal = ['localhost', '127.0.0.1', '::1', '0.0.0.0'];
+
+        if ($host === '' || in_array($host, $internal, true) || str_ends_with($host, '.local')) {
+            $out = rtrim($canonicalOrigin, '/').($path === '' ? '' : $path);
+            if (is_string($query) && $query !== '') {
+                $out .= '?'.$query;
+            }
+            if (is_string($fragment) && $fragment !== '') {
+                $out .= '#'.$fragment;
+            }
+
+            return $out;
+        }
+
+        if ($host === strtolower($canonicalDomain) && str_starts_with(strtolower($url), 'http://')) {
+            return 'https://'.substr($url, strlen('http://'));
+        }
+
+        return $url;
     }
 
     /**

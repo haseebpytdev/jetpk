@@ -73,9 +73,12 @@ class JetpkEmailBrandingResolver
         $brand['home_url'] = static::canonicalizePublicUrl($brand['home_url'] ?? null) ?? $brand['home_url'];
         $brand['manage_url'] = static::canonicalizeManageUrl($brand['manage_url'] ?? null);
 
-        // Normalise logo to an absolute URL (or null for text fallback).
-        $brand['logo_url'] = static::absoluteUrl($brand['logo_url'] ?? null);
-        $brand['home_url'] = static::absoluteUrl($brand['home_url'] ?? null) ?? ($brand['home_url'] ?? null);
+        // Normalise logo/home to absolute public HTTPS URLs (never APP_URL/localhost).
+        $brand['logo_url'] = static::publicAssetUrl($brand['logo_url'] ?? null);
+        $brand['home_url'] = static::canonicalizePublicUrl(
+            static::absoluteUrl($brand['home_url'] ?? null) ?? ($brand['home_url'] ?? null)
+        ) ?? static::canonicalPublicHomeUrl();
+        $brand['manage_url'] = static::canonicalizeManageUrl($brand['manage_url'] ?? null);
 
         // Guarantee the client slug is always JetPK for these views.
         $brand['client_slug'] = self::CLIENT_SLUG;
@@ -211,6 +214,14 @@ class JetpkEmailBrandingResolver
 
         $path = parse_url($url, PHP_URL_PATH);
         $path = is_string($path) && $path !== '' ? $path : '/';
+        $host = strtolower((string) (parse_url($url, PHP_URL_HOST) ?: ''));
+
+        // Internal / CLI hosts must never appear in outbound email.
+        if (in_array($host, ['localhost', '127.0.0.1', '::1', '0.0.0.0'], true) || str_ends_with($host, '.local')) {
+            $path = preg_replace('#^/jetpk(?=/|$)#i', '', $path) ?: '/';
+
+            return rtrim($canonical, '/').($path === '/' ? '' : $path);
+        }
 
         // Forbidden / stale public hosts → canonical JetPakistan host + unprefixed path.
         if (preg_match('#https?://(www\.)?jetpakistan\.com(/|$)#i', $url)) {
@@ -265,15 +276,51 @@ class JetpkEmailBrandingResolver
             return null;
         }
 
-        if (function_exists('asset')) {
-            try {
-                return asset($relative);
-            } catch (\Throwable $e) {
-                return static::absoluteUrl($relative);
-            }
+        // Email MIME must use the public HTTPS host — never asset()/APP_URL (often localhost on CLI).
+        return rtrim(static::canonicalPublicHomeUrl(), '/').'/'.ltrim($relative, '/');
+    }
+
+    /**
+     * Absolute URL for email-embedded assets. Rewrites localhost / internal hosts
+     * to the canonical JetPakistan public origin.
+     */
+    protected static function publicAssetUrl(?string $value): ?string
+    {
+        $value = trim((string) $value);
+        if ($value === '') {
+            return null;
         }
 
-        return static::absoluteUrl($relative);
+        if (! preg_match('#^(https?:)?//#i', $value)) {
+            return rtrim(static::canonicalPublicHomeUrl(), '/').'/'.ltrim($value, '/');
+        }
+
+        $host = strtolower((string) (parse_url($value, PHP_URL_HOST) ?: ''));
+        $path = (string) (parse_url($value, PHP_URL_PATH) ?: '/');
+        $query = parse_url($value, PHP_URL_QUERY);
+        $fragment = parse_url($value, PHP_URL_FRAGMENT);
+
+        $canonicalHost = strtolower((string) parse_url(static::canonicalPublicHomeUrl(), PHP_URL_HOST));
+        $internalHosts = ['localhost', '127.0.0.1', '::1', '0.0.0.0'];
+
+        if ($host === '' || in_array($host, $internalHosts, true) || ($canonicalHost !== '' && $host !== $canonicalHost && str_ends_with($host, '.local'))) {
+            $out = rtrim(static::canonicalPublicHomeUrl(), '/').($path === '' ? '' : $path);
+            if (is_string($query) && $query !== '') {
+                $out .= '?'.$query;
+            }
+            if (is_string($fragment) && $fragment !== '') {
+                $out .= '#'.$fragment;
+            }
+
+            return $out;
+        }
+
+        // Force https for public JetPakistan assets in email.
+        if ($canonicalHost !== '' && $host === $canonicalHost && str_starts_with(strtolower($value), 'http://')) {
+            return 'https://'.substr($value, strlen('http://'));
+        }
+
+        return $value;
     }
 
     protected static function previewHomeUrl(?string $previewPath): ?string
@@ -365,27 +412,14 @@ class JetpkEmailBrandingResolver
             return null;
         }
 
-        // Already absolute (http/https or protocol-relative).
+        // Already absolute — still rewrite localhost / internal hosts for email safety.
         if (preg_match('#^(https?:)?//#i', $value)) {
-            return $value;
+            return static::publicAssetUrl($value) ?? $value;
         }
 
         $path = '/' . ltrim($value, '/');
 
-        if (function_exists('url')) {
-            try {
-                return url($path);
-            } catch (\Throwable $e) {
-                // fall through to config-based build
-            }
-        }
-
-        $base = null;
-        if (function_exists('config')) {
-            $base = config('app.url');
-        }
-        $base = $base ?: ('https://'.trim((string) config('client.canonical_client.domain', 'jetpakistan.pk')));
-
-        return rtrim($base, '/') . $path;
+        // Prefer canonical public origin over APP_URL (CLI/queue often uses localhost).
+        return rtrim(static::canonicalPublicHomeUrl(), '/') . $path;
     }
 }
