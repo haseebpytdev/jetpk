@@ -67,7 +67,7 @@ class LogOutboundMailAcceptedTest extends TestCase
             clientSlug: 'jetpk',
         ));
 
-        Log::shouldHaveReceived('info')
+        Log::shouldHaveReceived('warning')
             ->withArgs(function (string $message, array $context): bool {
                 if ($message !== 'Outbound mail accepted by transport.') {
                     return false;

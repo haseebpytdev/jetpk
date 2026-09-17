@@ -37,7 +37,8 @@ final class LogOutboundMailAccepted
             break;
         }
 
-        Log::info('Outbound mail accepted by transport.', [
+        // Production LOG_LEVEL is often "warning"; use warning so SMTP acceptance is observable.
+        Log::warning('Outbound mail accepted by transport.', [
             'mailer' => (string) config('mail.default', ''),
             'message_id' => $messageId !== '' ? $messageId : null,
             'subject' => $subject !== '' ? $subject : null,
