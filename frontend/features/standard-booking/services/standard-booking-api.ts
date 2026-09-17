@@ -149,6 +149,7 @@ export async function fetchStandardPassengersContext(
 /**
  * Fire passengers JSON before hard-nav assign and persist into sessionStorage so the
  * Traveler document can hydrate without waiting for a cold XHR after unload.
+ * Always settles (abort on timeout) so the PHP session lock is not left held across assign.
  */
 export async function primePassengersContextBeforeHardNav(
   handoffUrl: string,
@@ -158,26 +159,36 @@ export async function primePassengersContextBeforeHardNav(
   const params = passengersParamsFromHandoffUrl(handoffUrl);
   if (!hasPassengersHandoffQuery(params)) return false;
   const key = buildQuery(params);
-  const timeoutMs = options?.timeoutMs ?? 1500;
-
-  const run = (async () => {
-    const result = await primeStandardPassengersContext(params);
-    if (result.ok && result.data && (result.data as { ok?: boolean }).ok !== false) {
-      writePassengersContextPrime(key, result.data);
-      return true;
-    }
-    return false;
-  })();
+  const timeoutMs = options?.timeoutMs ?? 2500;
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    return await Promise.race([
-      run,
-      new Promise<boolean>((resolve) => {
-        window.setTimeout(() => resolve(false), timeoutMs);
-      }),
-    ]);
+    const response = await fetch(laravelApiPath(`/booking/passengers?${key}`), {
+      credentials: "include",
+      headers: { ...JSON_HEADERS },
+      signal: controller.signal,
+    });
+    const contentType = response.headers.get("content-type") ?? "";
+    const payload = contentType.includes("application/json") ? await response.json() : null;
+    if (!response.ok || !payload || (payload as { ok?: boolean }).ok !== true) {
+      return false;
+    }
+    writePassengersContextPrime(key, payload);
+    passengersContextPrime = {
+      key,
+      promise: Promise.resolve({ ok: true as const, data: payload as StandardPassengersContext }),
+    };
+    window.__jpPassengersPrime = {
+      key,
+      promise: Promise.resolve({ ok: true, data: payload }),
+      source: "pre_nav_prime",
+    };
+    return true;
   } catch {
     return false;
+  } finally {
+    window.clearTimeout(timer);
   }
 }
 

@@ -81,8 +81,8 @@ function stampPassengersUrlAuthority(url: string, source: PassengersUrlAuthority
   }
   // Start document warm immediately — hard assign cannot reuse in-memory primes.
   warmPassengersHardNavDocument(url);
-  // Overlap Laravel passengers JSON with remaining UI work / image release.
-  void primePassengersContextBeforeHardNav(url, { timeoutMs: 1500 });
+  // Passengers JSON prime is awaited once in navigateHandoff (not here) to avoid
+  // overlapping same-session GETs that contend on the PHP session lock.
 }
 
 export type RevalidationParams = {
@@ -367,13 +367,19 @@ export function useRevalidation() {
 
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
-      // Await JSON prime (bounded) so Traveler can hydrate from sessionStorage after hard nav.
-      // Soft router.push remains forbidden — hangs under logo pool contention.
-      await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 1500 });
+      // Await JSON prime (abort-bounded) so Traveler hydrates from sessionStorage and
+      // the PHP session lock is released before hard-nav starts a second GET.
+      await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2500 });
       markBookNowTiming("T5_router_push", { nav: "hard_assign_after_json_prime" });
       markBookNowTiming("T7_passenger_route", { nav: "hard_assign_after_json_prime" });
       persistTimingForContinuity();
       releaseImageSlots();
+      // Abort leftover logo/pool work so hard-nav is not starved (~20s stalls observed).
+      try {
+        window.stop();
+      } catch {
+        /* ignore */
+      }
       // Hard assign remains authoritative for passengers_url handoff (soft push raced
       // fallback assign and produced hangs / destroyed contexts in 01R smoke).
       try {

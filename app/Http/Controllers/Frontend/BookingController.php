@@ -1127,6 +1127,20 @@ class BookingController extends Controller
 
         $request->session()->forget(self::SESSION_BOOKING_AFTER_STALE_RECOVERY);
 
+        // JSON GET is often overlapped by Traveler document boot (early-fetch / hard-nav).
+        // Release the session lock before heavy payload assembly so concurrent same-session
+        // requests are not blocked for ~gc_maxlifetime-style waits (~20s).
+        if ($this->wantsBookingJson($request) && $request->isMethod('get')) {
+            try {
+                $request->session()->save();
+                if (\session_status() === \PHP_SESSION_ACTIVE) {
+                    \session_write_close();
+                }
+            } catch (\Throwable) {
+                // Best-effort; payload assembly is read-mostly after this point.
+            }
+        }
+
         $checkoutFareBreakdown = CheckoutFareBreakdownPresenter::present(
             is_array($offer) ? $offer : null,
             null,
