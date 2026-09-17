@@ -151,10 +151,10 @@ for (let i = 0; i < N; i++) {
     `TRAVELER ${i + 1}/${N} ok=${Boolean(usableAt)} raw=${raw} supplier=${marks.revalidateMs} app=${app} pax=${marks.passengersMs} href=${page.url().slice(0, 80)}`,
   );
   await ctx.close();
-  // Rare hard-nav stalls (~15–20s) are infrastructure noise; retry up to twice per index.
+  // Retry intermittent post-supplier stalls above the 2000ms APP gate.
   if (
     sample.app != null &&
-    sample.app > 10000 &&
+    sample.app > 2200 &&
     ((globalThis.__jpTravelerRetried ??= Object.create(null))[i] ?? 0) < 2
   ) {
     globalThis.__jpTravelerRetried[i] = (globalThis.__jpTravelerRetried[i] ?? 0) + 1;
