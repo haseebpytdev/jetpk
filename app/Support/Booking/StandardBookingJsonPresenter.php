@@ -730,7 +730,7 @@ class StandardBookingJsonPresenter
             ->values()
             ->map(fn ($passenger): array => [
                 'passenger_type' => (string) $passenger->passenger_type,
-                'title' => (string) $passenger->title,
+                'title' => $this->sanitizePassengerLabel($passenger->title),
                 'first_name' => (string) $passenger->first_name,
                 'last_name' => (string) $passenger->last_name,
                 'gender' => (string) $passenger->gender,
@@ -741,6 +741,19 @@ class StandardBookingJsonPresenter
                 'national_id_masked' => $this->maskDocumentNumber((string) $passenger->national_id_number),
             ])
             ->all();
+    }
+
+    /**
+     * Prevent literal "null"/"undefined" strings (FormData null coercion) from leaking into review UI.
+     */
+    private function sanitizePassengerLabel(mixed $value): string
+    {
+        $text = trim((string) $value);
+        if ($text === '' || strcasecmp($text, 'null') === 0 || strcasecmp($text, 'undefined') === 0) {
+            return '';
+        }
+
+        return $text;
     }
 
     /**

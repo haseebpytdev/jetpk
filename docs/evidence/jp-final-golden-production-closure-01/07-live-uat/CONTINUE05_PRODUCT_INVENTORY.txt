@@ -1,0 +1,39 @@
+# CLOSURE-05 PRODUCT FEATURE INVENTORY (autodiscovery)
+
+SOURCE=repo routes + Next page trees + nav-config + PlatformModuleRegistry
+DATE=2026-09-17
+
+## Classification summary
+PUBLIC_HOME_FLIGHT_SEARCH=FEATURE_FLAGGED (public_flight_search)
+GROUPS=FEATURE_FLAGGED (public_umrah_groups) — LIVE PASS after token fix
+CHECKOUT=FEATURE_FLAGGED (customer_checkout)
+CUSTOMER_PORTAL=FEATURE_FLAGGED
+AGENT_PORTAL=ACTIVE+ADMIN_GATED
+ADMIN=ADMIN_GATED
+LOGIN_OTP=FEATURE_FLAGGED (admin settings + branding.config)
+ASK_JETPAKISTAN=ACCEPTED_DEBT (frontend UI; Laravel /api/public/ai/* not found)
+HOTELS_OFFERS=INTENTIONALLY_DISABLED
+CONTACT_PAGE=DEAD_LEGACY (308→/about-us)
+NEXT_ADMIN_PLANNED_STUBS=ACCEPTED_DEBT
+
+## Counts (code authority)
+SAFE_PUBLIC_ROUTES_DISCOVERED=45+
+CUSTOMER_ROUTES_DISCOVERED=12
+AGENT_ROUTES_DISCOVERED=22
+ADMIN_MENU_ITEMS_DISCOVERED=20+ (Next nav) + Laravel-only group/finance/OTP
+FEATURE_GATES_DISCOVERED=Login OTP; public_umrah_groups; public_flight_search; customer_*; agent_*; support_system; supplier enablement; CMS publish
+
+## Live tested so far (CONTINUE05)
+GROUPS_SEARCH_CHECKOUT_SAFE=PASS
+GUEST_MOBILE_HEADER_FAB=PASS
+CUSTOMER_HEADER_FAB=PASS
+ONEWAY_CHECKOUT_SAFE=PASS (payment boundary; title-null defect found+fix pending deploy)
+PAIR_CHECKOUT=IN_PROGRESS
+SEGMENTED_CHECKOUT=PENDING
+OCR=PENDING
+ADMIN_GROUPS=PENDING
+FULL_ROUTE_CRAWL=PENDING
+
+## UNKNOWN resolved
+Ask JetPakistan → ACCEPTED_DEBT (no Laravel AI routes in main)
+Groups provider → al_haider conn#6 DB managed_token

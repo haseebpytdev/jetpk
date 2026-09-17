@@ -38,15 +38,50 @@ export function emptyContact(): ContactFormValues {
   };
 }
 
+/** Drop null/undefined/blank/"null" so FormData and merges never persist a literal "null". */
+export function sanitizePassengerField(value: unknown, fallback = ""): string {
+  if (value === null || value === undefined) return fallback;
+  const text = String(value).trim();
+  if (text === "" || text.toLowerCase() === "null" || text.toLowerCase() === "undefined") {
+    return fallback;
+  }
+  return text;
+}
+
+function compactExistingPassenger(
+  existing: Partial<PassengerFormValues> | Record<string, unknown> | undefined,
+): Partial<PassengerFormValues> {
+  if (!existing || typeof existing !== "object") return {};
+  const out: Partial<PassengerFormValues> = {};
+  for (const [key, value] of Object.entries(existing)) {
+    if (value === null || value === undefined) continue;
+    if (typeof value === "string") {
+      const cleaned = sanitizePassengerField(value);
+      if (cleaned === "") continue;
+      (out as Record<string, string>)[key] = cleaned;
+      continue;
+    }
+    (out as Record<string, unknown>)[key] = value;
+  }
+  return out;
+}
+
 export function buildPassengersFromContext(context: StandardPassengersContext): PassengerFormValues[] {
   const expected = context.travellers.expected ?? [];
   const existing = context.existing_values.passengers ?? [];
 
-  return expected.map((slot, index) => ({
-    ...emptyPassenger(slot.type),
-    ...(existing[index] ?? {}),
-    passenger_type: slot.type,
-  }));
+  return expected.map((slot, index) => {
+    const base = emptyPassenger(slot.type);
+    const merged = {
+      ...base,
+      ...compactExistingPassenger(existing[index] as Partial<PassengerFormValues> | undefined),
+      passenger_type: slot.type,
+    };
+    // Controlled <select> must always hold a real option; null/"null" became the literal label "null".
+    merged.title = sanitizePassengerField(merged.title, base.title) || base.title;
+    merged.gender = sanitizePassengerField(merged.gender, base.gender) || base.gender;
+    return merged;
+  });
 }
 
 export function buildContactFromContext(context: StandardPassengersContext): ContactFormValues {
@@ -90,9 +125,11 @@ export function buildPassengerFormData(
 
   passengers.forEach((passenger, index) => {
     Object.entries(passenger).forEach(([key, value]) => {
-      if (value !== undefined && value !== "") {
-        formData.set(`passengers[${index}][${key}]`, value);
-      }
+      // FormData.set(null) stringifies to "null" and was saved as passenger title.
+      if (value === undefined || value === null) return;
+      const text = typeof value === "string" ? sanitizePassengerField(value) : String(value);
+      if (text === "") return;
+      formData.set(`passengers[${index}][${key}]`, text);
     });
   });
 

@@ -11,7 +11,7 @@ import {
   shouldFallbackAfterEarlyResult,
   shouldReuseEarlyPrime,
 } from "../../features/standard-booking/utils/passengers-fetch-query";
-import { buildPassengersFromContext } from "../../features/standard-booking/utils/passenger-form";
+import { buildPassengerFormData, buildPassengersFromContext } from "../../features/standard-booking/utils/passenger-form";
 import type { StandardPassengersContext } from "../../features/standard-booking/types";
 
 const HANDOFF =
@@ -180,4 +180,95 @@ test("existing passenger rendering still works", () => {
   const rows = buildPassengersFromContext(context);
   assert.equal(rows.length, 1);
   assert.equal(rows[0].first_name, "Ayesha");
+});
+
+test("buildPassengersFromContext ignores null title and keeps Mr default", () => {
+  const context = {
+    travellers: {
+      adults: 1,
+      children: 0,
+      infants: 0,
+      total: 1,
+      lead_passenger_index: 0,
+      expected: [{ type: "adult", label: "Adult" }],
+    },
+    existing_values: {
+      passengers: [
+        {
+          title: null,
+          first_name: "AHMED",
+          last_name: "KHAN",
+          gender: null,
+        },
+      ],
+      contact: {},
+    },
+    selection: {
+      search_id: "s1",
+      offer_id: "o1",
+      from: "LHE",
+      to: "DXB",
+      depart: "2026-10-15",
+      trip_type: "one_way",
+      cabin: "economy",
+    },
+    consent: { terms_version: "jetpk-checkout-terms-2026-08-22" },
+  } as unknown as StandardPassengersContext;
+
+  const rows = buildPassengersFromContext(context);
+  assert.equal(rows[0].title, "Mr");
+  assert.equal(rows[0].gender, "male");
+  assert.equal(rows[0].first_name, "AHMED");
+});
+
+test("buildPassengerFormData never writes literal null strings", () => {
+  const context = {
+    travellers: { adults: 1, children: 0, infants: 0, total: 1, lead_passenger_index: 0, expected: [] },
+    selection: {
+      search_id: "s1",
+      offer_id: "o1",
+      from: "LHE",
+      to: "DXB",
+      depart: "2026-10-15",
+      trip_type: "one_way",
+      cabin: "economy",
+    },
+    consent: { terms_version: "jetpk-checkout-terms-2026-08-22" },
+  } as unknown as StandardPassengersContext;
+
+  const formData = buildPassengerFormData(
+    context,
+    [
+      {
+        passenger_type: "adult",
+        title: null as unknown as string,
+        first_name: "AHMED",
+        last_name: "KHAN",
+        gender: "male",
+        date_of_birth: "1990-05-15",
+        nationality: "PK",
+        document_type: "passport",
+        passport_number: "AB1234567",
+        passport_issuing_country: "PK",
+        passport_expiry_date: "2030-12-31",
+        passport_issue_date: "2020-01-10",
+        national_id_number: "",
+      },
+    ],
+    {
+      contact_name: "",
+      email: "qa@example.test",
+      phone: "03001234567",
+      phone_country_code: "+92",
+      phone_number: "3001234567",
+      country: "Pakistan",
+      create_account: false,
+      password: "",
+      password_confirmation: "",
+    },
+    { termsAccepted: true },
+  );
+
+  assert.equal(formData.get("passengers[0][title]"), null);
+  assert.equal(formData.get("passengers[0][first_name]"), "AHMED");
 });

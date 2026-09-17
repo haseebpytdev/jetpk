@@ -1,7 +1,16 @@
+import { sanitizePassengerField } from "../utils/passenger-form";
+
 type ReviewPassengerListProps = {
   passengers: Array<Record<string, unknown>>;
   documents: Array<Record<string, unknown>>;
 };
+
+function passengerDisplayName(passenger: Record<string, unknown>): string {
+  return [passenger.title, passenger.first_name, passenger.last_name]
+    .map((part) => sanitizePassengerField(part))
+    .filter(Boolean)
+    .join(" ");
+}
 
 export function ReviewPassengerList({ passengers, documents }: ReviewPassengerListProps) {
   return (
@@ -10,9 +19,7 @@ export function ReviewPassengerList({ passengers, documents }: ReviewPassengerLi
       <ul className="mt-3 space-y-3">
         {passengers.map((passenger, index) => (
           <li key={index} className="rounded-jp-md border border-jp-border p-3 text-jp-sm">
-            <p className="font-semibold text-jp-text">
-              {(passenger.title as string) ?? ""} {(passenger.first_name as string) ?? ""} {(passenger.last_name as string) ?? ""}
-            </p>
+            <p className="font-semibold text-jp-text">{passengerDisplayName(passenger)}</p>
             <p className="text-jp-muted capitalize">{(passenger.passenger_type as string) ?? "adult"}</p>
           </li>
         ))}
