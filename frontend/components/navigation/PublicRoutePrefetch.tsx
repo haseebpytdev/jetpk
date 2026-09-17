@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 const PRIORITY_PREFETCH_ROUTES = ["/login", "/register"] as const;
 
 const PREFETCH_ROUTES = [
-  "/groups",
+  "/groups/search",
   "/about-us",
   "/contact",
   "/faq",
