@@ -1,7 +1,8 @@
 {
-  "releaseSha": "db901c2c7a28a1eb08151e6e5ab3a29d75b7281f",
-  "publicBuildId": "nme7eiDlifThiSEn_kQ9U",
-  "dashboardBuildId": "ztvU2IOk8lbYPPbBjMA7j",
+  "releaseSha": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+  "publicBuildId": "x0Fcwu-hw0F-hU42hMwZe",
+  "dashboardBuildId": "LqbZGu-MD_-drCGMO63af",
+  "harness": "correction-08",
   "rows": [
     {
       "FILE": "flights/flights-entry-w390.png",
@@ -9,20 +10,12 @@
       "VIEWPORT": 390,
       "ROLE": "anonymous",
       "STATE": "entry",
-      "PUBLIC_BUILD_ID": "nme7eiDlifThiSEn_kQ9U",
-      "RELEASE_SHA": "db901c2c7a28a1eb08151e6e5ab3a29d75b7281f",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
       "NOTES": "PASS",
       "SANITIZED": "YES",
-      "SELF_REVIEW": "PASS",
-      "METRICS": {
-        "overflowX": 0,
-        "path": "/",
-        "title": "JetPakistan | Affordable Flights, Umrah Packages & Tours",
-        "favicon": "https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png",
-        "logo": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
-        "h1": "Every flight from Pakistan Book Now!"
-      }
+      "SELF_REVIEW": "PASS"
     },
     {
       "FILE": "flights/flights-entry-w1440.png",
@@ -30,42 +23,203 @@
       "VIEWPORT": 1440,
       "ROLE": "anonymous",
       "STATE": "entry",
-      "PUBLIC_BUILD_ID": "nme7eiDlifThiSEn_kQ9U",
-      "RELEASE_SHA": "db901c2c7a28a1eb08151e6e5ab3a29d75b7281f",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
       "NOTES": "PASS",
       "SANITIZED": "YES",
-      "SELF_REVIEW": "PASS",
-      "METRICS": {
-        "overflowX": 0,
-        "path": "/",
-        "title": "JetPakistan | Affordable Flights, Umrah Packages & Tours",
-        "favicon": "https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png",
-        "logo": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
-        "h1": "Every flight from Pakistan Book Now!"
-      }
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/one-way-results-w390.png",
+      "URL_ROUTE": "/flights/results",
+      "VIEWPORT": 390,
+      "ROLE": "anonymous",
+      "STATE": "ONE_WAY_RESULTS",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "captured_stable_or_empty_search",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/one-way-results-w1440.png",
+      "URL_ROUTE": "/flights/results",
+      "VIEWPORT": 1440,
+      "ROLE": "anonymous",
+      "STATE": "ONE_WAY_RESULTS",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "captured_stable_or_empty_search",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/return-pair-w390.png",
+      "URL_ROUTE": "/flights/results?trip=return",
+      "VIEWPORT": 390,
+      "ROLE": "anonymous",
+      "STATE": "RETURN_PAIR",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "captured_stable_or_empty_search",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/return-pair-w1440.png",
+      "URL_ROUTE": "/flights/results?trip=return",
+      "VIEWPORT": 1440,
+      "ROLE": "anonymous",
+      "STATE": "RETURN_PAIR",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "captured_stable_or_empty_search",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/return-segmented-outbound-w390.png",
+      "URL_ROUTE": "/flights/return-options",
+      "VIEWPORT": 390,
+      "ROLE": "anonymous",
+      "STATE": "RETURN_SEGMENTED_OUTBOUND",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "captured_stable_or_empty_search",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/return-segmented-outbound-w1440.png",
+      "URL_ROUTE": "/flights/return-options",
+      "VIEWPORT": 1440,
+      "ROLE": "anonymous",
+      "STATE": "RETURN_SEGMENTED_OUTBOUND",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "captured_stable_or_empty_search",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/details-w390.png",
+      "URL_ROUTE": "/flights/details",
+      "VIEWPORT": 390,
+      "ROLE": "anonymous",
+      "STATE": "DETAILS",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "captured_stable_or_empty_search",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/details-w1440.png",
+      "URL_ROUTE": "/flights/details",
+      "VIEWPORT": 1440,
+      "ROLE": "anonymous",
+      "STATE": "DETAILS",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "captured_stable_or_empty_search",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/traveler-w390.png",
+      "URL_ROUTE": "/booking/passengers",
+      "VIEWPORT": 390,
+      "ROLE": "anonymous",
+      "STATE": "TRAVELER",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "captured_stable_or_empty_search",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/traveler-w1440.png",
+      "URL_ROUTE": "/booking/passengers",
+      "VIEWPORT": 1440,
+      "ROLE": "anonymous",
+      "STATE": "TRAVELER",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "captured_stable_or_empty_search",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/review-w390.png",
+      "URL_ROUTE": "/booking/review",
+      "VIEWPORT": 390,
+      "ROLE": "anonymous",
+      "STATE": "REVIEW",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "captured_stable_or_empty_search",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/review-w1440.png",
+      "URL_ROUTE": "/booking/review",
+      "VIEWPORT": 1440,
+      "ROLE": "anonymous",
+      "STATE": "REVIEW",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "captured_stable_or_empty_search",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
     },
     {
       "FILE": "portals/customer-dashboard-w390.png",
       "URL_ROUTE": "/customer/dashboard",
       "VIEWPORT": 390,
       "ROLE": "customer",
-      "STATE": "authenticated",
-      "PUBLIC_BUILD_ID": "nme7eiDlifThiSEn_kQ9U",
-      "DASHBOARD_BUILD_ID": "ztvU2IOk8lbYPPbBjMA7j",
-      "RELEASE_SHA": "db901c2c7a28a1eb08151e6e5ab3a29d75b7281f",
+      "STATE": "authenticated_stable",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "DASHBOARD_BUILD_ID": "LqbZGu-MD_-drCGMO63af",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "PASS",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
-        "path": "/customer/dashboard",
-        "title": "JetPakistan",
-        "favicon": "https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png",
-        "logo": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
-        "h1": "Dashboard overview",
-        "faviconCompanyProfile": "YES"
+        "ox": {
+          "overflowX": 0,
+          "path": "/customer/dashboard"
+        },
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Dashboard overview"
+        },
+        "styled": {
+          "ADMIN_DASHBOARD_STYLED": "N/A",
+          "hasBrand": true
+        },
+        "path": "/customer/dashboard"
       }
     },
     {
@@ -73,22 +227,35 @@
       "URL_ROUTE": "/customer/dashboard",
       "VIEWPORT": 1440,
       "ROLE": "customer",
-      "STATE": "authenticated",
-      "PUBLIC_BUILD_ID": "nme7eiDlifThiSEn_kQ9U",
-      "DASHBOARD_BUILD_ID": "ztvU2IOk8lbYPPbBjMA7j",
-      "RELEASE_SHA": "db901c2c7a28a1eb08151e6e5ab3a29d75b7281f",
+      "STATE": "authenticated_stable",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "DASHBOARD_BUILD_ID": "LqbZGu-MD_-drCGMO63af",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "PASS",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
-        "path": "/customer/dashboard",
-        "title": "JetPakistan",
-        "favicon": "https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png",
-        "logo": null,
-        "h1": "",
-        "faviconCompanyProfile": "YES"
+        "ox": {
+          "overflowX": 0,
+          "path": "/customer/dashboard"
+        },
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Dashboard overview"
+        },
+        "styled": {
+          "ADMIN_DASHBOARD_STYLED": "N/A",
+          "hasBrand": true
+        },
+        "path": "/customer/dashboard"
       }
     },
     {
@@ -96,22 +263,35 @@
       "URL_ROUTE": "/agent/dashboard",
       "VIEWPORT": 390,
       "ROLE": "agent",
-      "STATE": "authenticated",
-      "PUBLIC_BUILD_ID": "nme7eiDlifThiSEn_kQ9U",
-      "DASHBOARD_BUILD_ID": "ztvU2IOk8lbYPPbBjMA7j",
-      "RELEASE_SHA": "db901c2c7a28a1eb08151e6e5ab3a29d75b7281f",
+      "STATE": "authenticated_stable",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "DASHBOARD_BUILD_ID": "LqbZGu-MD_-drCGMO63af",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "PASS",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
-        "path": "/agent/dashboard",
-        "title": "JetPakistan",
-        "favicon": "https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png",
-        "logo": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
-        "h1": "Dashboard overview",
-        "faviconCompanyProfile": "YES"
+        "ox": {
+          "overflowX": 0,
+          "path": "/agent/dashboard"
+        },
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Dashboard overview"
+        },
+        "styled": {
+          "ADMIN_DASHBOARD_STYLED": "N/A",
+          "hasBrand": true
+        },
+        "path": "/agent/dashboard"
       }
     },
     {
@@ -119,22 +299,35 @@
       "URL_ROUTE": "/agent/dashboard",
       "VIEWPORT": 1440,
       "ROLE": "agent",
-      "STATE": "authenticated",
-      "PUBLIC_BUILD_ID": "nme7eiDlifThiSEn_kQ9U",
-      "DASHBOARD_BUILD_ID": "ztvU2IOk8lbYPPbBjMA7j",
-      "RELEASE_SHA": "db901c2c7a28a1eb08151e6e5ab3a29d75b7281f",
+      "STATE": "authenticated_stable",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "DASHBOARD_BUILD_ID": "LqbZGu-MD_-drCGMO63af",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "PASS",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
-        "path": "/agent/dashboard",
-        "title": "JetPakistan",
-        "favicon": "https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png",
-        "logo": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
-        "h1": "Dashboard overview",
-        "faviconCompanyProfile": "YES"
+        "ox": {
+          "overflowX": 0,
+          "path": "/agent/dashboard"
+        },
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Dashboard overview"
+        },
+        "styled": {
+          "ADMIN_DASHBOARD_STYLED": "N/A",
+          "hasBrand": true
+        },
+        "path": "/agent/dashboard"
       }
     },
     {
@@ -142,22 +335,38 @@
       "URL_ROUTE": "/admin/dashboard",
       "VIEWPORT": 1440,
       "ROLE": "admin",
-      "STATE": "authenticated",
-      "PUBLIC_BUILD_ID": "nme7eiDlifThiSEn_kQ9U",
-      "DASHBOARD_BUILD_ID": "ztvU2IOk8lbYPPbBjMA7j",
-      "RELEASE_SHA": "db901c2c7a28a1eb08151e6e5ab3a29d75b7281f",
+      "STATE": "authenticated_stable",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "DASHBOARD_BUILD_ID": "LqbZGu-MD_-drCGMO63af",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "PASS",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
-        "path": "/admin/dashboard",
-        "title": "JetPakistan Back Office",
-        "favicon": "https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png",
-        "logo": null,
-        "h1": "Dashboard",
-        "faviconCompanyProfile": "YES"
+        "ox": {
+          "overflowX": 0,
+          "path": "/admin/dashboard"
+        },
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Dashboard"
+        },
+        "styled": {
+          "stylesheets": 1,
+          "linkCss": 1,
+          "hasBrand": true,
+          "hasNav": true,
+          "ADMIN_DASHBOARD_STYLED": "YES"
+        },
+        "path": "/admin/dashboard"
       }
     },
     {
@@ -165,22 +374,28 @@
       "URL_ROUTE": "/admin/settings/branding",
       "VIEWPORT": 1440,
       "ROLE": "admin",
-      "STATE": "authenticated",
-      "PUBLIC_BUILD_ID": "nme7eiDlifThiSEn_kQ9U",
-      "DASHBOARD_BUILD_ID": "ztvU2IOk8lbYPPbBjMA7j",
-      "RELEASE_SHA": "db901c2c7a28a1eb08151e6e5ab3a29d75b7281f",
+      "STATE": "authenticated_stable",
+      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "DASHBOARD_BUILD_ID": "LqbZGu-MD_-drCGMO63af",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "PASS",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
-        "path": "/admin/settings/branding",
-        "title": "Branding Settings | JetPakistan",
-        "favicon": "https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png",
-        "logo": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
-        "h1": "Branding / Company profile",
-        "faviconCompanyProfile": "YES"
+        "ox": {
+          "overflowX": 0,
+          "path": "/admin/settings/branding"
+        },
+        "positive": {
+          "ok": true,
+          "fails": []
+        },
+        "styled": {
+          "ADMIN_DASHBOARD_STYLED": "N/A",
+          "hasBrand": true
+        },
+        "path": "/admin/settings/branding"
       }
     }
   ]

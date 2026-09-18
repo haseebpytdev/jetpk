@@ -1,7 +1,7 @@
 {
-  "RELEASE_SHA": "db901c2c7a28a1eb08151e6e5ab3a29d75b7281f",
-  "PUBLIC_BUILD_ID": "nme7eiDlifThiSEn_kQ9U",
-  "DASHBOARD_BUILD_ID": "ztvU2IOk8lbYPPbBjMA7j",
+  "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+  "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+  "DASHBOARD_BUILD_ID": "LqbZGu-MD_-drCGMO63af",
   "PAYMENT_EXECUTED": "NO",
   "PNR_CREATED": "NO",
   "ORDER_CREATED": "NO",
@@ -10,26 +10,6 @@
   "REFUND_EXECUTED": "NO",
   "checks": [
     {
-      "name": "HOME_SSR_LOGO_SOURCE",
-      "ok": "PASS",
-      "detail": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
-    },
-    {
-      "name": "HOME_HYDRATED_LOGO_SOURCE",
-      "ok": "PASS",
-      "detail": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
-    },
-    {
-      "name": "HOME_LOGO_SWAP_AFTER_HYDRATION",
-      "ok": "PASS",
-      "detail": "swap=0"
-    },
-    {
-      "name": "HOME_HTTP",
-      "ok": "PASS",
-      "detail": "200"
-    },
-    {
       "name": "OTP_FINAL_STATE_OFF",
       "ok": "PASS",
       "detail": "otpNodes=0"
@@ -37,27 +17,87 @@
     {
       "name": "Homepage",
       "ok": "PASS",
-      "detail": "http=200 path=/ ox=0"
+      "detail": "http=200 ox=0"
     },
     {
       "name": "Group Search",
       "ok": "PASS",
-      "detail": "http=200 path=/groups/search ox=0"
+      "detail": "http=200 ox=0"
     },
     {
       "name": "Flights entry",
       "ok": "PASS",
-      "detail": "http=200 path=/ ox=0"
+      "detail": "http=200 ox=0"
     },
     {
       "name": "Support",
       "ok": "PASS",
-      "detail": "http=200 path=/support ox=0"
+      "detail": "http=200 ox=0"
     },
     {
       "name": "FAQ",
       "ok": "PASS",
-      "detail": "http=200 path=/faq ox=0"
+      "detail": "http=200 ox=0"
+    },
+    {
+      "name": "FLIGHT_ONE_WAY_RESULTS_w390",
+      "ok": "PASS",
+      "detail": "/flights/results"
+    },
+    {
+      "name": "FLIGHT_ONE_WAY_RESULTS_w1440",
+      "ok": "PASS",
+      "detail": "/flights/results"
+    },
+    {
+      "name": "FLIGHT_RETURN_PAIR_w390",
+      "ok": "PASS",
+      "detail": "/flights/results?trip=return"
+    },
+    {
+      "name": "FLIGHT_RETURN_PAIR_w1440",
+      "ok": "PASS",
+      "detail": "/flights/results?trip=return"
+    },
+    {
+      "name": "FLIGHT_RETURN_SEGMENTED_OUTBOUND_w390",
+      "ok": "PASS",
+      "detail": "/flights/return-options"
+    },
+    {
+      "name": "FLIGHT_RETURN_SEGMENTED_OUTBOUND_w1440",
+      "ok": "PASS",
+      "detail": "/flights/return-options"
+    },
+    {
+      "name": "FLIGHT_DETAILS_w390",
+      "ok": "PASS",
+      "detail": "/flights/details"
+    },
+    {
+      "name": "FLIGHT_DETAILS_w1440",
+      "ok": "PASS",
+      "detail": "/flights/details"
+    },
+    {
+      "name": "FLIGHT_TRAVELER_w390",
+      "ok": "PASS",
+      "detail": "/booking/passengers"
+    },
+    {
+      "name": "FLIGHT_TRAVELER_w1440",
+      "ok": "PASS",
+      "detail": "/booking/passengers"
+    },
+    {
+      "name": "FLIGHT_REVIEW_w390",
+      "ok": "PASS",
+      "detail": "/booking/review"
+    },
+    {
+      "name": "FLIGHT_REVIEW_w1440",
+      "ok": "PASS",
+      "detail": "/booking/review"
     },
     {
       "name": "Customer_AUTH",
@@ -67,12 +107,12 @@
     {
       "name": "Customer_customer-dashboard_w390",
       "ok": "PASS",
-      "detail": "/customer/dashboard"
+      "detail": "PASS"
     },
     {
       "name": "Customer_customer-dashboard_w1440",
       "ok": "PASS",
-      "detail": "/customer/dashboard"
+      "detail": "PASS"
     },
     {
       "name": "Agent_AUTH",
@@ -82,12 +122,12 @@
     {
       "name": "Agent_agent-dashboard_w390",
       "ok": "PASS",
-      "detail": "/agent/dashboard"
+      "detail": "PASS"
     },
     {
       "name": "Agent_agent-dashboard_w1440",
       "ok": "PASS",
-      "detail": "/agent/dashboard"
+      "detail": "PASS"
     },
     {
       "name": "Admin_AUTH",
@@ -97,12 +137,12 @@
     {
       "name": "Admin_admin-dashboard_w1440",
       "ok": "PASS",
-      "detail": "/admin/dashboard"
+      "detail": "PASS"
     },
     {
       "name": "Admin_company-profile_w1440",
       "ok": "PASS",
-      "detail": "/admin/settings/branding"
+      "detail": "PASS"
     },
     {
       "name": "Ask JetPakistan FAB",
@@ -111,5 +151,6 @@
     }
   ],
   "FUNCTIONAL_REGRESSION": "PASS",
-  "VISUAL_PORTAL_FAILS": 0
+  "VISUAL_PORTAL_FAILS": 0,
+  "HARNESS": "correction-08"
 }

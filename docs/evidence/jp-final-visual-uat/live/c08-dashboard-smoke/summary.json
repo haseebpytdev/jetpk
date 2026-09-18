@@ -1,0 +1,51 @@
+{
+  "summary": {
+    "CUSTOMER_DASHBOARD": "PASS",
+    "AGENT_DASHBOARD": "PASS",
+    "ADMIN_DASHBOARD": "PASS"
+  },
+  "cust1440": {
+    "loading": false,
+    "something": false,
+    "unable": false,
+    "overview": 1,
+    "positive": true,
+    "failed": [
+      "404 https://jetpakistan.pk/laravel/logout?_rsc=OC-38N9S4kDPvuvE"
+    ]
+  },
+  "cust390": {
+    "loading": false,
+    "something": false,
+    "unable": false,
+    "overview": 1,
+    "positive": true,
+    "failed": []
+  },
+  "agent1440": {
+    "loading": false,
+    "something": false,
+    "unable": false,
+    "overview": 1,
+    "positive": true,
+    "failed": [
+      "404 https://jetpakistan.pk/laravel/logout?_rsc=VtvNsVLDwn_qhzwH"
+    ]
+  },
+  "agent390": {
+    "loading": false,
+    "something": false,
+    "unable": false,
+    "overview": 1,
+    "positive": true,
+    "failed": []
+  },
+  "admin1440": {
+    "loading": false,
+    "something": false,
+    "unable": false,
+    "overview": 0,
+    "positive": true,
+    "failed": []
+  }
+}

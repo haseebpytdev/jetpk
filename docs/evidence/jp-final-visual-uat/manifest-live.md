@@ -1,46 +1,26 @@
-# JetPakistan Final Visual UAT — LIVE Manifest
+# Live visual UAT — 27a1ed9f
 
-RELEASE_SHA: db901c2c7a28a1eb08151e6e5ab3a29d75b7281f
-PUBLIC_BUILD_ID: nme7eiDlifThiSEn_kQ9U
-CAPTURED_AT: 2026-09-18T11:43:23.173Z
-SOURCE: live production
-SANITIZED: YES
+| File | Route | W | Review |
+|---|---|---|---|
+| public/home-w320.png | / | 320 | PASS |
+| public/home-w360.png | / | 360 | PASS |
+| public/home-w375.png | / | 375 | PASS |
+| public/home-w390.png | / | 390 | PASS |
+| public/home-w412.png | / | 412 | PASS |
+| public/home-w768.png | / | 768 | PASS |
+| public/home-w1024.png | / | 1024 | PASS |
+| public/home-w1440.png | / | 1440 | PASS |
+| auth/login-w320.png | /login | 320 | PASS |
+| auth/login-w360.png | /login | 360 | PASS |
+| auth/login-w375.png | /login | 375 | PASS |
+| auth/login-w390.png | /login | 390 | PASS |
+| auth/login-w412.png | /login | 412 | PASS |
+| auth/login-w768.png | /login | 768 | PASS |
+| auth/login-w1024.png | /login | 1024 | PASS |
+| auth/login-w1440.png | /login | 1440 | PASS |
+| auth/register-w390.png | /register | 390 | PASS |
+| auth/register-w1440.png | /register | 1440 | PASS |
+| auth/forgot-password-w390.png | /forgot-password | 390 | PASS |
+| auth/forgot-password-w1440.png | /forgot-password | 1440 | PASS |
 
-| FILE | URL/ROUTE | VIEWPORT | ROLE | STATE | SELF_REVIEW | NOTES |
-| --- | --- | --- | --- | --- | --- | --- |
-| public/home-w320.png | / | 320 | anonymous | default | PASS | PASS; h1=Every flight from Pakistan Book Now!; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/home-w360.png | / | 360 | anonymous | default | PASS | PASS; h1=Every flight from Pakistan Book Now!; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/home-w375.png | / | 375 | anonymous | default | PASS | PASS; h1=Every flight from Pakistan Book Now!; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/home-w390.png | / | 390 | anonymous | default | PASS | PASS; h1=Every flight from Pakistan Book Now!; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/home-w412.png | / | 412 | anonymous | default | PASS | PASS; h1=Every flight from Pakistan Book Now!; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/home-w768.png | / | 768 | anonymous | default | PASS | PASS; h1=Every flight from Pakistan Book Now!; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/home-w1024.png | / | 1024 | anonymous | default | PASS | PASS; h1=Every flight from Pakistan Book Now!; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/home-w1440.png | / | 1440 | anonymous | default | PASS | PASS; h1=Every flight from Pakistan Book Now!; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/about-us-w390.png | /about-us | 390 | anonymous | default | PASS | PASS; h1=Cheap flights and secure online booking for Pakistan; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/about-us-w1440.png | /about-us | 1440 | anonymous | default | PASS | PASS; h1=Cheap flights and secure online booking for Pakistan; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/support-w390.png | /support | 390 | anonymous | default | PASS | PASS; h1=Flight booking help, 24/7; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/support-w1440.png | /support | 1440 | anonymous | default | PASS | PASS; h1=Flight booking help, 24/7; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/faq-w390.png | /faq | 390 | anonymous | default | PASS | PASS; h1=Frequently asked questions; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| public/faq-w1440.png | /faq | 1440 | anonymous | default | PASS | PASS; h1=Frequently asked questions; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| auth/login-w320.png | /login | 320 | anonymous | default | PASS | PASS; h1=Log in to your account; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| auth/login-w360.png | /login | 360 | anonymous | default | PASS | PASS; h1=Log in to your account; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| auth/login-w375.png | /login | 375 | anonymous | default | PASS | PASS; h1=Log in to your account; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| auth/login-w390.png | /login | 390 | anonymous | default | PASS | PASS; h1=Log in to your account; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| auth/login-w412.png | /login | 412 | anonymous | default | PASS | PASS; h1=Log in to your account; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| auth/login-w768.png | /login | 768 | anonymous | default | PASS | PASS; h1=Log in to your account; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| auth/login-w1024.png | /login | 1024 | anonymous | default | PASS | PASS; h1=Log in to your account; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| auth/login-w1440.png | /login | 1440 | anonymous | default | PASS | PASS; h1=Log in to your account; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| auth/register-w390.png | /register | 390 | anonymous | default | PASS | PASS; h1=Sign up; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| auth/register-w1440.png | /register | 1440 | anonymous | default | PASS | PASS; h1=Sign up; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| auth/forgot-password-w390.png | /forgot-password | 390 | anonymous | default | PASS | PASS; h1=Forgot password; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| auth/forgot-password-w1440.png | /forgot-password | 1440 | anonymous | default | PASS | PASS; h1=Forgot password; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| groups/groups-search-w320.png | /groups/search | 320 | anonymous | default | PASS | PASS; h1=Group Ticketing; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| groups/groups-search-w360.png | /groups/search | 360 | anonymous | default | PASS | PASS; h1=Group Ticketing; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| groups/groups-search-w375.png | /groups/search | 375 | anonymous | default | PASS | PASS; h1=Group Ticketing; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| groups/groups-search-w390.png | /groups/search | 390 | anonymous | default | PASS | PASS; h1=Group Ticketing; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| groups/groups-search-w412.png | /groups/search | 412 | anonymous | default | PASS | PASS; h1=Group Ticketing; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| groups/groups-search-w768.png | /groups/search | 768 | anonymous | default | PASS | PASS; h1=Group Ticketing; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| groups/groups-search-w1024.png | /groups/search | 1024 | anonymous | default | PASS | PASS; h1=Group Ticketing; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| groups/groups-search-w1440.png | /groups/search | 1440 | anonymous | default | PASS | PASS; h1=Group Ticketing; favicon=https://jetpakistan.pk/storage/agencies/1/branding/hCvIVfe7kwumtYyTTMWaPEkZ9KIcEGYsrvi1YynU.png; logo=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png |
-| branding/home-branding-w1440.png | / | 1440 | anonymous | branding_header | PASS | Header branding crop |
-| global/ask-fab-open-w390.png | / | 390 | anonymous | ask_fab_open | PASS | Ask FAB open |
+FAILS=0

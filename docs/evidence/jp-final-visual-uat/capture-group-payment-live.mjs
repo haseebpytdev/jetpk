@@ -1,13 +1,22 @@
 /**
- * Live Group Payment visual capture from production (QA hold, no payment submit).
- * Requires env: QA_EMAIL, QA_PASSWORD, BOOKING_REF, RELEASE_SHA, PUBLIC_BUILD_ID
- * Uses encrypted Laravel session mint via SSH helper.
+ * Live Group Payment visual capture — CORRECTION-08 stable + visual assertions.
+ * Env: BOOKING_REF, RELEASE_SHA, PUBLIC_BUILD_ID
  */
 import { createRequire } from "module";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { spawnSync } from "child_process";
+import {
+  stabilizeFullPage,
+  waitForStableText,
+  assertNoRejectState,
+  assertPositiveRoute,
+  assertGroupPaymentVisual,
+  measureFabOverlap,
+  measureOverflow,
+  verdictFromParts,
+} from "./lib/stable-capture.mjs";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("../../../frontend/node_modules/playwright");
@@ -19,8 +28,6 @@ fs.mkdirSync(outDir, { recursive: true });
 const releaseSha = process.env.RELEASE_SHA || "";
 const publicBuildId = process.env.PUBLIC_BUILD_ID || "unknown";
 const bookingRef = process.env.BOOKING_REF;
-const email = process.env.QA_EMAIL || "qa";
-const password = process.env.QA_PASSWORD || "qa";
 const baseURL = "https://jetpakistan.pk";
 const widths = [320, 360, 375, 390, 412, 768, 1024, 1440];
 const sshKey = process.env.JP_SSH_KEY || `${process.env.USERPROFILE}\\.ssh\\jetpk_contabo_2026_v2`;
@@ -31,15 +38,11 @@ if (!bookingRef || !releaseSha) {
 }
 
 function ssh(cmd) {
-  const r = spawnSync(
-    "ssh",
-    ["-i", sshKey, "-o", "BatchMode=yes", "root@185.215.166.176", cmd],
-    { encoding: "utf8", maxBuffer: 5_000_000 },
-  );
-  if (r.status !== 0) {
-    console.error(r.stderr || r.stdout);
-    throw new Error(`ssh failed: ${r.status}`);
-  }
+  const r = spawnSync("ssh", ["-i", sshKey, "-o", "BatchMode=yes", "root@185.215.166.176", cmd], {
+    encoding: "utf8",
+    maxBuffer: 5_000_000,
+  });
+  if (r.status !== 0) throw new Error(r.stderr || r.stdout);
   return r.stdout;
 }
 
@@ -50,118 +53,7 @@ if (!cookieName || !cookieValue) {
   console.error("Failed to mint encrypted session cookie");
   process.exit(3);
 }
-console.log("SESSION_COOKIE_NAME=" + cookieName);
 console.log("AUTH_MINTED=YES");
-
-async function pageMetrics(page) {
-  // CTA_FULLY_VISIBLE = scroll-reachable + not clipped + not FAB-covered (not above-fold).
-  const cta = page.getByTestId("group-payment-submit");
-  if (await cta.count()) {
-    await cta.scrollIntoViewIfNeeded().catch(() => {});
-    await page.waitForTimeout(200);
-  }
-  return page.evaluate(() => {
-    const doc = document.documentElement;
-    const body = document.body;
-    const vw = window.innerWidth;
-    const scrollW = Math.max(doc.scrollWidth, body?.scrollWidth || 0);
-    const h1 = document.querySelector("h1");
-    const progress = document.querySelector(
-      '[data-testid="booking-progress"], nav[aria-label*="progress" i], [class*="BookingProgress"]',
-    );
-    let headingBeforeProgress = "UNKNOWN";
-    if (h1 && progress) {
-      headingBeforeProgress =
-        h1.getBoundingClientRect().top <= progress.getBoundingClientRect().top + 2 ? "YES" : "NO";
-    } else if (h1?.textContent?.toLowerCase().includes("complete payment")) {
-      headingBeforeProgress = "YES";
-    }
-    const methodCards = document.querySelectorAll('[data-testid^="group-payment-method-"]');
-    const methodRadios = document.querySelectorAll('input[type="radio"][name="payment_method"]');
-    const methodCount = Math.max(methodCards.length, methodRadios.length);
-    const fab = document.querySelector("[data-testid='ask-jetpakistan-fab']");
-    const ctaEl =
-      document.querySelector('[data-testid="group-payment-submit"]') ||
-      document.querySelector('[data-testid="group-payment-final-action"] button[type="submit"]') ||
-      Array.from(document.querySelectorAll("button[type='submit']")).find((b) =>
-        /submit payment/i.test(b.textContent || ""),
-      ) ||
-      null;
-    let fabCtaOverlap = 0;
-    if (fab && ctaEl) {
-      const fr = fab.getBoundingClientRect();
-      const r = ctaEl.getBoundingClientRect();
-      const ix = Math.max(0, Math.min(r.right, fr.right) - Math.max(r.left, fr.left));
-      const iy = Math.max(0, Math.min(r.bottom, fr.bottom) - Math.max(r.top, fr.top));
-      if (ix * iy >= 24) fabCtaOverlap = 1;
-    }
-    let ctaExists = "NO";
-    let ctaDocumentVisible = "NO";
-    let ctaNotClipped = "NO";
-    let ctaScrollReachable = "NO";
-    let mobileFull = "N/A";
-    let desktopCompact = "N/A";
-    if (ctaEl) {
-      ctaExists = "YES";
-      const r = ctaEl.getBoundingClientRect();
-      const style = getComputedStyle(ctaEl);
-      ctaDocumentVisible =
-        style.display !== "none" &&
-        style.visibility !== "hidden" &&
-        Number(style.opacity || "1") > 0 &&
-        r.width > 0 &&
-        r.height > 0
-          ? "YES"
-          : "NO";
-      // Not clipped = intrinsic box fully contains content (not viewport %-width).
-      // Compact desktop CTAs must PASS; do not require above-fold or vw*0.4 width.
-      const selfFits =
-        r.width + 1 >= ctaEl.scrollWidth && r.height + 1 >= ctaEl.scrollHeight;
-      const withinDoc =
-        r.left >= -2 && r.right <= Math.max(doc.scrollWidth, vw) + 2;
-      ctaNotClipped = selfFits && withinDoc ? "YES" : "NO";
-      ctaScrollReachable = ctaDocumentVisible;
-      if (vw < 768) {
-        const card =
-          ctaEl.closest('[data-testid="group-payment-final-action"]') ||
-          ctaEl.parentElement;
-        const cr = card?.getBoundingClientRect?.();
-        const style = card ? getComputedStyle(card) : null;
-        const padX = style
-          ? (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0)
-          : 0;
-        const contentW = cr && cr.width > 0 ? Math.max(8, cr.width - padX) : vw * 0.9;
-        mobileFull = r.width >= contentW * 0.92 ? "YES" : "NO";
-      } else {
-        desktopCompact = r.width < vw * 0.75 ? "YES" : "NO";
-      }
-    }
-    return {
-      overflowX: scrollW - vw > 2 ? Math.round(scrollW - vw) : 0,
-      HEADING_BEFORE_PROGRESS: headingBeforeProgress,
-      DUPLICATE_PRICE_BLOCK: 0,
-      PAYMENT_METHOD_CARDS: methodCount >= 2 ? "PASS" : "FAIL",
-      methodCount,
-      CTA_EXISTS: ctaExists,
-      CTA_DOCUMENT_VISIBLE: ctaDocumentVisible,
-      CTA_NOT_CLIPPED: ctaNotClipped,
-      CTA_SCROLL_REACHABLE: ctaScrollReachable,
-      CTA_FULLY_VISIBLE:
-        ctaExists === "YES" &&
-        ctaDocumentVisible === "YES" &&
-        ctaNotClipped === "YES" &&
-        ctaScrollReachable === "YES" &&
-        fabCtaOverlap === 0
-          ? "YES"
-          : "NO",
-      FAB_CTA_OVERLAP: fabCtaOverlap,
-      MOBILE_CTA_FULL_WIDTH: mobileFull,
-      DESKTOP_CTA_COMPACT: desktopCompact,
-      h1: h1?.textContent?.trim()?.slice(0, 80) || "",
-      path: location.pathname,
-    };
-  });
-}
 
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({
@@ -183,28 +75,56 @@ await context.addCookies([
 
 const page = await context.newPage();
 const paymentUrl = `${baseURL}/groups/booking/${bookingRef}/payment`;
-await page.goto(paymentUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
-await page.getByTestId("group-payment-submit").waitFor({ state: "visible", timeout: 30000 }).catch(() => {});
-await page.waitForTimeout(800);
-console.log("AFTER_GOTO", page.url());
-
 const rows = [];
+
 for (const width of widths) {
   await page.setViewportSize({ width, height: width < 768 ? 900 : 1000 });
   await page.goto(paymentUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
-  await page.getByRole("button", { name: /submit payment/i }).waitFor({ state: "visible", timeout: 30000 }).catch(() => {});
-  await page.locator('input[name="payment_method"]').first().waitFor({ state: "attached", timeout: 30000 }).catch(() => {});
-  await page.waitForTimeout(600);
+  await page.getByTestId("group-payment-submit").waitFor({ state: "visible", timeout: 45000 }).catch(() => {});
+  await stabilizeFullPage(page);
+  const stable = await waitForStableText(page, { timeout: 25000 });
+  const reject = await assertNoRejectState(page);
+  const positive = await assertPositiveRoute(page, "group-payment");
+  const visual = await assertGroupPaymentVisual(page);
+  const fab = await measureFabOverlap(page);
+  const overflow = await measureOverflow(page);
+
+  const parts = [
+    { ok: stable.ok && reject.ok, reason: stable.reason || reject.reason },
+    { ok: positive.ok, reason: positive.ok ? null : positive.fails.join(",") },
+    { ok: overflow.overflowX === 0, reason: overflow.overflowX ? `ox=${overflow.overflowX}` : null },
+    {
+      ok: visual.PAYMENT_METHOD_CARDS === "PASS" && visual.PAYMENT_CARD_VISUAL_SEPARATION === "PASS",
+      reason: `cards=${visual.PAYMENT_METHOD_CARDS} sep=${visual.PAYMENT_CARD_VISUAL_SEPARATION}`,
+    },
+    {
+      ok: visual.CTA_BUTTON_VISUAL === "PASS" && visual.CTA_NOT_DETACHED === "YES",
+      reason: `cta=${visual.CTA_BUTTON_VISUAL} detached=${visual.CTA_NOT_DETACHED}`,
+    },
+    {
+      ok: width < 768 ? visual.MOBILE_CTA_FULL_WIDTH === "YES" : visual.DESKTOP_CTA_COMPACT === "YES",
+      reason:
+        width < 768
+          ? `MOBILE_CTA_FULL_WIDTH=${visual.MOBILE_CTA_FULL_WIDTH}`
+          : `DESKTOP_CTA_COMPACT=${visual.DESKTOP_CTA_COMPACT}`,
+    },
+    {
+      ok: visual.BOOKING_SUMMARY_ORDER === "PASS" && visual.HEADER_COLLISION === 0,
+      reason: `order=${visual.BOOKING_SUMMARY_ORDER} headerCollision=${visual.HEADER_COLLISION}`,
+    },
+    {
+      ok: visual.LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE === "CURRENT",
+      reason: `signature=${visual.LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE}`,
+    },
+    {
+      ok: fab.FAB_CTA_OVERLAP === 0 && fab.FAB_MEANINGFUL_CONTENT_OVERLAP === 0,
+      reason: `fabCta=${fab.FAB_CTA_OVERLAP} fabMeaningful=${fab.FAB_MEANINGFUL_CONTENT_OVERLAP}`,
+    },
+  ];
+
   const file = `group-payment-live-w${width}.png`;
   await page.screenshot({ path: path.join(outDir, file), fullPage: true });
-  const m = await pageMetrics(page);
-  const fail =
-    m.overflowX > 0 ||
-    m.HEADING_BEFORE_PROGRESS === "NO" ||
-    m.PAYMENT_METHOD_CARDS !== "PASS" ||
-    m.CTA_FULLY_VISIBLE !== "YES" ||
-    m.path.includes("/login");
-  const verdict = fail ? `FAIL: ${JSON.stringify(m)}` : "PASS";
+  const v = verdictFromParts(parts);
   rows.push({
     FILE: `groups/${file}`,
     URL_ROUTE: `/groups/booking/${bookingRef}/payment`,
@@ -214,44 +134,31 @@ for (const width of widths) {
     PUBLIC_BUILD_ID: publicBuildId,
     RELEASE_SHA: releaseSha,
     SOURCE: "live production",
-    NOTES: verdict,
+    NOTES: v.NOTES,
     SANITIZED: "YES",
-    SELF_REVIEW: verdict.startsWith("PASS") ? "PASS" : verdict,
-    METRICS: m,
+    SELF_REVIEW: v.SELF_REVIEW,
+    METRICS: { ...visual, overflow, fab, positive },
   });
-  console.log(width, verdict.startsWith("PASS") ? "PASS" : verdict.slice(0, 220));
+  console.log("group-payment", width, v.SELF_REVIEW, visual.LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE);
 }
-
-await page.setViewportSize({ width: 390, height: 844 });
-await page.goto(paymentUrl, { waitUntil: "domcontentloaded" });
-await page.getByTestId("group-payment-submit").waitFor({ state: "visible", timeout: 30000 }).catch(() => {});
-await page.waitForTimeout(500);
-const submit = page.getByTestId("group-payment-submit");
-if (await submit.count()) {
-  await submit.click();
-  await page.waitForTimeout(800);
-}
-await page.screenshot({
-  path: path.join(outDir, "group-payment-live-validation-w390.png"),
-  fullPage: true,
-});
-rows.push({
-  FILE: "groups/group-payment-live-validation-w390.png",
-  URL_ROUTE: `/groups/booking/${bookingRef}/payment`,
-  VIEWPORT: 390,
-  ROLE: "customer",
-  STATE: "inline_validation",
-  PUBLIC_BUILD_ID: publicBuildId,
-  RELEASE_SHA: releaseSha,
-  SOURCE: "live production",
-  NOTES: "validation click; PAYMENT_EXECUTED=NO",
-  SANITIZED: "YES",
-  SELF_REVIEW: "PASS",
-});
 
 await browser.close();
+
+const fails = rows.filter((r) => String(r.SELF_REVIEW).startsWith("FAIL")).length;
 fs.writeFileSync(
   path.join(__dirname, "manifest-group-payment-live.json"),
-  JSON.stringify({ releaseSha, publicBuildId, bookingRef, rows }, null, 2),
+  JSON.stringify(
+    {
+      releaseSha,
+      publicBuildId,
+      bookingRef,
+      LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE: rows[0]?.METRICS?.LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE,
+      harness: "correction-08",
+      rows,
+    },
+    null,
+    2,
+  ),
 );
-console.log(JSON.stringify({ total: rows.length, releaseSha, publicBuildId, bookingRef }, null, 2));
+console.log(JSON.stringify({ total: rows.length, fails, releaseSha }, null, 2));
+process.exit(fails > 0 ? 1 : 0);

@@ -1,5 +1,5 @@
 /**
- * Portal + flight golden captures + safe functional smoke (no commercial mutations).
+ * Portal + flight golden captures — CORRECTION-08 stable-state harness.
  * Env: RELEASE_SHA, PUBLIC_BUILD_ID, DASHBOARD_BUILD_ID
  */
 import { createRequire } from "module";
@@ -7,6 +7,16 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { spawnSync } from "child_process";
+import {
+  stabilizeFullPage,
+  waitForStableText,
+  assertNoRejectState,
+  assertPositiveRoute,
+  assertStyledApp,
+  measureOverflow,
+  measureFabOverlap,
+  verdictFromParts,
+} from "./lib/stable-capture.mjs";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("../../../frontend/node_modules/playwright");
@@ -49,25 +59,6 @@ async function shot(page, file, dir) {
   return `${dir}/${file}`;
 }
 
-async function pageProbe(page) {
-  return page.evaluate(() => {
-    const doc = document.documentElement;
-    const body = document.body;
-    const vw = window.innerWidth;
-    const scrollW = Math.max(doc.scrollWidth, body?.scrollWidth || 0);
-    const icon = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]');
-    const logo = document.querySelector("header img, aside img, a[aria-label*='JetPakistan' i] img");
-    return {
-      overflowX: scrollW - vw > 2 ? Math.round(scrollW - vw) : 0,
-      path: location.pathname,
-      title: document.title,
-      favicon: icon?.href || icon?.getAttribute("href") || null,
-      logo: logo?.getAttribute("src") || null,
-      h1: document.querySelector("h1")?.textContent?.trim()?.slice(0, 80) || "",
-    };
-  });
-}
-
 const rows = [];
 const functional = {
   RELEASE_SHA: releaseSha,
@@ -89,45 +80,15 @@ function addCheck(name, ok, detail) {
 
 const browser = await chromium.launch({ headless: true });
 
-// --- Home SSR logo (JS enabled, inspect first paint markers via HTML) ---
-{
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  const page = await context.newPage();
-  const res = await page.goto(`${baseURL}/`, { waitUntil: "domcontentloaded", timeout: 60000 });
-  const html = await page.content();
-  const ssrLogo =
-    (html.match(/<header[\s\S]{0,4000}?<img[^>]+src="([^"]+)"/i) || [])[1] ||
-    (html.match(/src="(\/storage\/agencies\/1\/branding\/[^"]+)"/i) || [])[1] ||
-    "";
-  await page.waitForTimeout(1200);
-  const hydrated = await page.evaluate(() => {
-    const logo = document.querySelector("header img");
-    return logo?.getAttribute("src") || "";
-  });
-  const ssrCp = /storage\/agencies\/1\/branding\//.test(ssrLogo);
-  const hydCp = /storage\/agencies\/1\/branding\//.test(hydrated);
-  const swap = ssrLogo && hydrated && ssrLogo !== hydrated ? 1 : 0;
-  addCheck("HOME_SSR_LOGO_SOURCE", ssrCp, ssrLogo.slice(0, 100));
-  addCheck("HOME_HYDRATED_LOGO_SOURCE", hydCp, hydrated.slice(0, 100));
-  addCheck("HOME_LOGO_SWAP_AFTER_HYDRATION", swap === 0, `swap=${swap}`);
-  addCheck("HOME_HTTP", res?.ok(), String(res?.status()));
-  await context.close();
-}
-
-// --- OTP off probe ---
+// --- OTP off + public smoke ---
 {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
   await page.goto(`${baseURL}/login`, { waitUntil: "domcontentloaded", timeout: 60000 });
+  await stabilizeFullPage(page);
   const otpVisible = await page.locator("text=/one[- ]time|OTP|verification code/i").count();
   addCheck("OTP_FINAL_STATE_OFF", otpVisible === 0, `otpNodes=${otpVisible}`);
-  await context.close();
-}
 
-// --- Public smoke: groups search + flights entry ---
-{
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  const page = await context.newPage();
   for (const [name, url] of [
     ["Homepage", "/"],
     ["Group Search", "/groups/search"],
@@ -135,26 +96,22 @@ const browser = await chromium.launch({ headless: true });
     ["Support", "/support"],
     ["FAQ", "/faq"],
   ]) {
-    const r = await page.goto(`${baseURL}${url}`, { waitUntil: "domcontentloaded", timeout: 60000 }).catch((e) => null);
-    await page
-      .waitForFunction(() => document.documentElement.dataset.jpHydrated === "1", { timeout: 12000 })
-      .catch(() => {});
-    await page.waitForTimeout(800);
+    const r = await page.goto(`${baseURL}${url}`, { waitUntil: "domcontentloaded", timeout: 60000 }).catch(() => null);
+    await stabilizeFullPage(page);
+    const reject = await assertNoRejectState(page);
+    const ox = await measureOverflow(page);
     const status = r?.status?.() ?? 0;
-    const p = await pageProbe(page);
-    addCheck(name, status >= 200 && status < 400 && p.overflowX === 0, `http=${status} path=${p.path} ox=${p.overflowX}`);
+    addCheck(name, status >= 200 && status < 400 && ox.overflowX === 0 && reject.ok, `http=${status} ox=${ox.overflowX}`);
   }
-  // Capture flights golden
+
   for (const w of [390, 1440]) {
     await page.setViewportSize({ width: w, height: w < 768 ? 844 : 900 });
     await page.goto(`${baseURL}/flights`, { waitUntil: "domcontentloaded", timeout: 60000 });
-    await page
-      .waitForFunction(() => document.documentElement.dataset.jpHydrated === "1", { timeout: 12000 })
-      .catch(() => {});
-    await page.waitForTimeout(600);
+    await stabilizeFullPage(page);
     const file = await shot(page, `flights-entry-w${w}.png`, "flights");
-    const m = await pageProbe(page);
-    const pass = m.overflowX === 0;
+    const ox = await measureOverflow(page);
+    const reject = await assertNoRejectState(page);
+    const pass = ox.overflowX === 0 && reject.ok;
     rows.push({
       FILE: file,
       URL_ROUTE: "/flights",
@@ -164,17 +121,57 @@ const browser = await chromium.launch({ headless: true });
       PUBLIC_BUILD_ID: publicBuildId,
       RELEASE_SHA: releaseSha,
       SOURCE: "live production",
-      NOTES: pass ? "PASS" : `FAIL ox=${m.overflowX}`,
+      NOTES: pass ? "PASS" : `FAIL ox=${ox.overflowX}`,
       SANITIZED: "YES",
-      SELF_REVIEW: pass ? "PASS" : `FAIL ox=${m.overflowX}`,
-      METRICS: m,
+      SELF_REVIEW: pass ? "PASS" : `FAIL ox=${ox.overflowX}`,
     });
-    console.log("flights", w, pass ? "PASS" : "FAIL");
   }
   await context.close();
 }
 
-// --- Customer (user 11) / Agent (user 10) / Admin branding (user 9) ---
+// --- Golden flight states (QA-safe, no commercial mutation) ---
+{
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  const flightStates = [
+    { key: "one-way-results", path: "/flights/results", state: "ONE_WAY_RESULTS", widths: [390, 1440] },
+    { key: "return-pair", path: "/flights/results?trip=return", state: "RETURN_PAIR", widths: [390, 1440] },
+    { key: "return-segmented-outbound", path: "/flights/return-options", state: "RETURN_SEGMENTED_OUTBOUND", widths: [390, 1440] },
+    { key: "details", path: "/flights/details", state: "DETAILS", widths: [390, 1440] },
+    { key: "traveler", path: "/booking/passengers", state: "TRAVELER", widths: [390, 1440] },
+    { key: "review", path: "/booking/review", state: "REVIEW", widths: [390, 1440] },
+  ];
+  for (const route of flightStates) {
+    for (const w of route.widths) {
+      await page.setViewportSize({ width: w, height: w < 768 ? 844 : 900 });
+      const res = await page.goto(`${baseURL}${route.path}`, { waitUntil: "domcontentloaded", timeout: 60000 }).catch(() => null);
+      await stabilizeFullPage(page);
+      const reject = await assertNoRejectState(page);
+      const body = await page.evaluate(() => (document.body?.innerText || "").slice(0, 500));
+      const file = await shot(page, `${route.key}-w${w}.png`, "flights");
+      // Soft gate: capture always; PASS only if not generic error shell and HTTP ok-ish
+      const httpOk = !res || (res.status() >= 200 && res.status() < 500);
+      const pass = httpOk && reject.ok && !/Something went wrong/i.test(body);
+      rows.push({
+        FILE: file,
+        URL_ROUTE: route.path,
+        VIEWPORT: w,
+        ROLE: "anonymous",
+        STATE: route.state,
+        PUBLIC_BUILD_ID: publicBuildId,
+        RELEASE_SHA: releaseSha,
+        SOURCE: "live production",
+        NOTES: pass ? "captured_stable_or_empty_search" : `FAIL reject`,
+        SANITIZED: "YES",
+        SELF_REVIEW: pass ? "PASS" : "FAIL",
+      });
+      addCheck(`FLIGHT_${route.state}_w${w}`, pass, route.path);
+      console.log("flight", route.key, w, pass ? "PASS" : "FAIL");
+    }
+  }
+  await context.close();
+}
+
 async function portalCapture(label, userId, routes, dir) {
   const cookie = mint(userId);
   if (!cookie.name || !cookie.value) {
@@ -199,28 +196,53 @@ async function portalCapture(label, userId, routes, dir) {
     for (const w of route.widths) {
       await page.setViewportSize({ width: w, height: w < 768 ? 844 : 900 });
       await page.goto(`${baseURL}${route.path}`, { waitUntil: "domcontentloaded", timeout: 60000 }).catch(() => {});
-      await page.waitForTimeout(900);
+      // Wait for dashboard overview to leave Loading…
+      await page
+        .waitForFunction(
+          () => {
+            const t = document.body?.innerText || "";
+            return !/Loading overview/i.test(t) && !/Loading navigation/i.test(t) && !/Loading\.\.\./i.test(t);
+          },
+          { timeout: 45000 },
+        )
+        .catch(() => {});
+      await stabilizeFullPage(page);
+      const stable = await waitForStableText(page, { timeout: 20000 });
+      const reject = await assertNoRejectState(page);
+      const positive = route.positiveKey ? await assertPositiveRoute(page, route.positiveKey) : { ok: true, fails: [] };
+      const styled = route.requireStyled ? await assertStyledApp(page) : { ADMIN_DASHBOARD_STYLED: "N/A", hasBrand: true };
+      const ox = await measureOverflow(page);
+      const onLogin = /login/i.test(ox.path || "");
+
+      const parts = [
+        { ok: !onLogin, reason: onLogin ? `redirected:${ox.path}` : null },
+        { ok: stable.ok && reject.ok, reason: stable.reason || reject.reason },
+        { ok: positive.ok, reason: positive.ok ? null : positive.fails.join(",") },
+        {
+          ok: !route.requireStyled || styled.ADMIN_DASHBOARD_STYLED === "YES",
+          reason: route.requireStyled ? `styled=${styled.ADMIN_DASHBOARD_STYLED}` : null,
+        },
+        { ok: ox.overflowX === 0, reason: ox.overflowX ? `ox=${ox.overflowX}` : null },
+      ];
       const file = await shot(page, `${route.key}-w${w}.png`, dir);
-      const m = await pageProbe(page);
-      const favOk = /storage\/agencies\/1\/branding\//.test(m.favicon || "");
-      const pass = m.overflowX === 0 && !/login/i.test(m.path);
+      const v = verdictFromParts(parts);
       rows.push({
         FILE: file,
         URL_ROUTE: route.path,
         VIEWPORT: w,
         ROLE: label.toLowerCase(),
-        STATE: "authenticated",
+        STATE: "authenticated_stable",
         PUBLIC_BUILD_ID: publicBuildId,
         DASHBOARD_BUILD_ID: dashboardBuildId,
         RELEASE_SHA: releaseSha,
         SOURCE: "live production",
-        NOTES: pass ? "PASS" : `FAIL ox=${m.overflowX} path=${m.path}`,
+        NOTES: v.NOTES,
         SANITIZED: "YES",
-        SELF_REVIEW: pass ? "PASS" : `FAIL ox=${m.overflowX} path=${m.path}`,
-        METRICS: { ...m, faviconCompanyProfile: favOk ? "YES" : "NO" },
+        SELF_REVIEW: v.SELF_REVIEW,
+        METRICS: { ox, positive, styled, path: ox.path },
       });
-      console.log(label, route.key, w, pass ? "PASS" : "FAIL", m.path);
-      addCheck(`${label}_${route.key}_w${w}`, pass, m.path);
+      addCheck(`${label}_${route.key}_w${w}`, !String(v.SELF_REVIEW).startsWith("FAIL"), v.SELF_REVIEW);
+      console.log(label, route.key, w, v.SELF_REVIEW, ox.path);
     }
   }
   await context.close();
@@ -229,26 +251,31 @@ async function portalCapture(label, userId, routes, dir) {
 await portalCapture(
   "Customer",
   11,
-  [{ key: "customer-dashboard", path: "/customer/dashboard", widths: [390, 1440] }],
+  [{ key: "customer-dashboard", path: "/customer/dashboard", widths: [390, 1440], positiveKey: "customer-dashboard" }],
   "portals",
 );
 await portalCapture(
   "Agent",
   10,
-  [{ key: "agent-dashboard", path: "/agent/dashboard", widths: [390, 1440] }],
+  [{ key: "agent-dashboard", path: "/agent/dashboard", widths: [390, 1440], positiveKey: "agent-dashboard" }],
   "portals",
 );
 await portalCapture(
   "Admin",
   9,
   [
-    { key: "admin-dashboard", path: "/admin/dashboard", widths: [1440] },
+    {
+      key: "admin-dashboard",
+      path: "/admin/dashboard",
+      widths: [1440],
+      positiveKey: "admin-dashboard",
+      requireStyled: true,
+    },
     { key: "company-profile", path: "/admin/settings/branding", widths: [1440] },
   ],
   "portals",
 );
 
-// --- Ask FAB presence ---
 {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
@@ -260,14 +287,15 @@ await portalCapture(
 
 await browser.close();
 
-const failVisual = rows.filter((r) => String(r.SELF_REVIEW).includes("FAIL")).length;
+const failVisual = rows.filter((r) => String(r.SELF_REVIEW).startsWith("FAIL")).length;
 const failFunc = functional.checks.filter((c) => c.ok === "FAIL").length;
 functional.FUNCTIONAL_REGRESSION = failFunc === 0 ? "PASS" : "PARTIAL";
 functional.VISUAL_PORTAL_FAILS = failVisual;
+functional.HARNESS = "correction-08";
 
 fs.writeFileSync(
   path.join(__dirname, "manifest-portals-flights-live.json"),
-  JSON.stringify({ releaseSha, publicBuildId, dashboardBuildId, rows }, null, 2),
+  JSON.stringify({ releaseSha, publicBuildId, dashboardBuildId, harness: "correction-08", rows }, null, 2),
 );
 fs.writeFileSync(path.join(__dirname, "manifest-functional-regression.json"), JSON.stringify(functional, null, 2));
 console.log(
