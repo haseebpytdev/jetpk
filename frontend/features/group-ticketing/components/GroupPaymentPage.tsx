@@ -266,7 +266,7 @@ export function GroupPaymentPage({ bookingRef }: GroupPaymentPageProps) {
             <PrimaryButton
               type="submit"
               fullWidth
-              className="w-full max-lg:!w-full lg:!w-auto lg:min-w-[14rem]"
+              className="w-full max-md:!w-full md:!w-auto md:min-w-[14rem]"
               disabled={submitting || expired}
               data-testid="group-payment-submit"
             >
