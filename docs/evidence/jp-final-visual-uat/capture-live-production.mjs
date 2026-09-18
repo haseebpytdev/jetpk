@@ -197,7 +197,7 @@ if (await fabBtn.count()) {
   });
 }
 
-await browser.close();
+await browser.close().catch(() => {});
 
 const failCount = manifest.filter((r) => String(r.SELF_REVIEW).startsWith("FAIL")).length;
 const lines = [

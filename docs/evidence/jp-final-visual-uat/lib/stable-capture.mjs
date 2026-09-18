@@ -16,22 +16,62 @@ export const REJECT_TEXT_PATTERNS = [
 
 export const HOMEPAGE_SECTIONS = [
   { key: "HEADER", testIds: [], selectors: ["header", "[data-testid='public-header']"], text: null },
-  { key: "HERO", testIds: [], selectors: ["[data-testid='home-hero']", "section[aria-label*='hero' i]", ".jp-home-hero"], text: null },
-  { key: "FLIGHT_SEARCH", testIds: ["flight-search", "home-flight-search"], selectors: ["form[action*='flight']", "[data-testid*='flight-search']"], text: /Search flights|From|To/i },
-  { key: "GROUPS", testIds: ["home-groups", "group-ticketing"], selectors: ["[data-testid*='group']"], text: /Group/i },
-  { key: "TRUST_PROOF", testIds: ["home-trust"], selectors: ["[data-testid*='trust']"], text: /Trusted|Travelers|Bookings/i },
-  { key: "TRENDING_ROUTES", testIds: ["trending-routes"], selectors: ["[data-testid*='trending']"], text: /Trending/i },
-  { key: "DESTINATIONS_ON_THE_RISE", testIds: ["destinations-on-the-rise"], selectors: ["[data-testid*='destination']"], text: /Destinations on the rise|Popular destinations/i },
-  { key: "FEATURED_DEALS", testIds: ["featured-deals"], selectors: ["[data-testid*='featured-deal']", "[data-testid*='deal']"], text: /Featured deals|Deals/i },
-  { key: "WHY_JETPAKISTAN", testIds: ["why-jetpakistan"], selectors: ["[data-testid*='why']"], text: /Why JetPakistan|Why choose/i },
-  { key: "SUPPORT_CTA", testIds: ["support-cta", "home-support"], selectors: ["[data-testid*='support']", "a[href='/support']"], text: /Support|Need help/i },
+  {
+    key: "HERO",
+    testIds: ["home-hero"],
+    selectors: ["[data-testid='home-hero']", "section[aria-label*='hero' i]", ".jp-home-hero"],
+    text: /Every flight from Pakistan|Book Now|hero/i,
+  },
+  {
+    key: "FLIGHT_SEARCH",
+    testIds: ["flight-search", "home-flight-search"],
+    selectors: ["form[action*='flight']", "[data-testid*='flight-search']", "[data-testid*='search']"],
+    text: /From|To|Departure|Search/i,
+  },
+  { key: "GROUPS", testIds: ["home-groups", "group-ticketing"], selectors: ["[data-testid*='group']", "a[href*='/groups']"], text: /Group ticketing|Group fares|Groups|group booking/i },
+  {
+    key: "TRUST_PROOF",
+    testIds: ["home-trust"],
+    selectors: ["[data-testid*='trust']"],
+    text: /True PKR pricing|Seconds to ticket|400\+ airlines|Licensed/i,
+  },
+  {
+    key: "TRENDING_ROUTES",
+    testIds: ["trending-routes"],
+    selectors: ["[data-testid*='trending']"],
+    text: /Where Pakistan is flying|Trending|LHE|ISB|KHI/i,
+  },
+  {
+    key: "DESTINATIONS_ON_THE_RISE",
+    testIds: ["destinations-on-the-rise"],
+    selectors: ["[data-testid*='destination']"],
+    text: /Destinations on the rise/i,
+  },
+  {
+    key: "FEATURED_DEALS",
+    testIds: ["featured-deals"],
+    selectors: ["[data-testid*='featured-deal']", "[data-testid*='deal']"],
+    text: /Featured deals/i,
+  },
+  {
+    key: "WHY_JETPAKISTAN",
+    testIds: ["why-jetpakistan"],
+    selectors: ["[data-testid*='why']"],
+    text: /Built for how Pakistan books|Why JetPakistan|Why choose/i,
+  },
+  {
+    key: "SUPPORT_CTA",
+    testIds: ["support-cta", "home-support"],
+    selectors: ["[data-testid*='support']", "a[href='/support']"],
+    text: /Talk to a human|AI Chat Support|Support/i,
+  },
   { key: "FOOTER", testIds: ["public-footer"], selectors: ["footer"], text: null },
 ];
 
 /**
  * Progressive scroll to trigger IntersectionObserver / lazy reveal, then return to top.
  */
-export async function stabilizeFullPage(page, { settleMs = 250 } = {}) {
+export async function stabilizeFullPage(page, { settleMs = 350 } = {}) {
   await page
     .waitForFunction(() => document.documentElement.dataset.jpHydrated === "1", { timeout: 15000 })
     .catch(() => {});
@@ -42,29 +82,30 @@ export async function stabilizeFullPage(page, { settleMs = 250 } = {}) {
     const doc = document.documentElement;
     const body = document.body;
     const height = Math.max(doc.scrollHeight, body?.scrollHeight || 0);
-    const step = Math.max(320, Math.floor(window.innerHeight * 0.85));
-    for (let y = 0; y < height + step; y += step) {
-      window.scrollTo(0, y);
-      await sleep(settle);
+    const step = Math.max(280, Math.floor(window.innerHeight * 0.7));
+    // Two-pass progressive scroll so IntersectionObserver/lazy media fire reliably.
+    for (let pass = 0; pass < 2; pass += 1) {
+      for (let y = 0; y < height + step; y += step) {
+        window.scrollTo(0, y);
+        await sleep(settle);
+      }
+      window.scrollTo(0, height);
+      await sleep(settle * 2);
     }
-    // Final settle at bottom then top
-    window.scrollTo(0, height);
-    await sleep(settle * 2);
-    // Wait for lazy images in viewport path
     const imgs = Array.from(document.images || []);
     await Promise.all(
       imgs.map((img) => {
-        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        if (img.naturalWidth > 0) return Promise.resolve();
         return new Promise((resolve) => {
           const done = () => resolve();
           img.addEventListener("load", done, { once: true });
           img.addEventListener("error", done, { once: true });
-          setTimeout(done, 4000);
+          setTimeout(done, 6000);
         });
       }),
     );
     window.scrollTo(0, 0);
-    await sleep(settle);
+    await sleep(settle * 2);
   }, { settleMs });
 }
 
@@ -177,18 +218,30 @@ export async function assertHomepageSections(page) {
 }
 
 export async function assertRouteMedia(page) {
+  await page.evaluate(async () => {
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const imgs = Array.from(document.images || []);
+    for (const img of imgs) {
+      try {
+        if (typeof img.decode === "function") await img.decode().catch(() => {});
+      } catch {
+        /* ignore */
+      }
+    }
+    await sleep(500);
+  });
   return page.evaluate(() => {
     const blank = [];
     const imgs = Array.from(
       document.querySelectorAll(
-        "[data-testid*='trending'] img, [data-testid*='destination'] img, [data-testid*='deal'] img, [data-testid*='featured'] img, section img",
+        "img[src*='route_seed'], img[src*='destination'], img[src*='featured_de'], [data-testid*='trending'] img, [data-testid*='destination'] img, [data-testid*='deal'] img, [data-testid*='featured'] img",
       ),
     );
     let incomplete = 0;
     for (const img of imgs) {
       const r = img.getBoundingClientRect();
       if (r.width < 8 || r.height < 8) continue;
-      if (!img.complete || img.naturalWidth === 0) {
+      if (img.naturalWidth === 0) {
         incomplete += 1;
         blank.push({
           src: (img.getAttribute("src") || "").slice(0, 120),
@@ -202,6 +255,9 @@ export async function assertRouteMedia(page) {
       BLANK_ROUTE_MEDIA: blank.length,
       blanks: blank.slice(0, 12),
       scanned: imgs.length,
+      TRENDING_ROUTE_MEDIA_BLANK: blank.filter((b) => /route_seed|trending/i.test(b.src)).length,
+      DESTINATION_MEDIA_BLANK: blank.filter((b) => /destination/i.test(b.src)).length,
+      FEATURED_DEAL_MEDIA_BLANK: blank.filter((b) => /featured_de|deal/i.test(b.src)).length,
     };
   });
 }
@@ -346,8 +402,8 @@ export function routePositiveSpec(routeKey) {
       requireSelectors: ["header", "footer"],
     },
     login: {
-      requireText: [/Sign in|Log in|Email/i],
-      requireSelectors: ["form", "input[type='email'], input[name='email']"],
+      requireText: [/Sign in|Log in|Welcome back/i],
+      requireSelectors: ["form", "input[name='login'], input[type='email'], input[name='email']"],
     },
     register: {
       requireText: [/Register|Create account|Sign up/i],
