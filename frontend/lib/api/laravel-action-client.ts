@@ -1,4 +1,4 @@
-import { laravelApiPath } from "@/services/flight-search";
+import { absoluteLaravelUrl, laravelApiPath } from "@/services/flight-search";
 import { pathAllowsCsrfAutoRetry, shouldRetryAfterCsrfExpired } from "./csrf-retry-policy.mjs";
 import { normalizeNonJsonPayload } from "./response-payload-policy.mjs";
 import type { ApiResult, LaravelRequestOptions } from "./types";
@@ -8,6 +8,17 @@ const JSON_HEADERS = {
   Accept: "application/json",
   "X-Requested-With": "XMLHttpRequest",
 } as const;
+
+/**
+ * Browser: same-origin `/laravel/*` proxy.
+ * Server (RSC/SSR): absolute LARAVEL_URL — relative `/laravel` is not valid in Node fetch.
+ */
+function resolveLaravelFetchUrl(path: string): string {
+  if (typeof window === "undefined") {
+    return absoluteLaravelUrl(path);
+  }
+  return laravelApiPath(path);
+}
 
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -29,7 +40,7 @@ export async function ensureLaravelCsrfToken(forceRefresh = false): Promise<stri
   }
 
   try {
-    const response = await fetch(laravelApiPath("/api/public/content/csrf-token"), {
+    const response = await fetch(resolveLaravelFetchUrl("/api/public/content/csrf-token"), {
       credentials: "include",
       headers: JSON_HEADERS,
       cache: "no-store",
@@ -102,7 +113,7 @@ async function executeRequest<T>(
   };
 
   try {
-    const response = await fetch(laravelApiPath(path), {
+    const response = await fetch(resolveLaravelFetchUrl(path), {
       method,
       credentials: "include",
       headers,
