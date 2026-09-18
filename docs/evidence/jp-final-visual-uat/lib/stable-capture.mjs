@@ -71,41 +71,42 @@ export const HOMEPAGE_SECTIONS = [
 /**
  * Progressive scroll to trigger IntersectionObserver / lazy reveal, then return to top.
  */
-export async function stabilizeFullPage(page, { settleMs = 350 } = {}) {
+export async function stabilizeFullPage(page, { settleMs = 200 } = {}) {
   await page
-    .waitForFunction(() => document.documentElement.dataset.jpHydrated === "1", { timeout: 15000 })
+    .waitForFunction(() => document.documentElement.dataset.jpHydrated === "1", { timeout: 12000 })
     .catch(() => {});
-  await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+  await page.waitForLoadState("domcontentloaded", { timeout: 10000 }).catch(() => {});
 
   await page.evaluate(async ({ settleMs: settle }) => {
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     const doc = document.documentElement;
     const body = document.body;
-    const height = Math.max(doc.scrollHeight, body?.scrollHeight || 0);
-    const step = Math.max(280, Math.floor(window.innerHeight * 0.7));
-    // Two-pass progressive scroll so IntersectionObserver/lazy media fire reliably.
+    const height = Math.min(Math.max(doc.scrollHeight, body?.scrollHeight || 0), 20000);
+    const step = Math.max(320, Math.floor(window.innerHeight * 0.85));
+    const maxSteps = 36;
     for (let pass = 0; pass < 2; pass += 1) {
-      for (let y = 0; y < height + step; y += step) {
+      let steps = 0;
+      for (let y = 0; y < height + step && steps < maxSteps; y += step, steps += 1) {
         window.scrollTo(0, y);
         await sleep(settle);
       }
       window.scrollTo(0, height);
-      await sleep(settle * 2);
+      await sleep(settle);
     }
-    const imgs = Array.from(document.images || []);
+    const imgs = Array.from(document.images || []).slice(0, 40);
     await Promise.all(
       imgs.map((img) => {
-        if (img.naturalWidth > 0) return Promise.resolve();
+        if (img.complete || img.naturalWidth > 0) return Promise.resolve();
         return new Promise((resolve) => {
           const done = () => resolve();
           img.addEventListener("load", done, { once: true });
           img.addEventListener("error", done, { once: true });
-          setTimeout(done, 6000);
+          setTimeout(done, 2500);
         });
       }),
     );
     window.scrollTo(0, 0);
-    await sleep(settle * 2);
+    await sleep(settle);
   }, { settleMs });
 }
 
@@ -220,15 +221,25 @@ export async function assertHomepageSections(page) {
 export async function assertRouteMedia(page) {
   await page.evaluate(async () => {
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-    const imgs = Array.from(document.images || []);
-    for (const img of imgs) {
+    const selector =
+      "img[src*='route_seed'], img[src*='destination'], img[src*='featured_de'], [data-testid*='trending'] img, [data-testid*='destination'] img, [data-testid*='deal'] img, [data-testid*='featured'] img";
+    const targets = Array.from(document.querySelectorAll(selector)).slice(0, 40);
+    for (const img of targets) {
       try {
-        if (typeof img.decode === "function") await img.decode().catch(() => {});
+        img.loading = "eager";
+        img.scrollIntoView({ block: "center", inline: "nearest" });
       } catch {
         /* ignore */
       }
+      await sleep(120);
+      if (typeof img.decode === "function") {
+        await Promise.race([
+          img.decode().then(() => undefined).catch(() => undefined),
+          sleep(2500),
+        ]);
+      }
     }
-    await sleep(500);
+    await sleep(400);
   });
   return page.evaluate(() => {
     const blank = [];
@@ -520,8 +531,12 @@ export async function assertGroupPaymentVisual(page) {
     let mobileFull = "N/A";
     let desktopCompact = "N/A";
     let detached = "NO";
+    let ctaWidth = 0;
+    let finalActionContentWidth = 0;
+    let ctaRatio = 0;
     if (cta) {
       const r = cta.getBoundingClientRect();
+      ctaWidth = Math.round(r.width);
       const st = getComputedStyle(cta);
       const bg = st.backgroundColor;
       const looksButton =
@@ -532,13 +547,16 @@ export async function assertGroupPaymentVisual(page) {
         (parseFloat(st.paddingLeft) > 8 || parseFloat(st.paddingInlineStart || "0") > 8);
       ctaVisual = looksButton ? "PASS" : "FAIL";
       const wrap = cta.closest("[data-testid='group-payment-final-action']") || cta.parentElement;
-      if (vw < 768 && wrap) {
+      if (wrap) {
         const wr = wrap.getBoundingClientRect();
         const pad =
           (parseFloat(getComputedStyle(wrap).paddingLeft) || 0) +
           (parseFloat(getComputedStyle(wrap).paddingRight) || 0);
-        const contentW = Math.max(8, wr.width - pad);
-        mobileFull = r.width >= contentW * 0.92 ? "YES" : "NO";
+        finalActionContentWidth = Math.round(Math.max(8, wr.width - pad));
+        ctaRatio = finalActionContentWidth > 0 ? Number((r.width / finalActionContentWidth).toFixed(3)) : 0;
+      }
+      if (vw < 768 && wrap) {
+        mobileFull = ctaRatio >= 0.92 ? "YES" : "NO";
       } else if (vw >= 768) {
         desktopCompact = r.width < vw * 0.75 ? "YES" : "NO";
       }
@@ -589,6 +607,9 @@ export async function assertGroupPaymentVisual(page) {
       MOBILE_CTA_FULL_WIDTH: mobileFull,
       DESKTOP_CTA_COMPACT: desktopCompact,
       CTA_NOT_DETACHED: detached === "NO" ? "YES" : "NO",
+      CTA_WIDTH: ctaWidth,
+      FINAL_ACTION_CONTENT_WIDTH: finalActionContentWidth,
+      CTA_RATIO: ctaRatio,
       BOOKING_SUMMARY_ORDER: orderPass,
       HEADER_COLLISION: headerCollision,
       methodCount: cards.length,
