@@ -80,7 +80,7 @@ export function PublicShell({
       <div className="jp-page flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-jp-page text-jp-text">
         <PublicRoutePrefetch />
         <SiteHeader session={session} branding={branding} aiEnabled={aiEnabled} />
-        <main id="main-content" className="jp-main flex-1">
+        <main id="main-content" className="jp-main min-w-0 flex-1 overflow-x-clip">
           {children}
         </main>
         {hideFooter ? null : <SiteFooter branding={branding} />}

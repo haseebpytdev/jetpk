@@ -18,11 +18,15 @@ function check(label, ok) {
 }
 
 const faviconPaths = [
-  join(root, "app/favicon.ico"),
   join(root, "public/favicon.ico"),
   join(repoRoot, "public/favicon.ico"),
   join(repoRoot, "public/client-assets/jetpk/favicon/favicon.ico"),
 ];
+
+check(
+  "frontend/app/favicon.ico removed (no Next special-file competitor)",
+  !existsSync(join(root, "app/favicon.ico")),
+);
 
 for (const path of faviconPaths) {
   const size = existsSync(path) ? statSync(path).size : 0;
@@ -57,7 +61,15 @@ check(
   "jp-fab-content-clear clears Ask FAB footprint (>=5.5rem)",
   /jp-fab-content-clear[\s\S]*?5\.5rem/.test(globals),
 );
-check("frontend/app/icon.png removed (no default Next metadata icon)", !existsSync(join(root, "app/icon.png")));
+check(
+  "homepage passes Company Profile branding into PublicShell",
+  /PublicShell[\s\S]*branding=\{branding\}/.test(read("app/page.tsx")) &&
+    /logo_url:\s*config\.logo_url/.test(read("app/page.tsx")),
+);
+check(
+  "homepage generateMetadata sets icons via resolveFaviconUrl",
+  /resolveFaviconUrl/.test(read("app/page.tsx")) && /icons:/.test(read("app/page.tsx")),
+);
 check(
   "globals.css hides dock while Ask panel open",
   /data-jp-ask-open="1"[\s\S]*?\.jp-public-fab-dock/.test(globals),
