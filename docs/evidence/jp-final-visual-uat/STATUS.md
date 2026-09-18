@@ -1,34 +1,29 @@
-# CLOSURE-05 Visual Branding — Evidence Status (NOT VERIFIED PASS)
+# CLOSURE-05 Visual Branding — Evidence Status (CORRECTION-06)
 
-## Handoff for ChatGPT visual review
+## Engineering tip (main)
 
-EVIDENCE_BRANCH=evidence/jp-final-visual-uat-20260917
-MANIFEST_PATH=docs/evidence/jp-final-visual-uat/manifest.md
-SCREENSHOT_DIR=docs/evidence/jp-final-visual-uat/groups/
+FINAL_RELEASE_SHA_CANDIDATE=`08cb61c4e78ee6af340d11252c16f79ec7496945`
 
-## Engineering (deploy candidate — visual gate still open)
+## This evidence branch
 
-- Group payment page restored to Golden card hierarchy: Complete payment → booking summary (mobile-first) → status/timer → method cards → details → submit CTA
-- Client validation via `noValidate` + field errors + FormErrorSummary (no native-required tooltip dependency)
-- Public config API emits Company Profile `logo_url` / `favicon_url` / `header_logo_height` / resolver `brand_name`
-- Next root + public layouts resolve favicon from PublicConfig; header logo fallback uses existing `logo.svg`
-- Email branding prefers `jetpk_company_branding()->logoUrl()`
+EVIDENCE_BRANCH=`evidence/jp-final-visual-uat-20260917`
+Merged main CORRECTION-06 (workflow + source). Evidence branch retained — **do not delete**.
 
-## Local proof (synthetic / mocked)
+## What CORRECTION-06 fixed in source
 
-- Playwright `group-ticketing.spec.ts`: 5 passed
-- PHPUnit branding propagation + public config structure: passed
-- Favicon static regression: passed
-- Group payment screenshots: 320/360/375/390/412/768/1024/1440 + validation + method-selected states
+- H1 Complete payment above BookingProgress
+- Removed GroupPriceBlock duplicate on payment page
+- Stronger `jp-fab-content-clear` (5.5rem) for Ask FAB
+- customer/agent/flights layouts pass PublicConfig branding
+- Dashboard favicon from Company Profile via public config
+- Removed default Next `app/icon.png`
 
-## Still blocked for VERIFIED PASS
+## Still NOT final visual certification
 
-- Live production deploy of engineering SHA
-- Live Group payment recapture after deploy
-- Live Company Profile logo/favicon upload E2E + project-wide favicon matrix
-- Full safe route screenshot sweep (public/auth/flights/checkout/portals)
-- ChatGPT visual certification
-- Exact SHA parity gates
+- Existing group payment PNGs remain **local mock** until protected deploy of `08cb61c4` + live recapture from https://jetpakistan.pk
+- Full route matrix + logo/favicon live E2E + artifact run IDs still required
 
 STATUS=VISUAL_APPROVAL_GATE_OPEN
+SOURCE=local mocked (preliminary) until live deploy
 VERIFIED_PASS=NO
+VISUAL_PASS=NO

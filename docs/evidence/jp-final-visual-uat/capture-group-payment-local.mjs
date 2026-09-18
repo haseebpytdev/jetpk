@@ -152,8 +152,8 @@ try {
 
   for (const width of widths) {
     await page.setViewportSize({ width, height: width < 768 ? 844 : 900 });
-    await page.goto(`${baseURL}/groups/booking/GRP-VISUAL-QA/payment`, { waitUntil: "networkidle" });
-    await page.getByRole("heading", { name: "Complete payment" }).waitFor({ timeout: 15000 });
+    await page.goto(`${baseURL}/groups/booking/GRP-VISUAL-QA/payment`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await page.getByRole("heading", { name: "Complete payment" }).waitFor({ timeout: 30000 });
 
     const file = `group-payment-w${width}.png`;
     const abs = path.join(outDir, file);
