@@ -17,7 +17,7 @@ function isInternalHref(href: string): boolean {
 
 export function SiteFooter({ className, branding = null }: SiteFooterProps) {
   return (
-    <footer className={cn("bg-jp-footer text-white", className)} role="contentinfo">
+    <footer className={cn("jp-fab-footer-clear bg-jp-footer text-white", className)} role="contentinfo">
       <PageContainer className="py-5 sm:py-6">
         <div className="grid gap-5 lg:grid-cols-[1.25fr_repeat(4,minmax(0,1fr))] lg:gap-6">
           <div className="space-y-2.5">

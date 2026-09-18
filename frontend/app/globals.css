@@ -66,6 +66,11 @@ body {
     padding-right: max(5.5rem, calc(env(safe-area-inset-right) + 4.5rem)) !important;
   }
 
+  /* Footer / end-of-page blocks that scroll under the fixed Ask FAB dock. */
+  .jp-fab-footer-clear {
+    padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem)) !important;
+  }
+
   html[data-jp-ask-open="1"] .jp-public-fab-dock {
     visibility: hidden;
     pointer-events: none;
