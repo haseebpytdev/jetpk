@@ -20,7 +20,8 @@ ACTIVE_MANIFESTS = [
     "manifest-golden-flights-live.json",
     "manifest-logo-favicon-matrix.json",
     "manifest-functional-regression.json",
-    "manifest.json",
+    # legacy top-level manifest.json points at obsolete groups/group-payment-w*.png
+    # and must not gate the active live artifact.
 ]
 
 ARCHIVE_MARKERS = ("archive-rejected-", "archive/")
