@@ -22,12 +22,12 @@ export function AuthPageShell({
   children,
 }: AuthPageShellProps) {
   return (
-    <PageContainer className="py-jp-lg sm:py-jp-xl">
+    <PageContainer className="jp-fab-footer-clear py-jp-lg sm:py-jp-xl">
       <div
         className="jp-auth grid items-stretch gap-jp-lg lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-jp-xl"
         data-testid="auth-page-shell"
       >
-        <div className="order-2 lg:order-1">
+        <div className="order-2 jp-fab-card-clear lg:order-1">
           <AuthIllustrationPanel
             eyebrow={eyebrow}
             headline={headline}

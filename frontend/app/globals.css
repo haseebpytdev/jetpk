@@ -71,6 +71,12 @@ body {
     padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem)) !important;
   }
 
+  /* Auth / marketing cards near the bottom of short viewports. */
+  .jp-fab-card-clear {
+    padding-right: max(5.5rem, calc(env(safe-area-inset-right) + 4.5rem)) !important;
+    padding-bottom: max(5.25rem, calc(env(safe-area-inset-bottom) + 4.25rem)) !important;
+  }
+
   html[data-jp-ask-open="1"] .jp-public-fab-dock {
     visibility: hidden;
     pointer-events: none;

@@ -67,15 +67,34 @@ function parseLaravelError(body: Record<string, unknown>, status: number): ReadO
   });
 }
 
+async function serverForwardCookieHeader(): Promise<string | undefined> {
+  if (typeof window !== "undefined") {
+    return undefined;
+  }
+  try {
+    const { cookies } = await import("next/headers");
+    const jar = await cookies();
+    const all = jar.getAll();
+    if (!all.length) return undefined;
+    return all.map((c) => `${c.name}=${c.value}`).join("; ");
+  } catch {
+    return undefined;
+  }
+}
+
 export async function fetchDashboardApi<T>(
   path: string,
   options?: LaravelFetchOptions,
 ): Promise<ReadOnlyResponseEnvelope<T>> {
   const url = `${dashboardApiUrl(path)}${serializeQuery(options?.query)}`;
+  const cookieHeader = await serverForwardCookieHeader();
   const response = await fetch(url, {
     method: "GET",
     credentials: "same-origin",
-    headers: { Accept: "application/json" },
+    headers: {
+      Accept: "application/json",
+      ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+    },
     signal: options?.signal,
     cache: "no-store",
   });
@@ -87,9 +106,10 @@ export async function fetchDashboardApi<T>(
     } catch {
       /* ignore */
     }
-    throw Object.assign(new Error(parseLaravelError(body, response.status).error.message), {
-      envelope: parseLaravelError(body, response.status),
-    });
+    // Must be ReadOnlyServiceError so overview maps unauthorized/forbidden correctly
+    // instead of collapsing to OV-UNKNOWN.
+    const { ReadOnlyServiceError } = await import("@/lib/read-only/read-only-service");
+    throw new ReadOnlyServiceError(parseLaravelError(body, response.status));
   }
 
   const payload = (await response.json()) as Record<string, unknown>;

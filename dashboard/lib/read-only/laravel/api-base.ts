@@ -1,7 +1,34 @@
-/** Laravel API base URL — empty string means same-origin (production mount under Laravel). */
+/**
+ * Laravel API base URL for dashboard read-only calls.
+ *
+ * Browser: prefer explicit NEXT_PUBLIC_LARAVEL_API_BASE, else same-origin `/laravel`
+ * (OLS bridges `/laravel` → public Next → Laravel). Never use bare `/api/...` from
+ * the dashboard origin — that 404s on Next :3001.
+ *
+ * Server: prefer LARAVEL_URL / NEXT_PUBLIC_LARAVEL_URL, else public `/laravel` mount.
+ */
 export function getLaravelApiBase(): string {
-  const base = process.env.NEXT_PUBLIC_LARAVEL_API_BASE ?? "";
-  return base.replace(/\/$/, "");
+  const configured = (process.env.NEXT_PUBLIC_LARAVEL_API_BASE ?? "").replace(/\/$/, "");
+  if (configured !== "") {
+    return configured;
+  }
+
+  if (typeof window === "undefined") {
+    const laravel =
+      process.env.LARAVEL_URL?.trim().replace(/\/$/, "") ||
+      process.env.NEXT_PUBLIC_LARAVEL_URL?.trim().replace(/\/$/, "") ||
+      "";
+    if (laravel !== "") {
+      return laravel;
+    }
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "") ||
+      process.env.APP_URL?.trim().replace(/\/$/, "") ||
+      "https://jetpakistan.pk";
+    return `${appUrl}/laravel`;
+  }
+
+  return "/laravel";
 }
 
 export function dashboardApiUrl(path: string): string {

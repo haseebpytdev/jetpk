@@ -155,10 +155,10 @@ export function GroupPaymentPage({ bookingRef }: GroupPaymentPageProps) {
                   <label
                     key={method.value}
                     className={cn(
-                      "flex cursor-pointer gap-3 rounded-jp-md border p-3.5 transition-colors sm:p-4",
+                      "flex cursor-pointer gap-3 rounded-jp-lg border-2 bg-jp-surface p-3.5 transition-colors sm:p-4",
                       selected
-                        ? "border-jp-primary bg-jp-primary-soft/40 shadow-sm"
-                        : "border-jp-border bg-jp-page/40 hover:border-jp-primary/40",
+                        ? "border-jp-primary bg-jp-primary-soft/50 shadow-jp-sm"
+                        : "border-jp-border hover:border-jp-primary/50",
                     )}
                     data-testid={`group-payment-method-${method.value}`}
                   >
@@ -170,9 +170,9 @@ export function GroupPaymentPage({ bookingRef }: GroupPaymentPageProps) {
                       onChange={() => setPaymentMethod(method.value)}
                       className="mt-1 h-4 w-4 shrink-0 border-jp-border text-jp-brand focus-visible:shadow-jp-focus"
                     />
-                    <span className="min-w-0">
-                      <span className="block text-jp-sm font-semibold text-jp-text">{method.title}</span>
-                      <span className="mt-1 block text-jp-xs leading-relaxed text-jp-muted">{method.hint}</span>
+                    <span className="min-w-0 space-y-1">
+                      <span className="block text-jp-sm font-semibold leading-snug text-jp-text">{method.title}</span>
+                      <span className="block text-jp-xs leading-relaxed text-jp-muted">{method.hint}</span>
                     </span>
                   </label>
                 );
@@ -259,10 +259,14 @@ export function GroupPaymentPage({ bookingRef }: GroupPaymentPageProps) {
             </p>
           ) : null}
 
-          <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 sm:p-5" data-testid="group-payment-final-action">
+          <div
+            className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 sm:p-5 max-lg:jp-fab-content-clear"
+            data-testid="group-payment-final-action"
+          >
             <PrimaryButton
               type="submit"
-              className="w-full max-lg:max-w-full lg:w-auto"
+              fullWidth
+              className="w-full max-lg:!w-full lg:!w-auto lg:min-w-[14rem]"
               disabled={submitting || expired}
               data-testid="group-payment-submit"
             >
@@ -274,7 +278,7 @@ export function GroupPaymentPage({ bookingRef }: GroupPaymentPageProps) {
           </div>
         </form>
 
-        <aside className="order-1 min-w-0 space-y-4 lg:sticky lg:top-24 lg:order-2">
+        <aside className="order-1 min-w-0 space-y-4 max-lg:mb-2 lg:sticky lg:top-24 lg:order-2">
           <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4" aria-labelledby="group-booking-summary-heading">
             <h2 id="group-booking-summary-heading" className="text-jp-base font-semibold text-jp-text">
               Booking summary
