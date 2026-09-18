@@ -15,6 +15,7 @@ import {
   measureFabOverlap,
   measureOverflow,
   assertPositiveRoute,
+  assertExpectedPublicBuild,
   verdictFromParts,
 } from "./lib/stable-capture.mjs";
 
@@ -61,6 +62,18 @@ const context = await browser.newContext({
 });
 const page = await context.newPage();
 
+// Fail-fast: homepage must serve expected final public build (no restamp).
+{
+  await page.goto(`${baseURL}/`, { waitUntil: "domcontentloaded", timeout: 60000 });
+  await stabilizeFullPage(page);
+  const buildCheck = await assertExpectedPublicBuild(page, publicBuildId);
+  console.log("OBSERVED_PUBLIC_BUILD", buildCheck.observed, "EXPECTED", publicBuildId);
+  if (!buildCheck.ok) {
+    console.error("PUBLIC_BUILD_MISMATCH", buildCheck.reason);
+    process.exit(3);
+  }
+}
+
 for (const route of routes) {
   const widths = route.highRisk ? highRiskWidths : standardWidths;
   for (const width of widths) {
@@ -71,6 +84,7 @@ for (const route of routes) {
     const reject = await assertNoRejectState(page);
     const overflow = await measureOverflow(page);
     const fab = await measureFabOverlap(page);
+    const buildCheck = await assertExpectedPublicBuild(page, publicBuildId);
     let sections = null;
     let media = null;
     let positive = null;
@@ -121,6 +135,7 @@ for (const route of routes) {
         reason: positive.ok ? null : `positive:${positive.fails.join(",")}`,
       });
     }
+    parts.push({ ok: buildCheck.ok, reason: buildCheck.reason });
 
     const file = `${route.key}-w${width}.png`;
     const abs = path.join(outRoot, route.dir, file);
@@ -133,6 +148,7 @@ for (const route of routes) {
       ROLE: "anonymous",
       STATE: "stable_default",
       PUBLIC_BUILD_ID: publicBuildId,
+      OBSERVED_PUBLIC_BUILD_ID: buildCheck.observed,
       RELEASE_SHA: releaseSha,
       SOURCE: "live production",
       NOTES: v.NOTES,
@@ -144,6 +160,7 @@ for (const route of routes) {
         sections,
         media,
         positive,
+        buildCheck,
         HOME_SCROLL_STABILIZED: route.homeSections ? "YES" : "N/A",
         MISSING_APPROVED_HOMEPAGE_SECTIONS: sections?.MISSING_APPROVED_HOMEPAGE_SECTIONS ?? null,
         TRENDING_ROUTE_MEDIA_BLANK: media?.BLANK_ROUTE_MEDIA ?? null,

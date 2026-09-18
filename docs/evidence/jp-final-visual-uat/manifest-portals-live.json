@@ -1,0 +1,254 @@
+{
+  "releaseSha": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+  "publicBuildId": "FfNP1fgjiB4_gK6lNt4FI",
+  "dashboardBuildId": "dOefZBIOnEl7EbTETViNa",
+  "harness": "correction-08-portals-only",
+  "NOTE": "Portals + flights-entry only. Golden flights live in manifest-golden-flights-live.json.",
+  "rows": [
+    {
+      "FILE": "flights/flights-entry-w390.png",
+      "URL_ROUTE": "/flights",
+      "VIEWPORT": 390,
+      "ROLE": "anonymous",
+      "STATE": "entry",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "PASS",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "flights/flights-entry-w1440.png",
+      "URL_ROUTE": "/flights",
+      "VIEWPORT": 1440,
+      "ROLE": "anonymous",
+      "STATE": "entry",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "PASS",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "portals/customer-dashboard-w390.png",
+      "URL_ROUTE": "/customer/dashboard",
+      "VIEWPORT": 390,
+      "ROLE": "customer",
+      "STATE": "authenticated_stable",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "DASHBOARD_BUILD_ID": "dOefZBIOnEl7EbTETViNa",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "ox": {
+          "overflowX": 0,
+          "path": "/customer/dashboard"
+        },
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Dashboard overview",
+          "path": "/customer/dashboard"
+        },
+        "styled": {
+          "ADMIN_DASHBOARD_STYLED": "N/A",
+          "hasBrand": true
+        },
+        "path": "/customer/dashboard"
+      }
+    },
+    {
+      "FILE": "portals/customer-dashboard-w1440.png",
+      "URL_ROUTE": "/customer/dashboard",
+      "VIEWPORT": 1440,
+      "ROLE": "customer",
+      "STATE": "authenticated_stable",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "DASHBOARD_BUILD_ID": "dOefZBIOnEl7EbTETViNa",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "ox": {
+          "overflowX": 0,
+          "path": "/customer/dashboard"
+        },
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Dashboard overview",
+          "path": "/customer/dashboard"
+        },
+        "styled": {
+          "ADMIN_DASHBOARD_STYLED": "N/A",
+          "hasBrand": true
+        },
+        "path": "/customer/dashboard"
+      }
+    },
+    {
+      "FILE": "portals/agent-dashboard-w390.png",
+      "URL_ROUTE": "/agent/dashboard",
+      "VIEWPORT": 390,
+      "ROLE": "agent",
+      "STATE": "authenticated_stable",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "DASHBOARD_BUILD_ID": "dOefZBIOnEl7EbTETViNa",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "ox": {
+          "overflowX": 0,
+          "path": "/agent/dashboard"
+        },
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Dashboard overview",
+          "path": "/agent/dashboard"
+        },
+        "styled": {
+          "ADMIN_DASHBOARD_STYLED": "N/A",
+          "hasBrand": true
+        },
+        "path": "/agent/dashboard"
+      }
+    },
+    {
+      "FILE": "portals/agent-dashboard-w1440.png",
+      "URL_ROUTE": "/agent/dashboard",
+      "VIEWPORT": 1440,
+      "ROLE": "agent",
+      "STATE": "authenticated_stable",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "DASHBOARD_BUILD_ID": "dOefZBIOnEl7EbTETViNa",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "ox": {
+          "overflowX": 0,
+          "path": "/agent/dashboard"
+        },
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Dashboard overview",
+          "path": "/agent/dashboard"
+        },
+        "styled": {
+          "ADMIN_DASHBOARD_STYLED": "N/A",
+          "hasBrand": true
+        },
+        "path": "/agent/dashboard"
+      }
+    },
+    {
+      "FILE": "portals/admin-dashboard-w1440.png",
+      "URL_ROUTE": "/admin/dashboard",
+      "VIEWPORT": 1440,
+      "ROLE": "admin",
+      "STATE": "authenticated_stable",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "DASHBOARD_BUILD_ID": "dOefZBIOnEl7EbTETViNa",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "ox": {
+          "overflowX": 0,
+          "path": "/admin/dashboard"
+        },
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Dashboard",
+          "path": "/admin/dashboard"
+        },
+        "styled": {
+          "stylesheets": 1,
+          "linkCss": 1,
+          "hasBrand": true,
+          "hasNav": true,
+          "ADMIN_DASHBOARD_STYLED": "YES"
+        },
+        "path": "/admin/dashboard"
+      }
+    },
+    {
+      "FILE": "portals/company-profile-w1440.png",
+      "URL_ROUTE": "/admin/settings/branding",
+      "VIEWPORT": 1440,
+      "ROLE": "admin",
+      "STATE": "authenticated_stable",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "DASHBOARD_BUILD_ID": "dOefZBIOnEl7EbTETViNa",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "ox": {
+          "overflowX": 0,
+          "path": "/admin/settings/branding"
+        },
+        "positive": {
+          "ok": true,
+          "fails": []
+        },
+        "styled": {
+          "ADMIN_DASHBOARD_STYLED": "N/A",
+          "hasBrand": true
+        },
+        "path": "/admin/settings/branding"
+      }
+    }
+  ]
+}

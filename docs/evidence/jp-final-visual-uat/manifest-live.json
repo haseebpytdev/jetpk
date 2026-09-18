@@ -1,19 +1,26 @@
 {
+  "releaseSha": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+  "publicBuildId": "FfNP1fgjiB4_gK6lNt4FI",
+  "harness": "correction-08",
   "rows": [
     {
       "FILE": "public/home-w320.png",
       "URL_ROUTE": "/",
       "VIEWPORT": 320,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -57,8 +64,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Every flight from Pakistan Book Now!"
-        }
+          "h1": "Every flight from Pakistan Book Now!",
+          "path": "/"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "YES",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": 0,
+        "TRENDING_ROUTE_MEDIA_BLANK": 0
       }
     },
     {
@@ -66,15 +83,19 @@
       "URL_ROUTE": "/",
       "VIEWPORT": 360,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -118,8 +139,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Every flight from Pakistan Book Now!"
-        }
+          "h1": "Every flight from Pakistan Book Now!",
+          "path": "/"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "YES",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": 0,
+        "TRENDING_ROUTE_MEDIA_BLANK": 0
       }
     },
     {
@@ -127,15 +158,19 @@
       "URL_ROUTE": "/",
       "VIEWPORT": 375,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -179,8 +214,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Every flight from Pakistan Book Now!"
-        }
+          "h1": "Every flight from Pakistan Book Now!",
+          "path": "/"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "YES",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": 0,
+        "TRENDING_ROUTE_MEDIA_BLANK": 0
       }
     },
     {
@@ -188,15 +233,19 @@
       "URL_ROUTE": "/",
       "VIEWPORT": 390,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -240,8 +289,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Every flight from Pakistan Book Now!"
-        }
+          "h1": "Every flight from Pakistan Book Now!",
+          "path": "/"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "YES",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": 0,
+        "TRENDING_ROUTE_MEDIA_BLANK": 0
       }
     },
     {
@@ -249,15 +308,19 @@
       "URL_ROUTE": "/",
       "VIEWPORT": 412,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -301,8 +364,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Every flight from Pakistan Book Now!"
-        }
+          "h1": "Every flight from Pakistan Book Now!",
+          "path": "/"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "YES",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": 0,
+        "TRENDING_ROUTE_MEDIA_BLANK": 0
       }
     },
     {
@@ -310,15 +383,19 @@
       "URL_ROUTE": "/",
       "VIEWPORT": 768,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -362,8 +439,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Every flight from Pakistan Book Now!"
-        }
+          "h1": "Every flight from Pakistan Book Now!",
+          "path": "/"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "YES",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": 0,
+        "TRENDING_ROUTE_MEDIA_BLANK": 0
       }
     },
     {
@@ -371,15 +458,19 @@
       "URL_ROUTE": "/",
       "VIEWPORT": 1024,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -423,8 +514,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Every flight from Pakistan Book Now!"
-        }
+          "h1": "Every flight from Pakistan Book Now!",
+          "path": "/"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "YES",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": 0,
+        "TRENDING_ROUTE_MEDIA_BLANK": 0
       }
     },
     {
@@ -432,15 +533,19 @@
       "URL_ROUTE": "/",
       "VIEWPORT": 1440,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -484,8 +589,258 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Every flight from Pakistan Book Now!"
-        }
+          "h1": "Every flight from Pakistan Book Now!",
+          "path": "/"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "YES",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": 0,
+        "TRENDING_ROUTE_MEDIA_BLANK": 0
+      }
+    },
+    {
+      "FILE": "public/about-us-w390.png",
+      "URL_ROUTE": "/about-us",
+      "VIEWPORT": 390,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/about-us"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": null,
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "public/about-us-w1440.png",
+      "URL_ROUTE": "/about-us",
+      "VIEWPORT": 1440,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/about-us"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": null,
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "public/support-w390.png",
+      "URL_ROUTE": "/support",
+      "VIEWPORT": 390,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/support"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": null,
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "public/support-w1440.png",
+      "URL_ROUTE": "/support",
+      "VIEWPORT": 1440,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/support"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": null,
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "public/faq-w390.png",
+      "URL_ROUTE": "/faq",
+      "VIEWPORT": 390,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/faq"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": null,
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "public/faq-w1440.png",
+      "URL_ROUTE": "/faq",
+      "VIEWPORT": 1440,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/faq"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": null,
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
     },
     {
@@ -493,15 +848,19 @@
       "URL_ROUTE": "/login",
       "VIEWPORT": 320,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/login"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -521,8 +880,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Log in to your account"
-        }
+          "h1": "Log in to your account",
+          "path": "/login"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
     },
     {
@@ -530,15 +899,19 @@
       "URL_ROUTE": "/login",
       "VIEWPORT": 360,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/login"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -558,8 +931,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Log in to your account"
-        }
+          "h1": "Log in to your account",
+          "path": "/login"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
     },
     {
@@ -567,15 +950,19 @@
       "URL_ROUTE": "/login",
       "VIEWPORT": 375,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/login"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -595,8 +982,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Log in to your account"
-        }
+          "h1": "Log in to your account",
+          "path": "/login"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
     },
     {
@@ -604,15 +1001,19 @@
       "URL_ROUTE": "/login",
       "VIEWPORT": 390,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/login"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -632,8 +1033,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Log in to your account"
-        }
+          "h1": "Log in to your account",
+          "path": "/login"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
     },
     {
@@ -641,15 +1052,19 @@
       "URL_ROUTE": "/login",
       "VIEWPORT": 412,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/login"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -669,8 +1084,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Log in to your account"
-        }
+          "h1": "Log in to your account",
+          "path": "/login"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
     },
     {
@@ -678,15 +1103,19 @@
       "URL_ROUTE": "/login",
       "VIEWPORT": 768,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/login"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -706,8 +1135,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Log in to your account"
-        }
+          "h1": "Log in to your account",
+          "path": "/login"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
     },
     {
@@ -715,15 +1154,19 @@
       "URL_ROUTE": "/login",
       "VIEWPORT": 1024,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/login"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -743,8 +1186,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Log in to your account"
-        }
+          "h1": "Log in to your account",
+          "path": "/login"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
     },
     {
@@ -752,15 +1205,19 @@
       "URL_ROUTE": "/login",
       "VIEWPORT": 1440,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/login"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -780,8 +1237,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Log in to your account"
-        }
+          "h1": "Log in to your account",
+          "path": "/login"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
     },
     {
@@ -789,15 +1256,19 @@
       "URL_ROUTE": "/register",
       "VIEWPORT": 390,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/register"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -817,8 +1288,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Sign up"
-        }
+          "h1": "Sign up",
+          "path": "/register"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
     },
     {
@@ -826,15 +1307,19 @@
       "URL_ROUTE": "/register",
       "VIEWPORT": 1440,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/register"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -854,8 +1339,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Sign up"
-        }
+          "h1": "Sign up",
+          "path": "/register"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
     },
     {
@@ -863,15 +1358,19 @@
       "URL_ROUTE": "/forgot-password",
       "VIEWPORT": 390,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/forgot-password"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -891,8 +1390,18 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Forgot password"
-        }
+          "h1": "Forgot password",
+          "path": "/forgot-password"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
     },
     {
@@ -900,15 +1409,19 @@
       "URL_ROUTE": "/forgot-password",
       "VIEWPORT": 1440,
       "ROLE": "anonymous",
-      "STATE": "settled",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
-      "NOTES": "ok; ok; ok; ok",
+      "NOTES": "ok; ok; ok; ok; ok",
       "SANITIZED": "YES",
       "SELF_REVIEW": "PASS",
       "METRICS": {
-        "overflowX": 0,
+        "overflow": {
+          "overflowX": 0,
+          "path": "/forgot-password"
+        },
         "fab": {
           "fabOverlap": 0,
           "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
@@ -928,12 +1441,453 @@
             "hasSubmitReview": false,
             "methodCards": 0
           },
-          "h1": "Forgot password"
-        }
+          "h1": "Forgot password",
+          "path": "/forgot-password"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
       }
+    },
+    {
+      "FILE": "groups/groups-search-w320.png",
+      "URL_ROUTE": "/groups/search",
+      "VIEWPORT": 320,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/groups/search"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Group Ticketing",
+          "path": "/groups/search"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "groups/groups-search-w360.png",
+      "URL_ROUTE": "/groups/search",
+      "VIEWPORT": 360,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/groups/search"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Group Ticketing",
+          "path": "/groups/search"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "groups/groups-search-w375.png",
+      "URL_ROUTE": "/groups/search",
+      "VIEWPORT": 375,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/groups/search"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Group Ticketing",
+          "path": "/groups/search"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "groups/groups-search-w390.png",
+      "URL_ROUTE": "/groups/search",
+      "VIEWPORT": 390,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/groups/search"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Group Ticketing",
+          "path": "/groups/search"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "groups/groups-search-w412.png",
+      "URL_ROUTE": "/groups/search",
+      "VIEWPORT": 412,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/groups/search"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Group Ticketing",
+          "path": "/groups/search"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "groups/groups-search-w768.png",
+      "URL_ROUTE": "/groups/search",
+      "VIEWPORT": 768,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/groups/search"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Group Ticketing",
+          "path": "/groups/search"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "groups/groups-search-w1024.png",
+      "URL_ROUTE": "/groups/search",
+      "VIEWPORT": 1024,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/groups/search"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Group Ticketing",
+          "path": "/groups/search"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "groups/groups-search-w1440.png",
+      "URL_ROUTE": "/groups/search",
+      "VIEWPORT": 1440,
+      "ROLE": "anonymous",
+      "STATE": "stable_default",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "OBSERVED_PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "ok; ok; ok; ok; ok",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS",
+      "METRICS": {
+        "overflow": {
+          "overflowX": 0,
+          "path": "/groups/search"
+        },
+        "fab": {
+          "fabOverlap": 0,
+          "FAB_MEANINGFUL_CONTENT_OVERLAP": 0,
+          "FAB_CARD_CONTENT_OVERLAP": 0,
+          "FAB_INTERACTIVE_OVERLAP": 0,
+          "FAB_CTA_OVERLAP": 0,
+          "fabHits": []
+        },
+        "sections": null,
+        "media": null,
+        "positive": {
+          "ok": true,
+          "fails": [],
+          "signature": {
+            "hasManualOnly": false,
+            "hasChooseHow": false,
+            "hasSubmitReview": false,
+            "methodCards": 0
+          },
+          "h1": "Group Ticketing",
+          "path": "/groups/search"
+        },
+        "buildCheck": {
+          "ok": true,
+          "observed": "FfNP1fgjiB4_gK6lNt4FI",
+          "expected": "FfNP1fgjiB4_gK6lNt4FI",
+          "reason": null
+        },
+        "HOME_SCROLL_STABILIZED": "N/A",
+        "MISSING_APPROVED_HOMEPAGE_SECTIONS": null,
+        "TRENDING_ROUTE_MEDIA_BLANK": null
+      }
+    },
+    {
+      "FILE": "branding/home-branding-w1440.png",
+      "URL_ROUTE": "/",
+      "VIEWPORT": 1440,
+      "ROLE": "anonymous",
+      "STATE": "branding_header",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "Header branding crop",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
+    },
+    {
+      "FILE": "global/ask-fab-open-w390.png",
+      "URL_ROUTE": "/",
+      "VIEWPORT": 390,
+      "ROLE": "anonymous",
+      "STATE": "ask_fab_open",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+      "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+      "SOURCE": "live production",
+      "NOTES": "Ask FAB open",
+      "SANITIZED": "YES",
+      "SELF_REVIEW": "PASS"
     }
-  ],
-  "fails": 0,
-  "releaseSha": "675c7e5efaa2656b2435c186cfe4665e086676bb",
-  "publicBuildId": "x0Fcwu-hw0F-hU42hMwZe"
+  ]
 }

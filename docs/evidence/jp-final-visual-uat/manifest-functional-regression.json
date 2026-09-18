@@ -1,7 +1,7 @@
 {
   "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
-  "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
-  "DASHBOARD_BUILD_ID": "LqbZGu-MD_-drCGMO63af",
+  "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
+  "DASHBOARD_BUILD_ID": "dOefZBIOnEl7EbTETViNa",
   "PAYMENT_EXECUTED": "NO",
   "PNR_CREATED": "NO",
   "ORDER_CREATED": "NO",
@@ -38,66 +38,6 @@
       "name": "FAQ",
       "ok": "PASS",
       "detail": "http=200 ox=0"
-    },
-    {
-      "name": "FLIGHT_ONE_WAY_RESULTS_w390",
-      "ok": "PASS",
-      "detail": "/flights/results"
-    },
-    {
-      "name": "FLIGHT_ONE_WAY_RESULTS_w1440",
-      "ok": "PASS",
-      "detail": "/flights/results"
-    },
-    {
-      "name": "FLIGHT_RETURN_PAIR_w390",
-      "ok": "PASS",
-      "detail": "/flights/results?trip=return"
-    },
-    {
-      "name": "FLIGHT_RETURN_PAIR_w1440",
-      "ok": "PASS",
-      "detail": "/flights/results?trip=return"
-    },
-    {
-      "name": "FLIGHT_RETURN_SEGMENTED_OUTBOUND_w390",
-      "ok": "PASS",
-      "detail": "/flights/return-options"
-    },
-    {
-      "name": "FLIGHT_RETURN_SEGMENTED_OUTBOUND_w1440",
-      "ok": "PASS",
-      "detail": "/flights/return-options"
-    },
-    {
-      "name": "FLIGHT_DETAILS_w390",
-      "ok": "PASS",
-      "detail": "/flights/details"
-    },
-    {
-      "name": "FLIGHT_DETAILS_w1440",
-      "ok": "PASS",
-      "detail": "/flights/details"
-    },
-    {
-      "name": "FLIGHT_TRAVELER_w390",
-      "ok": "PASS",
-      "detail": "/booking/passengers"
-    },
-    {
-      "name": "FLIGHT_TRAVELER_w1440",
-      "ok": "PASS",
-      "detail": "/booking/passengers"
-    },
-    {
-      "name": "FLIGHT_REVIEW_w390",
-      "ok": "PASS",
-      "detail": "/booking/review"
-    },
-    {
-      "name": "FLIGHT_REVIEW_w1440",
-      "ok": "PASS",
-      "detail": "/booking/review"
     },
     {
       "name": "Customer_AUTH",

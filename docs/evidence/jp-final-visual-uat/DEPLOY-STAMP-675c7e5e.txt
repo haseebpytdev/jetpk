@@ -1,0 +1,14 @@
+# JetPakistan CORRECTION-08 — final deploy provenance (exact-build)
+
+FINAL_RELEASE_SHA=675c7e5efaa2656b2435c186cfe4665e086676bb
+PRODUCTION_RUNTIME_SHA=675c7e5efaa2656b2435c186cfe4665e086676bb
+PUBLIC_BUILD_SOURCE_SHA=675c7e5efaa2656b2435c186cfe4665e086676bb
+DASHBOARD_BUILD_SOURCE_SHA=675c7e5efaa2656b2435c186cfe4665e086676bb
+PUBLIC_BUILD_ID=FfNP1fgjiB4_gK6lNt4FI
+DASHBOARD_BUILD_ID=dOefZBIOnEl7EbTETViNa
+RUNTIME_MARKER=jp-c08-675c7e5e-1789758710
+ROLLBACK_SHA=27a1ed9f3e420862627e2cafc39c1c334cd27a0c
+
+NOTE=Next apps rebuilt from exact tip 675c7e5e (real npm build). Verified on host 2026-09-18 via /home/pkjetp/jetpk_app/{frontend,dashboard}/.next/BUILD_ID and live HTML buildId "b":"FfNP1fgjiB4_gK6lNt4FI".
+
+HISTORICAL=See archive-historical/DEPLOY-STAMP-27a1ed9f.txt for prior x0Fc/Lqb stamp (not active).

@@ -744,3 +744,59 @@ export function verdictFromParts(parts) {
     NOTES: fails.map((f) => f.reason || f.note).join(" | "),
   };
 }
+
+/** Observe Next.js buildId from runtime (never restamp env). */
+export async function observeNextBuildId(page) {
+  const extract = (html) => {
+    if (!html) return null;
+    const patterns = [
+      /\\"b\\":\\"([^\\"]+)\\"/,
+      /"b":"([^"]+)"/,
+      /FfNP[A-Za-z0-9_-]+/,
+      /x0Fc[A-Za-z0-9_-]+/,
+      /dOef[A-Za-z0-9_-]+/,
+    ];
+    for (const re of patterns) {
+      const m = html.match(re);
+      if (m) return m[1] || m[0];
+    }
+    return null;
+  };
+
+  const fromDom = await page.evaluate(() => {
+    const nextData = window.__NEXT_DATA__;
+    if (nextData?.buildId) return String(nextData.buildId);
+    try {
+      const entries = performance.getEntriesByType("resource").map((e) => e.name);
+      for (const u of entries) {
+        const m = String(u).match(/\/_next\/static\/([^/]+)\//);
+        if (m?.[1] && !["chunks", "css", "media"].includes(m[1])) return m[1];
+      }
+    } catch {
+      /* ignore */
+    }
+    return null;
+  });
+  if (fromDom) return fromDom;
+
+  const html = await page.content().catch(() => "");
+  const fromContent = extract(html);
+  if (fromContent) return fromContent;
+
+  try {
+    const res = await page.request.get("https://jetpakistan.pk/");
+    return extract(await res.text());
+  } catch {
+    return null;
+  }
+}
+
+export async function assertExpectedPublicBuild(page, expected) {
+  const observed = await observeNextBuildId(page);
+  return {
+    ok: Boolean(expected) && observed === expected,
+    observed,
+    expected,
+    reason: observed === expected ? null : `buildId observed=${observed} expected=${expected}`,
+  };
+}

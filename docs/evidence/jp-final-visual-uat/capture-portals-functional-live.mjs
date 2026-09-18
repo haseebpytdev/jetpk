@@ -13,6 +13,7 @@ import {
   assertNoRejectState,
   assertPositiveRoute,
   assertStyledApp,
+  assertExpectedPublicBuild,
   measureOverflow,
   measureFabOverlap,
   verdictFromParts,
@@ -108,10 +109,17 @@ const browser = await chromium.launch({ headless: true });
     await page.setViewportSize({ width: w, height: w < 768 ? 844 : 900 });
     await page.goto(`${baseURL}/flights`, { waitUntil: "domcontentloaded", timeout: 60000 });
     await stabilizeFullPage(page);
+    const buildCheck = await assertExpectedPublicBuild(page, publicBuildId);
+    if (!buildCheck.ok) {
+      addCheck("PUBLIC_BUILD_OBSERVED", false, buildCheck.reason);
+      console.error("PUBLIC_BUILD_MISMATCH", buildCheck.reason);
+      await browser.close();
+      process.exit(3);
+    }
     const file = await shot(page, `flights-entry-w${w}.png`, "flights");
     const ox = await measureOverflow(page);
     const reject = await assertNoRejectState(page);
-    const pass = ox.overflowX === 0 && reject.ok;
+    const pass = ox.overflowX === 0 && reject.ok && buildCheck.ok;
     rows.push({
       FILE: file,
       URL_ROUTE: "/flights",
@@ -119,6 +127,7 @@ const browser = await chromium.launch({ headless: true });
       ROLE: "anonymous",
       STATE: "entry",
       PUBLIC_BUILD_ID: publicBuildId,
+      OBSERVED_PUBLIC_BUILD_ID: buildCheck.observed,
       RELEASE_SHA: releaseSha,
       SOURCE: "live production",
       NOTES: pass ? "PASS" : `FAIL ox=${ox.overflowX}`,
@@ -258,9 +267,30 @@ functional.FUNCTIONAL_REGRESSION = failFunc === 0 ? "PASS" : "PARTIAL";
 functional.VISUAL_PORTAL_FAILS = failVisual;
 functional.HARNESS = "correction-08";
 
+const portalsPayload = {
+  releaseSha,
+  publicBuildId,
+  dashboardBuildId,
+  harness: "correction-08-portals-only",
+  NOTE: "Portals + flights-entry only. Golden flights live in manifest-golden-flights-live.json.",
+  rows,
+};
+fs.writeFileSync(path.join(__dirname, "manifest-portals-live.json"), JSON.stringify(portalsPayload, null, 2));
+// Keep legacy filename as a thin pointer so older tooling does not silently use stale golden dupes.
 fs.writeFileSync(
   path.join(__dirname, "manifest-portals-flights-live.json"),
-  JSON.stringify({ releaseSha, publicBuildId, dashboardBuildId, harness: "correction-08", rows }, null, 2),
+  JSON.stringify(
+    {
+      SUPERSEDED_BY: "manifest-portals-live.json",
+      GOLDEN: "manifest-golden-flights-live.json",
+      releaseSha,
+      publicBuildId,
+      dashboardBuildId,
+      rows: [],
+    },
+    null,
+    2,
+  ),
 );
 fs.writeFileSync(path.join(__dirname, "manifest-functional-regression.json"), JSON.stringify(functional, null, 2));
 console.log(
@@ -271,6 +301,8 @@ console.log(
       functionalFails: failFunc,
       FUNCTIONAL_REGRESSION: functional.FUNCTIONAL_REGRESSION,
       releaseSha,
+      publicBuildId,
+      dashboardBuildId,
     },
     null,
     2,
