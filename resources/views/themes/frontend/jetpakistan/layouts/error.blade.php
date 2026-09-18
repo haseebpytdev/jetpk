@@ -22,6 +22,16 @@
 
     $pageTitle = trim($__env->yieldContent('title'));
     $documentTitle = $pageTitle !== '' ? $pageTitle : (function_exists('client_branding') ? client_branding()->companyName() : 'JetPakistan');
+    $jpFavicon = '/favicon.ico';
+    try {
+        if (function_exists('uses_jetpk_company_branding') && uses_jetpk_company_branding() && function_exists('jetpk_company_branding')) {
+            $jpFavicon = jetpk_company_branding()->faviconUrl() ?: $jpFavicon;
+        } elseif (function_exists('client_branding')) {
+            $jpFavicon = client_branding()->faviconUrl() ?: $jpFavicon;
+        }
+    } catch (\Throwable $e) {
+        // Keep static fallback on partial client context.
+    }
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="day">
@@ -29,6 +39,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ $documentTitle }}</title>
+<link rel="icon" href="{{ $jpFavicon }}"/>
+<link rel="shortcut icon" href="{{ $jpFavicon }}"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
