@@ -126,8 +126,12 @@ async function pageMetrics(page) {
           ctaEl.closest('[data-testid="group-payment-final-action"]') ||
           ctaEl.parentElement;
         const cr = card?.getBoundingClientRect?.();
-        const basis = cr && cr.width > 0 ? cr.width : vw * 0.9;
-        mobileFull = r.width >= basis * 0.9 ? "YES" : "NO";
+        const style = card ? getComputedStyle(card) : null;
+        const padX = style
+          ? (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0)
+          : 0;
+        const contentW = cr && cr.width > 0 ? Math.max(8, cr.width - padX) : vw * 0.9;
+        mobileFull = r.width >= contentW * 0.92 ? "YES" : "NO";
       } else {
         desktopCompact = r.width < vw * 0.75 ? "YES" : "NO";
       }
