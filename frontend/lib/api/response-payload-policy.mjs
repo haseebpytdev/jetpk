@@ -13,7 +13,8 @@ export function normalizeNonJsonPayload(contentType, bodyText, defaultMessageFor
   const isJson = contentType.includes("application/json");
   if (isJson) {
     try {
-      return JSON.parse(bodyText);
+      // Strip UTF-8 BOM if a PHP/config file ever emits one before JSON.
+      return JSON.parse(bodyText.replace(/^\uFEFF/, ""));
     } catch {
       return null;
     }

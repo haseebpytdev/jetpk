@@ -79,6 +79,14 @@ assert(htmlPayload?.message?.includes("Something went wrong"), "HTML body uses s
 const malformedJson = normalizeNonJsonPayload("application/json", "{not-json", defaultErrorMessage, 200);
 assert(malformedJson === null, "malformed JSON returns null");
 
+const bomJson = normalizeNonJsonPayload(
+  "application/json",
+  "\uFEFF{\"ok\":true,\"metrics\":{\"upcoming_trips\":0}}",
+  defaultErrorMessage,
+  200,
+);
+assert(bomJson?.ok === true && bomJson?.metrics?.upcoming_trips === 0, "UTF-8 BOM JSON parses to object");
+
 const emptyBody = normalizeNonJsonPayload("text/plain", "   ", defaultErrorMessage, 200);
 assert(emptyBody === null, "empty non-JSON body returns null");
 
@@ -90,4 +98,4 @@ const networkCodes = { network: 0, aborted: 0 };
 assert(networkCodes.network === 0 && networkCodes.aborted === 0, "network and abort use status 0 contract");
 
 if (failed > 0) process.exit(1);
-console.log(`JP-OPS-02 API error regression: ${statusCases.length + 6} assertions passed`);
+console.log(`JP-OPS-02 API error regression: ${statusCases.length + 7} assertions passed`);
