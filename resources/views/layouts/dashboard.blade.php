@@ -23,6 +23,15 @@
         $clientThemeMeta = $previewDashBranding['clientThemeMeta'] ?? [];
     } else {
         $clientThemeMeta = [];
+        // Company Profile favicon (same authority as public/Next shells).
+        if (function_exists('uses_jetpk_company_branding') && uses_jetpk_company_branding() && function_exists('jetpk_company_branding')) {
+            $dashFaviconUrl = jetpk_company_branding()->faviconUrl();
+        } elseif (function_exists('client_branding')) {
+            $dashFaviconUrl = client_branding()->faviconUrl();
+        }
+    }
+    if (! is_string($dashFaviconUrl) || trim($dashFaviconUrl) === '') {
+        $dashFaviconUrl = '/favicon.ico';
     }
     $pageTitleSection = trim($__env->yieldContent('title'));
     $documentTitle = $pageTitleSection !== ''
@@ -88,6 +97,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ $documentTitle }}</title>
+    <link rel="icon" href="{{ $dashFaviconUrl }}"/>
+    <link rel="shortcut icon" href="{{ $dashFaviconUrl }}"/>
     @if(is_client_preview() && ($clientThemeMeta['admin_theme'] ?? '') !== '')
         <meta name="ota-client-slug" content="{{ current_client_slug() }}">
         <meta name="ota-client-admin-theme" content="{{ $clientThemeMeta['admin_theme'] }}">
