@@ -52,29 +52,13 @@ async function head(url) {
   }
 }
 
-const mintOut = ssh("bash /tmp/jp-08cb61c4-mint-qa-session.sh");
-const cookieName = (mintOut.match(/SESSION_COOKIE_NAME=(.+)/) || [])[1]?.trim();
-const cookieValue = (mintOut.match(/SESSION_COOKIE_VALUE=(.+)/) || [])[1]?.trim();
-
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({
   viewport: { width: 1440, height: 900 },
   userAgent:
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 JetPakistanVisualUAT",
 });
-if (cookieName && cookieValue) {
-  await context.addCookies([
-    {
-      name: cookieName,
-      value: cookieValue,
-      domain: "jetpakistan.pk",
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "Lax",
-    },
-  ]);
-}
+// Anonymous context for public/auth routes — auth session can hide auth-layout logos.
 const page = await context.newPage();
 
 const logoRows = [];
@@ -88,11 +72,15 @@ let parwaaz = 0;
 
 for (const route of publicRoutes) {
   await page.goto(`${baseURL}${route}`, { waitUntil: "domcontentloaded", timeout: 60000 });
-  await page.waitForTimeout(900);
+  await page
+    .waitForFunction(() => document.documentElement.dataset.jpHydrated === "1", { timeout: 12000 })
+    .catch(() => {});
+  await page.waitForTimeout(600);
   const info = await page.evaluate(() => {
     const logo =
+      document.querySelector("header img[src*='branding'], header img[src*='storage']") ||
       document.querySelector("header img") ||
-      document.querySelector('a[aria-label*="JetPakistan" i] img') ||
+      document.querySelector('img[alt*="JetPakistan" i][src*="branding"]') ||
       document.querySelector('img[alt*="JetPakistan" i]');
     const icons = [...document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]')];
     return {
@@ -171,16 +159,36 @@ for (const route of publicRoutes) {
   console.log(route, "logo", logoHttp.http, "icon", iconHttp.http, iconAbs?.slice(0, 80));
 }
 
-// Dashboard routes (Next dashboard host may be same domain /admin)
+// Dashboard routes — remint platform admin for Laravel Company Profile page.
+const adminMint = ssh("bash /tmp/jp-c07c-mint-admin-session.sh 9");
+const adminCookieName = (adminMint.match(/SESSION_COOKIE_NAME=(.+)/) || [])[1]?.trim();
+const adminCookieValue = (adminMint.match(/SESSION_COOKIE_VALUE=(.+)/) || [])[1]?.trim();
+if (adminCookieName && adminCookieValue) {
+  await context.clearCookies();
+  await context.addCookies([
+    {
+      name: adminCookieName,
+      value: adminCookieValue,
+      domain: "jetpakistan.pk",
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "Lax",
+    },
+  ]);
+  console.log("ADMIN_AUTH_MINTED", (adminMint.match(/AUTH_EMAIL=(.+)/) || [])[1]?.trim());
+}
+
 const dashRoutes = ["/admin/dashboard", "/admin/settings/branding"];
 for (const route of dashRoutes) {
   await page.goto(`${baseURL}${route}`, { waitUntil: "domcontentloaded", timeout: 60000 }).catch(() => {});
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1500);
   const info = await page.evaluate(() => {
     const logo = document.querySelector("header img, aside img, img[alt*='Jet' i]");
     const icons = [...document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]')];
     return {
       url: location.href,
+      title: document.title,
       logoSrc: logo?.getAttribute("src") || null,
       icons: icons.map((el) => ({ rel: el.getAttribute("rel"), href: el.getAttribute("href") })),
     };
@@ -194,6 +202,8 @@ for (const route of dashRoutes) {
       : new URL(icon.href, page.url()).href
     : null;
   const iconHttp = iconAbs ? await head(iconAbs) : { http: 0, mime: "" };
+  if (!iconAbs || iconHttp.http !== 200) badFavicon += 1;
+  if (iconAbs && /\/favicon\.ico$/i.test(iconAbs) && !/storage\//.test(iconAbs)) defaultNext += 1;
   faviconRows.push({
     ROUTE: route,
     REL_ICON_HREF: icon?.href || null,
@@ -203,16 +213,17 @@ for (const route of dashRoutes) {
     SOURCE_AUTHORITY: /storage\/agencies|company/i.test(iconAbs || "")
       ? "company_profile"
       : "other",
-    FALLBACK_USED: "unknown",
+    FALLBACK_USED: /storage\/agencies/.test(iconAbs || "") ? "NO" : "MAYBE",
     VISUAL_TAB_ICON: "see_browser",
     FINAL_URL: info.url,
+    TITLE: info.title,
     DASHBOARD_BUILD_ID: dashboardBuildId,
     RELEASE_SHA: releaseSha,
     SOURCE: "live production",
     SANITIZED: "YES",
     FILE: `matrices/${file}`,
   });
-  console.log("DASH", route, "->", info.url, "icon", iconHttp.http);
+  console.log("DASH", route, "->", info.url, "icon", iconHttp.http, iconAbs?.slice(0, 80));
 }
 
 await browser.close();

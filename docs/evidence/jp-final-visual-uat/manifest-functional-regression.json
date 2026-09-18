@@ -1,0 +1,115 @@
+{
+  "RELEASE_SHA": "db901c2c7a28a1eb08151e6e5ab3a29d75b7281f",
+  "PUBLIC_BUILD_ID": "nme7eiDlifThiSEn_kQ9U",
+  "DASHBOARD_BUILD_ID": "ztvU2IOk8lbYPPbBjMA7j",
+  "PAYMENT_EXECUTED": "NO",
+  "PNR_CREATED": "NO",
+  "ORDER_CREATED": "NO",
+  "TICKET_ISSUED": "NO",
+  "VOID_EXECUTED": "NO",
+  "REFUND_EXECUTED": "NO",
+  "checks": [
+    {
+      "name": "HOME_SSR_LOGO_SOURCE",
+      "ok": "PASS",
+      "detail": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "name": "HOME_HYDRATED_LOGO_SOURCE",
+      "ok": "PASS",
+      "detail": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "name": "HOME_LOGO_SWAP_AFTER_HYDRATION",
+      "ok": "PASS",
+      "detail": "swap=0"
+    },
+    {
+      "name": "HOME_HTTP",
+      "ok": "PASS",
+      "detail": "200"
+    },
+    {
+      "name": "OTP_FINAL_STATE_OFF",
+      "ok": "PASS",
+      "detail": "otpNodes=0"
+    },
+    {
+      "name": "Homepage",
+      "ok": "PASS",
+      "detail": "http=200 path=/ ox=0"
+    },
+    {
+      "name": "Group Search",
+      "ok": "PASS",
+      "detail": "http=200 path=/groups/search ox=0"
+    },
+    {
+      "name": "Flights entry",
+      "ok": "PASS",
+      "detail": "http=200 path=/ ox=0"
+    },
+    {
+      "name": "Support",
+      "ok": "PASS",
+      "detail": "http=200 path=/support ox=0"
+    },
+    {
+      "name": "FAQ",
+      "ok": "PASS",
+      "detail": "http=200 path=/faq ox=0"
+    },
+    {
+      "name": "Customer_AUTH",
+      "ok": "PASS",
+      "detail": "jp-dash-03-qa-customer@jetpakistan.pk"
+    },
+    {
+      "name": "Customer_customer-dashboard_w390",
+      "ok": "PASS",
+      "detail": "/customer/dashboard"
+    },
+    {
+      "name": "Customer_customer-dashboard_w1440",
+      "ok": "PASS",
+      "detail": "/customer/dashboard"
+    },
+    {
+      "name": "Agent_AUTH",
+      "ok": "PASS",
+      "detail": "jp-dash-03-qa-agent@jetpakistan.pk"
+    },
+    {
+      "name": "Agent_agent-dashboard_w390",
+      "ok": "PASS",
+      "detail": "/agent/dashboard"
+    },
+    {
+      "name": "Agent_agent-dashboard_w1440",
+      "ok": "PASS",
+      "detail": "/agent/dashboard"
+    },
+    {
+      "name": "Admin_AUTH",
+      "ok": "PASS",
+      "detail": "jp-dash-03-qa-admin@jetpakistan.pk"
+    },
+    {
+      "name": "Admin_admin-dashboard_w1440",
+      "ok": "PASS",
+      "detail": "/admin/dashboard"
+    },
+    {
+      "name": "Admin_company-profile_w1440",
+      "ok": "PASS",
+      "detail": "/admin/settings/branding"
+    },
+    {
+      "name": "Ask JetPakistan FAB",
+      "ok": "PASS",
+      "detail": "count=1"
+    }
+  ],
+  "FUNCTIONAL_REGRESSION": "PASS",
+  "VISUAL_PORTAL_FAILS": 0
+}

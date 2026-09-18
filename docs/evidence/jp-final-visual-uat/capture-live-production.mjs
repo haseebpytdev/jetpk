@@ -48,16 +48,55 @@ function metrics(page) {
     const scrollW = Math.max(doc.scrollWidth, body?.scrollWidth || 0);
     const fab = document.querySelector("[data-testid='ask-jetpakistan-fab']");
     let fabOverlap = 0;
+    const fabHits = [];
     if (fab) {
       const fr = fab.getBoundingClientRect();
-      for (const el of body.querySelectorAll("input,button,a,label,h1,h2")) {
-        if (fab === el || fab.contains(el) || el.contains(fab)) continue;
+      // Meaningful interactive/content only — ignore decorative wrappers and the FAB subtree.
+      const candidates = body.querySelectorAll(
+        "a[href], button, input, select, textarea, label, [role='button'], [role='link'], [role='textbox'], h1, h2, p, li, td, th",
+      );
+      for (const el of candidates) {
+        if (fab === el || fab.contains(el) || (el instanceof Element && el.contains(fab))) continue;
+        // Dock siblings / Ask chrome are not content obstruction.
+        if (
+          el.closest("[data-testid='ask-jetpakistan-fab'], .jp-public-fab-dock, [data-jp-ask-open], [data-testid^='fab-']")
+        ) {
+          continue;
+        }
+        const testid = el.getAttribute("data-testid") || "";
+        if (testid.startsWith("fab-") || testid.startsWith("ask-")) continue;
+        const style = window.getComputedStyle(el);
+        if (style.visibility === "hidden" || style.display === "none" || Number(style.opacity) === 0) {
+          continue;
+        }
         const r = el.getBoundingClientRect();
         if (r.width <= 0 || r.height <= 0) continue;
-        // Ignore near-miss clearance zone: require real intersection with content
-        const hit =
-          !(r.right < fr.left || r.left > fr.right || r.bottom < fr.top || r.top > fr.bottom);
-        if (hit) fabOverlap += 1;
+        // Require a non-trivial intersection area (not a 1px edge kiss).
+        const ix = Math.max(0, Math.min(r.right, fr.right) - Math.max(r.left, fr.left));
+        const iy = Math.max(0, Math.min(r.bottom, fr.bottom) - Math.max(r.top, fr.top));
+        const area = ix * iy;
+        if (area < 24) continue;
+        const tag = el.tagName.toLowerCase();
+        const role = el.getAttribute("role") || tag;
+        const interactive = ["a", "button", "input", "select", "textarea", "label"].includes(tag) ||
+          ["button", "link", "textbox"].includes(role);
+        const text = (el.textContent || "").trim().slice(0, 40);
+        fabHits.push({
+          selector: el.getAttribute("data-testid")
+            ? `[data-testid='${el.getAttribute("data-testid")}']`
+            : `${tag}${el.id ? "#" + el.id : ""}.${(el.className || "").toString().split(/\s+/).slice(0, 2).join(".")}`,
+          role,
+          interactive,
+          text,
+          box: {
+            left: Math.round(r.left),
+            top: Math.round(r.top),
+            right: Math.round(r.right),
+            bottom: Math.round(r.bottom),
+          },
+          area: Math.round(area),
+        });
+        fabOverlap += 1;
       }
     }
     const icon = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]');
@@ -65,6 +104,15 @@ function metrics(page) {
     return {
       overflowX: scrollW - vw > 2 ? Math.round(scrollW - vw) : 0,
       fabOverlap,
+      fabHits: fabHits.slice(0, 8),
+      fabBox: fab
+        ? {
+            left: Math.round(fab.getBoundingClientRect().left),
+            top: Math.round(fab.getBoundingClientRect().top),
+            right: Math.round(fab.getBoundingClientRect().right),
+            bottom: Math.round(fab.getBoundingClientRect().bottom),
+          }
+        : null,
       faviconHref: icon?.getAttribute("href") || null,
       logoSrc: logo?.getAttribute("src") || null,
       h1: document.querySelector("h1")?.textContent?.trim()?.slice(0, 80) || "",
@@ -85,7 +133,10 @@ for (const route of routes) {
   for (const width of widths) {
     await page.setViewportSize({ width, height: width < 768 ? 844 : 900 });
     await page.goto(`${baseURL}${route.path}`, { waitUntil: "domcontentloaded", timeout: 60000 });
-    await page.waitForTimeout(1200);
+    await page
+      .waitForFunction(() => document.documentElement.dataset.jpHydrated === "1", { timeout: 12000 })
+      .catch(() => {});
+    await page.waitForTimeout(800);
     const file = `${route.key}-w${width}.png`;
     const abs = path.join(outRoot, route.dir, file);
     await page.screenshot({ path: abs, fullPage: true });
@@ -93,7 +144,7 @@ for (const route of routes) {
     const verdict =
       m.overflowX === 0 && m.fabOverlap === 0
         ? "PASS"
-        : `FAIL: overflowX=${m.overflowX} fabOverlap=${m.fabOverlap}`;
+        : `FAIL: overflowX=${m.overflowX} fabOverlap=${m.fabOverlap}${m.fabHits?.length ? " hits=" + JSON.stringify(m.fabHits) : ""}`;
     manifest.push({
       FILE: `${route.dir}/${file}`,
       URL_ROUTE: route.path,
