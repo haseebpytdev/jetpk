@@ -5,6 +5,10 @@ import { DashboardShell } from "@/layouts/dashboard-shell";
 import { SessionProvider } from "@/lib/session-context";
 import { themeBootstrapScript } from "@/lib/theme/theme-bootstrap-script";
 import { getDashboardSession } from "@/services/session-service";
+import {
+  getDashboardPublicBranding,
+  resolveDashboardFaviconUrl,
+} from "@/services/public-branding-service";
 import "./globals.css";
 
 const inter = Inter({
@@ -26,11 +30,21 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "JetPakistan Back Office",
-  description: "JetPakistan admin and staff back-office dashboard",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const branding = await getDashboardPublicBranding();
+  const brandName = branding?.brand_name?.trim() || "JetPakistan";
+  const favicon = resolveDashboardFaviconUrl(branding?.favicon_url);
+
+  return {
+    title: `${brandName} Back Office`,
+    description: `${brandName} admin and staff back-office dashboard`,
+    robots: { index: false, follow: false },
+    icons: {
+      icon: [{ url: favicon }],
+      shortcut: [{ url: favicon }],
+    },
+  };
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   let session = null;

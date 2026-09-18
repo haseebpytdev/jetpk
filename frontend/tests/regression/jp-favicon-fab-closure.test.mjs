@@ -54,6 +54,11 @@ check(
 check("globals.css defines .jp-public-fab-dock--lift", globals.includes(".jp-public-fab-dock--lift"));
 check("globals.css defines .jp-fab-content-clear", globals.includes(".jp-fab-content-clear"));
 check(
+  "jp-fab-content-clear clears Ask FAB footprint (>=5.5rem)",
+  /jp-fab-content-clear[\s\S]*?5\.5rem/.test(globals),
+);
+check("frontend/app/icon.png removed (no default Next metadata icon)", !existsSync(join(root, "app/icon.png")));
+check(
   "globals.css hides dock while Ask panel open",
   /data-jp-ask-open="1"[\s\S]*?\.jp-public-fab-dock/.test(globals),
 );

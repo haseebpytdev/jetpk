@@ -121,9 +121,14 @@ test("manual payment page shows only manual methods", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Complete payment" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Payment method" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Booking summary" })).toBeVisible();
+  await expect(page.getByText("Price per seat")).toHaveCount(0);
   await expect(page.getByText("Bank transfer")).toBeVisible();
   await expect(page.getByText("AbhiPay")).toHaveCount(0);
   await expect(page.getByLabel("Card payment")).toHaveCount(0);
+
+  const h1Box = await page.getByRole("heading", { name: "Complete payment" }).boundingBox();
+  const progressBox = await page.getByRole("navigation", { name: "Booking progress" }).boundingBox();
+  expect(h1Box && progressBox && h1Box.y < progressBox.y).toBeTruthy();
 });
 
 test("group payment shows inline validation without native required tooltip path", async ({ page }) => {

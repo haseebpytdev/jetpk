@@ -61,9 +61,9 @@ body {
     bottom: max(6.75rem, calc(env(safe-area-inset-bottom) + 5.5rem));
   }
 
-  /* Keep result/search content clear of the dock footprint on the right. */
+  /* Keep content clear of Ask FAB (58px) + dock inset on the right. */
   .jp-fab-content-clear {
-    padding-right: max(4.75rem, calc(env(safe-area-inset-right) + 3.75rem)) !important;
+    padding-right: max(5.5rem, calc(env(safe-area-inset-right) + 4.5rem)) !important;
   }
 
   html[data-jp-ask-open="1"] .jp-public-fab-dock {

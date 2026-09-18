@@ -1,15 +1,40 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { PublicShell } from "@/components/layout/PublicShell";
+import { PublicConfigService } from "@/features/public-content";
 import { requireAgentPortalLayoutAccess } from "@/features/auth/server/agent-portal-access";
+import { resolveFaviconUrl } from "@/lib/branding/resolve-favicon";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await PublicConfigService.getConfig();
+  const favicon = resolveFaviconUrl(config?.favicon_url);
+  return {
+    robots: { index: false, follow: false },
+    icons: {
+      icon: [{ url: favicon }],
+      shortcut: [{ url: favicon }],
+    },
+  };
+}
 
 export default async function AgentLayout({ children }: { children: ReactNode }) {
-  const session = await requireAgentPortalLayoutAccess();
-  return <PublicShell session={session}>{children}</PublicShell>;
+  const [session, config] = await Promise.all([
+    requireAgentPortalLayoutAccess(),
+    PublicConfigService.getConfig(),
+  ]);
+  const branding = config
+    ? {
+        brand_name: config.brand_name,
+        logo_url: config.logo_url,
+        header_logo_height: config.header_logo_height,
+      }
+    : null;
+
+  return (
+    <PublicShell session={session} branding={branding} aiEnabled={Boolean(config?.ai_assistant_enabled)}>
+      {children}
+    </PublicShell>
+  );
 }
