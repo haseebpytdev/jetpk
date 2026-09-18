@@ -11,7 +11,6 @@ import { fetchGroupPayment, submitGroupPayment } from "../services/group-ticketi
 import type { GroupPaymentInstructions } from "../types";
 import { GroupHoldCountdown } from "./GroupHoldCountdown";
 import { GroupHoldExpiredState } from "./GroupStateCards";
-import { GroupPriceBlock } from "./GroupPackageBlocks";
 
 type GroupPaymentPageProps = {
   bookingRef: string;
@@ -110,14 +109,14 @@ export function GroupPaymentPage({ bookingRef }: GroupPaymentPageProps) {
 
   return (
     <div className="jp-fab-content-clear mx-auto max-w-5xl px-4 py-6 sm:py-8">
-      <BookingProgress steps={booking.progress} className="mb-6" />
-
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold text-jp-text">Complete payment</h1>
         <p className="text-jp-sm text-jp-muted">
           Booking reference <span className="font-medium text-jp-text">{booking.reference}</span>
         </p>
       </header>
+
+      <BookingProgress steps={booking.progress} className="mt-5 mb-6" />
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)] lg:items-start">
         <form
@@ -260,10 +259,10 @@ export function GroupPaymentPage({ bookingRef }: GroupPaymentPageProps) {
             </p>
           ) : null}
 
-          <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 sm:p-5">
+          <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 sm:p-5" data-testid="group-payment-final-action">
             <PrimaryButton
               type="submit"
-              className="w-full sm:w-auto"
+              className="w-full max-lg:max-w-full lg:w-auto"
               disabled={submitting || expired}
               data-testid="group-payment-submit"
             >
@@ -316,13 +315,6 @@ export function GroupPaymentPage({ bookingRef }: GroupPaymentPageProps) {
               </div>
             </dl>
           </section>
-
-          <GroupPriceBlock
-            currency={booking.currency}
-            priceFormatted={booking.inventory?.price_formatted ?? booking.total_formatted}
-            seatCount={booking.seat_count}
-            totalFormatted={booking.total_formatted}
-          />
         </aside>
       </div>
     </div>

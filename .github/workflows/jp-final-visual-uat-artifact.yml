@@ -1,0 +1,46 @@
+name: jp-final-visual-uat-artifact
+
+# Packages sanitized visual UAT screenshots as a downloadable Actions artifact
+# for ChatGPT/GitHub connector review (PNG binaries are not multimodal via git API).
+
+on:
+  push:
+    branches:
+      - evidence/jp-final-visual-uat-20260917
+    paths:
+      - "docs/evidence/jp-final-visual-uat/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Stage artifact payload
+        run: |
+          mkdir -p artifact/screenshots
+          cp docs/evidence/jp-final-visual-uat/manifest.md artifact/manifest.md || true
+          cp docs/evidence/jp-final-visual-uat/manifest.json artifact/manifest.json || true
+          cp docs/evidence/jp-final-visual-uat/STATUS.md artifact/STATUS.md || true
+          if [ -d docs/evidence/jp-final-visual-uat/groups ]; then
+            cp -R docs/evidence/jp-final-visual-uat/groups artifact/screenshots/groups
+          fi
+          find docs/evidence/jp-final-visual-uat -maxdepth 2 -type d ! -path docs/evidence/jp-final-visual-uat ! -path '*/groups' | while read -r d; do
+            name=$(basename "$d")
+            mkdir -p "artifact/screenshots/$name"
+            cp -R "$d"/. "artifact/screenshots/$name/" 2>/dev/null || true
+          done
+          find artifact -type f | wc -l
+
+      - name: Upload jp-final-visual-uat artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jp-final-visual-uat
+          path: artifact/
+          if-no-files-found: error
+          retention-days: 30
