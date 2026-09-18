@@ -130,46 +130,11 @@ const browser = await chromium.launch({ headless: true });
 }
 
 // --- Golden flight states (QA-safe, no commercial mutation) ---
+// Soft empty-search PASS removed. Use capture-golden-flights-live.mjs for Golden certification.
 {
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  const page = await context.newPage();
-  const flightStates = [
-    { key: "one-way-results", path: "/flights/results", state: "ONE_WAY_RESULTS", widths: [390, 1440] },
-    { key: "return-pair", path: "/flights/results?trip=return", state: "RETURN_PAIR", widths: [390, 1440] },
-    { key: "return-segmented-outbound", path: "/flights/return-options", state: "RETURN_SEGMENTED_OUTBOUND", widths: [390, 1440] },
-    { key: "details", path: "/flights/details", state: "DETAILS", widths: [390, 1440] },
-    { key: "traveler", path: "/booking/passengers", state: "TRAVELER", widths: [390, 1440] },
-    { key: "review", path: "/booking/review", state: "REVIEW", widths: [390, 1440] },
-  ];
-  for (const route of flightStates) {
-    for (const w of route.widths) {
-      await page.setViewportSize({ width: w, height: w < 768 ? 844 : 900 });
-      const res = await page.goto(`${baseURL}${route.path}`, { waitUntil: "domcontentloaded", timeout: 60000 }).catch(() => null);
-      await stabilizeFullPage(page);
-      const reject = await assertNoRejectState(page);
-      const body = await page.evaluate(() => (document.body?.innerText || "").slice(0, 500));
-      const file = await shot(page, `${route.key}-w${w}.png`, "flights");
-      // Soft gate: capture always; PASS only if not generic error shell and HTTP ok-ish
-      const httpOk = !res || (res.status() >= 200 && res.status() < 500);
-      const pass = httpOk && reject.ok && !/Something went wrong/i.test(body);
-      rows.push({
-        FILE: file,
-        URL_ROUTE: route.path,
-        VIEWPORT: w,
-        ROLE: "anonymous",
-        STATE: route.state,
-        PUBLIC_BUILD_ID: publicBuildId,
-        RELEASE_SHA: releaseSha,
-        SOURCE: "live production",
-        NOTES: pass ? "captured_stable_or_empty_search" : `FAIL reject`,
-        SANITIZED: "YES",
-        SELF_REVIEW: pass ? "PASS" : "FAIL",
-      });
-      addCheck(`FLIGHT_${route.state}_w${w}`, pass, route.path);
-      console.log("flight", route.key, w, pass ? "PASS" : "FAIL");
-    }
-  }
-  await context.close();
+  console.log(
+    "SKIP soft empty golden stubs — populated captures come from capture-golden-flights-live.mjs",
+  );
 }
 
 async function portalCapture(label, userId, routes, dir) {

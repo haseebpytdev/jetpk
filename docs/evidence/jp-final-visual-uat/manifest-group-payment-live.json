@@ -1,17 +1,17 @@
 {
   "releaseSha": "675c7e5efaa2656b2435c186cfe4665e086676bb",
-  "publicBuildId": "x0Fcwu-hw0F-hU42hMwZe",
-  "bookingRef": "S6FOVVRD",
+  "publicBuildId": "FfNP1fgjiB4_gK6lNt4FI",
+  "bookingRef": "5ITBGDOY",
   "LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE": "CURRENT",
   "harness": "correction-08",
   "rows": [
     {
       "FILE": "groups/group-payment-live-w320.png",
-      "URL_ROUTE": "/groups/booking/S6FOVVRD/payment",
+      "URL_ROUTE": "/groups/booking/5ITBGDOY/payment",
       "VIEWPORT": 320,
       "ROLE": "customer",
       "STATE": "payment_entry_no_submit",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
       "NOTES": "ok; ok; ok; ok; ok; ok; ok; ok; ok",
@@ -33,7 +33,7 @@
         "LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE": "CURRENT",
         "overflow": {
           "overflowX": 0,
-          "path": "/groups/booking/S6FOVVRD/payment"
+          "path": "/groups/booking/5ITBGDOY/payment"
         },
         "fab": {
           "fabOverlap": 0,
@@ -58,11 +58,11 @@
     },
     {
       "FILE": "groups/group-payment-live-w360.png",
-      "URL_ROUTE": "/groups/booking/S6FOVVRD/payment",
+      "URL_ROUTE": "/groups/booking/5ITBGDOY/payment",
       "VIEWPORT": 360,
       "ROLE": "customer",
       "STATE": "payment_entry_no_submit",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
       "NOTES": "ok; ok; ok; ok; ok; ok; ok; ok; ok",
@@ -84,7 +84,7 @@
         "LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE": "CURRENT",
         "overflow": {
           "overflowX": 0,
-          "path": "/groups/booking/S6FOVVRD/payment"
+          "path": "/groups/booking/5ITBGDOY/payment"
         },
         "fab": {
           "fabOverlap": 0,
@@ -109,11 +109,11 @@
     },
     {
       "FILE": "groups/group-payment-live-w375.png",
-      "URL_ROUTE": "/groups/booking/S6FOVVRD/payment",
+      "URL_ROUTE": "/groups/booking/5ITBGDOY/payment",
       "VIEWPORT": 375,
       "ROLE": "customer",
       "STATE": "payment_entry_no_submit",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
       "NOTES": "ok; ok; ok; ok; ok; ok; ok; ok; ok",
@@ -135,7 +135,7 @@
         "LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE": "CURRENT",
         "overflow": {
           "overflowX": 0,
-          "path": "/groups/booking/S6FOVVRD/payment"
+          "path": "/groups/booking/5ITBGDOY/payment"
         },
         "fab": {
           "fabOverlap": 0,
@@ -160,11 +160,11 @@
     },
     {
       "FILE": "groups/group-payment-live-w390.png",
-      "URL_ROUTE": "/groups/booking/S6FOVVRD/payment",
+      "URL_ROUTE": "/groups/booking/5ITBGDOY/payment",
       "VIEWPORT": 390,
       "ROLE": "customer",
       "STATE": "payment_entry_no_submit",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
       "NOTES": "ok; ok; ok; ok; ok; ok; ok; ok; ok",
@@ -186,7 +186,7 @@
         "LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE": "CURRENT",
         "overflow": {
           "overflowX": 0,
-          "path": "/groups/booking/S6FOVVRD/payment"
+          "path": "/groups/booking/5ITBGDOY/payment"
         },
         "fab": {
           "fabOverlap": 0,
@@ -211,11 +211,11 @@
     },
     {
       "FILE": "groups/group-payment-live-w412.png",
-      "URL_ROUTE": "/groups/booking/S6FOVVRD/payment",
+      "URL_ROUTE": "/groups/booking/5ITBGDOY/payment",
       "VIEWPORT": 412,
       "ROLE": "customer",
       "STATE": "payment_entry_no_submit",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
       "NOTES": "ok; ok; ok; ok; ok; ok; ok; ok; ok",
@@ -237,7 +237,7 @@
         "LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE": "CURRENT",
         "overflow": {
           "overflowX": 0,
-          "path": "/groups/booking/S6FOVVRD/payment"
+          "path": "/groups/booking/5ITBGDOY/payment"
         },
         "fab": {
           "fabOverlap": 0,
@@ -262,11 +262,11 @@
     },
     {
       "FILE": "groups/group-payment-live-w768.png",
-      "URL_ROUTE": "/groups/booking/S6FOVVRD/payment",
+      "URL_ROUTE": "/groups/booking/5ITBGDOY/payment",
       "VIEWPORT": 768,
       "ROLE": "customer",
       "STATE": "payment_entry_no_submit",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
       "NOTES": "ok; ok; ok; ok; ok; ok; ok; ok; ok",
@@ -288,7 +288,7 @@
         "LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE": "CURRENT",
         "overflow": {
           "overflowX": 0,
-          "path": "/groups/booking/S6FOVVRD/payment"
+          "path": "/groups/booking/5ITBGDOY/payment"
         },
         "fab": {
           "fabOverlap": 0,
@@ -313,11 +313,11 @@
     },
     {
       "FILE": "groups/group-payment-live-w1024.png",
-      "URL_ROUTE": "/groups/booking/S6FOVVRD/payment",
+      "URL_ROUTE": "/groups/booking/5ITBGDOY/payment",
       "VIEWPORT": 1024,
       "ROLE": "customer",
       "STATE": "payment_entry_no_submit",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
       "NOTES": "ok; ok; ok; ok; ok; ok; ok; ok; ok",
@@ -339,7 +339,7 @@
         "LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE": "CURRENT",
         "overflow": {
           "overflowX": 0,
-          "path": "/groups/booking/S6FOVVRD/payment"
+          "path": "/groups/booking/5ITBGDOY/payment"
         },
         "fab": {
           "fabOverlap": 0,
@@ -364,11 +364,11 @@
     },
     {
       "FILE": "groups/group-payment-live-w1440.png",
-      "URL_ROUTE": "/groups/booking/S6FOVVRD/payment",
+      "URL_ROUTE": "/groups/booking/5ITBGDOY/payment",
       "VIEWPORT": 1440,
       "ROLE": "customer",
       "STATE": "payment_entry_no_submit",
-      "PUBLIC_BUILD_ID": "x0Fcwu-hw0F-hU42hMwZe",
+      "PUBLIC_BUILD_ID": "FfNP1fgjiB4_gK6lNt4FI",
       "RELEASE_SHA": "675c7e5efaa2656b2435c186cfe4665e086676bb",
       "SOURCE": "live production",
       "NOTES": "ok; ok; ok; ok; ok; ok; ok; ok; ok",
@@ -390,7 +390,7 @@
         "LIVE_GROUP_PAYMENT_SOURCE_SIGNATURE": "CURRENT",
         "overflow": {
           "overflowX": 0,
-          "path": "/groups/booking/S6FOVVRD/payment"
+          "path": "/groups/booking/5ITBGDOY/payment"
         },
         "fab": {
           "fabOverlap": 0,

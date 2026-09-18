@@ -454,6 +454,97 @@ export function routePositiveSpec(routeKey) {
       ],
       minMethodCards: 3,
     },
+    "one-way-results": {
+      requireText: [/Book Now|PKR|Details/i],
+      forbidText: [
+        /Unable to load results/i,
+        /Missing search details/i,
+        /Please start a new search/i,
+        /0 flights/i,
+        /No flights found/i,
+      ],
+      requireSelectors: [
+        "[data-testid*='result'], [data-testid*='offer'], [data-testid*='flight-card'], article, [class*='result']",
+      ],
+      minResultCards: 1,
+    },
+    "return-pair": {
+      requireText: [/Outbound|Return|PKR|Book/i],
+      forbidText: [
+        /Unable to load results/i,
+        /Missing search details/i,
+        /Please start a new search/i,
+        /0 flights/i,
+        /No flights found/i,
+      ],
+      requireSelectors: ["[data-testid='pair-return-card'], [data-testid*='pair']"],
+      minResultCards: 1,
+    },
+    "return-segmented": {
+      requireText: [/Select|Outbound|Return|PKR|Book Now|Choose return/i],
+      forbidText: [
+        /Unable to load results/i,
+        /Missing return search details/i,
+        /Missing search details/i,
+        /Please start a new search/i,
+      ],
+      requireSelectors: [
+        "[data-testid*='result'], [data-testid*='offer'], [data-testid*='segment'], [data-testid='outbound-option-card'], [data-testid='result-price-button']",
+      ],
+      minResultCards: 1,
+    },
+    "return-segmented-return": {
+      requireText: [/Return|Choose return|PKR|Book Now/i],
+      forbidText: [
+        /Unable to load results/i,
+        /Missing return search details/i,
+        /Missing search details/i,
+        /Please start a new search/i,
+      ],
+      requireSelectors: ["[data-testid='result-price-button'], [data-testid*='return']"],
+      minResultCards: 1,
+      requirePath: /\/flights\/return-options/i,
+    },
+    "flight-details": {
+      requireText: [/Duration|Depart|Arrive|Flight|Segment/i],
+      forbidText: [/Missing search details/i, /No flight selected/i, /Unable to load/i],
+      requireSelectors: ["dialog, [role='dialog'], [data-testid*='detail'], section"],
+    },
+    baggage: {
+      requireText: [/Baggage|Cabin|Checked|kg|piece/i],
+      forbidText: [/Missing search details/i, /No flight selected/i],
+      requireSelectors: ["dialog, [role='dialog'], [data-testid*='baggage'], section"],
+    },
+    "fare-policy": {
+      requireText: [/Fare|Policy|Refund|Change|Cancel/i],
+      forbidText: [/Missing search details/i, /No flight selected/i],
+      requireSelectors: ["dialog, [role='dialog'], [data-testid*='fare'], section"],
+    },
+    "fare-details": {
+      requireText: [/Fare|Tax|Total|PKR|Base/i],
+      forbidText: [/Missing search details/i, /No flight selected/i],
+      requireSelectors: ["dialog, [role='dialog'], [data-testid*='fare'], section"],
+    },
+    "branded-fare": {
+      requireText: [/Fare|Brand|Economy|Business|Select/i],
+      forbidText: [/Missing search details/i, /No flight selected/i, /No branded/i],
+      requireSelectors: ["[data-testid*='brand'], [data-testid*='fare-option'], dialog, [role='dialog']"],
+      minResultCards: 1,
+    },
+    traveler: {
+      requireText: [/Traveler|Passenger|First name|Last name|Contact/i],
+      forbidText: [/No flight selected/i, /Missing search details/i],
+      requireSelectors: ["form", "input", "[data-testid='standard-passengers-form']"],
+      requirePath: /\/booking\/passengers/i,
+    },
+    review: {
+      requireText: [/Review|Total|Passenger|PKR|Contact/i],
+      forbidText: [/No flight selected/i, /Missing search details/i, /Traveler information/i],
+      requireSelectors: [
+        "[data-testid='review-passenger-list'], [data-testid='review-continue-button'], [data-testid*='review']",
+      ],
+      requirePath: /\/booking\/review/i,
+    },
   };
   return specs[routeKey] || { requireText: [], requireSelectors: [] };
 }
@@ -463,6 +554,12 @@ export async function assertPositiveRoute(page, routeKey) {
   return page.evaluate((specIn) => {
     const body = (document.body?.innerText || "").replace(/\s+/g, " ");
     const fails = [];
+    if (specIn.requirePath) {
+      const re = new RegExp(specIn.requirePath.source, specIn.requirePath.flags || "i");
+      if (!re.test(location.pathname + location.search)) {
+        fails.push(`requirePath:${specIn.requirePath.source} got=${location.pathname}`);
+      }
+    }
     for (const t of specIn.requireText || []) {
       const re = new RegExp(t.source, t.flags || "i");
       if (!re.test(body)) fails.push(`missingText:${t.source}`);
@@ -482,6 +579,19 @@ export async function assertPositiveRoute(page, routeKey) {
       const n = document.querySelectorAll("[data-testid^='group-payment-method-']").length;
       if (n < specIn.minMethodCards) fails.push(`methodCards:${n}<${specIn.minMethodCards}`);
     }
+    if (specIn.minResultCards) {
+      const cards = document.querySelectorAll(
+        "[data-testid='pair-return-card'], [data-testid*='flight-card'], [data-testid*='result-card'], [data-testid*='offer-card'], [data-testid^='offer-'], article[data-testid]",
+      );
+      let n = cards.length;
+      if (n === 0) {
+        // fallback: priced Book Now rows
+        n = Array.from(document.querySelectorAll("button, a")).filter((el) =>
+          /Book Now|Select fare|Select return/i.test(el.textContent || ""),
+        ).length;
+      }
+      if (n < specIn.minResultCards) fails.push(`resultCards:${n}<${specIn.minResultCards}`);
+    }
     if (specIn.requireStyled) {
       const linkCss = document.querySelectorAll('link[rel="stylesheet"]').length;
       const hasJp = Boolean(document.querySelector("[class*='jp-'], [class*='text-jp-'], aside"));
@@ -499,11 +609,15 @@ export async function assertPositiveRoute(page, routeKey) {
       fails,
       signature,
       h1: document.querySelector("h1")?.textContent?.trim()?.slice(0, 80) || "",
+      path: location.pathname,
     };
   }, {
     ...spec,
     requireText: (spec.requireText || []).map((r) => ({ source: r.source, flags: r.flags })),
     forbidText: (spec.forbidText || []).map((r) => ({ source: r.source, flags: r.flags })),
+    requirePath: spec.requirePath
+      ? { source: spec.requirePath.source, flags: spec.requirePath.flags }
+      : null,
   });
 }
 

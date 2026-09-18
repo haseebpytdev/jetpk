@@ -21,21 +21,73 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Stage artifact payload
+      - name: Stage artifact payload (preserve nested paths; exclude archives)
         run: |
+          set -euo pipefail
+          ROOT="docs/evidence/jp-final-visual-uat"
           mkdir -p artifact/screenshots
-          cp docs/evidence/jp-final-visual-uat/manifest.md artifact/manifest.md || true
-          cp docs/evidence/jp-final-visual-uat/manifest.json artifact/manifest.json || true
-          cp docs/evidence/jp-final-visual-uat/STATUS.md artifact/STATUS.md || true
-          if [ -d docs/evidence/jp-final-visual-uat/groups ]; then
-            cp -R docs/evidence/jp-final-visual-uat/groups artifact/screenshots/groups
-          fi
-          find docs/evidence/jp-final-visual-uat -maxdepth 2 -type d ! -path docs/evidence/jp-final-visual-uat ! -path '*/groups' | while read -r d; do
-            name=$(basename "$d")
-            mkdir -p "artifact/screenshots/$name"
-            cp -R "$d"/. "artifact/screenshots/$name/" 2>/dev/null || true
+          # Manifests / status (active only)
+          for f in \
+            manifest.md manifest.json manifest-live.md manifest-live.json \
+            manifest-group-payment-live.json manifest-portals-flights-live.json \
+            manifest-golden-flights-live.json \
+            manifest-functional-regression.json manifest-logo-favicon-matrix.json \
+            STATUS.md STATUS-CORRECTION-08.md DEPLOY-STAMP-27a1ed9f.txt \
+            artifact-integrity.json
+          do
+            if [ -f "$ROOT/$f" ]; then
+              cp "$ROOT/$f" "artifact/$f"
+            fi
           done
-          find artifact -type f | wc -l
+
+          # Active screenshot trees only — never flatten with basename.
+          # Explicitly exclude archive-* so rejected bytes cannot overwrite live/.
+          if [ -d "$ROOT/live" ]; then
+            mkdir -p artifact/screenshots/live
+            # rsync-like: copy live but skip nested archive dirs if any
+            find "$ROOT/live" -mindepth 1 -maxdepth 1 ! -name 'archive-*' -exec \
+              cp -R {} artifact/screenshots/live/ \;
+          fi
+          if [ -d "$ROOT/groups" ]; then
+            # legacy top-level groups (non-live) — only if present and not archive
+            mkdir -p artifact/screenshots/groups-legacy
+            cp -R "$ROOT/groups"/. artifact/screenshots/groups-legacy/ || true
+          fi
+
+          # Optional: ship archives under a separate non-active prefix for audit only
+          if [ -d "$ROOT/archive-rejected-44823f1" ]; then
+            mkdir -p artifact/archive
+            cp -R "$ROOT/archive-rejected-44823f1" artifact/archive/ || true
+          fi
+
+          echo "STAGED_FILE_COUNT=$(find artifact -type f | wc -l)"
+          echo "ACTIVE_LIVE_PNG=$(find artifact/screenshots/live -type f -name '*.png' 2>/dev/null | wc -l || echo 0)"
+          # Guard: active live path must not contain archive-rejected content path segments
+          if find artifact/screenshots -type d -name 'archive-rejected-*' | grep -q .; then
+            echo "FAIL: archive-rejected leaked into screenshots/"
+            exit 1
+          fi
+
+      - name: Verify artifact integrity against active manifests
+        run: |
+          set -euo pipefail
+          python3 docs/evidence/jp-final-visual-uat/scripts/verify-artifact-integrity.py \
+            --evidence-root docs/evidence/jp-final-visual-uat \
+            --artifact-root artifact \
+            --out artifact/artifact-integrity.json
+          # Also keep a copy under evidence root for the commit trail when present
+          cp artifact/artifact-integrity.json docs/evidence/jp-final-visual-uat/artifact-integrity.json || true
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("artifact/artifact-integrity.json").read_text())
+          assert d.get("ARTIFACT_INTEGRITY")=="PASS", d
+          assert int(d.get("HASH_MISMATCH", 1))==0, d
+          assert int(d.get("SOURCE_FILE_MISSING", 1))==0, d
+          assert int(d.get("ARTIFACT_FILE_MISSING", 1))==0, d
+          assert int(d.get("ARCHIVE_OVERLAP", 1))==0, d
+          print("ARTIFACT_INTEGRITY=PASS HASH_MISMATCH=0")
+          PY
 
       - name: Upload jp-final-visual-uat artifact
         uses: actions/upload-artifact@v4
