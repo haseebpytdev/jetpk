@@ -1,0 +1,35 @@
+{
+  "sha": "675c7e5efaa2656b2435c186cfe4665e086676bb",
+  "build_id": "FfNP1fgjiB4_gK6lNt4FI",
+  "captured_at": "2026-09-19T12:52:44Z",
+  "source": "docs/evidence/jp-final-perf-cert-675c7e5e",
+  "live_rerun": "BLOCKED_at_profile_time",
+  "return_pair": {
+    "N": 30,
+    "duplicate_supplier_searches": 0,
+    "post_supplier_p50_ms": 766,
+    "post_supplier_p95_ms": 1509,
+    "d2r_flush_p95_ms": 208,
+    "dominant": "CLIENT"
+  },
+  "traveler": {
+    "N": 30,
+    "revalidate_p95_ms": 2628,
+    "app_post_revalidate_p95_ms": 2967,
+    "passengers_first_get_p95_ms": 1714,
+    "pre_nav_prime_code_path": "use-revalidation.ts",
+    "pre_nav_prime_in_offer_selection_at_profile": false,
+    "passengers_post_nav_fetch_count": null,
+    "dominant": "APP_POST_REVALIDATE"
+  },
+  "privacy_soft_nav": {
+    "route": "home_privacy",
+    "N": 20,
+    "app_p50_ms": 1596,
+    "app_p95_ms": 4435,
+    "managed_page_calls_per_nav": null,
+    "public_config_calls_per_nav": null,
+    "total_public_backend_calls_per_nav": null,
+    "dominant": "RSC_CLIENT_TRANSITION"
+  }
+}
