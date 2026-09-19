@@ -1,23 +1,13 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 import { AuthShell, LoginForm } from "@/features/auth";
+import { AuthAlreadySignedInRedirect } from "@/features/auth/components/AuthAlreadySignedInRedirect";
 import { LoginSessionNotice } from "@/features/auth/components/LoginSessionNotice";
-import { fetchSessionBootstrapFromCookies } from "@/features/auth/services/session-service";
-import { cookies } from "next/headers";
-import { sanitizeDashboardUrl } from "@/features/auth/utils/dashboard-allowlist";
 
-type LoginPageProps = {
-  searchParams: Promise<{ reason?: string }>;
-};
+/** Soft-nav: static RSC shell — session redirect after hydration. */
+export const revalidate = 60;
 
-export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { reason } = await searchParams;
-  const cookieStore = await cookies();
-  const bootstrap = await fetchSessionBootstrapFromCookies(cookieStore.getAll());
-  if (bootstrap.authenticated) {
-    redirect(sanitizeDashboardUrl(bootstrap.landing_route ?? bootstrap.dashboard_url, "/"));
-  }
-
+export default function LoginPage() {
   return (
     <AuthShell
       title="Log in to your account"
@@ -35,7 +25,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
       }
     >
-      <LoginSessionNotice reason={reason} />
+      <AuthAlreadySignedInRedirect />
+      <Suspense fallback={null}>
+        <LoginSessionNotice />
+      </Suspense>
       <LoginForm />
     </AuthShell>
   );

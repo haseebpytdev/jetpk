@@ -1,12 +1,19 @@
 import type { ReactNode } from "react";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { PublicConfigService } from "@/features/public-content";
-import { getPublicSession } from "@/services/session";
+import type { PublicSession } from "@/types/session";
 
-export const dynamic = "force-dynamic";
+/**
+ * Soft-nav / ISR: do not force-dynamic the auth tree.
+ * PublicShell upgrades anonymous SSR session from Laravel after hydration
+ * (same pattern as `(public)/layout.tsx`).
+ */
+export const revalidate = 60;
+
+const ANONYMOUS_SESSION: PublicSession = { status: "anonymous" };
 
 export default async function AuthGroupLayout({ children }: { children: ReactNode }) {
-  const [session, config] = await Promise.all([getPublicSession(), PublicConfigService.getConfig()]);
+  const config = await PublicConfigService.getConfig();
   const branding = config
     ? {
         brand_name: config.brand_name,
@@ -16,7 +23,7 @@ export default async function AuthGroupLayout({ children }: { children: ReactNod
     : null;
 
   return (
-    <PublicShell session={session} branding={branding} aiEnabled={Boolean(config?.ai_assistant_enabled)}>
+    <PublicShell session={ANONYMOUS_SESSION} branding={branding} aiEnabled={Boolean(config?.ai_assistant_enabled)}>
       {children}
     </PublicShell>
   );

@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
  * Wave-2 is delayed briefly to avoid stampeding RSC with the first wave
  * (08602d4a concurrent-priority regressing home_faq P95).
  */
-const PRIORITY_PREFETCH_ROUTES_WAVE1 = ["/login", "/register", "/privacy", "/faq", "/terms"] as const;
+const PRIORITY_PREFETCH_ROUTES_WAVE1 = ["/privacy", "/faq", "/terms", "/login", "/register"] as const;
 const PRIORITY_PREFETCH_ROUTES_WAVE2 = ["/about-us", "/support", "/contact", "/groups/search"] as const;
 
 /** Module-scoped: survives PublicShell remounts; never re-stampede RSC. */
