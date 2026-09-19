@@ -559,7 +559,8 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
   }, [filtersKey, laravelSort, resolvedSearchId, viewKey]);
 
   // Prefetch the alternate Return representation after first usable rows (same search_id).
-  // Never abort on effect cleanup/status churn — aborted writes caused Pair→Segmented cache misses.
+  // Defer until after first pair-card paint so POST_SUPPLIER critical path is not
+  // contended by a parallel /results/data?view=… fetch (still zero supplier searches).
   useEffect(() => {
     if (!resolvedSearchId) return;
     if (tripType !== "round_trip") return;
@@ -573,26 +574,53 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     if (representationPrefetchInflight.has(altKey)) return;
 
     const searchIdAtStart = resolvedSearchId;
-    const promise = (async (): Promise<FlightResultsDataResponse | null> => {
-      const response = await fetchFlightResultsData({
-        searchId: searchIdAtStart,
-        page: 1,
-        perPage: 12,
-        sort: laravelSort,
-        filters,
-        view: alt,
-      });
-      if (!response.ok) return null;
-      if (countVisibleResults(response.data) === 0) return null;
-      // Drop write if a newer search replaced this one.
-      if (lastBootstrappedId.current !== searchIdAtStart) return response.data;
-      viewPayloadCacheRef.current.set(altKey, response.data);
-      return response.data;
-    })().finally(() => {
-      representationPrefetchInflight.delete(altKey);
-    });
+    let cancelled = false;
+    const runPrefetch = () => {
+      if (cancelled) return;
+      if (viewPayloadCacheRef.current.has(altKey)) return;
+      if (representationPrefetchInflight.has(altKey)) return;
 
-    representationPrefetchInflight.set(altKey, promise);
+      const promise = (async (): Promise<FlightResultsDataResponse | null> => {
+        const response = await fetchFlightResultsData({
+          searchId: searchIdAtStart,
+          page: 1,
+          perPage: 12,
+          sort: laravelSort,
+          filters,
+          view: alt,
+        });
+        if (!response.ok) return null;
+        if (countVisibleResults(response.data) === 0) return null;
+        // Drop write if a newer search replaced this one.
+        if (lastBootstrappedId.current !== searchIdAtStart) return response.data;
+        viewPayloadCacheRef.current.set(altKey, response.data);
+        return response.data;
+      })().finally(() => {
+        representationPrefetchInflight.delete(altKey);
+      });
+
+      representationPrefetchInflight.set(altKey, promise);
+    };
+
+    let idleHandle: number | null = null;
+    let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+    const schedule = () => {
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        idleHandle = window.requestIdleCallback(() => runPrefetch(), { timeout: 1200 });
+      } else {
+        timeoutHandle = setTimeout(runPrefetch, 400);
+      }
+    };
+    // Yield past the first flushSync pair-card frame before scheduling idle work.
+    timeoutHandle = setTimeout(schedule, 0);
+
+    return () => {
+      cancelled = true;
+      if (timeoutHandle != null) clearTimeout(timeoutHandle);
+      if (idleHandle != null && typeof window !== "undefined" && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleHandle);
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     filtersKey,
