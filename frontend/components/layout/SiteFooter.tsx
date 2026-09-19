@@ -44,7 +44,7 @@ export function SiteFooter({ className, branding = null }: SiteFooterProps) {
                     {isInternalHref(link.href) ? (
                       <Link
                         href={link.href}
-                        prefetch
+                        prefetch={false}
                         className="text-jp-sm text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                       >
                         {link.label}

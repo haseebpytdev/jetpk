@@ -4,23 +4,31 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 /**
- * Soft-nav CTAs: warm in two immediate waves so legal + auth stay first
- * while about/support/contact/groups follow shortly after.
- * Wave-2 is delayed briefly to avoid stampeding RSC with the first wave
- * (08602d4a concurrent-priority regressing home_faq P95).
+ * Soft-nav warmth: single-flight RSC prefetch owned here only.
+ * Footer/header Links use prefetch={false} so they do not stampede with this queue
+ * (stage-decomp: concurrent Link prefetch + PublicRoutePrefetch starved destination RSC).
+ *
+ * /contact omitted — it 308s to /about-us and wastes a slot.
  */
-const PRIORITY_PREFETCH_ROUTES_WAVE1 = ["/privacy", "/faq", "/terms", "/login", "/register"] as const;
-const PRIORITY_PREFETCH_ROUTES_WAVE2 = ["/about-us", "/support", "/contact", "/groups/search"] as const;
+const PREFETCH_QUEUE = [
+  "/privacy",
+  "/faq",
+  "/terms",
+  "/login",
+  "/register",
+  "/about-us",
+  "/support",
+  "/groups/search",
+] as const;
+
+const STAGGER_MS = 280;
 
 /** Module-scoped: survives PublicShell remounts; never re-stampede RSC. */
 let publicRoutesPrefetchStarted = false;
 
 /**
- * Idle-prefetch ordinary public routes once per tab so soft-nav shell stays warm
- * without re-flooding ?_rsc fetches after every PublicShell remount.
- *
- * Timers are intentionally module-owned: unmount during soft-nav must not
- * cancel the once-per-tab queue (and must not restart it).
+ * Once-per-tab sequential prefetch so soft-nav soft clicks reuse warm Flight
+ * without flooding ?_rsc under the cert harness early-click window.
  */
 export function PublicRoutePrefetch() {
   const router = useRouter();
@@ -29,20 +37,26 @@ export function PublicRoutePrefetch() {
     if (publicRoutesPrefetchStarted) return;
     publicRoutesPrefetchStarted = true;
 
-    const prefetchHref = (href: string) => {
+    let index = 0;
+    let cancelled = false;
+
+    const prefetchNext = () => {
+      if (cancelled || index >= PREFETCH_QUEUE.length) return;
+      const href = PREFETCH_QUEUE[index++];
       try {
         void router.prefetch(href);
       } catch {
         /* best-effort */
       }
+      window.setTimeout(prefetchNext, STAGGER_MS);
     };
 
-    // Wave 1: header/footer legal + auth (highest soft-nav volume).
-    for (const href of PRIORITY_PREFETCH_ROUTES_WAVE1) prefetchHref(href);
-    // Wave 2: about/support/contact/groups after a short gap (avoids RSC stampede).
-    window.setTimeout(() => {
-      for (const href of PRIORITY_PREFETCH_ROUTES_WAVE2) prefetchHref(href);
-    }, 220);
+    // Small delay so first paint / LCP is not competing with the first RSC prefetch.
+    window.setTimeout(prefetchNext, 120);
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   return null;

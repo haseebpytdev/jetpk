@@ -29,7 +29,7 @@ function DesktopNavItem({ item }: { item: NavItem }) {
     return (
       <Link
         href={item.href}
-        prefetch
+        prefetch={false}
         className="inline-flex items-center gap-2 rounded-jp-md px-3 py-2 text-jp-sm font-semibold tracking-[-0.01em] text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
       >
         <span>{item.label}</span>
