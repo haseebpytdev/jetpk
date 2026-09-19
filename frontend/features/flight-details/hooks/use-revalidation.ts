@@ -382,17 +382,28 @@ export function useRevalidation() {
       markBookNowTiming("T7_passenger_route", { nav: "soft_push_prime_overlap" });
       persistTimingForContinuity();
 
-      const softOutcome = await Promise.race([
-        router
-          .push(softPath)
-          .then(() => "soft" as const)
-          .catch(() => "soft_fail" as const),
-        new Promise<"timeout">((resolve) => {
-          window.setTimeout(() => resolve("timeout"), 1800);
-        }),
-      ]);
+      void router.push(softPath);
+      const softLanded = await new Promise<boolean>((resolve) => {
+        const deadline = Date.now() + 1800;
+        const tick = () => {
+          try {
+            if (window.location.pathname.includes("/booking/passengers")) {
+              resolve(true);
+              return;
+            }
+          } catch {
+            /* ignore */
+          }
+          if (Date.now() >= deadline) {
+            resolve(false);
+            return;
+          }
+          window.setTimeout(tick, 50);
+        };
+        window.setTimeout(tick, 0);
+      });
 
-      if (softOutcome === "soft") {
+      if (softLanded) {
         // Prime continues in the same JS context; Traveler consumes __jpPassengersPrime.
         void primePromise;
         return true;
