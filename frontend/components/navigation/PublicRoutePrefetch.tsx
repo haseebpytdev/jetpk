@@ -4,22 +4,13 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 /**
- * Soft-nav CTAs: warm immediately so early header/footer clicks reuse RSC.
- * Includes about/support/contact — cert P95 on 536521f1 failed those while faq/terms passed.
+ * Soft-nav CTAs: warm in two immediate waves so legal + auth stay first
+ * while about/support/contact/groups follow shortly after.
+ * Wave-2 is delayed briefly to avoid stampeding RSC with the first wave
+ * (08602d4a concurrent-priority regressing home_faq P95).
  */
-const PRIORITY_PREFETCH_ROUTES = [
-  "/login",
-  "/register",
-  "/privacy",
-  "/faq",
-  "/terms",
-  "/about-us",
-  "/support",
-  "/contact",
-] as const;
-
-/** Remaining public routes — deferred idle queue (staggered). */
-const PREFETCH_ROUTES = ["/groups/search"] as const;
+const PRIORITY_PREFETCH_ROUTES_WAVE1 = ["/login", "/register", "/privacy", "/faq", "/terms"] as const;
+const PRIORITY_PREFETCH_ROUTES_WAVE2 = ["/about-us", "/support", "/contact", "/groups/search"] as const;
 
 /** Module-scoped: survives PublicShell remounts; never re-stampede RSC. */
 let publicRoutesPrefetchStarted = false;
@@ -38,8 +29,6 @@ export function PublicRoutePrefetch() {
     if (publicRoutesPrefetchStarted) return;
     publicRoutesPrefetchStarted = true;
 
-    let index = 0;
-
     const prefetchHref = (href: string) => {
       try {
         void router.prefetch(href);
@@ -48,33 +37,12 @@ export function PublicRoutePrefetch() {
       }
     };
 
-    const prefetchNext = () => {
-      if (index >= PREFETCH_ROUTES.length) return;
-      const href = PREFETCH_ROUTES[index++];
-      prefetchHref(href);
-      // Wide stagger: soft-nav RSC must not share the pipe with a prefetch burst.
-      window.setTimeout(prefetchNext, 350);
-    };
-
-    const startDeferredQueue = () => {
-      prefetchNext();
-    };
-
-    // Header + footer legal routes — prefetch immediately so early soft-nav avoids cold RSC.
-    for (const href of PRIORITY_PREFETCH_ROUTES) prefetchHref(href);
-
-    const ric = (window as Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
-    }).requestIdleCallback;
-
-    // Deferred queue only for lower-priority paths; legal routes already priority-warmed.
+    // Wave 1: header/footer legal + auth (highest soft-nav volume).
+    for (const href of PRIORITY_PREFETCH_ROUTES_WAVE1) prefetchHref(href);
+    // Wave 2: about/support/contact/groups after a short gap (avoids RSC stampede).
     window.setTimeout(() => {
-      if (typeof ric === "function") {
-        ric(startDeferredQueue, { timeout: 2500 });
-      } else {
-        startDeferredQueue();
-      }
-    }, 800);
+      for (const href of PRIORITY_PREFETCH_ROUTES_WAVE2) prefetchHref(href);
+    }, 220);
   }, [router]);
 
   return null;
