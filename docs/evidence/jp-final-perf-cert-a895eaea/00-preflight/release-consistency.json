@@ -1,0 +1,5 @@
+{
+    "releaseSha":  "a895eaea6bdaff310617801ee7e8ebf734258186",
+    "note":  "server curl warm before soft-nav; not harness prefetch wait",
+    "publicBuildId":  "tEgZGLmLHLmRO2eqJs__z"
+}
