@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero, publicSeoToMetadata } from "@/features/public-content";
+import FaqLoading from "./loading";
 
 export const revalidate = 300;
 
@@ -11,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return publicSeoToMetadata(page.seo, "/faq");
 }
 
-export default async function FaqPage() {
+async function FaqPageContent() {
   const page = await FaqService.getFaqPage();
 
   return (
@@ -29,5 +31,14 @@ export default async function FaqPage() {
         ) : null}
       </div>
     </PageContainer>
+  );
+}
+
+/** Suspense so soft-nav URL commits while CMS streams. */
+export default function FaqPage() {
+  return (
+    <Suspense fallback={<FaqLoading />}>
+      <FaqPageContent />
+    </Suspense>
   );
 }

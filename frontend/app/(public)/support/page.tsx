@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import {
   Breadcrumbs,
@@ -7,6 +8,7 @@ import {
   fetchSupportCategories,
   publicSeoToMetadata,
 } from "@/features/public-content";
+import SupportLoading from "./loading";
 
 /** Soft-nav ISR: keep CMS support payload warm for CLIENT_SOFT transitions. */
 export const revalidate = 300;
@@ -16,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return publicSeoToMetadata(content.seo, "/support");
 }
 
-export default async function SupportPage() {
+async function SupportPageContent() {
   // Support CMS body is critical for soft-nav usable; categories must not stall RSC.
   const content = await SupportContentService.getSupportPage();
   const categories = await Promise.race([
@@ -45,5 +47,14 @@ export default async function SupportPage() {
         />
       </div>
     </PageContainer>
+  );
+}
+
+/** Suspense so soft-nav URL commits while CMS streams. */
+export default function SupportPage() {
+  return (
+    <Suspense fallback={<SupportLoading />}>
+      <SupportPageContent />
+    </Suspense>
   );
 }
