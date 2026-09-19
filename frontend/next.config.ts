@@ -10,6 +10,13 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   outputFileTracingRoot: path.join(__dirname),
+  experimental: {
+    // Keep soft-nav Flight payloads warm longer within a tab (cert N samples / real browsing).
+    staleTimes: {
+      dynamic: 60,
+      static: 300,
+    },
+  },
   async redirects() {
     return [
       {
