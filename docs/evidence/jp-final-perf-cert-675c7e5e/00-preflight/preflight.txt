@@ -1,0 +1,16 @@
+﻿# JetPakistan FINAL PERFORMANCE CERTIFICATION preflight
+# Pinned: FINAL_RELEASE_SHA=675c7e5efaa2656b2435c186cfe4665e086676bb
+# PUBLIC_BUILD_ID=FfNP1fgjiB4_gK6lNt4FI DASHBOARD_BUILD_ID=dOefZBIOnEl7EbTETViNa
+
+## Command (as specified)
+git -C /home/pkjetp/jetpk_app rev-parse HEAD => fatal: not a git repository
+PUBLIC BUILD_ID: FfNP1fgjiB4_gK6lNt4FI
+DASHBOARD BUILD_ID: dOefZBIOnEl7EbTETViNa
+
+## Authoritative runtime SHA (read-only supplemental)
+.jetpk-runtime-sha: 675c7e5efaa2656b2435c186cfe4665e086676bb
+
+## Result
+SHA: PASS (runtime marker matches pin)
+PUBLIC_BUILD_ID: PASS
+DASHBOARD_BUILD_ID: PASS

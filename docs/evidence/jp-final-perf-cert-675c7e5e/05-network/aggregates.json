@@ -1,0 +1,112 @@
+{
+  "post": {
+    "N": 30,
+    "MIN": 517,
+    "P50": 766,
+    "P75": 964,
+    "P90": 1387,
+    "P95": 1509,
+    "MAX": 1525,
+    "MEAN": 873
+  },
+  "apps": {
+    "N": 30,
+    "MIN": 1312,
+    "P50": 1595,
+    "P75": 1745,
+    "P90": 2675,
+    "P95": 2967,
+    "MAX": 3204,
+    "MEAN": 1743.2
+  },
+  "p2s": {
+    "N": 20,
+    "MIN": 126,
+    "P50": 175,
+    "P75": 192,
+    "P90": 228,
+    "P95": 263,
+    "MAX": 355,
+    "MEAN": 183.8
+  },
+  "s2p": {
+    "N": 20,
+    "MIN": 94,
+    "P50": 154,
+    "P75": 164,
+    "P90": 181,
+    "P95": 186,
+    "MAX": 226,
+    "MEAN": 155
+  },
+  "softRows": [
+    {
+      "route": "home_support",
+      "N": 20,
+      "P50": 1322,
+      "P95": 1840,
+      "GATE": "FAIL"
+    },
+    {
+      "route": "support_home",
+      "N": 20,
+      "P50": 671,
+      "P95": 1219,
+      "GATE": "PASS"
+    },
+    {
+      "route": "home_privacy",
+      "N": 20,
+      "P50": 1596,
+      "P95": 4435,
+      "GATE": "FAIL"
+    },
+    {
+      "route": "privacy_terms",
+      "N": 20,
+      "P50": 561,
+      "P95": 1320,
+      "GATE": "PASS"
+    },
+    {
+      "route": "home_groups",
+      "N": 20,
+      "P50": 902,
+      "P95": 1854,
+      "GATE": "FAIL"
+    },
+    {
+      "route": "home_login",
+      "N": 20,
+      "P50": 637,
+      "P95": 1150,
+      "GATE": "PASS"
+    },
+    {
+      "route": "login_register",
+      "N": 20,
+      "P50": 328,
+      "P95": 1763,
+      "GATE": "FAIL"
+    },
+    {
+      "route": "home_about",
+      "N": 20,
+      "P50": 1091,
+      "P95": 1987,
+      "GATE": "FAIL"
+    },
+    {
+      "route": "home_faq",
+      "N": 20,
+      "P50": 1153,
+      "P95": 3813,
+      "GATE": "FAIL"
+    }
+  ],
+  "RETURN_DUP": 0,
+  "WRONG": 0,
+  "SWITCH_SUP": 0,
+  "TRAVELER_MUT": 0,
+  "TRAVELER_P95": 2967
+}

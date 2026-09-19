@@ -1,0 +1,1866 @@
+{
+  "BUILD_NOTE": "warm footer/header Link clicks; click→usable; cold context-per-sample retired",
+  "SOFT_NAV_ROUTES": 9,
+  "SOFT_N_PER_ROUTE": 20,
+  "SOFT_NAV_WORST_APP_P95": 4435,
+  "APP_MULTI_SECOND_ROUTE_COUNT": 6,
+  "APP_OVER_750_COUNT": 9,
+  "soft": {
+    "home_support": {
+      "n_soft": 20,
+      "hard_fallback": 0,
+      "APP_P50": 1322,
+      "APP_P95": 1840
+    },
+    "support_home": {
+      "n_soft": 20,
+      "hard_fallback": 0,
+      "APP_P50": 671,
+      "APP_P95": 1219
+    },
+    "home_privacy": {
+      "n_soft": 20,
+      "hard_fallback": 0,
+      "APP_P50": 1596,
+      "APP_P95": 4435
+    },
+    "privacy_terms": {
+      "n_soft": 20,
+      "hard_fallback": 0,
+      "APP_P50": 561,
+      "APP_P95": 1320
+    },
+    "home_groups": {
+      "n_soft": 20,
+      "hard_fallback": 0,
+      "APP_P50": 902,
+      "APP_P95": 1854
+    },
+    "home_login": {
+      "n_soft": 20,
+      "hard_fallback": 0,
+      "APP_P50": 637,
+      "APP_P95": 1150
+    },
+    "login_register": {
+      "n_soft": 20,
+      "hard_fallback": 0,
+      "APP_P50": 328,
+      "APP_P95": 1763
+    },
+    "home_about": {
+      "n_soft": 20,
+      "hard_fallback": 0,
+      "APP_P50": 1091,
+      "APP_P95": 1987
+    },
+    "home_faq": {
+      "n_soft": 20,
+      "hard_fallback": 0,
+      "APP_P50": 1153,
+      "APP_P95": 3813
+    }
+  },
+  "samples": [
+    {
+      "route": "home_support",
+      "i": 0,
+      "kind": "soft",
+      "raw": 1292,
+      "toUrl": 1280,
+      "app": 1280,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 2
+    },
+    {
+      "route": "home_support",
+      "i": 1,
+      "kind": "soft",
+      "raw": 1888,
+      "toUrl": 1840,
+      "app": 1840,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 2,
+      "kind": "soft",
+      "raw": 1671,
+      "toUrl": 1618,
+      "app": 1618,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 3,
+      "kind": "soft",
+      "raw": 1370,
+      "toUrl": 1322,
+      "app": 1322,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 4,
+      "kind": "soft",
+      "raw": 1700,
+      "toUrl": 1652,
+      "app": 1652,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 5,
+      "kind": "soft",
+      "raw": 907,
+      "toUrl": 864,
+      "app": 864,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 6,
+      "kind": "soft",
+      "raw": 1087,
+      "toUrl": 1041,
+      "app": 1041,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 7,
+      "kind": "soft",
+      "raw": 1103,
+      "toUrl": 1000,
+      "app": 1000,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 8,
+      "kind": "soft",
+      "raw": 1390,
+      "toUrl": 1330,
+      "app": 1330,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 9,
+      "kind": "soft",
+      "raw": 1829,
+      "toUrl": 1759,
+      "app": 1759,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 10,
+      "kind": "soft",
+      "raw": 1486,
+      "toUrl": 1434,
+      "app": 1434,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 11,
+      "kind": "soft",
+      "raw": 1681,
+      "toUrl": 1646,
+      "app": 1646,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 12,
+      "kind": "soft",
+      "raw": 3082,
+      "toUrl": 3019,
+      "app": 3019,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 13,
+      "kind": "soft",
+      "raw": 1023,
+      "toUrl": 967,
+      "app": 967,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 14,
+      "kind": "soft",
+      "raw": 1325,
+      "toUrl": 1285,
+      "app": 1285,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 15,
+      "kind": "soft",
+      "raw": 980,
+      "toUrl": 927,
+      "app": 927,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 16,
+      "kind": "soft",
+      "raw": 1262,
+      "toUrl": 1206,
+      "app": 1206,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 17,
+      "kind": "soft",
+      "raw": 1424,
+      "toUrl": 1351,
+      "app": 1351,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 18,
+      "kind": "soft",
+      "raw": 901,
+      "toUrl": 855,
+      "app": 855,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "home_support",
+      "i": 19,
+      "kind": "soft",
+      "raw": 1552,
+      "toUrl": 1505,
+      "app": 1505,
+      "url": "https://jetpakistan.pk/support",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 0,
+      "kind": "soft",
+      "raw": 1551,
+      "toUrl": 1219,
+      "app": 1219,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 1,
+      "kind": "soft",
+      "raw": 739,
+      "toUrl": 671,
+      "app": 671,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 2,
+      "kind": "soft",
+      "raw": 437,
+      "toUrl": 360,
+      "app": 360,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 3,
+      "kind": "soft",
+      "raw": 908,
+      "toUrl": 795,
+      "app": 795,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 4,
+      "kind": "soft",
+      "raw": 459,
+      "toUrl": 390,
+      "app": 390,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 5,
+      "kind": "soft",
+      "raw": 682,
+      "toUrl": 432,
+      "app": 432,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 6,
+      "kind": "soft",
+      "raw": 603,
+      "toUrl": 508,
+      "app": 508,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 7,
+      "kind": "soft",
+      "raw": 496,
+      "toUrl": 381,
+      "app": 381,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 8,
+      "kind": "soft",
+      "raw": 766,
+      "toUrl": 730,
+      "app": 730,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 9,
+      "kind": "soft",
+      "raw": 1200,
+      "toUrl": 1021,
+      "app": 1021,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 10,
+      "kind": "soft",
+      "raw": 1405,
+      "toUrl": 1370,
+      "app": 1370,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 11,
+      "kind": "soft",
+      "raw": 577,
+      "toUrl": 514,
+      "app": 514,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 12,
+      "kind": "soft",
+      "raw": 1174,
+      "toUrl": 1065,
+      "app": 1065,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 13,
+      "kind": "soft",
+      "raw": 813,
+      "toUrl": 759,
+      "app": 759,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 14,
+      "kind": "soft",
+      "raw": 495,
+      "toUrl": 426,
+      "app": 426,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 15,
+      "kind": "soft",
+      "raw": 465,
+      "toUrl": 401,
+      "app": 401,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 16,
+      "kind": "soft",
+      "raw": 617,
+      "toUrl": 495,
+      "app": 495,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 17,
+      "kind": "soft",
+      "raw": 726,
+      "toUrl": 681,
+      "app": 681,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 18,
+      "kind": "soft",
+      "raw": 799,
+      "toUrl": 737,
+      "app": 737,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "support_home",
+      "i": 19,
+      "kind": "soft",
+      "raw": 927,
+      "toUrl": 872,
+      "app": 872,
+      "url": "https://jetpakistan.pk/",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 0,
+      "kind": "soft",
+      "raw": 5187,
+      "toUrl": 5105,
+      "app": 5105,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 1,
+      "kind": "soft",
+      "raw": 4468,
+      "toUrl": 4435,
+      "app": 4435,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 2
+    },
+    {
+      "route": "home_privacy",
+      "i": 2,
+      "kind": "soft",
+      "raw": 2648,
+      "toUrl": 2628,
+      "app": 2628,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 3,
+      "kind": "soft",
+      "raw": 1352,
+      "toUrl": 1319,
+      "app": 1319,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 4,
+      "kind": "soft",
+      "raw": 1880,
+      "toUrl": 1827,
+      "app": 1827,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 5,
+      "kind": "soft",
+      "raw": 1268,
+      "toUrl": 1234,
+      "app": 1234,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 6,
+      "kind": "soft",
+      "raw": 1820,
+      "toUrl": 1770,
+      "app": 1770,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 7,
+      "kind": "soft",
+      "raw": 1765,
+      "toUrl": 1724,
+      "app": 1724,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 8,
+      "kind": "soft",
+      "raw": 1297,
+      "toUrl": 1250,
+      "app": 1250,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 9,
+      "kind": "soft",
+      "raw": 1599,
+      "toUrl": 1570,
+      "app": 1570,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 10,
+      "kind": "soft",
+      "raw": 2296,
+      "toUrl": 2233,
+      "app": 2233,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 11,
+      "kind": "soft",
+      "raw": 1833,
+      "toUrl": 1782,
+      "app": 1782,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 12,
+      "kind": "soft",
+      "raw": 1789,
+      "toUrl": 1739,
+      "app": 1739,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 13,
+      "kind": "soft",
+      "raw": 1615,
+      "toUrl": 1596,
+      "app": 1596,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 14,
+      "kind": "soft",
+      "raw": 1232,
+      "toUrl": 1195,
+      "app": 1195,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 15,
+      "kind": "soft",
+      "raw": 882,
+      "toUrl": 852,
+      "app": 852,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 16,
+      "kind": "soft",
+      "raw": 1144,
+      "toUrl": 1100,
+      "app": 1100,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 17,
+      "kind": "soft",
+      "raw": 1711,
+      "toUrl": 1694,
+      "app": 1694,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 18,
+      "kind": "soft",
+      "raw": 1334,
+      "toUrl": 1233,
+      "app": 1233,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "home_privacy",
+      "i": 19,
+      "kind": "soft",
+      "raw": 1375,
+      "toUrl": 1315,
+      "app": 1315,
+      "url": "https://jetpakistan.pk/privacy",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 0,
+      "kind": "soft",
+      "raw": 1333,
+      "toUrl": 1320,
+      "app": 1320,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 1,
+      "kind": "soft",
+      "raw": 578,
+      "toUrl": 562,
+      "app": 562,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 2,
+      "kind": "soft",
+      "raw": 547,
+      "toUrl": 532,
+      "app": 532,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 3,
+      "kind": "soft",
+      "raw": 618,
+      "toUrl": 602,
+      "app": 602,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 4,
+      "kind": "soft",
+      "raw": 723,
+      "toUrl": 717,
+      "app": 717,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 5,
+      "kind": "soft",
+      "raw": 849,
+      "toUrl": 843,
+      "app": 843,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 6,
+      "kind": "soft",
+      "raw": 323,
+      "toUrl": 306,
+      "app": 306,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 7,
+      "kind": "soft",
+      "raw": 511,
+      "toUrl": 498,
+      "app": 498,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 8,
+      "kind": "soft",
+      "raw": 365,
+      "toUrl": 350,
+      "app": 350,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 9,
+      "kind": "soft",
+      "raw": 584,
+      "toUrl": 561,
+      "app": 561,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 10,
+      "kind": "soft",
+      "raw": 590,
+      "toUrl": 572,
+      "app": 572,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 11,
+      "kind": "soft",
+      "raw": 1069,
+      "toUrl": 1028,
+      "app": 1028,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 12,
+      "kind": "soft",
+      "raw": 509,
+      "toUrl": 503,
+      "app": 503,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 13,
+      "kind": "soft",
+      "raw": 532,
+      "toUrl": 519,
+      "app": 519,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 14,
+      "kind": "soft",
+      "raw": 427,
+      "toUrl": 416,
+      "app": 416,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 15,
+      "kind": "soft",
+      "raw": 1853,
+      "toUrl": 1724,
+      "app": 1724,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 16,
+      "kind": "soft",
+      "raw": 530,
+      "toUrl": 483,
+      "app": 483,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 17,
+      "kind": "soft",
+      "raw": 659,
+      "toUrl": 645,
+      "app": 645,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 18,
+      "kind": "soft",
+      "raw": 623,
+      "toUrl": 617,
+      "app": 617,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "privacy_terms",
+      "i": 19,
+      "kind": "soft",
+      "raw": 412,
+      "toUrl": 394,
+      "app": 394,
+      "url": "https://jetpakistan.pk/terms",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 0,
+      "kind": "soft",
+      "raw": 4024,
+      "toUrl": 3961,
+      "app": 3961,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 1,
+      "kind": "soft",
+      "raw": 1273,
+      "toUrl": 1218,
+      "app": 1218,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 3
+    },
+    {
+      "route": "home_groups",
+      "i": 2,
+      "kind": "soft",
+      "raw": 1078,
+      "toUrl": 1053,
+      "app": 1053,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 3,
+      "kind": "soft",
+      "raw": 421,
+      "toUrl": 374,
+      "app": 374,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 4,
+      "kind": "soft",
+      "raw": 1904,
+      "toUrl": 1854,
+      "app": 1854,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 5,
+      "kind": "soft",
+      "raw": 1027,
+      "toUrl": 972,
+      "app": 972,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 6,
+      "kind": "soft",
+      "raw": 819,
+      "toUrl": 783,
+      "app": 783,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 7,
+      "kind": "soft",
+      "raw": 950,
+      "toUrl": 902,
+      "app": 902,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 8,
+      "kind": "soft",
+      "raw": 1914,
+      "toUrl": 1830,
+      "app": 1830,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 9,
+      "kind": "soft",
+      "raw": 1213,
+      "toUrl": 1197,
+      "app": 1197,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 10,
+      "kind": "soft",
+      "raw": 1471,
+      "toUrl": 1419,
+      "app": 1419,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 11,
+      "kind": "soft",
+      "raw": 1006,
+      "toUrl": 971,
+      "app": 971,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 12,
+      "kind": "soft",
+      "raw": 936,
+      "toUrl": 901,
+      "app": 901,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 13,
+      "kind": "soft",
+      "raw": 1241,
+      "toUrl": 1229,
+      "app": 1229,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 14,
+      "kind": "soft",
+      "raw": 466,
+      "toUrl": 398,
+      "app": 398,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 15,
+      "kind": "soft",
+      "raw": 723,
+      "toUrl": 689,
+      "app": 689,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 16,
+      "kind": "soft",
+      "raw": 645,
+      "toUrl": 588,
+      "app": 588,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 17,
+      "kind": "soft",
+      "raw": 568,
+      "toUrl": 525,
+      "app": 525,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 18,
+      "kind": "soft",
+      "raw": 999,
+      "toUrl": 884,
+      "app": 884,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_groups",
+      "i": 19,
+      "kind": "soft",
+      "raw": 833,
+      "toUrl": 777,
+      "app": 777,
+      "url": "https://jetpakistan.pk/groups/search",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 0,
+      "kind": "soft",
+      "raw": 3943,
+      "toUrl": 3831,
+      "app": 3831,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 1,
+      "kind": "soft",
+      "raw": 868,
+      "toUrl": 791,
+      "app": 791,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 2
+    },
+    {
+      "route": "home_login",
+      "i": 2,
+      "kind": "soft",
+      "raw": 996,
+      "toUrl": 945,
+      "app": 945,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 3,
+      "kind": "soft",
+      "raw": 946,
+      "toUrl": 871,
+      "app": 871,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 4,
+      "kind": "soft",
+      "raw": 1184,
+      "toUrl": 1150,
+      "app": 1150,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 5,
+      "kind": "soft",
+      "raw": 671,
+      "toUrl": 637,
+      "app": 637,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 6,
+      "kind": "soft",
+      "raw": 624,
+      "toUrl": 588,
+      "app": 588,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 7,
+      "kind": "soft",
+      "raw": 179,
+      "toUrl": 139,
+      "app": 139,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 8,
+      "kind": "soft",
+      "raw": 843,
+      "toUrl": 796,
+      "app": 796,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 9,
+      "kind": "soft",
+      "raw": 720,
+      "toUrl": 685,
+      "app": 685,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 10,
+      "kind": "soft",
+      "raw": 619,
+      "toUrl": 580,
+      "app": 580,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 11,
+      "kind": "soft",
+      "raw": 697,
+      "toUrl": 668,
+      "app": 668,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 12,
+      "kind": "soft",
+      "raw": 604,
+      "toUrl": 561,
+      "app": 561,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 13,
+      "kind": "soft",
+      "raw": 658,
+      "toUrl": 615,
+      "app": 615,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 14,
+      "kind": "soft",
+      "raw": 582,
+      "toUrl": 494,
+      "app": 494,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 15,
+      "kind": "soft",
+      "raw": 533,
+      "toUrl": 490,
+      "app": 490,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 16,
+      "kind": "soft",
+      "raw": 779,
+      "toUrl": 746,
+      "app": 746,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 17,
+      "kind": "soft",
+      "raw": 792,
+      "toUrl": 712,
+      "app": 712,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 18,
+      "kind": "soft",
+      "raw": 368,
+      "toUrl": 294,
+      "app": 294,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "home_login",
+      "i": 19,
+      "kind": "soft",
+      "raw": 416,
+      "toUrl": 381,
+      "app": 381,
+      "url": "https://jetpakistan.pk/login",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 0,
+      "kind": "soft",
+      "raw": 4438,
+      "toUrl": 4364,
+      "app": 4364,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 1,
+      "kind": "soft",
+      "raw": 462,
+      "toUrl": 441,
+      "app": 441,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 2,
+      "kind": "soft",
+      "raw": 520,
+      "toUrl": 501,
+      "app": 501,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 3,
+      "kind": "soft",
+      "raw": 433,
+      "toUrl": 422,
+      "app": 422,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 4,
+      "kind": "soft",
+      "raw": 797,
+      "toUrl": 756,
+      "app": 756,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 5,
+      "kind": "soft",
+      "raw": 242,
+      "toUrl": 210,
+      "app": 210,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 6,
+      "kind": "soft",
+      "raw": 211,
+      "toUrl": 195,
+      "app": 195,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 7,
+      "kind": "soft",
+      "raw": 332,
+      "toUrl": 304,
+      "app": 304,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 8,
+      "kind": "soft",
+      "raw": 786,
+      "toUrl": 740,
+      "app": 740,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 9,
+      "kind": "soft",
+      "raw": 185,
+      "toUrl": 168,
+      "app": 168,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 10,
+      "kind": "soft",
+      "raw": 177,
+      "toUrl": 161,
+      "app": 161,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 11,
+      "kind": "soft",
+      "raw": 248,
+      "toUrl": 228,
+      "app": 228,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 12,
+      "kind": "soft",
+      "raw": 346,
+      "toUrl": 322,
+      "app": 322,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 13,
+      "kind": "soft",
+      "raw": 670,
+      "toUrl": 638,
+      "app": 638,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 14,
+      "kind": "soft",
+      "raw": 293,
+      "toUrl": 261,
+      "app": 261,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 15,
+      "kind": "soft",
+      "raw": 354,
+      "toUrl": 323,
+      "app": 323,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 16,
+      "kind": "soft",
+      "raw": 356,
+      "toUrl": 328,
+      "app": 328,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 17,
+      "kind": "soft",
+      "raw": 454,
+      "toUrl": 421,
+      "app": 421,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 18,
+      "kind": "soft",
+      "raw": 1813,
+      "toUrl": 1763,
+      "app": 1763,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "login_register",
+      "i": 19,
+      "kind": "soft",
+      "raw": 686,
+      "toUrl": 659,
+      "app": 659,
+      "url": "https://jetpakistan.pk/register",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 0,
+      "kind": "soft",
+      "raw": 13627,
+      "toUrl": 13613,
+      "app": 13613,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 1,
+      "kind": "soft",
+      "raw": 916,
+      "toUrl": 874,
+      "app": 874,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 2,
+      "kind": "soft",
+      "raw": 1170,
+      "toUrl": 1141,
+      "app": 1141,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 3,
+      "kind": "soft",
+      "raw": 1372,
+      "toUrl": 1254,
+      "app": 1254,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 4,
+      "kind": "soft",
+      "raw": 1338,
+      "toUrl": 1305,
+      "app": 1305,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 5,
+      "kind": "soft",
+      "raw": 1987,
+      "toUrl": 1952,
+      "app": 1952,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 6,
+      "kind": "soft",
+      "raw": 943,
+      "toUrl": 875,
+      "app": 875,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 7,
+      "kind": "soft",
+      "raw": 1016,
+      "toUrl": 967,
+      "app": 967,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 8,
+      "kind": "soft",
+      "raw": 1978,
+      "toUrl": 1954,
+      "app": 1954,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 9,
+      "kind": "soft",
+      "raw": 851,
+      "toUrl": 820,
+      "app": 820,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 10,
+      "kind": "soft",
+      "raw": 1143,
+      "toUrl": 1002,
+      "app": 1002,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 11,
+      "kind": "soft",
+      "raw": 579,
+      "toUrl": 492,
+      "app": 492,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 12,
+      "kind": "soft",
+      "raw": 860,
+      "toUrl": 837,
+      "app": 837,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 13,
+      "kind": "soft",
+      "raw": 753,
+      "toUrl": 729,
+      "app": 729,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 14,
+      "kind": "soft",
+      "raw": 2020,
+      "toUrl": 1987,
+      "app": 1987,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 15,
+      "kind": "soft",
+      "raw": 1146,
+      "toUrl": 1109,
+      "app": 1109,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 16,
+      "kind": "soft",
+      "raw": 1113,
+      "toUrl": 1091,
+      "app": 1091,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 17,
+      "kind": "soft",
+      "raw": 802,
+      "toUrl": 783,
+      "app": 783,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 18,
+      "kind": "soft",
+      "raw": 1363,
+      "toUrl": 1309,
+      "app": 1309,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_about",
+      "i": 19,
+      "kind": "soft",
+      "raw": 1173,
+      "toUrl": 1143,
+      "app": 1143,
+      "url": "https://jetpakistan.pk/about-us",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 0,
+      "kind": "soft",
+      "raw": 2491,
+      "toUrl": 2413,
+      "app": 2413,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 1,
+      "kind": "soft",
+      "raw": 4768,
+      "toUrl": 4738,
+      "app": 4738,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 2,
+      "kind": "soft",
+      "raw": 3832,
+      "toUrl": 3813,
+      "app": 3813,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 3,
+      "kind": "soft",
+      "raw": 1498,
+      "toUrl": 1469,
+      "app": 1469,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 4,
+      "kind": "soft",
+      "raw": 2101,
+      "toUrl": 2000,
+      "app": 2000,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 5,
+      "kind": "soft",
+      "raw": 1501,
+      "toUrl": 1292,
+      "app": 1292,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 6,
+      "kind": "soft",
+      "raw": 1890,
+      "toUrl": 1773,
+      "app": 1773,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 7,
+      "kind": "soft",
+      "raw": 1198,
+      "toUrl": 1153,
+      "app": 1153,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 8,
+      "kind": "soft",
+      "raw": 1061,
+      "toUrl": 1032,
+      "app": 1032,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 9,
+      "kind": "soft",
+      "raw": 744,
+      "toUrl": 715,
+      "app": 715,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 10,
+      "kind": "soft",
+      "raw": 573,
+      "toUrl": 525,
+      "app": 525,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 11,
+      "kind": "soft",
+      "raw": 651,
+      "toUrl": 606,
+      "app": 606,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 12,
+      "kind": "soft",
+      "raw": 935,
+      "toUrl": 894,
+      "app": 894,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 13,
+      "kind": "soft",
+      "raw": 1180,
+      "toUrl": 1153,
+      "app": 1153,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 14,
+      "kind": "soft",
+      "raw": 1463,
+      "toUrl": 1449,
+      "app": 1449,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 15,
+      "kind": "soft",
+      "raw": 594,
+      "toUrl": 578,
+      "app": 578,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 16,
+      "kind": "soft",
+      "raw": 901,
+      "toUrl": 881,
+      "app": 881,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 17,
+      "kind": "soft",
+      "raw": 1265,
+      "toUrl": 1242,
+      "app": 1242,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 18,
+      "kind": "soft",
+      "raw": 2365,
+      "toUrl": 2334,
+      "app": 2334,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    },
+    {
+      "route": "home_faq",
+      "i": 19,
+      "kind": "soft",
+      "raw": 1150,
+      "toUrl": 1132,
+      "app": 1132,
+      "url": "https://jetpakistan.pk/faq",
+      "attempt": 1
+    }
+  ]
+}
