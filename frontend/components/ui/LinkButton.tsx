@@ -1,8 +1,8 @@
+import { PrefetchOnIntentLink } from "@/components/navigation/PrefetchOnIntentLink";
 import { cn } from "@/lib/cn";
-import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
-type LinkButtonProps = ComponentProps<typeof Link> & {
+type LinkButtonProps = ComponentProps<typeof PrefetchOnIntentLink> & {
   children: ReactNode;
   variant?: "primary" | "secondary";
   external?: boolean;
@@ -39,8 +39,8 @@ export function LinkButton({
   }
 
   return (
-    <Link className={classes} {...props}>
+    <PrefetchOnIntentLink className={classes} {...props}>
       {children}
-    </Link>
+    </PrefetchOnIntentLink>
   );
 }

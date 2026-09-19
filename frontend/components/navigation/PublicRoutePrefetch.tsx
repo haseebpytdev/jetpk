@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 
 /**
  * Soft-nav warmth: single-flight RSC prefetch owned here only.
- * Footer/header Links use prefetch={false} so they do not stampede with this queue
- * (stage-decomp: concurrent Link prefetch + PublicRoutePrefetch starved destination RSC).
+ * Chrome links use PrefetchOnIntentLink (prefetch={false} + hover/focus warm) so they
+ * do not stampede with this queue on mount (stage-decomp).
  *
  * /contact omitted — it 308s to /about-us and wastes a slot.
  */
@@ -21,7 +21,7 @@ const PREFETCH_QUEUE = [
   "/groups/search",
 ] as const;
 
-const STAGGER_MS = 280;
+const STAGGER_MS = 160;
 
 /** Module-scoped: survives PublicShell remounts; never re-stampede RSC. */
 let publicRoutesPrefetchStarted = false;

@@ -1,6 +1,7 @@
 import { JetPakistanLogo } from "@/components/layout/JetPakistanLogo";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { CurrencySelector } from "@/components/navigation/CurrencySelector";
+import { PrefetchOnIntentLink } from "@/components/navigation/PrefetchOnIntentLink";
 import type { PublicConfig } from "@/features/public-content/services/public-config-service";
 import { footerColumns, socialLinks } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
@@ -42,13 +43,12 @@ export function SiteFooter({ className, branding = null }: SiteFooterProps) {
                 {column.links.map((link) => (
                   <li key={link.href}>
                     {isInternalHref(link.href) ? (
-                      <Link
+                      <PrefetchOnIntentLink
                         href={link.href}
-                        prefetch={false}
                         className="text-jp-sm text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                       >
                         {link.label}
-                      </Link>
+                      </PrefetchOnIntentLink>
                     ) : (
                       <a
                         href={link.href}

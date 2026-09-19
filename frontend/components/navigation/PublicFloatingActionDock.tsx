@@ -1,10 +1,10 @@
 "use client";
 
 import { ThemeSwitch } from "@/components/theme/ThemeSwitch";
+import { PrefetchOnIntentLink } from "@/components/navigation/PrefetchOnIntentLink";
 import { primaryNavigationForSession } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
 import type { PublicSession } from "@/types/session";
-import Link from "next/link";
 import { usePublicFloatingLayoutOptional } from "@/features/public-floating/PublicFloatingLayoutProvider";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef } from "react";
@@ -143,9 +143,8 @@ export function PublicFloatingActionDock({
         <ul className="max-h-[min(60vh,22rem)] space-y-1 overflow-y-auto">
           {tiles.map((tile) => (
             <li key={`${tile.label}-${tile.href}`}>
-              <Link
+              <PrefetchOnIntentLink
                 href={tile.href}
-                prefetch={false}
                 data-testid={tile.testId}
                 onClick={() => {
                   if (detailsRef.current) detailsRef.current.open = false;
@@ -153,7 +152,7 @@ export function PublicFloatingActionDock({
                 className="flex min-h-12 items-center rounded-jp-md px-3 py-2 text-jp-sm font-semibold text-jp-text transition-colors duration-jp-fast hover:bg-jp-brand-soft hover:text-jp-brand focus-visible:outline-none focus-visible:shadow-jp-focus motion-reduce:transition-none"
               >
                 {tile.label}
-              </Link>
+              </PrefetchOnIntentLink>
             </li>
           ))}
         </ul>

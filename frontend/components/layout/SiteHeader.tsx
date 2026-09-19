@@ -59,7 +59,6 @@ export function SiteHeader({ session, branding = null, aiEnabled = false }: Site
                 <>
                   <LinkButton
                     href="/login"
-                    prefetch={false}
                     variant="secondary"
                     className={anonymousLoginActionClass}
                     data-testid="header-login-cta"
