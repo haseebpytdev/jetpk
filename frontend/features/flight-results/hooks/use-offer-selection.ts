@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { resolvePassengerCheckoutHandoffUrl } from "@/features/flight-details/utils/handoff";
+import { primePassengersContextBeforeHardNav } from "@/features/standard-booking/services/standard-booking-api";
 import {
   buildCheckoutHandoffUrl,
   revalidateOffer,
@@ -11,6 +12,12 @@ import type { FlightOffer } from "../types";
 function isIatiOffer(offer: FlightOffer): boolean {
   const provider = (offer.supplier_provider ?? offer.provider ?? "").toLowerCase();
   return provider === "iati";
+}
+
+function toAbsoluteHandoff(url: string): string {
+  const resolved = url.startsWith("http") ? url : url.startsWith("/") ? url : `/${url}`;
+  if (typeof window === "undefined") return resolved;
+  return resolved.startsWith("http") ? resolved : `${window.location.origin}${resolved}`;
 }
 
 export function useOfferSelection(searchId: string) {
@@ -53,8 +60,11 @@ export function useOfferSelection(searchId: string) {
           }
 
           const resolved = resolvePassengerCheckoutHandoffUrl(passengersUrl) ?? passengersUrl;
-          const next = resolved.startsWith("http") ? resolved : resolved.startsWith("/") ? resolved : `/${resolved}`;
-          window.location.assign(next);
+          const absolute = toAbsoluteHandoff(resolved);
+          // Bounded pre-nav prime (same contract as use-revalidation). Failure/timeout
+          // must not block handoff — Traveler falls back to early-document / React fetch.
+          await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2500 });
+          window.location.assign(absolute);
           return;
         }
 
@@ -65,12 +75,9 @@ export function useOfferSelection(searchId: string) {
           searchId,
         );
         const resolvedCheckout = resolvePassengerCheckoutHandoffUrl(checkoutUrl) ?? checkoutUrl;
-        const next = resolvedCheckout.startsWith("http")
-          ? resolvedCheckout
-          : resolvedCheckout.startsWith("/")
-            ? resolvedCheckout
-            : `/${resolvedCheckout}`;
-        window.location.assign(next);
+        const absolute = toAbsoluteHandoff(resolvedCheckout);
+        await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2500 });
+        window.location.assign(absolute);
       } finally {
         inFlightRef.current = false;
         setSelectingId(null);

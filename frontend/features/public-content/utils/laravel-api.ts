@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { absoluteLaravelUrl, laravelApiPath } from "@/services/flight-search";
 import type {
   ContactDetails,
@@ -13,6 +14,8 @@ export type LaravelValidationErrors = Record<string, string[]>;
 
 const LARAVEL_FETCH_TIMEOUT_MS = 3_000;
 
+type NextFetchInit = RequestInit & { next?: { revalidate?: number | false; tags?: string[] } };
+
 /**
  * Server components must call Laravel directly (runtime LARAVEL_URL) because
  * Next rewrites are baked at build time and can target the wrong loopback host.
@@ -26,7 +29,23 @@ export function publicContentFetchUrl(apiPath: string): string {
   return laravelApiPath(normalized);
 }
 
-export async function fetchWithTimeout(input: string, init?: RequestInit): Promise<Response> {
+/**
+ * Fetch with a client-side abort timeout.
+ * Server fetches that use Next `next.revalidate` / tags MUST NOT attach a unique
+ * AbortSignal — a fresh AbortController per call defeats Next fetch deduplication
+ * across generateMetadata + page + layout in the same request.
+ */
+export async function fetchWithTimeout(input: string, init?: NextFetchInit): Promise<Response> {
+  const isServerCachedFetch = typeof window === "undefined" && Boolean(init?.next);
+
+  if (isServerCachedFetch) {
+    return fetch(input, init);
+  }
+
+  if (init?.signal) {
+    return fetch(input, init);
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), LARAVEL_FETCH_TIMEOUT_MS);
 
@@ -63,7 +82,12 @@ export async function ensureLaravelCsrfToken(): Promise<string | null> {
   }
 }
 
-export async function fetchManagedPage(pageKey: string): Promise<LaravelManagedPageResponse | null> {
+/**
+ * Request-scoped dedupe for generateMetadata + page (and any other RSC callers)
+ * so one soft-nav does not hit Laravel twice for the same managed page key.
+ * Preserves next.revalidate: 60 / tag invalidation semantics.
+ */
+export const fetchManagedPage = cache(async (pageKey: string): Promise<LaravelManagedPageResponse | null> => {
   try {
     const response = await fetchWithTimeout(publicContentFetchUrl(`/api/public/content/pages/${pageKey}`), {
       headers: { Accept: "application/json" },
@@ -74,7 +98,7 @@ export async function fetchManagedPage(pageKey: string): Promise<LaravelManagedP
   } catch {
     return null;
   }
-}
+});
 
 export async function fetchSiteContactFromLaravel(): Promise<ContactDetails | null> {
   try {

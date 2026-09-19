@@ -358,6 +358,10 @@ export function useRevalidation() {
         }
       };
 
+      // Start passengers JSON prime immediately so it overlaps document warm + prefetch.
+      // Bounded timeout — failure must not block hard assign (session/inline fallback).
+      const primePromise = primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2500 });
+
       try {
         void router.prefetch(target.startsWith("http") ? new URL(target).pathname + new URL(target).search : target);
       } catch {
@@ -367,9 +371,7 @@ export function useRevalidation() {
 
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
-      // Full prime into sessionStorage before assign — short aborts forced a cold
-      // post-nav XHR (~1.7s) and pushed APP_P50 above 2000ms.
-      await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2500 });
+      await primePromise;
       persistTimingForContinuity();
       releaseImageSlots();
 

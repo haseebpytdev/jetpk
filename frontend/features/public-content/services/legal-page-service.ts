@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { PRIVACY_DOCUMENT_FIXTURE, TERMS_DOCUMENT_FIXTURE } from "../fixtures/legal";
 import type { LegalDocument, LegalSection, PublicSeo } from "../types";
 import { fetchManagedPage } from "../utils/laravel-api";
@@ -30,30 +31,33 @@ function mapLegal(content: Record<string, unknown>, fallback: LegalDocument): Le
   };
 }
 
-export const LegalPageService = {
-  async getTerms(): Promise<LegalDocument> {
-    const remote = await fetchManagedPage("terms");
-    if (!remote || remote.source === "empty") {
-      return allowContentFixtures() ? TERMS_DOCUMENT_FIXTURE : {
-        source: "empty",
-        title: "Terms and conditions",
-        sections: [],
-        seo: TERMS_DOCUMENT_FIXTURE.seo,
-      };
-    }
-    return mapLegal(remote.content, TERMS_DOCUMENT_FIXTURE);
-  },
+async function getTermsImpl(): Promise<LegalDocument> {
+  const remote = await fetchManagedPage("terms");
+  if (!remote || remote.source === "empty") {
+    return allowContentFixtures() ? TERMS_DOCUMENT_FIXTURE : {
+      source: "empty",
+      title: "Terms and conditions",
+      sections: [],
+      seo: TERMS_DOCUMENT_FIXTURE.seo,
+    };
+  }
+  return mapLegal(remote.content, TERMS_DOCUMENT_FIXTURE);
+}
 
-  async getPrivacy(): Promise<LegalDocument> {
-    const remote = await fetchManagedPage("privacy");
-    if (!remote || remote.source === "empty") {
-      return allowContentFixtures() ? PRIVACY_DOCUMENT_FIXTURE : {
-        source: "empty",
-        title: "Privacy policy",
-        sections: [],
-        seo: PRIVACY_DOCUMENT_FIXTURE.seo,
-      };
-    }
-    return mapLegal(remote.content, PRIVACY_DOCUMENT_FIXTURE);
-  },
+async function getPrivacyImpl(): Promise<LegalDocument> {
+  const remote = await fetchManagedPage("privacy");
+  if (!remote || remote.source === "empty") {
+    return allowContentFixtures() ? PRIVACY_DOCUMENT_FIXTURE : {
+      source: "empty",
+      title: "Privacy policy",
+      sections: [],
+      seo: PRIVACY_DOCUMENT_FIXTURE.seo,
+    };
+  }
+  return mapLegal(remote.content, PRIVACY_DOCUMENT_FIXTURE);
+}
+
+export const LegalPageService = {
+  getTerms: cache(getTermsImpl),
+  getPrivacy: cache(getPrivacyImpl),
 };

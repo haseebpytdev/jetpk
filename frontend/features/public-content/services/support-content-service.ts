@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { SUPPORT_PAGE_FIXTURE } from "../fixtures/support";
 import type { ContentCard, PublicPageHero, PublicSeo, SupportPageContent } from "../types";
 import { fetchManagedPage, mergeContactDetails } from "../utils/laravel-api";
@@ -25,7 +26,7 @@ function mapDepartments(content: Record<string, unknown>): ContentCard[] {
 }
 
 export const SupportContentService = {
-  async getSupportPage(): Promise<SupportPageContent> {
+  getSupportPage: cache(async (): Promise<SupportPageContent> => {
     const remote = await fetchManagedPage("support");
     if (!remote || remote.source === "empty") {
       if (allowContentFixtures()) {
@@ -63,5 +64,5 @@ export const SupportContentService = {
           : allowContentFixtures() ? SUPPORT_PAGE_FIXTURE.faqTeaser : undefined,
       seo: { ...SUPPORT_PAGE_FIXTURE.seo, ...(remote.seo ?? {}) } as PublicSeo,
     };
-  },
+  }),
 };

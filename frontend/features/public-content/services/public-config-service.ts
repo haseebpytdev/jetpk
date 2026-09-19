@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { laravelApiPath } from "@/services/flight-search";
 import { appConfig } from "@/lib/config";
 import type { ContactDetails } from "../types";
@@ -60,22 +61,25 @@ function publicConfigEndpoint(): string {
   return `${appBase}/laravel/api/public/content/config`;
 }
 
+async function getConfigImpl(): Promise<PublicConfig | null> {
+  try {
+    // Public config is not user-specific — avoid cookies()/no-store so layouts
+    // that still SSR-fetch config remain cacheable for soft-nav.
+    const response = await fetchWithTimeout(publicConfigEndpoint(), {
+      headers: { Accept: "application/json" },
+      credentials: typeof window !== "undefined" ? "include" : "omit",
+      ...(typeof window === "undefined"
+        ? { next: { revalidate: 60, tags: ["public-config"] } }
+        : { cache: "no-store" as RequestCache }),
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as PublicConfig;
+  } catch {
+    return null;
+  }
+}
+
 export const PublicConfigService = {
-  async getConfig(): Promise<PublicConfig | null> {
-    try {
-      // Public config is not user-specific — avoid cookies()/no-store so layouts
-      // that still SSR-fetch config remain cacheable for soft-nav.
-      const response = await fetchWithTimeout(publicConfigEndpoint(), {
-        headers: { Accept: "application/json" },
-        credentials: typeof window !== "undefined" ? "include" : "omit",
-        ...(typeof window === "undefined"
-          ? { next: { revalidate: 60, tags: ["public-config"] } }
-          : { cache: "no-store" as RequestCache }),
-      });
-      if (!response.ok) return null;
-      return (await response.json()) as PublicConfig;
-    } catch {
-      return null;
-    }
-  },
+  /** React cache(): one config resolution per RSC request across root/public layouts + metadata. */
+  getConfig: cache(getConfigImpl),
 };

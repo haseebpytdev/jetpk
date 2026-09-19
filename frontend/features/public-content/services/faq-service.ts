@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { FAQ_PAGE_FIXTURE } from "../fixtures/faq";
 import type { FaqCategory, FaqPageContent, PublicPageHero, PublicSeo } from "../types";
 import { fetchManagedPage } from "../utils/laravel-api";
@@ -37,7 +38,7 @@ function mapCategories(content: Record<string, unknown>): FaqCategory[] {
 }
 
 export const FaqService = {
-  async getFaqPage(): Promise<FaqPageContent> {
+  getFaqPage: cache(async (): Promise<FaqPageContent> => {
     const remote = await fetchManagedPage("faq");
     if (!remote || remote.source === "empty") {
       if (allowContentFixtures()) {
@@ -65,5 +66,5 @@ export const FaqService = {
         : FAQ_PAGE_FIXTURE.cta,
       seo: { ...FAQ_PAGE_FIXTURE.seo, ...(remote.seo ?? {}) } as PublicSeo,
     };
-  },
+  }),
 };

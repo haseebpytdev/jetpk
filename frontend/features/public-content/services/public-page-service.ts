@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { ABOUT_PAGE_FIXTURE } from "../fixtures/about";
 import type { ContentCard, PublicPage, PublicPageHero, PublicSeo } from "../types";
 import { fetchManagedPage } from "../utils/laravel-api";
@@ -42,7 +43,7 @@ function mapContentGrid(content: Record<string, unknown>): ContentCard[] {
 }
 
 export const PublicPageService = {
-  async getAboutPage(): Promise<PublicPage> {
+  getAboutPage: cache(async (): Promise<PublicPage> => {
     const remote = await fetchManagedPage("about");
     if (!remote || remote.source === "empty" || !remote.content?.hero) {
       if (allowContentFixtures()) {
@@ -104,5 +105,5 @@ export const PublicPageService = {
       },
       seo: mapSeo(remote.seo, ABOUT_PAGE_FIXTURE.seo),
     };
-  },
+  }),
 };
