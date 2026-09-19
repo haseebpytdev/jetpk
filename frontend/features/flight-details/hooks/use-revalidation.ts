@@ -358,8 +358,10 @@ export function useRevalidation() {
         }
       };
 
-      // Start passengers JSON prime immediately so it overlaps document warm + prefetch.
-      // Bounded timeout — failure must not block hard assign (session/inline fallback).
+      // Start passengers JSON prime immediately so it overlaps warm/prefetch/nav.
+      // Soft router.push keeps the SPA alive so __jpPassengersPrime can be consumed
+      // without awaiting the full Laravel GET before navigation (APP gate).
+      // Hard assign is fallback only if soft nav stalls — brief prime race before unload.
       const primePromise = primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2500 });
 
       try {
@@ -371,14 +373,41 @@ export function useRevalidation() {
 
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
-      await primePromise;
-      persistTimingForContinuity();
       releaseImageSlots();
 
-      // Hard assign after prime — soft router.push + 2.5s stall fallback inflated
-      // TRAVELER APP_P95 (~2.5–4s) when results kept the SPA busy.
-      markBookNowTiming("T5_router_push", { nav: "hard_assign_after_prime" });
-      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_after_prime" });
+      const softPath =
+        target.startsWith("http") ? new URL(target).pathname + new URL(target).search : target.startsWith("/") ? target : `/${target}`;
+
+      markBookNowTiming("T5_router_push", { nav: "soft_push_prime_overlap" });
+      markBookNowTiming("T7_passenger_route", { nav: "soft_push_prime_overlap" });
+      persistTimingForContinuity();
+
+      const softOutcome = await Promise.race([
+        router
+          .push(softPath)
+          .then(() => "soft" as const)
+          .catch(() => "soft_fail" as const),
+        new Promise<"timeout">((resolve) => {
+          window.setTimeout(() => resolve("timeout"), 1800);
+        }),
+      ]);
+
+      if (softOutcome === "soft") {
+        // Prime continues in the same JS context; Traveler consumes __jpPassengersPrime.
+        void primePromise;
+        return true;
+      }
+
+      // Soft stall/fail — allow a short prime window then hard assign (sessionStorage path).
+      await Promise.race([
+        primePromise,
+        new Promise<void>((resolve) => {
+          window.setTimeout(() => resolve(), 400);
+        }),
+      ]);
+      persistTimingForContinuity();
+      markBookNowTiming("T5_router_push", { nav: "hard_assign_after_soft_timeout" });
+      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_after_soft_timeout" });
       persistTimingForContinuity();
       try {
         window.location.assign(absolute);

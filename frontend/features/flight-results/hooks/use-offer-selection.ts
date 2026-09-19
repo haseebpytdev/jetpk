@@ -61,9 +61,15 @@ export function useOfferSelection(searchId: string) {
 
           const resolved = resolvePassengerCheckoutHandoffUrl(passengersUrl) ?? passengersUrl;
           const absolute = toAbsoluteHandoff(resolved);
-          // Bounded pre-nav prime (same contract as use-revalidation). Failure/timeout
-          // must not block handoff — Traveler falls back to early-document / React fetch.
-          await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2500 });
+          // Fire prime; prefer soft overlap via same-tab navigation when possible.
+          // Bounded race — never block forever; Traveler falls back to early-document fetch.
+          const primePromise = primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2500 });
+          await Promise.race([
+            primePromise,
+            new Promise<void>((resolve) => {
+              window.setTimeout(() => resolve(), 400);
+            }),
+          ]);
           window.location.assign(absolute);
           return;
         }
@@ -76,7 +82,13 @@ export function useOfferSelection(searchId: string) {
         );
         const resolvedCheckout = resolvePassengerCheckoutHandoffUrl(checkoutUrl) ?? checkoutUrl;
         const absolute = toAbsoluteHandoff(resolvedCheckout);
-        await primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2500 });
+        const primePromise = primePassengersContextBeforeHardNav(absolute, { timeoutMs: 2500 });
+        await Promise.race([
+          primePromise,
+          new Promise<void>((resolve) => {
+            window.setTimeout(() => resolve(), 400);
+          }),
+        ]);
         window.location.assign(absolute);
       } finally {
         inFlightRef.current = false;

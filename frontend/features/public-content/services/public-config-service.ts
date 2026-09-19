@@ -2,7 +2,6 @@ import { cache } from "react";
 import { laravelApiPath } from "@/services/flight-search";
 import { appConfig } from "@/lib/config";
 import type { ContactDetails } from "../types";
-import { fetchWithTimeout } from "../utils/laravel-api";
 
 export type PublicConfig = {
   brand_name: string;
@@ -62,12 +61,16 @@ function publicConfigEndpoint(): string {
 }
 
 async function getConfigImpl(): Promise<PublicConfig | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3_000);
   try {
     // Public config is not user-specific — avoid cookies()/no-store so layouts
     // that still SSR-fetch config remain cacheable for soft-nav.
-    const response = await fetchWithTimeout(publicConfigEndpoint(), {
+    // Timeout is inside React cache() so root+public layout share one fetch/signal.
+    const response = await fetch(publicConfigEndpoint(), {
       headers: { Accept: "application/json" },
       credentials: typeof window !== "undefined" ? "include" : "omit",
+      signal: controller.signal,
       ...(typeof window === "undefined"
         ? { next: { revalidate: 60, tags: ["public-config"] } }
         : { cache: "no-store" as RequestCache }),
@@ -76,6 +79,8 @@ async function getConfigImpl(): Promise<PublicConfig | null> {
     return (await response.json()) as PublicConfig;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

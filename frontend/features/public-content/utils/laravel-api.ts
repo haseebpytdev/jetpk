@@ -30,18 +30,17 @@ export function publicContentFetchUrl(apiPath: string): string {
 }
 
 /**
- * Fetch with a client-side abort timeout.
- * Server fetches that use Next `next.revalidate` / tags MUST NOT attach a unique
- * AbortSignal — a fresh AbortController per call defeats Next fetch deduplication
- * across generateMetadata + page + layout in the same request.
+ * Fetch with abort timeout.
+ *
+ * Server + `next.revalidate` callers that are NOT wrapped in React `cache()` must
+ * not invent a unique AbortSignal per call (breaks Next fetch dedupe). Prefer
+ * putting the timeout *inside* a `cache()` wrapper (one signal per request key).
+ *
+ * Plain server cached fetch without an outer cache() still uses a timeout via
+ * AbortSignal when the caller does not pass `signal` — but managed-page/config
+ * go through cache() implementations that own the timer.
  */
 export async function fetchWithTimeout(input: string, init?: NextFetchInit): Promise<Response> {
-  const isServerCachedFetch = typeof window === "undefined" && Boolean(init?.next);
-
-  if (isServerCachedFetch) {
-    return fetch(input, init);
-  }
-
   if (init?.signal) {
     return fetch(input, init);
   }
@@ -85,18 +84,24 @@ export async function ensureLaravelCsrfToken(): Promise<string | null> {
 /**
  * Request-scoped dedupe for generateMetadata + page (and any other RSC callers)
  * so one soft-nav does not hit Laravel twice for the same managed page key.
- * Preserves next.revalidate: 60 / tag invalidation semantics.
+ * Timeout lives inside cache() so metadata+page share one AbortSignal/fetch.
+ * ISR: revalidate 300 aligns with public legal/CMS page exports.
  */
 export const fetchManagedPage = cache(async (pageKey: string): Promise<LaravelManagedPageResponse | null> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LARAVEL_FETCH_TIMEOUT_MS);
   try {
-    const response = await fetchWithTimeout(publicContentFetchUrl(`/api/public/content/pages/${pageKey}`), {
+    const response = await fetch(publicContentFetchUrl(`/api/public/content/pages/${pageKey}`), {
       headers: { Accept: "application/json" },
-      next: { revalidate: 60, tags: ["public-seo", `public-seo-${pageKey}`] },
+      signal: controller.signal,
+      next: { revalidate: 300, tags: ["public-seo", `public-seo-${pageKey}`] },
     });
     if (!response.ok) return null;
     return (await response.json()) as LaravelManagedPageResponse;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 });
 

@@ -1,0 +1,3 @@
+﻿RETRY_DISCLOSURE=1
+REASON=genuine_harness_failure
+DETAIL=run-soft-nav.mjs aborted mid-suite with page.goto net::ERR_CONNECTION_CLOSED after 4/9 routes. Site recovered (home/privacy 200). Re-running full soft-nav N=20; partial first-attempt console retained as run-console-attempt1.txt. No samples discarded for slowness.
