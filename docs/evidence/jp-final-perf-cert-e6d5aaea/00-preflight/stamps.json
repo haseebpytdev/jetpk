@@ -1,0 +1,9 @@
+{
+  "preflight_at": "2026-09-19T21:05:00Z",
+  "FINAL_RELEASE_SHA": "e6d5aaea6a528d174d20133418aa56ab3014023a",
+  "PRODUCTION_RUNTIME_SHA": "e6d5aaea6a528d174d20133418aa56ab3014023a",
+  "PUBLIC_BUILD_SOURCE_SHA": "e6d5aaea6a528d174d20133418aa56ab3014023a",
+  "PUBLIC_BUILD_ID": "ukXo5hPaGs1auUWE9-8Xg",
+  "ROLLBACK_SHA": "ea6133bfb4b045bf81d7823c12efab4a5cf376ff",
+  "note": "PUBLIC_ONLY rebuild; intent PrefetchOnIntentLink + single-flight PublicRoutePrefetch STAGGER 160ms"
+}

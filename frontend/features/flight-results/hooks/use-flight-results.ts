@@ -604,19 +604,37 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
 
     let idleHandle: number | null = null;
     let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+    let pollHandle: ReturnType<typeof setTimeout> | null = null;
+
     const schedule = () => {
       if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-        idleHandle = window.requestIdleCallback(() => runPrefetch(), { timeout: 1200 });
+        // High timeout so Chromium does not force-run during first-card paint.
+        idleHandle = window.requestIdleCallback(() => runPrefetch(), { timeout: 2800 });
       } else {
-        timeoutHandle = setTimeout(runPrefetch, 400);
+        timeoutHandle = setTimeout(runPrefetch, 800);
       }
     };
-    // Yield past the first flushSync pair-card frame before scheduling idle work.
-    timeoutHandle = setTimeout(schedule, 0);
+
+    // Wait until first pair card stamped, then one extra frame, before idle schedule.
+    const waitForFirstCard = () => {
+      if (cancelled) return;
+      const w = window as Window & { __jpD2rCardAt?: number };
+      if (typeof w.__jpD2rCardAt === "number" && w.__jpD2rCardAt > 0) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (!cancelled) schedule();
+          });
+        });
+        return;
+      }
+      pollHandle = setTimeout(waitForFirstCard, 50);
+    };
+    timeoutHandle = setTimeout(waitForFirstCard, 0);
 
     return () => {
       cancelled = true;
       if (timeoutHandle != null) clearTimeout(timeoutHandle);
+      if (pollHandle != null) clearTimeout(pollHandle);
       if (idleHandle != null && typeof window !== "undefined" && "cancelIdleCallback" in window) {
         window.cancelIdleCallback(idleHandle);
       }

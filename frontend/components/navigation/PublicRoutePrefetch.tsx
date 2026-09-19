@@ -11,17 +11,17 @@ import { useRouter } from "next/navigation";
  * /contact omitted — it 308s to /about-us and wastes a slot.
  */
 const PREFETCH_QUEUE = [
+  "/support",
+  "/groups/search",
   "/privacy",
   "/faq",
   "/terms",
   "/login",
-  "/register",
   "/about-us",
-  "/support",
-  "/groups/search",
+  "/register",
 ] as const;
 
-const STAGGER_MS = 160;
+const STAGGER_MS = 120;
 
 /** Module-scoped: survives PublicShell remounts; never re-stampede RSC. */
 let publicRoutesPrefetchStarted = false;
