@@ -17,9 +17,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SupportPage() {
-  const [content, categories] = await Promise.all([
-    SupportContentService.getSupportPage(),
+  // Support CMS body is critical for soft-nav usable; categories must not stall RSC.
+  const content = await SupportContentService.getSupportPage();
+  const categories = await Promise.race([
     fetchSupportCategories(),
+    new Promise<Awaited<ReturnType<typeof fetchSupportCategories>>>((resolve) => {
+      setTimeout(() => resolve([]), 250);
+    }),
   ]);
 
   return (

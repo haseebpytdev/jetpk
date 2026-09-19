@@ -1,0 +1,25 @@
+{
+  "capturedAt": "2026-09-19T18:00:00Z",
+  "releaseSha": "536521f1752b420d4221970c4f8a2677762c753b",
+  "publicBuildId": "mHk-585jVMAtC6DsijCuS",
+  "url": "https://jetpakistan.pk",
+  "docsOnlyTipIgnored": "417f28da",
+  "historicalFailPacksImmutable": [
+    "docs/evidence/jp-final-perf-cert-675c7e5e",
+    "docs/evidence/jp-final-perf-cert-36221ac0"
+  ],
+  "gates": {
+    "softNavAppP95Ms": 1500,
+    "travelerAppP95Ms": 2000,
+    "returnPostSupplierP95Ms": 1000,
+    "softN": 20,
+    "travelerN": 30,
+    "returnN": 30,
+    "switchN": 20
+  },
+  "unbiasedRules": [
+    "no_slow_sample_removal",
+    "no_artificial_prefetch_wait_before_every_click",
+    "retry_only_for_harness_failure_disclosed"
+  ]
+}

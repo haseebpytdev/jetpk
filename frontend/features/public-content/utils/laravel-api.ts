@@ -105,33 +105,43 @@ export const fetchManagedPage = cache(async (pageKey: string): Promise<LaravelMa
   }
 });
 
-export async function fetchSiteContactFromLaravel(): Promise<ContactDetails | null> {
+export const fetchSiteContactFromLaravel = cache(async (): Promise<ContactDetails | null> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LARAVEL_FETCH_TIMEOUT_MS);
   try {
-    const response = await fetchWithTimeout(publicContentFetchUrl("/api/public/content/site-contact"), {
+    const response = await fetch(publicContentFetchUrl("/api/public/content/site-contact"), {
       headers: { Accept: "application/json" },
-      next: { revalidate: 300 },
+      signal: controller.signal,
+      next: { revalidate: 300, tags: ["public-seo", "public-site-contact"] },
     });
     if (!response.ok) return null;
     const body = (await response.json()) as { contact?: ContactDetails };
     return body.contact ?? null;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
-}
+});
 
-export async function fetchSupportCategories(): Promise<SupportTicketCategoryOption[]> {
+export const fetchSupportCategories = cache(async (): Promise<SupportTicketCategoryOption[]> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LARAVEL_FETCH_TIMEOUT_MS);
   try {
-    const response = await fetchWithTimeout(publicContentFetchUrl("/api/public/content/support/categories"), {
+    const response = await fetch(publicContentFetchUrl("/api/public/content/support/categories"), {
       headers: { Accept: "application/json" },
-      next: { revalidate: 3600 },
+      signal: controller.signal,
+      next: { revalidate: 3600, tags: ["public-seo", "public-support-categories"] },
     });
     if (!response.ok) return [];
     const body = (await response.json()) as { categories?: SupportTicketCategoryOption[] };
     return body.categories ?? [];
   } catch {
     return [];
+  } finally {
+    clearTimeout(timeout);
   }
-}
+});
 
 export async function submitSupportOrContactForm(payload: ContactFormPayload): Promise<ContactFormResponse> {
   const csrf = await ensureLaravelCsrfToken();

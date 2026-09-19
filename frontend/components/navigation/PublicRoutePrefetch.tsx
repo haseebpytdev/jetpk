@@ -3,16 +3,23 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-/** Soft-nav CTAs: warm immediately so early header/footer clicks reuse RSC. */
-const PRIORITY_PREFETCH_ROUTES = ["/login", "/register", "/privacy", "/faq", "/terms"] as const;
+/**
+ * Soft-nav CTAs: warm immediately so early header/footer clicks reuse RSC.
+ * Includes about/support/contact — cert P95 on 536521f1 failed those while faq/terms passed.
+ */
+const PRIORITY_PREFETCH_ROUTES = [
+  "/login",
+  "/register",
+  "/privacy",
+  "/faq",
+  "/terms",
+  "/about-us",
+  "/support",
+  "/contact",
+] as const;
 
 /** Remaining public routes — deferred idle queue (staggered). */
-const PREFETCH_ROUTES = [
-  "/groups/search",
-  "/about-us",
-  "/contact",
-  "/support",
-] as const;
+const PREFETCH_ROUTES = ["/groups/search"] as const;
 
 /** Module-scoped: survives PublicShell remounts; never re-stampede RSC. */
 let publicRoutesPrefetchStarted = false;

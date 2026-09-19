@@ -1,0 +1,9 @@
+RELEASE_SHA=536521f1752b420d4221970c4f8a2677762c753b
+PUBLIC_BUILD_ID=mHk-585jVMAtC6DsijCuS
+PUBLIC_BUILD_ID_VERIFIED=YES (_buildManifest.js HTTP 200 + RSC payload b=)
+SOFT_NAV_REDIAG_911124f7=NOT_FOUND (docs/evidence soft-nav rediag folder for jOxkQ0qppKD8m4VXqOg1V absent; use as historical diagnostic only if recovered)
+CERT_START_UTC=
+HARNESS=01-soft-nav/run-soft-nav.mjs (+ home_terms)
+JP_SOFT_N=20
+ROUTES=10 (owner matrix + privacy_terms)
+UNBIASED=no artificial prefetch wait; keep all soft samples
