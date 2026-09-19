@@ -79,9 +79,9 @@ function stampPassengersUrlAuthority(url: string, source: PassengersUrlAuthority
   } catch {
     /* ignore */
   }
-  // Start document warm immediately — hard assign cannot reuse in-memory primes.
-  warmPassengersHardNavDocument(url);
-  // Passengers JSON prime is awaited once in navigateHandoff (not here) to avoid
+  // Soft-nav path: do not warm HTML document here — races JSON prime / RSC.
+  // warmPassengersHardNavDocument runs only on hard-assign fallback in navigateHandoff.
+  // Passengers JSON prime is started in navigateHandoff (not here) to avoid
   // overlapping same-session GETs that contend on the PHP session lock.
 }
 

@@ -16,13 +16,36 @@ import {
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { mapFieldErrors, ensureLaravelCsrfToken } from "@/features/auth/utils/laravel-auth-api";
 import { fetchStandardPassengersContext, submitStandardPassengers } from "../services/standard-booking-api";
-import type { ContactFormValues, PassengerFormValues, StandardPassengersContext } from "../types";
 import {
   buildContactFromContext,
   buildPassengerFormData,
   buildPassengersFromContext,
+  emptyPassenger,
   passengerLabel,
 } from "../utils/passenger-form";
+import type { ContactFormValues, PassengerFormValues, StandardPassengersContext, TravelDocumentRequirement } from "../types";
+
+const OPTIMISTIC_DOC_REQUIREMENTS: TravelDocumentRequirement = {
+  passport_required: false,
+  national_id_allowed: false,
+  passport_fields: [],
+  national_id_fields: [],
+};
+
+function preserveTypedPassenger(
+  serverRow: PassengerFormValues,
+  typed: PassengerFormValues | undefined,
+): PassengerFormValues {
+  if (!typed) return serverRow;
+  const merge: PassengerFormValues = { ...serverRow };
+  (Object.keys(typed) as Array<keyof PassengerFormValues>).forEach((key) => {
+    const value = typed[key];
+    if (typeof value === "string" && value.trim() !== "") {
+      merge[key] = value;
+    }
+  });
+  return merge;
+}
 import { isAllowedBookingNextUrl, resolveBookingNextUrl } from "../utils/allowlist";
 import { laravelApiPath } from "@/services/flight-search";
 import { BookingSessionCountdown } from "./BookingSessionCountdown";
@@ -43,7 +66,8 @@ type PassengerDetailsPageProps = {
 export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps) {
   const router = useRouter();
   const [context, setContext] = useState<StandardPassengersContext | null>(null);
-  const [passengers, setPassengers] = useState<PassengerFormValues[]>([]);
+  // Optimistic adult shell so Book Now APP usable is not gated on Laravel passengers JSON.
+  const [passengers, setPassengers] = useState<PassengerFormValues[]>(() => [emptyPassenger("adult")]);
   const [contact, setContact] = useState<ContactFormValues>({ contact_name: "", email: "", phone: "", phone_country_code: "+92", phone_number: "", country: "" });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -83,8 +107,20 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
       }
 
       setContext(response.data);
-      setPassengers(buildPassengersFromContext(response.data));
-      setContact(buildContactFromContext(response.data));
+      setPassengers((prev) =>
+        buildPassengersFromContext(response.data!).map((row, index) =>
+          preserveTypedPassenger(row, prev[index]),
+        ),
+      );
+      setContact((prev) => {
+        const fromCtx = buildContactFromContext(response.data!);
+        return {
+          ...fromCtx,
+          contact_name: prev.contact_name.trim() ? prev.contact_name : fromCtx.contact_name,
+          email: prev.email.trim() ? prev.email : fromCtx.email,
+          phone_number: prev.phone_number.trim() ? prev.phone_number : fromCtx.phone_number,
+        };
+      });
     });
 
     return () => {
@@ -219,10 +255,6 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     }
   }, [context, formHasPassengerOrContactData]);
 
-  if (loading) {
-    return <BookingLoadingState message="Loading passenger form…" testId="passengers-loading" />;
-  }
-
   if (errorStatus === "missing_session") {
     return <div className="mx-auto max-w-jp-booking p-8"><MissingBookingSessionState /></div>;
   }
@@ -235,13 +267,16 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     return <div className="mx-auto max-w-jp-booking p-8"><BookingSessionExpiredState /></div>;
   }
 
-  if (!context) {
+  // After context fetch failed without a typed status — keep prior error cards.
+  if (!loading && !context && errorStatus) {
     return <div className="mx-auto max-w-jp-booking p-8"><SupplierRequirementsUnavailableState /></div>;
   }
 
+  const optimistic = loading || !context;
   const typeOrdinals: Record<string, number> = { adult: 0, child: 0, infant: 0 };
+  const documentRequirements = context?.document_requirements ?? OPTIMISTIC_DOC_REQUIREMENTS;
 
-  const summarySidebar = (
+  const summarySidebar = context ? (
     <OrderSummary
       itinerary={context.itinerary}
       travellerTotal={context.travellers.total}
@@ -250,25 +285,39 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
       onChangeFlight={() => void handleChangeFlight()}
       changeFlightDisabled={context.change_flight?.safe === false}
     />
+  ) : (
+    <div
+      className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 text-jp-sm text-jp-muted"
+      data-testid="flight-preview-loading"
+      aria-busy="true"
+    >
+      Loading flight preview…
+    </div>
   );
 
   return (
     <BookingPageShell testId="passenger-details-page">
-      <BookingProgress steps={context.booking_session.progress} className="mb-6" />
+      {context ? (
+        <BookingProgress steps={context.booking_session.progress} className="mb-6" />
+      ) : (
+        <div className="mb-6 h-10 animate-pulse rounded-jp-md bg-jp-surface-muted" aria-hidden="true" />
+      )}
 
       <BookingPageHeader
         title="Traveler information"
         description="Enter details exactly as shown on travel documents."
         actions={
-          <BookingSessionCountdown
-            expiresAt={context.booking_session.expires_at}
-            serverTime={context.booking_session.server_time}
-            onExpired={() => setExpired(true)}
-          />
+          context ? (
+            <BookingSessionCountdown
+              expiresAt={context.booking_session.expires_at}
+              serverTime={context.booking_session.server_time}
+              onExpired={() => setExpired(true)}
+            />
+          ) : null
         }
       />
 
-      {context.validation_alert ? (
+      {context?.validation_alert ? (
         <p className="mt-4 rounded-jp-md border border-amber-200 bg-amber-50 p-3 text-jp-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100" role="status">
           {context.validation_alert}
         </p>
@@ -279,6 +328,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
         className="mt-6"
         data-testid="standard-passengers-form"
         noValidate
+        aria-busy={optimistic}
       >
         <BookingLayout
           mobileSummary={<MobileOrderSummary label="Flight preview">{summarySidebar}</MobileOrderSummary>}
@@ -297,7 +347,10 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
               ) : null}
 
               {passengers.map((passenger, index) => {
-                const slot = context.travellers.expected[index];
+                const slot = context?.travellers.expected[index] ?? {
+                  type: passenger.passenger_type || "adult",
+                  label: "Adult",
+                };
                 const ordinal = (typeOrdinals[slot.type] ?? 0) + 1;
                 typeOrdinals[slot.type] = ordinal;
                 return (
@@ -305,10 +358,10 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
                     key={index}
                     index={index}
                     label={passengerLabel(slot, ordinal)}
-                    isLead={index === context.travellers.lead_passenger_index}
+                    isLead={index === (context?.travellers.lead_passenger_index ?? 0)}
                     passenger={passenger}
-                    documentRequirements={context.document_requirements}
-                    nationalIdAllowed={context.document_requirements.national_id_allowed}
+                    documentRequirements={documentRequirements}
+                    nationalIdAllowed={documentRequirements.national_id_allowed}
                     fieldErrors={fieldErrors}
                     onChange={updatePassenger}
                     onReplacePassenger={replacePassenger}
@@ -316,15 +369,17 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
                 );
               })}
 
-              <ContactDetailsSection
-                contact={contact}
-                locked={context.auth.agent_contact_locked}
-                canCreateAccount={context.auth.can_create_account}
-                fieldErrors={fieldErrors}
-                onChange={updateContact}
-              />
+              {context ? (
+                <ContactDetailsSection
+                  contact={contact}
+                  locked={context.auth.agent_contact_locked}
+                  canCreateAccount={context.auth.can_create_account}
+                  fieldErrors={fieldErrors}
+                  onChange={updateContact}
+                />
+              ) : null}
 
-              <SeatExtrasReadinessPanel message={context.seat_extras_capability.message} />
+              {context ? <SeatExtrasReadinessPanel message={context.seat_extras_capability.message} /> : null}
 
               <label
                 className="flex items-start gap-3 rounded-jp-md border border-jp-border bg-jp-page/50 p-3 text-sm text-jp-text"
@@ -336,15 +391,16 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
                   checked={termsAccepted}
                   onChange={(event) => setTermsAccepted(event.target.checked)}
                   data-testid="terms-acceptance-checkbox"
+                  disabled={optimistic}
                   aria-invalid={Boolean(fieldErrors.terms_accepted)}
                 />
                 <span>
                   I confirm that the traveler and document information provided is accurate, and I agree to JetPakistan&apos;s{" "}
-                  <a href={context.consent?.terms_url ?? "/terms"} className="font-semibold text-jp-primary underline" target="_blank" rel="noreferrer">
+                  <a href={context?.consent?.terms_url ?? "/terms"} className="font-semibold text-jp-primary underline" target="_blank" rel="noreferrer">
                     Terms &amp; Conditions
                   </a>{" "}
                   and{" "}
-                  <a href={context.consent?.privacy_url ?? "/privacy"} className="font-semibold text-jp-primary underline" target="_blank" rel="noreferrer">
+                  <a href={context?.consent?.privacy_url ?? "/privacy"} className="font-semibold text-jp-primary underline" target="_blank" rel="noreferrer">
                     Privacy Policy
                   </a>
                   , including the applicable airline/supplier fare rules, change, cancellation and refund conditions.
@@ -354,11 +410,11 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
               <PrimaryButton
                 type="submit"
                 className="hidden w-full sm:w-auto lg:inline-flex"
-                disabled={submitting || expired || !termsAccepted}
+                disabled={submitting || expired || !termsAccepted || optimistic}
                 aria-busy={submitting}
                 data-testid="save-and-continue"
               >
-                {submitting ? "Saving…" : "Continue to review"}
+                {submitting ? "Saving…" : optimistic ? "Preparing…" : "Continue to review"}
               </PrimaryButton>
             </BookingMainColumn>
           }
@@ -369,11 +425,11 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
           <PrimaryButton
             type="submit"
             className="w-full"
-            disabled={submitting || expired || !termsAccepted}
+            disabled={submitting || expired || !termsAccepted || optimistic}
             aria-busy={submitting}
             data-testid="save-and-continue-mobile"
           >
-            {submitting ? "Saving…" : "Continue to review"}
+            {submitting ? "Saving…" : optimistic ? "Preparing…" : "Continue to review"}
           </PrimaryButton>
         </div>
       </form>

@@ -44,6 +44,9 @@ export function PrefetchOnIntentLink({
       {...rest}
       href={href}
       prefetch={false}
+      onPointerDown={() => {
+        warm();
+      }}
       onMouseEnter={(event: MouseEvent<HTMLAnchorElement>) => {
         warm();
         onMouseEnter?.(event);
