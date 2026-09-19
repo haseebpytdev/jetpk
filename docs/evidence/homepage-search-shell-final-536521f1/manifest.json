@@ -1,0 +1,562 @@
+{
+  "RELEASE_SHA": "536521f1752b420d4221970c4f8a2677762c753b",
+  "PUBLIC_BUILD_ID": "mHk-585jVMAtC6DsijCuS",
+  "PUBLIC_BUILD_ID_FROM_HTML": "theme-preference",
+  "PUBLIC_SOURCE_SHA_FROM_HTML": null,
+  "capturedAt": "2026-09-19T17:50:12.193Z",
+  "url": "https://jetpakistan.pk",
+  "screenshotCount": 20,
+  "screenshots": [
+    "w320-flights-oneway.png",
+    "w320-flights-return.png",
+    "w320-flights-multicity.png",
+    "w320-group-ticketing.png",
+    "w390-flights-oneway.png",
+    "w390-flights-return.png",
+    "w390-flights-multicity.png",
+    "w390-group-ticketing.png",
+    "w768-flights-oneway.png",
+    "w768-flights-return.png",
+    "w768-flights-multicity.png",
+    "w768-group-ticketing.png",
+    "w1024-flights-oneway.png",
+    "w1024-flights-return.png",
+    "w1024-flights-multicity.png",
+    "w1024-group-ticketing.png",
+    "w1440-flights-oneway.png",
+    "w1440-flights-return.png",
+    "w1440-flights-multicity.png",
+    "w1440-group-ticketing.png"
+  ],
+  "backdropAt1024": {
+    "flights-oneway": {
+      "x": 0,
+      "y": 64.19,
+      "width": 1024,
+      "height": 378,
+      "right": 1024,
+      "bottom": 442.19
+    },
+    "flights-return": {
+      "x": 0,
+      "y": 64.19,
+      "width": 1024,
+      "height": 378,
+      "right": 1024,
+      "bottom": 442.19
+    },
+    "flights-multicity": {
+      "x": 0,
+      "y": 64.19,
+      "width": 1024,
+      "height": 378,
+      "right": 1024,
+      "bottom": 442.19
+    },
+    "group-ticketing": {
+      "x": 0,
+      "y": 64.19,
+      "width": 1024,
+      "height": 378,
+      "right": 1024,
+      "bottom": 442.19
+    }
+  },
+  "backdropDeltaAt1024": {
+    "x": 0,
+    "y": 0,
+    "width": 0,
+    "height": 0,
+    "max": 0
+  },
+  "SERVICE_RAIL_INTERSECTS_SEARCH_CARD": {
+    "flights-oneway": false,
+    "flights-return": false,
+    "flights-multicity": false,
+    "group-ticketing": false
+  },
+  "overflow": {
+    "flights-oneway": {
+      "at1024": false,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "hasOverflow": false
+    },
+    "flights-return": {
+      "at1024": false,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "hasOverflow": false
+    },
+    "flights-multicity": {
+      "at1024": false,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "hasOverflow": false
+    },
+    "group-ticketing": {
+      "at1024": false,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "hasOverflow": false
+    }
+  },
+  "allViewportsOverflow": false,
+  "rects": {
+    "flights-oneway": {
+      "boxes": {
+        "homepage-public-hero": {
+          "x": 0,
+          "y": 64.19,
+          "width": 1024,
+          "height": 752.55,
+          "right": 1024,
+          "bottom": 816.73
+        },
+        "homepage-hero-backdrop": {
+          "x": 0,
+          "y": 64.19,
+          "width": 1024,
+          "height": 378,
+          "right": 1024,
+          "bottom": 442.19
+        },
+        "homepage-search-shell": {
+          "x": 23.8,
+          "y": 362.19,
+          "width": 976.41,
+          "height": 345.75,
+          "right": 1000.2,
+          "bottom": 707.94
+        },
+        "homepage-service-switcher": {
+          "x": -40.2,
+          "y": 362.19,
+          "width": 56,
+          "height": 106,
+          "right": 15.8,
+          "bottom": 468.19
+        },
+        "homepage-hero-search-overlap": {
+          "x": 23.8,
+          "y": 362.19,
+          "width": 976.41,
+          "height": 434.75,
+          "right": 1000.2,
+          "bottom": 796.94
+        },
+        "search-module": {
+          "x": 30.8,
+          "y": 362.19,
+          "width": 969.41,
+          "height": 345.75,
+          "right": 1000.2,
+          "bottom": 707.94
+        },
+        "search-trip-tabs": {
+          "x": 51.59,
+          "y": 415.88,
+          "width": 761.38,
+          "height": 37,
+          "right": 812.97,
+          "bottom": 452.88
+        },
+        "search-header-travelers": {
+          "x": 820.97,
+          "y": 382.98,
+          "width": 158.44,
+          "height": 63.89,
+          "right": 979.41,
+          "bottom": 446.88
+        }
+      },
+      "serviceRail": {
+        "flexDirection": "column",
+        "buttonCount": 2,
+        "buttons": [
+          {
+            "ariaLabel": "Flights",
+            "text": "",
+            "width": 44,
+            "height": 44
+          },
+          {
+            "ariaLabel": "Group Ticketing",
+            "text": "",
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "width": 56,
+        "height": 106,
+        "intersectsSearchCard": false
+      },
+      "travelers": {
+        "headerPresent": true,
+        "headerVisible": true,
+        "inFormBodyCount": 0
+      },
+      "tripTabs": {
+        "visible": true,
+        "groupInTripRow": false
+      },
+      "layout": {
+        "overlapGap": 108.79437499999995,
+        "moduleClipped": false,
+        "searchButtonClipped": false
+      },
+      "heroImage": {
+        "objectFit": "cover",
+        "naturalWidth": 1672,
+        "naturalHeight": 941,
+        "displayWidth": 1024,
+        "displayHeight": 378
+      }
+    },
+    "flights-return": {
+      "boxes": {
+        "homepage-public-hero": {
+          "x": 0,
+          "y": 64.19,
+          "width": 1024,
+          "height": 772.84,
+          "right": 1024,
+          "bottom": 837.03
+        },
+        "homepage-hero-backdrop": {
+          "x": 0,
+          "y": 64.19,
+          "width": 1024,
+          "height": 378,
+          "right": 1024,
+          "bottom": 442.19
+        },
+        "homepage-search-shell": {
+          "x": 23.8,
+          "y": 362.19,
+          "width": 976.41,
+          "height": 366.05,
+          "right": 1000.2,
+          "bottom": 728.23
+        },
+        "homepage-service-switcher": {
+          "x": -40.2,
+          "y": 362.19,
+          "width": 56,
+          "height": 106,
+          "right": 15.8,
+          "bottom": 468.19
+        },
+        "homepage-hero-search-overlap": {
+          "x": 23.8,
+          "y": 362.19,
+          "width": 976.41,
+          "height": 455.05,
+          "right": 1000.2,
+          "bottom": 817.23
+        },
+        "search-module": {
+          "x": 30.8,
+          "y": 362.19,
+          "width": 969.41,
+          "height": 366.05,
+          "right": 1000.2,
+          "bottom": 728.23
+        },
+        "search-trip-tabs": {
+          "x": 51.59,
+          "y": 415.88,
+          "width": 761.38,
+          "height": 37,
+          "right": 812.97,
+          "bottom": 452.88
+        },
+        "search-header-travelers": {
+          "x": 820.97,
+          "y": 382.98,
+          "width": 158.44,
+          "height": 63.89,
+          "right": 979.41,
+          "bottom": 446.88
+        }
+      },
+      "serviceRail": {
+        "flexDirection": "column",
+        "buttonCount": 2,
+        "buttons": [
+          {
+            "ariaLabel": "Flights",
+            "text": "",
+            "width": 44,
+            "height": 44
+          },
+          {
+            "ariaLabel": "Group Ticketing",
+            "text": "",
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "width": 56,
+        "height": 106,
+        "intersectsSearchCard": false
+      },
+      "travelers": {
+        "headerPresent": true,
+        "headerVisible": true,
+        "inFormBodyCount": 0
+      },
+      "tripTabs": {
+        "visible": true,
+        "groupInTripRow": false
+      },
+      "layout": {
+        "overlapGap": 108.80124999999998,
+        "moduleClipped": false,
+        "searchButtonClipped": false
+      },
+      "heroImage": {
+        "objectFit": "cover",
+        "naturalWidth": 1672,
+        "naturalHeight": 941,
+        "displayWidth": 1024,
+        "displayHeight": 378
+      }
+    },
+    "flights-multicity": {
+      "boxes": {
+        "homepage-public-hero": {
+          "x": 0,
+          "y": 64.19,
+          "width": 1024,
+          "height": 881.33,
+          "right": 1024,
+          "bottom": 945.52
+        },
+        "homepage-hero-backdrop": {
+          "x": 0,
+          "y": 64.19,
+          "width": 1024,
+          "height": 378,
+          "right": 1024,
+          "bottom": 442.19
+        },
+        "homepage-search-shell": {
+          "x": 23.8,
+          "y": 362.19,
+          "width": 976.41,
+          "height": 474.53,
+          "right": 1000.2,
+          "bottom": 836.72
+        },
+        "homepage-service-switcher": {
+          "x": -40.2,
+          "y": 362.19,
+          "width": 56,
+          "height": 106,
+          "right": 15.8,
+          "bottom": 468.19
+        },
+        "homepage-hero-search-overlap": {
+          "x": 23.8,
+          "y": 362.19,
+          "width": 976.41,
+          "height": 563.53,
+          "right": 1000.2,
+          "bottom": 925.72
+        },
+        "search-module": {
+          "x": 30.8,
+          "y": 362.19,
+          "width": 969.41,
+          "height": 474.53,
+          "right": 1000.2,
+          "bottom": 836.72
+        },
+        "search-trip-tabs": {
+          "x": 51.59,
+          "y": 415.88,
+          "width": 761.38,
+          "height": 37,
+          "right": 812.97,
+          "bottom": 452.88
+        },
+        "search-header-travelers": {
+          "x": 820.97,
+          "y": 382.98,
+          "width": 158.44,
+          "height": 63.89,
+          "right": 979.41,
+          "bottom": 446.88
+        }
+      },
+      "serviceRail": {
+        "flexDirection": "column",
+        "buttonCount": 2,
+        "buttons": [
+          {
+            "ariaLabel": "Flights",
+            "text": "",
+            "width": 44,
+            "height": 44
+          },
+          {
+            "ariaLabel": "Group Ticketing",
+            "text": "",
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "width": 56,
+        "height": 106,
+        "intersectsSearchCard": false
+      },
+      "travelers": {
+        "headerPresent": true,
+        "headerVisible": true,
+        "inFormBodyCount": 0
+      },
+      "tripTabs": {
+        "visible": true,
+        "groupInTripRow": false
+      },
+      "layout": {
+        "overlapGap": 108.79562499999997,
+        "moduleClipped": false,
+        "searchButtonClipped": false
+      },
+      "heroImage": {
+        "objectFit": "cover",
+        "naturalWidth": 1672,
+        "naturalHeight": 941,
+        "displayWidth": 1024,
+        "displayHeight": 378
+      }
+    },
+    "group-ticketing": {
+      "boxes": {
+        "homepage-public-hero": {
+          "x": 0,
+          "y": 64.19,
+          "width": 1024,
+          "height": 692.44,
+          "right": 1024,
+          "bottom": 756.63
+        },
+        "homepage-hero-backdrop": {
+          "x": 0,
+          "y": 64.19,
+          "width": 1024,
+          "height": 378,
+          "right": 1024,
+          "bottom": 442.19
+        },
+        "homepage-search-shell": {
+          "x": 23.8,
+          "y": 362.19,
+          "width": 976.41,
+          "height": 285.64,
+          "right": 1000.2,
+          "bottom": 647.83
+        },
+        "homepage-service-switcher": {
+          "x": -40.2,
+          "y": 362.19,
+          "width": 56,
+          "height": 106,
+          "right": 15.8,
+          "bottom": 468.19
+        },
+        "homepage-hero-search-overlap": {
+          "x": 23.8,
+          "y": 362.19,
+          "width": 976.41,
+          "height": 374.64,
+          "right": 1000.2,
+          "bottom": 736.83
+        },
+        "search-module": {
+          "x": 30.8,
+          "y": 362.19,
+          "width": 969.41,
+          "height": 285.64,
+          "right": 1000.2,
+          "bottom": 647.83
+        },
+        "search-trip-tabs": null,
+        "search-header-travelers": null
+      },
+      "serviceRail": {
+        "flexDirection": "column",
+        "buttonCount": 2,
+        "buttons": [
+          {
+            "ariaLabel": "Flights",
+            "text": "",
+            "width": 44,
+            "height": 44
+          },
+          {
+            "ariaLabel": "Group Ticketing",
+            "text": "",
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "width": 56,
+        "height": 106,
+        "intersectsSearchCard": false
+      },
+      "travelers": {
+        "headerPresent": false,
+        "headerVisible": false,
+        "inFormBodyCount": 0
+      },
+      "tripTabs": {
+        "visible": false,
+        "groupInTripRow": false
+      },
+      "layout": {
+        "overlapGap": 108.79499999999996,
+        "moduleClipped": false,
+        "searchButtonClipped": false
+      },
+      "heroImage": {
+        "objectFit": "cover",
+        "naturalWidth": 1672,
+        "naturalHeight": 941,
+        "displayWidth": 1024,
+        "displayHeight": 378
+      }
+    }
+  },
+  "gates": {
+    "HERO_IMAGE_FULL_COVER": "PASS",
+    "HERO_IMAGE_ASPECT_DISTORTION": 0,
+    "HERO_BACKDROP_STABLE": "PASS",
+    "HERO_MODE_CROP_JUMP": 0,
+    "SERVICE_SWITCH_EXTERNAL": "PASS",
+    "SERVICE_SWITCH_SMALL_ICON_RAIL": "PASS",
+    "SERVICE_SWITCH_CARD_COMPRESSION": 0,
+    "SERVICE_SWITCH_OVERFLOW": 0,
+    "TRIP_TYPE_HEADER": "PASS",
+    "TRAVELERS_CABIN_TOP_RIGHT": "PASS",
+    "TRAVELERS_DUPLICATE_CONTROLS": 0,
+    "ONE_WAY_BASELINE": "PASS",
+    "RETURN_BASELINE": "PASS",
+    "MULTICITY_BASELINE": "PASS",
+    "GROUP_BASELINE": "PASS",
+    "CMS_EMPTY_HERO_FIELDS": "SKIPPED",
+    "NO_HORIZONTAL_OVERFLOW": "PASS",
+    "NO_NEXT_SECTION_OVERLAP": "PASS",
+    "NO_FIELD_CLIPPING": "PASS",
+    "NO_SEARCH_BUTTON_CLIPPING": "PASS"
+  },
+  "publicBuildId": "mHk-585jVMAtC6DsijCuS",
+  "publicBuildIdFromHtml": "theme-preference",
+  "publicBuildIdServer": "mHk-585jVMAtC6DsijCuS",
+  "publicBuildIdManifestHeadStatus": 200,
+  "releaseSha": "536521f1752b420d4221970c4f8a2677762c753b",
+  "publicBuildIdFromPageRsc": "mHk-585jVMAtC6DsijCuS",
+  "publicBuildIdInPageRscPayload": true
+}

@@ -1,0 +1,52 @@
+Homepage Search Shell — Final Production Visual UAT
+Date: 2026-09-19
+URL: https://jetpakistan.pk
+RELEASE_SHA: 536521f1752b420d4221970c4f8a2677762c753b
+PUBLIC_BUILD_ID: mHk-585jVMAtC6DsijCuS (page RSC payload + _buildManifest.js HEAD 200)
+PUBLIC_BUILD_ID_SERVER: mHk-585jVMAtC6DsijCuS (ssh .next/BUILD_ID)
+PUBLIC_BUILD_ID_IN_PAGE_RSC: true
+PUBLIC_SOURCE_SHA: 536521f1752b420d4221970c4f8a2677762c753b (runtime SHA matches release)
+
+Screenshots: 20/20 captured
+Path: docs/evidence/homepage-search-shell-final-536521f1/screenshots/
+Naming: w{viewport}-{state}.png
+  viewports: 320, 390, 768, 1024, 1440
+  states: flights-oneway, flights-return, flights-multicity, group-ticketing
+
+Backdrop box at 1024 (homepage-hero-backdrop):
+  flights-oneway: x=0, y=64.19, w=1024, h=378
+  flights-return: x=0, y=64.19, w=1024, h=378
+  flights-multicity: x=0, y=64.19, w=1024, h=378
+  group-ticketing: x=0, y=64.19, w=1024, h=378
+  Delta max: 0px (x/y/width/height max 0)
+
+SERVICE_RAIL_INTERSECTS_SEARCH_CARD at 1024:
+  flights-oneway: false
+  flights-return: false
+  flights-multicity: false
+  group-ticketing: false
+
+Horizontal overflow across 20 captures: false
+
+SECTION 17 — HOMEPAGE FINAL VISUAL GATES
+========================================
+HERO_IMAGE_FULL_COVER                = PASS
+HERO_IMAGE_ASPECT_DISTORTION         = 0
+HERO_BACKDROP_STABLE                 = PASS
+HERO_MODE_CROP_JUMP                  = 0
+SERVICE_SWITCH_EXTERNAL              = PASS
+SERVICE_SWITCH_SMALL_ICON_RAIL       = PASS
+SERVICE_SWITCH_CARD_COMPRESSION      = 0
+SERVICE_SWITCH_OVERFLOW              = 0
+TRIP_TYPE_HEADER                     = PASS
+TRAVELERS_CABIN_TOP_RIGHT            = PASS
+TRAVELERS_DUPLICATE_CONTROLS         = 0
+ONE_WAY_BASELINE                     = PASS
+RETURN_BASELINE                      = PASS
+MULTICITY_BASELINE                   = PASS
+GROUP_BASELINE                       = PASS
+CMS_EMPTY_HERO_FIELDS                = SKIPPED
+NO_HORIZONTAL_OVERFLOW               = PASS
+NO_NEXT_SECTION_OVERLAP              = PASS
+NO_FIELD_CLIPPING                    = PASS
+NO_SEARCH_BUTTON_CLIPPING            = PASS
