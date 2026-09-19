@@ -214,7 +214,7 @@ export function DropdownLinkItem({
   return (
     <Link
       href={href}
-      prefetch
+      prefetch={false}
       role="menuitem"
       className="block rounded-jp-sm px-3 py-2 text-jp-sm text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
       onClick={onNavigate}
