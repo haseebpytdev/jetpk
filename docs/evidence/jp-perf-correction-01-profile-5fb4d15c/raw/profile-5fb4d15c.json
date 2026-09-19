@@ -1,0 +1,51 @@
+{
+  "capturedAt": "2026-09-19T16:35:00+05:00",
+  "buildId": "4L3tBqI6YgVUivjpjMENc",
+  "sourceSha": "5fb4d15cf294fc297216733589ae4e1c29bffd1e",
+  "method": "live-playwright-soft-nav-diagnostic",
+  "nPerRoute": 6,
+  "gateAppP95Ms": 1500,
+  "routes": {
+    "home_privacy": {
+      "APP_P50": 564,
+      "APP_P95": 1082,
+      "MAX": 1082,
+      "routeCommitP95": 1082,
+      "visibleReadyP95": 1188,
+      "rscTtfbP95": 417
+    },
+    "home_faq": {
+      "APP_P50": 614,
+      "APP_P95": 6018,
+      "MAX": 6018,
+      "routeCommitP95": 6018,
+      "visibleReadyP95": 6030,
+      "rscTtfbP95": 2028
+    }
+  },
+  "worstRoute": "home_faq",
+  "gate": "FAIL",
+  "coldRscFetch": {
+    "privacy": { "p50": 2812, "p95": 5847, "payloadKb": 44 },
+    "faq": { "p50": 542, "p95": 988, "payloadKb": 47 }
+  },
+  "laravelApiNoStoreN5": {
+    "pages_privacy": { "p50": 433, "p95": 1841 },
+    "pages_faq": { "p50": 631, "p95": 771 },
+    "public_config": { "p50": 594, "p95": 3769 }
+  },
+  "bottlenecks": [
+    "NEXT_SERVER_RSC_RENDER_TAIL",
+    "LARAVEL_PUBLIC_CONFIG_TAIL",
+    "BIMODAL_PREFETCH_HIT_VS_COLD"
+  ],
+  "rootCauseHypothesis": "Bimodal soft-nav: warm/prefetch ~0.5–1.1s APP; cold RSC stalls on Laravel public-config (p95~3.7s) + managed-page fetch + Next streaming. Browser CMS calls=0 (cache() working). Medians improved vs 36221ac0 cert; P95 gate still FAIL.",
+  "readyForFullRecert": false,
+  "historicalBaseline": {
+    "sha": "36221ac0",
+    "buildId": "H9TYWa1Q2VFnwaR4TlPZy",
+    "home_privacy_p95": 8183,
+    "home_faq_p95": 7873
+  },
+  "sourceAgent": "d6d7d6d1-3aca-4036-aa0d-b88196ce7838"
+}
