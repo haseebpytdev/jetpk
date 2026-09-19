@@ -27,7 +27,7 @@ export function ModifySearchPanel({ open, onClose }: ModifySearchPanelProps) {
         >
           Close
         </button>
-        <SearchModule />
+        <SearchModule showServiceSwitcher={false} />
       </div>
     </div>
   );

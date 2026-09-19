@@ -15,8 +15,10 @@ import {
   MULTI_CITY_MAX_SEGMENTS,
   MULTI_CITY_MIN_SEGMENTS,
   type FlightSegment,
+  type ProductTab,
   type SearchMode,
   type SearchOptions,
+  type TripType,
 } from "../types";
 import { validateFlightSearch, validateGroupSearch } from "../utils/validation";
 import { flattenLaravelFieldErrors } from "../utils/laravel-errors";
@@ -26,6 +28,7 @@ import { MultiCityForm } from "./MultiCityForm";
 import { OneWayForm } from "./OneWayForm";
 import { ReturnForm } from "./ReturnForm";
 import { SearchStatusBanner } from "./SearchStatusBanner";
+import { SearchServiceSwitcher } from "./SearchServiceSwitcher";
 import { SearchTabs } from "./SearchTabs";
 import type { SearchLayout } from "./SearchFormErrors";
 
@@ -39,13 +42,24 @@ const DEFAULT_OPTIONS: SearchOptions = {
   flexibleDates: false,
 };
 
+function isTripType(mode: SearchMode): mode is TripType {
+  return mode === "one_way" || mode === "return" || mode === "multi_city";
+}
+
 type SearchModuleProps = {
   className?: string;
   layout?: SearchLayout;
+  /** When false, omit the Flights / Group service switcher (e.g. modify-search panels). */
+  showServiceSwitcher?: boolean;
 };
 
-export function SearchModule({ className, layout = "default" }: SearchModuleProps) {
+export function SearchModule({
+  className,
+  layout = "default",
+  showServiceSwitcher = true,
+}: SearchModuleProps) {
   const [mode, setMode] = useState<SearchMode>("one_way");
+  const lastFlightModeRef = useRef<TripType>("one_way");
   const [origin, setOrigin] = useState(() => findAirportByIata("ISB") ?? null);
   const [destination, setDestination] = useState(() => findAirportByIata("DXB") ?? null);
   const [departureDate, setDepartureDate] = useState("");
@@ -71,6 +85,8 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
   } = usePassengerSelection();
 
   const isSubmitting = submitState.status === "submitting" || submitState.status === "redirecting";
+  const service: ProductTab = mode === "group" ? "group" : "flights";
+  const tripMode: TripType = isTripType(mode) ? mode : lastFlightModeRef.current;
   const groupFacets = useGroupSearchFacets(mode === "group");
   const groupSectorValues = groupFacets.sectors.map((item) => item.value);
   const groupCategoryValues = groupFacets.categories.map((item) => item.value);
@@ -85,15 +101,38 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
     [setAdults, setChildren, setInfants, setCabin],
   );
 
-  const handleModeChange = useCallback((next: SearchMode) => {
+  const clearSubmitChrome = useCallback(() => {
     if (abortRef.current) {
       abortRef.current.abort();
       abortRef.current = null;
     }
-    setMode(next);
     setErrors([]);
     setSubmitState({ status: "idle" });
   }, []);
+
+  const handleTripTypeChange = useCallback(
+    (next: TripType) => {
+      clearSubmitChrome();
+      lastFlightModeRef.current = next;
+      setMode(next);
+    },
+    [clearSubmitChrome],
+  );
+
+  const handleServiceChange = useCallback(
+    (next: ProductTab) => {
+      clearSubmitChrome();
+      if (next === "group") {
+        if (isTripType(mode)) {
+          lastFlightModeRef.current = mode;
+        }
+        setMode("group");
+        return;
+      }
+      setMode(lastFlightModeRef.current);
+    },
+    [clearSubmitChrome, mode],
+  );
 
   const submitToLaravel = useCallback(
     async (searchMode: Exclude<SearchMode, "group">, draftSegments: FlightSegment[], extraReturnDate?: string) => {
@@ -104,19 +143,19 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
         return;
       }
 
-      const primary = draftSegments[0];
-      if (!primary?.from || !primary?.to) {
-        setErrors(["Origin and destination are required."]);
-        setSubmitState({ status: "idle" });
-        return;
-      }
-
       setErrors([]);
       setSubmitState({ status: "submitting" });
 
       if (abortRef.current) abortRef.current.abort();
       const controller = new AbortController();
       abortRef.current = controller;
+
+      const primary = draftSegments[0];
+      if (!primary?.from || !primary.to) {
+        setErrors(["Origin and destination are required."]);
+        setSubmitState({ status: "idle" });
+        return;
+      }
 
       const response = await initFlightSearch(
         {
@@ -204,22 +243,28 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
     });
   };
 
-  return (
+  const searchCard = (
     <section
       className={cn(
-        "min-w-0 max-w-full overflow-x-clip overflow-y-visible rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card max-lg:pr-[4.75rem]",
+        "min-w-0 max-w-full flex-1 overflow-x-clip overflow-y-visible rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card max-lg:pr-[4.75rem]",
+        showServiceSwitcher && "max-lg:w-full",
         layout === "compact" ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl",
         className,
       )}
-      aria-label="Flight search"
+      aria-label={service === "group" ? "Group ticketing search" : "Flight search"}
       data-testid="search-module"
       data-search-layout={layout}
+      data-search-service={service}
+      data-search-mode={mode}
     >
-      <SearchTabs mode={mode} onModeChange={handleModeChange} compact={layout === "compact"} />
+      {service === "flights" ? (
+        <SearchTabs mode={tripMode} onModeChange={handleTripTypeChange} compact={layout === "compact"} />
+      ) : null}
 
       <div
         className={cn(
-          "mt-jp-md transition-opacity duration-ui",
+          "transition-opacity duration-ui",
+          service === "flights" ? "mt-jp-md" : "mt-0",
           layout === "compact" ? "min-h-0" : "min-h-[18rem]",
         )}
       >
@@ -300,5 +345,23 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
 
       <SearchStatusBanner state={submitState} />
     </section>
+  );
+
+  if (!showServiceSwitcher) {
+    return searchCard;
+  }
+
+  return (
+    <div
+      className="flex min-w-0 max-w-full flex-col gap-jp-sm lg:flex-row lg:items-start lg:gap-jp-md"
+      data-testid="homepage-search-shell"
+    >
+      <SearchServiceSwitcher
+        service={service}
+        onServiceChange={handleServiceChange}
+        className="lg:sticky lg:top-[4.5rem] lg:self-start"
+      />
+      {searchCard}
+    </div>
   );
 }

@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ImageSlot } from "@/components/ui/ImageSlot";
+import { cn } from "@/lib/cn";
 import type { HomepageHeroContent, HomepageTrustChip } from "../types/homepage";
 import { BenefitStrip } from "../components/BenefitStrip";
 
@@ -26,12 +27,16 @@ type PublicHeroProps = {
   fallbackImage: string;
 };
 
+/**
+ * CMS-published empty strings are authoritative — do not substitute marketing fallbacks.
+ * Fixture/missing CMS source may still supply non-empty strings via the content service.
+ */
 export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps) {
-  const headline = hero.headline || "Explore the world with";
-  const highlight = hero.headlineHighlight || "JetPakistan";
-  const subtitle =
-    hero.subtitle ||
-    "Compare flights, pay in PKR, and book with a Pakistan-focused travel platform you can trust.";
+  const eyebrow = hero.eyebrow ?? "";
+  const headline = hero.headline ?? "";
+  const highlight = hero.headlineHighlight ?? "";
+  const subtitle = hero.subtitle ?? "";
+  const hasTitle = headline.trim() !== "" || highlight.trim() !== "";
   const desktopSrc = hero.image?.url ?? fallbackImage;
   const mobileSrc = hero.imageMobile?.url ?? desktopSrc;
   const objectPosition =
@@ -39,8 +44,12 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
 
   return (
     <section className="relative overflow-x-hidden bg-jp-page" data-testid="homepage-public-hero">
-      <div className="relative min-h-[clamp(20rem,42vh,30rem)]">
-        <div className="absolute inset-0 overflow-hidden" data-testid="homepage-hero-image">
+      {/* Stable viewport-tied backdrop — height must not track search-mode form height. */}
+      <div
+        className="relative h-[clamp(20rem,42vh,30rem)] overflow-hidden"
+        data-testid="homepage-hero-backdrop"
+      >
+        <div className="absolute inset-0" data-testid="homepage-hero-image">
           <picture>
             <source media="(max-width: 767px)" srcSet={mobileSrc} />
             <ImageSlot
@@ -63,26 +72,40 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
           />
         </div>
 
-        <PageContainer className="relative z-10 flex min-h-[clamp(20rem,42vh,30rem)] flex-col justify-end pb-jp-lg pt-jp-3xl">
-          <div className="max-w-3xl min-w-0 pb-jp-lg text-white">
-            {hero.eyebrow ? (
-              <p className="text-jp-sm font-semibold uppercase tracking-[0.18em] text-white/85">{hero.eyebrow}</p>
+        <PageContainer className="relative z-10 flex h-full flex-col justify-end pb-24 pt-jp-3xl sm:pb-28">
+          <div className="max-w-3xl min-w-0 text-white">
+            {eyebrow.trim() !== "" ? (
+              <p className="text-jp-sm font-semibold uppercase tracking-[0.18em] text-white/85">{eyebrow}</p>
             ) : null}
-            <h1 className="mt-3 break-words font-display text-jp-h1 font-bold leading-[1.15] text-white">
-              {headline}{" "}
-              <span className="text-jp-primary-soft">{highlight}</span>
-            </h1>
-            <p className="mt-4 max-w-2xl text-jp-body leading-relaxed text-white/90">{subtitle}</p>
+            {hasTitle ? (
+              <h1
+                className={cn(
+                  "break-words font-display text-jp-h1 font-bold leading-[1.15] text-white",
+                  eyebrow.trim() !== "" && "mt-3",
+                )}
+              >
+                {headline}
+                {headline.trim() !== "" && highlight.trim() !== "" ? " " : null}
+                {highlight.trim() !== "" ? (
+                  <span className="text-jp-primary-soft">{highlight}</span>
+                ) : null}
+              </h1>
+            ) : null}
+            {subtitle.trim() !== "" ? (
+              <p className="mt-4 max-w-2xl text-jp-body leading-relaxed text-white/90">{subtitle}</p>
+            ) : null}
           </div>
-
-          {hero.searchVisible ? (
-            <div className="relative z-20" data-testid="homepage-hero-search-overlap">
-              <SearchModule layout="compact" />
-              <BenefitStrip items={trustChips} variant="hero" className="mt-jp-md" />
-            </div>
-          ) : null}
         </PageContainer>
       </div>
+
+      {hero.searchVisible ? (
+        <PageContainer className="relative z-20 -mt-16 pb-jp-lg sm:-mt-20">
+          <div data-testid="homepage-hero-search-overlap">
+            <SearchModule layout="compact" />
+            <BenefitStrip items={trustChips} variant="hero" className="mt-jp-md" />
+          </div>
+        </PageContainer>
+      ) : null}
     </section>
   );
 }

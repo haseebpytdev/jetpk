@@ -106,8 +106,9 @@ test("group ticketing tab renders Laravel search fields only", async ({ page }) 
 
   await page.goto("/", { waitUntil: "load" });
 
-  await page.getByRole("tab", { name: "Group Ticketing" }).click();
+  await page.getByTestId("search-service-group").click();
   await expect(page.getByRole("button", { name: "Search Group Fares" })).toBeVisible();
+  await expect(page.getByTestId("search-trip-tabs")).toHaveCount(0);
   await expect(page.getByLabel("Sector")).toBeVisible();
   await expect(page.getByLabel("Travel date")).toBeVisible();
   await expect(page.getByLabel("Group category")).toBeVisible();
@@ -144,8 +145,10 @@ test("mobile homepage search layout remains usable", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 
   await expect(page.getByTestId("search-module")).toBeVisible();
+  await expect(page.getByTestId("homepage-service-switcher")).toBeVisible();
   await expect(page.getByRole("tab", { name: "One Way" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "Group Ticketing" })).toBeVisible();
+  await expect(page.getByTestId("search-service-group")).toBeVisible();
+  await expect(page.getByTestId("search-trip-tabs").getByRole("tab", { name: "Group Ticketing" })).toHaveCount(0);
   await expect(page.getByLabel("From")).toBeVisible();
 });
 

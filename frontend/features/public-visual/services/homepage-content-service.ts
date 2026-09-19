@@ -54,7 +54,7 @@ function emptyHero(): HomepageHeroContent {
   };
 }
 
-function mapHero(remote?: Record<string, unknown>): HomepageHeroContent {
+export function mapHero(remote?: Record<string, unknown>): HomepageHeroContent {
   const image = remote?.image as { url?: string; alt?: string } | null | undefined;
   const imageMobile = remote?.image_mobile as { url?: string; alt?: string } | null | undefined;
   return {
