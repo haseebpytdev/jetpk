@@ -24,8 +24,9 @@ const PREFETCH_QUEUE = [
   "/register",
 ] as const;
 
-const STAGGER_MS = 220;
-const START_DELAY_MS = 800;
+/** Background warm starts late so early soft-nav / LCP is intent-only (hover/focus). */
+const STAGGER_MS = 400;
+const START_DELAY_MS = 4000;
 
 /** Module-scoped: survives PublicShell remounts; never re-stampede RSC. */
 let publicRoutesPrefetchStarted = false;
@@ -33,6 +34,8 @@ let publicRoutesPrefetchStarted = false;
 /**
  * Once-per-tab sequential prefetch so soft-nav soft clicks reuse warm Flight
  * without flooding ?_rsc under the cert harness early-click window.
+ *
+ * Intent (PrefetchOnIntentLink) always preempts this queue via the coordinator.
  */
 export function PublicRoutePrefetch() {
   const router = useRouter();
@@ -54,7 +57,6 @@ export function PublicRoutePrefetch() {
       window.setTimeout(enqueueNext, STAGGER_MS);
     };
 
-    // Delay so first paint / LCP and early soft-nav clicks are not starved.
     window.setTimeout(enqueueNext, START_DELAY_MS);
 
     return () => {

@@ -2,38 +2,37 @@
 
 /**
  * Single-flight public RSC prefetch coordinator.
- * Intent (hover/focus) preempts the background queue so soft-nav clicks
- * do not compete with stampeding privacy/faq/terms/support Flights.
+ * Background queue is serial. Intent (hover/focus) may run in parallel so a
+ * soft-nav click is not blocked behind an unrelated background Flight.
  */
 
 type PrefetchFn = (href: string) => void | Promise<void>;
 
 let prefetchImpl: PrefetchFn | null = null;
-let busy = false;
-let intentHref: string | null = null;
+let backgroundBusy = false;
 const backgroundQueue: string[] = [];
 const warmed = new Set<string>();
+const inflightIntent = new Set<string>();
 
-function pump() {
-  if (busy || !prefetchImpl) return;
+function pumpBackground() {
+  if (backgroundBusy || !prefetchImpl) return;
 
-  const next = intentHref ?? backgroundQueue.shift() ?? null;
+  const next = backgroundQueue.shift() ?? null;
   if (!next) return;
-  if (intentHref === next) intentHref = null;
-  if (warmed.has(next)) {
-    queueMicrotask(pump);
+  if (warmed.has(next) || inflightIntent.has(next)) {
+    queueMicrotask(pumpBackground);
     return;
   }
 
-  busy = true;
+  backgroundBusy = true;
   Promise.resolve(prefetchImpl(next))
     .catch(() => {
       /* best-effort */
     })
     .finally(() => {
       warmed.add(next);
-      busy = false;
-      pump();
+      backgroundBusy = false;
+      pumpBackground();
     });
 }
 
@@ -42,18 +41,28 @@ export function registerPublicPrefetchImpl(fn: PrefetchFn) {
 }
 
 export function enqueueBackgroundPrefetch(href: string) {
-  if (!href.startsWith("/") || warmed.has(href)) return;
-  if (backgroundQueue.includes(href) || intentHref === href) return;
+  if (!href.startsWith("/") || warmed.has(href) || inflightIntent.has(href)) return;
+  if (backgroundQueue.includes(href)) return;
   backgroundQueue.push(href);
-  pump();
+  pumpBackground();
 }
 
-/** Hover/focus: jump the line; do not wait for the full background queue. */
+/** Hover/focus: start immediately (may overlap one background Flight). */
 export function prefetchOnIntent(href: string) {
-  if (!href.startsWith("/") || warmed.has(href)) return;
-  intentHref = href;
-  // Drop duplicate from background if present.
+  if (!href.startsWith("/") || warmed.has(href) || inflightIntent.has(href)) return;
+  if (!prefetchImpl) return;
+
   const idx = backgroundQueue.indexOf(href);
   if (idx >= 0) backgroundQueue.splice(idx, 1);
-  pump();
+
+  inflightIntent.add(href);
+  Promise.resolve(prefetchImpl(href))
+    .catch(() => {
+      /* best-effort */
+    })
+    .finally(() => {
+      inflightIntent.delete(href);
+      warmed.add(href);
+      pumpBackground();
+    });
 }
