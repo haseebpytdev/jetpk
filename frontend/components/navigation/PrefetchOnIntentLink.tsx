@@ -2,13 +2,18 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import type { ComponentProps, MouseEvent, FocusEvent } from "react";
+import {
+  prefetchOnIntent,
+  registerPublicPrefetchImpl,
+} from "@/components/navigation/public-prefetch-coordinator";
 
 type PrefetchOnIntentLinkProps = Omit<ComponentProps<typeof Link>, "prefetch">;
 
 /**
  * Soft-nav: no mount/viewport RSC stampede (`prefetch={false}`).
- * Warm only on hover/focus intent (matches real users + cert harness hover-before-click).
+ * Warm only on hover/focus intent via the shared single-flight coordinator.
  */
 export function PrefetchOnIntentLink({
   href,
@@ -18,10 +23,16 @@ export function PrefetchOnIntentLink({
 }: PrefetchOnIntentLinkProps) {
   const router = useRouter();
 
+  useEffect(() => {
+    registerPublicPrefetchImpl((path) => {
+      void router.prefetch(path);
+    });
+  }, [router]);
+
   const warm = () => {
     try {
       if (typeof href === "string" && href.startsWith("/")) {
-        void router.prefetch(href);
+        prefetchOnIntent(href);
       }
     } catch {
       /* best-effort */
