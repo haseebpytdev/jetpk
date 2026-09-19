@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
 import {
   BookingLayout,
-  BookingLoadingState,
   BookingMainColumn,
   BookingPageHeader,
   BookingPageShell,
