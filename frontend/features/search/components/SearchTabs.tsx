@@ -9,6 +9,8 @@ type SearchTabsProps = {
   mode: TripType;
   onModeChange: (mode: TripType) => void;
   compact?: boolean;
+  /** Optional trailing control (e.g. Travelers & Cabin) aligned top-right. */
+  end?: ReactNode;
 };
 
 function OneWayIcon({ active }: { active: boolean }) {
@@ -24,7 +26,7 @@ function OneWayIcon({ active }: { active: boolean }) {
       strokeLinejoin="round"
       aria-hidden="true"
       className={cn(
-        "shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none",
+        "shrink-0 transition-transform duration-150 ease-out motion-reduce:transition-none",
         active && "motion-safe:translate-x-0.5",
       )}
     >
@@ -47,7 +49,7 @@ function ReturnIcon({ active }: { active: boolean }) {
       strokeLinejoin="round"
       aria-hidden="true"
       className={cn(
-        "shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none",
+        "shrink-0 transition-transform duration-150 ease-out motion-reduce:transition-none",
         active && "motion-safe:scale-110",
       )}
     >
@@ -71,10 +73,7 @@ function MultiCityIcon({ active }: { active: boolean }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className={cn(
-        "shrink-0 transition-[stroke-dashoffset] duration-300 ease-out motion-reduce:transition-none",
-        active && "motion-safe:[stroke-dasharray:24] motion-safe:[stroke-dashoffset:0]",
-      )}
+      className={cn("shrink-0", active && "motion-safe:opacity-100")}
     >
       <circle cx="5" cy="12" r="2.25" fill="currentColor" stroke="none" />
       <circle cx="12" cy="7" r="2.25" fill="currentColor" stroke="none" />
@@ -90,47 +89,57 @@ const TRIP_ICONS: Record<TripType, (props: { active: boolean }) => ReactNode> = 
   multi_city: MultiCityIcon,
 };
 
-export function SearchTabs({ mode, onModeChange, compact = false }: SearchTabsProps) {
+export function SearchTabs({ mode, onModeChange, compact = false, end }: SearchTabsProps) {
   const { modes, modeLabels, handleKeyDown } = useSearchTabKeyboard(mode, onModeChange);
 
   return (
     <div
-      role="tablist"
-      aria-label="Flight trip type"
-      data-testid="search-trip-tabs"
       className={cn(
-        "flex gap-0.5 overflow-x-auto border-b border-jp-border pb-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        "flex flex-wrap items-end justify-between gap-2 border-b border-jp-border",
         compact ? "-mx-jp-md px-jp-md sm:-mx-jp-lg sm:px-jp-lg" : "-mx-jp-lg px-jp-lg sm:-mx-jp-xl sm:px-jp-xl",
       )}
+      data-testid="search-card-header"
     >
-      {modes.map((tabMode) => {
-        const selected = mode === tabMode;
-        const Icon = TRIP_ICONS[tabMode];
-        return (
-          <button
-            key={tabMode}
-            id={`search-tab-${tabMode}`}
-            type="button"
-            role="tab"
-            aria-selected={selected}
-            tabIndex={selected ? 0 : -1}
-            data-testid={`search-trip-tab-${tabMode}`}
-            onClick={() => onModeChange(tabMode)}
-            onKeyDown={(event) => handleKeyDown(event, tabMode)}
-            className={cn(
-              "inline-flex shrink-0 items-center gap-1.5 rounded-t-jp-md border border-b-0 font-semibold transition-colors duration-ui",
-              compact ? "px-2.5 py-1.5 text-jp-xs" : "px-3 py-2 text-jp-sm",
-              "focus-visible:outline-none focus-visible:shadow-jp-focus",
-              selected
-                ? "-mb-px border-jp-border bg-jp-surface text-jp-primary shadow-[0_-1px_0_0_var(--jp-surface)]"
-                : "border-transparent bg-transparent text-jp-muted hover:bg-jp-surface-muted hover:text-jp-text",
-            )}
-          >
-            <Icon active={selected} />
-            {modeLabels[tabMode]}
-          </button>
-        );
-      })}
+      <div
+        role="tablist"
+        aria-label="Flight trip type"
+        data-testid="search-trip-tabs"
+        className="flex min-w-0 flex-1 gap-0.5 overflow-x-auto pb-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {modes.map((tabMode) => {
+          const selected = mode === tabMode;
+          const Icon = TRIP_ICONS[tabMode];
+          return (
+            <button
+              key={tabMode}
+              id={`search-tab-${tabMode}`}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              tabIndex={selected ? 0 : -1}
+              data-testid={`search-trip-tab-${tabMode}`}
+              onClick={() => onModeChange(tabMode)}
+              onKeyDown={(event) => handleKeyDown(event, tabMode)}
+              className={cn(
+                "inline-flex shrink-0 items-center gap-1.5 rounded-t-jp-md border border-b-0 font-semibold transition-colors duration-ui",
+                compact ? "px-2.5 py-1.5 text-jp-xs" : "px-3 py-2 text-jp-sm",
+                "focus-visible:outline-none focus-visible:shadow-jp-focus",
+                selected
+                  ? "-mb-px border-jp-border bg-jp-surface text-jp-primary"
+                  : "border-transparent bg-transparent text-jp-muted hover:bg-jp-surface-muted hover:text-jp-text",
+              )}
+            >
+              <Icon active={selected} />
+              {modeLabels[tabMode]}
+            </button>
+          );
+        })}
+      </div>
+      {end ? (
+        <div className="mb-1.5 shrink-0 self-center" data-testid="search-header-travelers">
+          {end}
+        </div>
+      ) : null}
     </div>
   );
 }

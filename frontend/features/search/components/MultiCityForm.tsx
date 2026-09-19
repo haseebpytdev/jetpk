@@ -4,23 +4,15 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SecondaryButton } from "@/components/ui/SecondaryButton";
 import { useId } from "react";
 import { MULTI_CITY_MAX_SEGMENTS, MULTI_CITY_MIN_SEGMENTS } from "../types";
-import type { FlightSegment, PassengerSelection } from "../types";
+import type { FlightSegment } from "../types";
 import { AirportField } from "./AirportField";
 import { DateField } from "./DateField";
-import { TravelersCabinSelector } from "./TravelersCabinSelector";
 
 type MultiCityFormProps = {
   segments: FlightSegment[];
-  passengers: PassengerSelection;
   onSegmentChange: (index: number, segment: FlightSegment) => void;
   onAddSegment: () => void;
   onRemoveSegment: (index: number) => void;
-  onPassengersChange: {
-    adults: (value: number) => void;
-    children: (value: number) => void;
-    infants: (value: number) => void;
-    cabin: (value: PassengerSelection["cabin"]) => void;
-  };
   onSubmit: () => void;
   errors: string[];
   disabled?: boolean;
@@ -28,11 +20,9 @@ type MultiCityFormProps = {
 
 export function MultiCityForm({
   segments,
-  passengers,
   onSegmentChange,
   onAddSegment,
   onRemoveSegment,
-  onPassengersChange,
   onSubmit,
   errors,
   disabled = false,
@@ -95,14 +85,6 @@ export function MultiCityForm({
           Add Flight
         </SecondaryButton>
       ) : null}
-
-      <TravelersCabinSelector
-        passengers={passengers}
-        onAdultsChange={onPassengersChange.adults}
-        onChildrenChange={onPassengersChange.children}
-        onInfantsChange={onPassengersChange.infants}
-        onCabinChange={onPassengersChange.cabin}
-      />
 
       {errors.length > 0 ? (
         <div role="status" aria-live="polite" className="rounded-jp-md border border-red-200 bg-red-50 px-3 py-2 text-jp-sm text-red-800">

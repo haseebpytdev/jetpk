@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   handoffToGroupSearch,
   handoffToFlightResults,
@@ -30,6 +30,7 @@ import { ReturnForm } from "./ReturnForm";
 import { SearchStatusBanner } from "./SearchStatusBanner";
 import { SearchServiceSwitcher } from "./SearchServiceSwitcher";
 import { SearchTabs } from "./SearchTabs";
+import { TravelersCabinSelector } from "./TravelersCabinSelector";
 import type { SearchLayout } from "./SearchFormErrors";
 
 function createSegment(id: string): FlightSegment {
@@ -90,16 +91,6 @@ export function SearchModule({
   const groupFacets = useGroupSearchFacets(mode === "group");
   const groupSectorValues = groupFacets.sectors.map((item) => item.value);
   const groupCategoryValues = groupFacets.categories.map((item) => item.value);
-
-  const passengerHandlers = useMemo(
-    () => ({
-      adults: setAdults,
-      children: setChildren,
-      infants: setInfants,
-      cabin: setCabin,
-    }),
-    [setAdults, setChildren, setInfants, setCabin],
-  );
 
   const clearSubmitChrome = useCallback(() => {
     if (abortRef.current) {
@@ -243,11 +234,22 @@ export function SearchModule({
     });
   };
 
+  const travelersControl =
+    service === "flights" ? (
+      <TravelersCabinSelector
+        passengers={passengers}
+        onAdultsChange={setAdults}
+        onChildrenChange={setChildren}
+        onInfantsChange={setInfants}
+        onCabinChange={setCabin}
+        density={layout === "compact" ? "compact" : "default"}
+      />
+    ) : null;
+
   const searchCard = (
     <section
       className={cn(
-        "min-w-0 max-w-full flex-1 overflow-x-clip overflow-y-visible rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card max-lg:pr-[4.75rem]",
-        showServiceSwitcher && "max-lg:w-full",
+        "min-w-0 w-full max-w-full overflow-x-clip overflow-y-visible rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card",
         layout === "compact" ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl",
         className,
       )}
@@ -258,7 +260,12 @@ export function SearchModule({
       data-search-mode={mode}
     >
       {service === "flights" ? (
-        <SearchTabs mode={tripMode} onModeChange={handleTripTypeChange} compact={layout === "compact"} />
+        <SearchTabs
+          mode={tripMode}
+          onModeChange={handleTripTypeChange}
+          compact={layout === "compact"}
+          end={travelersControl}
+        />
       ) : null}
 
       <div
@@ -273,12 +280,10 @@ export function SearchModule({
             origin={origin}
             destination={destination}
             departureDate={departureDate}
-            passengers={passengers}
             options={options}
             onOriginChange={setOrigin}
             onDestinationChange={setDestination}
             onDepartureDateChange={setDepartureDate}
-            onPassengersChange={passengerHandlers}
             onOptionsChange={setOptions}
             onSubmit={handleOneWaySubmit}
             errors={errors}
@@ -293,13 +298,11 @@ export function SearchModule({
             destination={destination}
             departureDate={departureDate}
             returnDate={returnDate}
-            passengers={passengers}
             options={options}
             onOriginChange={setOrigin}
             onDestinationChange={setDestination}
             onDepartureDateChange={setDepartureDate}
             onReturnDateChange={setReturnDate}
-            onPassengersChange={passengerHandlers}
             onOptionsChange={setOptions}
             onSubmit={handleReturnSubmit}
             errors={errors}
@@ -311,11 +314,9 @@ export function SearchModule({
         {mode === "multi_city" ? (
           <MultiCityForm
             segments={segments}
-            passengers={passengers}
             onSegmentChange={updateSegment}
             onAddSegment={addSegment}
             onRemoveSegment={removeSegment}
-            onPassengersChange={passengerHandlers}
             onSubmit={handleMultiCitySubmit}
             errors={errors}
             disabled={isSubmitting}
@@ -353,15 +354,16 @@ export function SearchModule({
 
   return (
     <div
-      className="flex min-w-0 max-w-full flex-col gap-jp-sm lg:flex-row lg:items-start lg:gap-jp-md"
+      className="flex min-w-0 max-w-full flex-col gap-jp-sm lg:relative lg:flex-row lg:items-start lg:gap-jp-md"
       data-testid="homepage-search-shell"
     >
+      {/* External rail: sits beside the card; on lg pulls slightly into the left gutter so the card keeps full container width. */}
       <SearchServiceSwitcher
         service={service}
         onServiceChange={handleServiceChange}
-        className="lg:sticky lg:top-[4.5rem] lg:self-start"
+        className="self-start lg:sticky lg:top-[4.5rem] lg:-ml-16 lg:shrink-0"
       />
-      {searchCard}
+      <div className="min-w-0 w-full flex-1">{searchCard}</div>
     </div>
   );
 }

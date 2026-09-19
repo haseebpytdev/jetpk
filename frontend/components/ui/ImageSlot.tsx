@@ -29,6 +29,8 @@ type ImageSlotProps = {
   fallbackLabel?: string;
   /** Soft JetPakistan brand motif instead of a generic photo icon. */
   brandedFallback?: boolean;
+  /** Fill parent absolutely; skip aspect-ratio / maxWidth box (hero backdrops). */
+  fillContainer?: boolean;
 };
 
 export function ImageSlot({
@@ -44,11 +46,15 @@ export function ImageSlot({
   sizes,
   fallbackLabel = "Image unavailable",
   brandedFallback = false,
+  fillContainer = false,
 }: ImageSlotProps) {
   const [loading, setLoading] = useState(Boolean(src));
   const [failed, setFailed] = useState(false);
   const resolvedAlt = decorative ? "" : alt;
   const aspectRatio = `${width} / ${height}`;
+  const boxStyle = fillContainer
+    ? { width: "100%", height: "100%" }
+    : { aspectRatio, width: "100%", maxWidth: width };
 
   if (!src || failed) {
     return (
@@ -60,7 +66,7 @@ export function ImageSlot({
             : "bg-jp-surface-muted text-jp-muted",
           className,
         )}
-        style={{ aspectRatio, width: "100%", maxWidth: width }}
+        style={boxStyle}
         role={decorative ? "presentation" : "img"}
         aria-label={decorative ? undefined : fallbackLabel}
         data-testid="image-slot-fallback"
@@ -74,7 +80,7 @@ export function ImageSlot({
   return (
     <div
       className={cn("relative overflow-hidden rounded-jp-md", className)}
-      style={{ aspectRatio, width: "100%", maxWidth: width }}
+      style={boxStyle}
       data-testid="image-slot"
     >
       {loading ? (

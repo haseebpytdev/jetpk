@@ -149,6 +149,7 @@ test("mobile homepage search layout remains usable", async ({ page }) => {
   await expect(page.getByRole("tab", { name: "One Way" })).toBeVisible();
   await expect(page.getByTestId("search-service-group")).toBeVisible();
   await expect(page.getByTestId("search-trip-tabs").getByRole("tab", { name: "Group Ticketing" })).toHaveCount(0);
+  await expect(page.getByTestId("search-header-travelers")).toBeVisible();
   await expect(page.getByLabel("From")).toBeVisible();
 });
 

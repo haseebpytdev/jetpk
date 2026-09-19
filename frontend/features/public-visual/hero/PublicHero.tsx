@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { cn } from "@/lib/cn";
-import type { HomepageHeroContent, HomepageTrustChip } from "../types/homepage";
+import type { HomepageContent, HomepageHeroContent, HomepageTrustChip } from "../types/homepage";
 import { BenefitStrip } from "../components/BenefitStrip";
 
 const SearchModule = dynamic(
@@ -25,17 +25,31 @@ type PublicHeroProps = {
   hero: HomepageHeroContent;
   trustChips: HomepageTrustChip[];
   fallbackImage: string;
+  /**
+   * CMS published empty strings are authoritative when source is `cms`.
+   * Fixture / empty (no CMS) may use marketing fallbacks for copy.
+   */
+  contentSource: HomepageContent["source"];
 };
 
-/**
- * CMS-published empty strings are authoritative — do not substitute marketing fallbacks.
- * Fixture/missing CMS source may still supply non-empty strings via the content service.
- */
-export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps) {
+const FIXTURE_COPY = {
+  headline: "Explore the world with",
+  highlight: "JetPakistan",
+  subtitle:
+    "Compare flights, pay in PKR, and book with a Pakistan-focused travel platform you can trust.",
+} as const;
+
+export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: PublicHeroProps) {
+  const cmsAuthoritative = contentSource === "cms";
   const eyebrow = hero.eyebrow ?? "";
-  const headline = hero.headline ?? "";
-  const highlight = hero.headlineHighlight ?? "";
-  const subtitle = hero.subtitle ?? "";
+  const rawHeadline = hero.headline ?? "";
+  const rawHighlight = hero.headlineHighlight ?? "";
+  const rawSubtitle = hero.subtitle ?? "";
+
+  const headline = cmsAuthoritative ? rawHeadline : rawHeadline || FIXTURE_COPY.headline;
+  const highlight = cmsAuthoritative ? rawHighlight : rawHighlight || FIXTURE_COPY.highlight;
+  const subtitle = cmsAuthoritative ? rawSubtitle : rawSubtitle || FIXTURE_COPY.subtitle;
+
   const hasTitle = headline.trim() !== "" || highlight.trim() !== "";
   const desktopSrc = hero.image?.url ?? fallbackImage;
   const mobileSrc = hero.imageMobile?.url ?? desktopSrc;
@@ -44,13 +58,12 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
 
   return (
     <section className="relative overflow-x-hidden bg-jp-page" data-testid="homepage-public-hero">
-      {/* Stable viewport-tied backdrop — height must not track search-mode form height. */}
       <div
         className="relative h-[clamp(20rem,42vh,30rem)] overflow-hidden"
         data-testid="homepage-hero-backdrop"
       >
         <div className="absolute inset-0" data-testid="homepage-hero-image">
-          <picture>
+          <picture className="absolute inset-0 block h-full w-full">
             <source media="(max-width: 767px)" srcSet={mobileSrc} />
             <ImageSlot
               src={desktopSrc}
@@ -59,7 +72,8 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
               height={560}
               priority
               sizes="100vw"
-              className="!max-w-none !rounded-none h-full w-full"
+              fillContainer
+              className="!absolute !inset-0 !h-full !w-full !max-w-none !rounded-none"
               objectFit="cover"
               objectPosition={objectPosition}
               fallbackLabel="JetPakistan hero"
@@ -99,7 +113,7 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
       </div>
 
       {hero.searchVisible ? (
-        <PageContainer className="relative z-20 -mt-16 pb-jp-lg sm:-mt-20">
+        <PageContainer className="relative z-20 -mt-16 overflow-x-visible pb-jp-lg sm:-mt-20">
           <div data-testid="homepage-hero-search-overlap">
             <SearchModule layout="compact" />
             <BenefitStrip items={trustChips} variant="hero" className="mt-jp-md" />

@@ -17,6 +17,7 @@ export async function HomepageContent() {
         hero={content.hero}
         trustChips={content.trustChips}
         fallbackImage={HomepageContentService.heroFallbackImage}
+        contentSource={content.source}
       />
       <RoutesSection {...content.routes} />
       <DestinationsSection {...content.destinations} />

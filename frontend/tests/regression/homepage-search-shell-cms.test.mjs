@@ -14,13 +14,33 @@ function read(rel) {
   return readFileSync(join(root, rel), "utf8");
 }
 
-test("CMS_BLANK_HERO_TEXT_PRESERVED: PublicHero must not ||-fallback slogan copy", () => {
+test("CMS_BLANK_HERO_TEXT_PRESERVED: PublicHero must not ||-fallback slogan copy for CMS", () => {
   const src = read("features/public-visual/hero/PublicHero.tsx");
+  assert.match(src, /contentSource/);
+  assert.match(src, /cmsAuthoritative/);
   assert.equal(src.includes('hero.headline || "Explore the world'), false);
   assert.equal(src.includes('hero.headlineHighlight || "JetPakistan"'), false);
-  assert.equal(src.includes("Compare flights, pay in PKR"), false);
-  assert.match(src, /headline\.trim\(\)\s*!==\s*""/);
-  assert.match(src, /subtitle\.trim\(\)\s*!==\s*""/);
+  assert.match(src, /contentSource === "cms"/);
+});
+
+test("TRAVELERS_IN_HEADER_NOT_FORM_BODY", () => {
+  const oneWay = read("features/search/components/OneWayForm.tsx");
+  const ret = read("features/search/components/ReturnForm.tsx");
+  const multi = read("features/search/components/MultiCityForm.tsx");
+  const mod = read("features/search/components/SearchModule.tsx");
+  assert.equal(oneWay.includes("TravelersCabinSelector"), false);
+  assert.equal(ret.includes("TravelersCabinSelector"), false);
+  assert.equal(multi.includes("TravelersCabinSelector"), false);
+  assert.match(mod, /search-header-travelers|end=\{travelersControl\}/);
+  assert.match(mod, /TravelersCabinSelector/);
+});
+
+test("SERVICE_RAIL_ICON_ONLY_COMPACT", () => {
+  const switcher = read("features/search/components/SearchServiceSwitcher.tsx");
+  assert.match(switcher, /aria-label=\{SERVICE_LABELS\[tab\]\}/);
+  assert.match(switcher, /lg:w-14/);
+  assert.equal(switcher.includes("Group Ticketing</span>"), false);
+  assert.equal(switcher.includes("Hotels"), false);
 });
 
 test("CMS_BLANK_HERO_TEXT_PRESERVED: mapHero preserves empty strings", async () => {
