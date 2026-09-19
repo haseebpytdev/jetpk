@@ -2,13 +2,13 @@
 
 import { AccountMenu } from "@/components/navigation/AccountMenu";
 import { DesktopNavigation } from "@/components/navigation/DesktopNavigation";
+import { PrefetchOnIntentLink } from "@/components/navigation/PrefetchOnIntentLink";
 import { PublicFloatingActionDock } from "@/components/navigation/PublicFloatingActionDock";
 import { JetPakistanLogo } from "@/components/layout/JetPakistanLogo";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { ThemeSwitch } from "@/components/theme/ThemeSwitch";
 import type { PublicConfig } from "@/features/public-content/services/public-config-service";
 import type { PublicSession } from "@/types/session";
-import Link from "next/link";
 
 type SiteHeaderProps = {
   session: PublicSession;
@@ -32,9 +32,8 @@ export function SiteHeader({ session, branding = null, aiEnabled = false }: Site
       <header className="sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface" data-testid="site-header">
         <div className="mx-auto flex h-jp-nav w-full max-w-jp-container items-center justify-between gap-jp-md overflow-visible px-jp-xl lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
           <div className="flex min-w-0 items-center justify-start">
-            <Link
+            <PrefetchOnIntentLink
               href="/"
-              prefetch={false}
               className="shrink-0 rounded-jp-md focus-visible:outline-none focus-visible:shadow-jp-focus"
               aria-label="JetPakistan home"
               data-testid="site-logo-link"
@@ -45,7 +44,7 @@ export function SiteHeader({ session, branding = null, aiEnabled = false }: Site
                 brandName={branding?.brand_name}
                 logoHeight={branding?.header_logo_height}
               />
-            </Link>
+            </PrefetchOnIntentLink>
           </div>
 
           <DesktopNavigation session={session} className="justify-center" />

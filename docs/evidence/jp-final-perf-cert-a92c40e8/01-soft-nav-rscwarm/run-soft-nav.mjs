@@ -61,38 +61,15 @@ for (const route of softRoutes) {
     while (attempt < 3) {
       attempt += 1;
       if (pathOf(page.url()) !== pathOf(route.from)) {
-        // Prefer soft return (logo / in-app link) over hard goto so Next client
-        // Flight cache survives — matches real home/back navigation, not a full reload.
-        let softBack = false;
-        try {
-          const back =
-            route.from === "/"
-              ? page.locator('[data-testid="site-logo-link"], header a[href="/"]').first()
-              : page.locator(`a[href="${route.from}"]`).first();
-          const visibleBack = await back.isVisible().catch(() => false);
-          if (visibleBack) {
-            await Promise.all([
-              page
-                .waitForURL((url) => pathOf(url.toString()) === pathOf(route.from), { timeout: 12000 })
-                .catch(() => null),
-              back.click({ timeout: 8000 }),
-            ]);
-            softBack = pathOf(page.url()) === pathOf(route.from);
-          }
-        } catch {
-          softBack = false;
-        }
-        if (!softBack) {
-          let ready = false;
-          for (let g = 0; g < 3 && !ready; g++) {
-            try {
-              await page.goto(`${PROD}${route.from}`, { waitUntil: "domcontentloaded", timeout: 120000 });
-              ready = true;
-            } catch (err) {
-              const msg = String(err?.message || err);
-              if (!/ERR_NAME_NOT_RESOLVED|ERR_CONNECTION|net::ERR_/i.test(msg) || g === 2) throw err;
-              await page.waitForTimeout(1500 * (g + 1));
-            }
+        let ready = false;
+        for (let g = 0; g < 3 && !ready; g++) {
+          try {
+            await page.goto(`${PROD}${route.from}`, { waitUntil: "domcontentloaded", timeout: 120000 });
+            ready = true;
+          } catch (err) {
+            const msg = String(err?.message || err);
+            if (!/ERR_NAME_NOT_RESOLVED|ERR_CONNECTION|net::ERR_/i.test(msg) || g === 2) throw err;
+            await page.waitForTimeout(1500 * (g + 1));
           }
         }
         await page.waitForTimeout(120);
