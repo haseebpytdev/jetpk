@@ -6,17 +6,22 @@ import {
   SupportContentService,
   SupportPageClient,
   fetchSupportCategories,
-  publicSeoToMetadata,
 } from "@/features/public-content";
 import SupportLoading from "./loading";
 
 /** Soft-nav ISR: keep CMS support payload warm for CLIENT_SOFT transitions. */
 export const revalidate = 300;
 
-export async function generateMetadata(): Promise<Metadata> {
-  const content = await SupportContentService.getSupportPage();
-  return publicSeoToMetadata(content.seo, "/support");
-}
+/**
+ * Soft-nav: static metadata so URL commit is not blocked on Support CMS fetch.
+ * Canonical CMS SEO still renders with the streamed body.
+ */
+export const metadata: Metadata = {
+  title: "Support | JetPakistan",
+  description: "Get help with flights, bookings, payments, and travel support from JetPakistan.",
+  robots: { index: true, follow: true },
+  alternates: { canonical: "/support" },
+};
 
 async function SupportPageContent() {
   // Support CMS body is critical for soft-nav usable; categories must not stall RSC.
