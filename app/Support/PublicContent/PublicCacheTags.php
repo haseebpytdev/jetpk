@@ -3,20 +3,31 @@
 namespace App\Support\PublicContent;
 
 /**
- * Canonical Next.js ISR cache tags for JetPakistan public content.
+ * Canonical Next.js public-content cache tags for JetPakistan.
  *
- * Laravel publishers and the Next revalidation webhook must stay aligned with
- * the tags declared on fetch() in the public frontend services.
+ * Persistent cross-request authority uses jp-public-* tags via Next unstable_cache.
+ * Legacy public-* tags remain for dual-invalidation during cutover.
+ * Keep aligned with frontend/lib/public-cache-tags.ts.
  */
 final class PublicCacheTags
 {
-    public const HOMEPAGE = 'public-homepage';
+    public const CONTENT = 'jp-public-content';
 
-    public const CONFIG = 'public-config';
+    public const CONFIG = 'jp-public-config';
+
+    /** @deprecated Prefer CONFIG — legacy ISR tag. */
+    public const LEGACY_CONFIG = 'public-config';
+
+    public const HOMEPAGE = 'public-homepage';
 
     public const SEO = 'public-seo';
 
     public const CMS = 'public-cms';
+
+    public static function page(string $pageKey): string
+    {
+        return 'jp-public-page-'.trim($pageKey);
+    }
 
     public static function seoPage(string $pageKey): string
     {

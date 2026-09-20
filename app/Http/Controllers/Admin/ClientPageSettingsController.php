@@ -180,11 +180,24 @@ class ClientPageSettingsController extends Controller
             return back()->withErrors(['publish' => 'No draft found to publish.']);
         }
 
-        $this->nextCache->revalidatePublishedPageSettings($pageKey);
+        $revalidate = $this->nextCache->revalidatePublishedPageSettings($pageKey);
+
+        $status = 'Page published.';
+        if ($revalidate['endpoints'] !== []) {
+            $failed = array_values(array_filter(
+                $revalidate['endpoints'],
+                static fn (array $endpoint): bool => ! $endpoint['ok'],
+            ));
+            if ($failed !== []) {
+                $status .= ' Public cache revalidation deferred (safety TTL applies); see admin logs.';
+            } else {
+                $status .= ' Public cache revalidated.';
+            }
+        }
 
         return redirect()
             ->to(client_route('admin.page-settings.edit', ['pageKey' => $pageKey]))
-            ->with('status', 'Page published.');
+            ->with('status', $status);
     }
 
     public function saveCurrentAsDefault(Request $request, string $pageKey): RedirectResponse

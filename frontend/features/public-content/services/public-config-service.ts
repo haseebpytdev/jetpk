@@ -1,6 +1,12 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { laravelApiPath } from "@/services/flight-search";
 import { appConfig } from "@/lib/config";
+import {
+  PUBLIC_CACHE_TAGS,
+  PUBLIC_CONTENT_CACHE_TTL_SECONDS,
+} from "@/lib/public-cache-tags";
+import { recordLaravelPublicConfigCall } from "@/lib/public-content-cache-metrics";
 import type { ContactDetails } from "../types";
 
 export type PublicConfig = {
@@ -60,20 +66,19 @@ function publicConfigEndpoint(): string {
   return `${appBase}/laravel/api/public/content/config`;
 }
 
-async function getConfigImpl(): Promise<PublicConfig | null> {
+/**
+ * Raw Laravel public-config fetch. Always no-store + bounded timeout.
+ * Cross-request persistence is owned by unstable_cache.
+ */
+async function fetchPublicConfigRaw(): Promise<PublicConfig | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 3_000);
   try {
-    // Public config is not user-specific — avoid cookies()/no-store so layouts
-    // that still SSR-fetch config remain cacheable for soft-nav.
-    // Timeout is inside React cache() so root+public layout share one fetch/signal.
     const response = await fetch(publicConfigEndpoint(), {
       headers: { Accept: "application/json" },
       credentials: typeof window !== "undefined" ? "include" : "omit",
       signal: controller.signal,
-      ...(typeof window === "undefined"
-        ? { next: { revalidate: 60, tags: ["public-config"] } }
-        : { cache: "no-store" as RequestCache }),
+      cache: "no-store",
     });
     if (!response.ok) return null;
     return (await response.json()) as PublicConfig;
@@ -84,7 +89,38 @@ async function getConfigImpl(): Promise<PublicConfig | null> {
   }
 }
 
+async function getCachedPublicConfig(): Promise<PublicConfig | null> {
+  let cacheMiss = false;
+  const data = await unstable_cache(
+    async () => {
+      cacheMiss = true;
+      return fetchPublicConfigRaw();
+    },
+    ["jp-public-config"],
+    {
+      revalidate: PUBLIC_CONTENT_CACHE_TTL_SECONDS,
+      tags: [PUBLIC_CACHE_TAGS.content, PUBLIC_CACHE_TAGS.config],
+    },
+  )();
+
+  recordLaravelPublicConfigCall(cacheMiss ? "MISS" : "HIT");
+  return data;
+}
+
+async function getConfigImpl(options?: { preview?: boolean }): Promise<PublicConfig | null> {
+  // Browser / draft-preview: never use persistent public cache.
+  if (typeof window !== "undefined" || options?.preview) {
+    recordLaravelPublicConfigCall("BYPASS");
+    return fetchPublicConfigRaw();
+  }
+
+  return getCachedPublicConfig();
+}
+
 export const PublicConfigService = {
-  /** React cache(): one config resolution per RSC request across root/public layouts + metadata. */
+  /**
+   * React cache() → unstable_cache → raw Laravel fetch.
+   * One config resolution per RSC request; persistent across requests for published public.
+   */
   getConfig: cache(getConfigImpl),
 };

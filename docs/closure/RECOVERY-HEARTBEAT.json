@@ -1,0 +1,33 @@
+{
+  "phase": "SOFT_NAV_REMEDIATION",
+  "step": "implementing_unstable_cache_public_content",
+  "head_sha": "ee7c60122af93f3436c30dd9514bf81cc9d4cf83",
+  "public_build_id": "5ywT1QNy10VRk-IB0VWfy",
+  "started_at": "2026-09-20T11:46:00Z",
+  "last_progress_at": "2026-09-20T20:00:00Z",
+  "last_completed_action": "Architecture approved: React cache → unstable_cache → raw Laravel no-store; implementing fetchManagedPage + PublicConfigService + revalidate-public-content + Laravel wire",
+  "current_action": "IN_PROGRESS — persistent public-content cache layer (no route-group/force-static/shared-shell churn)",
+  "status": "IN_PROGRESS",
+  "soft_nav_gate": "PENDING",
+  "production": {
+    "runtime_sha": "ee7c60122af93f3436c30dd9514bf81cc9d4cf83",
+    "public_build_id": "5ywT1QNy10VRk-IB0VWfy",
+    "rollback_sha": "6dc3f7cd1ade0d4b3660581e41a0cfbdb5f4ac64"
+  },
+  "architecture": {
+    "authority": "unstable_cache",
+    "request_dedupe": "react_cache",
+    "raw_fetch": "cache:no-store + 3000ms timeout",
+    "ttl_seconds": 3600,
+    "tags": ["jp-public-content", "jp-public-config", "jp-public-page-${pageKey}"],
+    "invalidate": "/api/internal/revalidate-public-content"
+  },
+  "burned_remediations": [
+    "force-static auth layout/login/register",
+    "shared (site) PublicShell + client support/about"
+  ],
+  "best_measured": {
+    "sha": "2bb48065",
+    "pass": "7/10"
+  }
+}

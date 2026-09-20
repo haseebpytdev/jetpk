@@ -1,5 +1,11 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { absoluteLaravelUrl, laravelApiPath } from "@/services/flight-search";
+import {
+  PUBLIC_CACHE_TAGS,
+  PUBLIC_CONTENT_CACHE_TTL_SECONDS,
+} from "@/lib/public-cache-tags";
+import { recordLaravelPublicPageCall } from "@/lib/public-content-cache-metrics";
 import type {
   ContactDetails,
   ContactFormPayload,
@@ -15,6 +21,12 @@ export type LaravelValidationErrors = Record<string, string[]>;
 const LARAVEL_FETCH_TIMEOUT_MS = 3_000;
 
 type NextFetchInit = RequestInit & { next?: { revalidate?: number | false; tags?: string[] } };
+
+export type FetchManagedPageOptions = {
+  /** Draft/preview must bypass persistent public cache. */
+  preview?: boolean;
+  previewToken?: string | null;
+};
 
 /**
  * Server components must call Laravel directly (runtime LARAVEL_URL) because
@@ -82,19 +94,31 @@ export async function ensureLaravelCsrfToken(): Promise<string | null> {
 }
 
 /**
- * Request-scoped dedupe for generateMetadata + page (and any other RSC callers)
- * so one soft-nav does not hit Laravel twice for the same managed page key.
- * Timeout lives inside cache() so metadata+page share one AbortSignal/fetch.
- * ISR: revalidate 300 aligns with public legal/CMS page exports.
+ * Raw Laravel managed-page fetch. Always no-store + bounded timeout.
+ * Cross-request persistence is owned by unstable_cache, not fetch next.revalidate.
  */
-export const fetchManagedPage = cache(async (pageKey: string): Promise<LaravelManagedPageResponse | null> => {
+async function fetchManagedPageRaw(
+  pageKey: string,
+  options?: FetchManagedPageOptions,
+): Promise<LaravelManagedPageResponse | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), LARAVEL_FETCH_TIMEOUT_MS);
   try {
-    const response = await fetch(publicContentFetchUrl(`/api/public/content/pages/${pageKey}`), {
+    const params = new URLSearchParams();
+    if (options?.preview) {
+      params.set("jp_preview", "1");
+    }
+    const token = options?.previewToken?.trim();
+    if (token) {
+      params.set("jp_preview_token", token);
+    }
+    const query = params.toString();
+    const url = `${publicContentFetchUrl(`/api/public/content/pages/${pageKey}`)}${query ? `?${query}` : ""}`;
+
+    const response = await fetch(url, {
       headers: { Accept: "application/json" },
       signal: controller.signal,
-      next: { revalidate: 300, tags: ["public-seo", `public-seo-${pageKey}`] },
+      cache: "no-store",
     });
     if (!response.ok) return null;
     return (await response.json()) as LaravelManagedPageResponse;
@@ -103,7 +127,45 @@ export const fetchManagedPage = cache(async (pageKey: string): Promise<LaravelMa
   } finally {
     clearTimeout(timeout);
   }
-});
+}
+
+/**
+ * React cache() → unstable_cache → raw Laravel fetch.
+ * Request-level dedupe for generateMetadata + page; persistent cache for published public.
+ * Draft/preview bypasses unstable_cache.
+ */
+export const fetchManagedPage = cache(
+  async (
+    pageKey: string,
+    options?: FetchManagedPageOptions,
+  ): Promise<LaravelManagedPageResponse | null> => {
+    const key = pageKey.trim();
+    if (key === "") {
+      return null;
+    }
+
+    if (options?.preview || options?.previewToken) {
+      recordLaravelPublicPageCall(key, "BYPASS");
+      return fetchManagedPageRaw(key, options);
+    }
+
+    let cacheMiss = false;
+    const data = await unstable_cache(
+      async () => {
+        cacheMiss = true;
+        return fetchManagedPageRaw(key);
+      },
+      ["jp-public-page", key],
+      {
+        revalidate: PUBLIC_CONTENT_CACHE_TTL_SECONDS,
+        tags: [PUBLIC_CACHE_TAGS.content, PUBLIC_CACHE_TAGS.page(key)],
+      },
+    )();
+
+    recordLaravelPublicPageCall(key, cacheMiss ? "MISS" : "HIT");
+    return data;
+  },
+);
 
 export const fetchSiteContactFromLaravel = cache(async (): Promise<ContactDetails | null> => {
   const controller = new AbortController();
