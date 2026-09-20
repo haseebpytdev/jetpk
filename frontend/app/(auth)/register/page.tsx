@@ -4,7 +4,6 @@ import { AuthAlreadySignedInRedirect } from "@/features/auth/components/AuthAlre
 import { SIGNUP_BENEFITS } from "@/features/auth/config/auth-benefits";
 
 /** Soft-nav: avoid cookies()/force-dynamic so /register RSC stays prefetchable. */
-export const dynamic = "force-static";
 export const revalidate = 60;
 
 export default function RegisterPage() {
