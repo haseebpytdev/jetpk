@@ -66,8 +66,8 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
         className={cn(
           "relative isolate overflow-hidden",
           // Fixed canvas heights so trip/service mode switches do not resize/crop.
-          // Sized above tallest initial shell (multi-city ~730px at 1024).
-          "h-[46rem] sm:h-[48rem] md:h-[48rem] lg:h-[50rem] xl:h-[52rem]",
+          // Sized above tallest initial shell; 47rem clears 320px pad>=16 gate.
+          "h-[47rem] sm:h-[48rem] md:h-[48rem] lg:h-[50rem] xl:h-[52rem]",
         )}
         data-testid="homepage-hero-backdrop"
       >

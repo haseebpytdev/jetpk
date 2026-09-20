@@ -1,29 +1,54 @@
-# Soft-nav reconcile vs `8793cc9f`
+# Soft-nav remediation — continuous loop status
 
-## Proven regression after 8793
+## Best measured tip (redeploy target)
 
-| Commit | Change | Effect |
-|--------|--------|--------|
-| `4f1836c1` | Home anonymous ISR + root `loading.tsx` + LoginForm Suspense | Soft-nav regressed vs 8793 |
-| `22a4e759` | About-us CMS Suspense wrap | Tip pack 5/10 (`mbGGmJZh1GgGZCIWsBdEV`) |
+| Field | Value |
+|-------|-------|
+| SHA | `2bb480658d872a4415d3696c2fae4312c69bb223` |
+| Evidence | `docs/evidence/jp-final-perf-cert-2bb48065/01-soft-nav/` |
+| PASS | 7/10 |
+| FAIL | home_privacy 1976, home_about 1588, home_faq 1754 |
 
-Best pack remains `8793cc9f` / `aEdZnf5JjqhJtZyrKe0dr` = **8/10**.
+### 2bb48065 route table (N=20)
 
-## Working-tree corrective actions (no history rewrite)
+| Route | APP_P95 | Gate |
+|-------|---------|------|
+| home_support | 660 | PASS |
+| support_home | 1287 | PASS |
+| home_privacy | 1976 | FAIL |
+| privacy_terms | 220 | PASS |
+| home_groups | 730 | PASS |
+| home_login | 1125 | PASS |
+| login_register | 320 | PASS |
+| home_about | 1588 | FAIL |
+| home_faq | 1754 | FAIL |
+| home_terms | 1085 | PASS |
 
-1. Restored `frontend/app/page.tsx` to 8793 behavior (await session + config; no anonymous shell / page Suspense).
-2. Removed `frontend/app/loading.tsx` (did not exist at 8793).
-3. Restored `frontend/app/(auth)/login/page.tsx` to 8793 (LoginForm not wrapped in Suspense fallback).
-4. Restored `frontend/app/(public)/about-us/page.tsx` to 8793 (no Suspense wrap).
-5. Kept 8793 Support/FAQ Suspense (part of the 8/10 pack).
-6. Added homepage hero/below-fold Suspense split + request `cache()` dedupe to target `support_home` headroom without hiding SEO content.
+## Architectural wins retained on tip
 
-## Still required before soft-nav PASS
+- Homepage moved into `(public)` route group (shared PublicShell)
+- Terms/about Suspense
+- Header `priorityPrefetch` for Groups + Login
+- Intent-only PublicRoutePrefetch (no background/idle warm)
 
-- Commit + public-only deploy + N=20 soft-nav on **same** BUILD_ID
-- Close `support_home` and `home_login` under 1500 with variance headroom
-- Then same-SHA traveler/return/pair↔segmented cert
+## Attempts that regressed the matrix (do not reapply blindly)
 
-```text
-SOFT_NAV_GATE=PENDING_DEPLOY_MEASURE
-```
+- Wholesale / selective idle homepage warm
+- Moving login/register into `(public)`
+- Auth layout Suspense
+- Early 150ms footer CMS warm
+- Static metadata for all CMS pages in one stack (oscillated which routes fail)
+
+## Hard blocker
+
+`SOFT_NAV_GATE` remains FAIL. Production P95 is dominated by 1–2 cold outliers per failing route under fixed harness methodology (N=20, no sample dropping). Further metadata/warm micro-edits flip which routes fail without a stable 10/10.
+
+Owner decision needed: accept continued remediation with different architecture (e.g. CMS edge cache), or adjust scope — **without** gaming harness thresholds.
+
+## Later tips (not better)
+
+| SHA | Result |
+|-----|--------|
+| 96c382e4 | 7/10 (privacy/about PASS; support/faq/terms FAIL) |
+| 8b35e400 | 5/10 (worse) |
+| 4c336de7 | 5/10 (early warm regression) |
