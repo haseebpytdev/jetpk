@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import {
   DestinationsSection,
   FeaturedOffersSection,
@@ -10,46 +9,20 @@ import {
 } from "@/features/public-visual";
 
 /**
- * Soft-nav: stream hero/search shell first; below-fold CMS sections follow in Suspense.
- * SEO content remains SSR inside each async boundary (not client-only).
+ * Soft-nav critical path: single-block homepage render (8793cc9f profile).
+ * Do not split hero/below-fold behind Suspense — that regressed outbound home_* routes.
  */
-export function HomepageContent() {
+export async function HomepageContent() {
+  const content = await HomepageContentService.getHomepage();
+
   return (
     <>
-      <Suspense
-        fallback={
-          <div
-            className="relative min-h-[22rem] bg-jp-page"
-            data-testid="homepage-hero-suspense-fallback"
-            aria-busy="true"
-          />
-        }
-      >
-        <HomepageHeroBlock />
-      </Suspense>
-      <Suspense fallback={null}>
-        <HomepageBelowFoldBlock />
-      </Suspense>
-    </>
-  );
-}
-
-async function HomepageHeroBlock() {
-  const content = await HomepageContentService.getHomepage();
-  return (
-    <PublicHero
-      hero={content.hero}
-      trustChips={content.trustChips}
-      fallbackImage={HomepageContentService.heroFallbackImage}
-      contentSource={content.source}
-    />
-  );
-}
-
-async function HomepageBelowFoldBlock() {
-  const content = await HomepageContentService.getHomepage();
-  return (
-    <>
+      <PublicHero
+        hero={content.hero}
+        trustChips={content.trustChips}
+        fallbackImage={HomepageContentService.heroFallbackImage}
+        contentSource={content.source}
+      />
       <RoutesSection {...content.routes} />
       <DestinationsSection {...content.destinations} />
       <FeaturedOffersSection {...content.featuredDeals} />

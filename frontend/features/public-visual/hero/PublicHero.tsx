@@ -13,7 +13,7 @@ const SearchModule = dynamic(
     ssr: false,
     loading: () => (
       <div
-        className="min-h-[12rem] rounded-jp-card border border-white/20 bg-white/90 p-4 shadow-jp-card"
+        className="min-h-[12rem] rounded-jp-card border border-white/20 bg-jp-surface/90 p-4 shadow-jp-card"
         data-testid="homepage-search-placeholder"
         aria-busy="true"
       />
@@ -39,6 +39,10 @@ const FIXTURE_COPY = {
     "Compare flights, pay in PKR, and book with a Pakistan-focused travel platform you can trust.",
 } as const;
 
+/**
+ * Hero media canvas wraps copy + search shell so the image continues behind the full
+ * composition. Height is a stable responsive minimum (not tied to active trip mode).
+ */
 export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: PublicHeroProps) {
   const cmsAuthoritative = contentSource === "cms";
   const eyebrow = hero.eyebrow ?? "";
@@ -57,12 +61,16 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
     hero.focalPoint === "left" ? "left center" : hero.focalPoint === "right" ? "right center" : "center";
 
   return (
-    <section className="relative overflow-x-hidden bg-jp-page" data-testid="homepage-public-hero">
+    <section className="relative overflow-x-hidden" data-testid="homepage-public-hero">
       <div
-        className="relative isolate h-[clamp(22rem,48vh,34rem)] min-h-[22rem] overflow-hidden"
+        className={cn(
+          "relative isolate overflow-hidden",
+          // Stable canvas tall enough for copy + max initial search shell at each breakpoint.
+          "min-h-[34rem] sm:min-h-[36rem] md:min-h-[38rem] lg:min-h-[40rem] xl:min-h-[42rem]",
+        )}
         data-testid="homepage-hero-backdrop"
       >
-        <div className="absolute inset-0" data-testid="homepage-hero-image">
+        <div className="absolute inset-0" data-testid="homepage-hero-image" aria-hidden={!hasTitle}>
           <picture className="absolute inset-0 block h-full w-full">
             <source media="(max-width: 767px)" srcSet={mobileSrc} />
             <ImageSlot
@@ -81,45 +89,47 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
             />
           </picture>
           <div
-            className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-black/50 dark:from-black/55 dark:via-black/35 dark:to-black/65"
+            className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-black/55 dark:from-black/55 dark:via-black/40 dark:to-black/70"
             aria-hidden="true"
           />
         </div>
 
-        <PageContainer className="relative z-10 flex h-full flex-col justify-end pb-28 pt-jp-3xl sm:pb-32">
-          <div className="max-w-3xl min-w-0 text-white">
-            {eyebrow.trim() !== "" ? (
-              <p className="text-jp-sm font-semibold uppercase tracking-[0.18em] text-white/85">{eyebrow}</p>
-            ) : null}
-            {hasTitle ? (
-              <h1
-                className={cn(
-                  "break-words font-display text-jp-h1 font-bold leading-[1.15] text-white",
-                  eyebrow.trim() !== "" && "mt-3",
-                )}
-              >
-                {headline}
-                {headline.trim() !== "" && highlight.trim() !== "" ? " " : null}
-                {highlight.trim() !== "" ? (
-                  <span className="text-jp-primary-soft">{highlight}</span>
-                ) : null}
-              </h1>
-            ) : null}
-            {subtitle.trim() !== "" ? (
-              <p className="mt-4 max-w-2xl text-jp-body leading-relaxed text-white/90">{subtitle}</p>
-            ) : null}
-          </div>
-        </PageContainer>
-      </div>
+        <div className="relative z-10 flex min-h-[inherit] flex-col">
+          <PageContainer className="flex flex-1 flex-col justify-end pb-6 pt-jp-3xl sm:pb-8 sm:pt-jp-4xl">
+            <div className="max-w-3xl min-w-0 text-white">
+              {eyebrow.trim() !== "" ? (
+                <p className="text-jp-sm font-semibold uppercase tracking-[0.18em] text-white/85">{eyebrow}</p>
+              ) : null}
+              {hasTitle ? (
+                <h1
+                  className={cn(
+                    "break-words font-display text-jp-h1 font-bold leading-[1.15] text-white",
+                    eyebrow.trim() !== "" && "mt-3",
+                  )}
+                >
+                  {headline}
+                  {headline.trim() !== "" && highlight.trim() !== "" ? " " : null}
+                  {highlight.trim() !== "" ? (
+                    <span className="text-jp-primary-soft">{highlight}</span>
+                  ) : null}
+                </h1>
+              ) : null}
+              {subtitle.trim() !== "" ? (
+                <p className="mt-4 max-w-2xl text-jp-body leading-relaxed text-white/90">{subtitle}</p>
+              ) : null}
+            </div>
+          </PageContainer>
 
-      {hero.searchVisible ? (
-        <PageContainer className="relative z-20 -mt-16 overflow-x-visible pb-jp-lg sm:-mt-20">
-          <div data-testid="homepage-hero-search-overlap">
-            <SearchModule layout="compact" />
-            <BenefitStrip items={trustChips} variant="hero" className="mt-jp-md" />
-          </div>
-        </PageContainer>
-      ) : null}
+          {hero.searchVisible ? (
+            <PageContainer className="relative z-20 overflow-x-visible pb-6 sm:pb-8 md:pb-10">
+              <div data-testid="homepage-hero-search-overlap">
+                <SearchModule layout="compact" />
+                <BenefitStrip items={trustChips} variant="hero" className="mt-jp-md" />
+              </div>
+            </PageContainer>
+          ) : null}
+        </div>
+      </div>
     </section>
   );
 }

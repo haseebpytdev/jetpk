@@ -250,9 +250,17 @@ export function SearchModule({
     <section
       className={cn(
         "min-w-0 w-full max-w-full overflow-y-visible rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card",
-        // Travelers panel is portaled; keep card from introducing a nested X-scroll.
         "overflow-x-clip",
-        layout === "compact" ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl",
+        // Top padding 0 so trip tabs hang from the card ceiling.
+        layout === "compact"
+          ? cn(
+              "px-jp-md pb-jp-md sm:px-jp-lg sm:pb-jp-lg",
+              service === "flights" ? "pt-0" : "pt-jp-md sm:pt-jp-lg",
+            )
+          : cn(
+              "px-jp-lg pb-jp-lg sm:px-jp-xl sm:pb-jp-xl",
+              service === "flights" ? "pt-0" : "pt-jp-lg sm:pt-jp-xl",
+            ),
         className,
       )}
       aria-label={service === "group" ? "Group ticketing search" : "Flight search"}

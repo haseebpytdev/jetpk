@@ -113,7 +113,7 @@ export function SearchServiceSwitcher({
       aria-label="Search service"
       data-testid="homepage-service-switcher"
       className={cn(
-        "flex shrink-0 flex-row gap-1 rounded-jp-md border border-jp-border/70 bg-jp-surface/95 p-1 shadow-jp-sm",
+        "flex shrink-0 flex-row gap-1 rounded-jp-md border border-jp-border bg-jp-surface p-1 shadow-jp-sm",
         "w-full md:w-auto md:min-w-[16.5rem] md:justify-center",
         "lg:w-14 lg:min-w-0 lg:flex-col lg:items-center lg:justify-start lg:gap-1 lg:p-1.5",
         className,
