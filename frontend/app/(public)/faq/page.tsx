@@ -7,6 +7,7 @@ import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero } from "@/featur
 import FaqLoading from "./loading";
 
 export const revalidate = 300;
+export const dynamic = "force-static";
 
 /**
  * Soft-nav: static metadata so URL commit is not blocked on FaqService.

@@ -4,6 +4,7 @@ import { AboutPageContent, PublicPageService } from "@/features/public-content";
 import AboutLoading from "./loading";
 
 export const revalidate = 300;
+export const dynamic = "force-static";
 
 /**
  * Soft-nav: static metadata so URL commit is not blocked on About CMS fetch.

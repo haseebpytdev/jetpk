@@ -61,26 +61,25 @@ function publicConfigEndpoint(): string {
 }
 
 async function getConfigImpl(): Promise<PublicConfig | null> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 3_000);
   try {
-    // Public config is not user-specific — avoid cookies()/no-store so layouts
-    // that still SSR-fetch config remain cacheable for soft-nav.
-    // Timeout is inside React cache() so root+public layout share one fetch/signal.
-    const response = await fetch(publicConfigEndpoint(), {
-      headers: { Accept: "application/json" },
-      credentials: typeof window !== "undefined" ? "include" : "omit",
-      signal: controller.signal,
-      ...(typeof window === "undefined"
-        ? { next: { revalidate: 60, tags: ["public-config"] } }
-        : { cache: "no-store" as RequestCache }),
-    });
+    // Public config is not user-specific. Do NOT attach AbortSignal — it busts
+    // Next Data Cache and slows every soft-nav that revalidates public layout.
+    const response = await Promise.race([
+      fetch(publicConfigEndpoint(), {
+        headers: { Accept: "application/json" },
+        credentials: typeof window !== "undefined" ? "include" : "omit",
+        ...(typeof window === "undefined"
+          ? { next: { revalidate: 60, tags: ["public-config"] } }
+          : { cache: "no-store" as RequestCache }),
+      }),
+      new Promise<Response>((_, reject) => {
+        setTimeout(() => reject(new Error("public_config_timeout")), 3_000);
+      }),
+    ]);
     if (!response.ok) return null;
     return (await response.json()) as PublicConfig;
   } catch {
     return null;
-  } finally {
-    clearTimeout(timeout);
   }
 }
 

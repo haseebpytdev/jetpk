@@ -11,6 +11,7 @@ import SupportLoading from "./loading";
 
 /** Soft-nav ISR: keep CMS support payload warm for CLIENT_SOFT transitions. */
 export const revalidate = 300;
+export const dynamic = "force-static";
 
 /**
  * Soft-nav: static metadata so URL commit is not blocked on Support CMS fetch.
