@@ -45,6 +45,13 @@ export function SiteFooter({ className, branding = null }: SiteFooterProps) {
                     {isInternalHref(link.href) ? (
                       <PrefetchOnIntentLink
                         href={link.href}
+                        priorityPrefetch={
+                          link.href === "/privacy" ||
+                          link.href === "/about-us" ||
+                          link.href === "/faq" ||
+                          link.href === "/terms" ||
+                          link.href === "/support"
+                        }
                         className="text-jp-sm text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                       >
                         {link.label}
