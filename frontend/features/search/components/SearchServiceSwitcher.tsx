@@ -12,9 +12,14 @@ type SearchServiceSwitcherProps = {
 
 const SERVICES: ProductTab[] = ["flights", "group"];
 
-const SERVICE_LABELS: Record<ProductTab, string> = {
+const SERVICE_ARIA_LABELS: Record<ProductTab, string> = {
   flights: "Flights",
   group: "Group Ticketing",
+};
+
+const SERVICE_VISIBLE_LABELS: Record<ProductTab, string> = {
+  flights: "Flights",
+  group: "Groups",
 };
 
 function FlightsIcon({ active }: { active: boolean }) {
@@ -30,7 +35,7 @@ function FlightsIcon({ active }: { active: boolean }) {
       strokeLinejoin="round"
       aria-hidden="true"
       className={cn(
-        "transition-transform duration-150 ease-out motion-reduce:transition-none",
+        "h-5 w-5 shrink-0 transition-transform duration-150 ease-out motion-reduce:transition-none",
         active && "motion-safe:-translate-y-px motion-safe:rotate-[-6deg]",
       )}
     >
@@ -53,7 +58,7 @@ function GroupTicketingIcon({ active }: { active: boolean }) {
       strokeLinejoin="round"
       aria-hidden="true"
       className={cn(
-        "transition-transform duration-150 ease-out motion-reduce:transition-none",
+        "h-5 w-5 shrink-0 transition-transform duration-150 ease-out motion-reduce:transition-none",
         active && "motion-safe:scale-105",
       )}
     >
@@ -66,7 +71,12 @@ function GroupTicketingIcon({ active }: { active: boolean }) {
   );
 }
 
-/** Compact external icon rail — sibling of the search card, not an inner panel. */
+/**
+ * Three responsive modes:
+ * - small mobile: full search-card width horizontal labeled switch
+ * - tablet/intermediate: compact centered horizontal labeled switch (not card-wide)
+ * - large desktop: compact vertical external icon rail (~48–64px)
+ */
 export function SearchServiceSwitcher({
   service,
   onServiceChange,
@@ -103,8 +113,9 @@ export function SearchServiceSwitcher({
       aria-label="Search service"
       data-testid="homepage-service-switcher"
       className={cn(
-        "flex shrink-0 flex-row gap-1.5 rounded-jp-md border border-jp-border/70 bg-jp-surface/95 p-1 shadow-jp-sm",
-        "lg:w-14 lg:flex-col lg:items-center lg:gap-1 lg:p-1.5",
+        "flex shrink-0 flex-row gap-1 rounded-jp-md border border-jp-border/70 bg-jp-surface/95 p-1 shadow-jp-sm",
+        "w-full md:w-auto md:min-w-[16.5rem] md:justify-center",
+        "lg:w-14 lg:min-w-0 lg:flex-col lg:items-center lg:justify-start lg:gap-1 lg:p-1.5",
         className,
       )}
     >
@@ -116,15 +127,16 @@ export function SearchServiceSwitcher({
             id={`search-service-${tab}`}
             type="button"
             role="tab"
-            aria-label={SERVICE_LABELS[tab]}
-            title={SERVICE_LABELS[tab]}
+            aria-label={SERVICE_ARIA_LABELS[tab]}
+            title={SERVICE_ARIA_LABELS[tab]}
             aria-selected={selected}
             tabIndex={selected ? 0 : -1}
             data-testid={`search-service-${tab}`}
             onClick={() => onServiceChange(tab)}
             onKeyDown={(event) => handleKeyDown(event, tab)}
             className={cn(
-              "inline-flex h-11 w-11 items-center justify-center rounded-jp-md transition-colors duration-ui",
+              "inline-flex h-11 min-h-[2.75rem] flex-1 items-center justify-center gap-2 rounded-jp-md px-3 transition-colors duration-ui",
+              "lg:h-11 lg:w-11 lg:flex-none lg:px-0",
               "focus-visible:outline-none focus-visible:shadow-jp-focus",
               selected
                 ? "bg-jp-primary text-white shadow-jp-sm"
@@ -132,6 +144,7 @@ export function SearchServiceSwitcher({
             )}
           >
             {tab === "flights" ? <FlightsIcon active={selected} /> : <GroupTicketingIcon active={selected} />}
+            <span className="text-jp-sm font-semibold lg:hidden">{SERVICE_VISIBLE_LABELS[tab]}</span>
           </button>
         );
       })}

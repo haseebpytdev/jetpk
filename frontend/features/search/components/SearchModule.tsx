@@ -249,7 +249,9 @@ export function SearchModule({
   const searchCard = (
     <section
       className={cn(
-        "min-w-0 w-full max-w-full overflow-x-clip overflow-y-visible rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card",
+        "min-w-0 w-full max-w-full overflow-y-visible rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card",
+        // Travelers panel is portaled; keep card from introducing a nested X-scroll.
+        "overflow-x-clip",
         layout === "compact" ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl",
         className,
       )}
@@ -357,13 +359,20 @@ export function SearchModule({
       className="flex min-w-0 max-w-full flex-col gap-jp-sm lg:relative lg:flex-row lg:items-start lg:gap-jp-md"
       data-testid="homepage-search-shell"
     >
-      {/* External rail: sits beside the card; on lg pulls slightly into the left gutter so the card keeps full container width. */}
+      {/*
+        External service switch:
+        - mobile: full card width labeled horizontal
+        - tablet: compact centered horizontal (not card-wide)
+        - desktop: vertical icon rail in left gutter
+      */}
       <SearchServiceSwitcher
         service={service}
         onServiceChange={handleServiceChange}
-        className="self-start lg:sticky lg:top-[4.5rem] lg:-ml-16 lg:shrink-0"
+        className="self-stretch md:mx-auto md:w-auto md:self-center lg:sticky lg:top-[4.5rem] lg:-ml-16 lg:shrink-0 lg:self-start"
       />
-      <div className="min-w-0 w-full flex-1">{searchCard}</div>
+      <div className="min-w-0 w-full flex-1" data-testid="homepage-search-card-wrap">
+        {searchCard}
+      </div>
     </div>
   );
 }

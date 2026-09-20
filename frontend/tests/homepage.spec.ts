@@ -136,8 +136,25 @@ test("travelers selector enforces infant constraint", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 
   await page.getByTestId("travelers-cabin-trigger").first().click();
+  await expect(page.getByTestId("travelers-cabin-panel")).toBeVisible();
   await page.getByRole("button", { name: "Increase infants" }).click();
   await expect(page.getByRole("button", { name: "Increase infants" })).toBeDisabled();
+});
+
+test("travelers header has no visible Travelers & Cabin label", async ({ page }) => {
+  await page.goto("/", { waitUntil: "load" });
+  await expect(page.getByText("Travelers & Cabin")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Travelers and cabin" })).toBeVisible();
+});
+
+test("mobile trip tabs use compact visible labels without clipping semantics", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto("/", { waitUntil: "load" });
+
+  const oneWay = page.getByTestId("search-trip-tab-one_way");
+  await expect(oneWay).toHaveAttribute("aria-label", "One Way");
+  await expect(oneWay).toContainText("One");
+  await expect(page.getByTestId("search-trip-tab-multi_city")).toContainText("Multi");
 });
 
 test("mobile homepage search layout remains usable", async ({ page }) => {

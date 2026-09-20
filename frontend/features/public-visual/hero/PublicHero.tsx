@@ -59,7 +59,7 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
   return (
     <section className="relative overflow-x-hidden bg-jp-page" data-testid="homepage-public-hero">
       <div
-        className="relative h-[clamp(20rem,42vh,30rem)] overflow-hidden"
+        className="relative isolate h-[clamp(22rem,48vh,34rem)] min-h-[22rem] overflow-hidden"
         data-testid="homepage-hero-backdrop"
       >
         <div className="absolute inset-0" data-testid="homepage-hero-image">
@@ -73,7 +73,7 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
               priority
               sizes="100vw"
               fillContainer
-              className="!absolute !inset-0 !h-full !w-full !max-w-none !rounded-none"
+              className="!absolute !inset-0 !h-full !w-full !max-w-none !rounded-none [&_img]:!h-full [&_img]:!w-full [&_img]:!object-cover"
               objectFit="cover"
               objectPosition={objectPosition}
               fallbackLabel="JetPakistan hero"
@@ -86,7 +86,7 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
           />
         </div>
 
-        <PageContainer className="relative z-10 flex h-full flex-col justify-end pb-24 pt-jp-3xl sm:pb-28">
+        <PageContainer className="relative z-10 flex h-full flex-col justify-end pb-28 pt-jp-3xl sm:pb-32">
           <div className="max-w-3xl min-w-0 text-white">
             {eyebrow.trim() !== "" ? (
               <p className="text-jp-sm font-semibold uppercase tracking-[0.18em] text-white/85">{eyebrow}</p>

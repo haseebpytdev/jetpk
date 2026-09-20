@@ -2,7 +2,8 @@
 
 import { cn } from "@/lib/cn";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { CABIN_FIXTURES } from "../fixtures/cabins";
 import { passengerSummary } from "../hooks/use-passenger-selection";
 import type { CabinClass, PassengerSelection } from "../types";
@@ -67,6 +68,10 @@ function CounterRow({
   );
 }
 
+const PANEL_WIDTH = 320;
+const VIEWPORT_PAD = 14;
+const GAP = 8;
+
 export function TravelersCabinSelector({
   passengers,
   onAdultsChange,
@@ -79,9 +84,22 @@ export function TravelersCabinSelector({
   const panelId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({
+    position: "fixed",
+    top: 0,
+    left: 0,
+    zIndex: 80,
+    visibility: "hidden",
+  });
+  const [mounted, setMounted] = useState(false);
 
   const cabinLabel = CABIN_FIXTURES.find((cabin) => cabin.value === passengers.cabin)?.label ?? "Economy";
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEscapeKey(open, () => {
     setOpen(false);
@@ -91,17 +109,131 @@ export function TravelersCabinSelector({
   useEffect(() => {
     if (!open) return;
     const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (rootRef.current?.contains(target) || panelRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener("mousedown", handlePointerDown);
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [open]);
 
+  const updatePortalPosition = () => {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const panelWidth = Math.min(PANEL_WIDTH, window.innerWidth - VIEWPORT_PAD * 2);
+    const panelHeight = panelRef.current?.offsetHeight ?? 280;
+    const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_PAD - GAP;
+    const spaceAbove = rect.top - VIEWPORT_PAD - GAP;
+    const placeBelow = spaceBelow >= panelHeight || spaceBelow >= spaceAbove;
+
+    let top: number;
+    let maxHeight: number;
+    if (placeBelow) {
+      top = rect.bottom + GAP;
+      maxHeight = Math.max(120, window.innerHeight - top - VIEWPORT_PAD);
+    } else {
+      maxHeight = Math.max(120, spaceAbove);
+      top = Math.max(VIEWPORT_PAD, rect.top - GAP - Math.min(panelHeight, maxHeight));
+    }
+
+    const preferredLeft = rect.right - panelWidth;
+    const left = Math.min(
+      Math.max(VIEWPORT_PAD, preferredLeft),
+      Math.max(VIEWPORT_PAD, window.innerWidth - VIEWPORT_PAD - panelWidth),
+    );
+
+    setPanelStyle({
+      position: "fixed",
+      top,
+      left,
+      width: panelWidth,
+      maxHeight,
+      zIndex: 80,
+      visibility: "visible",
+    });
+  };
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    updatePortalPosition();
+    const raf = window.requestAnimationFrame(() => {
+      updatePortalPosition();
+      window.requestAnimationFrame(updatePortalPosition);
+    });
+    window.addEventListener("resize", updatePortalPosition);
+    window.addEventListener("scroll", updatePortalPosition, true);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("resize", updatePortalPosition);
+      window.removeEventListener("scroll", updatePortalPosition, true);
+    };
+  }, [open, passengers.adults, passengers.children, passengers.infants, passengers.cabin]);
+
+  const panel =
+    open && mounted ? (
+      <div
+        ref={panelRef}
+        id={panelId}
+        role="dialog"
+        aria-label="Travelers and cabin selection"
+        data-testid="travelers-cabin-panel"
+        style={panelStyle}
+        className="overflow-y-auto rounded-jp-md border border-jp-border bg-jp-surface p-3 shadow-jp-md"
+      >
+        <CounterRow
+          label="Adults"
+          description="Age 12+"
+          value={passengers.adults}
+          min={1}
+          max={9}
+          onDecrement={() => onAdultsChange(passengers.adults - 1)}
+          onIncrement={() => onAdultsChange(passengers.adults + 1)}
+        />
+        <CounterRow
+          label="Children"
+          description="Age 2–11"
+          value={passengers.children}
+          min={0}
+          max={8}
+          onDecrement={() => onChildrenChange(passengers.children - 1)}
+          onIncrement={() => onChildrenChange(passengers.children + 1)}
+        />
+        <CounterRow
+          label="Infants"
+          description="Under 2, on lap"
+          value={passengers.infants}
+          min={0}
+          max={passengers.adults}
+          onDecrement={() => onInfantsChange(passengers.infants - 1)}
+          onIncrement={() => onInfantsChange(passengers.infants + 1)}
+        />
+        <div className="mt-2 border-t border-jp-border pt-3">
+          <label
+            htmlFor={`${panelId}-cabin`}
+            className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-muted"
+          >
+            Cabin
+          </label>
+          <select
+            id={`${panelId}-cabin`}
+            value={passengers.cabin}
+            onChange={(event) => onCabinChange(event.target.value as CabinClass)}
+            className="w-full min-h-jp-tap rounded-jp-md border border-jp-border bg-jp-surface px-3 py-2 text-jp-sm focus-visible:outline-none focus-visible:shadow-jp-focus"
+          >
+            {CABIN_FIXTURES.map((cabin) => (
+              <option key={cabin.value} value={cabin.value}>
+                {cabin.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+    ) : null;
+
   return (
     <div ref={rootRef} className={cn("relative min-w-0", className)}>
-      <span className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">
-        Travelers &amp; Cabin
-      </span>
+      {/* Visible header label removed — accessible name stays on the trigger. */}
       <button
         ref={triggerRef}
         type="button"
@@ -109,7 +241,13 @@ export function TravelersCabinSelector({
         data-testid="travelers-cabin-trigger"
         aria-expanded={open}
         aria-controls={panelId}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() =>
+          setOpen((value) => {
+            const next = !value;
+            if (next) requestAnimationFrame(() => updatePortalPosition());
+            return next;
+          })
+        }
         className={cn(
           "flex w-full items-center justify-between gap-2 rounded-jp-md border border-jp-border bg-jp-surface px-3 text-left text-jp-sm",
           density === "compact" ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
@@ -122,59 +260,7 @@ export function TravelersCabinSelector({
         </svg>
       </button>
 
-      {open ? (
-        <div
-          id={panelId}
-          role="dialog"
-          aria-label="Travelers and cabin selection"
-          className="absolute z-40 mt-1 w-[min(100%,20rem)] rounded-jp-md border border-jp-border bg-jp-surface p-3 shadow-jp-md"
-        >
-          <CounterRow
-            label="Adults"
-            description="Age 12+"
-            value={passengers.adults}
-            min={1}
-            max={9}
-            onDecrement={() => onAdultsChange(passengers.adults - 1)}
-            onIncrement={() => onAdultsChange(passengers.adults + 1)}
-          />
-          <CounterRow
-            label="Children"
-            description="Age 2–11"
-            value={passengers.children}
-            min={0}
-            max={8}
-            onDecrement={() => onChildrenChange(passengers.children - 1)}
-            onIncrement={() => onChildrenChange(passengers.children + 1)}
-          />
-          <CounterRow
-            label="Infants"
-            description="Under 2, on lap"
-            value={passengers.infants}
-            min={0}
-            max={passengers.adults}
-            onDecrement={() => onInfantsChange(passengers.infants - 1)}
-            onIncrement={() => onInfantsChange(passengers.infants + 1)}
-          />
-          <div className="mt-2 border-t border-jp-border pt-3">
-            <label htmlFor={`${panelId}-cabin`} className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">
-              Cabin
-            </label>
-            <select
-              id={`${panelId}-cabin`}
-              value={passengers.cabin}
-              onChange={(event) => onCabinChange(event.target.value as CabinClass)}
-              className="w-full min-h-jp-tap rounded-jp-md border border-jp-border bg-jp-surface px-3 py-2 text-jp-sm focus-visible:outline-none focus-visible:shadow-jp-focus"
-            >
-              {CABIN_FIXTURES.map((cabin) => (
-                <option key={cabin.value} value={cabin.value}>
-                  {cabin.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      ) : null}
+      {mounted && typeof document !== "undefined" ? createPortal(panel, document.body) : null}
     </div>
   );
 }

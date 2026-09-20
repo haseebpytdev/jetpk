@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { BENEFIT_FIXTURES } from "@/features/home/fixtures/benefits";
 import { DESTINATION_FIXTURES } from "@/features/home/fixtures/destinations";
 import { INSPIRATION_FIXTURES, VALUE_PROPOSITION_FIXTURES } from "@/features/home/fixtures/inspiration";
@@ -368,41 +369,55 @@ export const HomepageContentService = {
     headers?: Record<string, string>;
     previewToken?: string | null;
   }): Promise<HomepageContent> {
-    try {
-      const params = new URLSearchParams();
-      if (options?.preview) {
-        params.set("jp_preview", "1");
-      }
-      const token = options?.previewToken?.trim();
-      if (token) {
-        params.set("jp_preview_token", token);
-      }
-      const query = params.toString();
-      const url = `${resolveHomepageApiUrl()}${query ? `?${query}` : ""}`;
-
-      const response = await fetchWithTimeout(url, {
-        headers: {
-          Accept: "application/json",
-          ...(options?.headers ?? {}),
-        },
-        // Preview must stay fresh; published homepage CMS can short-revalidate.
-        ...(options?.preview
-          ? { cache: "no-store" as const, next: { tags: [PUBLIC_CACHE_TAGS.homepage] } }
-          : { next: { revalidate: 120, tags: [PUBLIC_CACHE_TAGS.homepage] } }),
-      });
-
-      if (!response.ok) {
-        return allowContentFixtures() ? fixtureHomepage() : emptyHomepage();
-      }
-
-      const remote = (await response.json()) as RemoteHomepage;
-      if (remote.source === "empty") {
-        return allowContentFixtures() ? fixtureHomepage() : emptyHomepage();
-      }
-
-      return mapRemote(remote);
-    } catch {
-      return allowContentFixtures() ? fixtureHomepage() : emptyHomepage();
+    // Request-level dedupe so hero + below-fold Suspense share one CMS fetch.
+    if (!options?.preview && !options?.headers && !options?.previewToken) {
+      return getHomepageCached();
     }
+    return fetchHomepage(options);
   },
 };
+
+const getHomepageCached = cache(async () => fetchHomepage());
+
+async function fetchHomepage(options?: {
+  preview?: boolean;
+  headers?: Record<string, string>;
+  previewToken?: string | null;
+}): Promise<HomepageContent> {
+  try {
+    const params = new URLSearchParams();
+    if (options?.preview) {
+      params.set("jp_preview", "1");
+    }
+    const token = options?.previewToken?.trim();
+    if (token) {
+      params.set("jp_preview_token", token);
+    }
+    const query = params.toString();
+    const url = `${resolveHomepageApiUrl()}${query ? `?${query}` : ""}`;
+
+    const response = await fetchWithTimeout(url, {
+      headers: {
+        Accept: "application/json",
+        ...(options?.headers ?? {}),
+      },
+      // Preview must stay fresh; published homepage CMS can short-revalidate.
+      ...(options?.preview
+        ? { cache: "no-store" as const, next: { tags: [PUBLIC_CACHE_TAGS.homepage] } }
+        : { next: { revalidate: 120, tags: [PUBLIC_CACHE_TAGS.homepage] } }),
+    });
+
+    if (!response.ok) {
+      return allowContentFixtures() ? fixtureHomepage() : emptyHomepage();
+    }
+
+    const remote = (await response.json()) as RemoteHomepage;
+    if (remote.source === "empty") {
+      return allowContentFixtures() ? fixtureHomepage() : emptyHomepage();
+    }
+
+    return mapRemote(remote);
+  } catch {
+    return allowContentFixtures() ? fixtureHomepage() : emptyHomepage();
+  }
+}

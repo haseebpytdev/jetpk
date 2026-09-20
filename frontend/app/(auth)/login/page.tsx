@@ -1,15 +1,11 @@
-import { Suspense } from "react";
 import Link from "next/link";
+import { Suspense } from "react";
 import { AuthShell, LoginForm } from "@/features/auth";
 import { AuthAlreadySignedInRedirect } from "@/features/auth/components/AuthAlreadySignedInRedirect";
 import { LoginSessionNotice } from "@/features/auth/components/LoginSessionNotice";
 
 /** Soft-nav: static RSC shell — session redirect after hydration. */
 export const revalidate = 60;
-
-function LoginFormFallback() {
-  return <div className="min-h-[12rem] animate-pulse rounded-jp-md bg-jp-surface-muted" aria-hidden="true" />;
-}
 
 export default function LoginPage() {
   return (
@@ -33,9 +29,7 @@ export default function LoginPage() {
       <Suspense fallback={null}>
         <LoginSessionNotice />
       </Suspense>
-      <Suspense fallback={<LoginFormFallback />}>
-        <LoginForm />
-      </Suspense>
+      <LoginForm />
     </AuthShell>
   );
 }

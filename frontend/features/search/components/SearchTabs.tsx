@@ -90,7 +90,7 @@ const TRIP_ICONS: Record<TripType, (props: { active: boolean }) => ReactNode> = 
 };
 
 export function SearchTabs({ mode, onModeChange, compact = false, end }: SearchTabsProps) {
-  const { modes, modeLabels, handleKeyDown } = useSearchTabKeyboard(mode, onModeChange);
+  const { modes, modeLabels, compactModeLabels, handleKeyDown } = useSearchTabKeyboard(mode, onModeChange);
 
   return (
     <div
@@ -115,6 +115,7 @@ export function SearchTabs({ mode, onModeChange, compact = false, end }: SearchT
               id={`search-tab-${tabMode}`}
               type="button"
               role="tab"
+              aria-label={modeLabels[tabMode]}
               aria-selected={selected}
               tabIndex={selected ? 0 : -1}
               data-testid={`search-trip-tab-${tabMode}`}
@@ -122,7 +123,7 @@ export function SearchTabs({ mode, onModeChange, compact = false, end }: SearchT
               onKeyDown={(event) => handleKeyDown(event, tabMode)}
               className={cn(
                 "inline-flex shrink-0 items-center gap-1.5 rounded-t-jp-md border border-b-0 font-semibold transition-colors duration-ui",
-                compact ? "px-2.5 py-1.5 text-jp-xs" : "px-3 py-2 text-jp-sm",
+                compact ? "px-2 py-1.5 text-jp-xs sm:px-2.5" : "px-3 py-2 text-jp-sm",
                 "focus-visible:outline-none focus-visible:shadow-jp-focus",
                 selected
                   ? "-mb-px border-jp-border bg-jp-surface text-jp-primary"
@@ -130,7 +131,8 @@ export function SearchTabs({ mode, onModeChange, compact = false, end }: SearchT
               )}
             >
               <Icon active={selected} />
-              {modeLabels[tabMode]}
+              <span className="sm:hidden">{compactModeLabels[tabMode]}</span>
+              <span className="hidden sm:inline">{modeLabels[tabMode]}</span>
             </button>
           );
         })}

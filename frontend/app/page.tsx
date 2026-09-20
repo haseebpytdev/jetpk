@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { HomepageContent } from "@/features/home";
 import { PublicConfigService, SeoJsonLd, publicSeoToMetadata } from "@/features/public-content";
 import { resolveFaviconUrl } from "@/lib/branding/resolve-favicon";
-import type { PublicSession } from "@/types/session";
+import { getPublicSession } from "@/services/session";
 
 const HOMEPAGE_SEO_FALLBACK = {
   title: "JetPakistan | Affordable Flights, Umrah Packages & Tours",
@@ -12,11 +11,6 @@ const HOMEPAGE_SEO_FALLBACK = {
     "Search and compare domestic and international flights from Pakistan, explore Umrah packages, and plan travel with JetPakistan.",
   robots: "index,follow",
 };
-
-/** Soft-nav / ISR: do not await session cookies on the homepage critical path. */
-export const revalidate = 60;
-
-const ANONYMOUS_SESSION: PublicSession = { status: "anonymous" };
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await PublicConfigService.getConfig();
@@ -33,8 +27,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-async function HomeBody() {
-  const config = await PublicConfigService.getConfig();
+export default async function HomePage() {
+  const [session, config] = await Promise.all([getPublicSession(), PublicConfigService.getConfig()]);
   const branding = config
     ? {
         brand_name: config.brand_name,
@@ -44,23 +38,9 @@ async function HomeBody() {
     : null;
 
   return (
-    <PublicShell session={ANONYMOUS_SESSION} branding={branding} aiEnabled={Boolean(config?.ai_assistant_enabled)}>
+    <PublicShell session={session} branding={branding} aiEnabled={Boolean(config?.ai_assistant_enabled)}>
       <SeoJsonLd config={config} />
       <HomepageContent />
     </PublicShell>
-  );
-}
-
-export default function HomePage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="mx-auto w-full max-w-jp-container px-jp-xl py-jp-4xl">
-          <div className="min-h-[20rem] animate-pulse rounded-jp-card border border-jp-border bg-jp-surface-muted" />
-        </div>
-      }
-    >
-      <HomeBody />
-    </Suspense>
   );
 }
