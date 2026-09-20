@@ -1,7 +1,5 @@
 import { cache } from "react";
-import { unstable_cache } from "next/cache";
 import { absoluteLaravelUrl, laravelApiPath } from "@/services/flight-search";
-import { PUBLIC_CACHE_TAGS } from "@/lib/public-cache-tags";
 import type {
   ContactDetails,
   ContactFormPayload,
@@ -84,94 +82,65 @@ export async function ensureLaravelCsrfToken(): Promise<string | null> {
 }
 
 /**
- * Timeout without AbortSignal on the fetch — AbortSignal busts Next Data Cache keys
- * and was regressing cold soft-nav to CMS pages (home_privacy P95 multi-second).
- */
-async function fetchJsonNoAbortSignal<T>(
-  url: string,
-  init: NextFetchInit,
-): Promise<T | null> {
-  try {
-    const response = await Promise.race([
-      fetch(url, init),
-      new Promise<Response>((_, reject) => {
-        setTimeout(() => reject(new Error("laravel_fetch_timeout")), LARAVEL_FETCH_TIMEOUT_MS);
-      }),
-    ]);
-    if (!response.ok) return null;
-    return (await response.json()) as T;
-  } catch {
-    return null;
-  }
-}
-
-async function loadManagedPageFromLaravel(pageKey: string): Promise<LaravelManagedPageResponse | null> {
-  return fetchJsonNoAbortSignal<LaravelManagedPageResponse>(
-    publicContentFetchUrl(`/api/public/content/pages/${pageKey}`),
-    {
-      headers: { Accept: "application/json" },
-      next: {
-        revalidate: 300,
-        tags: [PUBLIC_CACHE_TAGS.seo, PUBLIC_CACHE_TAGS.seoPage(pageKey), PUBLIC_CACHE_TAGS.cms],
-      },
-    },
-  );
-}
-
-/**
- * Cross-request persistent cache for published public CMS pages.
- * React `cache()` only dedupes within one RSC request; soft-nav needs Data Cache.
- * Preview/draft must call a no-store path separately (not this helper).
- */
-function getCachedManagedPage(pageKey: string) {
-  return unstable_cache(
-    async () => loadManagedPageFromLaravel(pageKey),
-    ["jp-public-managed-page", pageKey],
-    {
-      revalidate: 300,
-      tags: [PUBLIC_CACHE_TAGS.seo, PUBLIC_CACHE_TAGS.seoPage(pageKey), PUBLIC_CACHE_TAGS.cms],
-    },
-  )();
-}
-
-/**
- * Request-scoped dedupe for generateMetadata + page, backed by unstable_cache
- * for cross-request soft-nav. ISR tags align with Laravel PublicCacheTags.
+ * Request-scoped dedupe for generateMetadata + page (and any other RSC callers)
+ * so one soft-nav does not hit Laravel twice for the same managed page key.
+ * Timeout lives inside cache() so metadata+page share one AbortSignal/fetch.
+ * ISR: revalidate 300 aligns with public legal/CMS page exports.
  */
 export const fetchManagedPage = cache(async (pageKey: string): Promise<LaravelManagedPageResponse | null> => {
-  return getCachedManagedPage(pageKey);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LARAVEL_FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(publicContentFetchUrl(`/api/public/content/pages/${pageKey}`), {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+      next: { revalidate: 300, tags: ["public-seo", `public-seo-${pageKey}`] },
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as LaravelManagedPageResponse;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
 });
 
 export const fetchSiteContactFromLaravel = cache(async (): Promise<ContactDetails | null> => {
-  const body = await unstable_cache(
-    async () =>
-      fetchJsonNoAbortSignal<{ contact?: ContactDetails }>(
-        publicContentFetchUrl("/api/public/content/site-contact"),
-        {
-          headers: { Accept: "application/json" },
-          next: { revalidate: 300, tags: [PUBLIC_CACHE_TAGS.seo, "public-site-contact"] },
-        },
-      ),
-    ["jp-public-site-contact"],
-    { revalidate: 300, tags: [PUBLIC_CACHE_TAGS.seo, "public-site-contact"] },
-  )();
-  return body?.contact ?? null;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LARAVEL_FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(publicContentFetchUrl("/api/public/content/site-contact"), {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+      next: { revalidate: 300, tags: ["public-seo", "public-site-contact"] },
+    });
+    if (!response.ok) return null;
+    const body = (await response.json()) as { contact?: ContactDetails };
+    return body.contact ?? null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
 });
 
 export const fetchSupportCategories = cache(async (): Promise<SupportTicketCategoryOption[]> => {
-  const body = await unstable_cache(
-    async () =>
-      fetchJsonNoAbortSignal<{ categories?: SupportTicketCategoryOption[] }>(
-        publicContentFetchUrl("/api/public/content/support/categories"),
-        {
-          headers: { Accept: "application/json" },
-          next: { revalidate: 3600, tags: [PUBLIC_CACHE_TAGS.seo, "public-support-categories"] },
-        },
-      ),
-    ["jp-public-support-categories"],
-    { revalidate: 3600, tags: [PUBLIC_CACHE_TAGS.seo, "public-support-categories"] },
-  )();
-  return body?.categories ?? [];
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LARAVEL_FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(publicContentFetchUrl("/api/public/content/support/categories"), {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+      next: { revalidate: 3600, tags: ["public-seo", "public-support-categories"] },
+    });
+    if (!response.ok) return [];
+    const body = (await response.json()) as { categories?: SupportTicketCategoryOption[] };
+    return body.categories ?? [];
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timeout);
+  }
 });
 
 export async function submitSupportOrContactForm(payload: ContactFormPayload): Promise<ContactFormResponse> {

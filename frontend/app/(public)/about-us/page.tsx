@@ -1,21 +1,14 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { AboutPageContent, PublicPageService } from "@/features/public-content";
+import { AboutPageContent, PublicPageService, publicSeoToMetadata } from "@/features/public-content";
 import AboutLoading from "./loading";
 
 export const revalidate = 300;
-export const dynamic = "force-static";
 
-/**
- * Soft-nav: static metadata so URL commit is not blocked on About CMS fetch.
- * Canonical CMS SEO still renders with the streamed body.
- */
-export const metadata: Metadata = {
-  title: "About Us | JetPakistan",
-  description: "Learn about JetPakistan — flights, Umrah packages, and travel support across Pakistan.",
-  robots: { index: true, follow: true },
-  alternates: { canonical: "/about-us" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await PublicPageService.getAboutPage();
+  return publicSeoToMetadata(page.seo, "/about-us");
+}
 
 async function AboutUsContent() {
   const page = await PublicPageService.getAboutPage();
