@@ -3,15 +3,21 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero, publicSeoToMetadata } from "@/features/public-content";
+import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero } from "@/features/public-content";
 import FaqLoading from "./loading";
 
 export const revalidate = 300;
 
-export async function generateMetadata(): Promise<Metadata> {
-  const page = await FaqService.getFaqPage();
-  return publicSeoToMetadata(page.seo, "/faq");
-}
+/**
+ * Soft-nav: static metadata so URL commit is not blocked on FaqService.
+ * Canonical CMS SEO still renders with the streamed body.
+ */
+export const metadata: Metadata = {
+  title: "FAQ | JetPakistan",
+  description: "Frequently asked questions about flights, bookings, payments, and travel with JetPakistan.",
+  robots: { index: true, follow: true },
+  alternates: { canonical: "/faq" },
+};
 
 async function FaqPageContent() {
   const page = await FaqService.getFaqPage();
