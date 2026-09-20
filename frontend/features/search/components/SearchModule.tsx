@@ -70,8 +70,8 @@ export function SearchModule({
     createSegment("segment-1"),
     createSegment("segment-2"),
   ]);
+  const [groupAirline, setGroupAirline] = useState("");
   const [groupSector, setGroupSector] = useState("");
-  const [groupCategory, setGroupCategory] = useState("all");
   const [groupTravelDate, setGroupTravelDate] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [submitState, setSubmitState] = useState<SearchSubmitState>({ status: "idle" });
@@ -90,7 +90,7 @@ export function SearchModule({
   const tripMode: TripType = isTripType(mode) ? mode : lastFlightModeRef.current;
   const groupFacets = useGroupSearchFacets(mode === "group");
   const groupSectorValues = groupFacets.sectors.map((item) => item.value);
-  const groupCategoryValues = groupFacets.categories.map((item) => item.value);
+  const groupAirlineValues = groupFacets.airlines.map((item) => item.value);
 
   const clearSubmitChrome = useCallback(() => {
     if (abortRef.current) {
@@ -197,13 +197,13 @@ export function SearchModule({
 
   const handleGroupSubmit = () => {
     const draftInput = {
+      airline: groupAirline,
       sector: groupSector,
-      category: groupCategory,
       travelDate: groupTravelDate,
     };
     const result = validateGroupSearch(draftInput, {
       sectorValues: groupSectorValues,
-      categoryValues: groupCategoryValues,
+      airlineValues: groupAirlineValues,
     });
     if (!result.valid) {
       setErrors(result.errors);
@@ -335,17 +335,17 @@ export function SearchModule({
 
         {mode === "group" ? (
           <GroupTicketingForm
+            airline={groupAirline}
             sector={groupSector}
-            category={groupCategory}
             travelDate={groupTravelDate}
             facetsState={groupFacets.state}
+            airlines={groupFacets.airlines}
             sectors={groupFacets.sectors}
-            categories={groupFacets.categories}
             dateBounds={groupFacets.dateBounds}
             facetsError={groupFacets.errorMessage}
             onRetryFacets={groupFacets.retry}
+            onAirlineChange={setGroupAirline}
             onSectorChange={setGroupSector}
-            onCategoryChange={setGroupCategory}
             onTravelDateChange={setGroupTravelDate}
             onSubmit={handleGroupSubmit}
             errors={errors}

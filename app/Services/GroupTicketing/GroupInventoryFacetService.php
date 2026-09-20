@@ -195,8 +195,10 @@ class GroupInventoryFacetService
 
     /**
      * @return array{
+     *     airlines: list<array{value: string, label: string}>,
      *     sectors: list<array{value: string, label: string}>,
-     *     categories: list<array{value: string, label: string}>,
+     *     categories: list<array{value: string, label: string, inventory_count?: int, image_url?: ?string, subtitle?: ?string}>,
+     *     tiles: list<array{key: string, slug: ?string, title: string, image_url: ?string, package_count: int, url: string}>,
      *     date_bounds: ?array{minimum: string, maximum: string}
      * }
      */
@@ -215,18 +217,47 @@ class GroupInventoryFacetService
             ];
         }
 
+        /** @var GroupHomepageTilePresenter $tilePresenter */
+        $tilePresenter = app(GroupHomepageTilePresenter::class);
+        $tiles = $tilePresenter->presentForPublicDiscovery();
+
+        $tileByKey = [];
+        foreach ($tiles as $tile) {
+            $tileByKey[(string) $tile['key']] = $tile;
+        }
+
+        $categories = [];
+        foreach ($this->categoriesWithInventory() as $category) {
+            $slug = (string) ($category['slug'] ?? '');
+            if ($slug === '') {
+                continue;
+            }
+            $tile = $tileByKey[$slug] ?? null;
+            $categories[] = [
+                'value' => $slug,
+                'label' => $tile !== null
+                    ? (string) $tile['title']
+                    : GroupHomepageTilePresenter::categoryDisplayTitle((string) ($category['name'] ?? '')),
+                'inventory_count' => (int) ($category['inventory_count'] ?? 0),
+                'image_url' => $tile['image_url'] ?? null,
+                'subtitle' => null,
+            ];
+        }
+
         return [
+            'airlines' => array_map(
+                fn (array $airline): array => [
+                    'value' => (string) ($airline['name'] ?? ''),
+                    'label' => (string) ($airline['name'] ?? ''),
+                ],
+                $all['airlines'] ?? [],
+            ),
             'sectors' => array_map(
                 fn (string $sector): array => ['value' => $sector, 'label' => $sector],
                 $all['sectors'] ?? [],
             ),
-            'categories' => array_map(
-                fn (array $category): array => [
-                    'value' => (string) ($category['slug'] ?? ''),
-                    'label' => (string) ($category['name'] ?? ''),
-                ],
-                $all['categories'] ?? [],
-            ),
+            'categories' => $categories,
+            'tiles' => $tiles,
             'date_bounds' => $dateBounds,
         ];
     }

@@ -46,11 +46,12 @@ export type SearchDraft = {
   submittedAt: string;
 };
 
-/** Mirrors Laravel `GroupTicketingSearchRequest` query fields submitted to `/groups/search`. */
+/** Mirrors Laravel `GroupTicketingSearchRequest` primary search fields. Category is URL-only. */
 export type GroupSearchDraft = {
   airline?: string;
   sector: string;
-  category: string;
+  /** Optional results filter from category cards — not a primary form field. */
+  category?: string;
   travelDate: string;
   submittedAt: string;
 };

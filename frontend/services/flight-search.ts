@@ -142,6 +142,7 @@ export function handoffToGroupSearch(query: URLSearchParams): void {
 
 export function buildGroupHandoffQuery(draft: Omit<GroupSearchDraft, "submittedAt">): URLSearchParams {
   return buildGroupSearchQueryParams({
+    airline: draft.airline,
     sector: draft.sector,
     category: draft.category,
     travelDate: draft.travelDate,

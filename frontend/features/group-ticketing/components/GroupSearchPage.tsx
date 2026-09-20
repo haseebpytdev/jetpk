@@ -14,6 +14,7 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 
 function parseFilters(params: URLSearchParams): GroupSearchFilters {
   return {
+    airline: params.get("airline") ?? undefined,
     sector: params.get("sector") ?? undefined,
     date_from: params.get("date_from") ?? undefined,
     category: params.get("category") ?? undefined,
@@ -27,15 +28,17 @@ export function GroupSearchPage() {
   const searchParams = useSearchParams();
   const params = useMemo(() => new URLSearchParams(searchParams.toString()), [searchParams]);
   const filters = useMemo(() => parseFilters(params), [params]);
-  const hasSearch = Boolean(filters.sector || filters.date_from || filters.category);
+  const hasSearch = Boolean(filters.sector || filters.date_from || filters.category || filters.airline);
 
   const facets = useGroupSearchFacets();
   const sectorValues = useMemo(() => facets.sectors.map((item) => item.value), [facets.sectors]);
+  const airlineValues = useMemo(() => facets.airlines.map((item) => item.value), [facets.airlines]);
   const categoryValues = useMemo(() => facets.categories.map((item) => item.value), [facets.categories]);
 
+  const [airline, setAirline] = useState(filters.airline ?? "");
   const [sector, setSector] = useState(filters.sector ?? "");
-  const [category, setCategory] = useState(filters.category ?? "all");
   const [travelDate, setTravelDate] = useState(filters.date_from ?? "");
+  const [category, setCategory] = useState(filters.category ?? "");
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [cards, setCards] = useState<GroupPackage[]>([]);
@@ -47,14 +50,23 @@ export function GroupSearchPage() {
   const [page, setPage] = useState(filters.page ?? 1);
   const [hasMore, setHasMore] = useState(false);
 
+  const categoryLabel = useMemo(() => {
+    if (!category) return null;
+    const match = facets.categories.find((item) => item.value === category);
+    return match?.label ?? category;
+  }, [category, facets.categories]);
+
   const staleFacetErrors = useMemo(() => {
     if (facets.state !== "loaded") return [];
     const next: string[] = [];
     if (filters.sector && !sectorValues.includes(filters.sector)) {
       next.push("Selected sector is no longer available. Please choose again.");
     }
+    if (filters.airline && !airlineValues.includes(filters.airline)) {
+      next.push("Selected airline is no longer available. Please choose again.");
+    }
     return next;
-  }, [facets.state, filters.sector, sectorValues]);
+  }, [facets.state, filters.sector, filters.airline, sectorValues, airlineValues]);
 
   const formErrors = useMemo(() => [...staleFacetErrors, ...errors], [staleFacetErrors, errors]);
 
@@ -69,21 +81,38 @@ export function GroupSearchPage() {
       setSector("");
     }
 
+    if (filters.airline && !airlineValues.includes(filters.airline)) {
+      setAirline("");
+    } else if (filters.airline && airlineValues.includes(filters.airline)) {
+      setAirline(filters.airline);
+    } else if (airline && !airlineValues.includes(airline)) {
+      setAirline("");
+    }
+
     if (filters.category && !categoryValues.includes(filters.category)) {
-      setCategory("all");
-    } else if (category !== "all" && !categoryValues.includes(category)) {
-      setCategory("all");
+      setCategory("");
     } else if (filters.category && categoryValues.includes(filters.category)) {
       setCategory(filters.category);
     }
-  }, [facets.state, filters.sector, filters.category, sector, category, sectorValues, categoryValues]);
+  }, [
+    facets.state,
+    filters.sector,
+    filters.airline,
+    filters.category,
+    sector,
+    airline,
+    sectorValues,
+    airlineValues,
+    categoryValues,
+  ]);
 
   const filtersValid = useMemo(() => {
     if (facets.state !== "loaded") return false;
     if (filters.sector && !sectorValues.includes(filters.sector)) return false;
+    if (filters.airline && !airlineValues.includes(filters.airline)) return false;
     if (filters.category && !categoryValues.includes(filters.category)) return false;
     return true;
-  }, [facets.state, filters.sector, filters.category, sectorValues, categoryValues]);
+  }, [facets.state, filters.sector, filters.airline, filters.category, sectorValues, airlineValues, categoryValues]);
 
   const loadResults = useCallback(async (nextFilters: GroupSearchFilters, append = false) => {
     setLoading(true);
@@ -113,8 +142,8 @@ export function GroupSearchPage() {
 
   const handleSubmit = () => {
     const result = validateGroupSearch(
-      { sector, category, travelDate },
-      { sectorValues, categoryValues },
+      { airline, sector, travelDate, category: category || undefined },
+      { sectorValues, airlineValues },
     );
     if (!result.valid) {
       setErrors(result.errors);
@@ -122,9 +151,19 @@ export function GroupSearchPage() {
     }
 
     const next = new URLSearchParams();
+    if (airline.trim()) next.set("airline", airline.trim());
     if (sector) next.set("sector", sector);
     if (travelDate) next.set("date_from", travelDate);
-    if (category && category !== "all") next.set("category", category);
+    if (category) next.set("category", category);
+    router.push(`/groups/search?${next.toString()}`);
+  };
+
+  const clearCategory = () => {
+    const next = new URLSearchParams();
+    if (airline.trim()) next.set("airline", airline.trim());
+    if (sector) next.set("sector", sector);
+    if (travelDate) next.set("date_from", travelDate);
+    setCategory("");
     router.push(`/groups/search?${next.toString()}`);
   };
 
@@ -150,25 +189,45 @@ export function GroupSearchPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-8" data-testid="group-search-page">
       <header className="mb-6">
         <h1 className="text-2xl font-semibold text-jp-text">Group Ticketing</h1>
-        <p className="mt-1 text-jp-sm text-jp-muted">Search sector, travel date, and category. Passenger counts are collected during booking.</p>
+        <p className="mt-1 text-jp-sm text-jp-muted">
+          Search by airline, sector, and travel date. Passenger counts are collected during booking.
+        </p>
       </header>
+
+      {categoryLabel ? (
+        <div
+          className="mb-4 inline-flex items-center gap-2 rounded-jp-pill border border-jp-border bg-jp-surface-muted px-3 py-1.5 text-jp-sm"
+          data-testid="group-category-filter-chip"
+        >
+          <span className="text-jp-muted">Category:</span>
+          <span className="font-semibold text-jp-text">{categoryLabel}</span>
+          <button
+            type="button"
+            onClick={clearCategory}
+            className="ml-1 rounded-jp-md px-1.5 py-0.5 text-jp-xs font-semibold text-jp-muted hover:text-jp-text focus-visible:outline-none focus-visible:shadow-jp-focus"
+            aria-label="Clear category filter"
+          >
+            Clear
+          </button>
+        </div>
+      ) : null}
 
       <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-sm">
         <GroupTicketingForm
+          airline={airline}
           sector={sector}
-          category={category}
           travelDate={travelDate}
           facetsState={facets.state}
+          airlines={facets.airlines}
           sectors={facets.sectors}
-          categories={facets.categories}
           dateBounds={facets.dateBounds}
           facetsError={facets.errorMessage}
           onRetryFacets={facets.retry}
+          onAirlineChange={setAirline}
           onSectorChange={setSector}
-          onCategoryChange={setCategory}
           onTravelDateChange={setTravelDate}
           onSubmit={handleSubmit}
           errors={formErrors}
@@ -182,7 +241,9 @@ export function GroupSearchPage() {
             <h2 className="text-lg font-semibold text-jp-text">Results</h2>
             <p className="text-jp-sm text-jp-muted">{countLabel}</p>
           </div>
-          {userNotice ? <p className="rounded-jp-md border border-amber-200 bg-amber-50 px-3 py-2 text-jp-sm text-amber-900">{userNotice}</p> : null}
+          {userNotice ? (
+            <p className="rounded-jp-md border border-amber-200 bg-amber-50 px-3 py-2 text-jp-sm text-amber-900">{userNotice}</p>
+          ) : null}
           {statusMessage && cards.length === 0 ? <GroupEmptyResultsState /> : null}
           {cards.map((card) => (
             <GroupResultCard key={`${card.public_id ?? card.id}`} card={card} />

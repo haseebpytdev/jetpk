@@ -17,17 +17,31 @@ export type GroupSearchFacetOption = {
   inventory_count?: number;
   image_url?: string | null;
   subtitle?: string | null;
+  /** Optional absolute/relative card target; defaults from value. */
+  href?: string | null;
+};
+
+export type GroupDiscoveryTile = {
+  key: string;
+  slug: string | null;
+  title: string;
+  image_url?: string | null;
+  package_count: number;
+  url: string;
 };
 
 export type GroupSearchFacetsResponse = {
+  airlines: GroupSearchFacetOption[];
   sectors: GroupSearchFacetOption[];
   categories: GroupSearchFacetOption[];
+  tiles?: GroupDiscoveryTile[];
   date_bounds: { minimum: string; maximum: string } | null;
 };
 
 export type GroupSearchFacetsLoadState = "loading" | "loaded" | "empty" | "error";
 
 export type GroupSearchFilters = {
+  airline?: string;
   sector?: string;
   date_from?: string;
   category?: string;

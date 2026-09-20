@@ -7,6 +7,7 @@ import { validateGroupSearch } from "@/features/search/utils/validation";
 import { GroupTicketingForm } from "@/features/search/components/GroupTicketingForm";
 import { GroupCategoryCards } from "./GroupCategoryCards";
 import { laravelApiPath } from "@/services/flight-search";
+import type { GroupSearchFacetOption } from "../types";
 
 type GroupsLandingCms = {
   hero?: { kicker?: string; title?: string; description?: string };
@@ -18,40 +19,44 @@ const DEFAULT_CMS: Required<GroupsLandingCms> = {
     kicker: "GROUP TRAVEL MADE SIMPLE",
     title: "Find better group fares for your journey",
     description:
-      "Search live block-seat inventory by route, airline, and departure — transparent per-seat pricing before you book.",
+      "Search live block-seat inventory by airline, sector, and departure — transparent per-seat pricing before you book.",
   },
   categories: {
-    kicker: "Explore destinations",
-    title: "Browse by group category",
-    description: "Jump into UAE, KSA, and other available group corridors.",
+    kicker: "Explore Group Travel Packages",
+    title: "Browse available group corridors",
+    description: "Open All Groups or a live inventory category to refine results.",
   },
 };
 
-function formatSectorLabel(sector: string): string {
-  const parts = sector.split("-").map((p) => p.trim()).filter(Boolean);
-  if (parts.length === 2) {
-    return `${parts[0]} → ${parts[1]}`;
-  }
-  return sector;
-}
-
 /**
- * /groups discovery landing — hero + search handoff to /groups/search.
- * Aligned to current GroupTicketingForm / facets hook (no airline field).
+ * /groups discovery landing — Airline | Sector | Date search + API category tiles.
  */
 export function GroupsLandingPage() {
   const router = useRouter();
   const facets = useGroupSearchFacets();
   const [cms, setCms] = useState(DEFAULT_CMS);
+  const [airline, setAirline] = useState("");
   const [sector, setSector] = useState("");
-  const [category, setCategory] = useState("all");
   const [travelDate, setTravelDate] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [searching, setSearching] = useState(false);
 
   const sectorValues = useMemo(() => facets.sectors.map((item) => item.value), [facets.sectors]);
-  const categoryValues = useMemo(() => facets.categories.map((item) => item.value), [facets.categories]);
-  const popularSectors = useMemo(() => facets.sectors.slice(0, 6), [facets.sectors]);
+  const airlineValues = useMemo(() => facets.airlines.map((item) => item.value), [facets.airlines]);
+
+  const categoryCards = useMemo((): GroupSearchFacetOption[] => {
+    if (facets.tiles.length > 0) {
+      return facets.tiles.map((tile) => ({
+        value: tile.slug ?? tile.key,
+        label: tile.title,
+        inventory_count: tile.package_count,
+        image_url: tile.image_url ?? null,
+        href: tile.url,
+      }));
+    }
+
+    return facets.categories;
+  }, [facets.tiles, facets.categories]);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,8 +93,8 @@ export function GroupsLandingPage() {
 
   const pushSearch = useCallback(() => {
     const result = validateGroupSearch(
-      { sector, category, travelDate },
-      { sectorValues, categoryValues },
+      { airline, sector, travelDate },
+      { sectorValues, airlineValues },
     );
     if (!result.valid) {
       setErrors(result.errors);
@@ -99,11 +104,11 @@ export function GroupsLandingPage() {
     setErrors([]);
     setSearching(true);
     const next = new URLSearchParams();
+    if (airline.trim()) next.set("airline", airline.trim());
     if (sector) next.set("sector", sector);
     if (travelDate) next.set("date_from", travelDate);
-    if (category && category !== "all") next.set("category", category);
     router.push(`/groups/search?${next.toString()}`);
-  }, [sector, category, travelDate, sectorValues, categoryValues, router]);
+  }, [airline, sector, travelDate, sectorValues, airlineValues, router]);
 
   return (
     <div data-testid="groups-landing-page">
@@ -137,39 +142,22 @@ export function GroupsLandingPage() {
             data-testid="groups-landing-search"
           >
             <GroupTicketingForm
+              airline={airline}
               sector={sector}
-              category={category}
               travelDate={travelDate}
               facetsState={facets.state}
+              airlines={facets.airlines}
               sectors={facets.sectors}
-              categories={facets.categories}
               dateBounds={facets.dateBounds}
               facetsError={facets.errorMessage}
               onRetryFacets={facets.retry}
+              onAirlineChange={setAirline}
               onSectorChange={setSector}
-              onCategoryChange={setCategory}
               onTravelDateChange={setTravelDate}
               onSubmit={pushSearch}
               errors={errors}
               disabled={searching}
             />
-            {popularSectors.length > 0 ? (
-              <div className="mt-4 flex flex-wrap gap-2" data-testid="groups-landing-popular-sectors">
-                {popularSectors.map((item) => (
-                  <button
-                    key={item.value}
-                    type="button"
-                    className="rounded-jp-md border border-jp-border bg-jp-surface-muted px-3 py-1.5 text-jp-xs font-medium text-jp-text hover:border-jp-brand hover:text-jp-brand"
-                    onClick={() => setSector(item.value)}
-                  >
-                    {formatSectorLabel(item.label || item.value)}
-                    {typeof item.inventory_count === "number" ? (
-                      <span className="ml-1 text-jp-muted">({item.inventory_count})</span>
-                    ) : null}
-                  </button>
-                ))}
-              </div>
-            ) : null}
           </div>
         </div>
       </section>
@@ -185,7 +173,7 @@ export function GroupsLandingPage() {
           ) : null}
         </div>
         <GroupCategoryCards
-          categories={facets.categories}
+          categories={categoryCards}
           mode="link"
           variant="media"
           disabled={facets.state !== "loaded"}

@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { fetchGroupSearchFacets } from "../services/group-ticketing-api";
-import type { GroupSearchFacetsLoadState, GroupSearchFacetsResponse, GroupSearchFacetOption } from "../types";
+import type {
+  GroupDiscoveryTile,
+  GroupSearchFacetsLoadState,
+  GroupSearchFacetsResponse,
+  GroupSearchFacetOption,
+} from "../types";
 
 declare global {
   interface Window {
@@ -12,8 +17,10 @@ declare global {
 
 type UseGroupSearchFacetsResult = {
   state: GroupSearchFacetsLoadState;
+  airlines: GroupSearchFacetOption[];
   sectors: GroupSearchFacetOption[];
   categories: GroupSearchFacetOption[];
+  tiles: GroupDiscoveryTile[];
   dateBounds: GroupSearchFacetsResponse["date_bounds"];
   errorMessage: string | null;
   retry: () => void;
@@ -21,6 +28,16 @@ type UseGroupSearchFacetsResult = {
 
 let cachedFacets: GroupSearchFacetsResponse | null = null;
 let inflightRequest: Promise<Awaited<ReturnType<typeof fetchGroupSearchFacets>>> | null = null;
+
+function normalizeFacets(data: GroupSearchFacetsResponse): GroupSearchFacetsResponse {
+  return {
+    airlines: data.airlines ?? [],
+    sectors: data.sectors ?? [],
+    categories: data.categories ?? [],
+    tiles: data.tiles ?? [],
+    date_bounds: data.date_bounds ?? null,
+  };
+}
 
 function deriveState(data: GroupSearchFacetsResponse): GroupSearchFacetsLoadState {
   return data.sectors.length === 0 ? "empty" : "loaded";
@@ -38,9 +55,11 @@ async function requestFacets(force = false) {
   inflightRequest = fetchGroupSearchFacets().then((response) => {
     inflightRequest = null;
     if (response.ok) {
-      cachedFacets = response.data;
+      cachedFacets = normalizeFacets(response.data);
     }
-    return response;
+    return response.ok
+      ? { ok: true as const, data: cachedFacets as GroupSearchFacetsResponse }
+      : response;
   });
 
   return inflightRequest;
@@ -48,38 +67,49 @@ async function requestFacets(force = false) {
 
 export function useGroupSearchFacets(enabled = true): UseGroupSearchFacetsResult {
   const [state, setState] = useState<GroupSearchFacetsLoadState>(enabled ? "loading" : "loaded");
+  const [airlines, setAirlines] = useState<GroupSearchFacetOption[]>(cachedFacets?.airlines ?? []);
   const [sectors, setSectors] = useState<GroupSearchFacetOption[]>(cachedFacets?.sectors ?? []);
   const [categories, setCategories] = useState<GroupSearchFacetOption[]>(cachedFacets?.categories ?? []);
-  const [dateBounds, setDateBounds] = useState<GroupSearchFacetsResponse["date_bounds"]>(cachedFacets?.date_bounds ?? null);
+  const [tiles, setTiles] = useState<GroupDiscoveryTile[]>(cachedFacets?.tiles ?? []);
+  const [dateBounds, setDateBounds] = useState<GroupSearchFacetsResponse["date_bounds"]>(
+    cachedFacets?.date_bounds ?? null,
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const load = useCallback(async (force = false) => {
-    if (!enabled) return;
-
-    if (!force && cachedFacets) {
-      setState(deriveState(cachedFacets));
-      setSectors(cachedFacets.sectors);
-      setCategories(cachedFacets.categories);
-      setDateBounds(cachedFacets.date_bounds);
-      setErrorMessage(null);
-      return;
-    }
-
-    setState("loading");
+  const applyData = useCallback((data: GroupSearchFacetsResponse) => {
+    const normalized = normalizeFacets(data);
+    setAirlines(normalized.airlines);
+    setSectors(normalized.sectors);
+    setCategories(normalized.categories);
+    setTiles(normalized.tiles ?? []);
+    setDateBounds(normalized.date_bounds);
+    setState(deriveState(normalized));
     setErrorMessage(null);
+  }, []);
 
-    const response = await requestFacets(force);
-    if (!response.ok) {
-      setState("error");
-      setErrorMessage(response.message);
-      return;
-    }
+  const load = useCallback(
+    async (force = false) => {
+      if (!enabled) return;
 
-    setSectors(response.data.sectors);
-    setCategories(response.data.categories);
-    setDateBounds(response.data.date_bounds);
-    setState(deriveState(response.data));
-  }, [enabled]);
+      if (!force && cachedFacets) {
+        applyData(cachedFacets);
+        return;
+      }
+
+      setState("loading");
+      setErrorMessage(null);
+
+      const response = await requestFacets(force);
+      if (!response.ok) {
+        setState("error");
+        setErrorMessage(response.message);
+        return;
+      }
+
+      applyData(response.data);
+    },
+    [enabled, applyData],
+  );
 
   useEffect(() => {
     void load(false);
@@ -90,7 +120,7 @@ export function useGroupSearchFacets(enabled = true): UseGroupSearchFacetsResult
     void load(true);
   }, [load]);
 
-  return { state, sectors, categories, dateBounds, errorMessage, retry };
+  return { state, airlines, sectors, categories, tiles, dateBounds, errorMessage, retry };
 }
 
 /** Test helper to reset module cache between Playwright runs. */

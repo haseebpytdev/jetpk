@@ -26,8 +26,8 @@ type PublicHeroProps = {
   trustChips: HomepageTrustChip[];
   fallbackImage: string;
   /**
-   * CMS published empty strings are authoritative when source is `cms`.
-   * Fixture / empty (no CMS) may use marketing fallbacks for copy.
+   * `cms` and `empty` preserve blanks (no JetPakistan backfill).
+   * Only explicit `fixture` source may use marketing fallbacks.
    */
   contentSource: HomepageContent["source"];
 };
@@ -40,19 +40,22 @@ const FIXTURE_COPY = {
 } as const;
 
 /**
- * Hero media canvas wraps copy + search shell so the image continues behind the full
- * composition. Height is a stable responsive minimum (not tied to active trip mode).
+ * Content-driven hero: section height follows copy + search + trust strip.
+ * Absolute media fills that box so the image covers the composition without a
+ * fixed 47–52rem dead zone below the search shell.
+ * Search zone keeps a stable min-height so mode switches do not crop-jump.
  */
 export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: PublicHeroProps) {
-  const cmsAuthoritative = contentSource === "cms";
+  const useFixtureCopy = contentSource === "fixture";
   const eyebrow = hero.eyebrow ?? "";
   const rawHeadline = hero.headline ?? "";
   const rawHighlight = hero.headlineHighlight ?? "";
   const rawSubtitle = hero.subtitle ?? "";
 
-  const headline = cmsAuthoritative ? rawHeadline : rawHeadline || FIXTURE_COPY.headline;
-  const highlight = cmsAuthoritative ? rawHighlight : rawHighlight || FIXTURE_COPY.highlight;
-  const subtitle = cmsAuthoritative ? rawSubtitle : rawSubtitle || FIXTURE_COPY.subtitle;
+  // Explicit CMS / empty blanks stay blank — never substitute JetPakistan.
+  const headline = useFixtureCopy ? rawHeadline || FIXTURE_COPY.headline : rawHeadline;
+  const highlight = useFixtureCopy ? rawHighlight || FIXTURE_COPY.highlight : rawHighlight;
+  const subtitle = useFixtureCopy ? rawSubtitle || FIXTURE_COPY.subtitle : rawSubtitle;
 
   const hasTitle = headline.trim() !== "" || highlight.trim() !== "";
   const desktopSrc = hero.image?.url ?? fallbackImage;
@@ -61,16 +64,11 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
     hero.focalPoint === "left" ? "left center" : hero.focalPoint === "right" ? "right center" : "center";
 
   return (
-    <section className="relative overflow-x-hidden" data-testid="homepage-public-hero">
-      <div
-        className={cn(
-          "relative isolate overflow-hidden",
-          // Fixed canvas heights so trip/service mode switches do not resize/crop.
-          // Sized above tallest initial shell; 47rem clears 320px pad>=16 gate.
-          "h-[47rem] sm:h-[48rem] md:h-[48rem] lg:h-[50rem] xl:h-[52rem]",
-        )}
-        data-testid="homepage-hero-backdrop"
-      >
+    <section
+      className="relative isolate overflow-x-hidden"
+      data-testid="homepage-public-hero"
+    >
+      <div className="relative isolate overflow-hidden" data-testid="homepage-hero-backdrop">
         <div className="absolute inset-0" data-testid="homepage-hero-image" aria-hidden={!hasTitle}>
           <picture className="absolute inset-0 block h-full w-full">
             <source media="(max-width: 767px)" srcSet={mobileSrc} />
@@ -95,8 +93,8 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
           />
         </div>
 
-        <div className="relative z-10 flex min-h-[inherit] flex-col">
-          <PageContainer className="flex flex-1 flex-col justify-end pb-6 pt-jp-3xl sm:pb-8 sm:pt-jp-4xl">
+        <div className="relative z-10 flex flex-col">
+          <PageContainer className="pb-4 pt-jp-3xl sm:pb-5 sm:pt-jp-4xl">
             <div className="max-w-3xl min-w-0 text-white">
               {eyebrow.trim() !== "" ? (
                 <p className="text-jp-sm font-semibold uppercase tracking-[0.18em] text-white/85">{eyebrow}</p>
@@ -107,11 +105,20 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
                     "break-words font-display text-jp-h1 font-bold leading-[1.15] text-white",
                     eyebrow.trim() !== "" && "mt-3",
                   )}
+                  data-testid="homepage-hero-h1"
                 >
-                  {headline}
-                  {headline.trim() !== "" && highlight.trim() !== "" ? " " : null}
+                  {headline.trim() !== "" ? (
+                    <span className="block" data-testid="homepage-hero-headline">
+                      {headline}
+                    </span>
+                  ) : null}
                   {highlight.trim() !== "" ? (
-                    <span className="text-jp-primary-soft">{highlight}</span>
+                    <span
+                      className={cn("block text-jp-primary-soft", headline.trim() !== "" && "mt-1")}
+                      data-testid="homepage-hero-highlight"
+                    >
+                      {highlight}
+                    </span>
                   ) : null}
                 </h1>
               ) : null}
@@ -123,8 +130,14 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
 
           {hero.searchVisible ? (
             <PageContainer className="relative z-20 overflow-x-visible pb-6 sm:pb-8 md:pb-10">
-              <div data-testid="homepage-hero-search-overlap">
-                <SearchModule layout="compact" />
+              {/* Stable reservation for tallest initial search shell (multi-city / group). */}
+              <div
+                data-testid="homepage-hero-search-overlap"
+                className="min-h-[22rem] sm:min-h-[20rem] md:min-h-[18rem] lg:min-h-[16rem]"
+              >
+                <div data-testid="homepage-search-shell">
+                  <SearchModule layout="compact" />
+                </div>
                 <BenefitStrip items={trustChips} variant="hero" className="mt-jp-md" />
               </div>
             </PageContainer>

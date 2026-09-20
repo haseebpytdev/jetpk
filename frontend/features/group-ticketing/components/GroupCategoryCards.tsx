@@ -50,7 +50,10 @@ export function GroupCategoryCards({
         {categories.map((category) => {
           const active = selected === category.value;
           const count = category.inventory_count;
-          const href = `/groups/search?category=${encodeURIComponent(category.value)}`;
+          const isAll = category.value === "all" || category.value === "";
+          const href =
+            category.href?.trim() ||
+            (isAll ? "/groups/search" : `/groups/search?category=${encodeURIComponent(category.value)}`);
           const imageUrl = category.image_url?.trim() || null;
 
           const mediaBody = (

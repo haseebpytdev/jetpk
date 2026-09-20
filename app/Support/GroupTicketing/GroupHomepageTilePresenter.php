@@ -103,6 +103,29 @@ class GroupHomepageTilePresenter
      */
     public function presentDynamicInventoryTilesForHome(): Collection
     {
+        return $this->presentForPublicDiscovery()
+            ->map(fn (array $tile): array => [
+                'title' => $tile['title'],
+                'url' => $tile['url'],
+                'image_url' => $tile['image_url'],
+                'package_count' => $tile['package_count'],
+            ]);
+    }
+
+    /**
+     * Public discovery tiles for /groups category cards (API-driven).
+     *
+     * @return Collection<int, array{
+     *     key: string,
+     *     slug: ?string,
+     *     title: string,
+     *     image_url: ?string,
+     *     package_count: int,
+     *     url: string
+     * }>
+     */
+    public function presentForPublicDiscovery(): Collection
+    {
         if (! Schema::hasTable('group_inventories')) {
             return collect();
         }
@@ -115,14 +138,18 @@ class GroupHomepageTilePresenter
 
         $allOverride = $overrides['all'] ?? null;
         $allOverrideActive = $allOverride === null || $allOverride->is_active;
-        $tiles->push([
-            'title' => ($allOverrideActive && $allOverride?->title)
-                ? $allOverride->title
-                : 'All Groups',
-            'url' => route('group-ticketing.search'),
-            'image_url' => $allOverrideActive ? $this->resolveImageUrl($allOverride) : null,
-            'package_count' => $totalCount,
-        ]);
+        if ($totalCount > 0) {
+            $tiles->push([
+                'key' => 'all',
+                'slug' => null,
+                'title' => ($allOverrideActive && $allOverride?->title)
+                    ? $allOverride->title
+                    : 'All Groups',
+                'url' => route('group-ticketing.search'),
+                'image_url' => $allOverrideActive ? $this->resolveImageUrl($allOverride) : null,
+                'package_count' => $totalCount,
+            ]);
+        }
 
         $categoryTiles = collect();
         foreach ($categories as $index => $category) {
@@ -134,6 +161,8 @@ class GroupHomepageTilePresenter
             }
 
             $categoryTiles->push([
+                'key' => $slug,
+                'slug' => $slug,
                 'title' => $categoryOverride?->title ?: self::categoryDisplayTitle($category['name']),
                 'url' => route('group-ticketing.search', ['category' => $slug]),
                 'image_url' => $this->resolveImageUrl($categoryOverride),
