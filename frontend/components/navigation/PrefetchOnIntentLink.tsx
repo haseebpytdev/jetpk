@@ -9,16 +9,24 @@ import {
   registerPublicPrefetchImpl,
 } from "@/components/navigation/public-prefetch-coordinator";
 
-type PrefetchOnIntentLinkProps = Omit<ComponentProps<typeof Link>, "prefetch">;
+type PrefetchOnIntentLinkProps = Omit<ComponentProps<typeof Link>, "prefetch"> & {
+  /**
+   * Soft-nav: allow Next viewport prefetch for always-visible header targets
+   * (e.g. Groups / Login) so the 600ms homepage settle can warm RSC before click.
+   * Default remains intent-only to avoid footer/CMS stampede.
+   */
+  priorityPrefetch?: boolean;
+};
 
 /**
- * Soft-nav: no mount/viewport RSC stampede (`prefetch={false}`).
- * Warm only on hover/focus intent via the shared single-flight coordinator.
+ * Soft-nav: no mount/viewport RSC stampede (`prefetch={false}`) by default.
+ * Warm on hover/focus/pointerdown via the shared single-flight coordinator.
  */
 export function PrefetchOnIntentLink({
   href,
   onMouseEnter,
   onFocus,
+  priorityPrefetch = false,
   ...rest
 }: PrefetchOnIntentLinkProps) {
   const router = useRouter();
@@ -43,7 +51,7 @@ export function PrefetchOnIntentLink({
     <Link
       {...rest}
       href={href}
-      prefetch={false}
+      prefetch={priorityPrefetch ? true : false}
       onPointerDown={() => {
         warm();
       }}
