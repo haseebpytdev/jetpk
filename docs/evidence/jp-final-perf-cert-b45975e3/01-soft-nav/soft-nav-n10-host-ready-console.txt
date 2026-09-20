@@ -1,0 +1,176 @@
+SAMPLE home_support i=0 kind=soft app=237 attempt=1
+SAMPLE home_support i=1 kind=soft app=260 attempt=1
+SAMPLE home_support i=2 kind=soft app=173 attempt=1
+SAMPLE home_support i=3 kind=soft app=175 attempt=1
+SAMPLE home_support i=4 kind=soft app=169 attempt=1
+SAMPLE home_support i=5 kind=soft app=264 attempt=1
+SAMPLE home_support i=6 kind=soft app=261 attempt=1
+SAMPLE home_support i=7 kind=soft app=155 attempt=1
+SAMPLE home_support i=8 kind=soft app=188 attempt=1
+SAMPLE home_support i=9 kind=soft app=188 attempt=1
+SOFT home_support APP_P50=188 APP_P95=264 soft_n=10 hard=0
+SAMPLE support_home i=0 kind=soft app=329 attempt=1
+SAMPLE support_home i=1 kind=soft app=1477 attempt=1
+SAMPLE support_home i=2 kind=soft app=365 attempt=1
+SAMPLE support_home i=3 kind=soft app=201 attempt=1
+SAMPLE support_home i=4 kind=soft app=206 attempt=1
+SAMPLE support_home i=5 kind=soft app=192 attempt=1
+SAMPLE support_home i=6 kind=soft app=307 attempt=1
+SAMPLE support_home i=7 kind=soft app=177 attempt=1
+SAMPLE support_home i=8 kind=soft app=203 attempt=1
+SAMPLE support_home i=9 kind=soft app=194 attempt=1
+SOFT support_home APP_P50=203 APP_P95=1477 soft_n=10 hard=0
+SAMPLE home_privacy i=0 kind=soft app=172 attempt=1
+SAMPLE home_privacy i=1 kind=soft app=139 attempt=1
+SAMPLE home_privacy i=2 kind=soft app=140 attempt=1
+SAMPLE home_privacy i=3 kind=soft app=135 attempt=1
+SAMPLE home_privacy i=4 kind=soft app=154 attempt=1
+SAMPLE home_privacy i=5 kind=soft app=135 attempt=1
+SAMPLE home_privacy i=6 kind=soft app=136 attempt=1
+SAMPLE home_privacy i=7 kind=soft app=161 attempt=1
+SAMPLE home_privacy i=8 kind=soft app=139 attempt=1
+SAMPLE home_privacy i=9 kind=soft app=160 attempt=1
+SOFT home_privacy APP_P50=139 APP_P95=172 soft_n=10 hard=0
+SAMPLE privacy_terms i=0 kind=soft app=134 attempt=1
+SAMPLE privacy_terms i=1 kind=soft app=135 attempt=1
+SAMPLE privacy_terms i=2 kind=soft app=111 attempt=1
+SAMPLE privacy_terms i=3 kind=soft app=119 attempt=1
+SAMPLE privacy_terms i=4 kind=soft app=136 attempt=1
+SAMPLE privacy_terms i=5 kind=soft app=105 attempt=1
+SAMPLE privacy_terms i=6 kind=soft app=124 attempt=1
+SAMPLE privacy_terms i=7 kind=soft app=136 attempt=1
+SAMPLE privacy_terms i=8 kind=soft app=144 attempt=1
+SAMPLE privacy_terms i=9 kind=soft app=156 attempt=1
+SOFT privacy_terms APP_P50=134 APP_P95=156 soft_n=10 hard=0
+SAMPLE home_groups i=0 kind=soft app=131 attempt=1
+SAMPLE home_groups i=1 kind=soft app=179 attempt=1
+SAMPLE home_groups i=2 kind=soft app=134 attempt=1
+SAMPLE home_groups i=3 kind=soft app=156 attempt=1
+SAMPLE home_groups i=4 kind=soft app=203 attempt=1
+SAMPLE home_groups i=5 kind=soft app=118 attempt=1
+SAMPLE home_groups i=6 kind=soft app=156 attempt=1
+SAMPLE home_groups i=7 kind=soft app=120 attempt=1
+SAMPLE home_groups i=8 kind=soft app=163 attempt=1
+SAMPLE home_groups i=9 kind=soft app=156 attempt=1
+SOFT home_groups APP_P50=156 APP_P95=203 soft_n=10 hard=0
+SAMPLE home_login i=0 kind=soft app=223 attempt=1
+SAMPLE home_login i=1 kind=soft app=208 attempt=1
+SAMPLE home_login i=2 kind=soft app=146 attempt=1
+SAMPLE home_login i=3 kind=soft app=122 attempt=1
+SAMPLE home_login i=4 kind=soft app=188 attempt=1
+SAMPLE home_login i=5 kind=soft app=130 attempt=1
+SAMPLE home_login i=6 kind=soft app=111 attempt=1
+SAMPLE home_login i=7 kind=soft app=141 attempt=1
+SAMPLE home_login i=8 kind=soft app=104 attempt=1
+SAMPLE home_login i=9 kind=soft app=133 attempt=1
+SOFT home_login APP_P50=133 APP_P95=223 soft_n=10 hard=0
+SAMPLE login_register i=0 kind=soft app=143 attempt=1
+SAMPLE login_register i=1 kind=soft app=121 attempt=1
+SAMPLE login_register i=2 kind=soft app=147 attempt=1
+SAMPLE login_register i=3 kind=soft app=113 attempt=1
+SAMPLE login_register i=4 kind=soft app=140 attempt=1
+SAMPLE login_register i=5 kind=soft app=122 attempt=1
+SAMPLE login_register i=6 kind=soft app=106 attempt=1
+SAMPLE login_register i=7 kind=soft app=120 attempt=1
+SAMPLE login_register i=8 kind=soft app=111 attempt=1
+SAMPLE login_register i=9 kind=soft app=106 attempt=1
+SOFT login_register APP_P50=120 APP_P95=147 soft_n=10 hard=0
+SAMPLE home_about i=0 kind=soft app=158 attempt=1
+SAMPLE home_about i=1 kind=soft app=158 attempt=1
+SAMPLE home_about i=2 kind=soft app=137 attempt=1
+SAMPLE home_about i=3 kind=soft app=157 attempt=1
+SAMPLE home_about i=4 kind=soft app=143 attempt=1
+SAMPLE home_about i=5 kind=soft app=167 attempt=1
+SAMPLE home_about i=6 kind=soft app=166 attempt=1
+SAMPLE home_about i=7 kind=soft app=139 attempt=1
+SAMPLE home_about i=8 kind=soft app=149 attempt=1
+SAMPLE home_about i=9 kind=soft app=126 attempt=1
+SOFT home_about APP_P50=149 APP_P95=167 soft_n=10 hard=0
+SAMPLE home_faq i=0 kind=soft app=175 attempt=1
+SAMPLE home_faq i=1 kind=soft app=152 attempt=1
+SAMPLE home_faq i=2 kind=soft app=129 attempt=1
+SAMPLE home_faq i=3 kind=soft app=135 attempt=1
+SAMPLE home_faq i=4 kind=soft app=116 attempt=1
+SAMPLE home_faq i=5 kind=soft app=120 attempt=1
+SAMPLE home_faq i=6 kind=soft app=120 attempt=1
+SAMPLE home_faq i=7 kind=soft app=104 attempt=1
+SAMPLE home_faq i=8 kind=soft app=104 attempt=1
+SAMPLE home_faq i=9 kind=soft app=168 attempt=1
+SOFT home_faq APP_P50=120 APP_P95=175 soft_n=10 hard=0
+SAMPLE home_terms i=0 kind=soft app=171 attempt=1
+SAMPLE home_terms i=1 kind=soft app=126 attempt=1
+SAMPLE home_terms i=2 kind=soft app=123 attempt=1
+SAMPLE home_terms i=3 kind=soft app=169 attempt=1
+SAMPLE home_terms i=4 kind=soft app=146 attempt=1
+SAMPLE home_terms i=5 kind=soft app=122 attempt=1
+SAMPLE home_terms i=6 kind=soft app=133 attempt=1
+SAMPLE home_terms i=7 kind=soft app=178 attempt=1
+SAMPLE home_terms i=8 kind=soft app=166 attempt=1
+SAMPLE home_terms i=9 kind=soft app=133 attempt=1
+SOFT home_terms APP_P50=133 APP_P95=178 soft_n=10 hard=0
+{
+  "PASS_COUNT": 10,
+  "WORST": 1477,
+  "soft": {
+    "home_support": {
+      "n_soft": 10,
+      "hard_fallback": 0,
+      "APP_P50": 188,
+      "APP_P95": 264
+    },
+    "support_home": {
+      "n_soft": 10,
+      "hard_fallback": 0,
+      "APP_P50": 203,
+      "APP_P95": 1477
+    },
+    "home_privacy": {
+      "n_soft": 10,
+      "hard_fallback": 0,
+      "APP_P50": 139,
+      "APP_P95": 172
+    },
+    "privacy_terms": {
+      "n_soft": 10,
+      "hard_fallback": 0,
+      "APP_P50": 134,
+      "APP_P95": 156
+    },
+    "home_groups": {
+      "n_soft": 10,
+      "hard_fallback": 0,
+      "APP_P50": 156,
+      "APP_P95": 203
+    },
+    "home_login": {
+      "n_soft": 10,
+      "hard_fallback": 0,
+      "APP_P50": 133,
+      "APP_P95": 223
+    },
+    "login_register": {
+      "n_soft": 10,
+      "hard_fallback": 0,
+      "APP_P50": 120,
+      "APP_P95": 147
+    },
+    "home_about": {
+      "n_soft": 10,
+      "hard_fallback": 0,
+      "APP_P50": 149,
+      "APP_P95": 167
+    },
+    "home_faq": {
+      "n_soft": 10,
+      "hard_fallback": 0,
+      "APP_P50": 120,
+      "APP_P95": 175
+    },
+    "home_terms": {
+      "n_soft": 10,
+      "hard_fallback": 0,
+      "APP_P50": 133,
+      "APP_P95": 178
+    }
+  }
+}

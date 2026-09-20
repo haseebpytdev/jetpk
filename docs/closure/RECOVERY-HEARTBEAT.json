@@ -1,37 +1,25 @@
 {
-  "phase": "SOFT_NAV_REMEDIATION",
-  "step": "softnav_n10_fail_expand_homepage_cache",
-  "head_sha": "ca0becc54c2aca165e236998fd2a975c3026bfa8",
-  "public_build_id": "ZYgWLE8mRjjAJlyWtW9sg",
+  "phase": "SEO_RECOVERY",
+  "step": "same_sha_perf_pass_begin_seo",
+  "head_sha": "b45975e36004cf74c9370e71a358fcb38de8ab69",
+  "public_build_id": "S49jLxNux1bMJZD6Wx_U6",
   "started_at": "2026-09-20T11:46:00Z",
-  "last_progress_at": "2026-09-20T20:33:00Z",
-  "last_completed_action": "Deployed ca0becc5; revalidate OK on :3010; FIXTURE_LEAK=NO; soft-nav N=10 FAIL (1/10 ≤1500, worst home_login P95=11383)",
-  "current_action": "Extend approved unstable_cache to homepage CMS (same architecture; no route-group churn); then redeploy + N=10",
+  "last_progress_at": "2026-09-20T22:55:00Z",
+  "last_completed_action": "SAME_SHA_PERF_CERT PASS — soft-nav host N=20 10/10@242ms; Traveler 30@1770; Return Pair 30 poll 0.652; Pair+Segmented N20 dup=0",
+  "current_action": "Begin SEO recovery / short URLs / AEO-GEO / parity / retirement / release-lock",
   "status": "IN_PROGRESS",
-  "soft_nav_gate": "FAIL",
-  "soft_nav_n10": {
-    "pass_count": 1,
-    "threshold_ms": 1500,
-    "worst": { "route": "home_login", "p95": 11383 },
-    "passing": ["privacy_terms"],
-    "build": "ZYgWLE8mRjjAJlyWtW9sg"
-  },
+  "soft_nav_gate": "PASS",
+  "traveler_gate": "PASS",
+  "return_pair_gate": "PASS",
+  "pair_segmented_gate": "PASS",
+  "same_sha_perf_cert": "PASS",
   "production": {
-    "runtime_sha": "ca0becc54c2aca165e236998fd2a975c3026bfa8",
-    "public_build_id": "ZYgWLE8mRjjAJlyWtW9sg",
+    "runtime_sha": "b45975e36004cf74c9370e71a358fcb38de8ab69",
+    "public_build_id": "S49jLxNux1bMJZD6Wx_U6",
     "rollback_sha": "ee7c60122af93f3436c30dd9514bf81cc9d4cf83"
   },
   "architecture": {
     "authority": "unstable_cache",
-    "applied": ["fetchManagedPage", "PublicConfigService.getConfig"],
-    "next": ["HomepageContentService published path"]
-  },
-  "burned_remediations": [
-    "force-static auth layout/login/register",
-    "shared (site) PublicShell + client support/about"
-  ],
-  "best_measured": {
-    "sha": "2bb48065",
-    "pass": "7/10"
+    "commits": ["ca0becc54c2aca165e236998fd2a975c3026bfa8", "b45975e36004cf74c9370e71a358fcb38de8ab69"]
   }
 }
