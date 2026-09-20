@@ -8,6 +8,7 @@ import type { PublicSession } from "@/types/session";
  * dominating home_login P95 cold outliers. PublicShell upgrades branding +
  * session from Laravel after hydration (same as anonymous public SSR).
  */
+export const dynamic = "force-static";
 export const revalidate = 60;
 
 const ANONYMOUS_SESSION: PublicSession = { status: "anonymous" };

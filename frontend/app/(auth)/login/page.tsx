@@ -5,6 +5,7 @@ import { AuthAlreadySignedInRedirect } from "@/features/auth/components/AuthAlre
 import { LoginSessionNotice } from "@/features/auth/components/LoginSessionNotice";
 
 /** Soft-nav: static RSC shell — session redirect after hydration. */
+export const dynamic = "force-static";
 export const revalidate = 60;
 
 export default function LoginPage() {
