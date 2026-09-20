@@ -65,8 +65,9 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
       <div
         className={cn(
           "relative isolate overflow-hidden",
-          // Stable canvas tall enough for copy + max initial search shell at each breakpoint.
-          "min-h-[34rem] sm:min-h-[36rem] md:min-h-[38rem] lg:min-h-[40rem] xl:min-h-[42rem]",
+          // Fixed canvas heights so trip/service mode switches do not resize/crop.
+          // Sized above tallest initial shell (multi-city ~730px at 1024).
+          "h-[46rem] sm:h-[48rem] md:h-[48rem] lg:h-[50rem] xl:h-[52rem]",
         )}
         data-testid="homepage-hero-backdrop"
       >
