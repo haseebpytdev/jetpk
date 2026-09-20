@@ -1,23 +1,26 @@
 /**
  * Server-side counters for public CMS cache instrumentation.
  * Log lines are structured for soft-nav / deploy evidence (no PII).
+ * Use console.log (not info) so PM2 captures lines under default log levels.
  */
 
 type Metrics = {
   laravelPublicPageCalls: number;
   laravelPublicConfigCalls: number;
+  laravelPublicHomepageCalls: number;
 };
 
 const metrics: Metrics = {
   laravelPublicPageCalls: 0,
   laravelPublicConfigCalls: 0,
+  laravelPublicHomepageCalls: 0,
 };
 
 export function recordLaravelPublicPageCall(pageKey: string, cacheStatus: "HIT" | "MISS" | "BYPASS"): void {
   if (cacheStatus === "MISS" || cacheStatus === "BYPASS") {
     metrics.laravelPublicPageCalls += 1;
   }
-  console.info(
+  console.log(
     JSON.stringify({
       scope: "jp-public-content",
       resource: "managed_page",
@@ -32,12 +35,26 @@ export function recordLaravelPublicConfigCall(cacheStatus: "HIT" | "MISS" | "BYP
   if (cacheStatus === "MISS" || cacheStatus === "BYPASS") {
     metrics.laravelPublicConfigCalls += 1;
   }
-  console.info(
+  console.log(
     JSON.stringify({
       scope: "jp-public-content",
       resource: "public_config",
       CACHE_STATUS: cacheStatus,
       LARAVEL_PUBLIC_CONFIG_CALLS: metrics.laravelPublicConfigCalls,
+    }),
+  );
+}
+
+export function recordLaravelPublicHomepageCall(cacheStatus: "HIT" | "MISS" | "BYPASS"): void {
+  if (cacheStatus === "MISS" || cacheStatus === "BYPASS") {
+    metrics.laravelPublicHomepageCalls += 1;
+  }
+  console.log(
+    JSON.stringify({
+      scope: "jp-public-content",
+      resource: "homepage",
+      CACHE_STATUS: cacheStatus,
+      LARAVEL_PUBLIC_HOMEPAGE_CALLS: metrics.laravelPublicHomepageCalls,
     }),
   );
 }

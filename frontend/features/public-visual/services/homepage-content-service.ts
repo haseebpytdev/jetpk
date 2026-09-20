@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { BENEFIT_FIXTURES } from "@/features/home/fixtures/benefits";
 import { DESTINATION_FIXTURES } from "@/features/home/fixtures/destinations";
 import { INSPIRATION_FIXTURES, VALUE_PROPOSITION_FIXTURES } from "@/features/home/fixtures/inspiration";
@@ -7,7 +8,11 @@ import { laravelApiPath } from "@/services/flight-search";
 import { allowContentFixtures, resolveContentSource } from "@/features/public-content/utils/content-policy";
 import { fetchWithTimeout } from "@/features/public-content/utils/laravel-api";
 import { approvedHeroMedia } from "@/lib/homepage-media";
-import { PUBLIC_CACHE_TAGS } from "@/lib/public-cache-tags";
+import {
+  PUBLIC_CACHE_TAGS,
+  PUBLIC_CONTENT_CACHE_TTL_SECONDS,
+} from "@/lib/public-cache-tags";
+import { recordLaravelPublicHomepageCall } from "@/lib/public-content-cache-metrics";
 import type {
   HomepageContent,
   HomepageDestinationCard,
@@ -369,17 +374,42 @@ export const HomepageContentService = {
     headers?: Record<string, string>;
     previewToken?: string | null;
   }): Promise<HomepageContent> {
-    // Request-level dedupe so hero + below-fold Suspense share one CMS fetch.
-    if (!options?.preview && !options?.headers && !options?.previewToken) {
-      return getHomepageCached();
+    // Draft/preview must bypass persistent public cache.
+    if (options?.preview || options?.headers || options?.previewToken) {
+      recordLaravelPublicHomepageCall("BYPASS");
+      return fetchHomepageRaw(options);
     }
-    return fetchHomepage(options);
+    // Request-level dedupe so hero + below-fold Suspense share one resolution.
+    return getHomepageCached();
   },
 };
 
-const getHomepageCached = cache(async () => fetchHomepage());
+/**
+ * React cache() → unstable_cache → raw Laravel fetch (no-store).
+ * Published homepage uses persistent public-content cache; preview bypasses above.
+ */
+const getHomepageCached = cache(async () => {
+  let cacheMiss = false;
+  const data = await unstable_cache(
+    async () => {
+      cacheMiss = true;
+      return fetchHomepageRaw();
+    },
+    ["jp-public-homepage"],
+    {
+      revalidate: PUBLIC_CONTENT_CACHE_TTL_SECONDS,
+      tags: [
+        PUBLIC_CACHE_TAGS.content,
+        PUBLIC_CACHE_TAGS.page("home"),
+        PUBLIC_CACHE_TAGS.homepage,
+      ],
+    },
+  )();
+  recordLaravelPublicHomepageCall(cacheMiss ? "MISS" : "HIT");
+  return data;
+});
 
-async function fetchHomepage(options?: {
+async function fetchHomepageRaw(options?: {
   preview?: boolean;
   headers?: Record<string, string>;
   previewToken?: string | null;
@@ -401,10 +431,7 @@ async function fetchHomepage(options?: {
         Accept: "application/json",
         ...(options?.headers ?? {}),
       },
-      // Preview must stay fresh; published homepage CMS can short-revalidate.
-      ...(options?.preview
-        ? { cache: "no-store" as const, next: { tags: [PUBLIC_CACHE_TAGS.homepage] } }
-        : { next: { revalidate: 120, tags: [PUBLIC_CACHE_TAGS.homepage] } }),
+      cache: "no-store",
     });
 
     if (!response.ok) {
