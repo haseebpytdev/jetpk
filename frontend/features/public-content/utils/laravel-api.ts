@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { absoluteLaravelUrl, laravelApiPath } from "@/services/flight-search";
+import { laravelApiPath } from "@/services/flight-search";
 import type {
   ContactDetails,
   ContactFormPayload,
@@ -7,27 +7,17 @@ import type {
   LaravelManagedPageResponse,
   SupportTicketCategoryOption,
 } from "../types";
-import { SITE_CONTACT_FIXTURE } from "../fixtures/site-contact";
-import { allowContentFixtures } from "./content-policy";
+import { publicContentFetchUrl } from "./laravel-api-url";
+
+export { publicContentFetchUrl } from "./laravel-api-url";
+export { fetchManagedPageBrowser } from "./managed-page-browser";
+export { mergeContactDetails } from "./contact-merge";
 
 export type LaravelValidationErrors = Record<string, string[]>;
 
 const LARAVEL_FETCH_TIMEOUT_MS = 3_000;
 
 type NextFetchInit = RequestInit & { next?: { revalidate?: number | false; tags?: string[] } };
-
-/**
- * Server components must call Laravel directly (runtime LARAVEL_URL) because
- * Next rewrites are baked at build time and can target the wrong loopback host.
- */
-export function publicContentFetchUrl(apiPath: string): string {
-  const normalized = apiPath.startsWith("/") ? apiPath : `/${apiPath}`;
-  if (typeof window === "undefined") {
-    return absoluteLaravelUrl(normalized);
-  }
-
-  return laravelApiPath(normalized);
-}
 
 /**
  * Fetch with abort timeout.
@@ -193,40 +183,3 @@ export async function submitSupportOrContactForm(payload: ContactFormPayload): P
   }
 }
 
-export function mergeContactDetails(primary: ContactDetails | null | undefined): ContactDetails {
-  const normalize = (contact: ContactDetails): ContactDetails => ({
-    ...contact,
-    website: normalizePublicWebsite(contact.website ?? ""),
-  });
-
-  if (!primary) {
-    return allowContentFixtures() ? normalize(SITE_CONTACT_FIXTURE) : {
-      phone: "",
-      phone_e164: "",
-      email: "",
-      whatsapp: "",
-      website: "",
-      office: "",
-      hours: "",
-      company_legal_name: "",
-    };
-  }
-
-  if (!allowContentFixtures()) {
-    return normalize(primary);
-  }
-
-  return normalize({
-    ...SITE_CONTACT_FIXTURE,
-    ...Object.fromEntries(Object.entries(primary).filter(([, value]) => value !== "")),
-  } as ContactDetails);
-}
-
-function normalizePublicWebsite(website: string): string {
-  const trimmed = website.trim();
-  if (trimmed === "") {
-    return "";
-  }
-
-  return trimmed.replace(/^https?:\/\/(www\.)?jetpakistan\.com\/?$/i, "https://jetpakistan.pk");
-}
