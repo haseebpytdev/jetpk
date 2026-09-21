@@ -22,7 +22,7 @@ Remaining: ensure Support page exposes clear factual answers (hours, phone, What
 | GEO_CRAWLABILITY | PARTIAL | robots allow public; disallow private; sitemap core paths |
 | GEO_CITATION_READY_CONTENT | PARTIAL | About/Support/FAQ/Terms/Privacy are crawlable SSR |
 | GEO_FRESHNESS_SIGNALS | PARTIAL | CMS publish → `revalidate-public-content` + sitemap lastmod |
-| GEO_AI_CRAWLER_POLICY | PENDING | Audit robots for GPTBot/ClaudeBot/etc. — no fake geo claims |
+| GEO_AI_CRAWLER_POLICY | PARTIAL | AI bots inherit `User-agent: *` Allow; no explicit bans — see `04-ai-crawler-robots.txt` |
 
 ## Explicit non-claims
 
