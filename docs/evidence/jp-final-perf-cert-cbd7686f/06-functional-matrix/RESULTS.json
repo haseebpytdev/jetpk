@@ -1,0 +1,177 @@
+{
+  "runtime_sha": "cbd7686feadd35773fd0b597117538b8b99b59fa",
+  "public_build_id": "kf8S-ybDOI8Vw8LzUye0H",
+  "live_build_id": "kf8S-ybDOI8Vw8LzUye0H",
+  "pass": 30,
+  "fail": 0,
+  "skip": 11,
+  "mutations_flagged": [],
+  "commercial_mutations": "NO",
+  "rows": {
+    "RUNTIME_BUILD_MATCH": {
+      "status": "PASS",
+      "detail": "live=kf8S-ybDOI8Vw8LzUye0H expect=kf8S-ybDOI8Vw8LzUye0H"
+    },
+    "HOMEPAGE": {
+      "status": "PASS",
+      "detail": "HTTP 200 title=JetPakistan | Affordable Flights, Umrah Packages & Tours"
+    },
+    "AUTH_LOGIN": {
+      "status": "PASS",
+      "detail": "HTTP 200 title=JetPakistan"
+    },
+    "AUTH_REGISTER": {
+      "status": "PASS",
+      "detail": "HTTP 200 title=JetPakistan"
+    },
+    "ONE_WAY_INIT": {
+      "status": "PASS",
+      "detail": "short_url=/flights/s/blfjzask2hloo6vwlj search_id=present"
+    },
+    "SHORT_URL": {
+      "status": "PASS",
+      "detail": "https://jetpakistan.pk/flights/s/blfjzask2hloo6vwlj"
+    },
+    "REFRESH": {
+      "status": "PASS",
+      "detail": "https://jetpakistan.pk/flights/s/blfjzask2hloo6vwlj"
+    },
+    "BACK_FORWARD": {
+      "status": "PASS",
+      "detail": "https://jetpakistan.pk/flights/s/blfjzask2hloo6vwlj"
+    },
+    "ONE_WAY_RESULTS": {
+      "status": "PASS",
+      "detail": "card visible"
+    },
+    "DETAILS": {
+      "status": "PASS",
+      "detail": "opened"
+    },
+    "BAGGAGE": {
+      "status": "SKIP_WITH_REASON",
+      "detail": "control not present on this offer card"
+    },
+    "FARE_POLICY": {
+      "status": "SKIP_WITH_REASON",
+      "detail": "control not present on this offer card"
+    },
+    "FARE_DETAILS": {
+      "status": "SKIP_WITH_REASON",
+      "detail": "control not present on this offer card"
+    },
+    "BRANDED_FARE": {
+      "status": "SKIP_WITH_REASON",
+      "detail": "control not present on this offer card"
+    },
+    "LEGACY_LONG_URL": {
+      "status": "PASS",
+      "detail": "https://jetpakistan.pk/flights/results?from=KHI&to=DXB&depart=2026-10-05&trip_type=one_way&adults=1&children=0&infants=0&cabin=economy&search_id=5cd78c50-0323-4bdc-8575-4697895fc264"
+    },
+    "EXPIRED_SHORT_REF": {
+      "status": "PASS",
+      "detail": "https://jetpakistan.pk/flights/s/zzzzzzzzzzzzzzzz"
+    },
+    "RETURN_PAIR": {
+      "status": "PASS",
+      "detail": "https://jetpakistan.pk/flights/s/8n6ytrihkggsbqn8jt?view=pair&sort=cheapest"
+    },
+    "RETURN_SEGMENTED": {
+      "status": "PASS",
+      "detail": "https://jetpakistan.pk/flights/s/idh8r3gf9nyqlwdswv?view=segmented&sort=cheapest"
+    },
+    "TRAVELER": {
+      "status": "SKIP_WITH_REASON",
+      "detail": "covered by same-SHA traveler N=30 PASS on this runtime; no re-burn"
+    },
+    "REVIEW": {
+      "status": "SKIP_WITH_REASON",
+      "detail": "no commercial review submit; payment presentation checked on groups only if GET"
+    },
+    "GROUP_LANDING": {
+      "status": "PASS",
+      "detail": "HTTP 200 title=Group ticketing — JetPakistan"
+    },
+    "GROUP_CATEGORY_CARDS": {
+      "status": "PASS",
+      "detail": "count=2"
+    },
+    "GROUP_CATEGORY_ALL": {
+      "status": "PASS",
+      "detail": "All Groups / cards"
+    },
+    "GROUP_SEARCH": {
+      "status": "PASS",
+      "detail": "HTTP 200 title=Group search — JetPakistan"
+    },
+    "GROUP_SEARCH_FIELDS": {
+      "status": "PASS",
+      "detail": "{\"fields\":3,\"hasCategoryInForm\":false,\"airline\":true,\"sector\":true,\"date\":true}"
+    },
+    "GROUP_PACKAGE_DETAIL": {
+      "status": "SKIP_WITH_REASON",
+      "detail": "no package link on search page"
+    },
+    "GROUP_PASSENGERS_SAFE_FLOW": {
+      "status": "SKIP_WITH_REASON",
+      "detail": "GET-only; no hold — auth inventory not forced"
+    },
+    "GROUP_REVIEW_SAFE_FLOW": {
+      "status": "SKIP_WITH_REASON",
+      "detail": "GET-only; no mutation"
+    },
+    "GROUP_PAYMENT_PRESENTATION": {
+      "status": "SKIP_WITH_REASON",
+      "detail": "no payment POST; presentation requires booking ref"
+    },
+    "CUSTOMER_DASHBOARD": {
+      "status": "PASS",
+      "detail": "HTTP 200 url=https://jetpakistan.pk/customer/dashboard"
+    },
+    "AGENT_DASHBOARD": {
+      "status": "PASS",
+      "detail": "HTTP 0 url=https://jetpakistan.pk/agent/dashboard"
+    },
+    "ADMIN_DASHBOARD": {
+      "status": "PASS",
+      "detail": "HTTP 0 url=https://jetpakistan.pk/admin/dashboard"
+    },
+    "COMPANY_PROFILE": {
+      "status": "PASS",
+      "detail": "HTTP 200 title=About us — JetPakistan"
+    },
+    "ASK_JETPAKISTAN": {
+      "status": "SKIP_WITH_REASON",
+      "detail": "trigger not visible on homepage viewport"
+    },
+    "SEO_FAQ": {
+      "status": "PASS",
+      "detail": "HTTP 200 title=FAQ ΓÇö JetPakistan"
+    },
+    "SEO_SUPPORT": {
+      "status": "PASS",
+      "detail": "HTTP 200 title=Support & contact ΓÇö JetPakistan"
+    },
+    "SEO_PRIVACY": {
+      "status": "PASS",
+      "detail": "HTTP 200 title=Privacy policy ΓÇö JetPakistan"
+    },
+    "SEO_TERMS": {
+      "status": "PASS",
+      "detail": "HTTP 200 title=Terms of service ΓÇö JetPakistan"
+    },
+    "SEO_SITEMAP": {
+      "status": "PASS",
+      "detail": "HTTP 200 title="
+    },
+    "SEO_ROBOTS": {
+      "status": "PASS",
+      "detail": "HTTP 200 title="
+    },
+    "HTTP_404": {
+      "status": "PASS",
+      "detail": "Page not found — JetPakistan"
+    }
+  },
+  "verdict": "PASS"
+}

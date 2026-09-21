@@ -1,0 +1,166 @@
+{
+  "sha": "cbd7686feadd35773fd0b597117538b8b99b59fa",
+  "build_id": "kf8S-ybDOI8Vw8LzUye0H",
+  "generated_at": "2026-09-21T07:35:22.872Z",
+  "gates": {
+    "CMS_H1_TWO_LINE": "PASS",
+    "CMS_EMPTY_HIGHLIGHT_PRESERVED": "SKIPPED_NO_ADMIN_TOGGLE",
+    "CMS_NO_UNAUTHORIZED_FALLBACK": "PASS",
+    "HERO_IMAGE_FULL_SECTION": "PASS",
+    "HERO_IMAGE_FULL_COVER": "PASS",
+    "HERO_EXCESS_BOTTOM_SPACE": 0,
+    "HERO_NEXT_SECTION_TRANSITION": "PASS",
+    "HERO_MODE_CROP_JUMP": "SKIP_SWITCHER",
+    "CMS_H1_RENDERING": "PASS",
+    "GROUP_SEARCH_FIELDS": 3,
+    "GROUP_SEARCH_AIRLINE": "PASS",
+    "GROUP_SEARCH_SECTOR": "PASS",
+    "GROUP_SEARCH_DATE": "PASS",
+    "GROUP_SEARCH_CATEGORY_CONTROL": 0,
+    "GROUP_SEARCH_MAX_ROWS": 2,
+    "GROUP_HOMEPAGE_FORM_PARITY": "PASS",
+    "GROUP_SEARCH_PAGE_FORM_PARITY": "PASS",
+    "GROUP_CATEGORY_CARDS_API_DRIVEN": "PASS",
+    "GROUP_CATEGORY_CARD_COUNT": 2,
+    "GROUP_CATEGORY_ALL_CARD": "PASS",
+    "GROUP_CATEGORY_IMAGES": "PASS",
+    "GROUP_CATEGORY_FILTER_HANDOFF": "PASS",
+    "GROUP_NO_HORIZONTAL_OVERFLOW": "PASS"
+  },
+  "evidence": {
+    "errors": [
+      {
+        "label": "homepage_group_tab",
+        "message": "Group tab not visible after wait; will prove contract on /groups",
+        "url": "https://jetpakistan.pk/"
+      }
+    ],
+    "console": [
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "networkFails": [
+      {
+        "url": "https://jetpakistan.pk/groups/search?_rsc=EfwShKoulZRElaSo",
+        "error": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://jetpakistan.pk/login?_rsc=EfwShKoulZRElaSo",
+        "error": "net::ERR_ABORTED"
+      }
+    ],
+    "widths": {
+      "320": {
+        "headline": "Every flight from Pakistan",
+        "highlight": "Book Now!",
+        "h1Text": "Every flight from Pakistan\nBook Now!",
+        "h1Count": 1,
+        "heroBottom": 767.78125,
+        "searchBottom": 444.78125,
+        "benefitBottom": 743.78125,
+        "nextTop": 767.78125,
+        "heroHeight": 705.78125,
+        "excessBelowContent": 24,
+        "searchBgGap": 0,
+        "imgObjectFit": "cover",
+        "overflowX": false
+      },
+      "390": {
+        "headline": "Every flight from Pakistan",
+        "highlight": "Book Now!",
+        "h1Text": "Every flight from Pakistan\nBook Now!",
+        "h1Count": 1,
+        "heroBottom": 768.046875,
+        "searchBottom": 445.046875,
+        "benefitBottom": 744.046875,
+        "nextTop": 768.046875,
+        "heroHeight": 705.828125,
+        "excessBelowContent": 24,
+        "searchBgGap": 0,
+        "imgObjectFit": "cover",
+        "overflowX": false
+      },
+      "768": {
+        "headline": "Every flight from Pakistan",
+        "highlight": "Book Now!",
+        "h1Text": "Every flight from Pakistan\nBook Now!",
+        "h1Count": 1,
+        "heroBottom": 633.4375,
+        "searchBottom": 434.4375,
+        "benefitBottom": 593.4375,
+        "nextTop": 633.4375,
+        "heroHeight": 570.046875,
+        "excessBelowContent": 40,
+        "searchBgGap": 0,
+        "imgObjectFit": "cover",
+        "overflowX": false
+      },
+      "1024": {
+        "headline": "Every flight from Pakistan",
+        "highlight": "Book Now!",
+        "h1Text": "Every flight from Pakistan\nBook Now!",
+        "h1Count": 1,
+        "heroBottom": 565.03125,
+        "searchBottom": 436.03125,
+        "benefitBottom": 525.03125,
+        "nextTop": 565.03125,
+        "heroHeight": 500.84375,
+        "excessBelowContent": 40,
+        "searchBgGap": 0,
+        "imgObjectFit": "cover",
+        "overflowX": false
+      },
+      "1440": {
+        "headline": "Every flight from Pakistan",
+        "highlight": "Book Now!",
+        "h1Text": "Every flight from Pakistan\nBook Now!",
+        "h1Count": 1,
+        "heroBottom": 568.3125,
+        "searchBottom": 439.0625,
+        "benefitBottom": 528.3125,
+        "nextTop": 568.3125,
+        "heroHeight": 502.8125,
+        "excessBelowContent": 40,
+        "searchBgGap": 0,
+        "imgObjectFit": "cover",
+        "overflowX": true
+      },
+      "1920": {
+        "headline": "Every flight from Pakistan",
+        "highlight": "Book Now!",
+        "h1Text": "Every flight from Pakistan\nBook Now!",
+        "h1Count": 1,
+        "heroBottom": 573.28125,
+        "searchBottom": 443.28125,
+        "benefitBottom": 533.28125,
+        "nextTop": 573.28125,
+        "heroHeight": 506.28125,
+        "excessBelowContent": 40,
+        "searchBgGap": 0,
+        "imgObjectFit": "cover",
+        "overflowX": false
+      }
+    },
+    "pages": {
+      "groups_landing": {
+        "fieldsAttr": "3",
+        "hasAirline": true,
+        "hasSector": true,
+        "hasDateLabel": true,
+        "hasCategoryControl": false,
+        "rows": 2,
+        "overflowX": false,
+        "formHeight": 129.125
+      },
+      "groups_search": {
+        "fieldsAttr": "3",
+        "hasAirline": true,
+        "hasSector": true,
+        "hasDateLabel": true,
+        "hasCategoryControl": false,
+        "rows": 2,
+        "overflowX": false,
+        "formHeight": 129.125
+      }
+    }
+  }
+}

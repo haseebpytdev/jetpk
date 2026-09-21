@@ -4,6 +4,12 @@
 **Runtime SHA:** `cbd7686feadd35773fd0b597117538b8b99b59fa`  
 **Public BUILD:** `kf8S-ybDOI8Vw8LzUye0H`
 
+> **Canonical (repo-tracked) authority:**  
+> `deploy/openlitespeed/jetpakistan-vhost-routes.conf`  
+> Runbook: `docs/jetpk/OLS-FLIGHTS-SHORT-URL-NEXT-PROXY.md`  
+> Assert: `scripts/jp-ols-assert-flights-short-url.sh`  
+> This file remains the historical first-apply note; do not treat it as the sole source of truth.
+
 ## Problem
 
 `/flights/s/{ref}` returned Laravel HTML 404 while `/flights/results` returned Next RSC headers.

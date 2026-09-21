@@ -1,0 +1,5 @@
+# Opaque Class B short search URL — extract for ownership tests / apply scripts.
+# Full flight block lives in deploy/openlitespeed/jetpakistan-vhost-routes.conf
+
+    RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
+    RewriteRule ^/flights/s/([A-Za-z0-9]{8,32})$ http://jetpk_public_next/flights/s/$1 [P,L,E=PROXY-HOST:jetpakistan.pk]
