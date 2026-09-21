@@ -1,0 +1,36 @@
+{
+  "phase": "JP-AI-POST-RECOVERY-CLOSURE-08-SMOKE-3",
+  "started_at": "2026-09-21T14:48:52.793Z",
+  "completed_at": "2026-09-21T14:49:41.836Z",
+  "result": "BLOCKED_AT_PREFLIGHT",
+  "total": 3,
+  "first_attempt_pass": 0,
+  "first_attempt_fail": 0,
+  "pass_ids": [],
+  "fail_ids": [],
+  "preflight": {
+    "session_valid": true,
+    "canary_eligible": false,
+    "config_ai_enabled": true,
+    "ai_assistant_enabled_for_session": true,
+    "fab_visible": true,
+    "probe": {
+      "authenticated": true,
+      "admin_identity": true,
+      "canary_eligible": false,
+      "config_ai_enabled": true,
+      "assistant_mode": "public",
+      "ai_assistant_enabled_for_session": true
+    }
+  },
+  "blocker": "PREFLIGHT_FAIL: production assistant_mode=public; harness requires internal_canary. flight_search_read_only_enabled=false on live health probe.",
+  "production_health_snapshot": {
+    "assistant_mode": "public",
+    "internal_canary_enabled": false,
+    "flight_search_read_only_enabled": false,
+    "lab_adapter_enabled": false,
+    "public_enabled": true,
+    "gateway": "degraded",
+    "ai_lab_gateway_healthy": true
+  }
+}
