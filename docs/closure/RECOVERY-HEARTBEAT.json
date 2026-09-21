@@ -1,7 +1,7 @@
 {
   "phase": "PROVENANCE_CORRECTION",
   "application_release_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
-  "closure_metadata_commit_sha": "29e1e385d61f4d6e643eefba46fa4f7e845efcbb",
+  "closure_metadata_commit_sha": "8c5d79da42126fdbd49681938583492dbc5422cf",
   "public_build_id": "wmNT0P2lJftqG2n9tM6gp",
   "dashboard_build_id": "3TyyvdcNScpOGj0oCkQuT",
   "runtime_marker": "jp-final-78dadc7b-20260921T085837Z",

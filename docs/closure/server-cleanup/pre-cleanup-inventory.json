@@ -1,0 +1,69 @@
+{
+  "captured_at": "2026-09-21T09:54:00Z",
+  "host": "185.215.166.176",
+  "hostname": "vmi3400777",
+  "user": "pkjetp",
+  "disk_before": {
+    "filesystem": "/dev/sda1",
+    "size_bytes": 102888095744,
+    "used_bytes": 67548753920,
+    "avail_bytes": 34996514816,
+    "use_percent": 66,
+    "avail_human": "33G"
+  },
+  "home_du_bytes_approx": {
+    "/home/pkjetp": "25G",
+    "backups": "9.3G",
+    "jetpk_app": "8.6G",
+    "releases": "4.4G",
+    "releases_entry_count": 666
+  },
+  "active_authority": {
+    "ACTIVE_LARAVEL_PATH": "/home/pkjetp/jetpk_app",
+    "ACTIVE_PUBLIC_NEXT_PATH": "/home/pkjetp/jetpk_app/frontend",
+    "ACTIVE_DASHBOARD_PATH": "/home/pkjetp/jetpk_app/dashboard",
+    "ACTIVE_PUBLIC_BUILD": "wmNT0P2lJftqG2n9tM6gp",
+    "ACTIVE_DASHBOARD_BUILD": "3TyyvdcNScpOGj0oCkQuT",
+    "ACTIVE_RUNTIME_SHA": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
+    "ACTIVE_AUTHORIZED_SHA": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
+    "ACTIVE_ROLLBACK_SHA": "cbd7686feadd35773fd0b597117538b8b99b59fa"
+  },
+  "pm2": [
+    {
+      "name": "jetpk-public-frontend",
+      "status": "online",
+      "exec_cwd": "/home/pkjetp/jetpk_app/frontend",
+      "listen": "127.0.0.1:3010"
+    },
+    {
+      "name": "jetpk-dashboard",
+      "status": "online",
+      "exec_cwd": "/home/pkjetp/jetpk_app/dashboard",
+      "listen": "127.0.0.1:3001"
+    }
+  ],
+  "listeners": ["127.0.0.1:3010", "127.0.0.1:3001", "127.0.0.1:3000", "127.0.0.1:8088", "127.0.0.1:3306", "127.0.0.1:6379"],
+  "db": {
+    "driver": "mysql",
+    "host_class": "localhost"
+  },
+  "ols": {
+    "vhost_conf_readable_by_app_user": false,
+    "assert_log": "/tmp/jp-ols-assert-provenance.log",
+    "route_ownership_guard": "PASS",
+    "logrotate": "/etc/logrotate.d/jetpakistan"
+  },
+  "env_locations": [
+    "/home/pkjetp/jetpk_app/.env",
+    "/home/pkjetp/jetpk_app/frontend/.env.production.local",
+    "/home/pkjetp/jetpk_app/dashboard/.env.production.local"
+  ],
+  "immutable_freeze": {
+    "application_release_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
+    "release_tag": "jetpakistan-recovered-final-20260921",
+    "public_build_id": "wmNT0P2lJftqG2n9tM6gp",
+    "dashboard_build_id": "3TyyvdcNScpOGj0oCkQuT",
+    "rollback_sha": "cbd7686feadd35773fd0b597117538b8b99b59fa",
+    "metadata_tip": "8c5d79da42126fdbd49681938583492dbc5422cf"
+  }
+}
