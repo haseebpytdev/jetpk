@@ -138,7 +138,14 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      return sessionStorage.getItem(STORAGE_KEY);
+    } catch {
+      return null;
+    }
+  });
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [leadCaptureRequired, setLeadCaptureRequired] = useState(false);
   const [leadFields, setLeadFields] = useState<string[]>([

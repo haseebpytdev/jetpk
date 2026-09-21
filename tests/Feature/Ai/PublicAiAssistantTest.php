@@ -2,11 +2,13 @@
 
 namespace Tests\Feature\Ai;
 
+use App\Enums\CustomerQueryStatus;
 use App\Models\Agency;
 use App\Models\AiConversation;
 use App\Models\AiMessage;
 use App\Models\Booking;
 use App\Models\BookingContact;
+use App\Models\CustomerQuery;
 use App\Enums\BookingStatus;
 use App\Services\Ai\NullInferenceProvider;
 use App\Contracts\Ai\InferenceProvider;
@@ -352,6 +354,146 @@ class PublicAiAssistantTest extends TestCase
 
         $third->assertOk()->assertJsonPath('status', 'not_found');
         $this->assertStringNotContainsString('lhe', mb_strtolower((string) $third->json('message')));
+    }
+
+    public function test_orchestrator_clear_rebinds_linked_customer_query(): void
+    {
+        $hash = hash('sha256', str_repeat('n', 40));
+        $old = AiConversation::query()->create([
+            'public_id' => (string) Str::uuid(),
+            'channel' => 'web',
+            'visitor_token_hash' => $hash,
+            'state' => AiConversation::STATE_AI_ACTIVE,
+            'shopping_state' => ['origin' => 'LHE', 'destination' => 'JED'],
+        ]);
+
+        $query = CustomerQuery::query()->create([
+            'visitor_token_hash' => $hash,
+            'ai_conversation_id' => $old->id,
+            'name' => 'QA Guest',
+            'email' => 'qa-clear-direct@example.com',
+            'phone_raw' => '03001234567',
+            'phone_e164' => '+923001234567',
+            'phone_country' => 'PK',
+            'contact_consent' => true,
+            'consent_timestamp' => now(),
+            'consent_source' => 'ask_jetpakistan',
+            'source' => 'ask_jetpakistan',
+            'status' => CustomerQueryStatus::Qualified,
+            'last_activity_at' => now(),
+        ]);
+
+        $this->assertSame($old->id, $query->fresh()->ai_conversation_id);
+        $this->assertSame(1, CustomerQuery::query()->where('ai_conversation_id', $old->id)->count());
+
+        $new = app(\App\Services\Ai\AiChatOrchestrator::class)
+            ->clearConversation($old, $hash);
+
+        $query->refresh();
+        $this->assertSame(0, CustomerQuery::query()->where('ai_conversation_id', $old->id)->count());
+        $this->assertSame($new->id, $query->ai_conversation_id);
+        $this->assertSame(AiConversation::STATE_CLOSED, $old->fresh()->state);
+    }
+
+    public function test_clear_rebinds_customer_query_and_isolates_travel_state(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
+
+        $vid = str_repeat('m', 40);
+        $hash = hash('sha256', $vid);
+
+        $old = AiConversation::query()->create([
+            'public_id' => (string) Str::uuid(),
+            'channel' => 'web',
+            'visitor_token_hash' => $hash,
+            'state' => AiConversation::STATE_AI_ACTIVE,
+            'shopping_state' => ['origin' => 'LHE', 'destination' => 'JED'],
+        ]);
+
+        $query = CustomerQuery::query()->create([
+            'visitor_token_hash' => $hash,
+            'ai_conversation_id' => $old->id,
+            'name' => 'QA Guest',
+            'email' => 'qa-clear@example.com',
+            'phone_raw' => '03001234567',
+            'phone_e164' => '+923001234567',
+            'phone_country' => 'PK',
+            'contact_consent' => true,
+            'consent_timestamp' => now(),
+            'consent_source' => 'ask_jetpakistan',
+            'source' => 'ask_jetpakistan',
+            'status' => CustomerQueryStatus::Qualified,
+            'origin' => 'LHE',
+            'destination' => 'JED',
+            'last_activity_at' => now(),
+        ]);
+
+        $clear = $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/clear', ['conversation_id' => $old->public_id]);
+
+        $clear->assertOk();
+        $newPublicId = (string) $clear->json('conversation_id');
+        $this->assertNotSame($old->public_id, $newPublicId);
+
+        $new = AiConversation::query()->where('public_id', $newPublicId)->first();
+        $this->assertNotNull($new);
+        $this->assertSame([], $new->shopping_state);
+        $this->assertSame(AiConversation::STATE_AI_ACTIVE, $new->state);
+
+        $old->refresh();
+        $this->assertSame(AiConversation::STATE_CLOSED, $old->state);
+
+        $query->refresh();
+        $this->assertSame($new->id, $query->ai_conversation_id);
+
+        $chat = $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', ['message' => 'LHE to DXB 22 Dec']);
+
+        $chat->assertOk();
+        $this->assertNotSame('JED', data_get($chat->json(), 'meta.intent.slots.destination'));
+        $this->assertSame($newPublicId, $chat->json('conversation_id'));
+    }
+
+    public function test_resolve_conversation_resumes_active_recent_query_without_clear(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
+
+        $vid = str_repeat('p', 40);
+        $hash = hash('sha256', $vid);
+
+        $conversation = AiConversation::query()->create([
+            'public_id' => (string) Str::uuid(),
+            'channel' => 'web',
+            'visitor_token_hash' => $hash,
+            'state' => AiConversation::STATE_AI_ACTIVE,
+            'shopping_state' => ['origin' => 'LHE', 'destination' => 'DXB'],
+        ]);
+
+        CustomerQuery::query()->create([
+            'visitor_token_hash' => $hash,
+            'ai_conversation_id' => $conversation->id,
+            'name' => 'QA Guest',
+            'email' => 'qa-resume@example.com',
+            'phone_raw' => '03001234567',
+            'phone_e164' => '+923001234567',
+            'phone_country' => 'PK',
+            'contact_consent' => true,
+            'consent_timestamp' => now(),
+            'consent_source' => 'ask_jetpakistan',
+            'source' => 'ask_jetpakistan',
+            'status' => CustomerQueryStatus::Qualified,
+            'last_activity_at' => now(),
+        ]);
+
+        $chat = $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', ['message' => 'same route tomorrow']);
+
+        $chat->assertOk();
+        $this->assertSame($conversation->public_id, $chat->json('conversation_id'));
+        $conversation->refresh();
+        $this->assertSame(AiConversation::STATE_AI_ACTIVE, $conversation->state);
     }
 
     public function test_application_rate_limit_returns_429_after_budget_exhausted(): void

@@ -1,7 +1,7 @@
 /**
- * JP-AI-LIVE-SEARCH-MATRIX-CLOSURE-08 — strict first-attempt LS-01..LS-12 certification.
- * Retries are diagnostic only; certification uses first_attempt_result only.
+ * JP-AI-CONVERSATION-ISOLATION-CANONICAL-CLOSURE-10 — strict first-attempt LS-01..LS-12.
  */
+import { clearThrottleMetrics, resetClearThrottleMetrics } from "./canary-matrix-helpers.mjs";
 import { chromium } from "playwright";
 import fs from "node:fs";
 import path from "node:path";
@@ -62,10 +62,11 @@ async function main() {
   }
 
   resetReport();
+  resetClearThrottleMetrics();
   fs.mkdirSync(evidenceDir, { recursive: true });
 
   const ledger = {
-    phase: "JP-AI-LIVE-SEARCH-MATRIX-CLOSURE-08",
+    phase: "JP-AI-CONVERSATION-ISOLATION-CANONICAL-CLOSURE-10-MATRIX",
     started_at: new Date().toISOString(),
     total: LIVE_CASES.length,
     first_attempt_pass: 0,
@@ -97,8 +98,8 @@ async function main() {
       search_calls: 0,
       mutations: 0,
     },
-    conversation_isolation: "API_CLEAR_PER_CASE",
-    state_reset_method: "POST_/api/public/ai/clear+sessionStorage",
+    conversation_isolation: "UI_CLEAR_WITH_RETRY_AFTER_PREFLIGHT",
+    state_reset_method: "UI_Clear_conversation+sessionStorage_hydration",
     fab_readiness: "waitForAskReady",
   };
 
@@ -138,6 +139,7 @@ async function main() {
         error: result.error,
         route_meta: result.routeMeta,
         confirmation_before_search: result.confirmationBeforeSearch === true,
+        isolation: result.isolation ?? null,
       };
 
       if (firstPass) {
@@ -162,10 +164,14 @@ async function main() {
         }
       }
 
-      await page.waitForTimeout(8000);
     }
+  } catch (e) {
+    ledger.aborted = true;
+    ledger.abort_reason = e instanceof Error ? e.message : String(e);
+    throw e;
   } finally {
     await browser.close();
+    ledger.clear_throttle = { ...clearThrottleMetrics };
     ledger.completed_at = new Date().toISOString();
     ledger.read_only_search_ready =
       ledger.first_attempt_pass === 12 &&

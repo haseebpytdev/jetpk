@@ -22,6 +22,90 @@ export const metrics = {
   loginCount: 0,
 };
 
+/** JP-AI-CONVERSATION-ISOLATION-CANONICAL-CLOSURE-10 — pre-case /clear throttle evidence */
+export const clearThrottleMetrics = {
+  clear_requests: 0,
+  clear_429_count: 0,
+  retry_after_values: [],
+  bounded_retries: 0,
+  preflight_failures: 0,
+  throttle_wait_ms: 0,
+};
+
+export function resetClearThrottleMetrics() {
+  clearThrottleMetrics.clear_requests = 0;
+  clearThrottleMetrics.clear_429_count = 0;
+  clearThrottleMetrics.retry_after_values = [];
+  clearThrottleMetrics.bounded_retries = 0;
+  clearThrottleMetrics.preflight_failures = 0;
+  clearThrottleMetrics.throttle_wait_ms = 0;
+}
+
+export const CLEAR_RATE_LIMIT = "10/min";
+
+function parseRetryAfterSeconds(response) {
+  const raw = response.headers()?.["retry-after"] ?? response.headers()?.["Retry-After"];
+  if (raw == null || raw === "") return null;
+  const numeric = Number.parseInt(String(raw), 10);
+  if (Number.isFinite(numeric) && numeric >= 0) return numeric;
+  const dateMs = Date.parse(String(raw));
+  if (!Number.isNaN(dateMs)) {
+    return Math.max(0, Math.ceil((dateMs - Date.now()) / 1000));
+  }
+  return null;
+}
+
+function boundedThrottleWaitSeconds(retryAfterSeconds) {
+  const base = retryAfterSeconds == null ? 61 : retryAfterSeconds + 1;
+  return Math.min(base, 75);
+}
+
+async function sleepMs(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function readSessionConversationId(page) {
+  return page.evaluate(() => {
+    try {
+      return sessionStorage.getItem("jp_ai_conversation_id");
+    } catch {
+      return null;
+    }
+  });
+}
+
+async function triggerUiClear(page) {
+  const clearResponsePromise = page.waitForResponse(
+    (res) => res.url().includes("/api/public/ai/clear") && res.request().method() === "POST",
+    { timeout: 90_000 },
+  );
+  await page.getByRole("button", { name: "Chat options" }).click({ timeout: 30_000 });
+  await page.getByRole("menuitem", { name: "Clear conversation" }).click({ timeout: 30_000 });
+  const clearResponse = await clearResponsePromise;
+  clearThrottleMetrics.clear_requests += 1;
+  let clearJson = {};
+  try {
+    clearJson = await clearResponse.json();
+  } catch {
+    clearJson = {};
+  }
+  const requestBody = (() => {
+    try {
+      return JSON.parse(clearResponse.request().postData() ?? "{}");
+    } catch {
+      return {};
+    }
+  })();
+  return {
+    status: clearResponse.status(),
+    ok: clearResponse.ok(),
+    conversation_id:
+      typeof clearJson.conversation_id === "string" ? clearJson.conversation_id : null,
+    request_conversation_id: requestBody.conversation_id ?? null,
+    retry_after_seconds: parseRetryAfterSeconds(clearResponse),
+  };
+}
+
 fs.mkdirSync(evidenceDir, { recursive: true });
 
 export function appendCaseRecord(record) {
@@ -263,80 +347,86 @@ export async function waitForAskReady(page, timeoutMs = 120_000) {
   return preflight;
 }
 
+export async function waitForConversationIdHydrated(page, expectedId, timeoutMs = 30_000) {
+  if (!expectedId) {
+    throw new Error("HARNESS_CONVERSATION_ID_NOT_HYDRATED:missing_expected_id");
+  }
+
+  await page.waitForFunction(
+    (id) => {
+      try {
+        return sessionStorage.getItem("jp_ai_conversation_id") === id;
+      } catch {
+        return false;
+      }
+    },
+    expectedId,
+    { timeout: timeoutMs },
+  );
+}
+
 export async function clearConversation(page) {
   const panel = page.getByTestId("ask-jetpakistan-panel");
   if ((await panel.count()) === 0) {
     await openAskPanel(page);
   }
 
-  const cleared = await page.evaluate(async (base) => {
-    const fetchJson = async (url, init) => {
-      const res = await fetch(url, {
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-        ...init,
-      });
-      let json = {};
-      try {
-        json = await res.json();
-      } catch {
-        json = {};
-      }
-      return { ok: res.ok, status: res.status, json };
-    };
-
-    await fetchJson(`${base}/laravel/api/public/content/csrf-token`, { method: "GET" });
-    const cookies = document.cookie.split(";").map((c) => c.trim());
-    const xsrfRaw = cookies.find((c) => c.startsWith("XSRF-TOKEN="));
-    const xsrf = xsrfRaw ? decodeURIComponent(xsrfRaw.split("=").slice(1).join("=")) : "";
-
-    let conversationId = null;
+  const snapshot = await page.evaluate(() => {
+    let storedId = null;
     try {
-      conversationId = sessionStorage.getItem("jp_ai_conversation_id");
+      storedId = sessionStorage.getItem("jp_ai_conversation_id");
     } catch {
-      conversationId = null;
+      storedId = null;
     }
+    const el = document.querySelector('[data-testid="ask-jetpakistan-messages"]');
+    const messageText = (el?.textContent ?? "").trim();
+    return { storedId, messageText };
+  });
 
-    const clear = await fetchJson(`${base}/laravel/api/public/ai/clear`, {
-      method: "POST",
-      headers: xsrf ? { "X-XSRF-TOKEN": xsrf } : {},
-      body: JSON.stringify({ conversation_id: conversationId }),
-    });
-
-    const nextId =
-      typeof clear.json?.conversation_id === "string" ? clear.json.conversation_id : null;
-    try {
-      if (nextId) sessionStorage.setItem("jp_ai_conversation_id", nextId);
-      else sessionStorage.removeItem("jp_ai_conversation_id");
-    } catch {
-      /* best-effort */
-    }
-
+  const oldConversationId = snapshot.storedId ?? null;
+  if (!snapshot.messageText && !oldConversationId) {
     return {
-      ok: clear.ok,
-      status: clear.status,
-      conversation_id: nextId,
+      conversation_id: null,
+      skipped: true,
+      old_conversation_id: null,
+      clear_response_new_id: null,
+      session_storage_after_clear: null,
     };
-  }, BASE);
-
-  if (!cleared.ok) {
-    try {
-      await page.getByRole("button", { name: "Chat options" }).click({ timeout: 15_000 });
-      await page.getByRole("menuitem", { name: "Clear conversation" }).click({ timeout: 15_000 });
-    } catch {
-      /* fall through to reload */
-    }
   }
 
-  await page.goto(`${BASE}/#ask-jetpakistan`, { waitUntil: "domcontentloaded", timeout: 120_000 });
-  await waitForConfigHydration(page, 60_000).catch(() => {});
-  const panelAfter = page.getByTestId("ask-jetpakistan-panel");
-  if (!(await panelAfter.isVisible().catch(() => false))) {
-    await openAskPanel(page);
+  let attempt = await triggerUiClear(page);
+  if (attempt.status === 429) {
+    clearThrottleMetrics.clear_429_count += 1;
+    const retryAfter = attempt.retry_after_seconds;
+    clearThrottleMetrics.retry_after_values.push(retryAfter ?? 61);
+    const waitSeconds = boundedThrottleWaitSeconds(retryAfter);
+    const waitMs = waitSeconds * 1000;
+    clearThrottleMetrics.throttle_wait_ms += waitMs;
+    clearThrottleMetrics.bounded_retries += 1;
+    await sleepMs(waitMs);
+    attempt = await triggerUiClear(page);
+  }
+
+  if (attempt.status === 429 || !attempt.ok || !attempt.conversation_id) {
+    clearThrottleMetrics.preflight_failures += 1;
+    throw new Error(
+      `CLEAR_PREFLIGHT_INFRA_FAILURE:status=${attempt.status} id=${attempt.conversation_id ?? "null"}`,
+    );
+  }
+
+  const newId = attempt.conversation_id;
+  if (oldConversationId && newId === oldConversationId) {
+    clearThrottleMetrics.preflight_failures += 1;
+    throw new Error("HARNESS_CONVERSATION_ID_NOT_ISOLATED:clear_new_equals_old");
+  }
+
+  await waitForConversationIdHydrated(page, newId);
+  const sessionStorageId = await readSessionConversationId(page);
+  if (sessionStorageId !== newId) {
+    clearThrottleMetrics.preflight_failures += 1;
+    throw new Error(
+      `HARNESS_CONVERSATION_ID_NOT_ISOLATED:session=${sessionStorageId ?? "null"}:expected=${newId}`,
+    );
   }
 
   await page.waitForFunction(
@@ -344,10 +434,19 @@ export async function clearConversation(page) {
       const el = document.querySelector('[data-testid="ask-jetpakistan-messages"]');
       return el && (el.textContent ?? "").trim().length === 0;
     },
-    { timeout: 15_000 },
+    { timeout: 60_000 },
   ).catch(() => {});
 
-  await page.waitForTimeout(1000);
+  await waitForAskReady(page);
+
+  return {
+    conversation_id: newId,
+    old_conversation_id: oldConversationId,
+    clear_response_new_id: newId,
+    session_storage_after_clear: sessionStorageId,
+    clear_request_id: attempt.request_conversation_id,
+    clear_preflight_rate_limited: clearThrottleMetrics.clear_429_count > 0,
+  };
 }
 
 export async function withCanaryFaultMode(page, faultMode, fn) {
