@@ -1,15 +1,15 @@
-{
+﻿{
   "phase": "FINAL_CLOSURE",
-  "step": "stamped_dual_build_lock_tag",
-  "head_sha": "pending-lock-commit",
-  "runtime_sha": "1fc2dad1386d417d128473891afbc47c0ba330a8",
+  "step": "canonical_tagged",
+  "head_sha": "d84f350aab57963d8991bc830e23700eedc1abe3",
+  "runtime_sha": "d84f350aab57963d8991bc830e23700eedc1abe3",
   "public_build_id": "Mxj-CVOg4w_poyBeBzoIp",
   "dashboard_build_id": "E4_XqZnXxChe1Bdw4rJ0l",
-  "runtime_marker": "jp-final-1fc2dad1-20260921T081450Z",
+  "runtime_marker": "jp-final-d84f350a",
   "rollback_sha": "cbd7686feadd35773fd0b597117538b8b99b59fa",
-  "remote_main_sha": "1fc2dad1386d417d128473891afbc47c0ba330a8",
-  "last_progress_at": "2026-09-21T08:15:00Z",
-  "status": "STAMPED_PENDING_LOCK_COMMIT",
+  "remote_main_sha": "d84f350aab57963d8991bc830e23700eedc1abe3",
+  "last_progress_at": "2026-09-21T08:20:00Z",
+  "status": "VERIFIED",
   "functional_golden_matrix": "PASS",
   "homepage_guard": "PASS",
   "group_guard": "PASS",
@@ -21,6 +21,5 @@
   "return_metric_equivalence": "PASS",
   "aeo_geo": "PASS",
   "indexnow": "NOT_APPLICABLE",
-  "sha_parity": "PASS",
-  "next": "commit filled lock → FF main → retag stamps to tip → annotated tag"
+  "sha_parity": "PASS"
 }
