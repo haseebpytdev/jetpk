@@ -1,6 +1,7 @@
 {
   "phase": "PROVENANCE_CORRECTION",
   "application_release_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
+  "closure_metadata_commit_sha": "29e1e385d61f4d6e643eefba46fa4f7e845efcbb",
   "public_build_id": "wmNT0P2lJftqG2n9tM6gp",
   "dashboard_build_id": "3TyyvdcNScpOGj0oCkQuT",
   "runtime_marker": "jp-final-78dadc7b-20260921T085837Z",
@@ -10,7 +11,5 @@
   "build_provenance": "PASS",
   "targeted_post_rebuild_guard": "PASS",
   "ols_route_guard": "PASS",
-  "soft_guard_max_ms": 124,
-  "last_progress_at": "2026-09-21T09:05:00Z",
-  "status": "METADATA_COMMIT_PENDING"
+  "status": "VERIFIED"
 }

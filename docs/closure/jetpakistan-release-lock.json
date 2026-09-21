@@ -4,7 +4,7 @@
   "tag": "jetpakistan-recovered-final-20260921",
   "status": "VERIFIED",
   "application_release_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
-  "closure_metadata_commit_sha": null,
+  "closure_metadata_commit_sha": "29e1e385d61f4d6e643eefba46fa4f7e845efcbb",
   "remote_main_sha_note": "May equal closure_metadata_commit_sha after metadata FF; binaries remain application_release_sha",
   "production_runtime_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
   "public_build_source_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
