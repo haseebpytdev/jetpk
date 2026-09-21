@@ -27,7 +27,7 @@ jobs:
           fi
           echo "RETIRED_PATH_GUARD=PASS"
 
-      - name: Release lock + OLS artifacts present and stamped
+      - name: Release lock provenance semantics (v2)
         run: |
           test -f docs/closure/jetpakistan-release-lock.json
           test -f docs/JETPAKISTAN_RELEASE_GUARD_POLICY.md
@@ -38,22 +38,55 @@ jobs:
           php -r '
             $lock = json_decode(file_get_contents("docs/closure/jetpakistan-release-lock.json"), true);
             if (!is_array($lock)) { fwrite(STDERR, "LOCK_JSON_INVALID\n"); exit(1); }
-            foreach (["release_sha","remote_main_sha","production_runtime_sha","public_build_source_sha","dashboard_build_source_sha","public_build_id","dashboard_build_id","runtime_marker","rollback_sha"] as $k) {
+            $app = $lock["application_release_sha"] ?? null;
+            if (!$app || !preg_match("/^[0-9a-f]{40}$/", $app)) {
+              fwrite(STDERR, "APPLICATION_RELEASE_SHA_INVALID\n");
+              exit(1);
+            }
+            $required = [
+              "production_runtime_sha",
+              "public_build_source_sha",
+              "dashboard_build_source_sha",
+              "public_build_id",
+              "dashboard_build_id",
+              "runtime_marker",
+              "rollback_sha",
+            ];
+            foreach ($required as $k) {
               if (empty($lock[$k])) { fwrite(STDERR, "LOCK_MISSING_$k\n"); exit(1); }
             }
-            // release_sha may be this commit or its immediate parent (self-SHA chicken-egg).
-            $head = trim((string) shell_exec('git rev-parse HEAD'));
-            $rel = $lock['release_sha'];
-            if ($rel !== $head) {
-              $parent = trim((string) shell_exec('git rev-parse HEAD~1'));
-              if ($rel !== $parent) {
-                fwrite(STDERR, "LOCK_SHA_NOT_HEAD_OR_PARENT head=$head rel=$rel\n");
+            foreach (["production_runtime_sha","public_build_source_sha","dashboard_build_source_sha"] as $k) {
+              if (($lock[$k] ?? null) !== $app) {
+                fwrite(STDERR, "BUILD_PROVENANCE_MISMATCH field=$k got={$lock[$k]} want=$app\n");
                 exit(1);
               }
             }
-            if (($lock["critical_route_owners"]["/flights/s/{ref}"] ?? null) !== "NEXT") { fwrite(STDERR, "SHORT_OWNER_FAIL\n"); exit(1); }
-            if (($lock["ols_configuration_source"] ?? null) !== "deploy/openlitespeed/jetpakistan-vhost-routes.conf") { fwrite(STDERR, "OLS_SOURCE_FAIL\n"); exit(1); }
-            echo "RELEASE_LOCK_STAMPED=PASS\n";
+            // Metadata tip may follow application release; never require HEAD==app or HEAD~1 hacks.
+            $meta = $lock["closure_metadata_commit_sha"] ?? null;
+            if ($meta !== null && $meta !== "" && !preg_match("/^[0-9a-f]{40}$/", $meta)) {
+              fwrite(STDERR, "CLOSURE_METADATA_SHA_INVALID\n");
+              exit(1);
+            }
+            if (($lock["critical_route_owners"]["/flights/s/{ref}"] ?? null) !== "NEXT") {
+              fwrite(STDERR, "SHORT_OWNER_FAIL\n");
+              exit(1);
+            }
+            if (($lock["ols_configuration_source"] ?? null) !== "deploy/openlitespeed/jetpakistan-vhost-routes.conf") {
+              fwrite(STDERR, "OLS_SOURCE_FAIL\n");
+              exit(1);
+            }
+            $manifest = file_get_contents("docs/closure/JETPAKISTAN_CANONICAL_RELEASE.md");
+            if (strpos($manifest, $app) === false) {
+              fwrite(STDERR, "MANIFEST_MISSING_APPLICATION_RELEASE_SHA\n");
+              exit(1);
+            }
+            if (strpos($manifest, "1fc2dad1386d417d128473891afbc47c0ba330a8") !== false && strpos($manifest, "application_release_sha") === false) {
+              fwrite(STDERR, "MANIFEST_STALE_1fc2dad1_AS_FINAL\n");
+              exit(1);
+            }
+            echo "APPLICATION_RELEASE_SHA=$app\n";
+            echo "RELEASE_LOCK_SEMANTICS=PASS\n";
+            echo "BUILD_PROVENANCE_LOCK=PASS\n";
           '
           echo "RELEASE_ARTIFACTS=PASS"
 

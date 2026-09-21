@@ -43,4 +43,21 @@ class PublicUrlSensitivityGuardTest extends TestCase
             $lock['ols_configuration_source'] ?? null
         );
     }
+
+    #[Test]
+    public function release_lock_v2_application_release_matches_build_stamps(): void
+    {
+        $lock = json_decode((string) file_get_contents(base_path('docs/closure/jetpakistan-release-lock.json')), true);
+        $this->assertIsArray($lock);
+        $app = $lock['application_release_sha'] ?? null;
+        $this->assertIsString($app);
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{40}$/', $app);
+        $this->assertSame($app, $lock['production_runtime_sha'] ?? null);
+        $this->assertSame($app, $lock['public_build_source_sha'] ?? null);
+        $this->assertSame($app, $lock['dashboard_build_source_sha'] ?? null);
+        $this->assertNotEmpty($lock['public_build_id'] ?? null);
+        $this->assertNotEmpty($lock['dashboard_build_id'] ?? null);
+        // Deprecated v1 self-hash fields / HEAD~1 authority must not reappear as sole keys.
+        $this->assertArrayNotHasKey('release_sha', $lock);
+    }
 }

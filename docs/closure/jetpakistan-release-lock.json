@@ -1,21 +1,22 @@
-﻿{
-  "schema": "jetpakistan-release-lock/v1",
+{
+  "schema": "jetpakistan-release-lock/v2",
   "closure_date": "2026-09-21",
   "tag": "jetpakistan-recovered-final-20260921",
   "status": "VERIFIED",
-  "release_sha": "0df3b3ba21742daa456fa3317c5bec4b0cdb943c",
-  "remote_main_sha": "0df3b3ba21742daa456fa3317c5bec4b0cdb943c",
-  "production_runtime_sha": "0df3b3ba21742daa456fa3317c5bec4b0cdb943c",
-  "public_build_source_sha": "0df3b3ba21742daa456fa3317c5bec4b0cdb943c",
-  "dashboard_build_source_sha": "0df3b3ba21742daa456fa3317c5bec4b0cdb943c",
-  "dual_build_source_sha": "1fc2dad1386d417d128473891afbc47c0ba330a8",
-  "public_build_id": "Mxj-CVOg4w_poyBeBzoIp",
-  "dashboard_build_id": "E4_XqZnXxChe1Bdw4rJ0l",
-  "runtime_marker": "jp-final-0df3b3ba",
+  "application_release_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
+  "closure_metadata_commit_sha": null,
+  "remote_main_sha_note": "May equal closure_metadata_commit_sha after metadata FF; binaries remain application_release_sha",
+  "production_runtime_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
+  "public_build_source_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
+  "dashboard_build_source_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
+  "public_build_id": "wmNT0P2lJftqG2n9tM6gp",
+  "dashboard_build_id": "3TyyvdcNScpOGj0oCkQuT",
+  "runtime_marker": "jp-final-78dadc7b-20260921T085837Z",
   "rollback_sha": "cbd7686feadd35773fd0b597117538b8b99b59fa",
   "prior_certified_runtime_sha": "cbd7686feadd35773fd0b597117538b8b99b59fa",
   "prior_public_build_id": "kf8S-ybDOI8Vw8LzUye0H",
-  "sha_parity": "PASS",
+  "build_provenance": "PASS",
+  "sha_parity_application": "PASS",
   "critical_route_owners": {
     "/flights/s/{ref}": "NEXT",
     "/flights/results": "NEXT",
@@ -37,7 +38,7 @@
     "traveler_p95_ms": 1954,
     "return_post_supplier_p95_ms": 645,
     "duplicate_supplier_calls": 0,
-    "post_stamp_note": "App tree unchanged vs cbd7686f; dual rebuild from 1fc2dad1; docs stamp tip d84f350a"
+    "post_stamp_note": "Fresh dual Next rebuild from application_release_sha 78dadc7b on 2026-09-21; metadata commit follows without becoming binary authority"
   },
   "retired_paths": [
     "docs/closure/01-homepage/docs/closure/01-homepage"
@@ -50,6 +51,15 @@
     "docs/jetpk/DEPLOYMENT-CONTEXT.md",
     "docs/closure/SEO-AEO-GEO",
     "docs/evidence/jp-final-perf-cert-cbd7686f"
+  ],
+  "zero_reference_retirement": "PASS_FOR_PROVEN_ITEMS",
+  "unknown_retirement_items": [
+    "resources/views/frontend/**",
+    "legacy mobile OTA specs",
+    "host /home/pkjetp/jp-*-cbd7686f harness dirs",
+    "host releases/jp-final-05-*",
+    "public/css/ota-public.css",
+    "duplicate Group search Laravel controllers"
   ],
   "commercial_mutations": {
     "payment_executed": false,

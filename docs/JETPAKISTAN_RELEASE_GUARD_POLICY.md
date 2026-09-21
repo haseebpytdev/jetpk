@@ -17,25 +17,40 @@ A green CI build or a GitHub `main` tip is never sufficient for production PASS.
 3. Runtime SHA stamps + BUILD_ID provenance on host
 4. Live verification on `https://jetpakistan.pk` only
 
-## Exact SHA parity
+## Application release vs closure metadata
 
-Required equality after deploy:
+Separate identities (never conflate):
 
 ```
-FINAL_MAIN_SHA
-  = REMOTE_MAIN_SHA
-  = PRODUCTION_RUNTIME_SHA
+application_release_sha   = immutable commit whose tree produced live binaries
+closure_metadata_commit_sha = optional later docs/lock/CI commit on main
+```
+
+- Binaries and host stamps must track **`application_release_sha` only**.
+- `closure_metadata_commit_sha` may advance `REMOTE_MAIN` without becoming build authority.
+- Do **not** treat `HEAD~1` / parent heuristics as release authority.
+- Do **not** claim a metadata commit as binary source unless `npm run build` was actually run from that tree.
+
+## Exact production stamp parity
+
+Required equality after deploy (application release):
+
+```
+PRODUCTION_RUNTIME_SHA
   = PUBLIC_BUILD_SOURCE_SHA
   = DASHBOARD_BUILD_SOURCE_SHA
+  = application_release_sha
 ```
 
-Mismatch ⇒ `SHA_PARITY=FAIL` ⇒ no FINAL VERIFIED PASS.
+`REMOTE_MAIN_SHA` may equal `closure_metadata_commit_sha` when a metadata-only tip follows the tagged application release. Tag remains on `application_release_sha` unless an explicit new annotated tag is cut.
+
+Mismatch of runtime/source stamps vs `application_release_sha` ⇒ `BUILD_PROVENANCE=FAIL`.
 
 ## Build provenance
 
-- Public and dashboard Next must be built from the canonical SHA (even if dashboard code unchanged).
+- Public and dashboard Next must be built from **`application_release_sha`** (even if dashboard code unchanged).
 - Marker files (`.jetpk-runtime-sha`, `.jetpk-runtime-marker`, `.jetpk-*-source-sha`) never substitute for a real `npm run build`.
-- Record `PUBLIC_BUILD_ID` and `DASHBOARD_BUILD_ID` from `.next/BUILD_ID`.
+- Record `PUBLIC_BUILD_ID` and `DASHBOARD_BUILD_ID` from `.next/BUILD_ID` after that build.
 
 ## No production-only authority
 

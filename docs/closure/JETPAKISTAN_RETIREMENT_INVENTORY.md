@@ -75,8 +75,10 @@ Remove only when listed in a signed cleanup log with zero-ref proof:
 
 ```
 RETIREMENT_INVENTORY=PASS
-ZERO_REFERENCE_RETIREMENT=PARTIAL_SAFE
-FILES_DELETED=<nested homepage duplicate tree only, if present>
+ZERO_REFERENCE_RETIREMENT=PASS_FOR_PROVEN_ITEMS
+FILES_DELETED=docs/closure/01-homepage/docs/closure/01-homepage (nested duplicate)
 FILES_ARCHIVED=evidence packs retained in-place
-UNKNOWN_ITEMS=Blade frontend views + old host releases (documented)
+UNKNOWN_RETIREMENT_ITEMS=resources/views/frontend/**; legacy mobile OTA specs; host jp-*-cbd7686f harness dirs; host releases/jp-final-05-*; public/css/ota-public.css; duplicate Group search Laravel controllers
 ```
+
+Do **not** delete UNKNOWN candidates until zero-reference proof exists.
