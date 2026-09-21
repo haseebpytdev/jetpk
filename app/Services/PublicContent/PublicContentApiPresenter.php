@@ -211,6 +211,8 @@ final class PublicContentApiPresenter
             ['path' => '/faq'],
             ['path' => '/terms'],
             ['path' => '/privacy'],
+            ['path' => '/groups'],
+            ['path' => '/sitemap'],
         ] as $route) {
             if ($this->sitemapEligibility->isManagedPathEligible($route['path'])) {
                 $routes[] = $route;

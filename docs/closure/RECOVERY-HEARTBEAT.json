@@ -1,18 +1,22 @@
 {
   "phase": "SEO_RECOVERY",
-  "step": "same_sha_perf_pass_begin_seo",
-  "head_sha": "b45975e36004cf74c9370e71a358fcb38de8ab69",
+  "step": "wp0_audit_wp2_wp5_remediation",
+  "head_sha": "local-uncommitted-seo-package",
   "public_build_id": "S49jLxNux1bMJZD6Wx_U6",
   "started_at": "2026-09-20T11:46:00Z",
-  "last_progress_at": "2026-09-20T22:55:00Z",
-  "last_completed_action": "SAME_SHA_PERF_CERT PASS — soft-nav host N=20 10/10@242ms; Traveler 30@1770; Return Pair 30 poll 0.652; Pair+Segmented N20 dup=0",
-  "current_action": "Begin SEO recovery / short URLs / AEO-GEO / parity / retirement / release-lock",
+  "last_progress_at": "2026-09-21T00:00:00Z",
+  "last_completed_action": "SEO WP0 audit + WP1 inventory + WP2/WP4/WP5 first remediation (metadata, robots parity, FAQPage JSON-LD, sitemap /groups+/sitemap)",
+  "current_action": "Commit/deploy SEO package; then WP7 short URLs → AEO/GEO → §49 gates",
   "status": "IN_PROGRESS",
   "soft_nav_gate": "PASS",
   "traveler_gate": "PASS",
   "return_pair_gate": "PASS",
   "pair_segmented_gate": "PASS",
   "same_sha_perf_cert": "PASS",
+  "seo_full_project_audit": "PASS",
+  "seo_metadata": "PARTIAL",
+  "seo_structured_data": "PARTIAL",
+  "seo_robots": "PARTIAL",
   "production": {
     "runtime_sha": "b45975e36004cf74c9370e71a358fcb38de8ab69",
     "public_build_id": "S49jLxNux1bMJZD6Wx_U6",
@@ -21,5 +25,6 @@
   "architecture": {
     "authority": "unstable_cache",
     "commits": ["ca0becc54c2aca165e236998fd2a975c3026bfa8", "b45975e36004cf74c9370e71a358fcb38de8ab69"]
-  }
+  },
+  "contact_policy": "KEEP_REDIRECT_TO_ABOUT_US"
 }

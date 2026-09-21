@@ -8,6 +8,7 @@ export { ContentCardGrid } from "./components/ContentCardGrid";
 export { ContentRichText } from "./components/ContentRichText";
 export { ContentSection } from "./components/ContentSection";
 export { EmptyContentState } from "./components/EmptyContentState";
+export { FaqJsonLd } from "./components/FaqJsonLd";
 export { FaqPageClient } from "./components/FaqPageClient";
 export { LegalDocumentLayout } from "./components/LegalDocumentLayout";
 export { PublicContentErrorState } from "./components/PublicContentErrorState";
@@ -27,6 +28,7 @@ export { PublicConfigService } from "./services/public-config-service";
 export { submitSupportOrContactForm, fetchSupportCategories } from "./services/contact-service";
 
 export { publicSeoToMetadata, noIndexMetadata } from "./utils/seo-metadata";
+export { buildFaqPageJsonLd } from "./utils/faq-json-ld";
 export { isReservedPublicSlug } from "./utils/reserved-public-paths";
 
 export type * from "./types";

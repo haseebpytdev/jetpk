@@ -174,6 +174,8 @@ class PublicContentApiTest extends TestCase
         $paths = collect(app(PublicContentApiPresenter::class)->sitemapRoutes())->pluck('path')->all();
 
         $this->assertContains('/about-us', $paths);
+        $this->assertContains('/groups', $paths);
+        $this->assertContains('/sitemap', $paths);
         $this->assertNotContains('/contact', $paths);
         $this->assertNotContains('/flights', $paths);
         $this->assertNotContains('/lookup-booking', $paths);

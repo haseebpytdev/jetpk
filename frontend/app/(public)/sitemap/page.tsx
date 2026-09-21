@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { publicSeoToMetadata } from "@/features/public-content";
 import { laravelApiPath } from "@/services/flight-search";
 
 type SitemapRoute = {
@@ -26,11 +27,14 @@ async function fetchRoutes(): Promise<SitemapRoute[]> {
   }
 }
 
-export const metadata: Metadata = {
-  title: "Sitemap",
-  description: "Browse all public JetPakistan pages.",
-  robots: "index,follow",
-};
+export const metadata: Metadata = publicSeoToMetadata(
+  {
+    title: "Sitemap — JetPakistan",
+    description: "Browse all public JetPakistan pages.",
+    robots: "index,follow",
+  },
+  "/sitemap",
+);
 
 export default async function HtmlSitemapPage() {
   const routes = await fetchRoutes();

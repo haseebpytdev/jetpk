@@ -3,13 +3,27 @@ Allow: /
 
 # Authenticated, operational and technical surfaces are not search landing pages.
 # These rules guide crawlers; authorization remains enforced by the application.
-Disallow: /admin
-Disallow: /agent/dashboard
-Disallow: /staff
+# Keep in sync with frontend/app/robots.ts production disallowPrivate.
 Disallow: /customer
+Disallow: /agent
+Disallow: /admin
+Disallow: /staff
 Disallow: /dashboard
+Disallow: /booking
+Disallow: /flights/results
+Disallow: /flights/return-options
+Disallow: /flights/fare-selection
+Disallow: /lookup-booking
+Disallow: /groups/search
+Disallow: /access-denied
+Disallow: /login/otp
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /forgot-password
 Disallow: /api
 Disallow: /dev
 Disallow: /ui
+Disallow: /laravel
+Disallow: /testdash
 
 Sitemap: https://jetpakistan.pk/sitemap.xml
