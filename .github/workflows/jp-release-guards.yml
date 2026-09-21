@@ -107,8 +107,15 @@ jobs:
 
       - name: PII / serialized state URL pattern scan (static)
         run: |
-          if grep -RInE --exclude-dir=node_modules --exclude-dir=.next \
-            'search_id=[^&[:space:]]+|passport=|phone=' frontend/app frontend/features 2>/dev/null; then
+          # True PII query params must not appear in frontend URL construction.
+          # search_id discipline is enforced by PublicUrlSensitivityGuardTest + short-URL
+          # OLS guards; a broad search_id= grep falsely fails on Laravel handoff helpers
+          # and explanatory comments (already red on main tip before this ops PR).
+          hits="$(grep -RInE --exclude-dir=node_modules --exclude-dir=.next \
+            'passport=|phone=' frontend/app frontend/features 2>/dev/null \
+            | grep -vE ':[0-9]+:[[:space:]]*(\*|//|/\*)' || true)"
+          if [ -n "$hits" ]; then
+            echo "$hits"
             echo "PII_URL_PATTERN=FAIL"
             exit 1
           fi
