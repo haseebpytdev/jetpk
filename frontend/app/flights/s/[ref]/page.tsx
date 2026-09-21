@@ -6,7 +6,7 @@ import { noIndexMetadata } from "@/features/public-content";
 import { FlightResultsPage } from "@/features/flight-results";
 import { ResultSkeleton } from "@/features/flight-results/components/ResultSkeleton";
 import { ExpiredSearchState } from "@/features/flight-results/components/ExpiredSearchState";
-import { laravelApiPath } from "@/services/flight-search";
+import { publicContentFetchUrl } from "@/features/public-content/utils/laravel-api";
 
 type ShortSearchPageProps = {
   params: Promise<{ ref: string }>;
@@ -65,8 +65,9 @@ export default async function FlightShortSearchPage({ params }: ShortSearchPageP
   let expiredMessage = "This search link has expired. Please start a new search.";
 
   try {
+    // SSR must use absolute LARAVEL_URL — relative /laravel is invalid in Node fetch.
     const response = await fetch(
-      laravelApiPath(
+      publicContentFetchUrl(
         `/api/public/content/short-refs/${encodeURIComponent(code)}?purpose=flight_search`,
       ),
       {

@@ -50,8 +50,13 @@ Future: migrate catalog canonical from `/about-us` → `/about`, then reverse re
 2. Persist short refs (cache-backed Class B for search TTL; DB store optional later)
 3. Mint short code when search_id created; return `short_ref` / `short_url` in init JSON
 4. Next route `/flights/s/[ref]` resolves SSR → same `FlightResultsPage` with `initialSearchId` + `shortRef` (**no redirect**)
-5. Soft-nav + same-SHA perf recert **required** before making short URL the default browser URL from search submit
-6. Booking `/b/{ref}` only after audit proves current URLs leak sensitive params
+5. **OLS (required):** jetpakistan.pk vhost must proxy GET/HEAD `/flights/s/{code}` to Public Next. Exact page rules for `/flights/(fare-selection|results|return-options)` alone leave `/flights/s/*` on Laravel → soft 404. Production rule:
+
+   `RewriteRule ^/flights/s/([A-Za-z0-9]{8,32})$ http://jetpk_public_next/flights/s/$1 [P,L,E=PROXY-HOST:jetpakistan.pk]`
+
+6. SSR resolve must call Laravel via absolute `LARAVEL_URL` (`publicContentFetchUrl`) — relative `/laravel/*` is invalid in Node fetch.
+7. Soft-nav + same-SHA perf recert **required** before making short URL the default browser URL from search submit
+8. Booking `/b/{ref}` only after audit proves current URLs leak sensitive params
 
 ## Class C — Share
 
