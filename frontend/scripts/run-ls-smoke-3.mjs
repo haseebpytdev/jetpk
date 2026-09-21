@@ -1,6 +1,7 @@
 /**
- * JP-AI-POST-RECOVERY-CLOSURE-08 — first-attempt smoke LS-01, LS-02, LS-12 only.
+ * JP-AI-CONVERSATION-ISOLATION-CANONICAL-CLOSURE-10 — first-attempt smoke LS-01, LS-02, LS-12.
  */
+import { clearThrottleMetrics, resetClearThrottleMetrics } from "./canary-matrix-helpers.mjs";
 import { chromium } from "playwright";
 import fs from "node:fs";
 import path from "node:path";
@@ -22,7 +23,7 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const evidenceDir = path.resolve(
   __dirname,
-  "../../docs/evidence/jp-ai-post-recovery-closure-08",
+  "../../docs/evidence/jp-ai-conversation-isolation-canonical-10",
 );
 const ledgerPath = path.join(evidenceDir, "ls-smoke-3-ledger.json");
 
@@ -40,10 +41,11 @@ async function main() {
   }
 
   resetReport();
+  resetClearThrottleMetrics();
   fs.mkdirSync(evidenceDir, { recursive: true });
 
   const ledger = {
-    phase: "JP-AI-POST-RECOVERY-CLOSURE-08-SMOKE-3",
+    phase: "JP-AI-CONVERSATION-ISOLATION-CANONICAL-CLOSURE-10-SMOKE-3",
     started_at: new Date().toISOString(),
     total: SMOKE_CASES.length,
     first_attempt_pass: 0,
@@ -91,6 +93,7 @@ async function main() {
         error: result.error,
         route_meta: result.routeMeta,
         confirmation_before_search: result.confirmationBeforeSearch === true,
+        isolation: result.isolation ?? null,
       };
       if (firstPass) {
         ledger.first_attempt_pass += 1;
@@ -99,10 +102,14 @@ async function main() {
         ledger.first_attempt_fail += 1;
         ledger.fail_ids.push(c.id);
       }
-      await page.waitForTimeout(8000);
     }
+  } catch (e) {
+    ledger.aborted = true;
+    ledger.abort_reason = e instanceof Error ? e.message : String(e);
+    throw e;
   } finally {
     await browser.close();
+    ledger.clear_throttle = { ...clearThrottleMetrics };
     ledger.completed_at = new Date().toISOString();
     fs.writeFileSync(ledgerPath, JSON.stringify(ledger, null, 2));
     console.log(JSON.stringify(ledger, null, 2));

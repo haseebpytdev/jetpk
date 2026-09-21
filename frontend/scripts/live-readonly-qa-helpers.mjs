@@ -18,7 +18,10 @@ import {
 } from "./canary-matrix-helpers.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-export const evidenceDir = path.resolve(__dirname, "../../docs/evidence/jp-ai-live-readonly-final-qa-01");
+export const evidenceDir = path.resolve(
+  __dirname,
+  "../../docs/evidence/jp-ai-conversation-isolation-canonical-10",
+);
 export const reportPath = path.join(evidenceDir, "final-qa-report.jsonl");
 export const summaryPath = path.join(evidenceDir, "final-qa-summary.json");
 
@@ -220,15 +223,53 @@ export async function runConfirmedLiveSearch(page, caseId, steps, expectRoute, o
   let firstAttemptResult = "FAIL";
   let confirmationBeforeSearch = false;
   let routeMeta = null;
+  let isolationMeta = null;
+  let firstChatRequestId = null;
   try {
     await waitForChatInputReady(page);
-    await clearConversation(page);
+    const cleared = await clearConversation(page);
+    if (/CLEAR_PREFLIGHT_INFRA_FAILURE|HARNESS_CONVERSATION_ID_NOT_ISOLATED/.test(String(cleared))) {
+      throw cleared instanceof Error ? cleared : new Error(String(cleared));
+    }
+    const expectedConversationId = cleared?.conversation_id ?? null;
+    isolationMeta = {
+      old_conversation_id: cleared?.old_conversation_id ?? null,
+      clear_response_new_id: cleared?.clear_response_new_id ?? null,
+      session_storage_after_clear: cleared?.session_storage_after_clear ?? null,
+      first_chat_request_id: null,
+      skipped_clear: cleared?.skipped === true,
+    };
     await waitForChatInputReady(page);
 
     for (let i = 0; i < steps.length; i++) {
       const msg = i === steps.length - 1 ? normalizeConfirmationStep(steps[i]) : steps[i];
       await waitForChatInputReady(page);
+      const conversationIdAssertion =
+        i === 0 && expectedConversationId
+          ? page.waitForRequest(
+              (req) =>
+                req.url().includes("/api/public/ai/chat") && req.method() === "POST",
+              { timeout: 180_000 },
+            )
+          : null;
       const result = await sendMessage(page, msg, { responseTimeoutMs: 180_000 });
+      if (conversationIdAssertion) {
+        const chatRequest = await conversationIdAssertion;
+        let body = {};
+        try {
+          body = JSON.parse(chatRequest.postData() ?? "{}");
+        } catch {
+          body = {};
+        }
+        const requestId = body.conversation_id ?? null;
+        firstChatRequestId = requestId;
+        if (isolationMeta) isolationMeta.first_chat_request_id = requestId;
+        if (requestId !== expectedConversationId) {
+          throw new Error(
+            `HARNESS_CONVERSATION_ID_NOT_ISOLATED:expected=${expectedConversationId}:actual=${requestId ?? "null"}`,
+          );
+        }
+      }
       lastPayload = result.payload ?? {};
       visible = result.body;
       if (result.status >= 500) throw new Error(`HTTP_${result.status}`);
@@ -284,6 +325,9 @@ export async function runConfirmedLiveSearch(page, caseId, steps, expectRoute, o
     firstAttemptResult = "PASS";
   } catch (e) {
     error = e instanceof Error ? e.message : String(e);
+    if (/CLEAR_PREFLIGHT_INFRA_FAILURE|HARNESS_CONVERSATION_ID_NOT_ISOLATED/.test(error)) {
+      throw e instanceof Error ? e : new Error(error);
+    }
     if (/FAB_UNAVAILABLE|CANARY_NOT_ELIGIBLE/i.test(error)) {
       error = error.includes("FAB_UNAVAILABLE") ? "FAB_UNAVAILABLE" : error;
     }
@@ -304,9 +348,20 @@ export async function runConfirmedLiveSearch(page, caseId, steps, expectRoute, o
     payload_meta: lastPayload?.meta ?? null,
     route_meta: routeMeta,
     confirmation_before_search: confirmationBeforeSearch,
+    isolation: isolationMeta,
+    first_chat_request_id: firstChatRequestId,
     screenshot,
   });
-  return { pass, error, visible, firstAttemptResult, routeMeta, confirmationBeforeSearch };
+  return {
+    pass,
+    error,
+    visible,
+    firstAttemptResult,
+    routeMeta,
+    confirmationBeforeSearch,
+    isolation: isolationMeta,
+    firstChatRequestId,
+  };
 }
 
 export {
