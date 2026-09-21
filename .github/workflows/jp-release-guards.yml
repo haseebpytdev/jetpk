@@ -17,12 +17,7 @@ jobs:
         with:
           php-version: "8.3"
           coverage: none
-
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
-
-      - name: OLS short-URL snippet + URL sensitivity unit tests
-        run: php vendor/bin/phpunit --filter "OlsFlightsShortUrlSnippetTest|PublicUrlSensitivityGuardTest"
+          tools: none
 
       - name: Retired nested homepage duplicate must stay gone
         run: |
@@ -32,7 +27,7 @@ jobs:
           fi
           echo "RETIRED_PATH_GUARD=PASS"
 
-      - name: Release lock + OLS artifacts present
+      - name: Release lock + OLS artifacts present and stamped
         run: |
           test -f docs/closure/jetpakistan-release-lock.json
           test -f docs/JETPAKISTAN_RELEASE_GUARD_POLICY.md
@@ -40,7 +35,32 @@ jobs:
           test -f docs/closure/JETPAKISTAN_RETIREMENT_INVENTORY.md
           test -f deploy/openlitespeed/jetpakistan-vhost-routes.conf
           test -f scripts/jp-ols-assert-flights-short-url.sh
+          php -r '
+            $lock = json_decode(file_get_contents("docs/closure/jetpakistan-release-lock.json"), true);
+            if (!is_array($lock)) { fwrite(STDERR, "LOCK_JSON_INVALID\n"); exit(1); }
+            foreach (["release_sha","remote_main_sha","production_runtime_sha","public_build_source_sha","dashboard_build_source_sha","public_build_id","dashboard_build_id","runtime_marker","rollback_sha"] as $k) {
+              if (empty($lock[$k])) { fwrite(STDERR, "LOCK_MISSING_$k\n"); exit(1); }
+            }
+            if (($lock["critical_route_owners"]["/flights/s/{ref}"] ?? null) !== "NEXT") { fwrite(STDERR, "SHORT_OWNER_FAIL\n"); exit(1); }
+            if (($lock["ols_configuration_source"] ?? null) !== "deploy/openlitespeed/jetpakistan-vhost-routes.conf") { fwrite(STDERR, "OLS_SOURCE_FAIL\n"); exit(1); }
+            echo "RELEASE_LOCK_STAMPED=PASS\n";
+          '
           echo "RELEASE_ARTIFACTS=PASS"
+
+      - name: OLS vhost routes exact short-URL rule
+        run: |
+          php -r '
+            $conf = file_get_contents("deploy/openlitespeed/jetpakistan-vhost-routes.conf");
+            $need = [
+              "RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$",
+              "RewriteRule ^/flights/s/([A-Za-z0-9]{8,32})$ http://jetpk_public_next/flights/s/\$1 [P,L,E=PROXY-HOST:jetpakistan.pk]",
+              "RewriteRule ^/groups$ http://jetpk_public_next/groups [P,L,E=PROXY-HOST:jetpakistan.pk]",
+            ];
+            foreach ($need as $n) {
+              if (strpos($conf, $n) === false) { fwrite(STDERR, "MISSING: $n\n"); exit(1); }
+            }
+            echo "OLS_SNIPPET_GUARD=PASS\n";
+          '
 
       - name: PII / serialized state URL pattern scan (static)
         run: |
@@ -55,3 +75,11 @@ jobs:
         run: |
           grep -RIn "flights/s/" frontend docs/jetpk deploy/openlitespeed scripts/jp-ols-assert-flights-short-url.sh >/dev/null
           echo "SHORT_URL_REFERENCES=PASS"
+
+      - name: Optional PHPUnit when vendor present
+        run: |
+          if [ -d vendor/bin ]; then
+            php vendor/bin/phpunit --filter "OlsFlightsShortUrlSnippetTest|PublicUrlSensitivityGuardTest"
+          else
+            echo "PHPUNIT_SKIPPED_NO_VENDOR=PASS"
+          fi

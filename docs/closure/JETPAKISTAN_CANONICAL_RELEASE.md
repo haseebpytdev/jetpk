@@ -1,23 +1,19 @@
 # JetPakistan — Canonical Release Manifest
 
 **Closure date:** 2026-09-21  
-**Tag (when cut):** `jetpakistan-recovered-final-20260921`
+**Tag:** `jetpakistan-recovered-final-20260921`
 
-## Identity (filled at stamp)
+## Identity
 
 | Field | Value |
 |---|---|
-| FINAL_MAIN_SHA | _pending post-docs tip → filled in release-lock.json_ |
-| REMOTE_MAIN_SHA | same |
-| PRODUCTION_RUNTIME_SHA | same |
-| PUBLIC_BUILD_SOURCE_SHA | same |
-| DASHBOARD_BUILD_SOURCE_SHA | same |
-| PUBLIC_BUILD_ID | _from host after dual build_ |
-| DASHBOARD_BUILD_ID | _from host after dual build_ |
-| RUNTIME_MARKER | _from host `.jetpk-runtime-marker`_ |
-| ROLLBACK_SHA | `cbd7686feadd35773fd0b597117538b8b99b59fa` (prior certified runtime) |
+| FINAL_MAIN_SHA | `1fc2dad1386d417d128473891afbc47c0ba330a8` (dual-build tip; lock-stamp docs tip follows) |
+| PUBLIC_BUILD_ID | `Mxj-CVOg4w_poyBeBzoIp` |
+| DASHBOARD_BUILD_ID | `E4_XqZnXxChe1Bdw4rJ0l` |
+| RUNTIME_MARKER | `jp-final-1fc2dad1-20260921T081450Z` |
+| ROLLBACK_SHA | `cbd7686feadd35773fd0b597117538b8b99b59fa` |
 
-Machine truth: `docs/closure/jetpakistan-release-lock.json`.
+Machine truth after stamp commit: `docs/closure/jetpakistan-release-lock.json`.
 
 ## Architecture
 
@@ -31,55 +27,22 @@ Machine truth: `docs/closure/jetpakistan-release-lock.json`.
 See `deploy/openlitespeed/jetpakistan-vhost-routes.conf` and `docs/jetpk/OLS-FLIGHTS-SHORT-URL-NEXT-PROXY.md`.
 
 - Short URL owner: **NEXT**
-- OLS config: **repo-tracked + assert script**
+- OLS config: **repo-tracked + assert script** (`docs/evidence/jp-final-perf-cert-cbd7686f/10-ols-assert-final.log`)
 
-## CMS authority
+## CMS / Group / Ask / SEO / Short URL / Performance
 
-Homepage H1 = CMS `headline` + `headline_highlight` (explicit blank ⇒ no JetPakistan fallback). Hero content-driven height.
+Unchanged from certified `cbd7686f` evidence packs. Return metric: `BROWSER_RENDER_MS`.  
+SEO/AEO/GEO: `docs/closure/SEO-AEO-GEO/11-FINAL-CONSOLIDATION.md`. IndexNow NOT_APPLICABLE.
 
-## Group authority
+## Retirement
 
-`GROUP_SEARCH_FIELDS=3` — Airline, Sector, Date. Category cards below search; no Category field in search box. Homepage Group mode + `/groups/search` same contract.
-
-## Ask authority
-
-Ask JetPakistan public FAB/API; no commercial mutations in closure UAT.
-
-## SEO / AEO / GEO authority
-
-`docs/closure/SEO-AEO-GEO/` — consolidation `11-FINAL-CONSOLIDATION.md`. IndexNow NOT_APPLICABLE (documented).
-
-## Short URL authority
-
-Class-B opaque refs; OLS GET/HEAD proxy; SSR resolve via absolute Laravel URL; no search_id in browser URL.
-
-## Performance authority
-
-`docs/evidence/jp-final-perf-cert-cbd7686f/SUMMARY.md`  
-Return metric: `BROWSER_RENDER_MS` (`05-return-metric-equivalence.md`).
-
-## Functional authority
-
-`docs/evidence/jp-final-perf-cert-cbd7686f/06-functional-matrix/`  
-Homepage/Group owner: `09-homepage-group-uat/`.
-
-## Retired / protected paths
-
-Inventory: `docs/closure/JETPAKISTAN_RETIREMENT_INVENTORY.md`  
-Policy: `docs/JETPAKISTAN_RELEASE_GUARD_POLICY.md`
+`docs/closure/JETPAKISTAN_RETIREMENT_INVENTORY.md` — nested homepage duplicate deleted; host deep cleanup PARTIAL_SAFE.
 
 ## Rollback procedure
 
-1. Restore app tree / release labeled by `ROLLBACK_SHA`
-2. Restore OLS from `vhconf.conf.bak-shorturl-*` / `bak-jp-ols-routes-*` if route rules changed
+1. Restore app / pointer to `ROLLBACK_SHA` (`cbd7686f`)
+2. Restore OLS from `vhconf.conf.bak-shorturl-*` / `bak-jp-ols-routes-*` if needed
 3. Preserve `.env*` and storage
 4. Rebuild Next from rollback SHA if binaries diverge
-5. Stamp `.jetpk-runtime-sha` to rollback; verify `/` + `/flights/s/{ref}` + `/groups`
-6. Forward-restore to canonical when drill complete — do not leave rolled back
-
-## Evidence locations
-
-- Perf: `docs/evidence/jp-final-perf-cert-cbd7686f/`
-- SEO: `docs/closure/SEO-AEO-GEO/`
-- OLS: `docs/jetpk/OLS-FLIGHTS-SHORT-URL-NEXT-PROXY.md`
-- Heartbeat: `docs/closure/RECOVERY-HEARTBEAT.json`
+5. Verify `/` + `/flights/s/{ref}` + `/groups`
+6. Forward-restore to canonical — do not leave rolled back
