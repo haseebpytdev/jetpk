@@ -33,6 +33,14 @@ export function SeoJsonLd({ config, contact }: SeoJsonLdProps) {
     url: appUrl,
   };
 
+  const sameAs = (config?.social_links ?? [])
+    .map((link) => link.href?.trim())
+    .filter((href): href is string => Boolean(href));
+
+  if (sameAs.length > 0) {
+    (organization as Record<string, unknown>).sameAs = sameAs;
+  }
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }} />

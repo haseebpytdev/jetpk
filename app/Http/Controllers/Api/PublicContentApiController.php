@@ -115,4 +115,23 @@ class PublicContentApiController extends Controller
             'source' => 'laravel',
         ]);
     }
+
+    public function resolveShortRef(string $code, \App\Services\PublicContent\PublicShortRefService $shortRefs): JsonResponse
+    {
+        $record = $shortRefs->resolve($code);
+        if ($record === null) {
+            return response()->json([
+                'expired' => true,
+                'message' => 'Search reference not found or expired.',
+            ], 410);
+        }
+
+        return response()->json([
+            'code' => $record['code'],
+            'purpose' => $record['purpose'],
+            'target_type' => $record['target_type'],
+            'target_key' => $record['target_key'],
+            'expires_at' => $record['expires_at'],
+        ]);
+    }
 }

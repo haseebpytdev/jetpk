@@ -74,6 +74,11 @@ final class ReservedPublicPath
         'forgot-password',
         'reset-password',
         'dev-cp',
+        // Short transactional / share first segments (WP7) — never CMS-captured.
+        'b',
+        'g',
+        'v',
+        'l',
     ];
 
     public static function isReservedFirstSegment(string $segment): bool

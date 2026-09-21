@@ -1,12 +1,12 @@
 {
   "phase": "SEO_RECOVERY",
-  "step": "wp0_audit_wp2_wp5_remediation",
-  "head_sha": "local-uncommitted-seo-package",
+  "step": "wp7_short_url_foundation_pre_deploy",
+  "head_sha": "pending-commit",
   "public_build_id": "S49jLxNux1bMJZD6Wx_U6",
   "started_at": "2026-09-20T11:46:00Z",
-  "last_progress_at": "2026-09-21T00:00:00Z",
-  "last_completed_action": "SEO WP0 audit + WP1 inventory + WP2/WP4/WP5 first remediation (metadata, robots parity, FAQPage JSON-LD, sitemap /groups+/sitemap)",
-  "current_action": "Commit/deploy SEO package; then WP7 short URLs → AEO/GEO → §49 gates",
+  "last_progress_at": "2026-09-21T00:20:00Z",
+  "last_completed_action": "SEO WP0–WP5 + WP7 foundation (/about alias, reserved b/g/v/l, PublicShortRefService, /flights/s/[ref] resolve, AEO/GEO checklist)",
+  "current_action": "Commit + PUBLIC_ONLY deploy SEO/short-URL package; mint wire deferred until soft-nav-safe; then AEO/GEO probes + §49",
   "status": "IN_PROGRESS",
   "soft_nav_gate": "PASS",
   "traveler_gate": "PASS",
@@ -14,17 +14,14 @@
   "pair_segmented_gate": "PASS",
   "same_sha_perf_cert": "PASS",
   "seo_full_project_audit": "PASS",
-  "seo_metadata": "PARTIAL",
-  "seo_structured_data": "PARTIAL",
-  "seo_robots": "PARTIAL",
+  "seo_metadata": "IMPROVED",
+  "seo_structured_data": "IMPROVED",
+  "seo_robots": "IMPROVED",
+  "short_url_foundation": "PARTIAL",
+  "contact_policy": "KEEP_REDIRECT_TO_ABOUT_US",
   "production": {
     "runtime_sha": "b45975e36004cf74c9370e71a358fcb38de8ab69",
     "public_build_id": "S49jLxNux1bMJZD6Wx_U6",
     "rollback_sha": "ee7c60122af93f3436c30dd9514bf81cc9d4cf83"
-  },
-  "architecture": {
-    "authority": "unstable_cache",
-    "commits": ["ca0becc54c2aca165e236998fd2a975c3026bfa8", "b45975e36004cf74c9370e71a358fcb38de8ab69"]
-  },
-  "contact_policy": "KEEP_REDIRECT_TO_ABOUT_US"
+  }
 }

@@ -77,6 +77,11 @@ export const RESERVED_PUBLIC_FIRST_SEGMENTS = new Set([
   "access-denied",
   "laravel",
   "_next",
+  // Short transactional / share first segments (WP7)
+  "b",
+  "g",
+  "v",
+  "l",
 ]);
 
 export function normalizePublicSlug(slug: string): string {

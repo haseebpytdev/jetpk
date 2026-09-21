@@ -24,6 +24,12 @@ const nextConfig: NextConfig = {
         destination: "/about-us",
         permanent: true,
       },
+      {
+        // Short SEO alias; canonical remains /about-us until catalog migration.
+        source: "/about",
+        destination: "/about-us",
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

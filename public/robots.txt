@@ -13,8 +13,13 @@ Disallow: /booking
 Disallow: /flights/results
 Disallow: /flights/return-options
 Disallow: /flights/fare-selection
+Disallow: /flights/s
 Disallow: /lookup-booking
 Disallow: /groups/search
+Disallow: /b
+Disallow: /g
+Disallow: /v
+Disallow: /l
 Disallow: /access-denied
 Disallow: /login/otp
 Disallow: /reset-password

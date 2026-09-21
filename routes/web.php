@@ -57,6 +57,10 @@ Route::prefix('api/public/content')->group(function (): void {
     Route::get('/config', [PublicContentApiController::class, 'publicConfig'])->name('api.public.content.config');
     Route::get('/homepage', [PublicContentApiController::class, 'homepage'])->name('api.public.content.homepage');
     Route::get('/sitemap-routes', [PublicContentApiController::class, 'sitemapRoutes'])->name('api.public.content.sitemap-routes');
+    Route::get('/short-refs/{code}', [PublicContentApiController::class, 'resolveShortRef'])
+        ->where('code', '[A-Za-z0-9]{8,32}')
+        ->middleware('throttle:60,1')
+        ->name('api.public.content.short-ref');
 });
 
 Route::prefix('api/public/auth')->group(function (): void {
@@ -95,6 +99,7 @@ Route::middleware('platform.module:support_system')->group(function (): void {
     Route::get('/support/submitted', [SupportController::class, 'submitted'])->name('support.submitted');
 });
 Route::get('/about-us', [SupportController::class, 'about'])->name('about');
+Route::permanentRedirect('/about', '/about-us');
 Route::get('/faq', [ClientManagedPageController::class, 'faq'])->name('faq');
 Route::get('/terms', [ClientManagedPageController::class, 'terms'])->name('terms');
 Route::get('/privacy', [ClientManagedPageController::class, 'privacy'])->name('privacy');
