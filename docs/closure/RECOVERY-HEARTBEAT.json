@@ -1,14 +1,16 @@
 {
   "phase": "FINAL_CLOSURE",
-  "step": "functional_ols_ready_for_main_ff",
+  "step": "release_docs_ready_dual_build",
   "head_sha": "pending-commit",
   "runtime_sha": "cbd7686feadd35773fd0b597117538b8b99b59fa",
   "public_build_id": "kf8S-ybDOI8Vw8LzUye0H",
-  "last_progress_at": "2026-09-21T07:36:00Z",
+  "remote_main_sha": "cbf4062b545b84220c6d3b8de1cff45ba9a14d5f",
+  "last_progress_at": "2026-09-21T08:00:00Z",
   "status": "IN_PROGRESS",
   "functional_golden_matrix": "PASS",
   "homepage_guard": "PASS",
   "group_guard": "PASS",
+  "ask_jetpakistan_guard": "PASS",
   "ols_config_reproducible": "PASS",
   "short_url_route_owner": "NEXT",
   "route_ownership_guard": "PASS",
@@ -16,5 +18,6 @@
   "return_metric_equivalence": "PASS",
   "aeo_geo": "PASS",
   "indexnow": "NOT_APPLICABLE",
-  "next": "commit OLS+evidence → main FF → dual Next rebuild → deploy → retirement/lock/tag"
+  "main_ff_cbf4062b": "DONE",
+  "next": "commit release docs → FF main → dual Next rebuild → stamp lock → tag"
 }

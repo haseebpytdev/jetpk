@@ -1,42 +1,53 @@
-# Soft-nav + same-SHA perf gate status
+# JetPakistan final closure gate matrix (2026-09-21)
 
-## Current production tip
+## Canonical runtime baseline (perf-certified)
 
-`5f78a5e138c9cdf649f2e1429a6c5cc3e55ca0e6` — SEO recovery + short-URL foundation  
-PUBLIC_BUILD=`GpIljRfA8zEVcmPGCGRQS`  
-Rollback=`b45975e36004cf74c9370e71a358fcb38de8ab69`
+`cbd7686feadd35773fd0b597117538b8b99b59fa` / PUBLIC_BUILD=`kf8S-ybDOI8Vw8LzUye0H`  
+Tip lineage: docs/OLS/release guards over that runtime → dual rebuild stamps final main.
 
-## Soft-nav
-
-**SOFT_NAV_GATE=PASS** (host Playwright, same-origin)
-
-| N | Pass | Worst APP P95 |
-|---|---|---|
-| 10 | 10/10 | 561ms |
-| 20 | 10/10 | **333ms** |
-
-Evidence: `docs/evidence/jp-final-perf-cert-5f78a5e1/01-soft-nav/`
-
-## Same-SHA performance
-
-**SAME_SHA_PERF_CERT=PASS** — `docs/evidence/jp-final-perf-cert-5f78a5e1/SUMMARY.md`
+## Performance (do not reopen architecture)
 
 | Gate | Result |
 |---|---|
-| Traveler N≥30 P95≤2000 | PASS (`total_p95=1548`, dup=0) |
-| Return Pair N≥30 post-supplier ≤1000 | PASS (`poll_total_p95=0.581`, dup=0) |
-| Pair↔Segmented N≥20 each | PASS (pair via return N=30; segmented N=20 `poll=0.773`, dup=0) |
+| Soft-nav N=20 | 10/10, worst P95=**878ms** ≤1500 — PASS |
+| Traveler N=30 | P95=**1954ms** ≤2000, dup=0 — PASS |
+| Return Pair N=30 `BROWSER_RENDER_MS` | P95=**645ms** ≤1000 — PASS |
+| Pair↔Segmented | PASS, duplicates=0 |
+| RETURN_METRIC_EQUIVALENCE | PASS (`BROWSER_RENDER_MS`) |
 
-## SEO recovery
+Evidence: `docs/evidence/jp-final-perf-cert-cbd7686f/`
 
-| Gate | Status |
+## Functional / owner
+
+| Gate | Result |
 |---|---|
-| SEO audit WP0 | PASS |
-| Metadata / FAQPage / robots / sitemap | IMPROVED (live probes PASS) |
-| Short URL foundation | PARTIAL (alias + resolve; mint cutover deferred) |
-| AEO / GEO | PARTIAL — continue §49 |
-| Contact policy | KEEP 308 → `/about-us` |
+| FUNCTIONAL_GOLDEN_MATRIX | PASS |
+| HOMEPAGE_GUARD | PASS |
+| GROUP_GUARD | PASS (`GROUP_SEARCH_FIELDS=3`) |
+| ASK_JETPAKISTAN_GUARD | PASS (API health 200; FAB may be viewport-skipped in matrix) |
 
-## Next open gates
+## SEO / AEO / GEO / Short URL / OLS
 
-AEO/GEO §49 completion → search short-ref mint (soft-nav-safe) → parity / retirement / release-lock / main FF
+| Gate | Result |
+|---|---|
+| SEO_FULL_PROJECT_AUDIT | PASS |
+| AEO_CLOSURE / GEO_CLOSURE | PASS |
+| INDEXNOW | NOT_APPLICABLE |
+| SHORT_URL_GUARD | PASS |
+| OLS_CONFIG_REPRODUCIBLE | PASS |
+| SHORT_URL_ROUTE_OWNER | NEXT |
+| ROUTE_OWNERSHIP_GUARD | PASS |
+
+## Release artifacts
+
+| Artifact | Path |
+|---|---|
+| Policy | `docs/JETPAKISTAN_RELEASE_GUARD_POLICY.md` |
+| Manifest | `docs/closure/JETPAKISTAN_CANONICAL_RELEASE.md` |
+| Lock | `docs/closure/jetpakistan-release-lock.json` |
+| Retirement | `docs/closure/JETPAKISTAN_RETIREMENT_INVENTORY.md` |
+| CI | `.github/workflows/jp-release-guards.yml` |
+
+## Next
+
+Dual Next build + stamp from final main → fill lock → annotated tag `jetpakistan-recovered-final-20260921`.

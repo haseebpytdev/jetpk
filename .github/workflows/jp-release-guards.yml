@@ -1,0 +1,57 @@
+name: JetPakistan release guards
+
+on:
+  push:
+    branches: [main, "perf/**", "claude/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  release-guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: OLS short-URL snippet + URL sensitivity unit tests
+        run: php vendor/bin/phpunit --filter "OlsFlightsShortUrlSnippetTest|PublicUrlSensitivityGuardTest"
+
+      - name: Retired nested homepage duplicate must stay gone
+        run: |
+          if [ -d "docs/closure/01-homepage/docs/closure/01-homepage" ]; then
+            echo "RETIRED_PATH_PRESENT=FAIL"
+            exit 1
+          fi
+          echo "RETIRED_PATH_GUARD=PASS"
+
+      - name: Release lock + OLS artifacts present
+        run: |
+          test -f docs/closure/jetpakistan-release-lock.json
+          test -f docs/JETPAKISTAN_RELEASE_GUARD_POLICY.md
+          test -f docs/closure/JETPAKISTAN_CANONICAL_RELEASE.md
+          test -f docs/closure/JETPAKISTAN_RETIREMENT_INVENTORY.md
+          test -f deploy/openlitespeed/jetpakistan-vhost-routes.conf
+          test -f scripts/jp-ols-assert-flights-short-url.sh
+          echo "RELEASE_ARTIFACTS=PASS"
+
+      - name: PII / serialized state URL pattern scan (static)
+        run: |
+          if grep -RInE --exclude-dir=node_modules --exclude-dir=.next \
+            'search_id=[^&[:space:]]+|passport=|phone=' frontend/app frontend/features 2>/dev/null; then
+            echo "PII_URL_PATTERN=FAIL"
+            exit 1
+          fi
+          echo "PII_URL_PATTERN_SCAN=PASS"
+
+      - name: Short URL path convention
+        run: |
+          grep -RIn "flights/s/" frontend docs/jetpk deploy/openlitespeed scripts/jp-ols-assert-flights-short-url.sh >/dev/null
+          echo "SHORT_URL_REFERENCES=PASS"
