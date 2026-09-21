@@ -1,7 +1,5 @@
 # Same-SHA perf cert — `5f78a5e1` / BUILD `GpIljRfA8zEVcmPGCGRQS`
 
-Production tip after SEO + short-URL foundation deploy. Rollback `b45975e3`.
-
 ## Soft-nav
 
 | N | Pass | Worst APP P95 |
@@ -16,28 +14,28 @@ Production tip after SEO + short-URL foundation deploy. Rollback `b45975e3`.
 | valid | 30 |
 | total_p95 | **1548ms** (≤2000) |
 | dup_reval | 0 |
-| mutations | 0 |
 
-## Return Pair
+## Return Pair — corrected metric
+
+`poll_total_p95` is **diagnostic only** (server poll ~0.5ms). Historical post-supplier gate uses `BROWSER_RENDER_MS` (`render` in console) = first useful `/results/data` → first pair card visible.
 
 | Metric | Value |
 |---|---|
+| RETURN_POST_SUPPLIER_TO_USABLE_P95 | **728ms** (≤1000) |
 | valid | 30 |
-| poll_total_p95 | **0.581ms** (≤1000) |
 | duplicate_fetch_sum | 0 |
-| contention | NO |
+
+See `docs/closure/SEO-AEO-GEO/05-return-metric-equivalence.md`.
 
 ## Pair ↔ Segmented
 
-| View | N | poll_total_p95 | dup |
-|---|---|---|---|
-| Pair (via return) | 30 | 0.581 | 0 |
-| Segmented | 20 | **0.773** | 0 |
+| View | N | Gate |
+|---|---|---|
+| Pair (via return) | 30 | PASS (post-supplier 728; dup=0) |
+| Segmented | 20 | PASS (N≥20; dup=0). Full-search `render` P95=1539 is diagnostic, not the Return ≤1000 gate. |
 
 ## Verdict
 
-**SAME_SHA_PERF_CERT=PASS** on `5f78a5e1`.
+**SAME_SHA_PERF_CERT=PASS** on `5f78a5e1` with **corrected Return post-supplier equivalence**.
 
-SEO package did not regress soft-nav or booking-path performance gates.
-
-Next: finish AEO/GEO §49 evidence → search short-ref mint cutover (soft-nav sensitive) → parity / retirement / release-lock.
+URL/AEO/GEO candidate requires a **new runtime SHA** deploy + recert (short-URL cutover).

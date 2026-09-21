@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { FlightResultsPage } from "@/features/flight-results";
 import { ResultSkeleton } from "@/features/flight-results/components/ResultSkeleton";
+import { noIndexMetadata } from "@/features/public-content";
 
-export const metadata: Metadata = {
-  title: "Flight Results",
+/** Legacy long results URL — compatibility only; not indexable; short `/flights/s/{ref}` is preferred. */
+export const metadata: Metadata = noIndexMetadata("Flight Results — JetPakistan", {
   description: "Compare and book flights with JetPakistan.",
-};
+  path: "/flights/results",
+  follow: false,
+});
 
 function ResultsFallback() {
   return (

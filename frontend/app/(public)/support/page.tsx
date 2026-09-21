@@ -3,9 +3,11 @@ import { Suspense } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import {
   Breadcrumbs,
+  SiteContactService,
   SupportContentService,
   SupportPageClient,
   fetchSupportCategories,
+  hasVisibleContactFacts,
   publicSeoToMetadata,
 } from "@/features/public-content";
 import SupportLoading from "./loading";
@@ -20,13 +22,18 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function SupportPageContent() {
   // Support CMS body is critical for soft-nav usable; categories must not stall RSC.
-  const content = await SupportContentService.getSupportPage();
+  // SiteContact aligns visible facts with TravelAgency JSON-LD (PublicConfig contact).
+  const [content, siteContact] = await Promise.all([
+    SupportContentService.getSupportPage(),
+    SiteContactService.getContactDetails(),
+  ]);
   const categories = await Promise.race([
     fetchSupportCategories(),
     new Promise<Awaited<ReturnType<typeof fetchSupportCategories>>>((resolve) => {
       setTimeout(() => resolve([]), 250);
     }),
   ]);
+  const contact = hasVisibleContactFacts(siteContact) ? siteContact : content.contact;
 
   return (
     <PageContainer className="py-jp-4xl">
@@ -34,6 +41,7 @@ async function SupportPageContent() {
       <div className="mt-jp-xl">
         <SupportPageClient
           content={content}
+          contact={contact}
           categories={
             categories.length
               ? categories

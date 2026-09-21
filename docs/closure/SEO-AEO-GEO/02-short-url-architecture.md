@@ -26,11 +26,11 @@
 
 Future: migrate catalog canonical from `/about-us` → `/about`, then reverse redirect. Not in this slice.
 
-## Class B — Transactional (planned; soft-nav sensitive)
+## Class B — Transactional (implemented for flight search; soft-nav default deferred)
 
 | Purpose | Target path | Resolves to |
 |---|---|---|
-| Flight search session | `/flights/s/{ref}` | Existing `search_id` + criteria store |
+| Flight search session | `/flights/s/{ref}` | Same results shell; `search_id` is internal prop/state only |
 | Booking flow | `/b/{ref}` | Draft/session — only if entropy already insufficient |
 | Group booking | `/g/{ref}` | Group booking session |
 | Voucher / guest | `/v/{token}` | Prefer existing guest access token if already strong |
@@ -38,17 +38,19 @@ Future: migrate catalog canonical from `/about-us` → `/about`, then reverse re
 ### Search short-ref requirements (§33)
 
 - Refresh / back-forward / Return Pair / Segmented / Traveler handoff must keep working
-- TTL on ref; expired → clean “search expired” UI (no silent re-search)
-- Mint on search init; resolve server-side; **do not** Base64 criteria into the URL
+- TTL on ref (aligned with `FlightSearchResultStore::SESSION_TTL_SECONDS`); expired → in-place “Search expired” UI (no silent re-search, **no** `search_id` in URL, **no** redirect to `/flights/results?search_id=`)
+- Mint-once on search init (`PublicShortRefService::mintFlightSearch` + reverse cache map); return `short_ref` + `short_url` in init JSON; resolve server-side; **do not** Base64 criteria into the URL
+- Browser URL on short route stays `/flights/s/{ref}` (filter/sort query allowed without `search_id`)
 - Legacy `/flights/results?…&search_id=` remains valid forever for bookmarks/emails
+- Cache: `CACHE_STORE=file` on a single host is acceptable when the FS is shared across workers; multi-host needs a shared cache store
 
 ### Implementation order (do not invert)
 
 1. Reserve first segments: `b`, `g`, `v`, `l` (+ document `flights/s`)
-2. Persist `public_short_refs` (code, purpose, target_type, target_key, expires_at)
-3. Mint short code when search_id created; return `short_ref` in init JSON
-4. Additive Next route `/flights/s/[ref]` that resolves → same results shell with `search_id`
-5. Soft-nav + same-SHA perf recert **required** before making short URL the default browser URL
+2. Persist short refs (cache-backed Class B for search TTL; DB store optional later)
+3. Mint short code when search_id created; return `short_ref` / `short_url` in init JSON
+4. Next route `/flights/s/[ref]` resolves SSR → same `FlightResultsPage` with `initialSearchId` + `shortRef` (**no redirect**)
+5. Soft-nav + same-SHA perf recert **required** before making short URL the default browser URL from search submit
 6. Booking `/b/{ref}` only after audit proves current URLs leak sensitive params
 
 ## Class C — Share

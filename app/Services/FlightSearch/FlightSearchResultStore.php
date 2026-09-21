@@ -20,7 +20,10 @@ class FlightSearchResultStore
 {
     private const CACHE_PREFIX = 'flight_search:';
 
-    private const TTL_SECONDS = 1800;
+    /** Session / short-ref TTL alignment (seconds). Shared with PublicShortRefService mint. */
+    public const SESSION_TTL_SECONDS = 1800;
+
+    private const TTL_SECONDS = self::SESSION_TTL_SECONDS;
 
     private const MAX_STORED_OFFERS = 150;
 

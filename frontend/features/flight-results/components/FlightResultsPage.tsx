@@ -48,11 +48,31 @@ const SearchModule = dynamic(
   { ssr: false },
 );
 
-export function FlightResultsPage() {
+export type FlightResultsPageProps = {
+  /** Authoritative search_id from short-ref SSR resolve (internal only). */
+  initialSearchId?: string | null;
+  /** Opaque short ref — when set, browser URL stays `/flights/s/{ref}` without search_id. */
+  shortRef?: string | null;
+};
+
+function buildResultsHref(qs: URLSearchParams, shortRef?: string | null): string {
+  if (shortRef) {
+    const cleaned = new URLSearchParams(qs);
+    cleaned.delete("search_id");
+    const query = cleaned.toString();
+    return query ? `/flights/s/${shortRef}?${query}` : `/flights/s/${shortRef}`;
+  }
+  return `/flights/results?${qs.toString()}`;
+}
+
+export function FlightResultsPage({
+  initialSearchId = null,
+  shortRef = null,
+}: FlightResultsPageProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params = useMemo(() => new URLSearchParams(searchParams.toString()), [searchParams]);
-  const searchId = params.get("search_id");
+  const searchId = initialSearchId || params.get("search_id");
   const tripType = params.get("trip_type");
   const viewParam = params.get("view");
   const isReturn = tripType === "round_trip";
@@ -99,15 +119,19 @@ export function FlightResultsPage() {
     defaultSortSynced.current = true;
     const next = new URLSearchParams(params);
     next.set("sort", "cheapest");
-    const liveId =
-      typeof window !== "undefined"
-        ? new URLSearchParams(window.location.search).get("search_id")
-        : null;
-    if (liveId && !next.get("search_id")) {
-      next.set("search_id", liveId);
+    if (!shortRef) {
+      const liveId =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("search_id")
+          : null;
+      if (liveId && !next.get("search_id")) {
+        next.set("search_id", liveId);
+      }
+    } else {
+      next.delete("search_id");
     }
-    router.replace(`/flights/results?${next.toString()}`, { scroll: false });
-  }, [params, router]);
+    router.replace(buildResultsHref(next, shortRef), { scroll: false });
+  }, [params, router, shortRef]);
 
   const results = useFlightResults({
     searchId,
@@ -115,6 +139,7 @@ export function FlightResultsPage() {
     sort,
     filters,
     view: resolvedView,
+    shortRef,
   });
 
   const startFreshSearchFromCheckoutReturn = useCallback(() => {
@@ -125,6 +150,7 @@ export function FlightResultsPage() {
     setViewOverride(null);
     clearResultsLeftForCheckout();
     const next = buildFreshResultsSearchParams(params);
+    // Fresh criteria search uses legacy long URL until soft-nav short cutover.
     router.replace(`/flights/results?${next.toString()}`, { scroll: false });
     window.setTimeout(() => {
       freshSearchInFlight.current = false;
@@ -181,16 +207,20 @@ export function FlightResultsPage() {
       liveSearchId?: string | null,
     ) => {
       const next = new URLSearchParams(params);
-      // history.replaceState may have added search_id outside Next navigation —
-      // never drop it when switching Pair/Segmented or sorting.
-      const authoritativeSearchId =
-        liveSearchId ||
-        next.get("search_id") ||
-        (typeof window !== "undefined"
-          ? new URLSearchParams(window.location.search).get("search_id")
-          : null);
-      if (authoritativeSearchId) {
-        next.set("search_id", authoritativeSearchId);
+      if (shortRef) {
+        next.delete("search_id");
+      } else {
+        // history.replaceState may have added search_id outside Next navigation —
+        // never drop it when switching Pair/Segmented or sorting.
+        const authoritativeSearchId =
+          liveSearchId ||
+          next.get("search_id") ||
+          (typeof window !== "undefined"
+            ? new URLSearchParams(window.location.search).get("search_id")
+            : null);
+        if (authoritativeSearchId) {
+          next.set("search_id", authoritativeSearchId);
+        }
       }
       // Persist Laravel-authoritative sort keys in the URL.
       next.set("sort", nextSort === "lowest_price" ? "cheapest" : nextSort);
@@ -227,9 +257,9 @@ export function FlightResultsPage() {
           else next.set(key, value);
         });
       }
-      router.replace(`/flights/results?${next.toString()}`, { scroll: false });
+      router.replace(buildResultsHref(next, shortRef), { scroll: false });
     },
-    [params, router],
+    [params, router, shortRef],
   );
 
   const handleFiltersChange = (next: typeof filters) => {
@@ -256,22 +286,26 @@ export function FlightResultsPage() {
         const next = new URLSearchParams(
           typeof window !== "undefined" ? window.location.search : params.toString(),
         );
-        const authoritativeSearchId =
-          results.resolvedSearchId ||
-          next.get("search_id") ||
-          searchId ||
-          null;
-        if (authoritativeSearchId) next.set("search_id", authoritativeSearchId);
+        if (shortRef) {
+          next.delete("search_id");
+        } else {
+          const authoritativeSearchId =
+            results.resolvedSearchId ||
+            next.get("search_id") ||
+            searchId ||
+            null;
+          if (authoritativeSearchId) next.set("search_id", authoritativeSearchId);
+        }
         next.set("view", view);
         next.delete("outbound_key");
         next.delete("combo_id");
         next.delete("fare_option_key");
-        window.history.replaceState(null, "", `/flights/results?${next.toString()}`);
+        window.history.replaceState(null, "", buildResultsHref(next, shortRef));
       } catch {
         syncUrl(filters, sort, { view, outbound_key: null, combo_id: null, fare_option_key: null }, results.resolvedSearchId);
       }
     },
-    [filters, params, results.resolvedSearchId, searchId, sort, syncUrl],
+    [filters, params, results.resolvedSearchId, searchId, shortRef, sort, syncUrl],
   );
 
   // First useful cards first; expand remaining after paint (no fare accuracy compromise).

@@ -49,10 +49,12 @@ class NextjsFlightSearchInitJsonTest extends TestCase
             'flexible_dates' => '1',
         ]);
 
-        $this->getJson('/flights/results/search?'.$query)
+        $response = $this->getJson('/flights/results/search?'.$query)
             ->assertOk()
             ->assertJsonStructure([
                 'search_id',
+                'short_ref',
+                'short_url',
                 'results_page_url',
                 'initial_results_url',
                 'criteria',
@@ -60,5 +62,10 @@ class NextjsFlightSearchInitJsonTest extends TestCase
             ->assertJsonPath('criteria.direct_only', true)
             ->assertJsonPath('criteria.nearby_airports', true)
             ->assertJsonPath('criteria.flexible_dates', true);
+
+        $payload = $response->json();
+        $this->assertMatchesRegularExpression('/^[a-z0-9]{8,32}$/', (string) ($payload['short_ref'] ?? ''));
+        $this->assertSame('/flights/s/'.$payload['short_ref'], $payload['short_url'] ?? null);
+        $this->assertNotSame($payload['search_id'], $payload['short_ref']);
     }
 }

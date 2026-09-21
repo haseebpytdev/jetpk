@@ -14,6 +14,7 @@ use App\Services\FlightSearch\FlightSearchResultStore;
 use App\Services\FlightSearch\FlightSearchService;
 use App\Services\FlightSearch\NearbyDateFareStripService;
 use App\Services\FlightSearch\ReturnSplitComboService;
+use App\Services\PublicContent\PublicShortRefService;
 use App\Services\Support\SupportTicketService;
 use App\Enums\SupportTicketCategory;
 use App\Services\Suppliers\Iati\IatiSelectedOfferRevalidationGate;
@@ -165,9 +166,16 @@ class FlightController extends Controller
         [, $searchId, $warnings] = $this->runSearch($criteria, $request);
 
         $freshness = app(SabreOfferFreshness::class);
+        $shortRef = app(PublicShortRefService::class)->mintFlightSearch(
+            $searchId,
+            FlightSearchResultStore::SESSION_TTL_SECONDS
+        );
+        $shortUrl = '/flights/s/'.$shortRef;
 
         return response()->json([
             'search_id' => $searchId,
+            'short_ref' => $shortRef,
+            'short_url' => $shortUrl,
             'summary' => [
                 'text' => $this->formatSearchSummary($criteria),
             ],

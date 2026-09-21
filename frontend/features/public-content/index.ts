@@ -29,6 +29,7 @@ export { submitSupportOrContactForm, fetchSupportCategories } from "./services/c
 
 export { publicSeoToMetadata, noIndexMetadata } from "./utils/seo-metadata";
 export { buildFaqPageJsonLd } from "./utils/faq-json-ld";
+export { hasVisibleContactFacts } from "./utils/contact-facts";
 export { isReservedPublicSlug } from "./utils/reserved-public-paths";
 
 export type * from "./types";

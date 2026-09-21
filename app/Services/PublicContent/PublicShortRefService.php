@@ -10,6 +10,10 @@ use Illuminate\Support\Str;
  *
  * Cache-backed for search-session TTL alignment; does not replace booking_reference.
  * Codes are cryptographically random — never sequential or reversible DB ids.
+ *
+ * Production note: with CACHE_STORE=file on a single host, forward + reverse maps are
+ * acceptable for search TTL when the cache filesystem is shared across PHP workers on
+ * that node. Multi-host without a shared cache store may mint divergent codes.
  */
 final class PublicShortRefService
 {
@@ -18,6 +22,8 @@ final class PublicShortRefService
     public const PURPOSE_SHARE = 'share';
 
     private const CACHE_PREFIX = 'jp_public_short_ref:';
+
+    private const REVERSE_PREFIX = 'jp_public_short_ref_rev:';
 
     private const CODE_BYTES = 9;
 
@@ -57,12 +63,62 @@ final class PublicShortRefService
         return is_array($record) ? $record : null;
     }
 
+    /**
+     * Reverse lookup: purpose + target → existing short code (cache-backed).
+     */
+    public function findCodeForTarget(string $purpose, string $targetType, string $targetKey): ?string
+    {
+        $targetKey = trim($targetKey);
+        if ($purpose === '' || $targetType === '' || $targetKey === '') {
+            return null;
+        }
+
+        $code = Cache::get($this->reverseCacheKey($purpose, $targetType, $targetKey));
+
+        return is_string($code) && $code !== '' ? $code : null;
+    }
+
+    /**
+     * Idempotent mint for a flight search session. Reuses an existing reverse map
+     * when the forward record still resolves to the same search_id.
+     */
     public function mintFlightSearch(string $searchId, int $ttlSeconds = 1800): string
     {
-        return $this->mint(self::PURPOSE_FLIGHT_SEARCH, [
+        $searchId = trim($searchId);
+        $ttl = max(60, $ttlSeconds);
+
+        if ($searchId === '') {
+            return $this->mint(self::PURPOSE_FLIGHT_SEARCH, [
+                'target_type' => 'search_id',
+                'target_key' => $searchId,
+            ], $ttl);
+        }
+
+        $existing = $this->findCodeForTarget(self::PURPOSE_FLIGHT_SEARCH, 'search_id', $searchId);
+        if ($existing !== null) {
+            $record = $this->resolve($existing);
+            if (
+                is_array($record)
+                && ($record['purpose'] ?? '') === self::PURPOSE_FLIGHT_SEARCH
+                && ($record['target_type'] ?? '') === 'search_id'
+                && ($record['target_key'] ?? '') === $searchId
+            ) {
+                return $existing;
+            }
+        }
+
+        $code = $this->mint(self::PURPOSE_FLIGHT_SEARCH, [
             'target_type' => 'search_id',
             'target_key' => $searchId,
-        ], $ttlSeconds);
+        ], $ttl);
+
+        Cache::put(
+            $this->reverseCacheKey(self::PURPOSE_FLIGHT_SEARCH, 'search_id', $searchId),
+            $code,
+            $ttl
+        );
+
+        return $code;
     }
 
     private function generateCode(): string
@@ -74,5 +130,10 @@ final class PublicShortRefService
     private function cacheKey(string $code): string
     {
         return self::CACHE_PREFIX.$code;
+    }
+
+    private function reverseCacheKey(string $purpose, string $targetType, string $targetKey): string
+    {
+        return self::REVERSE_PREFIX.$purpose.':'.$targetType.':'.hash('sha256', $targetKey);
     }
 }

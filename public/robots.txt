@@ -1,9 +1,105 @@
+# JetPakistan robots.txt
+# Policy: docs/closure/SEO-AEO-GEO/06-ai-crawler-policy.md
+# Keep production rules in sync with frontend/app/robots.ts
+
+# --- Default search / discovery ---
 User-agent: *
 Allow: /
 
 # Authenticated, operational and technical surfaces are not search landing pages.
 # These rules guide crawlers; authorization remains enforced by the application.
-# Keep in sync with frontend/app/robots.ts production disallowPrivate.
+Disallow: /customer
+Disallow: /agent
+Disallow: /admin
+Disallow: /staff
+Disallow: /dashboard
+Disallow: /booking
+Disallow: /flights/results
+Disallow: /flights/return-options
+Disallow: /flights/fare-selection
+Disallow: /flights/s
+Disallow: /lookup-booking
+Disallow: /groups/search
+Disallow: /b
+Disallow: /g
+Disallow: /v
+Disallow: /l
+Disallow: /access-denied
+Disallow: /login/otp
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /forgot-password
+Disallow: /api
+Disallow: /dev
+Disallow: /ui
+Disallow: /laravel
+Disallow: /testdash
+
+# --- AI discovery bots (intentional; same public allow + private disallow as *) ---
+# Owner goal: discoverability / citation of public SEO pages.
+# Training vs discovery: Google-Extended is named for transparency; private paths stay closed.
+# Do NOT remove private Disallows below for these agents.
+
+User-agent: GPTBot
+Allow: /
+Disallow: /customer
+Disallow: /agent
+Disallow: /admin
+Disallow: /staff
+Disallow: /dashboard
+Disallow: /booking
+Disallow: /flights/results
+Disallow: /flights/return-options
+Disallow: /flights/fare-selection
+Disallow: /flights/s
+Disallow: /lookup-booking
+Disallow: /groups/search
+Disallow: /b
+Disallow: /g
+Disallow: /v
+Disallow: /l
+Disallow: /access-denied
+Disallow: /login/otp
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /forgot-password
+Disallow: /api
+Disallow: /dev
+Disallow: /ui
+Disallow: /laravel
+Disallow: /testdash
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /customer
+Disallow: /agent
+Disallow: /admin
+Disallow: /staff
+Disallow: /dashboard
+Disallow: /booking
+Disallow: /flights/results
+Disallow: /flights/return-options
+Disallow: /flights/fare-selection
+Disallow: /flights/s
+Disallow: /lookup-booking
+Disallow: /groups/search
+Disallow: /b
+Disallow: /g
+Disallow: /v
+Disallow: /l
+Disallow: /access-denied
+Disallow: /login/otp
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /forgot-password
+Disallow: /api
+Disallow: /dev
+Disallow: /ui
+Disallow: /laravel
+Disallow: /testdash
+
+User-agent: Google-Extended
+Allow: /
 Disallow: /customer
 Disallow: /agent
 Disallow: /admin

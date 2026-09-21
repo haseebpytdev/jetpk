@@ -23,6 +23,24 @@ class PublicShortRefServiceTest extends TestCase
         $this->assertSame('abc-search-id-uuid', $record['target_key']);
     }
 
+    public function test_mint_flight_search_is_idempotent_via_reverse_map(): void
+    {
+        Cache::flush();
+        $service = app(PublicShortRefService::class);
+        $first = $service->mintFlightSearch('same-search-id', 600);
+        $second = $service->mintFlightSearch('same-search-id', 600);
+
+        $this->assertSame($first, $second);
+        $this->assertSame(
+            $first,
+            $service->findCodeForTarget(
+                PublicShortRefService::PURPOSE_FLIGHT_SEARCH,
+                'search_id',
+                'same-search-id'
+            )
+        );
+    }
+
     public function test_resolve_rejects_unknown_and_malformed_codes(): void
     {
         $service = app(PublicShortRefService::class);

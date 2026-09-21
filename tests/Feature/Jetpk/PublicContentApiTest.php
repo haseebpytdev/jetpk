@@ -247,4 +247,26 @@ class PublicContentApiTest extends TestCase
             ->assertJsonPath('why_book.enabled', false)
             ->assertJsonMissing(['fixture', 'sample']);
     }
+
+    public function test_short_ref_resolve_returns_target_and_expired_omits_target_key(): void
+    {
+        $service = app(\App\Services\PublicContent\PublicShortRefService::class);
+        $code = $service->mintFlightSearch('feature-test-search-id', 600);
+
+        $this->getJson(route('api.public.content.short-ref', ['code' => $code]).'?purpose=flight_search')
+            ->assertOk()
+            ->assertJsonPath('purpose', 'flight_search')
+            ->assertJsonPath('target_type', 'search_id')
+            ->assertJsonPath('target_key', 'feature-test-search-id');
+
+        $this->getJson(route('api.public.content.short-ref', ['code' => $code]).'?purpose=share')
+            ->assertStatus(410)
+            ->assertJsonPath('expired', true)
+            ->assertJsonMissing(['target_key']);
+
+        $this->getJson(route('api.public.content.short-ref', ['code' => 'zzzzzzzzzzzzzzzz']))
+            ->assertStatus(410)
+            ->assertJsonPath('expired', true)
+            ->assertJsonMissing(['target_key']);
+    }
 }

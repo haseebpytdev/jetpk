@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
-import { redirect, notFound } from "next/navigation";
+import { Suspense } from "react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { noIndexMetadata } from "@/features/public-content";
+import { FlightResultsPage } from "@/features/flight-results";
+import { ResultSkeleton } from "@/features/flight-results/components/ResultSkeleton";
+import { ExpiredSearchState } from "@/features/flight-results/components/ExpiredSearchState";
 import { laravelApiPath } from "@/services/flight-search";
 
 type ShortSearchPageProps = {
@@ -8,7 +13,7 @@ type ShortSearchPageProps = {
 };
 
 export const metadata: Metadata = noIndexMetadata("Flight search — JetPakistan", {
-  description: "Resolving your JetPakistan flight search session.",
+  description: "Your JetPakistan flight search session.",
   path: "/flights/s",
   follow: false,
 });
@@ -18,12 +23,35 @@ type ShortRefPayload = {
   target_type?: string;
   target_key?: string;
   expired?: boolean;
+  message?: string;
 };
 
+function ResultsFallback() {
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      <ResultSkeleton count={4} />
+    </div>
+  );
+}
+
+function ShortSearchExpired({ message }: { message: string }) {
+  return (
+    <div className="mx-auto max-w-3xl px-4 py-10">
+      <ExpiredSearchState message={message} />
+      <p className="mt-4 text-sm text-slate-600">
+        <Link href="/" className="font-medium text-jp-primary underline-offset-2 hover:underline">
+          Return home
+        </Link>{" "}
+        to start a new search.
+      </p>
+    </div>
+  );
+}
+
 /**
- * Additive short search URL (§32). Resolves opaque ref → existing results shell.
- * Legacy `/flights/results?search_id=` remains valid. Soft-nav default URL cutover
- * is deferred until same-SHA recert.
+ * True short search URL (§32 / Class B). Resolves opaque ref server-side and renders
+ * the same results shell. Browser URL stays `/flights/s/{ref}` — never redirects to
+ * `/flights/results?search_id=`. Default search handoff prefers this path.
  */
 export default async function FlightShortSearchPage({ params }: ShortSearchPageProps) {
   const { ref } = await params;
@@ -33,21 +61,39 @@ export default async function FlightShortSearchPage({ params }: ShortSearchPageP
   }
 
   let payload: ShortRefPayload | null = null;
+  let expired = false;
+  let expiredMessage = "This search link has expired. Please start a new search.";
+
   try {
-    const response = await fetch(laravelApiPath(`/api/public/content/short-refs/${encodeURIComponent(code)}`), {
-      headers: { Accept: "application/json" },
-      cache: "no-store",
-      signal: AbortSignal.timeout(3_000),
-    });
+    const response = await fetch(
+      laravelApiPath(
+        `/api/public/content/short-refs/${encodeURIComponent(code)}?purpose=flight_search`,
+      ),
+      {
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+        signal: AbortSignal.timeout(3_000),
+      },
+    );
     if (response.status === 410) {
-      redirect("/flights/results?expired=1");
-    }
-    if (!response.ok) {
+      expired = true;
+      try {
+        const body = (await response.json()) as ShortRefPayload;
+        if (body.message) expiredMessage = body.message;
+      } catch {
+        /* keep default */
+      }
+    } else if (!response.ok) {
       notFound();
+    } else {
+      payload = (await response.json()) as ShortRefPayload;
     }
-    payload = (await response.json()) as ShortRefPayload;
   } catch {
     notFound();
+  }
+
+  if (expired) {
+    return <ShortSearchExpired message={expiredMessage} />;
   }
 
   if (
@@ -55,8 +101,12 @@ export default async function FlightShortSearchPage({ params }: ShortSearchPageP
     payload.target_type !== "search_id" ||
     !payload.target_key
   ) {
-    notFound();
+    return <ShortSearchExpired message={expiredMessage} />;
   }
 
-  redirect(`/flights/results?search_id=${encodeURIComponent(payload.target_key)}`);
+  return (
+    <Suspense fallback={<ResultsFallback />}>
+      <FlightResultsPage initialSearchId={payload.target_key} shortRef={code} />
+    </Suspense>
+  );
 }

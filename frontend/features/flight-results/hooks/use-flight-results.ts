@@ -21,6 +21,8 @@ export type UseFlightResultsOptions = {
   sort: UiSortKey;
   filters: ActiveResultsFilters;
   view?: string | null;
+  /** When set, URL sync stays on `/flights/s/{ref}` without putting search_id in the browser URL. */
+  shortRef?: string | null;
 };
 
 /** REG-04: after store delivery fix, cadence bounds pair→browser worst case (~interval + RTT). */
@@ -88,7 +90,7 @@ function mapPipelineToPageStatus(
   return "empty";
 }
 
-export function useFlightResults({ searchId, searchParams, sort, filters, view }: UseFlightResultsOptions) {
+export function useFlightResults({ searchId, searchParams, sort, filters, view, shortRef }: UseFlightResultsOptions) {
   const [resolvedSearchId, setResolvedSearchId] = useState<string | null>(searchId);
   const [status, setStatus] = useState<ResultsPageStatus>("idle");
   const [message, setMessage] = useState("Searching flights…");
@@ -113,7 +115,10 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
   const lastEmptyPollMessageAt = useRef(0);
   const filtersKey = JSON.stringify(filters);
   const laravelSort = resolveLaravelSort(sort);
-  const identity = searchIdentityKey(searchParams);
+  // Prefer authoritative search_id (incl. short-URL SSR prop) so presentation URL sync does not re-init.
+  const identity = searchId?.trim()
+    ? `id:${searchId.trim()}`
+    : searchIdentityKey(searchParams);
   const viewKey = view ?? "";
   const tripType = searchParams.get("trip_type") ?? "one_way";
 
@@ -453,8 +458,21 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         id = init.data.search_id;
         setResolvedSearchId(id);
         const nextParams = new URLSearchParams(searchParams);
-        nextParams.set("search_id", id);
-        window.history.replaceState(null, "", `/flights/results?${nextParams.toString()}`);
+        const shortFromInit = (init.data.short_ref || shortRef || "").trim();
+        if (shortFromInit) {
+          nextParams.delete("search_id");
+          const qs = nextParams.toString();
+          const href = qs ? `/flights/s/${shortFromInit}?${qs}` : `/flights/s/${shortFromInit}`;
+          // Prefer App Router navigation when cutting over from legacy /flights/results.
+          if (!shortRef && typeof window !== "undefined" && !window.location.pathname.startsWith("/flights/s/")) {
+            window.location.assign(href);
+            return;
+          }
+          window.history.replaceState(null, "", href);
+        } else {
+          nextParams.set("search_id", id);
+          window.history.replaceState(null, "", `/flights/results?${nextParams.toString()}`);
+        }
       } else {
         setResolvedSearchId(id);
       }

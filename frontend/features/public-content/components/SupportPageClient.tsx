@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AnimatedFlightPath } from "@/components/motion/AnimatedFlightPath";
 import { PublicSectionHeader } from "@/features/public-visual";
-import type { SupportPageContent } from "../types";
+import type { ContactDetails, SupportPageContent } from "../types";
+import { hasVisibleContactFacts } from "../utils/contact-facts";
 import { ContactDetailsCard } from "./ContactDetailsCard";
 import { ContactForm } from "./ContactForm";
 import { ContentCardGrid } from "./ContentCardGrid";
@@ -13,10 +14,14 @@ import { EmptyContentState } from "./EmptyContentState";
 type SupportPageClientProps = {
   content: SupportPageContent;
   categories: Array<{ value: string; label: string }>;
+  /** Authoritative PublicConfig / SiteContact facts (aligned with TravelAgency JSON-LD). */
+  contact?: ContactDetails;
 };
 
-export function SupportPageClient({ content, categories }: SupportPageClientProps) {
+export function SupportPageClient({ content, categories, contact }: SupportPageClientProps) {
   const [query, setQuery] = useState("");
+  const resolvedContact = contact ?? content.contact;
+  const showContactFacts = hasVisibleContactFacts(resolvedContact);
 
   const filteredTopics = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -61,6 +66,10 @@ export function SupportPageClient({ content, categories }: SupportPageClientProp
         <AnimatedFlightPath variant="hero" className="hidden lg:block" />
       </div>
 
+      {showContactFacts ? (
+        <ContactDetailsCard contact={resolvedContact} title="How to reach JetPakistan support" />
+      ) : null}
+
       {filteredTopics.length ? (
         <section>
           <PublicSectionHeader title="Explore Support Topics" ctaText="View all topics" ctaUrl="/faq" />
@@ -86,8 +95,14 @@ export function SupportPageClient({ content, categories }: SupportPageClientProp
         ) : null}
 
         <section className="space-y-jp-lg">
-          <PublicSectionHeader title="Contact Us" subtitle="Multiple ways to reach our support team." />
-          <ContactDetailsCard contact={content.contact} />
+          <PublicSectionHeader
+            title="Contact Us"
+            subtitle={
+              showContactFacts
+                ? "Use the channels above, or send a secure message below."
+                : "Send a secure message to our support team."
+            }
+          />
         </section>
       </div>
 

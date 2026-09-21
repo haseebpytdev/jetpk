@@ -120,6 +120,16 @@ class PublicContentApiController extends Controller
     {
         $record = $shortRefs->resolve($code);
         if ($record === null) {
+            // Expired/missing: never leak target_key.
+            return response()->json([
+                'expired' => true,
+                'message' => 'Search reference not found or expired.',
+            ], 410);
+        }
+
+        $purpose = (string) ($record['purpose'] ?? '');
+        $expectedPurpose = trim((string) request()->query('purpose', ''));
+        if ($expectedPurpose !== '' && $expectedPurpose !== $purpose) {
             return response()->json([
                 'expired' => true,
                 'message' => 'Search reference not found or expired.',
@@ -128,7 +138,7 @@ class PublicContentApiController extends Controller
 
         return response()->json([
             'code' => $record['code'],
-            'purpose' => $record['purpose'],
+            'purpose' => $purpose,
             'target_type' => $record['target_type'],
             'target_key' => $record['target_key'],
             'expires_at' => $record['expires_at'],

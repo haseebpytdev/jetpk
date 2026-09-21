@@ -13,6 +13,10 @@ export type LaravelValidationErrors = Record<string, string[]>;
 
 export type FlightSearchInitResponse = {
   search_id: string;
+  /** Opaque Class B short ref (minted with search session TTL). */
+  short_ref?: string;
+  /** Path-only short results URL, e.g. `/flights/s/{ref}`. Default browser land after cutover. */
+  short_url?: string;
   results_page_url: string;
   initial_results_url: string;
   summary?: { text?: string };
@@ -44,7 +48,19 @@ export function absoluteLaravelUrl(path: string): string {
   return `${base}${normalized}`;
 }
 
+/**
+ * Prefer opaque short URL when minted. Criteria query may remain for UX chrome;
+ * search_id must never appear on the short path.
+ */
 function resolveResultsPath(data: FlightSearchInitResponse, fallbackQuery: URLSearchParams): string {
+  const short = (data.short_url ?? "").trim();
+  if (short.startsWith("/flights/s/")) {
+    const params = new URLSearchParams(fallbackQuery);
+    params.delete("search_id");
+    const qs = params.toString();
+    return qs ? `${short}?${qs}` : short;
+  }
+
   const params = new URLSearchParams(fallbackQuery);
   if (data.search_id) {
     params.set("search_id", data.search_id);
