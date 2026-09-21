@@ -6,6 +6,7 @@ use App\Contracts\Ai\InferenceProvider;
 use App\Models\AiConversation;
 use App\Models\AiHandoffAudit;
 use App\Models\AiMessage;
+use App\Models\CustomerQuery;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -48,7 +49,21 @@ final class AiChatOrchestrator
         if ($conversation === null && $createIfMissing && ($publicId === null || $publicId === '')) {
             $openQuery = $this->leadService->findRecentOpenQuery($hash, $request->user());
             if ($openQuery?->conversation !== null) {
-                $conversation = $openQuery->conversation;
+                $linked = $openQuery->conversation;
+                if ($linked->state === AiConversation::STATE_CLOSED) {
+                    $conversation = AiConversation::query()->create([
+                        'channel' => 'web',
+                        'visitor_token_hash' => $hash,
+                        'user_id' => $request->user()?->id,
+                        'state' => AiConversation::STATE_AI_ACTIVE,
+                        'shopping_state' => [],
+                    ]);
+                    $openQuery->ai_conversation_id = $conversation->id;
+                    $openQuery->save();
+                    $setCookie = true;
+                } else {
+                    $conversation = $linked;
+                }
             } else {
                 $conversation = AiConversation::query()->create([
                     'channel' => 'web',
@@ -412,13 +427,24 @@ final class AiChatOrchestrator
         $old->state = AiConversation::STATE_CLOSED;
         $old->save();
 
-        return AiConversation::query()->create([
+        $conversation = AiConversation::query()->create([
             'channel' => 'web',
             'visitor_token_hash' => $visitorHash,
             'user_id' => $old->user_id,
             'state' => AiConversation::STATE_AI_ACTIVE,
             'shopping_state' => [],
         ]);
+
+        foreach (
+            CustomerQuery::query()
+                ->where('ai_conversation_id', $old->id)
+                ->get() as $linkedQuery
+        ) {
+            $linkedQuery->ai_conversation_id = $conversation->id;
+            $linkedQuery->save();
+        }
+
+        return $conversation;
     }
 
     /**
