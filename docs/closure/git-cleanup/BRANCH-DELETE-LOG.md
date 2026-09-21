@@ -1,0 +1,124 @@
+# Merged branch delete log
+
+DELETED_COUNT=68
+
+- deleted `feat/jetpk-seo-management-phase-2`
+- deleted `fix/jetpk-canonical-responsive-ui-cms`
+- deleted `fix/jetpk-seo-indexing-2026-09-14`
+- deleted `fix/seo-phase1-hotfix`
+- deleted `fix/sitemap-route-exclusion`
+- deleted `integration/jetpk-homepage-cms-final`
+- deleted `phase/jetpk-dash-13-admin-staff-production-cutover`
+- deleted `phase/jetpk-dash-hydration-01-production-ssr-stability`
+- deleted `phase/jetpk-fe-01-public-shell`
+- deleted `phase/jetpk-fe-02-homepage-search`
+- deleted `phase/jetpk-fe-03-public-content`
+- deleted `phase/jetpk-fe-04-auth-session-role-routing`
+- deleted `phase/jetpk-fe-04a-customer-route-closure`
+- deleted `phase/jetpk-fe-05-flight-results`
+- deleted `phase/jetpk-fe-05a-lowest-price-sort-fix`
+- deleted `phase/jetpk-fe-06-flight-details-revalidation`
+- deleted `phase/jetpk-fe-06a-sabre-fare-change-closure`
+- deleted `phase/jetpk-fe-07-group-ticketing-flow`
+- deleted `phase/jetpk-fe-07a-group-search-facets-closure`
+- deleted `phase/jetpk-fe-08-standard-flight-passenger-flow`
+- deleted `phase/jetpk-fe-09-standard-flight-review-payment`
+- deleted `phase/jetpk-fe-10-booking-success-post-booking`
+- deleted `phase/jetpk-fe-10a-booking-lookup-turnstile-closure`
+- deleted `phase/jetpk-fe-11-customer-dashboard`
+- deleted `phase/jetpk-fe-12-agent-dashboard`
+- deleted `phase/jetpk-fe-13-public-cms-closure`
+- deleted `phase/jetpk-fe-13a-public-playwright-closure`
+- deleted `phase/jetpk-frontend-motion-ajax-ux`
+- deleted `phase/jetpk-full-next-frontend-ui-integration`
+- deleted `phase/jetpk-fullstack-01-public-customer-agent-checkout-connectivity`
+- deleted `phase/jetpk-fullstack-01a-r1-force-password-regression-repair`
+- deleted `phase/jetpk-fullstack-01b-public-search-results-fare-connectivity`
+- deleted `phase/jetpk-fullstack-01c-customer-checkout-passengers-booking`
+- deleted `phase/jetpk-fullstack-01d-payment-return-confirmation-connectivity`
+- deleted `phase/jetpk-fullstack-01e-guest-lookup-customer-portal-verification`
+- deleted `phase/jetpk-fullstack-01e-scope-lock`
+- deleted `phase/jetpk-fullstack-01f-agent-agent-staff-rbac-travelers`
+- deleted `phase/jetpk-fullstack-01g-cms-branding-fixture-hardening-final-regression`
+- deleted `phase/jetpk-ops-01-full-stack-operational-audit`
+- deleted `phase/jetpk-ops-02-auth-session-api-bridge`
+- deleted `phase/jetpk-ops-03-customer-portal-closure`
+- deleted `phase/jetpk-ops-04-agent-agent-staff-closure`
+- deleted `phase/jetpk-ops-05-admin-platform-staff-closure`
+- deleted `phase/jetpk-ops-06-controlled-execution-closure`
+- deleted `phase/jetpk-ops-07-admin-staff-parity-closure`
+- deleted `phase/jetpk-public-next-frontend-final-gate`
+- deleted `phase/jetpk-public-next-frontend-main-test-fix`
+- deleted `phase/jetpk-public-next-theme-02-design-system-cms-foundation`
+- deleted `phase/jetpk-public-next-theme-rebuild`
+- deleted `phase/jetpk-release-02-final-predeploy-readiness`
+- deleted `phase/jetpk-ui-01-final-ui-closure-audit`
+- deleted `phase/jetpk-ui-01-mockup-sitemap-audit`
+- deleted `phase/jetpk-ui-02-design-system-foundation`
+- deleted `phase/jetpk-ui-02a-global-legacy-typography`
+- deleted `phase/jetpk-ui-03-homepage-public-cms-closure`
+- deleted `phase/jetpk-ui-03-public-pages-visual-parity`
+- deleted `phase/jetpk-ui-03a-visual-matrix-closure`
+- deleted `phase/jetpk-ui-04-booking-journey-visual-parity`
+- deleted `phase/jetpk-ui-04-results-fare-selection-closure`
+- deleted `phase/jetpk-ui-04a-booking-state-matrix-closure`
+- deleted `phase/jetpk-ui-05-auth-portals-dashboard-visual-parity`
+- deleted `phase/jetpk-ui-05-booking-checkout-closure`
+- deleted `phase/jetpk-ui-05a-dashboard-hydration-rbac-closure`
+- deleted `phase/jetpk-ui-05b-ownership-rbac-logout-closure`
+- deleted `phase/jetpk-ui-06-customer-agent-portal-closure`
+- deleted `phase/jetpk-ui-07-admin-staff-dashboard-closure`
+- deleted `phase/jetpk-ui-08-cms-page-builder-closure`
+- deleted `phase/jetpk-ui-09-final-regression-closure`
+
+## Skipped
+
+- `ARCHIVE:archive/jp-public-next-theme-03-rejected-20260801`
+- `ARCHIVE:archive/jp-public-next-theme-03d-final-20260801`
+- `ARCHIVE:archive/jp-ui-06-rejected-20260801`
+- `PROTECT:backup/jetpakistan-post-recovery-20260921`
+- `PROTECT:checkpoint/jetpakistan-app-release-20260921`
+- `UNMERGED:claude/ui-master`
+- `UNMERGED:control/jetpk-predeploy-loop`
+- `PROTECT:docs/iati-capability-reference-20260815`
+- `UNMERGED:evidence/jp-final-visual-uat-20260917`
+- `UNMERGED:feat/jetpk-flight-results-booking-flow-20260819`
+- `UNMERGED:feature/jetpk-search-ui-polish-20260819`
+- `UNMERGED:fix/jetpk-home-visual-production-20260819`
+- `UNMERGED:fix/jetpk-search-input-flow-20260819`
+- `UNMERGED:fix/jetpk-search-ui-live-followup-20260819`
+- `UNMERGED:fix/jp-ai-closure-ls12-leads`
+- `UNMERGED:integration/jetpk-ui`
+- `PROTECT:main`
+- `PROTECT:ops/post-recovery-cleanup-20260921`
+- `PROTECT:perf/PERF-CORRECTION-01`
+- `UNMERGED:phase/JETPK-HERO-VISUAL-CLARITY-FIX`
+- `UNMERGED:phase/jetpk-dash-02-design-system-responsive-shell-and-bookings-foundation`
+- `UNMERGED:phase/jetpk-dash-03-operational-backoffice`
+- `UNMERGED:phase/jetpk-dash-03-payments-transactions-foundation`
+- `UNMERGED:phase/jetpk-dash-04-05-customers-suppliers-foundation`
+- `UNMERGED:phase/jetpk-dash-06-07-agents-tickets-pnrs-foundation`
+- `UNMERGED:phase/jetpk-dash-08-09-reports-analytics-theme-aware-cms`
+- `UNMERGED:phase/jetpk-dash-10-settings-users-rbac-audit-foundation`
+- `UNMERGED:phase/jetpk-dash-11-laravel-read-only-integration-foundation`
+- `UNMERGED:phase/jetpk-ops-08-cross-portal-realtime`
+- `UNMERGED:phase/jetpk-owner-uat-w2-21-22-shell-typography`
+- `UNMERGED:phase/jetpk-owner-uat-wave-1-portals-public-shell`
+- `UNMERGED:phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`
+- `UNMERGED:phase/jetpk-release-01-pre-deployment-readiness`
+- `UNMERGED:phase/jetpk-release-02a-dashboard-asset-namespace`
+- `UNMERGED:phase/jetpk-uat-01-autonomous-business-uat`
+- `UNMERGED:phase/jetpk-ui-02-design-system-shared-shell-closure`
+- `UNMERGED:phase/jetpk-ui-06-canonical-mockup-blueprint-parity`
+- `UNMERGED:phase/jp-admin-cms-03`
+- `UNMERGED:phase/jp-ai-production-canary-01`
+- `UNMERGED:phase/jp-bo-04`
+- `UNMERGED:phase/jp-bo-04g-progressive`
+- `UNMERGED:phase/jp-email-prod-branding-02`
+- `UNMERGED:phase/jp-flight-perf-01`
+- `UNMERGED:phase/jp-grp-commercial-seat-sync-01`
+- `UNMERGED:phase/jp-grp-return-closeout-01`
+- `UNMERGED:phase/jp-grp-ui-01`
+- `UNMERGED:phase/jp-homepage-cms-authority-06`
+- `UNMERGED:phase/jp-master-closure-09`
+- `UNMERGED:phase/jp-master-unfinished-closure-10`

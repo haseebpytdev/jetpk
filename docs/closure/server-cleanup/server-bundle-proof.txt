@@ -1,0 +1,17 @@
+﻿-rw-rw-r-- 1 pkjetp pkjetp 305M Sep 21 12:07 /home/pkjetp/backups/jetpakistan-recovered-20260921/JetPakistan-Recovered-20260921.bundle
+364d9b04d4f54e054536dd56124725c65238a69848a82f31f432e96edc33d5ca  /home/pkjetp/backups/jetpakistan-recovered-20260921/JetPakistan-Recovered-20260921.bundle
+total 306M
+drwx------ 11 pkjetp pkjetp 4.0K Sep 21 11:56 .
+drwxrwxr-x 34 pkjetp pkjetp  20K Sep 21 12:09 ..
+-rw-rw-r--  1 pkjetp pkjetp 103K Sep 21 11:54 config-ops-20260921T095424Z.tar.gz
+drwxrwxr-x  2 pkjetp pkjetp 4.0K Sep 21 11:54 cron
+drwx------  2 pkjetp pkjetp 4.0K Sep 21 11:54 db
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 21 11:54 deploy-scripts
+drwx------  2 pkjetp pkjetp 4.0K Sep 21 11:54 env
+-rw-rw-r--  1 pkjetp pkjetp 305M Sep 21 12:07 JetPakistan-Recovered-20260921.bundle
+drwxrwxr-x  2 pkjetp pkjetp 4.0K Sep 21 11:54 locks
+drwxrwxr-x  2 pkjetp pkjetp 4.0K Sep 21 12:09 manifests
+-rw-------  1 pkjetp pkjetp    0 Sep 21 11:54 NO_PUBLIC_WEB_ACCESS
+drwxrwxr-x  2 pkjetp pkjetp 4.0K Sep 21 11:54 ols
+drwxrwxr-x  2 pkjetp pkjetp 4.0K Sep 21 11:54 pm2
+drwxrwxr-x  2 pkjetp pkjetp 4.0K Sep 21 11:54 stamps

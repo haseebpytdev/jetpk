@@ -130,3 +130,19 @@ Default UAT/closure: no payment, PNR create, order create, ticketing, void, refu
 ## Rollback
 
 Documented rollback SHA + OLS bak + env preservation + forward restoration. Do not leave production rolled back after a verification drill.
+
+## Post-recovery deploy safety (2026-09-21)
+
+Production deployment accepts only an authorized `main` SHA or the explicit rollback SHA.
+Guards (see `scripts/jetpk/guard-*.sh`):
+
+| Gate | Fail token |
+|---|---|
+| Dirty worktree | `WORKTREE_DIRTY=FAIL` |
+| Unauthorized / mismatched source SHA | `SOURCE_SHA_NOT_AUTHORIZED=FAIL` / `BUILD_SOURCE_SHA_MISMATCH=FAIL` |
+| Missing replacement `.next` before PM2 restart | `BUILD_BEFORE_RESTART_GUARD=FAIL` |
+| Disk below reserve | `DISK_SPACE_GUARD=FAIL` |
+| Release retention | default **DRY-RUN** via `release-retention-dry-run.sh` |
+
+Sequence: backup → stage → install → build → verify BUILD_ID → switch/restart → health → live smoke → stamp.
+If build fails, leave current runtime untouched.
