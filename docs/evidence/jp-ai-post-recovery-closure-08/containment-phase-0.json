@@ -1,0 +1,32 @@
+{
+  "phase": "JP-AI-CONTAINMENT-PHASE-0",
+  "ts": "2026-09-21T15:29:09.293Z",
+  "patch_status": 302,
+  "before": {
+    "assistant_mode": "public",
+    "public_enabled": true,
+    "internal_canary_enabled": false,
+    "audience_mode": "public",
+    "config_ai_enabled": true,
+    "config_mode": "public",
+    "canary_eligible": false
+  },
+  "after_admin": {
+    "assistant_mode": "internal_canary",
+    "public_enabled": false,
+    "internal_canary_enabled": true,
+    "audience_mode": "internal_canary",
+    "config_ai_enabled": true,
+    "config_mode": "internal_canary",
+    "canary_eligible": true
+  },
+  "anonymous": {
+    "ai_assistant_enabled": false,
+    "ai_assistant_mode": "internal_canary"
+  },
+  "containment": {
+    "GENERAL_PUBLIC_NEW_AI": "NO",
+    "ANONYMOUS_NEW_AI": "NO",
+    "PUBLIC_ROLLOUT_OFF": "YES"
+  }
+}
