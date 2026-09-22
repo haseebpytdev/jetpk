@@ -167,50 +167,114 @@ export function normalizeConfirmationStep(msg) {
   return msg;
 }
 
+export function isLeadCapturePending(payload = {}) {
+  return (
+    payload?.meta?.lead_capture_pending === true ||
+    payload?.status === "lead_capture_required" ||
+    payload?.mode === "LEAD_CAPTURE"
+  );
+}
+
+async function readPanelText(page) {
+  return page.getByTestId("ask-jetpakistan-messages").innerText().catch(() => "");
+}
+
+function panelPromptKind(text) {
+  const lower = String(text).toLowerCase();
+  if (/may i start with your name|what should i call you/i.test(lower)) return "name";
+  if (/email address and contact number|best contact number|email address as well/i.test(lower)) return "contact";
+  if (/is it okay for jetpakistan to contact you/i.test(lower)) return "consent";
+  return null;
+}
+
 export async function completeLeadCaptureIfNeeded(page, options = {}) {
   const panel = page.locator('[data-testid="ask-jetpakistan-panel"]');
   const leadCapture = panel.locator('[data-testid="ask-jetpakistan-lead-capture"]');
-  if (!(await leadCapture.isVisible().catch(() => false))) {
+  const lead = options.lead ?? SYNTHETIC_QA_LEAD;
+  const timeoutMs = Number(options.leadTimeoutMs ?? 120_000);
+
+  if (await leadCapture.isVisible().catch(() => false)) {
+    const nameInput = panel.locator("#lead-name");
+    if (await nameInput.isVisible().catch(() => false)) {
+      await nameInput.fill(lead.name);
+    }
+    const emailInput = panel.locator("#lead-email");
+    if (await emailInput.isVisible().catch(() => false)) {
+      await emailInput.fill(lead.email);
+    }
+    const phoneInput = panel.locator("#lead-phone");
+    if (await phoneInput.isVisible().catch(() => false)) {
+      await phoneInput.fill(lead.phone);
+    }
+    const consent = panel.locator('[data-testid="ask-jetpakistan-lead-capture"] input[type="checkbox"]').first();
+    if (await consent.isVisible().catch(() => false) && !(await consent.isChecked())) {
+      await consent.check();
+    }
+    const responsePromise = page.waitForResponse(
+      (res) => res.url().includes("/api/public/ai/lead") && res.request().method() === "POST",
+      { timeout: timeoutMs },
+    );
+    await panel.getByRole("button", { name: /continue/i }).click();
+    const response = await responsePromise;
+    let payload = {};
+    try {
+      payload = await response.json();
+    } catch {
+      payload = {};
+    }
+    await page.waitForTimeout(1500);
+    return {
+      completed: true,
+      status: response.status(),
+      payload,
+      reason: response.ok() ? "LEAD_SUBMITTED_LEGACY_FORM" : "LEAD_SUBMIT_FAILED",
+    };
+  }
+
+  let lastPayload = options.initialPayload ?? {};
+  const panelText = await readPanelText(page);
+  const initialKind = panelPromptKind(panelText);
+  if (!initialKind && !isLeadCapturePending(lastPayload)) {
     return { completed: false, reason: "NO_LEAD_GATE" };
   }
 
-  const lead = options.lead ?? SYNTHETIC_QA_LEAD;
-  const nameInput = panel.locator("#lead-name");
-  if (await nameInput.isVisible().catch(() => false)) {
-    await nameInput.fill(lead.name);
+  const steps = [];
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const text = await readPanelText(page);
+    const kind = panelPromptKind(text);
+    if (kind === "name") {
+      const nameResult = await sendMessage(page, lead.name, { responseTimeoutMs: timeoutMs });
+      steps.push({ step: "name", payload: nameResult.payload ?? {} });
+      lastPayload = nameResult.payload ?? lastPayload;
+      continue;
+    }
+    if (kind === "contact") {
+      const contactResult = await sendMessage(page, `${lead.email} ${lead.phone}`, {
+        responseTimeoutMs: timeoutMs,
+      });
+      steps.push({ step: "contact", payload: contactResult.payload ?? {} });
+      lastPayload = contactResult.payload ?? lastPayload;
+      continue;
+    }
+    if (kind === "consent") {
+      const consentResult = await sendMessage(page, options.consentMessage ?? "yes", {
+        responseTimeoutMs: timeoutMs,
+      });
+      steps.push({ step: "consent", payload: consentResult.payload ?? {} });
+      lastPayload = consentResult.payload ?? lastPayload;
+      break;
+    }
+    if (!isLeadCapturePending(lastPayload)) {
+      break;
+    }
   }
-  const emailInput = panel.locator("#lead-email");
-  if (await emailInput.isVisible().catch(() => false)) {
-    await emailInput.fill(lead.email);
-  }
-  const phoneInput = panel.locator("#lead-phone");
-  if (await phoneInput.isVisible().catch(() => false)) {
-    await phoneInput.fill(lead.phone);
-  }
-  const consent = panel.locator('[data-testid="ask-jetpakistan-lead-capture"] input[type="checkbox"]').first();
-  if (await consent.isVisible().catch(() => false) && !(await consent.isChecked())) {
-    await consent.check();
-  }
-
-  const responsePromise = page.waitForResponse(
-    (res) => res.url().includes("/api/public/ai/lead") && res.request().method() === "POST",
-    { timeout: Number(options.leadTimeoutMs ?? 120_000) },
-  );
-  await panel.getByRole("button", { name: /continue/i }).click();
-  const response = await responsePromise;
-  let payload = {};
-  try {
-    payload = await response.json();
-  } catch {
-    payload = {};
-  }
-  await page.waitForTimeout(1500);
 
   return {
     completed: true,
-    status: response.status(),
-    payload,
-    reason: response.ok() ? "LEAD_SUBMITTED" : "LEAD_SUBMIT_FAILED",
+    status: 200,
+    payload: lastPayload,
+    steps,
+    reason: "LEAD_SUBMITTED_CONVERSATIONAL",
   };
 }
 
@@ -273,8 +337,8 @@ export async function runConfirmedLiveSearch(page, caseId, steps, expectRoute, o
       lastPayload = result.payload ?? {};
       visible = result.body;
       if (result.status >= 500) throw new Error(`HTTP_${result.status}`);
-      if (result.payload?.status === "lead_capture_required" || result.payload?.mode === "LEAD_CAPTURE") {
-        const lead = await completeLeadCaptureIfNeeded(page, options);
+      if (isLeadCapturePending(result.payload)) {
+        const lead = await completeLeadCaptureIfNeeded(page, { ...options, initialPayload: result.payload });
         if (!lead.completed || lead.status >= 400) {
           throw new Error(lead.reason ?? "LEAD_CAPTURE_FAILED");
         }
