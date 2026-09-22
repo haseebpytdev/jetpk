@@ -496,6 +496,189 @@ class PublicAiAssistantTest extends TestCase
         $this->assertSame(AiConversation::STATE_AI_ACTIVE, $conversation->state);
     }
 
+    public function test_booking_lookup_accepts_reference_and_phone(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
+
+        $agency = Agency::factory()->create();
+        $booking = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'booking_reference' => 'PHONEREF1',
+            'status' => BookingStatus::PaymentPending,
+        ]);
+        BookingContact::query()->create([
+            'booking_id' => $booking->id,
+            'email' => 'phone-guest@example.com',
+            'phone' => '+923001112233',
+        ]);
+
+        $vid = str_repeat('q', 40);
+        $first = $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', ['message' => 'Look up my booking please']);
+        $cid = $first->json('conversation_id');
+
+        $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', [
+                'message' => 'Reference PHONEREF1',
+                'conversation_id' => $cid,
+            ]);
+
+        $third = $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', [
+                'message' => 'Phone 03001112233',
+                'conversation_id' => $cid,
+            ]);
+
+        $third->assertOk()->assertJsonPath('status', 'ok');
+        $this->assertStringContainsString('phoneref1', mb_strtolower((string) $third->json('message')));
+    }
+
+    public function test_booking_lookup_wrong_phone_returns_generic_failure(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
+
+        $agency = Agency::factory()->create();
+        $booking = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'booking_reference' => 'PHONEWRONG',
+            'status' => BookingStatus::PaymentPending,
+        ]);
+        BookingContact::query()->create([
+            'booking_id' => $booking->id,
+            'email' => 'real-phone@example.com',
+            'phone' => '+923009998877',
+        ]);
+
+        $vid = str_repeat('s', 40);
+        $cid = $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', ['message' => 'Look up my booking'])
+            ->json('conversation_id');
+
+        $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', [
+                'message' => 'Reference PHONEWRONG',
+                'conversation_id' => $cid,
+            ]);
+
+        $third = $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', [
+                'message' => 'Phone 03001112233',
+                'conversation_id' => $cid,
+            ]);
+
+        $third->assertOk()->assertJsonPath('status', 'not_found');
+        $this->assertNull($third->json('booking'));
+        $this->assertStringNotContainsString('real-phone@example.com', (string) $third->json('message'));
+    }
+
+    public function test_booking_lookup_wrong_reference_returns_generic_failure(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
+
+        $agency = Agency::factory()->create();
+        $booking = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'booking_reference' => 'RIGHTREF1',
+            'status' => BookingStatus::PaymentPending,
+        ]);
+        BookingContact::query()->create([
+            'booking_id' => $booking->id,
+            'email' => 'guest-right@example.com',
+        ]);
+
+        $vid = str_repeat('t', 40);
+        $cid = $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', ['message' => 'Look up my booking'])
+            ->json('conversation_id');
+
+        $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', [
+                'message' => 'Reference WRONGREF9',
+                'conversation_id' => $cid,
+            ]);
+
+        $third = $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', [
+                'message' => 'Email guest-right@example.com',
+                'conversation_id' => $cid,
+            ]);
+
+        $third->assertOk()->assertJsonPath('status', 'not_found');
+        $this->assertNull($third->json('booking'));
+        $this->assertStringNotContainsString('rightref1', mb_strtolower((string) $third->json('message')));
+    }
+
+    public function test_booking_lookup_rejects_name_only_verification(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
+
+        $agency = Agency::factory()->create();
+        $booking = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'booking_reference' => 'NAMEONLY1',
+            'status' => BookingStatus::PaymentPending,
+        ]);
+        BookingContact::query()->create([
+            'booking_id' => $booking->id,
+            'email' => 'name-only@example.com',
+        ]);
+
+        $vid = str_repeat('u', 40);
+        $cid = $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', ['message' => 'Look up my booking'])
+            ->json('conversation_id');
+
+        $response = $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', [
+                'message' => 'My name is John Smith',
+                'conversation_id' => $cid,
+            ]);
+
+        $response->assertOk()->assertJsonPath('status', 'clarify');
+        $this->assertNull($response->json('booking'));
+        $this->assertStringNotContainsString('nameonly1', mb_strtolower((string) $response->json('message')));
+    }
+
+    public function test_booking_change_request_does_not_trigger_supplier_mutation(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
+
+        $response = $this->withCookie('jp_ai_vid', str_repeat('r', 40))
+            ->postJson('/api/public/ai/chat', [
+                'message' => 'Please cancel my booking and refund now',
+            ]);
+
+        $response->assertOk();
+        $this->assertNull($response->json('meta.search_record.live_supplier_called'));
+        $this->assertNull($response->json('meta.booking_lookup'));
+        $this->assertNotSame('flight_search', data_get($response->json(), 'meta.intent.intent'));
+    }
+
+    public function test_hard_locked_write_capabilities_remain_unavailable(): void
+    {
+        $locked = app(\App\Services\Ai\AiAssistantSettingsService::class)->hardLockedWriteCapabilities();
+        $keys = array_column($locked, 'key');
+        $this->assertContains('booking', $keys);
+        $this->assertContains('hold', $keys);
+        $this->assertContains('create_pnr', $keys);
+        $this->assertContains('issue_ticket', $keys);
+        $this->assertContains('payment', $keys);
+        $this->assertContains('cancel', $keys);
+        $this->assertContains('refund', $keys);
+        $this->assertContains('void', $keys);
+        $this->assertContains('exchange', $keys);
+        $this->assertContains('live_supplier_write', $keys);
+        foreach ($locked as $capability) {
+            $this->assertTrue($capability['locked']);
+            $this->assertFalse($capability['activatable']);
+        }
+    }
+
     public function test_application_rate_limit_returns_429_after_budget_exhausted(): void
     {
         $this->enablePublicAi([
