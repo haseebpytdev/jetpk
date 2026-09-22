@@ -59,6 +59,16 @@ final class AiCommercialIntentClassifier
         return false;
     }
 
+    public function isBookingHelpIntent(string $message): bool
+    {
+        $lower = mb_strtolower(trim($message));
+
+        return preg_match(
+            '/\b(existing\s+)?(booking|reservation)\b|\blook\s*up\s+my\s+booking\b|\bmy\s+booking\s+reference\b|\bhelp with an existing booking\b/u',
+            $lower,
+        ) === 1;
+    }
+
     public function isSimpleGreeting(string $message): bool
     {
         $lower = mb_strtolower(trim($message));

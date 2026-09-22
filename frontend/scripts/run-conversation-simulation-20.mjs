@@ -6,12 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
-import {
-  BASE,
-  openAskPanel,
-  sendMessage,
-  waitForAskReady,
-} from "./canary-matrix-helpers.mjs";
+import { BASE, sendMessage } from "./canary-matrix-helpers.mjs";
 import { isLeadCapturePending } from "./live-readonly-qa-helpers.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -99,6 +94,18 @@ function routeFromPayload(payload) {
   };
 }
 
+async function waitForPublicChatReady(page, timeoutMs = 120_000) {
+  const input = page.getByRole("textbox", { name: /Message Ask JetPakistan/i });
+  await input.waitFor({ state: "visible", timeout: timeoutMs });
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector('[data-testid="ask-jetpakistan-panel"] input');
+      return el && !el.disabled && el.getAttribute("aria-busy") !== "true";
+    },
+    { timeout: timeoutMs },
+  );
+}
+
 async function freshAnonymousContext(browser) {
   return browser.newContext({
     viewport: { width: 1440, height: 900 },
@@ -107,9 +114,28 @@ async function freshAnonymousContext(browser) {
 }
 
 async function openFreshChat(page) {
-  await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded", timeout: 120_000 });
-  await page.getByRole("button", { name: /^Ask JetPakistan$/i }).click({ timeout: 60_000 });
-  await waitForAskReady(page, 120_000);
+  await page.goto(`${BASE}/#ask-jetpakistan`, { waitUntil: "domcontentloaded", timeout: 120_000 });
+  await page.waitForFunction(
+    async (base) => {
+      const res = await fetch(`${base}/laravel/api/public/content/config`, {
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) return false;
+      const json = await res.json();
+      return json.ai_assistant_enabled === true;
+    },
+    BASE,
+    { timeout: 90_000 },
+  );
+  const fab = page.getByTestId("ask-jetpakistan-fab");
+  const panel = page.getByTestId("ask-jetpakistan-panel");
+  await fab.or(panel).waitFor({ state: "visible", timeout: 90_000 });
+  if (!(await panel.isVisible().catch(() => false))) {
+    await fab.click({ timeout: 30_000 });
+  }
+  await panel.waitFor({ state: "visible", timeout: 90_000 });
+  await waitForPublicChatReady(page, 120_000);
   await assertNoLeadForm(page);
   await assertComposerUsable(page);
 }

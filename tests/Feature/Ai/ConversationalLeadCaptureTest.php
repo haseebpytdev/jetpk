@@ -221,6 +221,22 @@ class ConversationalLeadCaptureTest extends TestCase
         $this->assertDatabaseCount('customer_queries', 0);
     }
 
+    public function test_generic_help_after_consent_returns_ack_without_replay(): void
+    {
+        $this->enablePublicAi();
+        $vid = str_repeat('z', 40);
+        $cid = $this->chat($vid, "Hi, I'd like some help")['conversation_id'];
+        $this->chat($vid, 'Haseeb Asif', $cid);
+        $this->chat($vid, 'lead@example.com 03001234567', $cid);
+
+        $consent = $this->chat($vid, 'Yes sure', $cid);
+        $consent['response']->assertOk();
+        $message = mb_strtolower((string) $consent['response']->json('message'));
+        $this->assertStringContainsString('perfect, haseeb', $message);
+        $this->assertStringContainsString('how can i help you', $message);
+        $this->assertNotEmpty($consent['response']->json('query_reference'));
+    }
+
     public function test_pending_flight_request_resumes_after_consent(): void
     {
         $this->enablePublicAi();

@@ -708,14 +708,15 @@ final class CustomerQueryLeadService
         $pendingMessage = (string) ($state['lead_pending_message'] ?? '');
         $this->clearLeadCaptureState($conversation);
 
-        $ack = $pendingMessage !== ''
+        $shouldReplay = $this->shouldReplayPendingLeadMessage($pendingMessage);
+        $ack = $shouldReplay
             ? "Perfect, {$name}. Let me help with that."
             : "Perfect, {$name}. How can I help you?";
 
         $response = $this->buildConversationalResponse($conversation, $ack, false);
         $response['query_reference'] = $result['query']->query_reference;
 
-        if ($pendingMessage !== '') {
+        if ($shouldReplay) {
             return [
                 'action' => 'replay',
                 'response' => $response,
@@ -870,6 +871,20 @@ final class CustomerQueryLeadService
         }
 
         return null;
+    }
+
+    private function shouldReplayPendingLeadMessage(string $pendingMessage): bool
+    {
+        $pendingMessage = trim($pendingMessage);
+        if ($pendingMessage === '') {
+            return false;
+        }
+
+        if ($this->intentClassifier->isCommercialTravelIntent($pendingMessage)) {
+            return true;
+        }
+
+        return $this->intentClassifier->isBookingHelpIntent($pendingMessage);
     }
 
     private function clearLeadCaptureState(AiConversation $conversation): void
