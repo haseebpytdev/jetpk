@@ -24,7 +24,8 @@ class GroupInventoryFreshnessService
 
     private static bool $refreshedThisRequest = false;
 
-    private static bool $providerConfirmedThisRequest = false;
+    /** @var list<string> */
+    private static array $confirmedSuppliersThisRequest = [];
 
     public function __construct(
         private readonly GroupInventoryFacetService $facetService,
@@ -41,8 +42,10 @@ class GroupInventoryFreshnessService
      *     refresh_attempted: bool,
      *     refresh_failed: bool,
      *     provider_confirmed: bool,
+     *     confirmed_suppliers: list<string>,
      *     bookable: bool,
-     *     user_notice: ?string
+     *     user_notice: ?string,
+     *     providers?: array<string, array<string, mixed>>
      * }
      */
     public function ensureFreshForSearch(): array
@@ -50,8 +53,14 @@ class GroupInventoryFreshnessService
         $lastSyncedAt = $this->facetService->lastInventorySyncAt();
         $minutesAgo = $this->minutesAgo($lastSyncedAt);
 
-        if (self::$refreshedThisRequest && self::$providerConfirmedThisRequest) {
-            return $this->confirmedResult($lastSyncedAt, $minutesAgo, skipped: true, skipReason: 'request_dedupe');
+        if (self::$refreshedThisRequest && self::$confirmedSuppliersThisRequest !== []) {
+            return $this->confirmedResult(
+                $lastSyncedAt,
+                $minutesAgo,
+                skipped: true,
+                skipReason: 'request_dedupe',
+                confirmedSuppliers: self::$confirmedSuppliersThisRequest,
+            );
         }
 
         if (! $this->isRealtimeEnabled()) {
@@ -84,30 +93,34 @@ class GroupInventoryFreshnessService
                 'ttl_seconds' => $this->realtimeTtlSeconds(),
             ]);
 
-            $syncResult = $this->syncService->sync(forceFresh: true);
+            $syncResult = $this->syncService->sync(null, false, true);
+            $confirmedSuppliers = $syncResult['successful_providers'] ?? [];
 
-            if (($syncResult['skipped'] ?? false) === true) {
+            if ($confirmedSuppliers === []) {
                 Log::warning('group_inventory_realtime_refresh_failed', [
                     'reason' => 'sync_skipped',
                     'message' => $syncResult['message'] ?? null,
+                    'failed_providers' => $syncResult['failed_providers'] ?? [],
                 ]);
 
                 return $this->failedResult(
                     $syncResult['message'] ?? 'sync_skipped',
                     $this->facetService->lastInventorySyncAt(),
+                    providers: $syncResult['providers'] ?? [],
                 );
             }
 
             $ttlSeconds = $this->realtimeTtlSeconds();
             $this->markRealtimeSyncCompleted($ttlSeconds);
-            self::$providerConfirmedThisRequest = true;
-            $this->markSessionProviderConfirmed();
+            self::$confirmedSuppliersThisRequest = $confirmedSuppliers;
+            $this->markSessionProviderConfirmed($confirmedSuppliers);
 
             $refreshedAt = $this->facetService->lastInventorySyncAt();
 
             Log::info('group_inventory_realtime_refresh_success', [
                 'synced' => $syncResult['synced'] ?? 0,
                 'deactivated' => $syncResult['deactivated'] ?? 0,
+                'successful_providers' => $confirmedSuppliers,
             ]);
 
             return $this->result(
@@ -119,8 +132,10 @@ class GroupInventoryFreshnessService
                 refreshAttempted: true,
                 refreshFailed: false,
                 providerConfirmed: true,
+                confirmedSuppliers: $confirmedSuppliers,
                 bookable: true,
                 userNotice: null,
+                providers: $syncResult['providers'] ?? [],
             );
         } catch (\Throwable $exception) {
             Log::error('group_inventory_realtime_refresh_failed', [
@@ -135,20 +150,31 @@ class GroupInventoryFreshnessService
 
     public function isSessionProviderConfirmed(): bool
     {
-        if (self::$providerConfirmedThisRequest) {
-            return true;
+        return $this->getSessionConfirmedSuppliers() !== [];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getSessionConfirmedSuppliers(): array
+    {
+        if (self::$confirmedSuppliersThisRequest !== []) {
+            return self::$confirmedSuppliersThisRequest;
         }
 
         $sessionId = session()->getId();
         if ($sessionId === '') {
-            return false;
+            return [];
         }
 
-        return (bool) Cache::get(self::SESSION_CONFIRM_PREFIX.$sessionId);
+        $cached = Cache::get(self::SESSION_CONFIRM_PREFIX.$sessionId);
+
+        return is_array($cached) ? array_values(array_filter($cached, 'is_string')) : [];
     }
 
     public function clearSessionProviderConfirmed(): void
     {
+        self::$confirmedSuppliersThisRequest = [];
         $sessionId = session()->getId();
         if ($sessionId !== '') {
             Cache::forget(self::SESSION_CONFIRM_PREFIX.$sessionId);
@@ -194,6 +220,7 @@ class GroupInventoryFreshnessService
                 refreshAttempted: $refreshAttempted,
                 refreshFailed: true,
                 providerConfirmed: false,
+                confirmedSuppliers: [],
                 bookable: false,
                 userNotice: GroupTicketingLivePolicy::PUBLIC_SEARCH_UNAVAILABLE_MESSAGE,
             );
@@ -220,12 +247,14 @@ class GroupInventoryFreshnessService
             refreshAttempted: $refreshAttempted,
             refreshFailed: false,
             providerConfirmed: false,
+            confirmedSuppliers: [],
             bookable: true,
             userNotice: null,
         );
     }
 
     /**
+     * @param  list<string>  $confirmedSuppliers
      * @return array<string, mixed>
      */
     private function confirmedResult(
@@ -233,6 +262,7 @@ class GroupInventoryFreshnessService
         ?int $minutesAgo,
         bool $skipped,
         ?string $skipReason,
+        array $confirmedSuppliers,
     ): array {
         return $this->result(
             synced: false,
@@ -243,16 +273,21 @@ class GroupInventoryFreshnessService
             refreshAttempted: false,
             refreshFailed: false,
             providerConfirmed: true,
+            confirmedSuppliers: $confirmedSuppliers,
             bookable: true,
             userNotice: null,
         );
     }
 
     /**
+     * @param  array<string, array<string, mixed>>  $providers
      * @return array<string, mixed>
      */
-    private function failedResult(string $skipReason, ?\DateTimeInterface $lastSyncedAt): array
-    {
+    private function failedResult(
+        string $skipReason,
+        ?\DateTimeInterface $lastSyncedAt,
+        array $providers = [],
+    ): array {
         $failClosed = GroupTicketingLivePolicy::publicResultsMustBeProviderConfirmed();
 
         return $this->result(
@@ -264,23 +299,28 @@ class GroupInventoryFreshnessService
             refreshAttempted: true,
             refreshFailed: true,
             providerConfirmed: false,
+            confirmedSuppliers: [],
             bookable: ! $failClosed,
             userNotice: $failClosed
                 ? GroupTicketingLivePolicy::PUBLIC_SEARCH_UNAVAILABLE_MESSAGE
                 : 'Inventory refresh temporarily unavailable. Showing latest available results.',
+            providers: $providers,
         );
     }
 
-    private function markSessionProviderConfirmed(): void
+    /**
+     * @param  list<string>  $confirmedSuppliers
+     */
+    private function markSessionProviderConfirmed(array $confirmedSuppliers): void
     {
         $sessionId = session()->getId();
-        if ($sessionId === '') {
+        if ($sessionId === '' || $confirmedSuppliers === []) {
             return;
         }
 
         Cache::put(
             self::SESSION_CONFIRM_PREFIX.$sessionId,
-            true,
+            array_values($confirmedSuppliers),
             self::SESSION_CONFIRM_SECONDS,
         );
     }
@@ -326,6 +366,8 @@ class GroupInventoryFreshnessService
     }
 
     /**
+     * @param  list<string>  $confirmedSuppliers
+     * @param  array<string, array<string, mixed>>  $providers
      * @return array{
      *     synced: bool,
      *     skipped: bool,
@@ -335,8 +377,10 @@ class GroupInventoryFreshnessService
      *     refresh_attempted: bool,
      *     refresh_failed: bool,
      *     provider_confirmed: bool,
+     *     confirmed_suppliers: list<string>,
      *     bookable: bool,
-     *     user_notice: ?string
+     *     user_notice: ?string,
+     *     providers?: array<string, array<string, mixed>>
      * }
      */
     private function result(
@@ -348,10 +392,12 @@ class GroupInventoryFreshnessService
         bool $refreshAttempted,
         bool $refreshFailed,
         bool $providerConfirmed,
+        array $confirmedSuppliers,
         bool $bookable,
         ?string $userNotice,
+        array $providers = [],
     ): array {
-        return [
+        $payload = [
             'synced' => $synced,
             'skipped' => $skipped,
             'skip_reason' => $skipReason,
@@ -360,8 +406,15 @@ class GroupInventoryFreshnessService
             'refresh_attempted' => $refreshAttempted,
             'refresh_failed' => $refreshFailed,
             'provider_confirmed' => $providerConfirmed,
+            'confirmed_suppliers' => $confirmedSuppliers,
             'bookable' => $bookable,
             'user_notice' => $userNotice,
         ];
+
+        if ($providers !== []) {
+            $payload['providers'] = $providers;
+        }
+
+        return $payload;
     }
 }

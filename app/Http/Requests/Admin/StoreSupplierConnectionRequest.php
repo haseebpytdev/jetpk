@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierEnvironment;
 use App\Enums\SupplierProvider;
+use App\Support\Suppliers\GroupSupplierCredentialValidator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -115,6 +116,16 @@ class StoreSupplierConnectionRequest extends FormRequest
                         $validator->errors()->add('credentials.'.$field, 'This field is required for IATI.');
                     }
                 }
+            }
+
+            if (in_array($provider, [SupplierProvider::AlHaider->value, SupplierProvider::AmeerEMillat->value], true)) {
+                GroupSupplierCredentialValidator::validate(
+                    $validator,
+                    $provider,
+                    $credentials,
+                    [],
+                    false,
+                );
             }
         });
     }

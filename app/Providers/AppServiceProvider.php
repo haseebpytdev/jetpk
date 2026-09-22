@@ -54,6 +54,9 @@ use App\Policies\SupportTicketPolicy;
 use App\Policies\UserManagementPolicy;
 use App\Services\Client\ClientRedirectResolver;
 use App\Services\Client\CurrentClientContext;
+use App\Services\GroupTicketing\GroupTicketSupplierRegistry;
+use App\Services\Suppliers\AlHaider\AlHaiderGroupTicketAdapter;
+use App\Services\Suppliers\AmeerEMillat\AmeerEMillatGroupTicketAdapter;
 use App\Support\Branding\BrandDisplayResolver;
 use App\Support\Branding\CompanyEmailProfileResolver;
 use App\Support\Branding\PlatformBrandingResolver;
@@ -89,6 +92,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(CurrentClientContext::class);
         $this->app->scoped(ClientRedirectResolver::class);
         $this->app->singleton(\App\Support\Sabre\Scenario\SabreGdsScenarioCorrelationRegistry::class);
+
+        $this->app->singleton(GroupTicketSupplierRegistry::class, function ($app): GroupTicketSupplierRegistry {
+            $registry = new GroupTicketSupplierRegistry();
+            $registry->register($app->make(AlHaiderGroupTicketAdapter::class));
+            $registry->register($app->make(AmeerEMillatGroupTicketAdapter::class));
+
+            return $registry;
+        });
     }
 
     /**

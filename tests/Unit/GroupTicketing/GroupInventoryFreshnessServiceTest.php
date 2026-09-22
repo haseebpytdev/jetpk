@@ -55,12 +55,15 @@ class GroupInventoryFreshnessServiceTest extends TestCase
 
         $sync = $this->createMock(GroupInventorySyncService::class);
         $sync->expects($this->once())->method('sync')
-            ->with(false, true)
+            ->with(null, false, true)
             ->willReturn([
                 'synced' => 5,
                 'deactivated' => 0,
                 'skipped' => false,
                 'message' => null,
+                'successful_providers' => ['alhaider'],
+                'failed_providers' => [],
+                'providers' => [],
             ]);
 
         $service = new GroupInventoryFreshnessService($facet, $sync);
@@ -110,12 +113,15 @@ class GroupInventoryFreshnessServiceTest extends TestCase
 
         $sync = $this->createMock(GroupInventorySyncService::class);
         $sync->expects($this->once())->method('sync')
-            ->with(false, true)
+            ->with(null, false, true)
             ->willReturn([
                 'synced' => 1,
                 'deactivated' => 0,
                 'skipped' => false,
                 'message' => null,
+                'successful_providers' => ['alhaider'],
+                'failed_providers' => [],
+                'providers' => [],
             ]);
 
         $service = new GroupInventoryFreshnessService($facet, $sync);
@@ -163,12 +169,15 @@ class GroupInventoryFreshnessServiceTest extends TestCase
 
         $sync = $this->createMock(GroupInventorySyncService::class);
         $sync->expects($this->once())->method('sync')
-            ->with(false, true)
+            ->with(null, false, true)
             ->willReturn([
                 'synced' => 0,
                 'deactivated' => 0,
                 'skipped' => true,
                 'message' => 'Al-Haider API unavailable.',
+                'successful_providers' => [],
+                'failed_providers' => ['alhaider'],
+                'providers' => [],
             ]);
 
         $service = new GroupInventoryFreshnessService($facet, $sync);
@@ -185,8 +194,14 @@ class GroupInventoryFreshnessServiceTest extends TestCase
     private function resetFreshnessRequestFlag(): void
     {
         $reflection = new \ReflectionClass(GroupInventoryFreshnessService::class);
-        $property = $reflection->getProperty('refreshedThisRequest');
-        $property->setAccessible(true);
-        $property->setValue(null, false);
+        $refreshed = $reflection->getProperty('refreshedThisRequest');
+        $refreshed->setAccessible(true);
+        $refreshed->setValue(null, false);
+
+        if ($reflection->hasProperty('confirmedSuppliersThisRequest')) {
+            $confirmed = $reflection->getProperty('confirmedSuppliersThisRequest');
+            $confirmed->setAccessible(true);
+            $confirmed->setValue(null, []);
+        }
     }
 }

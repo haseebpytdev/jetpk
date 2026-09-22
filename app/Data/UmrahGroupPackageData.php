@@ -3,7 +3,7 @@
 namespace App\Data;
 
 /**
- * Normalized Al-Haider Umrah group package for public display (no raw supplier payload).
+ * Normalized Umrah group package for public display (no raw supplier payload).
  */
 class UmrahGroupPackageData
 {

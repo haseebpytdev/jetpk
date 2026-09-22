@@ -44,6 +44,7 @@ return [
     'modules' => [
         'sabre' => filter_var(env('OTA_MODULE_SABRE', true), FILTER_VALIDATE_BOOL),
         'al_haider_group_ticketing' => filter_var(env('OTA_MODULE_AL_HAIDER_GROUP_TICKETING', true), FILTER_VALIDATE_BOOL),
+        'ameer_e_millat_group_ticketing' => filter_var(env('OTA_MODULE_AMEER_E_MILLAT_GROUP_TICKETING', true), FILTER_VALIDATE_BOOL),
         'accounting' => filter_var(env('OTA_MODULE_ACCOUNTING', true), FILTER_VALIDATE_BOOL),
         'hotels' => filter_var(env('OTA_MODULE_HOTELS', true), FILTER_VALIDATE_BOOL),
         'visa' => filter_var(env('OTA_MODULE_VISA', true), FILTER_VALIDATE_BOOL),

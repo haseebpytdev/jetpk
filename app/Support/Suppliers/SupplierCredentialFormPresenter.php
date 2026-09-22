@@ -13,6 +13,7 @@ final class SupplierCredentialFormPresenter
         'client_secret',
         'password',
         'token',
+        'existing_token',
         'api_key',
         'secret',
         'agent_password',

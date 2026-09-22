@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\SupplierProvider;
+use App\Support\Suppliers\GroupSupplierCredentialValidator;
 use App\Support\Suppliers\SabreSupplierConnectionNormalizer;
 use App\Support\Suppliers\SupplierCredentialFormPresenter;
 use Illuminate\Validation\Rule;
@@ -167,6 +168,18 @@ class UpdateSupplierConnectionRequest extends StoreSupplierConnectionRequest
                 if (! $hasApiKey && ! $hasToken && ! $hasUserPass) {
                     $validator->errors()->add('credentials', 'Airline direct usually needs api_key, token, or username/password.');
                 }
+
+                return;
+            }
+
+            if (in_array($provider, [SupplierProvider::AlHaider->value, SupplierProvider::AmeerEMillat->value], true)) {
+                GroupSupplierCredentialValidator::validate(
+                    $validator,
+                    $provider,
+                    $credentials,
+                    $existingCredentials,
+                    true,
+                );
 
                 return;
             }
