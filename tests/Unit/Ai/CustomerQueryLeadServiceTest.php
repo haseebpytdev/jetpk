@@ -183,4 +183,23 @@ class CustomerQueryLeadServiceTest extends TestCase
 
         $this->assertFalse($this->service->needsLeadCapture($conversation, 'Find flights Lahore to Dubai', $user));
     }
+
+    public function test_uat_harness_synthetic_lead_name_is_validator_accepted(): void
+    {
+        $conversation = AiConversation::query()->create([
+            'channel' => 'web',
+            'visitor_token_hash' => hash('sha256', 'visitor-uat-name'),
+            'state' => AiConversation::STATE_AI_ACTIVE,
+            'shopping_state' => [],
+        ]);
+
+        $valid = $this->service->createFromPayload($conversation, [
+            'name' => 'UAT Lead QA',
+            'email' => 'uat-lead-qa@jetpakistan.pk',
+            'phone' => '03001234567',
+            'contact_consent' => true,
+        ], $conversation->visitor_token_hash);
+
+        $this->assertTrue($valid['ok']);
+    }
 }
