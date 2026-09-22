@@ -380,6 +380,114 @@ return [
                 'notes' => ['label' => 'Notes', 'type' => 'text', 'required' => false],
             ],
         ],
+        'al_haider' => [
+            'fields' => [
+                'auth_mode' => [
+                    'label' => 'Authentication mode',
+                    'type' => 'select',
+                    'required' => true,
+                    'options' => [
+                        'manual_token' => 'Manual bearer token',
+                        'managed_token' => 'Managed token (admin supplies)',
+                        'credentials_auto_token' => 'Username/password (auto login)',
+                    ],
+                    'default' => 'manual_token',
+                    'help' => 'Manual uses a pasted bearer token. Managed keeps a token you supply. Auto logs in with username/password.',
+                ],
+                'existing_token' => [
+                    'label' => 'Bearer token',
+                    'type' => 'password',
+                    'required' => false,
+                    'placeholder' => 'Leave blank to keep existing value.',
+                    'help' => 'Required for manual/managed modes unless switching to auto login.',
+                ],
+                'token_expires_at' => [
+                    'label' => 'Token expires at',
+                    'type' => 'text',
+                    'required' => false,
+                    'placeholder' => 'ISO-8601 or blank to derive from JWT',
+                ],
+                'username' => [
+                    'label' => 'Username',
+                    'type' => 'text',
+                    'required' => false,
+                    'placeholder' => 'Used for auto login or managed renewal',
+                ],
+                'password' => [
+                    'label' => 'Password',
+                    'type' => 'password',
+                    'required' => false,
+                    'placeholder' => 'Leave blank to keep existing value.',
+                ],
+                'auto_renew' => [
+                    'label' => 'Auto renew managed token',
+                    'type' => 'select',
+                    'required' => false,
+                    'options' => [
+                        '0' => 'Disabled',
+                        '1' => 'Enabled',
+                    ],
+                    'default' => '0',
+                ],
+            ],
+        ],
+        'ameer_e_millat' => [
+            'fields' => [
+                'auth_mode' => [
+                    'label' => 'Authentication mode',
+                    'type' => 'select',
+                    'required' => true,
+                    'options' => [
+                        'manual_token' => 'Manual bearer token',
+                        'managed_token' => 'Managed token (admin supplies)',
+                        'credentials_auto_token' => 'Email/password (auto login)',
+                    ],
+                    'default' => 'manual_token',
+                    'help' => 'Manual uses a pasted bearer token. Managed keeps a token you supply. Auto logs in with email/password.',
+                ],
+                'existing_token' => [
+                    'label' => 'Bearer token',
+                    'type' => 'password',
+                    'required' => false,
+                    'placeholder' => 'Leave blank to keep existing value.',
+                    'help' => 'Required for manual/managed modes unless switching to auto login.',
+                ],
+                'token_expires_at' => [
+                    'label' => 'Token expires at',
+                    'type' => 'text',
+                    'required' => false,
+                    'placeholder' => 'ISO-8601 or blank to derive from JWT',
+                ],
+                'email' => [
+                    'label' => 'Email',
+                    'type' => 'text',
+                    'required' => false,
+                    'placeholder' => 'Login email for auto mode',
+                ],
+                'username' => [
+                    'label' => 'Username',
+                    'type' => 'text',
+                    'required' => false,
+                    'placeholder' => 'Optional alias for email',
+                ],
+                'password' => [
+                    'label' => 'Password',
+                    'type' => 'password',
+                    'required' => false,
+                    'placeholder' => 'Leave blank to keep existing value.',
+                ],
+                'auto_renew' => [
+                    'label' => 'Auto renew managed token',
+                    'type' => 'select',
+                    'required' => false,
+                    'options' => [
+                        '0' => 'Disabled',
+                        '1' => 'Enabled',
+                    ],
+                    'default' => '0',
+                ],
+            ],
+        ],
         'amadeus' => [
             'fields' => [
                 'client_id' => ['label' => 'Client ID', 'type' => 'text', 'required' => true],

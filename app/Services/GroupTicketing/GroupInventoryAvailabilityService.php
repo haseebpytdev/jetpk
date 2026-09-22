@@ -3,9 +3,6 @@
 namespace App\Services\GroupTicketing;
 
 use App\Models\GroupInventory;
-use App\Services\Suppliers\AlHaider\AlHaiderClient;
-use App\Services\Suppliers\AlHaider\AlHaiderProviderException;
-use App\Services\Suppliers\AlHaider\AlHaiderUmrahGroupService;
 use App\Support\GroupTicketing\GroupTicketingLivePolicy;
 use Illuminate\Support\Facades\Log;
 
@@ -18,9 +15,8 @@ class GroupInventoryAvailabilityService
     public const UNAVAILABLE_MESSAGE = GroupTicketingLivePolicy::BOOKING_BLOCKED_MESSAGE;
 
     public function __construct(
-        private readonly AlHaiderUmrahGroupService $umrahGroups,
+        private readonly GroupTicketSupplierRegistry $registry,
         private readonly GroupInventorySyncService $syncService,
-        private readonly AlHaiderClient $client,
     ) {}
 
     public static function insufficientSeatsMessage(int $availableSeats): string
@@ -52,10 +48,16 @@ class GroupInventoryAvailabilityService
         $blockWhenUnavailable = GroupTicketingLivePolicy::blockBookingWhenProviderUnavailable();
         $providerConfirmed = false;
 
+        $adapter = $this->registry->forInventory($inventory);
+        $detailId = $inventory->public_id !== ''
+            ? $inventory->public_id
+            : $adapter->publicIdPrefix().$inventory->supplier_package_id;
+
         if ($requireLive && $blockWhenUnavailable) {
-            if (! (bool) config('suppliers.al_haider.enabled') || ! $this->client->isConfigured()) {
+            if (! $adapter->isEnabled() || ! $adapter->isConfigured()) {
                 Log::warning('group_inventory_booking_blocked_provider_unavailable', [
                     'inventory_id' => $inventory->id,
+                    'supplier' => $inventory->supplier,
                     'supplier_package_id' => $inventory->supplier_package_id,
                     'reason' => 'provider_not_configured',
                 ]);
@@ -64,15 +66,13 @@ class GroupInventoryAvailabilityService
             }
 
             try {
-                $package = $this->umrahGroups->getPackageDetail(
-                    (string) $inventory->supplier_package_id,
-                    forceFresh: true,
-                );
+                $package = $adapter->getPackageDetail($detailId, forceFresh: true);
 
                 if ($package === null) {
                     $this->syncService->refreshSingle($inventory, null);
                     Log::warning('group_inventory_booking_blocked_live_unavailable', [
                         'inventory_id' => $inventory->id,
+                        'supplier' => $inventory->supplier,
                         'supplier_package_id' => $inventory->supplier_package_id,
                         'reason' => 'package_missing',
                     ]);
@@ -84,26 +84,25 @@ class GroupInventoryAvailabilityService
                 $this->syncService->refreshSingle($inventory, $package);
                 $providerConfirmed = true;
             } catch (\Throwable $exception) {
-                $reason = $exception instanceof AlHaiderProviderException ? $exception->errorCode : 'exception';
-
                 Log::warning('group_inventory_booking_blocked_provider_failed', [
                     'inventory_id' => $inventory->id,
+                    'supplier' => $inventory->supplier,
                     'supplier_package_id' => $inventory->supplier_package_id,
                     'message' => $exception->getMessage(),
-                    'reason' => $reason,
                 ]);
 
                 return $this->blockedResult($inventory);
             }
         } else {
             try {
-                if ((bool) config('suppliers.al_haider.enabled') && $this->canSyncFromSupplier($inventory)) {
-                    $package = $this->umrahGroups->getPackageDetail((string) $inventory->supplier_package_id);
+                if ($adapter->isEnabled() && $adapter->isConfigured() && trim((string) $inventory->supplier_package_id) !== '') {
+                    $package = $adapter->getPackageDetail($detailId);
 
                     if ($package === null) {
                         $this->syncService->refreshSingle($inventory, null);
                         Log::warning('group_inventory_selected_package_unavailable', [
                             'inventory_id' => $inventory->id,
+                            'supplier' => $inventory->supplier,
                             'supplier_package_id' => $inventory->supplier_package_id,
                         ]);
                     } else {
@@ -114,6 +113,7 @@ class GroupInventoryAvailabilityService
             } catch (\Throwable $exception) {
                 Log::warning('group_inventory_revalidate_failed', [
                     'inventory_id' => $inventory->id,
+                    'supplier' => $inventory->supplier,
                     'message' => $exception->getMessage(),
                 ]);
             }
@@ -129,6 +129,7 @@ class GroupInventoryAvailabilityService
             if ($requireLive && $blockWhenUnavailable) {
                 Log::warning('group_inventory_booking_blocked_live_unavailable', [
                     'inventory_id' => $inventory->id,
+                    'supplier' => $inventory->supplier,
                     'supplier_package_id' => $inventory->supplier_package_id,
                     'reason' => 'no_seats_after_live_refresh',
                 ]);
@@ -148,13 +149,6 @@ class GroupInventoryAvailabilityService
         }
 
         return $this->result(true, false, false, $inventory, $providerConfirmed);
-    }
-
-    private function canSyncFromSupplier(GroupInventory $inventory): bool
-    {
-        $packageId = trim((string) $inventory->supplier_package_id);
-
-        return $packageId !== '';
     }
 
     /**

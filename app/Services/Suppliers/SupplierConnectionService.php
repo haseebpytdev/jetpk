@@ -8,6 +8,9 @@ use App\Models\Agency;
 use App\Models\AuditLog;
 use App\Models\SupplierConnection;
 use App\Models\User;
+use App\Services\Suppliers\AmeerEMillat\AmeerEMillatClient;
+use App\Support\Suppliers\AlHaiderSupplierConnectionNormalizer;
+use App\Support\Suppliers\AmeerEMillatSupplierConnectionNormalizer;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +19,7 @@ class SupplierConnectionService
 {
     public function __construct(
         protected SupplierDiagnosticLogger $diagnosticLogger,
+        protected AmeerEMillatClient $ameerEMillatClient,
     ) {}
 
     /**
@@ -95,13 +99,25 @@ class SupplierConnectionService
             $lastError = null;
             $lastTestStatus = null;
 
-            if ($hasCreds && $this->hasRequiredCredentialKeys($connection->provider, $credentials)) {
-                $lastTestStatus = 'ready_for_review';
-            } else {
+            if (! $hasCreds || ! $this->hasRequiredCredentialKeys($connection->provider, $credentials)) {
                 $lastTestStatus = 'missing_credentials';
                 $lastError = 'Required credentials are missing for readiness check.';
                 $connection->status = SupplierConnectionStatus::Error;
                 $connection->is_active = false;
+            } elseif ($connection->provider === SupplierProvider::AmeerEMillat) {
+                $probe = $this->ameerEMillatClient->probeUserProfileForConnection($connection);
+
+                if (($probe['profile_ok'] ?? false) === true) {
+                    $lastTestStatus = 'connection_ok';
+                    $lastError = null;
+                } else {
+                    $lastTestStatus = 'connection_failed';
+                    $lastError = 'Ameer-e-Millat connection test failed ('.($probe['reason_code'] ?? 'unknown').').';
+                    $connection->status = SupplierConnectionStatus::Error;
+                    $connection->is_active = false;
+                }
+            } else {
+                $lastTestStatus = 'ready_for_review';
             }
 
             $connection->last_tested_at = now();
@@ -205,8 +221,40 @@ class SupplierConnectionService
                 && in_array('agent_code', $keys, true)
                 && in_array('rest_auth_url', $keys, true)
                 && in_array('rest_search_url', $keys, true),
+            SupplierProvider::AlHaider => $this->groupTokenProviderCredentialsConfigured($credentials, AlHaiderSupplierConnectionNormalizer::class),
+            SupplierProvider::AmeerEMillat => $this->groupTokenProviderCredentialsConfigured(
+                $credentials,
+                AmeerEMillatSupplierConnectionNormalizer::class,
+                requiresEmail: true,
+            ),
             default => true,
         };
+    }
+
+    /**
+     * @param  array<string, mixed>  $credentials
+     * @param  class-string  $normalizerClass
+     */
+    protected function groupTokenProviderCredentialsConfigured(
+        array $credentials,
+        string $normalizerClass,
+        bool $requiresEmail = false,
+    ): bool {
+        $authMode = strtolower(trim((string) ($credentials['auth_mode'] ?? $normalizerClass::AUTH_MODE_MANUAL)));
+        if (! in_array($authMode, $normalizerClass::supportedAuthModes(), true)) {
+            $authMode = $normalizerClass::AUTH_MODE_MANUAL;
+        }
+
+        if ($authMode === $normalizerClass::AUTH_MODE_AUTO) {
+            $username = trim((string) ($credentials['username'] ?? ''));
+            $email = trim((string) ($credentials['email'] ?? ''));
+            $password = trim((string) ($credentials['password'] ?? ''));
+            $identity = $requiresEmail ? ($email !== '' ? $email : $username) : $username;
+
+            return $identity !== '' && $password !== '';
+        }
+
+        return trim((string) ($credentials['existing_token'] ?? '')) !== '';
     }
 
     protected function writeAudit(SupplierConnection $connection, ?User $actor, string $action, array $oldValues, array $newValues): void

@@ -155,6 +155,7 @@
                         || ($selectedProvider === 'iati' && $credentialKey === 'secret')
                         || ($selectedProvider === 'pia_ndc' && in_array($credentialKey, ['username', 'password', 'agency_id', 'agency_name', 'owner_code', 'mco_invoice_number', 'payment_type'], true))
                         || ($selectedProvider === 'airblue' && in_array($credentialKey, ['username', 'password', 'agency_id', 'agency_name', 'owner_code', 'agent_password', 'client_id', 'client_key', 'agent_type', 'agent_id'], true))
+                        || (in_array($selectedProvider, ['al_haider', 'ameer_e_millat'], true) && in_array($credentialKey, ['existing_token', 'username', 'email', 'password'], true))
                         || (($fieldState['has_saved'] ?? false) && ! empty($fieldMeta['required']))
                     );
                     if ($selectedProvider === 'airblue' && $credentialKey === 'api_channel') { continue; }
@@ -169,15 +170,29 @@
                             <span class="badge bg-secondary-lt">Saved</span>
                         @endif
                     </label>
-                    <input
-                        type="{{ $fieldMeta['type'] ?? 'text' }}"
-                        name="credentials[{{ $credentialKey }}]"
-                        class="jp-control jp-control"
-                        value="{{ $inputValue }}"
-                        placeholder="{{ $inputPlaceholder }}"
-                        autocomplete="off"
-                        @if (!empty($fieldMeta['required']) && ! $editOptional) required @endif
-                    >
+                    @if (($fieldMeta['type'] ?? 'text') === 'select')
+                        <select
+                            name="credentials[{{ $credentialKey }}]"
+                            class="jp-control jp-control"
+                            @if (!empty($fieldMeta['required']) && ! $editOptional) required @endif
+                        >
+                            @foreach ((array) ($fieldMeta['options'] ?? []) as $optionValue => $optionLabel)
+                                <option value="{{ $optionValue }}" @selected((string) ($inputValue !== '' ? $inputValue : ($fieldMeta['default'] ?? '')) === (string) $optionValue)>
+                                    {{ $optionLabel }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @else
+                        <input
+                            type="{{ $fieldMeta['type'] ?? 'text' }}"
+                            name="credentials[{{ $credentialKey }}]"
+                            class="jp-control jp-control"
+                            value="{{ $inputValue }}"
+                            placeholder="{{ $inputPlaceholder }}"
+                            autocomplete="off"
+                            @if (!empty($fieldMeta['required']) && ! $editOptional) required @endif
+                        >
+                    @endif
                     @if (! empty($fieldState['preserve_hint']))
                         <p class="form-hint">Saved value exists. Leave blank to keep it, or enter a new value.</p>
                     @elseif (!empty($fieldMeta['help']))

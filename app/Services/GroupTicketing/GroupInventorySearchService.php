@@ -4,6 +4,7 @@ namespace App\Services\GroupTicketing;
 
 use App\Models\GroupCategory;
 use App\Models\GroupInventory;
+use App\Support\GroupTicketing\GroupTicketingLivePolicy;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -50,6 +51,7 @@ class GroupInventorySearchService
             ->with('category');
 
         $this->applyFilters($query, $filters);
+        $this->applyConfirmedSupplierFilter($query, $filters);
         $this->applySort($query, (string) ($filters['sort'] ?? 'departure'));
 
         return $query;
@@ -71,17 +73,61 @@ class GroupInventorySearchService
             return null;
         }
 
+        $upper = strtoupper($publicId);
+
+        if (str_starts_with($upper, 'AEM-')) {
+            $rawId = substr($publicId, 4);
+
+            return GroupInventory::query()
+                ->where('supplier', 'ameer_e_millat')
+                ->where(function (Builder $q) use ($publicId, $rawId): void {
+                    $q->where('public_id', $publicId)
+                        ->orWhere('supplier_package_id', $rawId);
+                })
+                ->where('is_active', true)
+                ->first();
+        }
+
+        if (str_starts_with($upper, 'ALH-')) {
+            $rawId = substr($publicId, 4);
+
+            return GroupInventory::query()
+                ->where('supplier', 'alhaider')
+                ->where(function (Builder $q) use ($publicId, $rawId): void {
+                    $q->where('public_id', $publicId)
+                        ->orWhere('supplier_package_id', $rawId);
+                })
+                ->where('is_active', true)
+                ->first();
+        }
+
+        // Legacy bare ids resolve to Al-Haider only.
         return GroupInventory::query()
+            ->where('supplier', 'alhaider')
             ->where(function (Builder $q) use ($publicId): void {
                 $q->where('public_id', $publicId)
                     ->orWhere('supplier_package_id', $publicId);
-
-                if (str_starts_with(strtoupper($publicId), 'ALH-')) {
-                    $q->orWhere('supplier_package_id', substr($publicId, 4));
-                }
             })
             ->where('is_active', true)
             ->first();
+    }
+
+    /**
+     * @param  Builder<GroupInventory>  $query
+     * @param  array<string, mixed>  $filters
+     */
+    private function applyConfirmedSupplierFilter(Builder $query, array $filters): void
+    {
+        if (! GroupTicketingLivePolicy::publicResultsMustBeProviderConfirmed()) {
+            return;
+        }
+
+        $confirmed = $filters['confirmed_suppliers'] ?? null;
+        if (! is_array($confirmed) || $confirmed === []) {
+            return;
+        }
+
+        $query->whereIn('supplier', array_values(array_filter($confirmed, 'is_string')));
     }
 
     /**

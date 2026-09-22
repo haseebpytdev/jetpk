@@ -2,11 +2,11 @@
 
 namespace App\Services\GroupTicketing;
 
+use App\Contracts\GroupTicketing\GroupTicketSupplierInterface;
 use App\Enums\GroupBookingStatus;
 use App\Models\GroupBooking;
 use App\Models\GroupInventory;
 use App\Models\User;
-use App\Services\Suppliers\AlHaider\AlHaiderClient;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 class GroupReservationService
 {
     public function __construct(
-        private readonly AlHaiderClient $client,
+        private readonly GroupTicketSupplierRegistry $registry,
         private readonly GroupBookingReferenceGenerator $referenceGenerator,
         private readonly GroupBookingRestrictionService $restrictionService,
         private readonly GroupTicketingCommunicationService $communicationService,
@@ -105,27 +105,30 @@ class GroupReservationService
                 );
             }
 
+            $adapter = $this->registry->forInventory($inventory);
             $supplierReservationId = null;
             $providerHoldStatus = 'unheld_manual_review';
 
-            if ($this->client->isConfigured() && (bool) config('suppliers.al_haider.booking_enabled')) {
+            if ($adapter->supportsPrePaymentReservation()) {
                 try {
-                    $response = $this->client->reserveGroup($inventory->supplier_package_id, [
-                        'seats' => $booking->seat_count,
-                        'reference' => $booking->reference,
-                    ]);
-                    $supplierReservationId = (string) ($response['reservation_id'] ?? $response['id'] ?? '');
-                    if ($supplierReservationId !== '') {
-                        $providerHoldStatus = 'provider_held';
+                    $holdResult = $adapter->reserveHold($booking, $inventory);
+                    if (! ($holdResult['skipped'] ?? false)) {
+                        $supplierReservationId = trim((string) ($holdResult['supplier_reservation_id'] ?? ''));
+                        if ($supplierReservationId !== '') {
+                            $providerHoldStatus = 'provider_held';
+                        }
                     }
                 } catch (\Throwable $exception) {
                     Log::warning('group_ticketing.reserve_failed', [
                         'booking_id' => $booking->id,
+                        'supplier' => $inventory->supplier,
                         'message' => $exception->getMessage(),
                     ]);
                     $booking->update(['status' => GroupBookingStatus::Failed]);
                     throw $exception;
                 }
+            } elseif ($adapter->supportsPostPaymentBooking()) {
+                $providerHoldStatus = 'local_hold_post_payment';
             } elseif ($availability['provider_confirmed'] ?? false) {
                 $providerHoldStatus = 'provider_unheld_live_confirmed';
             }
@@ -226,13 +229,24 @@ class GroupReservationService
             $inventory->decrement('held_seats', min($booking->seat_count, $inventory->held_seats));
             $inventory->increment('sold_seats', $booking->seat_count);
 
-            $booking->update([
-                'status' => GroupBookingStatus::Confirmed,
+            $adapter = $this->registry->forInventory($inventory);
+            $meta = $booking->meta ?? [];
+
+            $update = [
                 'manual_payment_status' => 'verified',
                 'admin_payment_verified_at' => now(),
                 'admin_payment_verified_by' => $admin->id,
                 'expires_at' => null,
-            ]);
+            ];
+
+            if ($adapter->supportsPostPaymentBooking()) {
+                $update = array_merge($update, $this->finalizePostPaymentSupplierBooking($booking, $inventory, $adapter, $meta));
+            } else {
+                $update['status'] = GroupBookingStatus::Confirmed;
+            }
+
+            $update['meta'] = $meta;
+            $booking->update($update);
 
             return $booking->fresh(['passengers', 'inventory', 'user']);
         });
@@ -286,21 +300,26 @@ class GroupReservationService
             $supplierFailed = false;
             $supplierResponse = null;
 
-            if ($booking->supplier_reservation_id && $this->client->isConfigured() && (bool) config('suppliers.al_haider.booking_enabled')) {
-                $booking->update(['supplier_release_attempted_at' => now()]);
-                try {
-                    $response = $this->client->cancelReservation($booking->supplier_reservation_id, [
-                        'reference' => $booking->reference,
-                    ]);
-                    $supplierResponse = is_string($response) ? $response : json_encode($response);
-                    $booking->supplier_released_at = now();
-                } catch (\Throwable $exception) {
-                    $supplierFailed = true;
-                    $supplierResponse = $exception->getMessage();
-                    Log::warning('group_ticketing.cancel_failed', [
-                        'booking_id' => $booking->id,
-                        'message' => $exception->getMessage(),
-                    ]);
+            if ($booking->supplier_reservation_id && $inventory !== null) {
+                $adapter = $this->registry->forInventory($inventory);
+                if ($adapter->supportsCancel()) {
+                    $booking->update(['supplier_release_attempted_at' => now()]);
+                    try {
+                        $response = $adapter->cancelReservation($booking->supplier_reservation_id, [
+                            'reference' => $booking->reference,
+                        ]);
+                        $raw = $response['raw'] ?? $response;
+                        $supplierResponse = is_string($raw) ? $raw : json_encode($raw);
+                        $booking->supplier_released_at = now();
+                    } catch (\Throwable $exception) {
+                        $supplierFailed = true;
+                        $supplierResponse = $exception->getMessage();
+                        Log::warning('group_ticketing.cancel_failed', [
+                            'booking_id' => $booking->id,
+                            'supplier' => $inventory->supplier,
+                            'message' => $exception->getMessage(),
+                        ]);
+                    }
                 }
             }
 
@@ -342,5 +361,65 @@ class GroupReservationService
     public function releaseExpired(GroupBooking $booking): GroupBooking
     {
         return $this->releaseUnpaidBooking($booking, 'unpaid_timeout');
+    }
+
+    /**
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    private function finalizePostPaymentSupplierBooking(
+        GroupBooking $booking,
+        GroupInventory $inventory,
+        GroupTicketSupplierInterface $adapter,
+        array &$meta,
+    ): array {
+        $existingId = trim((string) ($meta['supplier_booking_id'] ?? $booking->supplier_reservation_id ?? ''));
+        if ($existingId !== '') {
+            return [
+                'status' => GroupBookingStatus::Confirmed,
+                'supplier_reservation_id' => $existingId,
+            ];
+        }
+
+        $booking->loadMissing(['passengers', 'user']);
+
+        try {
+            $result = $adapter->createSupplierBooking($booking, $inventory);
+            $supplierBookingId = trim((string) ($result['supplier_booking_id'] ?? ''));
+            if ($supplierBookingId !== '') {
+                $meta['supplier_booking_id'] = $supplierBookingId;
+                if (isset($result['raw'])) {
+                    $meta['supplier_booking_raw'] = $result['raw'];
+                }
+
+                return [
+                    'status' => GroupBookingStatus::Confirmed,
+                    'supplier_reservation_id' => $supplierBookingId,
+                ];
+            }
+
+            $meta['supplier_booking_failed'] = true;
+            $meta['needs_manual_reconciliation'] = true;
+            $meta['supplier_confirm_pending'] = true;
+
+            return [
+                'status' => GroupBookingStatus::ManualPaymentPendingReview,
+            ];
+        } catch (\Throwable $exception) {
+            Log::warning('group_ticketing.supplier_booking_failed', [
+                'booking_id' => $booking->id,
+                'supplier' => $inventory->supplier,
+                'message' => $exception->getMessage(),
+            ]);
+
+            $meta['supplier_booking_failed'] = true;
+            $meta['needs_manual_reconciliation'] = true;
+            $meta['supplier_confirm_pending'] = true;
+            $meta['supplier_booking_error'] = $exception->getMessage();
+
+            return [
+                'status' => GroupBookingStatus::ManualPaymentPendingReview,
+            ];
+        }
     }
 }
