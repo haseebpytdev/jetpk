@@ -112,3 +112,10 @@ cd "${APP}"
 
 echo "RUNTIME_SHA=$(tr -d '\n' < "${APP}/.jetpk-runtime-sha")"
 echo "PROTECTED_AI_DEPLOY=PASS"
+
+MARKER_SCRIPT="${REPO}/scripts/jetpk/write-deploy-sha-marker.sh"
+if [[ -f "${MARKER_SCRIPT}" ]]; then
+  DEPLOY_SHA="${AUTHORIZED_SHA}" APP="${APP}" bash "${MARKER_SCRIPT}" || {
+    echo "DEPLOY_SHA_MARKER_WARN reason=marker_write_failed"
+  }
+fi
