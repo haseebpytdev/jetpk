@@ -1,0 +1,720 @@
+{
+  "phase": "JP-AI-PERFORMANCE-MEASUREMENT-CORRECTION-16",
+  "completed_at": "2026-09-22T14:21:39.068Z",
+  "HARNESS_ARTIFACT_FIXED": true,
+  "sanity": {
+    "turns": [
+      {
+        "message_type": "GENERAL_WARM",
+        "http_status": 200,
+        "API_MS": 799,
+        "DOM_AFTER_API_MS": 14,
+        "USER_VISIBLE_MS": 813,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      },
+      {
+        "message_type": "RAG",
+        "http_status": 200,
+        "API_MS": 1865,
+        "DOM_AFTER_API_MS": 12,
+        "USER_VISIBLE_MS": 1877,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      }
+    ],
+    "search": {
+      "marker": "SANITY-LHE-DXB",
+      "setup": {
+        "setup_clear_ms": 31967,
+        "setup_throttle_wait_ms": 0
+      },
+      "turns": [
+        {
+          "message_type": "SEARCH_TURN_1",
+          "http_status": 200,
+          "API_MS": 689,
+          "DOM_AFTER_API_MS": 23,
+          "USER_VISIBLE_MS": 712,
+          "API_RESULT": "PASS",
+          "DOM_RESULT": "PASS",
+          "DOM_RENDER_TIMEOUT": false,
+          "measurement_valid": true
+        },
+        {
+          "message_type": "SEARCH_TURN_2",
+          "http_status": 200,
+          "API_MS": 565,
+          "DOM_AFTER_API_MS": 18,
+          "USER_VISIBLE_MS": 583,
+          "API_RESULT": "PASS",
+          "DOM_RESULT": "PASS",
+          "DOM_RENDER_TIMEOUT": false,
+          "measurement_valid": true
+        },
+        {
+          "message_type": "SEARCH_TURN_3",
+          "http_status": 200,
+          "API_MS": 757,
+          "DOM_AFTER_API_MS": 6,
+          "USER_VISIBLE_MS": 763,
+          "API_RESULT": "PASS",
+          "DOM_RESULT": "PASS",
+          "DOM_RENDER_TIMEOUT": false,
+          "measurement_valid": true
+        },
+        {
+          "message_type": "SEARCH_TURN_4",
+          "http_status": 200,
+          "API_MS": 7384,
+          "DOM_AFTER_API_MS": 28,
+          "USER_VISIBLE_MS": 7412,
+          "API_RESULT": "PASS",
+          "DOM_RESULT": "PASS",
+          "DOM_RENDER_TIMEOUT": false,
+          "measurement_valid": true
+        }
+      ],
+      "SEARCH_EXECUTION_MS": 7384,
+      "FULL_FLOW_AUTOMATED_MS": 9894,
+      "live_supplier_called": null
+    }
+  },
+  "SETUP_CLEAR_MS": {
+    "n": 5,
+    "median": 93705,
+    "min": 32351,
+    "max": 93776
+  },
+  "SETUP_THROTTLE_MS": {
+    "n": 5,
+    "median": 61000,
+    "min": 0,
+    "max": 61000
+  },
+  "clear_throttle_metrics": {
+    "clear_requests": 2,
+    "clear_429_count": 1,
+    "retry_after_values": [
+      61
+    ],
+    "bounded_retries": 1,
+    "preflight_failures": 0,
+    "throttle_wait_ms": 61000
+  },
+  "GENERAL": {
+    "n": 5,
+    "median": 727,
+    "min": 646,
+    "max": 751,
+    "failed_measurements": 0,
+    "dom_median": 3,
+    "visible_median": 732,
+    "samples": [
+      {
+        "message_type": "GENERAL_WARM",
+        "http_status": 200,
+        "API_MS": 716,
+        "DOM_AFTER_API_MS": 2,
+        "USER_VISIBLE_MS": 718,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      },
+      {
+        "message_type": "GENERAL_WARM",
+        "http_status": 200,
+        "API_MS": 727,
+        "DOM_AFTER_API_MS": 5,
+        "USER_VISIBLE_MS": 732,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      },
+      {
+        "message_type": "GENERAL_WARM",
+        "http_status": 200,
+        "API_MS": 741,
+        "DOM_AFTER_API_MS": 3,
+        "USER_VISIBLE_MS": 744,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      },
+      {
+        "message_type": "GENERAL_WARM",
+        "http_status": 200,
+        "API_MS": 751,
+        "DOM_AFTER_API_MS": 2,
+        "USER_VISIBLE_MS": 753,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      },
+      {
+        "message_type": "GENERAL_WARM",
+        "http_status": 200,
+        "API_MS": 646,
+        "DOM_AFTER_API_MS": 5,
+        "USER_VISIBLE_MS": 651,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      }
+    ]
+  },
+  "RAG": {
+    "n": 5,
+    "median": 701,
+    "min": 602,
+    "max": 783,
+    "failed_measurements": 0,
+    "dom_median": 4,
+    "visible_median": 703,
+    "samples": [
+      {
+        "message_type": "RAG",
+        "http_status": 200,
+        "API_MS": 689,
+        "DOM_AFTER_API_MS": 5,
+        "USER_VISIBLE_MS": 694,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      },
+      {
+        "message_type": "RAG",
+        "http_status": 200,
+        "API_MS": 602,
+        "DOM_AFTER_API_MS": 4,
+        "USER_VISIBLE_MS": 606,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      },
+      {
+        "message_type": "RAG",
+        "http_status": 200,
+        "API_MS": 747,
+        "DOM_AFTER_API_MS": 2,
+        "USER_VISIBLE_MS": 749,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      },
+      {
+        "message_type": "RAG",
+        "http_status": 200,
+        "API_MS": 701,
+        "DOM_AFTER_API_MS": 2,
+        "USER_VISIBLE_MS": 703,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      },
+      {
+        "message_type": "RAG",
+        "http_status": 200,
+        "API_MS": 783,
+        "DOM_AFTER_API_MS": 5,
+        "USER_VISIBLE_MS": 788,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      }
+    ]
+  },
+  "LEAD": {
+    "n": 0,
+    "median": null,
+    "min": null,
+    "max": null,
+    "failed_measurements": 3,
+    "dom_median": null,
+    "visible_median": null,
+    "samples": [
+      {
+        "message_type": "LEAD_SUBMIT",
+        "http_status": null,
+        "API_MS": 13,
+        "DOM_AFTER_API_MS": null,
+        "USER_VISIBLE_MS": 876,
+        "measurement_valid": false,
+        "DOM_RENDER_TIMEOUT": false,
+        "API_RESULT": "FAIL",
+        "DOM_RESULT": "FAIL"
+      },
+      {
+        "message_type": "LEAD_SUBMIT",
+        "http_status": null,
+        "API_MS": 6,
+        "DOM_AFTER_API_MS": null,
+        "USER_VISIBLE_MS": 974,
+        "measurement_valid": false,
+        "DOM_RENDER_TIMEOUT": false,
+        "API_RESULT": "FAIL",
+        "DOM_RESULT": "FAIL"
+      },
+      {
+        "message_type": "LEAD_SUBMIT",
+        "http_status": null,
+        "API_MS": 10,
+        "DOM_AFTER_API_MS": null,
+        "USER_VISIBLE_MS": 997,
+        "measurement_valid": false,
+        "DOM_RENDER_TIMEOUT": false,
+        "API_RESULT": "FAIL",
+        "DOM_RESULT": "FAIL"
+      }
+    ]
+  },
+  "SEARCH": {
+    "n": 5,
+    "median": 1031,
+    "min": 824,
+    "max": 3848,
+    "failed_measurements": 0,
+    "dom_median": 3,
+    "visible_median": 1033,
+    "search_execution": {
+      "n": 5,
+      "median": 1031,
+      "min": 824,
+      "max": 3848
+    },
+    "samples": [
+      {
+        "message_type": "SEARCH_CONFIRM",
+        "http_status": 200,
+        "API_MS": 824,
+        "DOM_AFTER_API_MS": 2,
+        "USER_VISIBLE_MS": 826,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true,
+        "SEARCH_EXECUTION_MS": 824,
+        "setup_clear_ms": 32351,
+        "setup_throttle_wait_ms": 0
+      },
+      {
+        "message_type": "SEARCH_CONFIRM",
+        "http_status": 200,
+        "API_MS": 1066,
+        "DOM_AFTER_API_MS": 3,
+        "USER_VISIBLE_MS": 1069,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true,
+        "SEARCH_EXECUTION_MS": 1066,
+        "setup_clear_ms": 93776,
+        "setup_throttle_wait_ms": 61000
+      },
+      {
+        "message_type": "SEARCH_CONFIRM",
+        "http_status": 200,
+        "API_MS": 1031,
+        "DOM_AFTER_API_MS": 2,
+        "USER_VISIBLE_MS": 1033,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true,
+        "SEARCH_EXECUTION_MS": 1031,
+        "setup_clear_ms": 93705,
+        "setup_throttle_wait_ms": 61000
+      },
+      {
+        "message_type": "SEARCH_CONFIRM",
+        "http_status": 200,
+        "API_MS": 3848,
+        "DOM_AFTER_API_MS": 6,
+        "USER_VISIBLE_MS": 3854,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true,
+        "SEARCH_EXECUTION_MS": 3848,
+        "setup_clear_ms": 93508,
+        "setup_throttle_wait_ms": 61000
+      },
+      {
+        "message_type": "SEARCH_CONFIRM",
+        "http_status": 200,
+        "API_MS": 868,
+        "DOM_AFTER_API_MS": 3,
+        "USER_VISIBLE_MS": 871,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true,
+        "SEARCH_EXECUTION_MS": 868,
+        "setup_clear_ms": 93735,
+        "setup_throttle_wait_ms": 61000
+      }
+    ]
+  },
+  "FULL_FLOW": {
+    "n": 5,
+    "median": 3431,
+    "min": 3084,
+    "max": 9397,
+    "samples": [
+      {
+        "FULL_FLOW_AUTOMATED_MS": 3174,
+        "SEARCH_EXECUTION_MS": 824,
+        "setup_clear_ms": 32351,
+        "setup_throttle_wait_ms": 0,
+        "turns": [
+          {
+            "message_type": "SEARCH_TURN_1",
+            "http_status": 200,
+            "API_MS": 586,
+            "DOM_AFTER_API_MS": 6,
+            "USER_VISIBLE_MS": 592,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_2",
+            "http_status": 200,
+            "API_MS": 776,
+            "DOM_AFTER_API_MS": 6,
+            "USER_VISIBLE_MS": 782,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_3",
+            "http_status": 200,
+            "API_MS": 715,
+            "DOM_AFTER_API_MS": 2,
+            "USER_VISIBLE_MS": 717,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_4",
+            "http_status": 200,
+            "API_MS": 824,
+            "DOM_AFTER_API_MS": 2,
+            "USER_VISIBLE_MS": 826,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          }
+        ]
+      },
+      {
+        "FULL_FLOW_AUTOMATED_MS": 3775,
+        "SEARCH_EXECUTION_MS": 1066,
+        "setup_clear_ms": 93776,
+        "setup_throttle_wait_ms": 61000,
+        "turns": [
+          {
+            "message_type": "SEARCH_TURN_1",
+            "http_status": 200,
+            "API_MS": 711,
+            "DOM_AFTER_API_MS": 4,
+            "USER_VISIBLE_MS": 715,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_2",
+            "http_status": 200,
+            "API_MS": 802,
+            "DOM_AFTER_API_MS": 2,
+            "USER_VISIBLE_MS": 804,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_3",
+            "http_status": 200,
+            "API_MS": 950,
+            "DOM_AFTER_API_MS": 2,
+            "USER_VISIBLE_MS": 952,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_4",
+            "http_status": 200,
+            "API_MS": 1066,
+            "DOM_AFTER_API_MS": 3,
+            "USER_VISIBLE_MS": 1069,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          }
+        ]
+      },
+      {
+        "FULL_FLOW_AUTOMATED_MS": 3431,
+        "SEARCH_EXECUTION_MS": 1031,
+        "setup_clear_ms": 93705,
+        "setup_throttle_wait_ms": 61000,
+        "turns": [
+          {
+            "message_type": "SEARCH_TURN_1",
+            "http_status": 200,
+            "API_MS": 604,
+            "DOM_AFTER_API_MS": 3,
+            "USER_VISIBLE_MS": 607,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_2",
+            "http_status": 200,
+            "API_MS": 672,
+            "DOM_AFTER_API_MS": 2,
+            "USER_VISIBLE_MS": 674,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_3",
+            "http_status": 200,
+            "API_MS": 848,
+            "DOM_AFTER_API_MS": 5,
+            "USER_VISIBLE_MS": 853,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_4",
+            "http_status": 200,
+            "API_MS": 1031,
+            "DOM_AFTER_API_MS": 2,
+            "USER_VISIBLE_MS": 1033,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          }
+        ]
+      },
+      {
+        "FULL_FLOW_AUTOMATED_MS": 9397,
+        "SEARCH_EXECUTION_MS": 3848,
+        "setup_clear_ms": 93508,
+        "setup_throttle_wait_ms": 61000,
+        "turns": [
+          {
+            "message_type": "SEARCH_TURN_1",
+            "http_status": 200,
+            "API_MS": 2951,
+            "DOM_AFTER_API_MS": 16,
+            "USER_VISIBLE_MS": 2967,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_2",
+            "http_status": 200,
+            "API_MS": 1315,
+            "DOM_AFTER_API_MS": 2,
+            "USER_VISIBLE_MS": 1317,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_3",
+            "http_status": 200,
+            "API_MS": 923,
+            "DOM_AFTER_API_MS": 11,
+            "USER_VISIBLE_MS": 934,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_4",
+            "http_status": 200,
+            "API_MS": 3848,
+            "DOM_AFTER_API_MS": 6,
+            "USER_VISIBLE_MS": 3854,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          }
+        ]
+      },
+      {
+        "FULL_FLOW_AUTOMATED_MS": 3084,
+        "SEARCH_EXECUTION_MS": 868,
+        "setup_clear_ms": 93735,
+        "setup_throttle_wait_ms": 61000,
+        "turns": [
+          {
+            "message_type": "SEARCH_TURN_1",
+            "http_status": 200,
+            "API_MS": 527,
+            "DOM_AFTER_API_MS": 9,
+            "USER_VISIBLE_MS": 536,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_2",
+            "http_status": 200,
+            "API_MS": 623,
+            "DOM_AFTER_API_MS": 2,
+            "USER_VISIBLE_MS": 625,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_3",
+            "http_status": 200,
+            "API_MS": 651,
+            "DOM_AFTER_API_MS": 2,
+            "USER_VISIBLE_MS": 653,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          },
+          {
+            "message_type": "SEARCH_TURN_4",
+            "http_status": 200,
+            "API_MS": 868,
+            "DOM_AFTER_API_MS": 3,
+            "USER_VISIBLE_MS": 871,
+            "API_RESULT": "PASS",
+            "DOM_RESULT": "PASS",
+            "DOM_RENDER_TIMEOUT": false,
+            "measurement_valid": true
+          }
+        ]
+      }
+    ]
+  },
+  "COLD": {
+    "n": 3,
+    "median": 543,
+    "min": 514,
+    "max": 791,
+    "failed_measurements": 0,
+    "dom_median": 2,
+    "visible_median": 548,
+    "GENUINE_COLD_START_PROVEN": "NO",
+    "samples": [
+      {
+        "message_type": "COLD_AFTER_CLEAR",
+        "http_status": 200,
+        "API_MS": 791,
+        "DOM_AFTER_API_MS": 2,
+        "USER_VISIBLE_MS": 793,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      },
+      {
+        "message_type": "COLD_AFTER_CLEAR",
+        "http_status": 200,
+        "API_MS": 543,
+        "DOM_AFTER_API_MS": 5,
+        "USER_VISIBLE_MS": 548,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      },
+      {
+        "message_type": "COLD_AFTER_CLEAR",
+        "http_status": 200,
+        "API_MS": 514,
+        "DOM_AFTER_API_MS": 2,
+        "USER_VISIBLE_MS": 516,
+        "API_RESULT": "PASS",
+        "DOM_RESULT": "PASS",
+        "DOM_RENDER_TIMEOUT": false,
+        "measurement_valid": true
+      }
+    ]
+  },
+  "FAILED_MEASUREMENTS": {
+    "general": 0,
+    "rag": 0,
+    "lead": 3,
+    "search": 0,
+    "cold": 0
+  },
+  "ROOT_CAUSE": {
+    "HISTORICAL_286S": "HARNESS_MEASUREMENT_ARTIFACT",
+    "HISTORICAL_47S": "HARNESS_MEASUREMENT_ARTIFACT",
+    "PRODUCT_BOTTLENECK": "NONE_PROVEN"
+  },
+  "SUPPLIERS": {
+    "ACTIVE": [
+      "sabre",
+      "pia_ndc"
+    ],
+    "EXECUTION_MODEL": "SERIAL",
+    "OBSERVED_TOTAL_MS": "~2000-3000",
+    "FUTURE_SERIALIZATION_RISK": "YES"
+  },
+  "resources_before": {
+    "VPS_RAM_AVAILABLE": 10338,
+    "VPS_SWAP_USED": 211,
+    "SYSTEM_LOAD": "0.02, 0.05, 0.00",
+    "RESOURCE_PRESSURE": "NO"
+  },
+  "resources_during": {
+    "VPS_RAM_AVAILABLE": 10317,
+    "VPS_SWAP_USED": 211,
+    "SYSTEM_LOAD": "0.16, 0.08, 0.01",
+    "RESOURCE_PRESSURE": "NO"
+  },
+  "server_log_tail": "[2026-09-22 13:57:55] production.WARNING: sabre.branded_fares_search_probe {\"provider\":\"sabre\",\"sabre.branded_fares_search_probe_enabled\":true,\"branded_fares_request_variant\":\"iati_exact_gds_v4\",\"endpoint_path\":\"/v4/offers/shop\",\"search_id\":\"f49f2d00-2065-424f-96e7-892f19b13792\",\"connection_id\":1,\"environment\":\"live\",\"origin\":\"LHE\",\"destination\":\"DXB\",\"departure_date\":\"2026-12-22\",\"trip_type\":\"one_way\",\"cabin\":\"economy\",\"passenger_counts\":{\"adults\":1,\"children\":0,\"infants\":0},\"pcc_present\":true,\"pcc_sent_in_shop_request\":true} \n[2026-09-22 14:09:11] production.WARNING: sabre.branded_fares_search_probe {\"provider\":\"sabre\",\"sabre.branded_fares_search_probe_enabled\":true,\"branded_fares_request_variant\":\"iati_exact_gds_v4\",\"endpoint_path\":\"/v4/offers/shop\",\"search_id\":\"108f1b3e-7ec1-4fa4-8a89-bb3716441899\",\"connection_id\":1,\"environment\":\"live\",\"origin\":\"LHE\",\"destination\":\"DXB\",\"departure_date\":\"2026-12-22\",\"trip_type\":\"one_way\",\"cabin\":\"economy\",\"passenger_counts\":{\"adults\":1,\"children\":0,\"infants\":0},\"pcc_present\":true,\"pcc_sent_in_shop_request\":true} \n[2026-09-22 14:15:07] production.WARNING: sabre.branded_fares_search_probe {\"provider\":\"sabre\",\"sabre.branded_fares_search_probe_enabled\":true,\"branded_fares_request_variant\":\"iati_exact_gds_v4\",\"endpoint_path\":\"/v4/offers/shop\",\"search_id\":\"c8e8c783-180f-4425-bffe-3fb098eb31bd\",\"connection_id\":1,\"environment\":\"live\",\"origin\":\"LHE\",\"destination\":\"DXB\",\"departure_date\":\"2026-12-22\",\"trip_type\":\"one_way\",\"cabin\":\"economy\",\"passenger_counts\":{\"adults\":1,\"children\":0,\"infants\":0},\"pcc_present\":true,\"pcc_sent_in_shop_request\":true} \n",
+  "PERFORMANCE_READY": "YES"
+}
