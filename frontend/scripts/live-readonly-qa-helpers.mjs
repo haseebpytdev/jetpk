@@ -161,7 +161,7 @@ const SYNTHETIC_QA_LEAD = {
   phone: "+923001234567",
 };
 
-function normalizeConfirmationStep(msg) {
+export function normalizeConfirmationStep(msg) {
   if (/^(yes|ji|haan|okay|correct)(\s+confirm)?$/i.test(msg.trim())) return "yes";
   if (/^(haan|ji)\s+confirm$/i.test(msg.trim())) return "haan";
   return msg;

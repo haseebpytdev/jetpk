@@ -372,6 +372,8 @@ export async function waitForConversationIdHydrated(page, expectedId, timeoutMs 
 }
 
 export async function clearConversation(page) {
+  const setupStarted = Date.now();
+  let setupThrottleWaitMs = 0;
   const panel = page.getByTestId("ask-jetpakistan-panel");
   if ((await panel.count()) === 0) {
     await openAskPanel(page);
@@ -397,6 +399,8 @@ export async function clearConversation(page) {
       old_conversation_id: null,
       clear_response_new_id: null,
       session_storage_after_clear: null,
+      setup_clear_ms: Date.now() - setupStarted,
+      setup_throttle_wait_ms: 0,
     };
   }
 
@@ -408,6 +412,7 @@ export async function clearConversation(page) {
     const waitSeconds = boundedThrottleWaitSeconds(retryAfter);
     const waitMs = waitSeconds * 1000;
     clearThrottleMetrics.throttle_wait_ms += waitMs;
+    setupThrottleWaitMs += waitMs;
     clearThrottleMetrics.bounded_retries += 1;
     await sleepMs(waitMs);
     attempt = await triggerUiClear(page);
@@ -452,6 +457,8 @@ export async function clearConversation(page) {
     session_storage_after_clear: sessionStorageId,
     clear_request_id: attempt.request_conversation_id,
     clear_preflight_rate_limited: clearThrottleMetrics.clear_429_count > 0,
+    setup_clear_ms: Date.now() - setupStarted,
+    setup_throttle_wait_ms: setupThrottleWaitMs,
   };
 }
 
@@ -482,85 +489,200 @@ export async function withCanaryFaultMode(page, faultMode, fn) {
   }
 }
 
+/** Normalize assistant text for deterministic DOM matching (collapse whitespace). */
+export function normalizeAssistantVisibleText(text) {
+  return String(text ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Read assistant message bodies from the chat panel (CSS-module-safe selectors). */
+export async function readAssistantMessageBodies(page) {
+  return page.evaluate(() => {
+    const container = document.querySelector('[data-testid="ask-jetpakistan-messages"]');
+    if (!container) return [];
+    const rows = container.querySelectorAll('[class*="messageRow"]');
+    const bodies = [];
+    for (const row of rows) {
+      const className = row.className ?? "";
+      if (className.includes("userRow")) continue;
+      const body = row.querySelector('[class*="messageBody"]');
+      if (body) bodies.push((body.textContent ?? "").trim());
+    }
+    return bodies;
+  });
+}
+
+/**
+ * Wait until a new assistant bubble matches the API body (not whole-panel length).
+ * @returns {{ ok: boolean, dom_render_timeout?: boolean, matched_body?: string }}
+ */
+function assistantBodyMatches(normalizedExpected, bodyText) {
+  const norm = normalizeAssistantVisibleText(bodyText).toLowerCase();
+  const probe =
+    normalizedExpected.length > 0
+      ? normalizedExpected.slice(0, Math.min(48, normalizedExpected.length))
+      : "";
+  return (
+    probe.length === 0 ||
+    norm === normalizedExpected ||
+    norm.includes(probe) ||
+    normalizedExpected.includes(norm.slice(0, Math.min(24, norm.length)))
+  );
+}
+
+export async function waitForAssistantDomMatch(page, expectedBody, priorAssistantCount, timeoutMs) {
+  const normalizedExpected = normalizeAssistantVisibleText(expectedBody).toLowerCase();
+  const probe =
+    normalizedExpected.length > 0
+      ? normalizedExpected.slice(0, Math.min(48, normalizedExpected.length))
+      : "";
+
+  const existingBodies = await readAssistantMessageBodies(page);
+  for (const body of existingBodies) {
+    if (assistantBodyMatches(normalizedExpected, body)) {
+      return { ok: true, matched_body: body, duplicate_visible: true };
+    }
+  }
+
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const bodies = await readAssistantMessageBodies(page);
+    if (bodies.length > priorAssistantCount) {
+      for (let i = priorAssistantCount; i < bodies.length; i += 1) {
+        if (assistantBodyMatches(normalizedExpected, bodies[i])) {
+          return { ok: true, matched_body: bodies[i] };
+        }
+      }
+    }
+    await page.waitForTimeout(40);
+  }
+
+  return { ok: false, dom_render_timeout: true };
+}
+
+async function waitForComposerInputReady(page, timeoutMs) {
+  await page.waitForFunction(
+    () => {
+      const input = document.querySelector(
+        '[data-testid="ask-jetpakistan-panel"] input[type="text"], [data-testid="ask-jetpakistan-panel"] input',
+      );
+      return input && !input.disabled && input.getAttribute("aria-busy") !== "true";
+    },
+    { timeout: timeoutMs },
+  );
+}
+
+async function waitForComposerInteractive(page, timeoutMs) {
+  await waitForComposerInputReady(page, timeoutMs);
+  await page.waitForFunction(
+    () => {
+      const btn = document.querySelector('[data-testid="ask-jetpakistan-panel"] button[type="submit"]');
+      return btn && !btn.disabled && btn.getAttribute("aria-busy") !== "true";
+    },
+    { timeout: timeoutMs },
+  );
+}
+
 export async function sendMessage(page, text, options = {}) {
   const sendOnce = async () => {
     const input = page
       .locator('[data-testid="ask-jetpakistan-panel"] input[type="text"], [data-testid="ask-jetpakistan-panel"] input')
       .first();
     await input.waitFor({ state: "visible", timeout: 60_000 });
-    await page.waitForFunction(
-      () => {
-        const el = document.querySelector('[data-testid="ask-jetpakistan-panel"] input[type="text"], [data-testid="ask-jetpakistan-panel"] input');
-        return el && !el.disabled && el.getAttribute("aria-busy") !== "true";
-      },
-      { timeout: Number(options.inputReadyTimeoutMs ?? 120_000) },
-    );
-    const priorText = await page.getByTestId("ask-jetpakistan-messages").innerText().catch(() => "");
-    const priorLen = priorText.length;
+    await waitForComposerInputReady(page, Number(options.inputReadyTimeoutMs ?? 120_000));
+
+    const priorAssistantCount = (await readAssistantMessageBodies(page)).length;
     await input.fill(text);
+
+    const chatResponseTimeoutMs = Number(options.chatResponseTimeoutMs ?? 90_000);
+    const domTimeoutMs = Number(options.domRenderTimeoutMs ?? options.responseTimeoutMs ?? 15_000);
+
+    const requestPromise = page.waitForRequest(
+      (req) => req.url().includes("/api/public/ai/chat") && req.method() === "POST",
+      { timeout: chatResponseTimeoutMs },
+    );
     const responsePromise = page.waitForResponse(
       (res) => res.url().includes("/api/public/ai/chat") && res.request().method() === "POST",
-      { timeout: Number(options.chatResponseTimeoutMs ?? 90_000) },
+      { timeout: chatResponseTimeoutMs },
     );
-    const started = Date.now();
+
     const sendButton = page.getByRole("button", { name: /send/i });
-    await page.waitForFunction(
-      () => {
-        const btn = document.querySelector('[data-testid="ask-jetpakistan-panel"] button[type="submit"]');
-        return btn && !btn.disabled && btn.getAttribute("aria-busy") !== "true";
-      },
-      { timeout: Number(options.sendReadyTimeoutMs ?? 120_000) },
-    );
+    await waitForComposerInteractive(page, Number(options.sendReadyTimeoutMs ?? 120_000));
+
+    const t_click = Date.now();
     let response;
+    let t_chat_request = null;
     try {
       await sendButton.click({ timeout: Number(options.sendClickTimeoutMs ?? 120_000) });
+      const chatRequest = await requestPromise;
+      t_chat_request = Date.now();
+      void chatRequest;
       response = await responsePromise;
     } catch (error) {
       await responsePromise.catch(() => {});
+      await requestPromise.catch(() => {});
       throw error;
     }
+
+    const t_chat_response_headers = Date.now();
     let payload = {};
     try {
       payload = await response.json();
     } catch {
       payload = {};
     }
-    const apiMessage = String(payload.message ?? "").trim();
-    const timeoutMs = Number(options.responseTimeoutMs ?? 45_000);
+    const t_chat_response_body = Date.now();
 
-    await page
-      .waitForFunction(
-        ({ snippet, minLen, apiLen }) => {
-          const el = document.querySelector('[data-testid="ask-jetpakistan-messages"]');
-          if (!el) return false;
-          const text = el.textContent ?? "";
-          if (text.length <= minLen) return false;
-          if (apiLen > 0 && snippet) {
-            const probe = snippet.slice(0, Math.min(24, snippet.length));
-            return probe.length > 0 && text.includes(probe);
-          }
-          return text.length > minLen + 8;
-        },
-        { snippet: apiMessage, minLen: priorLen, apiLen: apiMessage.length },
-        { timeout: timeoutMs },
-      )
-      .catch(async () => {
-        await page.waitForFunction(
-          () => {
-            const busy = document.querySelector('[data-testid="ask-jetpakistan-panel"] [aria-busy="true"]');
-            return !busy;
-          },
-          { timeout: 5000 },
-        ).catch(() => {});
-        await page.waitForTimeout(1200);
-      });
+    const apiMessage = String(payload.message ?? "").trim();
+    const domWait = await waitForAssistantDomMatch(page, apiMessage, priorAssistantCount, domTimeoutMs);
+    const t_dom_message_present = domWait.ok ? Date.now() : null;
+
+    let t_input_ready_again = null;
+    if (domWait.ok) {
+      try {
+        await waitForComposerInputReady(page, Number(options.interactiveReadyTimeoutMs ?? 30_000));
+        t_input_ready_again = Date.now();
+      } catch {
+        t_input_ready_again = null;
+      }
+    }
+
+    const api_response_ms = t_chat_response_body - t_click;
+    const network_response_ms = t_chat_response_headers - t_click;
+    const dom_commit_ms = domWait.ok ? t_dom_message_present - t_chat_response_body : null;
+    const interactive_again_ms =
+      domWait.ok && t_input_ready_again ? t_input_ready_again - t_chat_response_body : null;
+    const user_visible_total_ms = domWait.ok ? t_dom_message_present - t_click : null;
 
     const messages = await page.getByTestId("ask-jetpakistan-messages").innerText();
+    const timing = {
+      t_click,
+      t_chat_request,
+      t_chat_response_headers,
+      t_chat_response_body,
+      t_dom_message_present,
+      t_input_ready_again,
+      api_response_ms,
+      network_response_ms,
+      dom_commit_ms,
+      interactive_again_ms,
+      user_visible_total_ms,
+      api_result: response.ok() ? "PASS" : "FAIL",
+      dom_result: domWait.ok ? "PASS" : "FAIL",
+      dom_render_timeout: domWait.dom_render_timeout === true,
+      measurement_valid: domWait.ok && response.ok(),
+      prior_assistant_count: priorAssistantCount,
+    };
+
     return {
       status: response.status(),
       body: messages,
       payload,
-      latency_ms: Date.now() - started,
+      timing,
+      /** @deprecated Use timing.api_response_ms for API latency; timing.user_visible_total_ms for UI. */
+      latency_ms: api_response_ms,
+      message_type: options.messageType ?? null,
     };
   };
 
