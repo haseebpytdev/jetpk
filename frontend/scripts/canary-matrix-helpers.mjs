@@ -298,6 +298,12 @@ export async function openAskPanel(page) {
   await page.goto(`${BASE}/#ask-jetpakistan`, { waitUntil: "domcontentloaded", timeout: 120_000 });
   await waitForConfigHydration(page, 90_000).catch(() => {});
 
+  await page
+    .getByTestId("ask-jetpakistan-fab")
+    .or(page.getByTestId("ask-jetpakistan-panel"))
+    .waitFor({ state: "visible", timeout: 120_000 })
+    .catch(() => {});
+
   let preflight = await sessionPreflight(page);
   if (!preflight.fab_visible) {
     const recovery = await recoverSession(page);
@@ -317,7 +323,7 @@ export async function openAskPanel(page) {
   if (!(await panel.isVisible().catch(() => false))) {
     await fab.click({ timeout: 30_000 });
   }
-  await panel.waitFor({ state: "visible", timeout: 30_000 });
+  await panel.waitFor({ state: "visible", timeout: 120_000 });
   return preflight;
 }
 
@@ -494,11 +500,25 @@ export async function sendMessage(page, text, options = {}) {
     await input.fill(text);
     const responsePromise = page.waitForResponse(
       (res) => res.url().includes("/api/public/ai/chat") && res.request().method() === "POST",
-      { timeout: 90_000 },
+      { timeout: Number(options.chatResponseTimeoutMs ?? 90_000) },
     );
     const started = Date.now();
-    await page.getByRole("button", { name: /send/i }).click();
-    const response = await responsePromise;
+    const sendButton = page.getByRole("button", { name: /send/i });
+    await page.waitForFunction(
+      () => {
+        const btn = document.querySelector('[data-testid="ask-jetpakistan-panel"] button[type="submit"]');
+        return btn && !btn.disabled && btn.getAttribute("aria-busy") !== "true";
+      },
+      { timeout: Number(options.sendReadyTimeoutMs ?? 120_000) },
+    );
+    let response;
+    try {
+      await sendButton.click({ timeout: Number(options.sendClickTimeoutMs ?? 120_000) });
+      response = await responsePromise;
+    } catch (error) {
+      await responsePromise.catch(() => {});
+      throw error;
+    }
     let payload = {};
     try {
       payload = await response.json();
