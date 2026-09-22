@@ -48,3 +48,10 @@ echo "FRONTEND_SOURCE_PARITY=PASS"
 echo "BUILD_ROOT=${BUILD_ROOT}"
 echo "FAB_BUNDLE_HITS=${FAB_HITS:-none}"
 echo "FRONTEND_SKIP_RESTART=${FRONTEND_SKIP_RESTART}"
+
+MARKER_SCRIPT="${REPO}/scripts/jetpk/write-deploy-sha-marker.sh"
+if [[ -f "${MARKER_SCRIPT}" ]]; then
+  DEPLOY_SHA="${AUTHORIZED_SHA}" APP="${APP}" bash "${MARKER_SCRIPT}" || {
+    echo "DEPLOY_SHA_MARKER_WARN reason=marker_write_failed"
+  }
+fi
