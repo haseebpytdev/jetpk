@@ -36,7 +36,7 @@ final class AiAssistantBookingLookupTool
             return [
                 'ok' => false,
                 'found' => false,
-                'message' => 'I need your booking reference and the email used when you booked.',
+                'message' => 'I need your booking reference and the email or phone number used when you booked.',
             ];
         }
 
@@ -45,7 +45,7 @@ final class AiAssistantBookingLookupTool
             return [
                 'ok' => true,
                 'found' => false,
-                'message' => 'I could not find a booking matching that reference and email. Please double-check both details.',
+                'message' => 'I could not find a booking matching those details. Please double-check your reference and contact information.',
             ];
         }
 
@@ -76,6 +76,13 @@ final class AiAssistantBookingLookupTool
 
         if (preg_match('/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i', $message, $m) === 1) {
             $state['booking_email'] = strtolower($m[0]);
+        }
+
+        if (preg_match('/\b(?:\+?92|0)3[0-9]{9}\b/', $message, $m) === 1) {
+            $state['booking_phone'] = preg_replace('/\s+/', '', $m[0]) ?? $m[0];
+        } elseif (preg_match('/\b(\+?[0-9][0-9\s\-]{7,14}[0-9])\b/', $message, $m) === 1
+            && preg_match('/\b(phone|mobile|number)\b/i', $message) === 1) {
+            $state['booking_phone'] = preg_replace('/[\s\-]/', '', $m[1]) ?? $m[1];
         }
 
         return $state;

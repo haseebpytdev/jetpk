@@ -5,6 +5,7 @@ namespace App\Services\Customer;
 use App\Models\Booking;
 use App\Models\GuestBookingAccessToken;
 use App\Support\Branding\PlatformBrandingResolver;
+use App\Support\Phone\PhoneNumberNormalizer;
 use Illuminate\Support\Str;
 
 class GuestBookingAccessService
@@ -53,19 +54,43 @@ class GuestBookingAccessService
         }
 
         $candidates = PlatformBrandingResolver::lookupReferenceCandidates($reference);
+        $normalizedEmail = is_string($email) ? strtolower(trim($email)) : null;
+        $normalizedPhone = is_string($phone) ? $this->normalizeLookupPhone($phone) : null;
 
-        return Booking::query()
+        $bookings = Booking::query()
             ->whereIn('booking_reference', $candidates)
-            ->whereHas('contact', function ($query) use ($email, $phone): void {
-                if ($email !== null) {
-                    $query->where('email', $email);
-                }
-                if ($phone !== null) {
-                    $email !== null
-                        ? $query->orWhere('phone', $phone)
-                        : $query->where('phone', $phone);
-                }
-            })
-            ->first();
+            ->with('contact')
+            ->get();
+
+        foreach ($bookings as $booking) {
+            $contact = $booking->contact;
+            if ($contact === null) {
+                continue;
+            }
+
+            $emailMatch = $normalizedEmail !== null
+                && strtolower(trim((string) $contact->email)) === $normalizedEmail;
+            $phoneMatch = $normalizedPhone !== null
+                && $this->normalizeLookupPhone((string) $contact->phone) === $normalizedPhone;
+
+            if ($normalizedEmail !== null && $normalizedPhone !== null && ($emailMatch || $phoneMatch)) {
+                return $booking;
+            }
+            if ($normalizedEmail !== null && $normalizedPhone === null && $emailMatch) {
+                return $booking;
+            }
+            if ($normalizedPhone !== null && $normalizedEmail === null && $phoneMatch) {
+                return $booking;
+            }
+        }
+
+        return null;
+    }
+
+    private function normalizeLookupPhone(string $phone): string
+    {
+        $parts = PhoneNumberNormalizer::splitForSupplierDialing($phone, '92');
+
+        return $parts['e164'] !== '' ? $parts['e164'] : '';
     }
 }
