@@ -27,6 +27,7 @@ final class AiChatOrchestrator
         private readonly AiConversationalAgent $conversational,
         private readonly AiAssistantBookingLookupTool $bookingLookupTool,
         private readonly CustomerQueryLeadService $leadService,
+        private readonly AiCommercialIntentClassifier $intentClassifier,
         private readonly ?\App\Services\Ai\Lab\AiLabAdapter $labAdapter = null,
     ) {}
 
@@ -240,7 +241,12 @@ final class AiChatOrchestrator
             return $this->replyLockedWriteRefusal($conversation, $lockedWrite);
         }
 
-        if ($this->shouldUseLabAdapter($conversation) && $this->labAdapter !== null) {
+        $priorState = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        if (
+            ! $this->shouldUseStructuredCorePath($cleanMessage, $priorState)
+            && $this->shouldUseLabAdapter($conversation)
+            && $this->labAdapter !== null
+        ) {
             try {
                 $labResponse = $this->labAdapter->handleTurn($conversation, $cleanMessage);
                 $searchRecord = is_array($labResponse['meta'] ?? null)
@@ -522,6 +528,30 @@ final class AiChatOrchestrator
         }
 
         return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $prior
+     */
+    private function shouldUseStructuredCorePath(string $cleanMessage, array $prior): bool
+    {
+        if ($this->shouldContinueBookingLookup($prior, $cleanMessage)) {
+            return true;
+        }
+
+        if ($this->intentClassifier->isBookingHelpIntent($cleanMessage)) {
+            return true;
+        }
+
+        $lower = mb_strtolower(trim($cleanMessage));
+        if (preg_match(
+            '/talk to (a )?(person|human)|speak to (a )?(person|human|support|agent)|need to speak to|human (support|agent)|agent please|live agent|connect (me )?to (a )?(human|agent|support)|please connect me to support|handoff/u',
+            $lower,
+        ) === 1) {
+            return true;
+        }
+
+        return false;
     }
 
     private function shouldUseLabAdapter(AiConversation $conversation): bool

@@ -326,14 +326,14 @@ final class HybridTravelPipeline
     private function wantsBookingLookup(string $normalized, string $original): bool
     {
         return (bool) preg_match(
-            '/\b(look\s*up|lookup|find|check|track|status\s+of)\s+(my\s+)?(booking|reservation|pnr)\b|\b(my\s+)?booking\s+(reference|ref|status)\b|\bbooking\s+reference\b|\bpnr\b|\bmera\s+booking\b|\bbooking\s+check\b|\bmanage\s+my\s+booking\b/u',
+            '/\b(look\s*up|lookup|find|check|track|status\s+of)\s+(my\s+)?(booking|reservation|pnr)\b|\b(my\s+)?booking\s+(reference|ref|status)\b|\bbooking\s+reference\b|\bhelp with an existing booking\b|\bexisting booking\b|\bpnr\b|\bmera\s+booking\b|\bbooking\s+check\b|\bmanage\s+my\s+booking\b/u',
             $normalized.' '.$original
         );
     }
 
     private function isGreeting(string $normalized): bool
     {
-        return (bool) preg_match('/^(hi|hello|hey|salam|assalamualaikum|aoa)\b/u', $normalized);
+        return (bool) preg_match('/^(hi|hello|hey|salam|assalamualaikum|aoa)[\s!.?]*$/u', trim($normalized));
     }
 
     private function looksHostile(string $text): bool

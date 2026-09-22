@@ -397,6 +397,29 @@ class ConversationalLeadCaptureTest extends TestCase
         $this->assertSame('cancel', data_get($turn['response']->json(), 'meta.locked_write_action'));
     }
 
+    public function test_booking_help_after_consent_bypasses_lab_for_lookup_intake(): void
+    {
+        $this->enablePublicAi();
+        config(['ai_lab.enabled' => true]);
+        \App\Models\AiAssistantSetting::query()->delete();
+        $settings = app(\App\Services\Ai\AiAssistantSettingsService::class)->get();
+        $settings->lab_adapter_enabled = true;
+        $settings->save();
+        $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
+
+        $vid = str_repeat('k', 40);
+        $cid = $this->chat($vid, 'Hi, I need help with an existing booking')['conversation_id'];
+        $this->chat($vid, 'Ayesha Khan', $cid);
+        $this->chat($vid, 'lead@example.com 03001234567', $cid);
+
+        $consent = $this->chat($vid, 'Yes', $cid);
+        $consent['response']->assertOk();
+        $message = mb_strtolower((string) $consent['response']->json('message'));
+        $this->assertStringContainsString('booking reference', $message);
+        $this->assertStringNotContainsString('source: jetpakistan booking process', $message);
+        $this->assertSame('booking_lookup', data_get($consent['response']->json(), 'meta.intent.intent'));
+    }
+
     private function completeLeadFlow(string $visitorId, string $openingMessage): string
     {
         $cid = $this->chat($visitorId, $openingMessage)['conversation_id'];
