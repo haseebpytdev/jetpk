@@ -49,9 +49,12 @@ echo "BUILD_ROOT=${BUILD_ROOT}"
 echo "FAB_BUNDLE_HITS=${FAB_HITS:-none}"
 echo "FRONTEND_SKIP_RESTART=${FRONTEND_SKIP_RESTART}"
 
+FINALIZE_SCRIPT="${REPO}/scripts/jetpk/finalize-deploy-sha-marker.sh"
 MARKER_SCRIPT="${REPO}/scripts/jetpk/write-deploy-sha-marker.sh"
-if [[ -f "${MARKER_SCRIPT}" ]]; then
-  DEPLOY_SHA="${AUTHORIZED_SHA}" APP="${APP}" bash "${MARKER_SCRIPT}" || {
-    echo "DEPLOY_SHA_MARKER_WARN reason=marker_write_failed"
-  }
+if [[ -f "${FINALIZE_SCRIPT}" ]]; then
+  DEPLOY_SHA="${AUTHORIZED_SHA}" APP="${APP}" MARKER_SCRIPT="${MARKER_SCRIPT}" bash "${FINALIZE_SCRIPT}"
+else
+  echo "DEPLOY_COMPONENT_APPLIED=YES"
+  echo "DEPLOY_SHA_MARKER=SKIP"
+  echo "FINAL_DEPLOY_STATUS=PASS"
 fi
