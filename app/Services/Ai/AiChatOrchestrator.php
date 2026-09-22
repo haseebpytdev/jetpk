@@ -235,6 +235,11 @@ final class AiChatOrchestrator
             return $this->withMessageId($assistant, $leadPrompt);
         }
 
+        $lockedWrite = $this->lockedWriteActionRequest($cleanMessage);
+        if ($lockedWrite !== null) {
+            return $this->replyLockedWriteRefusal($conversation, $lockedWrite);
+        }
+
         if ($this->shouldUseLabAdapter($conversation) && $this->labAdapter !== null) {
             try {
                 $labResponse = $this->labAdapter->handleTurn($conversation, $cleanMessage);
@@ -834,6 +839,56 @@ final class AiChatOrchestrator
         }
 
         return 'I can help search flights or groups, answer booking/payment FAQs, or connect you with support. What would you like to do?';
+    }
+
+    private function lockedWriteActionRequest(string $message): ?string
+    {
+        $lower = mb_strtolower(trim($message));
+        if (preg_match('/\b(can you |please )?(book|buy|purchase|reserve)\b/u', $lower)
+            && preg_match('/\b(for me|this|it|cheapest|that one|the cheapest|one for me)\b/u', $lower)) {
+            return 'booking';
+        }
+        if (preg_match('/\b(cancel|refund|void)\b/u', $lower)
+            && preg_match('/\b(booking|reservation|this|it|for me)\b/u', $lower)) {
+            return 'cancel';
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function replyLockedWriteRefusal(AiConversation $conversation, string $action): array
+    {
+        $body = match ($action) {
+            'booking' => 'I cannot complete a booking directly in chat, but I can help you review options and guide you through the booking process on JetPakistan. Please use the View & Book link on your chosen flight, or talk to support if you need personal assistance.',
+            'cancel' => 'I cannot cancel or change a booking directly in chat. Please contact JetPakistan support with your booking reference and verified contact details, or use the support options on our website.',
+            default => 'That action is not available in chat. I can help with travel questions, search, and support guidance.',
+        };
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+            'mode' => 'STRUCTURED_FALLBACK',
+            'locked_write_action' => $action,
+        ]);
+
+        return $this->withMessageId($assistant, [
+            'ok' => true,
+            'status' => 'ok',
+            'mode' => 'STRUCTURED_FALLBACK',
+            'conversation_id' => $conversation->public_id,
+            'state' => $conversation->state,
+            'message' => $body,
+            'recommendations' => [],
+            'actions' => [
+                ['label' => 'Contact Support', 'href' => '/support'],
+                ['label' => 'Lookup Booking', 'href' => '/lookup-booking'],
+            ],
+            'meta' => [
+                'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+                'AI_GROUP_SEARCH_READ_CALLS' => 0,
+                'locked_write_action' => $action,
+            ],
+        ]);
     }
 
     /**
