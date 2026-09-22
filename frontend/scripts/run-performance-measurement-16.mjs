@@ -20,6 +20,7 @@ import {
 import {
   loginAdmin,
   completeLeadCaptureIfNeeded,
+  isLeadCapturePending,
   normalizeConfirmationStep,
 } from "./live-readonly-qa-helpers.mjs";
 
@@ -114,8 +115,8 @@ async function runSearchFlow(page, marker, { includeSetupClear = false } = {}) {
       domRenderTimeoutMs: 15_000,
       messageType: label,
     });
-    if (result.payload?.status === "lead_capture_required" || result.payload?.mode === "LEAD_CAPTURE") {
-      const lead = await completeLeadCaptureIfNeeded(page, { lead: SYNTHETIC_LEAD });
+    if (isLeadCapturePending(result.payload)) {
+      const lead = await completeLeadCaptureIfNeeded(page, { lead: SYNTHETIC_LEAD, initialPayload: result.payload });
       if (!lead.completed) throw new Error(lead.reason ?? "LEAD_CAPTURE_FAILED");
     }
     turns.push(turnRecord(label, result));

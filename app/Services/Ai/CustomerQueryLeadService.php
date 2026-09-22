@@ -500,7 +500,7 @@ final class CustomerQueryLeadService
                 'action' => 'prompt',
                 'response' => $this->buildConversationalResponse(
                     $conversation,
-                    "I didn't quite catch the name. What should I call you?",
+                    "I didn't quite catch the name. May I start with your name, please?",
                     true,
                 ),
             ];
@@ -787,11 +787,11 @@ final class CustomerQueryLeadService
 
         return match ($stage) {
             'name' => $isSupport || $pending === ''
-                ? 'Of course. What should I call you?'
-                : 'Sure. What should I call you?',
+                ? 'Of course. May I start with your name, please?'
+                : 'Sure. May I start with your name, please?',
             'contact' => $this->buildContactPrompt($state),
             'consent' => 'Thanks. Is it okay for JetPakistan to contact you about this inquiry if our team needs to follow up?',
-            default => 'What should I call you?',
+            default => 'May I start with your name, please?',
         };
     }
 
@@ -806,16 +806,16 @@ final class CustomerQueryLeadService
         $prefix = $name !== '' ? "Thanks, {$name}. " : 'Thanks. ';
 
         if ($needsEmail && $needsPhone) {
-            return $prefix.'Could you share your email address and contact number as well?';
+            return $prefix.'Could you share your email address and contact number, please?';
         }
         if ($needsEmail) {
-            return $prefix."What's the best email address for you?";
+            return $prefix.'Could you share your email address as well?';
         }
         if ($needsPhone) {
-            return $prefix."What's the best contact number for you?";
+            return $prefix.'Could you also share the best contact number for you?';
         }
 
-        return $prefix.'Could you share your email address and contact number as well?';
+        return $prefix.'Could you share your email address and contact number, please?';
     }
 
     /**
@@ -853,7 +853,10 @@ final class CustomerQueryLeadService
         }
 
         $negative = ['no thanks', 'not now', 'nope', 'nah'];
-        $affirmative = ['yes please', 'yes', 'sure', 'okay', 'ok', 'yep', 'yeah', 'jee', 'ji', 'haan', 'han'];
+        $affirmative = [
+            'yes sure', 'yeah thats fine', 'thats fine', 'yes please', 'yes', 'sure',
+            'okay', 'ok', 'yep', 'yeah', 'jee', 'ji', 'haan', 'han',
+        ];
 
         foreach ($negative as $phrase) {
             if ($lower === $phrase || str_starts_with($lower, $phrase.' ')) {

@@ -73,7 +73,7 @@ class ConversationalLeadCaptureTest extends TestCase
         $turn['response']->assertOk()
             ->assertJsonPath('status', 'ok')
             ->assertJsonPath('meta.lead_capture_pending', true);
-        $this->assertStringContainsString('call you', mb_strtolower((string) $turn['response']->json('message')));
+        $this->assertStringContainsString('may i start with your name', mb_strtolower((string) $turn['response']->json('message')));
     }
 
     public function test_name_response_asks_for_contact(): void
@@ -179,6 +179,19 @@ class ConversationalLeadCaptureTest extends TestCase
         $this->assertStringContainsString('contact number', $message);
     }
 
+    public function test_yes_sure_recognized_as_affirmative_consent(): void
+    {
+        $this->enablePublicAi();
+        $vid = str_repeat('a', 40);
+        $cid = $this->chat($vid, 'I need help')['conversation_id'];
+        $this->chat($vid, 'Haseeb Asif', $cid);
+        $this->chat($vid, 'lead@example.com 03001234567', $cid);
+
+        $consent = $this->chat($vid, 'Yes sure', $cid);
+        $consent['response']->assertOk();
+        $this->assertDatabaseCount('customer_queries', 1);
+    }
+
     public function test_affirmative_consent_creates_customer_query_once(): void
     {
         $this->enablePublicAi();
@@ -266,7 +279,7 @@ class ConversationalLeadCaptureTest extends TestCase
 
         $message = mb_strtolower((string) $first->json('message'));
         $this->assertStringContainsString('contact you', $message);
-        $this->assertStringNotContainsString('what should i call you', $message);
+        $this->assertStringNotContainsString('may i start with your name', $message);
         $this->assertStringNotContainsString('email address and contact number', $message);
     }
 
@@ -286,7 +299,7 @@ class ConversationalLeadCaptureTest extends TestCase
 
         $message = mb_strtolower((string) $first->json('message'));
         $this->assertStringContainsString('contact number', $message);
-        $this->assertStringNotContainsString('what should i call you', $message);
+        $this->assertStringNotContainsString('may i start with your name', $message);
     }
 
     public function test_what_is_jetpakistan_returns_useful_information_without_lead_gate(): void
