@@ -318,7 +318,7 @@ final class HybridTravelPipeline
     private function wantsKnowledge(string $normalized, string $original): bool
     {
         return (bool) preg_match(
-            '/how (does |do )?booking|how (can|do) i (contact|check)|contact (jetpakistan )?support|guest booking|customer registration|payment (deadline|process|help)|cancellation|refund policy|saved travelers?|support hours|group ticket|group ticketing|faq|ادائیگی|ریفنڈ|محفوظ مسافر/u',
+            '/what is jetpakistan|what services do you offer|baggage allowance|how does a refund work|how do refunds work|do you offer umrah|how (does |do )?booking|how (can|do) i (contact|check)|contact (jetpakistan )?support|guest booking|customer registration|payment (deadline|process|help)|cancellation|refund policy|saved travelers?|support hours|group ticket|group ticketing|faq|ادائیگی|ریفنڈ|محفوظ مسافر/u',
             $normalized.' '.$original
         );
     }

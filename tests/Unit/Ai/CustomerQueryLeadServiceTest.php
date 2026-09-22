@@ -95,7 +95,9 @@ class CustomerQueryLeadServiceTest extends TestCase
 
         $prompt = $this->service->leadCapturePromptPayload($conversation, 'Find flights Lahore to Dubai', $user);
         $this->assertIsArray($prompt);
-        $this->assertSame(['contact_consent'], $prompt['lead_capture']['fields']);
+        $this->assertSame('ok', $prompt['status']);
+        $this->assertTrue($prompt['meta']['lead_capture_pending']);
+        $this->assertStringContainsString('contact you', mb_strtolower((string) $prompt['message']));
     }
 
     public function test_authenticated_user_missing_phone_requires_phone_and_consent(): void

@@ -235,7 +235,15 @@ class PublicAiAssistantController extends Controller
 
         $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
         $pendingMessage = (string) ($state['lead_pending_message'] ?? '');
-        unset($state['lead_capture_pending'], $state['lead_pending_message']);
+        unset(
+            $state['lead_capture_pending'],
+            $state['lead_capture_stage'],
+            $state['lead_name'],
+            $state['lead_email'],
+            $state['lead_phone'],
+            $state['lead_pending_message'],
+            $state['lead_capture_fields'],
+        );
         $conversation->shopping_state = $state;
         $conversation->save();
 

@@ -55,11 +55,12 @@ final class CustomerQueryLeadService
 
     public function needsLeadCapture(AiConversation $conversation, string $message, ?User $user = null): bool
     {
-        if (! $this->intentClassifier->isCommercialTravelIntent($message)) {
+        if ($this->hasValidLead($conversation, $user)) {
             return false;
         }
 
-        return ! $this->hasValidLead($conversation, $user);
+        return $this->intentClassifier->isCommercialTravelIntent($message)
+            || $this->intentClassifier->isSupportAssistanceIntent($message);
     }
 
     /**
@@ -236,21 +237,78 @@ final class CustomerQueryLeadService
             return null;
         }
 
-        $fields = $this->requiredLeadFields($user);
-        $known = $this->knownFieldLabels($user);
-
         $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
         $state['lead_capture_pending'] = true;
         $state['lead_pending_message'] = $message;
-        $state['lead_capture_fields'] = $fields;
+        $state['lead_capture_fields'] = $this->requiredLeadFields($user);
+        $state = $this->seedLeadContactFromProfile($state, $user);
+        $state['lead_capture_stage'] = $this->resolveLeadCaptureStage($state, $user);
         $conversation->shopping_state = $state;
         $conversation->save();
 
-        return $this->buildLeadCaptureResponse($conversation, $fields, $known);
+        return $this->buildConversationalResponse(
+            $conversation,
+            $this->promptForStage($state, $user),
+            true,
+        );
     }
 
     /**
-     * Resume an in-progress lead capture gate with the correct field set.
+     * Advance conversational lead capture from the current user turn.
+     *
+     * @return array{
+     *     action: 'prompt'|'complete'|'declined'|'replay',
+     *     response: array<string, mixed>,
+     *     pending_message?: string,
+     *     query?: CustomerQuery
+     * }
+     */
+    public function handleConversationalLeadTurn(
+        AiConversation $conversation,
+        string $message,
+        ?User $user = null,
+        ?string $visitorHash = null,
+        ?string $ipCountryHint = null,
+    ): array {
+        $user = $user ?? $this->resolveConversationUser($conversation);
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        $stage = (string) ($state['lead_capture_stage'] ?? 'name');
+
+        if ($stage === 'name') {
+            return $this->handleNameStage($conversation, $message, $state, $user);
+        }
+
+        if ($stage === 'contact') {
+            return $this->handleContactStage($conversation, $message, $state, $user);
+        }
+
+        if ($stage === 'consent') {
+            return $this->handleConsentStage(
+                $conversation,
+                $message,
+                $state,
+                $user,
+                $visitorHash ?? $conversation->visitor_token_hash,
+                $ipCountryHint,
+            );
+        }
+
+        $state['lead_capture_stage'] = $this->resolveLeadCaptureStage($state, $user);
+        $conversation->shopping_state = $state;
+        $conversation->save();
+
+        return [
+            'action' => 'prompt',
+            'response' => $this->buildConversationalResponse(
+                $conversation,
+                $this->promptForStage($state, $user),
+                true,
+            ),
+        ];
+    }
+
+    /**
+     * @deprecated Structured form endpoint only; conversational flow uses handleConversationalLeadTurn.
      *
      * @return array<string, mixed>
      */
@@ -258,11 +316,15 @@ final class CustomerQueryLeadService
     {
         $user = $this->resolveConversationUser($conversation);
         $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
-        $fields = is_array($state['lead_capture_fields'] ?? null) && $state['lead_capture_fields'] !== []
-            ? array_values($state['lead_capture_fields'])
-            : $this->requiredLeadFields($user);
+        $state['lead_capture_stage'] = $this->resolveLeadCaptureStage($state, $user);
+        $conversation->shopping_state = $state;
+        $conversation->save();
 
-        return $this->buildLeadCaptureResponse($conversation, $fields, $this->knownFieldLabels($user));
+        return $this->buildConversationalResponse(
+            $conversation,
+            $this->promptForStage($state, $user),
+            true,
+        );
     }
 
     public function profileContactPayload(?User $user): ?array
@@ -382,24 +444,35 @@ final class CustomerQueryLeadService
      */
     private function buildLeadCaptureResponse(AiConversation $conversation, array $fields, array $known): array
     {
-        $contactFields = array_values(array_intersect($fields, self::CONTACT_FIELDS));
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        $user = $this->resolveConversationUser($conversation);
 
+        return $this->buildConversationalResponse(
+            $conversation,
+            $this->promptForStage($state, $user),
+            true,
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildConversationalResponse(
+        AiConversation $conversation,
+        string $message,
+        bool $pending = false,
+    ): array {
         return [
             'ok' => true,
-            'status' => 'lead_capture_required',
-            'mode' => 'LEAD_CAPTURE',
+            'status' => 'ok',
+            'mode' => 'STRUCTURED_FALLBACK',
             'conversation_id' => $conversation->public_id,
             'state' => $conversation->state,
-            'message' => $this->buildLeadCaptureMessage($contactFields),
-            'lead_capture' => [
-                'required' => true,
-                'fields' => $fields,
-                'known_fields' => array_keys($known),
-            ],
+            'message' => $message,
             'recommendations' => [],
             'actions' => [],
             'meta' => [
-                'lead_capture_pending' => true,
+                'lead_capture_pending' => $pending,
                 'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
                 'AI_GROUP_SEARCH_READ_CALLS' => 0,
             ],
@@ -407,24 +480,409 @@ final class CustomerQueryLeadService
     }
 
     /**
-     * @param  list<string>  $contactFields
+     * @param  array<string, mixed>  $state
+     * @return array{
+     *     action: 'prompt'|'complete'|'declined'|'replay',
+     *     response: array<string, mixed>,
+     *     pending_message?: string,
+     *     query?: CustomerQuery
+     * }
      */
-    private function buildLeadCaptureMessage(array $contactFields): string
+    private function handleNameStage(
+        AiConversation $conversation,
+        string $message,
+        array $state,
+        ?User $user,
+    ): array {
+        $name = trim($message);
+        if (! $this->isValidName($name)) {
+            return [
+                'action' => 'prompt',
+                'response' => $this->buildConversationalResponse(
+                    $conversation,
+                    "I didn't quite catch the name. What should I call you?",
+                    true,
+                ),
+            ];
+        }
+
+        $state['lead_name'] = $name;
+        $state['lead_capture_stage'] = $this->resolveLeadCaptureStage($state, $user);
+        $conversation->shopping_state = $state;
+        $conversation->save();
+
+        return [
+            'action' => 'prompt',
+            'response' => $this->buildConversationalResponse(
+                $conversation,
+                $this->promptForStage($state, $user),
+                true,
+            ),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     * @return array{
+     *     action: 'prompt'|'complete'|'declined'|'replay',
+     *     response: array<string, mixed>,
+     *     pending_message?: string,
+     *     query?: CustomerQuery
+     * }
+     */
+    private function handleContactStage(
+        AiConversation $conversation,
+        string $message,
+        array $state,
+        ?User $user,
+    ): array {
+        $parsed = $this->parseContactFromMessage($message);
+        $email = $parsed['email'] ?? (string) ($state['lead_email'] ?? '');
+        $phone = $parsed['phone'] ?? (string) ($state['lead_phone'] ?? '');
+        $errors = [];
+
+        if ($email !== '' && ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'email';
+            $email = (string) ($state['lead_email'] ?? '');
+        }
+
+        if ($phone !== '' && ! $this->isValidPhone($phone)) {
+            $errors[] = 'phone';
+            $phone = (string) ($state['lead_phone'] ?? '');
+        }
+
+        if ($email !== '') {
+            $state['lead_email'] = mb_strtolower($email);
+        }
+        if ($phone !== '') {
+            $state['lead_phone'] = trim($phone);
+        }
+
+        $needsEmail = ! filter_var((string) ($state['lead_email'] ?? ''), FILTER_VALIDATE_EMAIL);
+        $needsPhone = ! $this->isValidPhone((string) ($state['lead_phone'] ?? ''));
+
+        if ($needsEmail && $needsPhone && $errors !== []) {
+            $conversation->shopping_state = $state;
+            $conversation->save();
+
+            return [
+                'action' => 'prompt',
+                'response' => $this->buildConversationalResponse(
+                    $conversation,
+                    'I could not read a valid email address and contact number from that. Could you share both again?',
+                    true,
+                ),
+            ];
+        }
+
+        if ($needsEmail && ! $needsPhone) {
+            $conversation->shopping_state = $state;
+            $conversation->save();
+
+            return [
+                'action' => 'prompt',
+                'response' => $this->buildConversationalResponse(
+                    $conversation,
+                    $errors !== [] && in_array('email', $errors, true)
+                        ? 'That email address does not look valid. What is the best email for you?'
+                        : "Thanks. What's the best email address for you?",
+                    true,
+                ),
+            ];
+        }
+
+        if ($needsPhone && ! $needsEmail) {
+            $conversation->shopping_state = $state;
+            $conversation->save();
+
+            return [
+                'action' => 'prompt',
+                'response' => $this->buildConversationalResponse(
+                    $conversation,
+                    $errors !== [] && in_array('phone', $errors, true)
+                        ? 'That contact number does not look valid. What is the best contact number for you?'
+                        : "Thanks. What's the best contact number for you?",
+                    true,
+                ),
+            ];
+        }
+
+        if ($needsEmail || $needsPhone) {
+            $conversation->shopping_state = $state;
+            $conversation->save();
+
+            return [
+                'action' => 'prompt',
+                'response' => $this->buildConversationalResponse(
+                    $conversation,
+                    $this->promptForStage($state, $user),
+                    true,
+                ),
+            ];
+        }
+
+        $state['lead_capture_stage'] = 'consent';
+        $conversation->shopping_state = $state;
+        $conversation->save();
+
+        return [
+            'action' => 'prompt',
+            'response' => $this->buildConversationalResponse(
+                $conversation,
+                $this->promptForStage($state, $user),
+                true,
+            ),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     * @return array{
+     *     action: 'prompt'|'complete'|'declined'|'replay',
+     *     response: array<string, mixed>,
+     *     pending_message?: string,
+     *     query?: CustomerQuery
+     * }
+     */
+    private function handleConsentStage(
+        AiConversation $conversation,
+        string $message,
+        array $state,
+        ?User $user,
+        ?string $visitorHash,
+        ?string $ipCountryHint,
+    ): array {
+        $consent = $this->parseConsent($message);
+        if ($consent === null) {
+            return [
+                'action' => 'prompt',
+                'response' => $this->buildConversationalResponse(
+                    $conversation,
+                    'Please let me know with yes or no — is it okay for JetPakistan to contact you about this inquiry if our team needs to follow up?',
+                    true,
+                ),
+            ];
+        }
+
+        if ($consent === false) {
+            $pendingMessage = (string) ($state['lead_pending_message'] ?? '');
+            $this->clearLeadCaptureState($conversation);
+
+            return [
+                'action' => 'declined',
+                'response' => $this->buildConversationalResponse(
+                    $conversation,
+                    "No problem — I won't save this as a contactable inquiry. I can still help with general travel questions.",
+                    false,
+                ),
+                'pending_message' => $pendingMessage,
+            ];
+        }
+
+        $payload = [
+            'name' => (string) ($state['lead_name'] ?? ''),
+            'email' => (string) ($state['lead_email'] ?? ''),
+            'phone' => (string) ($state['lead_phone'] ?? ''),
+            'contact_consent' => true,
+        ];
+        $result = $this->createFromPayload(
+            $conversation,
+            $payload,
+            $visitorHash,
+            $user,
+            $ipCountryHint,
+        );
+
+        if (! ($result['ok'] ?? false)) {
+            return [
+                'action' => 'prompt',
+                'response' => $this->buildConversationalResponse(
+                    $conversation,
+                    'I still need valid contact details before we continue. Could you share your email address and contact number again?',
+                    true,
+                ),
+            ];
+        }
+
+        $name = trim((string) ($state['lead_name'] ?? ''));
+        $pendingMessage = (string) ($state['lead_pending_message'] ?? '');
+        $this->clearLeadCaptureState($conversation);
+
+        $ack = $pendingMessage !== ''
+            ? "Perfect, {$name}. Let me help with that."
+            : "Perfect, {$name}. How can I help you?";
+
+        $response = $this->buildConversationalResponse($conversation, $ack, false);
+        $response['query_reference'] = $result['query']->query_reference;
+
+        if ($pendingMessage !== '') {
+            return [
+                'action' => 'replay',
+                'response' => $response,
+                'pending_message' => $pendingMessage,
+                'query' => $result['query'],
+            ];
+        }
+
+        return [
+            'action' => 'complete',
+            'response' => $response,
+            'query' => $result['query'],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     * @return array<string, mixed>
+     */
+    private function seedLeadContactFromProfile(array $state, ?User $user): array
     {
-        if ($contactFields === []) {
-            return 'Before we continue with your travel request, may I have your permission to contact you about this inquiry if our team needs to follow up?';
+        if ($user === null) {
+            return $state;
         }
 
-        if (count($contactFields) === 1) {
-            return match ($contactFields[0]) {
-                'name' => 'Before we continue, please share your name so our team can follow up on this inquiry if needed.',
-                'email' => 'Before we continue, please share your email address so our team can follow up on this inquiry if needed.',
-                'phone' => 'Before we continue, please share your contact number so our team can follow up on this inquiry if needed.',
-                default => 'Before we continue, please share the missing contact detail below.',
-            };
+        $contact = $this->resolveProfileContact($user);
+        if ($this->isValidName($contact['name']) && ! filled($state['lead_name'] ?? null)) {
+            $state['lead_name'] = $contact['name'];
+        }
+        if (filter_var($contact['email'], FILTER_VALIDATE_EMAIL) && ! filled($state['lead_email'] ?? null)) {
+            $state['lead_email'] = $contact['email'];
+        }
+        if ($this->isValidPhone($contact['phone']) && ! filled($state['lead_phone'] ?? null)) {
+            $state['lead_phone'] = $contact['phone'];
         }
 
-        return 'Sure. Before we continue, may I have your name, email address and contact number so our team can follow up on your inquiry if needed?';
+        return $state;
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     */
+    private function resolveLeadCaptureStage(array $state, ?User $user): string
+    {
+        $state = $this->seedLeadContactFromProfile($state, $user);
+        $name = (string) ($state['lead_name'] ?? '');
+        $email = (string) ($state['lead_email'] ?? '');
+        $phone = (string) ($state['lead_phone'] ?? '');
+
+        if (! $this->isValidName($name)) {
+            return 'name';
+        }
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL) || ! $this->isValidPhone($phone)) {
+            return 'contact';
+        }
+
+        return 'consent';
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     */
+    private function promptForStage(array $state, ?User $user): string
+    {
+        $stage = $this->resolveLeadCaptureStage($state, $user);
+        $name = trim((string) ($state['lead_name'] ?? ''));
+        $pending = trim((string) ($state['lead_pending_message'] ?? ''));
+        $isSupport = $pending !== '' && $this->intentClassifier->isSupportAssistanceIntent($pending);
+
+        return match ($stage) {
+            'name' => $isSupport || $pending === ''
+                ? 'Of course. What should I call you?'
+                : 'Sure. What should I call you?',
+            'contact' => $this->buildContactPrompt($state),
+            'consent' => 'Thanks. Is it okay for JetPakistan to contact you about this inquiry if our team needs to follow up?',
+            default => 'What should I call you?',
+        };
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     */
+    private function buildContactPrompt(array $state): string
+    {
+        $name = trim((string) ($state['lead_name'] ?? ''));
+        $needsEmail = ! filter_var((string) ($state['lead_email'] ?? ''), FILTER_VALIDATE_EMAIL);
+        $needsPhone = ! $this->isValidPhone((string) ($state['lead_phone'] ?? ''));
+        $prefix = $name !== '' ? "Thanks, {$name}. " : 'Thanks. ';
+
+        if ($needsEmail && $needsPhone) {
+            return $prefix.'Could you share your email address and contact number as well?';
+        }
+        if ($needsEmail) {
+            return $prefix."What's the best email address for you?";
+        }
+        if ($needsPhone) {
+            return $prefix."What's the best contact number for you?";
+        }
+
+        return $prefix.'Could you share your email address and contact number as well?';
+    }
+
+    /**
+     * @return array{email: ?string, phone: ?string}
+     */
+    private function parseContactFromMessage(string $message): array
+    {
+        $email = null;
+        $phone = null;
+
+        if (preg_match('/\b[\w.+-]+@[\w.-]+\.\w{2,}\b/u', $message, $matches) === 1) {
+            $email = mb_strtolower($matches[0]);
+        }
+
+        $compact = preg_replace('/\s+/', '', $message) ?? $message;
+        if (preg_match('/(?:\+92|0)?3\d{9}/', $compact, $matches) === 1) {
+            $phone = $matches[0];
+        } elseif (preg_match('/\b\d{7,15}\b/', $message, $matches) === 1) {
+            $candidate = $matches[0];
+            if ($email === null || ! str_contains($candidate, '@')) {
+                $phone = $candidate;
+            }
+        }
+
+        return ['email' => $email, 'phone' => $phone];
+    }
+
+    private function parseConsent(string $message): ?bool
+    {
+        $lower = mb_strtolower(trim($message));
+        $lower = trim(preg_replace('/[^\p{L}\p{N}\s]/u', '', $lower) ?? $lower);
+
+        if ($lower === 'no') {
+            return false;
+        }
+
+        $negative = ['no thanks', 'not now', 'nope', 'nah'];
+        $affirmative = ['yes please', 'yes', 'sure', 'okay', 'ok', 'yep', 'yeah', 'jee', 'ji', 'haan', 'han'];
+
+        foreach ($negative as $phrase) {
+            if ($lower === $phrase || str_starts_with($lower, $phrase.' ')) {
+                return false;
+            }
+        }
+        foreach ($affirmative as $phrase) {
+            if ($lower === $phrase || str_starts_with($lower, $phrase.' ')) {
+                return true;
+            }
+        }
+
+        return null;
+    }
+
+    private function clearLeadCaptureState(AiConversation $conversation): void
+    {
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        unset(
+            $state['lead_capture_pending'],
+            $state['lead_capture_stage'],
+            $state['lead_name'],
+            $state['lead_email'],
+            $state['lead_phone'],
+            $state['lead_pending_message'],
+            $state['lead_capture_fields'],
+        );
+        $conversation->shopping_state = $state;
+        $conversation->save();
     }
 
     /**
