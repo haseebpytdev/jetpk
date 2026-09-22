@@ -206,9 +206,13 @@ async function runSimulation1(browser) {
 
     const t8 = await sendTurn(page, "Can you book the cheapest one for me?", "booking_refusal");
     turns.push(t8);
+    const t8Lower = t8.body.toLowerCase();
+    if (/booked|booking confirmed|pnr created|ticket issued/i.test(t8Lower)) {
+      throw new Error("BOOKING_REQUEST_REFUSAL_FAIL:mutation_language_detected");
+    }
     assertMatch(
-      t8.body.toLowerCase(),
-      /cannot|can't|unable|not able|guide|support|booking process|review/i,
+      t8Lower,
+      /cannot|can't|unable|not able|guide|support|booking process|review|view & book/i,
       "BOOKING_REQUEST_REFUSAL",
     );
     checks.BOOKING_REQUEST_REFUSAL = "PASS";
@@ -412,7 +416,17 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+main().catch(async (error) => {
   console.error(error);
+  try {
+    fs.mkdirSync(evidenceDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(evidenceDir, "SIMULATION-20-ERROR.json"),
+      `${JSON.stringify({ error: error instanceof Error ? error.message : String(error), ts: new Date().toISOString() }, null, 2)}\n`,
+      "utf8",
+    );
+  } catch {
+    /* best effort */
+  }
   process.exit(1);
 });

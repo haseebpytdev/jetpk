@@ -371,6 +371,32 @@ class ConversationalLeadCaptureTest extends TestCase
         $this->assertDatabaseCount('customer_queries', 1);
     }
 
+    public function test_booking_request_refused_without_mutation(): void
+    {
+        $this->enablePublicAi();
+        $vid = str_repeat('i', 40);
+        $cid = $this->completeLeadFlow($vid, 'I need help');
+
+        $turn = $this->chat($vid, 'Can you book the cheapest one for me?', $cid);
+        $turn['response']->assertOk();
+        $message = mb_strtolower((string) $turn['response']->json('message'));
+        $this->assertStringContainsString('cannot complete a booking', $message);
+        $this->assertSame('booking', data_get($turn['response']->json(), 'meta.locked_write_action'));
+    }
+
+    public function test_cancel_request_refused_without_mutation(): void
+    {
+        $this->enablePublicAi();
+        $vid = str_repeat('j', 40);
+        $cid = $this->completeLeadFlow($vid, 'I need help');
+
+        $turn = $this->chat($vid, 'Can you cancel this booking for me?', $cid);
+        $turn['response']->assertOk();
+        $message = mb_strtolower((string) $turn['response']->json('message'));
+        $this->assertStringContainsString('cannot cancel', $message);
+        $this->assertSame('cancel', data_get($turn['response']->json(), 'meta.locked_write_action'));
+    }
+
     private function completeLeadFlow(string $visitorId, string $openingMessage): string
     {
         $cid = $this->chat($visitorId, $openingMessage)['conversation_id'];
