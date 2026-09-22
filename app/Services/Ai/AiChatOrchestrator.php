@@ -679,21 +679,22 @@ final class AiChatOrchestrator
 
         $reference = is_string($state['booking_reference'] ?? null) ? $state['booking_reference'] : null;
         $email = is_string($state['booking_email'] ?? null) ? $state['booking_email'] : null;
+        $phone = is_string($state['booking_phone'] ?? null) ? $state['booking_phone'] : null;
 
-        if ($reference === null && $email === null) {
-            $body = 'Of course — I can help you check a booking. Please send your booking reference and the email address used when you booked.';
+        if ($reference === null && $email === null && $phone === null) {
+            $body = 'Of course — I can help you check a booking. Please send your booking reference and the email or phone number used when you booked.';
             $status = 'clarify';
             $bookingPayload = null;
         } elseif ($reference === null) {
-            $body = 'Thanks. What is your booking reference? I need it together with your email to verify your booking securely.';
+            $body = 'Thanks. What is your booking reference? I need it together with your email or phone to verify your booking securely.';
             $status = 'clarify';
             $bookingPayload = null;
-        } elseif ($email === null) {
-            $body = 'Thanks. What email address was used for booking '.$reference.'? JetPakistan verifies both before showing booking details.';
+        } elseif ($email === null && $phone === null) {
+            $body = 'Thanks. What email or phone number was used for booking '.$reference.'? JetPakistan verifies your ownership before showing booking details.';
             $status = 'clarify';
             $bookingPayload = null;
         } else {
-            $lookup = $this->bookingLookupTool->lookup($reference, $email);
+            $lookup = $this->bookingLookupTool->lookup($reference, $email, $phone);
             $body = (string) ($lookup['message'] ?? 'Lookup complete.');
             $status = ($lookup['found'] ?? false) ? 'ok' : 'not_found';
             $bookingPayload = $lookup['booking'] ?? null;
@@ -701,7 +702,12 @@ final class AiChatOrchestrator
 
         $assistant = $this->storeMessage($conversation, 'assistant', $body, [
             'mode' => $mode,
-            'intent' => ['intent' => 'booking_lookup', 'booking_reference' => $reference, 'booking_email' => $email],
+            'intent' => [
+                'intent' => 'booking_lookup',
+                'booking_reference' => $reference,
+                'booking_email' => $email,
+                'booking_phone' => $phone,
+            ],
             'booking' => $bookingPayload,
         ]);
 
@@ -736,11 +742,12 @@ final class AiChatOrchestrator
             return true;
         }
 
-        if (! isset($prior['booking_reference']) && ! isset($prior['booking_email'])) {
+        if (! isset($prior['booking_reference']) && ! isset($prior['booking_email']) && ! isset($prior['booking_phone'])) {
             return false;
         }
 
         return preg_match('/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i', $message) === 1
+            || preg_match('/\b(?:\+?92|0)3[0-9]{9}\b/', $message) === 1
             || preg_match('/\b(reference|ref|pnr)\s*(is|:)?\s*[A-Z0-9]{5,12}\b/i', $message) === 1
             || preg_match('/\b[A-Z0-9]{5,12}\b/u', $message) === 1;
     }
