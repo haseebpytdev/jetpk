@@ -7,6 +7,31 @@ namespace App\Services\Ai;
  */
 final class AiCommercialIntentClassifier
 {
+    public function isSupportAssistanceIntent(string $message): bool
+    {
+        $lower = mb_strtolower(trim($message));
+        if ($lower === '' || $this->isSimpleGreeting($lower)) {
+            return false;
+        }
+
+        if ($this->isInformationalOnly($lower)) {
+            return false;
+        }
+
+        $patterns = [
+            '/\b(i need help|i\'d like some help|can you help me|could you help me|need assistance|i need assistance)\b/u',
+            '/\b(help me|please help)\b/u',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $lower) === 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function isCommercialTravelIntent(string $message): bool
     {
         $lower = mb_strtolower(trim($message));
@@ -34,6 +59,13 @@ final class AiCommercialIntentClassifier
         return false;
     }
 
+    public function isSimpleGreeting(string $message): bool
+    {
+        $lower = mb_strtolower(trim($message));
+
+        return preg_match('/^(hi|hello|hey|salam|assalam|assalamu alaikum|good morning|good evening|good afternoon)[\s!.?]*$/u', $lower) === 1;
+    }
+
     private function isInformationalOnly(string $lower): bool
     {
         $infoPhrases = [
@@ -43,6 +75,9 @@ final class AiCommercialIntentClassifier
             'how can i contact',
             'support contact',
             'baggage allowance',
+            'how does a refund work',
+            'how do refunds work',
+            'do you offer umrah',
             'payment help',
         ];
 

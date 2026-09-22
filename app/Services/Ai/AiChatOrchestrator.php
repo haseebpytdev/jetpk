@@ -219,12 +219,7 @@ final class AiChatOrchestrator
 
         $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
         if ($state['lead_capture_pending'] ?? false) {
-            $resume = $this->leadService->resumeLeadCapturePayload($conversation);
-            $assistant = $this->storeMessage($conversation, 'assistant', (string) $resume['message'], [
-                'mode' => 'LEAD_CAPTURE',
-            ]);
-
-            return $this->withMessageId($assistant, $resume);
+            return $this->handleConversationalLeadTurn($conversation, $cleanMessage);
         }
 
         $leadPrompt = $this->leadService->leadCapturePromptPayload(
@@ -234,7 +229,7 @@ final class AiChatOrchestrator
         );
         if (is_array($leadPrompt)) {
             $assistant = $this->storeMessage($conversation, 'assistant', (string) $leadPrompt['message'], [
-                'mode' => 'LEAD_CAPTURE',
+                'mode' => 'STRUCTURED_FALLBACK',
             ]);
 
             return $this->withMessageId($assistant, $leadPrompt);
@@ -839,6 +834,35 @@ final class AiChatOrchestrator
         }
 
         return 'I can help search flights or groups, answer booking/payment FAQs, or connect you with support. What would you like to do?';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function handleConversationalLeadTurn(AiConversation $conversation, string $cleanMessage): array
+    {
+        $turn = $this->leadService->handleConversationalLeadTurn(
+            $conversation,
+            $cleanMessage,
+            $this->resolveAuthenticatedUser($conversation),
+            $conversation->visitor_token_hash,
+        );
+
+        $assistant = $this->storeMessage($conversation, 'assistant', (string) ($turn['response']['message'] ?? ''), [
+            'mode' => 'STRUCTURED_FALLBACK',
+        ]);
+        $payload = $this->withMessageId($assistant, $turn['response']);
+
+        if (($turn['action'] ?? '') === 'replay' && filled($turn['pending_message'] ?? null)) {
+            $followUp = $this->handleChat($conversation->fresh(), (string) $turn['pending_message']);
+            if (isset($turn['query'])) {
+                $followUp['query_reference'] = $turn['query']->query_reference;
+            }
+
+            return $followUp;
+        }
+
+        return $payload;
     }
 
     /**
