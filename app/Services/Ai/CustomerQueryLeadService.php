@@ -24,7 +24,7 @@ final class CustomerQueryLeadService
         private readonly AiCommercialIntentClassifier $intentClassifier,
     ) {}
 
-    public function findRecentOpenQuery(?string $visitorHash, ?User $user = null): ?CustomerQuery
+    public function findRecentOpenQuery(?string $visitorHash, ?User $user = null, ?int $embedTenantId = null): ?CustomerQuery
     {
         $cutoff = now()->subMinutes(self::OPEN_QUERY_MINUTES);
         $query = CustomerQuery::query()
@@ -36,6 +36,12 @@ final class CustomerQueryLeadService
                 CustomerQueryStatus::CallbackRequired,
                 CustomerQueryStatus::FollowUp,
             ]);
+
+        if ($embedTenantId !== null) {
+            $query->where('ai_embed_tenant_id', $embedTenantId);
+        } else {
+            $query->whereNull('ai_embed_tenant_id');
+        }
 
         if ($user !== null) {
             $query->where('user_id', $user->id);
@@ -50,7 +56,11 @@ final class CustomerQueryLeadService
 
     public function hasValidLead(AiConversation $conversation, ?User $user = null): bool
     {
-        return $this->findRecentOpenQuery($conversation->visitor_token_hash, $user) !== null;
+        return $this->findRecentOpenQuery(
+            $conversation->visitor_token_hash,
+            $user,
+            $conversation->ai_embed_tenant_id,
+        ) !== null;
     }
 
     public function needsLeadCapture(AiConversation $conversation, string $message, ?User $user = null): bool
@@ -133,7 +143,7 @@ final class CustomerQueryLeadService
         $email = mb_strtolower(trim((string) $merged['email']));
         $phone = $this->normalizePhone((string) $merged['phone'], (string) ($merged['phone_country'] ?? $ipCountryHint ?? 'PK'));
 
-        $existing = $this->findRecentOpenQuery($visitorHash, $user);
+        $existing = $this->findRecentOpenQuery($visitorHash, $user, $conversation->ai_embed_tenant_id);
         if ($existing !== null) {
             $existing->fill([
                 'name' => trim((string) $merged['name']),
@@ -157,6 +167,7 @@ final class CustomerQueryLeadService
             'visitor_token_hash' => $visitorHash,
             'user_id' => $user?->id,
             'ai_conversation_id' => $conversation->id,
+            'ai_embed_tenant_id' => $conversation->ai_embed_tenant_id,
             'name' => trim((string) $merged['name']),
             'email' => $email,
             'phone_raw' => trim((string) $merged['phone']),

@@ -2,24 +2,28 @@
 
 namespace App\Services\Ai;
 
+use App\Models\AiEmbedTenant;
+use App\Services\Ai\Embed\EmbedTenantResolver;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 /**
- * Opaque, origin-bound embed sessions for cross-origin iframe AI transport.
+ * Opaque, origin-bound, tenant-bound embed sessions for cross-origin iframe AI transport.
  */
 final class AiEmbedSessionService
 {
     private const CACHE_PREFIX = 'ai_embed_sess:';
 
-    private const ENTRY_PATH_PATTERN = '/^[A-Za-z0-9_-]{16,128}$/';
+    public function __construct(
+        private readonly EmbedTenantResolver $tenantResolver,
+    ) {}
 
     /**
-     * @return array{token: string, expires_at: string, tenant: string, parent_origin: string}|null
+     * @return array{token: string, expires_at: string, tenant_public_id: string, parent_origin: string}|null
      */
-    public function createSession(string $tenant, string $parentOrigin): ?array
+    public function createSession(AiEmbedTenant $tenant, string $parentOrigin): ?array
     {
-        if (! $this->isEnabledForTenant($tenant)) {
+        if (! $this->isTenantSessionReady($tenant)) {
             return null;
         }
 
@@ -33,7 +37,8 @@ final class AiEmbedSessionService
         $expiresAt = now()->addSeconds($ttl);
 
         $payload = [
-            'tenant' => $tenant,
+            'tenant_id' => $tenant->id,
+            'tenant_public_id' => $tenant->public_id,
             'parent_origin' => $normalizedOrigin,
             'visitor_raw' => Str::random(40),
             'conversation_public_id' => null,
@@ -46,7 +51,7 @@ final class AiEmbedSessionService
         return [
             'token' => $rawToken,
             'expires_at' => $payload['expires_at'],
-            'tenant' => $tenant,
+            'tenant_public_id' => $tenant->public_id,
             'parent_origin' => $normalizedOrigin,
         ];
     }
@@ -54,7 +59,7 @@ final class AiEmbedSessionService
     /**
      * @return array<string, mixed>|null
      */
-    public function validateToken(string $tenant, string $rawToken, ?string $parentOrigin = null): ?array
+    public function validateToken(AiEmbedTenant $tenant, string $rawToken, ?string $parentOrigin = null): ?array
     {
         $rawToken = trim($rawToken);
         if ($rawToken === '' || strlen($rawToken) < 32) {
@@ -67,7 +72,7 @@ final class AiEmbedSessionService
             return null;
         }
 
-        if (($payload['tenant'] ?? null) !== $tenant) {
+        if ((int) ($payload['tenant_id'] ?? 0) !== (int) $tenant->id) {
             return null;
         }
 
@@ -84,6 +89,8 @@ final class AiEmbedSessionService
 
             return null;
         }
+
+        $payload['tenant'] = $tenant;
 
         return $payload;
     }
@@ -157,59 +164,32 @@ final class AiEmbedSessionService
         return 'https://'.$host.$port;
     }
 
-    public function isOriginAllowed(string $tenant, string $normalizedOrigin): bool
+    public function isOriginAllowed(AiEmbedTenant $tenant, string $normalizedOrigin): bool
     {
-        $allowed = config("ai_embed.tenants.{$tenant}.allowed_origins", []);
-
-        return is_array($allowed) && in_array($normalizedOrigin, $allowed, true);
-    }
-
-    public function isEnabledForTenant(string $tenant): bool
-    {
-        if (! (bool) config('ai_embed.enabled', false)) {
+        $allowed = $tenant->normalizedAllowedOrigins();
+        if ($allowed === []) {
             return false;
         }
 
-        if ($this->configuredEntryPath($tenant) === null) {
-            return false;
-        }
-
-        $allowed = config("ai_embed.tenants.{$tenant}.allowed_origins", []);
-
-        return is_array($allowed) && $allowed !== [];
+        return in_array($normalizedOrigin, $allowed, true);
     }
 
-    public function normalizeEntryPathToken(string $token): ?string
+    public function isTenantSessionReady(AiEmbedTenant $tenant): bool
     {
-        $token = trim($token);
-        if ($token === '' || preg_match(self::ENTRY_PATH_PATTERN, $token) !== 1) {
-            return null;
-        }
-
-        return $token;
+        return $this->tenantResolver->isGloballyEnabled()
+            && $tenant->status === AiEmbedTenant::STATUS_ACTIVE
+            && $tenant->embed_enabled
+            && $tenant->keys()->where('status', \App\Models\AiEmbedTenantKey::STATUS_ACTIVE)->exists();
     }
 
-    public function configuredEntryPath(string $tenant): ?string
+    public function isEmbedPageAvailable(AiEmbedTenant $tenant): bool
     {
-        $raw = trim((string) config("ai_embed.entry_paths.{$tenant}", ''));
-
-        return $this->normalizeEntryPathToken($raw);
+        return $this->isTenantSessionReady($tenant);
     }
 
-    public function matchesEntryPath(string $tenant, string $pathToken): bool
+    public function resolveTenantByEmbedKey(string $embedKey): ?AiEmbedTenant
     {
-        $configured = $this->configuredEntryPath($tenant);
-        $candidate = $this->normalizeEntryPathToken($pathToken);
-        if ($configured === null || $candidate === null) {
-            return false;
-        }
-
-        return hash_equals($configured, $candidate);
-    }
-
-    public function isEmbedPageAvailable(string $tenant): bool
-    {
-        return $this->isEnabledForTenant($tenant);
+        return $this->tenantResolver->resolveOperationalByEmbedKey($embedKey);
     }
 
     private function cacheKey(string $rawToken): string

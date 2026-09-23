@@ -69,7 +69,7 @@
             return;
         }
         window.parent.postMessage(
-            Object.assign({ type: type, tenant: cfg.tenant || "jetpakistan" }, detail || {}),
+            Object.assign({ type: type, tenantPublicId: cfg.tenantPublicId || null }, detail || {}),
             parentOrigin
         );
     }

@@ -12,10 +12,12 @@ use App\Enums\BookingStatus;
 use App\Services\Ai\NullInferenceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Tests\Support\InteractsWithEmbedTenants;
 use Tests\TestCase;
 
 class AiEmbedChatTest extends TestCase
 {
+    use InteractsWithEmbedTenants;
     use RefreshDatabase;
 
     private const PARENT = 'https://client.example.com';
@@ -28,30 +30,14 @@ class AiEmbedChatTest extends TestCase
         Cache::flush();
     }
 
-    /**
-     * @param  array<string, mixed>  $extra
-     */
     private function enableEmbed(array $extra = []): void
     {
-        config(array_merge([
-            'ai_embed.enabled' => true,
-            'ai_embed.session_ttl_seconds' => 3600,
-            'ai_embed.entry_paths.jetpakistan' => self::ENTRY_PATH,
-            'ai_embed.tenants.jetpakistan.allowed_origins' => [self::PARENT],
-            'ota.ai_assistant.mode' => 'public',
-            'ota.ai_assistant.enabled' => true,
-            'ota.ai_assistant.hard_allow.master' => true,
-            'ota.ai_assistant.hard_allow.public' => true,
-            'ota.ai_assistant.hard_allow.human_handoff' => true,
-            'ota.ai_assistant.flight_search_enabled' => true,
-            'ota.ai_assistant.human_handoff_enabled' => true,
-            'ota.ai_assistant.knowledge_enabled' => true,
-            'ota.ai_assistant.conversational_enabled' => false,
-            'ota.ai_assistant.optional_llm_assist' => false,
-        ], $extra));
-
-        \App\Models\AiAssistantSetting::query()->delete();
-        app(\App\Services\Ai\AiAssistantSettingsService::class)->get();
+        $this->enableEmbedTenant(embedKey: self::ENTRY_PATH, allowedOrigins: [self::PARENT]);
+        if ($extra !== []) {
+            config($extra);
+            \App\Models\AiAssistantSetting::query()->delete();
+            app(\App\Services\Ai\AiAssistantSettingsService::class)->get();
+        }
     }
 
     /**
@@ -59,7 +45,7 @@ class AiEmbedChatTest extends TestCase
      */
     private function embedHeaders(string $parentOrigin = self::PARENT): array
     {
-        $session = $this->postJson('/api/embed/ai/jetpakistan/session', [], [
+        $session = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/session'), [], [
             'X-JP-AI-Embed-Parent-Origin' => $parentOrigin,
         ])->assertOk();
 
@@ -80,7 +66,7 @@ class AiEmbedChatTest extends TestCase
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
         $embed = $this->embedHeaders();
 
-        $response = $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $response = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'What is JetPakistan?',
         ], $embed['headers']);
 
@@ -96,7 +82,7 @@ class AiEmbedChatTest extends TestCase
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
         $embed = $this->embedHeaders();
 
-        $response = $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $response = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'How can I contact JetPakistan support?',
         ], $embed['headers']);
 
@@ -106,7 +92,7 @@ class AiEmbedChatTest extends TestCase
 
     public function test_embed_read_only_search_reuses_orchestrator(): void
     {
-        $this->enableEmbed();
+        $tenant = $this->enableEmbedTenant(embedKey: self::ENTRY_PATH, allowedOrigins: [self::PARENT]);
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
 
         $embed = $this->embedHeaders();
@@ -115,6 +101,7 @@ class AiEmbedChatTest extends TestCase
 
         CustomerQuery::query()->create([
             'visitor_token_hash' => $visitorHash,
+            'ai_embed_tenant_id' => $tenant->id,
             'name' => 'Embed Guest',
             'email' => 'embed-guest@example.com',
             'phone_raw' => '03001234567',
@@ -128,7 +115,7 @@ class AiEmbedChatTest extends TestCase
             'last_activity_at' => now(),
         ]);
 
-        $response = $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $response = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'LHE to DXB tomorrow',
         ], $embed['headers']);
 
@@ -145,7 +132,7 @@ class AiEmbedChatTest extends TestCase
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
         $embed = $this->embedHeaders();
 
-        $first = $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $first = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'I need help booking a group to Dubai',
         ], $embed['headers']);
 
@@ -176,18 +163,18 @@ class AiEmbedChatTest extends TestCase
         ]);
 
         $embed = $this->embedHeaders();
-        $first = $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $first = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'Can you look up my booking?',
         ], $embed['headers'])->assertOk();
 
         $cid = $first->json('conversation_id');
 
-        $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'My booking reference is EMBEDREF1',
             'conversation_id' => $cid,
         ], $embed['headers'])->assertOk();
 
-        $valid = $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $valid = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'My email is embed@example.com',
             'conversation_id' => $cid,
         ], $embed['headers']);
@@ -203,13 +190,13 @@ class AiEmbedChatTest extends TestCase
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
         $embed = $this->embedHeaders();
 
-        $chat = $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $chat = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'Talk to support',
         ], $embed['headers'])->assertOk();
 
         $cid = $chat->json('conversation_id');
 
-        $handoff = $this->postJson('/api/embed/ai/jetpakistan/handoff', [
+        $handoff = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/handoff'), [
             'conversation_id' => $cid,
         ], $embed['headers']);
 
@@ -224,13 +211,13 @@ class AiEmbedChatTest extends TestCase
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
         $embed = $this->embedHeaders();
 
-        $chat = $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $chat = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'What is JetPakistan?',
         ], $embed['headers'])->assertOk();
 
         $oldId = $chat->json('conversation_id');
 
-        $clear = $this->postJson('/api/embed/ai/jetpakistan/clear', [
+        $clear = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/clear'), [
             'conversation_id' => $oldId,
         ], $embed['headers']);
 
@@ -245,7 +232,7 @@ class AiEmbedChatTest extends TestCase
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
         $embed = $this->embedHeaders();
 
-        $response = $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $response = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'What is JetPakistan?',
         ], $embed['headers']);
 
@@ -262,7 +249,7 @@ class AiEmbedChatTest extends TestCase
         ]);
         $embed = $this->embedHeaders();
 
-        $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'What is JetPakistan?',
         ], $embed['headers'])->assertStatus(503)
             ->assertJsonPath('status', 'unavailable');

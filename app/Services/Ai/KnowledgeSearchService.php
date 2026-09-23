@@ -13,13 +13,18 @@ final class KnowledgeSearchService
     /**
      * @return list<array{slug: string, title: string, excerpt: string, score: float}>
      */
-    public function search(string $query, int $limit = 3): array
+    public function search(string $query, int $limit = 3, ?string $namespace = null): array
     {
         if (! (bool) config('ota.ai_assistant.knowledge_enabled', true)) {
             return [];
         }
 
-        $dir = base_path('ai-assistant/knowledge');
+        $ctx = app(\App\Services\Ai\Embed\EmbedRuntimeContext::class);
+        if ($namespace === null && $ctx->isActive() && $ctx->knowledgeProvider() !== null) {
+            return $ctx->knowledgeProvider()->search($query, $limit);
+        }
+
+        $dir = $this->resolveKnowledgeDirectory($namespace);
         if (! File::isDirectory($dir)) {
             return [];
         }
@@ -56,6 +61,21 @@ final class KnowledgeSearchService
         usort($hits, static fn (array $a, array $b): int => $b['score'] <=> $a['score']);
 
         return array_slice($hits, 0, max(1, min(5, $limit)));
+    }
+
+    private function resolveKnowledgeDirectory(?string $namespace): string
+    {
+        $base = base_path('ai-assistant/knowledge');
+        if ($namespace === null || $namespace === '' || $namespace === 'jetpakistan') {
+            return $base;
+        }
+
+        $safe = preg_replace('/[^a-z0-9_-]/i', '', $namespace) ?? '';
+        if ($safe === '') {
+            return $base;
+        }
+
+        return $base.'/'.$safe;
     }
 
     /**
