@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Sourceable Ask JetPakistan AI runtime deploy allowlist (repo-relative paths).
+# shellcheck disable=SC2034
+AI_RUNTIME_DEPLOY_PATHSPECS=(
+  app/Contracts/Ai
+  app/Data/Ai
+  app/Enums/CustomerQueryStatus.php
+  app/Http/Controllers/Admin/AiAssistantStatusController.php
+  app/Http/Controllers/Admin/AdminSettingsHubController.php
+  app/Http/Controllers/Ai
+  app/Http/Controllers/Api/EmbedAiAssistantController.php
+  app/Http/Controllers/Api/PublicAiAssistantController.php
+  app/Http/Middleware/ApplyAiEmbedFrameHeaders.php
+  app/Http/Middleware/AuthenticateAiEmbedSession.php
+  app/Http/Middleware/ApplyAiLabCanaryFaultHeader.php
+  app/Http/Middleware/SecurityHeaders.php
+  app/Models/AiAssistantSetting.php
+  app/Models/AiConversation.php
+  app/Models/AiHandoffAudit.php
+  app/Models/AiMessage.php
+  app/Models/CustomerQuery.php
+  app/Providers/AiServiceProvider.php
+  app/Services/Ai
+  app/Services/PublicContent/PublicContentApiPresenter.php
+  app/Support/Ai
+  bootstrap/providers.php
+  bootstrap/app.php
+  config/ota.php
+  config/ai_lab.php
+  config/ai_embed.php
+  database/migrations/2026_09_01_010000_create_ai_conversations_tables.php
+  database/migrations/2026_09_14_100000_create_ai_assistant_settings_table.php
+  database/migrations/2026_09_14_200000_create_customer_queries_table.php
+  public/css/ai-embed.css
+  public/js/ai-embed.js
+  resources/views/ai
+  resources/views/dashboard/admin/settings/ai-assistant.blade.php
+  routes/web.php
+  routes/admin.php
+  scripts/jetpk/deploy-ai-runtime-protected.sh
+  docs/deploy/jetpk-ai-lab-gateway.service
+  ai-lab-gateway/server.py
+  ai-lab-gateway/requirements.txt
+)
+
+# Public webroot assets derived from APP/public/* (published separately).
+AI_RUNTIME_PUBLIC_ASSET_RELS=(
+  public/js/ai-embed.js
+  public/css/ai-embed.css
+)
