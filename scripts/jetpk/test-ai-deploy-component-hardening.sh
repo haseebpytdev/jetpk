@@ -135,4 +135,20 @@ AUTH_SHA="$(git -C "${REPO}" rev-parse HEAD)"
 CHANGED="$(CURRENT_DEPLOYED_SHA="${BASE_SHA}" AUTHORIZED_SHA="${AUTH_SHA}" REPO="${REPO}" bash "${REPO}/scripts/jetpk/resolve-ai-runtime-changed-paths.sh" 2>/dev/null || true)"
 grep -q 'app/Evil/hack.php' <<< "${CHANGED}" && fail "G_unauthorized_path_leaked"
 
+# Test H: Embed-02 runtime registry/ops files remain in the protected deploy allowlist.
+ALLOWLIST_FILE="${SCRIPT_DIR}/ai-runtime-deploy-allowlist.sh"
+for required in \
+  app/Console/Commands/AiEmbedKeyRotateCommand.php \
+  app/Console/Commands/AiEmbedTenantStatusCommand.php \
+  app/Console/Commands/AiEmbedTenantSyncJetPakistanCommand.php \
+  app/Console/Commands/AiEmbedTenantUpsertCommand.php \
+  app/Models/AiEmbedAuditEvent.php \
+  app/Models/AiEmbedTenant.php \
+  app/Models/AiEmbedTenantKey.php \
+  app/Providers/AiEmbedServiceProvider.php \
+  database/migrations/2026_09_23_140000_create_ai_embed_tenant_registry_tables.php
+do
+  grep -Fxq "  ${required}" "${ALLOWLIST_FILE}" || fail "H_missing_embed02_allowlist_path_${required//\//_}"
+done
+
 echo "AI_DEPLOY_HARDENING_TEST=PASS"
