@@ -15,9 +15,14 @@ final class JetPakistanKnowledgeProvider implements KnowledgeProvider
 
     public function search(string $query, int $limit = 3): array
     {
-        $namespace = $this->tenant->slug === 'jetpakistan'
-            ? 'jetpakistan'
-            : $this->tenant->knowledge_namespace;
+        if ($this->tenant->slug === 'jetpakistan') {
+            return $this->knowledge->searchJetPakistanCorpus($query, $limit);
+        }
+
+        $namespace = trim($this->tenant->knowledge_namespace);
+        if ($namespace === '' || strcasecmp($namespace, 'jetpakistan') === 0) {
+            return [];
+        }
 
         return $this->knowledge->search($query, $limit, $namespace);
     }

@@ -62,7 +62,7 @@ return new class extends Migration
         Schema::table('customer_queries', function (Blueprint $table): void {
             $table->foreignId('ai_embed_tenant_id')
                 ->nullable()
-                ->after('conversation_id')
+                ->after('ai_conversation_id')
                 ->constrained('ai_embed_tenants')
                 ->nullOnDelete();
         });

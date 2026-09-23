@@ -25,12 +25,17 @@ class AiEmbedTenantUpsertCommand extends Command
     public function handle(EmbedTenantManager $manager): int
     {
         $slug = (string) $this->argument('slug');
+        $capabilities = $this->capabilities();
+        if ($capabilities === null) {
+            return self::FAILURE;
+        }
+
         $tenant = $manager->upsertTenant(
             slug: $slug,
             displayName: (string) ($this->option('display-name') ?: $slug),
             assistantName: (string) ($this->option('assistant-name') ?: 'AI Assistant'),
             allowedOrigins: array_values((array) $this->option('origin')),
-            capabilities: $this->capabilities(),
+            capabilities: $capabilities,
             embedEnabled: (bool) $this->option('enabled') && ! (bool) $this->option('disabled'),
             status: AiEmbedTenant::STATUS_ACTIVE,
             knowledgeNamespace: (string) $this->option('namespace'),
@@ -50,15 +55,29 @@ class AiEmbedTenantUpsertCommand extends Command
     }
 
     /**
-     * @return list<string>
+     * @return list<string>|null
      */
-    private function capabilities(): array
+    private function capabilities(): ?array
     {
-        $caps = array_values(array_filter((array) $this->option('capability')));
-        if ($caps !== []) {
-            return $caps;
+        $requested = array_values(array_filter((array) $this->option('capability')));
+        if ($requested === []) {
+            return [];
         }
 
-        return EmbedTenantCapability::all();
+        $known = EmbedTenantCapability::all();
+        $valid = array_values(array_intersect($requested, $known));
+        $unknown = array_values(array_diff($requested, $known));
+
+        foreach ($unknown as $capability) {
+            $this->warn('Ignoring unknown capability: '.$capability);
+        }
+
+        if ($valid === []) {
+            $this->error('No valid capabilities provided.');
+
+            return null;
+        }
+
+        return $valid;
     }
 }
