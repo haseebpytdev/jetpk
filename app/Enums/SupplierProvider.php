@@ -12,6 +12,7 @@ enum SupplierProvider: string
     case Iati = 'iati';
     case OneApi = 'one_api';
     case AlHaider = 'al_haider';
+    case AmeerEMillat = 'ameer_e_millat';
     case Amadeus = 'amadeus';
     case Travelport = 'travelport';
     /** Transactional email / SMTP module (not a flight adapter). */

@@ -11,6 +11,8 @@ use App\Http\Requests\Admin\UpdateSupplierConnectionRequest;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\SupplierConnectionService;
 use App\Support\Suppliers\AirBlueSupplierConnectionNormalizer;
+use App\Support\Suppliers\AlHaiderSupplierConnectionNormalizer;
+use App\Support\Suppliers\AmeerEMillatSupplierConnectionNormalizer;
 use App\Support\Suppliers\IatiSupplierConnectionNormalizer;
 use App\Support\Suppliers\OneApiSupplierConnectionNormalizer;
 use App\Support\Suppliers\PiaNdcSupplierConnectionNormalizer;
@@ -104,6 +106,7 @@ class SupplierConnectionController extends Controller
             ['key' => 'airline_direct', 'label' => 'Airline Direct', 'channel' => 'Direct', 'description' => 'Direct airline API or portal integration.', 'icon' => 'AD', 'capabilities' => ['Direct'], 'readiness' => 'Custom'],
             ['key' => 'airsial', 'label' => 'AirSial', 'channel' => 'Direct', 'description' => 'AirSial direct inventory and booking channel.', 'icon' => 'AS', 'capabilities' => ['Direct', 'LCC'], 'readiness' => 'Live ready'],
             ['key' => 'al_haider', 'label' => 'Al-Haider', 'channel' => 'Group', 'description' => 'Al-Haider Umrah group ticketing and package inventory.', 'icon' => 'AH', 'capabilities' => ['Group', 'Umrah'], 'readiness' => 'Group'],
+            ['key' => 'ameer_e_millat', 'label' => 'Ameer-e-Millat', 'channel' => 'Group', 'description' => 'Ameer-e-Millat group flight inventory and post-payment booking.', 'icon' => 'AM', 'capabilities' => ['Group', 'Live Inventory', 'Booking'], 'readiness' => 'Group'],
             ['key' => 'generic', 'label' => 'Generic', 'channel' => 'Other', 'description' => 'Generic supplier connection for custom integrations.', 'icon' => 'GX', 'capabilities' => ['Custom'], 'readiness' => 'Advanced'],
         ];
 
@@ -282,11 +285,17 @@ class SupplierConnectionController extends Controller
             $payload['sabre_ndc_enabled'] = $request->boolean('sabre_ndc_enabled', false);
         }
 
-        return OneApiSupplierConnectionNormalizer::normalizePayload(
-            AirBlueSupplierConnectionNormalizer::normalizePayload(
-                PiaNdcSupplierConnectionNormalizer::normalizePayload(
-                    IatiSupplierConnectionNormalizer::normalizePayload(
-                        SabreSupplierConnectionNormalizer::normalizePayload($payload, $existing),
+        return AmeerEMillatSupplierConnectionNormalizer::normalizePayload(
+            AlHaiderSupplierConnectionNormalizer::normalizePayload(
+                OneApiSupplierConnectionNormalizer::normalizePayload(
+                    AirBlueSupplierConnectionNormalizer::normalizePayload(
+                        PiaNdcSupplierConnectionNormalizer::normalizePayload(
+                            IatiSupplierConnectionNormalizer::normalizePayload(
+                                SabreSupplierConnectionNormalizer::normalizePayload($payload, $existing),
+                                $existing
+                            ),
+                            $existing
+                        ),
                         $existing
                     ),
                     $existing

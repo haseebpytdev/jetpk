@@ -46,7 +46,7 @@ class GroupTicketingSearchController extends Controller
         $facets = $this->facetService->all();
         $bookable = $this->freshnessService->publicResultsAreBookable($inventoryFreshness, $page);
         $paginator = $bookable
-            ? $this->searchService->searchPaginated($filters)
+            ? $this->searchService->searchPaginated($this->filtersWithConfirmedSuppliers($filters, $inventoryFreshness, $page))
             : $this->emptyPaginator($filters);
         $results = $paginator->getCollection();
         $cards = $this->jsonPresenter->presentResultCards($results, $bookable);
@@ -108,7 +108,7 @@ class GroupTicketingSearchController extends Controller
 
         $bookable = $this->freshnessService->publicResultsAreBookable($inventoryFreshness, $page);
         $paginator = $bookable
-            ? $this->searchService->searchPaginated($filters)
+            ? $this->searchService->searchPaginated($this->filtersWithConfirmedSuppliers($filters, $inventoryFreshness, $page))
             : $this->emptyPaginator($filters);
         $results = $paginator->getCollection();
         $cards = $this->cardPresenter->presentMany($results, $bookable);
@@ -201,7 +201,7 @@ class GroupTicketingSearchController extends Controller
         $facets = $this->facetService->all();
         $bookable = $this->freshnessService->publicResultsAreBookable($inventoryFreshness, $page);
         $paginator = $bookable
-            ? $this->searchService->searchPaginated($filters)
+            ? $this->searchService->searchPaginated($this->filtersWithConfirmedSuppliers($filters, $inventoryFreshness, $page))
             : $this->emptyPaginator($filters);
         $results = $paginator->getCollection();
         $cards = $this->cardPresenter->presentMany($results, $bookable);
@@ -231,6 +231,32 @@ class GroupTicketingSearchController extends Controller
             'countLabel' => $this->countLabel($total, $shown, $bookable),
             'groupPageContent' => $this->pageRenderer->viewModel(ClientPageKeys::GROUP_SEARCH)['content'] ?? [],
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     * @param  array<string, mixed>|null  $inventoryFreshness
+     * @return array<string, mixed>
+     */
+    private function filtersWithConfirmedSuppliers(array $filters, ?array $inventoryFreshness, int $page): array
+    {
+        if (! GroupTicketingLivePolicy::publicResultsMustBeProviderConfirmed()) {
+            return $filters;
+        }
+
+        $confirmed = is_array($inventoryFreshness)
+            ? ($inventoryFreshness['confirmed_suppliers'] ?? [])
+            : [];
+
+        if ($page > 1) {
+            $confirmed = $this->freshnessService->getSessionConfirmedSuppliers();
+        }
+
+        if ($confirmed !== []) {
+            $filters['confirmed_suppliers'] = $confirmed;
+        }
+
+        return $filters;
     }
 
     /**
