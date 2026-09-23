@@ -18,6 +18,8 @@ class AiEmbedSecurityTest extends TestCase
 
     private const PARENT = 'https://client.example.com';
 
+    private const ENTRY_PATH = 'test-embed-path-token12';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -32,6 +34,7 @@ class AiEmbedSecurityTest extends TestCase
         config(array_merge([
             'ai_embed.enabled' => true,
             'ai_embed.session_ttl_seconds' => 3600,
+            'ai_embed.entry_paths.jetpakistan' => self::ENTRY_PATH,
             'ai_embed.tenants.jetpakistan.allowed_origins' => [self::PARENT, 'https://www.client.example.com'],
             'ota.ai_assistant.mode' => 'public',
             'ota.ai_assistant.enabled' => true,
@@ -56,6 +59,11 @@ class AiEmbedSecurityTest extends TestCase
         return (string) $response->json('token');
     }
 
+    private function embedPageUrl(?string $path = null): string
+    {
+        return '/integrations/ai/'.($path ?? self::ENTRY_PATH);
+    }
+
     public function test_homepage_still_sends_sameorigin_x_frame_options(): void
     {
         $this->enableEmbed();
@@ -69,7 +77,7 @@ class AiEmbedSecurityTest extends TestCase
     {
         $this->enableEmbed();
 
-        $response = $this->get('/ai/embed/jetpakistan');
+        $response = $this->get($this->embedPageUrl());
 
         $response->assertOk();
         $this->assertFalse($response->headers->has('X-Frame-Options'));
@@ -79,11 +87,44 @@ class AiEmbedSecurityTest extends TestCase
         $this->assertStringNotContainsString('*', $csp);
     }
 
-    public function test_unknown_tenant_returns_not_found(): void
+    public function test_wrong_private_path_returns_not_found_with_sameorigin(): void
     {
         $this->enableEmbed();
 
-        $this->get('/ai/embed/unknown-brand')->assertNotFound();
+        $response = $this->get('/integrations/ai/wrong-token-value');
+
+        $response->assertNotFound();
+        $this->assertSame('SAMEORIGIN', $response->headers->get('X-Frame-Options'));
+        $this->assertFalse($response->headers->has('Content-Security-Policy'));
+    }
+
+    public function test_legacy_predictable_embed_path_returns_not_found(): void
+    {
+        $this->enableEmbed();
+
+        $this->get('/ai/embed/jetpakistan')->assertNotFound();
+    }
+
+    public function test_embed_path_not_exposed_in_public_config_or_sitemap(): void
+    {
+        $this->enableEmbed();
+
+        $config = $this->getJson('/api/public/content/config')->assertOk()->json();
+        $encoded = json_encode($config);
+        $this->assertIsString($encoded);
+        $this->assertStringNotContainsString(self::ENTRY_PATH, $encoded);
+        $this->assertStringNotContainsString('/integrations/ai/', $encoded);
+
+        $sitemap = $this->getJson('/api/public/content/sitemap-routes')->assertOk()->json('routes') ?? [];
+        $paths = collect($sitemap)->pluck('path')->all();
+        $this->assertNotContains('/integrations/ai/'.self::ENTRY_PATH, $paths);
+        $this->assertNotContains('/ai/embed/jetpakistan', $paths);
+    }
+
+    public function test_unknown_tenant_api_returns_not_found(): void
+    {
+        $this->enableEmbed();
+
         $this->postJson('/api/embed/ai/unknown-brand/session')->assertNotFound();
     }
 
@@ -91,10 +132,18 @@ class AiEmbedSecurityTest extends TestCase
     {
         config([
             'ai_embed.enabled' => false,
+            'ai_embed.entry_paths.jetpakistan' => self::ENTRY_PATH,
             'ai_embed.tenants.jetpakistan.allowed_origins' => [self::PARENT],
         ]);
 
-        $this->get('/ai/embed/jetpakistan')->assertNotFound();
+        $this->get($this->embedPageUrl())->assertNotFound();
+    }
+
+    public function test_embed_missing_path_config_returns_not_found(): void
+    {
+        $this->enableEmbed(['ai_embed.entry_paths.jetpakistan' => '']);
+
+        $this->get($this->embedPageUrl())->assertNotFound();
     }
 
     public function test_session_rejects_unknown_parent_origin(): void
@@ -204,6 +253,8 @@ class AiEmbedSecurityTest extends TestCase
         $this->assertNull($service->normalizeOrigin('*'));
         $this->assertNull($service->normalizeOrigin('http://client.example.com'));
         $this->assertSame(self::PARENT, $service->normalizeOrigin(self::PARENT));
+        $this->assertNull($service->normalizeEntryPathToken('short'));
+        $this->assertSame(self::ENTRY_PATH, $service->normalizeEntryPathToken(self::ENTRY_PATH));
     }
 
     public function test_public_ai_routes_remain_unchanged_without_embed_headers(): void

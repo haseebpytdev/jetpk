@@ -12,6 +12,8 @@ final class AiEmbedSessionService
 {
     private const CACHE_PREFIX = 'ai_embed_sess:';
 
+    private const ENTRY_PATH_PATTERN = '/^[A-Za-z0-9_-]{16,128}$/';
+
     /**
      * @return array{token: string, expires_at: string, tenant: string, parent_origin: string}|null
      */
@@ -168,9 +170,46 @@ final class AiEmbedSessionService
             return false;
         }
 
+        if ($this->configuredEntryPath($tenant) === null) {
+            return false;
+        }
+
         $allowed = config("ai_embed.tenants.{$tenant}.allowed_origins", []);
 
         return is_array($allowed) && $allowed !== [];
+    }
+
+    public function normalizeEntryPathToken(string $token): ?string
+    {
+        $token = trim($token);
+        if ($token === '' || preg_match(self::ENTRY_PATH_PATTERN, $token) !== 1) {
+            return null;
+        }
+
+        return $token;
+    }
+
+    public function configuredEntryPath(string $tenant): ?string
+    {
+        $raw = trim((string) config("ai_embed.entry_paths.{$tenant}", ''));
+
+        return $this->normalizeEntryPathToken($raw);
+    }
+
+    public function matchesEntryPath(string $tenant, string $pathToken): bool
+    {
+        $configured = $this->configuredEntryPath($tenant);
+        $candidate = $this->normalizeEntryPathToken($pathToken);
+        if ($configured === null || $candidate === null) {
+            return false;
+        }
+
+        return hash_equals($configured, $candidate);
+    }
+
+    public function isEmbedPageAvailable(string $tenant): bool
+    {
+        return $this->isEnabledForTenant($tenant);
     }
 
     private function cacheKey(string $rawToken): string

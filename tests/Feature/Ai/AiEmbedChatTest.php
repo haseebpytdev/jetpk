@@ -20,6 +20,8 @@ class AiEmbedChatTest extends TestCase
 
     private const PARENT = 'https://client.example.com';
 
+    private const ENTRY_PATH = 'test-embed-path-token12';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -34,6 +36,7 @@ class AiEmbedChatTest extends TestCase
         config(array_merge([
             'ai_embed.enabled' => true,
             'ai_embed.session_ttl_seconds' => 3600,
+            'ai_embed.entry_paths.jetpakistan' => self::ENTRY_PATH,
             'ai_embed.tenants.jetpakistan.allowed_origins' => [self::PARENT],
             'ota.ai_assistant.mode' => 'public',
             'ota.ai_assistant.enabled' => true,

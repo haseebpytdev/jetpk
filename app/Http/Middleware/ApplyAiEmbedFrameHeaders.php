@@ -9,6 +9,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ApplyAiEmbedFrameHeaders
 {
+    private const TENANT = 'jetpakistan';
+
     public function __construct(
         private readonly AiEmbedSessionService $embedSessions,
     ) {}
@@ -18,12 +20,16 @@ class ApplyAiEmbedFrameHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $pathToken = (string) $request->route('pathToken', '');
+        if (! $this->embedSessions->matchesEntryPath(self::TENANT, $pathToken)) {
+            abort(404);
+        }
+
         $request->attributes->set('ai_embed_framing', true);
 
         $response = $next($request);
 
-        $tenant = (string) $request->route('tenant', '');
-        $allowed = config("ai_embed.tenants.{$tenant}.allowed_origins", []);
+        $allowed = config('ai_embed.tenants.'.self::TENANT.'.allowed_origins', []);
         $directives = [];
 
         if (is_array($allowed)) {

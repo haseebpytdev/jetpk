@@ -34,7 +34,11 @@ PATHSPECS=(
   app/Enums/CustomerQueryStatus.php
   app/Http/Controllers/Admin/AiAssistantStatusController.php
   app/Http/Controllers/Admin/AdminSettingsHubController.php
+  app/Http/Controllers/Ai
+  app/Http/Controllers/Api/EmbedAiAssistantController.php
   app/Http/Controllers/Api/PublicAiAssistantController.php
+  app/Http/Middleware/ApplyAiEmbedFrameHeaders.php
+  app/Http/Middleware/AuthenticateAiEmbedSession.php
   app/Http/Middleware/ApplyAiLabCanaryFaultHeader.php
   app/Models/AiAssistantSetting.php
   app/Models/AiConversation.php
@@ -49,9 +53,13 @@ PATHSPECS=(
   bootstrap/app.php
   config/ota.php
   config/ai_lab.php
+  config/ai_embed.php
   database/migrations/2026_09_01_010000_create_ai_conversations_tables.php
   database/migrations/2026_09_14_100000_create_ai_assistant_settings_table.php
   database/migrations/2026_09_14_200000_create_customer_queries_table.php
+  public/css/ai-embed.css
+  public/js/ai-embed.js
+  resources/views/ai
   resources/views/dashboard/admin/settings/ai-assistant.blade.php
   routes/web.php
   routes/admin.php

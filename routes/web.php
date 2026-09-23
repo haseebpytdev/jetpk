@@ -92,9 +92,9 @@ Route::post('/api/public/ai/handoff', [PublicAiAssistantController::class, 'requ
     ->middleware('throttle:10,1')
     ->name('api.public.ai.handoff');
 
-Route::get('/ai/embed/{tenant}', [AiEmbedPageController::class, 'show'])
+Route::get('/integrations/ai/{pathToken}', [AiEmbedPageController::class, 'show'])
     ->middleware(['throttle:60,1', 'ai.embed.frame'])
-    ->where('tenant', 'jetpakistan')
+    ->where('pathToken', '[A-Za-z0-9_-]+')
     ->name('ai.embed.show');
 
 Route::prefix('api/embed/ai/{tenant}')

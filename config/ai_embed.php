@@ -9,6 +9,14 @@ return [
 
     'parent_origin_header' => 'X-JP-AI-Embed-Parent-Origin',
 
+    /*
+     * Unlisted iframe entry slug for Embed-01 (JetPakistan only).
+     * High-entropy, URL-safe value from AI_EMBED_JETPAKISTAN_PATH — not a security boundary.
+     */
+    'entry_paths' => [
+        'jetpakistan' => (string) env('AI_EMBED_JETPAKISTAN_PATH', ''),
+    ],
+
     'tenants' => [
         'jetpakistan' => [
             'display_name' => 'JetPakistan',
