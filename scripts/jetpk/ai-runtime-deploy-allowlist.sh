@@ -2,6 +2,10 @@
 # Sourceable Ask JetPakistan AI runtime deploy allowlist (repo-relative paths).
 # shellcheck disable=SC2034
 AI_RUNTIME_DEPLOY_PATHSPECS=(
+  app/Console/Commands/AiEmbedKeyRotateCommand.php
+  app/Console/Commands/AiEmbedTenantStatusCommand.php
+  app/Console/Commands/AiEmbedTenantSyncJetPakistanCommand.php
+  app/Console/Commands/AiEmbedTenantUpsertCommand.php
   app/Contracts/Ai
   app/Data/Ai
   app/Enums/CustomerQueryStatus.php
@@ -16,9 +20,13 @@ AI_RUNTIME_DEPLOY_PATHSPECS=(
   app/Http/Middleware/SecurityHeaders.php
   app/Models/AiAssistantSetting.php
   app/Models/AiConversation.php
+  app/Models/AiEmbedAuditEvent.php
+  app/Models/AiEmbedTenant.php
+  app/Models/AiEmbedTenantKey.php
   app/Models/AiHandoffAudit.php
   app/Models/AiMessage.php
   app/Models/CustomerQuery.php
+  app/Providers/AiEmbedServiceProvider.php
   app/Providers/AiServiceProvider.php
   app/Services/Ai
   app/Services/PublicContent/PublicContentApiPresenter.php
@@ -31,6 +39,7 @@ AI_RUNTIME_DEPLOY_PATHSPECS=(
   database/migrations/2026_09_01_010000_create_ai_conversations_tables.php
   database/migrations/2026_09_14_100000_create_ai_assistant_settings_table.php
   database/migrations/2026_09_14_200000_create_customer_queries_table.php
+  database/migrations/2026_09_23_140000_create_ai_embed_tenant_registry_tables.php
   public/css/ai-embed.css
   public/js/ai-embed.js
   resources/views/ai
