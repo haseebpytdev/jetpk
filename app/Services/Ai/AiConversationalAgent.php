@@ -245,7 +245,7 @@ final class AiConversationalAgent
     }
 
     /**
-     * Fail-closed grounding: paraphrases OK; invented policies/fees/guarantees rejected.
+     * Fail-closed grounding: paraphrases OK; unsupported company facts rejected.
      *
      * @param  list<array{slug?: string, title?: string, excerpt?: string}>  $sources
      */
@@ -266,7 +266,7 @@ final class AiConversationalAgent
             return false;
         }
 
-        // Company-specific claim families — must also appear in approved source text.
+        // Policy / commercial claim families — must also appear in approved source text.
         $gatedPatterns = [
             '/\brefunds?\b/u',
             '/\bguarantees?\b/u',
@@ -288,7 +288,109 @@ final class AiConversationalAgent
             }
         }
 
+        // Clause-level: JetPakistan-specific factual claims need source support.
+        $sentences = preg_split('/(?<=[.!?])\s+/u', $reply) ?: [$reply];
+        foreach ($sentences as $sentence) {
+            $clause = mb_strtolower(trim((string) $sentence));
+            if ($clause === '' || $this->isGroundingConversationalGlue($clause)) {
+                continue;
+            }
+            if (! $this->isCompanySpecificFactualClause($clause)) {
+                continue;
+            }
+            if (! $this->clauseSupportedByApprovedCorpus($clause, $corpus)) {
+                return false;
+            }
+        }
+
         return true;
+    }
+
+    private function isGroundingConversationalGlue(string $clauseLower): bool
+    {
+        // Pure glue without company facts may be ignored.
+        if (preg_match('/\bjetpakistan\b/u', $clauseLower) === 1) {
+            return false;
+        }
+
+        return preg_match(
+            '/^(sure|okay|ok|thanks|thank you|here\'?s( the)?( short)?( version)?|i can help( with that)?|let me know|of course)[.!]?$/u',
+            $clauseLower
+        ) === 1;
+    }
+
+    private function isCompanySpecificFactualClause(string $clauseLower): bool
+    {
+        if (preg_match('/\bjetpakistan\b/u', $clauseLower) === 1) {
+            return true;
+        }
+
+        // First-person service/product assertions in a grounded JP knowledge turn.
+        return preg_match(
+            '/\b(we|our)\s+(offer|offers|provide|provides|operate|operates|issue|issues|own|owns|have|has|include|includes)\b/u',
+            $clauseLower
+        ) === 1;
+    }
+
+    private function clauseSupportedByApprovedCorpus(string $clauseLower, string $corpusLower): bool
+    {
+        // Named services/products not in corpus → immediate reject.
+        $serviceNouns = [
+            'hotel', 'hotels', 'lounge', 'lounges', 'visa', 'visas',
+            'fleet', 'aircraft', 'airline', 'airlines', 'cruise', 'cruises',
+            'rail', 'bus', 'rental', 'insurance', 'car hire',
+        ];
+        foreach ($serviceNouns as $noun) {
+            if (preg_match('/\b'.preg_quote($noun, '/').'\b/u', $clauseLower) === 1
+                && preg_match('/\b'.preg_quote($noun, '/').'\b/u', $corpusLower) !== 1) {
+                return false;
+            }
+        }
+
+        // Numeric facts in company clauses must appear in corpus.
+        if (preg_match_all('/\b\d+(?:\.\d+)?\b/u', $clauseLower, $nums) > 0) {
+            foreach ($nums[0] as $num) {
+                if (! str_contains($corpusLower, $num)) {
+                    return false;
+                }
+            }
+        }
+
+        $stop = [
+            'that', 'this', 'with', 'from', 'have', 'help', 'helps', 'helping', 'customers', 'customer',
+            'online', 'platform', 'agency', 'travel', 'also', 'offers', 'offer', 'provides', 'provide',
+            'their', 'them', 'than', 'then', 'into', 'about', 'which', 'while', 'where', 'when',
+            'your', 'ours', 'does', 'doesn', 'just', 'only', 'more', 'most', 'such', 'ready',
+            'continue', 'general', 'questions', 'compare', 'options', 'available', 'receive', 'get',
+            'jetpakistan',
+        ];
+
+        $tokens = preg_split('/[^a-z0-9]+/u', $clauseLower, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $content = [];
+        foreach ($tokens as $token) {
+            if (mb_strlen($token) < 4) {
+                continue;
+            }
+            if (in_array($token, $stop, true)) {
+                continue;
+            }
+            $content[] = $token;
+        }
+
+        if ($content === []) {
+            // Company claim with no sourceable content nouns — fail closed.
+            return false;
+        }
+
+        $matched = 0;
+        foreach ($content as $token) {
+            if (str_contains($corpusLower, $token)) {
+                $matched++;
+            }
+        }
+
+        // Conservative: require strong lexical support in approved corpus.
+        return ($matched / count($content)) >= 0.6;
     }
 
     /**

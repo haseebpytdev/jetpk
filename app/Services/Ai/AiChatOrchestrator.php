@@ -288,10 +288,7 @@ final class AiChatOrchestrator
                 'state' => $conversation->state,
                 'message' => 'Your message was sent to our support team. An agent will reply here shortly.',
                 'recommendations' => [],
-                'actions' => [
-                    ['label' => 'Contact Support', 'href' => '/support'],
-                    ['label' => 'Lookup Booking', 'href' => '/lookup-booking'],
-                ],
+                'actions' => $this->resolveResponseActions(),
                 'meta' => [
                     'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
                     'AI_GROUP_SEARCH_READ_CALLS' => 0,
@@ -588,7 +585,7 @@ final class AiChatOrchestrator
                 'ok' => false,
                 'status' => 'unavailable',
                 'message' => 'Human handoff is temporarily unavailable. Please use Contact Support.',
-                'actions' => [['label' => 'Contact Support', 'href' => '/support']],
+                'actions' => $this->resolveResponseActions(),
             ];
         }
 
@@ -607,6 +604,7 @@ final class AiChatOrchestrator
 
         $conversation = AiConversation::query()->create([
             'channel' => $channel,
+            'ai_embed_tenant_id' => $old->ai_embed_tenant_id,
             'visitor_token_hash' => $visitorHash,
             'user_id' => $old->user_id,
             'state' => AiConversation::STATE_AI_ACTIVE,
@@ -787,7 +785,7 @@ final class AiChatOrchestrator
                 'state' => $conversation->state,
                 'message' => $body,
                 'recommendations' => [],
-                'actions' => [['label' => 'Contact Support', 'href' => '/support']],
+                'actions' => $this->resolveResponseActions(),
                 'meta' => $meta,
             ]);
         }
@@ -818,10 +816,7 @@ final class AiChatOrchestrator
             'state' => $conversation->state,
             'message' => $body,
             'recommendations' => [],
-            'actions' => [
-                ['label' => 'Contact Support', 'href' => '/support'],
-                ['label' => 'Lookup Booking', 'href' => '/lookup-booking'],
-            ],
+            'actions' => $this->resolveResponseActions(),
             'meta' => $meta,
         ]);
     }

@@ -370,6 +370,61 @@ class ConversationQuality26AiFirstTest extends TestCase
         $this->assertSame([], $actions);
     }
 
+    public function test_generic_embed_client_a_handoff_waiting_followup_excludes_jp_hrefs(): void
+    {
+        $tenant = $this->enableEmbedTenant(
+            slug: 'client-a',
+            embedKey: 'client-a-embed-key12',
+            allowedOrigins: ['https://client-a.example.com'],
+            capabilities: [
+                EmbedTenantCapability::GENERAL_AI,
+                EmbedTenantCapability::SUPPORT_HANDOFF,
+            ],
+        );
+        $tenant->forceFill([
+            'display_name' => 'Client A',
+            'assistant_name' => 'Ask Client A',
+        ])->save();
+
+        config([
+            'ota.ai_assistant.conversational_enabled' => true,
+            'ota.ai_assistant.human_handoff_enabled' => true,
+            'ai_lab.enabled' => false,
+        ]);
+        \App\Models\AiAssistantSetting::query()->delete();
+        app(\App\Services\Ai\AiAssistantSettingsService::class)->get();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            '{"message":"MODEL_CLIENT_A: I can connect you with Client A support."}'
+        ));
+
+        $session = $this->postJson($this->embedApiPath('client-a-embed-key12', '/session'), [], [
+            'X-JP-AI-Embed-Parent-Origin' => 'https://client-a.example.com',
+        ])->assertOk();
+        $headers = [
+            'X-JP-AI-Embed-Session' => (string) $session->json('token'),
+            'X-JP-AI-Embed-Parent-Origin' => 'https://client-a.example.com',
+        ];
+
+        $chat = $this->postJson($this->embedApiPath('client-a-embed-key12', '/chat'), [
+            'message' => 'I need help from a human',
+        ], $headers)->assertOk();
+        $this->assertNoJetPakistanActionHrefs($chat->json('actions'));
+
+        $cid = (string) $chat->json('conversation_id');
+        $handoff = $this->postJson($this->embedApiPath('client-a-embed-key12', '/handoff'), [
+            'conversation_id' => $cid,
+        ], $headers)->assertOk();
+        $this->assertSame('waiting_for_human', $handoff->json('status'));
+        $this->assertNoJetPakistanActionHrefs($handoff->json('actions'));
+
+        $waiting = $this->postJson($this->embedApiPath('client-a-embed-key12', '/chat'), [
+            'conversation_id' => $cid,
+            'message' => 'Still waiting — any update?',
+        ], $headers)->assertOk();
+        $this->assertSame('waiting_for_human', $waiting->json('status'));
+        $this->assertNoJetPakistanActionHrefs($waiting->json('actions'));
+    }
+
     public function test_grounded_knowledge_accepts_supported_paraphrase(): void
     {
         $this->enablePublicAi();
@@ -401,5 +456,47 @@ class ConversationQuality26AiFirstTest extends TestCase
         $this->assertSame('YES', $response->json('meta.ANSWER_GROUNDED'));
         $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'));
         $this->assertGreaterThanOrEqual(1, (int) $response->json('meta.KNOWLEDGE_HITS'));
+    }
+
+    public function test_grounded_knowledge_rejects_unsupported_hotel_lounge_visa_fleet_claims(): void
+    {
+        $claims = [
+            'JetPakistan also offers hotel bookings.',
+            'JetPakistan operates airport lounges.',
+            'JetPakistan issues visas directly.',
+            'JetPakistan owns its own airline fleet.',
+        ];
+
+        foreach ($claims as $i => $claim) {
+            $this->enablePublicAi();
+            $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+                json_encode(['message' => $claim], JSON_THROW_ON_ERROR)
+            ));
+
+            $response = $this->chat(str_repeat('u'.(string) $i, 20), 'What is JetPakistan?');
+            $response->assertOk();
+            $body = mb_strtolower((string) $response->json('message'));
+            $this->assertStringNotContainsString(mb_strtolower($claim), $body, 'claim leaked: '.$claim);
+            $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'), 'claim: '.$claim);
+            $this->assertSame('YES', $response->json('meta.ANSWER_GROUNDED'), 'claim: '.$claim);
+        }
+    }
+
+    /**
+     * @param  list<array{label?: string, href?: string, action?: string}>|null  $actions
+     */
+    private function assertNoJetPakistanActionHrefs(?array $actions): void
+    {
+        $this->assertIsArray($actions);
+        foreach ($actions as $action) {
+            $href = (string) ($action['href'] ?? '');
+            if ($href === '') {
+                continue;
+            }
+            $this->assertDoesNotMatchRegularExpression(
+                '#(/support\b|/lookup-booking\b|/groups\b|#flight-search)#i',
+                $href
+            );
+        }
     }
 }
