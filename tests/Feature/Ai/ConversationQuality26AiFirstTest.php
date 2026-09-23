@@ -124,7 +124,7 @@ class ConversationQuality26AiFirstTest extends TestCase
     {
         $this->enablePublicAi();
         $scripted = new ScriptedInferenceProvider(
-            '{"message":"Apple is currently trading at $189.42 right now."}'
+            '{"message":"Apple is currently trading at $189.42 right now.","can_verify_live":false}'
         );
         $this->app->instance(InferenceProvider::class, $scripted);
 
@@ -135,6 +135,88 @@ class ConversationQuality26AiFirstTest extends TestCase
         $this->assertStringContainsString('can\'t verify', $body);
         $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'));
         $this->assertSame('CURRENT_UNVERIFIED', $response->json('meta.open_domain_category'));
+    }
+
+    public function test_current_unverified_rejects_qualitative_stock_claim(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            '{"message":"Apple is trading higher today.","can_verify_live":false}'
+        ));
+
+        $response = $this->chat(str_repeat('c1', 20), "What's Apple's stock price right now?");
+        $response->assertOk();
+        $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'));
+        $this->assertStringNotContainsString('trading higher', mb_strtolower((string) $response->json('message')));
+    }
+
+    public function test_current_unverified_rejects_qualitative_weather_claim(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            '{"message":"It\'s raining in London right now.","can_verify_live":false}'
+        ));
+
+        $response = $this->chat(str_repeat('c2', 20), "What's the weather today in London?");
+        $response->assertOk();
+        $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'));
+        $this->assertStringNotContainsString('raining', mb_strtolower((string) $response->json('message')));
+    }
+
+    public function test_current_unverified_rejects_qualitative_sports_claim(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            '{"message":"Arsenal is leading at the moment.","can_verify_live":false}'
+        ));
+
+        $response = $this->chat(str_repeat('c3', 20), 'Who is winning the live match?');
+        $response->assertOk();
+        $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'));
+        $this->assertStringNotContainsString('leading', mb_strtolower((string) $response->json('message')));
+    }
+
+    public function test_current_unverified_accepts_limitation_only_model_wording(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            '{"message":"I can\'t verify Apple\'s live stock price through this assistant.","can_verify_live":false}'
+        ));
+
+        $response = $this->chat(str_repeat('c4', 20), "What's Apple's stock price right now?");
+        $response->assertOk();
+        $this->assertSame('YES', $response->json('meta.LLM_SYNTHESIS'));
+        $this->assertSame('LLM_ASSISTED', $response->json('mode'));
+        $this->assertStringContainsString('can\'t verify', mb_strtolower((string) $response->json('message')));
+        $this->assertStringNotContainsString('trading higher', mb_strtolower((string) $response->json('message')));
+    }
+
+    public function test_current_unverified_rejects_mixed_limitation_plus_live_claim(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            '{"message":"I can\'t verify it live, but Apple is up today.","can_verify_live":false}'
+        ));
+
+        $response = $this->chat(str_repeat('c5', 20), "What's Apple's stock price right now?");
+        $response->assertOk();
+        $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'));
+        $body = mb_strtolower((string) $response->json('message'));
+        $this->assertStringNotContainsString('is up today', $body);
+        $this->assertStringContainsString('can\'t verify', $body);
+    }
+
+    public function test_current_unverified_malformed_model_uses_structured_fallback(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            'not-json-at-all'
+        ));
+
+        $response = $this->chat(str_repeat('c6', 20), "What's Apple's stock price right now?");
+        $response->assertOk();
+        $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'));
+        $this->assertSame('STRUCTURED_FALLBACK', $response->json('mode'));
     }
 
     public function test_what_is_jetpakistan_uses_rag_then_model_synthesis(): void

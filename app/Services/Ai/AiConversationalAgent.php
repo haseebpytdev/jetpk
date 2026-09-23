@@ -123,6 +123,10 @@ final class AiConversationalAgent
                 'redirect_only_to_enabled_capabilities' => true,
                 'never_mention_other_brands' => true,
                 'no_live_unverified_facts' => $category === 'CURRENT_UNVERIFIED',
+                'current_unverified_message_must_be_limitation_only' => $category === 'CURRENT_UNVERIFIED',
+                'prefer_schema' => $category === 'CURRENT_UNVERIFIED'
+                    ? ['message' => 'string', 'can_verify_live' => false]
+                    : ['message' => 'string'],
             ],
         ];
 
@@ -135,13 +139,24 @@ final class AiConversationalAgent
             return null;
         }
 
-        $reply = $this->extractMessage((string) ($result['content'] ?? ''));
-        if ($reply === null || $reply === '') {
+        $content = (string) ($result['content'] ?? '');
+        $parsed = $this->decodeJsonObject($content);
+        $reply = is_array($parsed)
+            ? trim((string) ($parsed['message'] ?? ''))
+            : (string) ($this->extractMessage($content) ?? '');
+
+        if ($reply === '') {
             return null;
         }
 
-        if ($category === 'CURRENT_UNVERIFIED' && $this->looksLikeFabricatedLiveFact($reply)) {
-            return null;
+        if ($category === 'CURRENT_UNVERIFIED') {
+            // Prefer schema flag but never trust it alone — fail closed on uncertain text.
+            if (is_array($parsed) && array_key_exists('can_verify_live', $parsed) && $parsed['can_verify_live'] !== false) {
+                return null;
+            }
+            if (! $this->isAcceptableCurrentUnverifiedReply($reply)) {
+                return null;
+            }
         }
 
         if (strcasecmp($brand, 'JetPakistan') !== 0
@@ -280,13 +295,84 @@ final class AiConversationalAgent
         return $trimmed;
     }
 
-    private function looksLikeFabricatedLiveFact(string $reply): bool
+    /**
+     * CURRENT_UNVERIFIED fail-closed gate: require a limitation cue and reject live assertions.
+     */
+    private function isAcceptableCurrentUnverifiedReply(string $reply): bool
     {
-        $lower = mb_strtolower($reply);
-        if (preg_match('/\$\s?\d|\b\d{2,}\s*(usd|pkr|points|degrees)\b/u', $lower) === 1) {
+        $lower = mb_strtolower(trim($reply));
+        if ($lower === '') {
+            return false;
+        }
+
+        if (! $this->hasCurrentUnverifiedLimitationCue($lower)) {
+            return false;
+        }
+
+        if ($this->assertsUnsupportedLiveState($lower)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function hasCurrentUnverifiedLimitationCue(string $lower): bool
+    {
+        return preg_match(
+            '/\b(can\'?t|cannot|could not|unable to)\s+(verify|confirm|check|access)\b'.
+            '|\b(don\'?t|do not)\s+have\s+(live|current|real[- ]?time)\b'.
+            '|\blive\s+(data|market|scores?|prices?|weather|information)\s+(is\s+)?(not|un)available\b'.
+            '|\bno\s+(approved\s+)?(live|current|real[- ]?time)\b'.
+            '|\bcannot\s+verify\s+(live|current)\b'.
+            '|\bwithout\s+(an\s+)?approved\s+live\b'.
+            '|\b(live|current)\s+(data|information)\s+isn\'?t\s+available\b/u',
+            $lower
+        ) === 1;
+    }
+
+    private function assertsUnsupportedLiveState(string $lower): bool
+    {
+        // Numeric / priced live facts.
+        if (preg_match('/\$\s?\d|\b\d{2,}\s*(usd|pkr|points|degrees|°)\b/u', $lower) === 1) {
             return true;
         }
         if (preg_match('/\b(currently|right now|as of today)\b.*\b\d/u', $lower) === 1) {
+            return true;
+        }
+
+        // Qualitative market / stock direction.
+        if (preg_match(
+            '/\b(trading\s+(higher|lower)|is\s+(up|down)\s+today|rising|falling|gaining|losing)\b'.
+            '|\b(stock|share|bitcoin|crypto|market)\b.{0,40}\b(up|down|higher|lower|rally|plunge)\b/u',
+            $lower
+        ) === 1) {
+            return true;
+        }
+
+        // Weather state claims.
+        if (preg_match(
+            '/\b(raining|rainy|sunny|snowing|cloudy|stormy)\b'.
+            '|\b(hot|cold|warm|humid)\b.{0,20}\b(right now|today|currently)\b'.
+            '|\b(right now|currently|today)\b.{0,30}\b(raining|sunny|snowing|cloudy|hot|cold)\b/u',
+            $lower
+        ) === 1) {
+            return true;
+        }
+
+        // Sports live state.
+        if (preg_match(
+            '/\b(leading|winning|ahead|trailing|drew)\b'.
+            '|\bscore\s+is\b|\bwon\s+today\b|\bjust\s+scored\b/u',
+            $lower
+        ) === 1) {
+            return true;
+        }
+
+        // Breaking / just-happened news.
+        if (preg_match(
+            '/\b(has\s+just\s+announced|just\s+announced|breaking\s+news|has\s+happened\s+today|happened\s+today)\b/u',
+            $lower
+        ) === 1) {
             return true;
         }
 

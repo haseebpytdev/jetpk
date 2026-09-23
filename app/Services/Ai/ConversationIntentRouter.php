@@ -99,6 +99,22 @@ final class ConversationIntentRouter
             return null;
         }
 
+        // Safety / live-data gates before travel-intent short-circuit (e.g. "weather today in London").
+        if (preg_match('/\b(diagnos|prescription|lawsuit|invest(ment)? advice|how to make a bomb|suicide|self[- ]harm)\b/u', $lower) === 1) {
+            return 'HIGH_RISK';
+        }
+
+        if (preg_match(
+            '/\b(stock price|share price|breaking news|live score|live match|who won|who is winning)\b'.
+            '|\b(today\'?s|current)\s+weather\b'.
+            '|\bweather\s+(today|now|tomorrow|in)\b'.
+            '|\btemperature in\b|\bcurrent (president|prime minister)\b'.
+            '|\b(bitcoin|crypto).{0,20}\b(price|today)\b/u',
+            $lower
+        ) === 1) {
+            return 'CURRENT_UNVERIFIED';
+        }
+
         if ($this->isJetPakistanKnowledgeQuestion($lower) || $this->hasStrongActionableIntent($lower)) {
             return null;
         }
@@ -107,14 +123,6 @@ final class ConversationIntentRouter
         if (preg_match('/\b(jetpakistan|support|contact|refund|baggage|payment|booking help|faq)\b/u', $lower) === 1
             && preg_match('/^(how|what|where|when|can)\b/u', $lower) === 1) {
             return null;
-        }
-
-        if (preg_match('/\b(diagnos|prescription|lawsuit|invest(ment)? advice|how to make a bomb|suicide|self[- ]harm)\b/u', $lower) === 1) {
-            return 'HIGH_RISK';
-        }
-
-        if (preg_match('/\b(stock price|share price|breaking news|live score|who won|weather (today|now|tomorrow)|temperature in|current (president|prime minister))\b/u', $lower) === 1) {
-            return 'CURRENT_UNVERIFIED';
         }
 
         if (preg_match('/\b(tell me a joke|i(\'m| am) bored|how are you|long day|what\'?s up)\b/u', $lower) === 1) {

@@ -1,0 +1,15 @@
+R4 regression (CURRENT_FACT_GATE)
+Date: 2026-09-24
+
+ConversationQuality26AiFirstTest: 15 passed / 15 (74 assertions)
+ConversationQuality26Test + PublicAiAssistantTest + ConversationalLeadCaptureTest: 60 passed / 60 (317 assertions)
+AiEmbedChatTest + AiEmbedSecurityTest + Embed/TenantIsolationTest + Embed/EmbedKnowledgeIsolationTest: 37 passed / 37 (125 assertions)
+
+TOTAL: 112 passed / 112
+FAILURES: 0
+ERRORS: 0
+
+Artifacts:
+- r4-aifirst.xml
+- r4-batch2.xml
+- r4-batch3.xml
