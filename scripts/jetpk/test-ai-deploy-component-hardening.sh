@@ -138,6 +138,7 @@ grep -q 'app/Evil/hack.php' <<< "${CHANGED}" && fail "G_unauthorized_path_leaked
 # Test H: Embed-02 runtime registry/ops files remain in the protected deploy allowlist.
 ALLOWLIST_FILE="${SCRIPT_DIR}/ai-runtime-deploy-allowlist.sh"
 for required in \
+  ai-assistant/knowledge \
   app/Console/Commands/AiEmbedKeyRotateCommand.php \
   app/Console/Commands/AiEmbedTenantStatusCommand.php \
   app/Console/Commands/AiEmbedTenantSyncJetPakistanCommand.php \
