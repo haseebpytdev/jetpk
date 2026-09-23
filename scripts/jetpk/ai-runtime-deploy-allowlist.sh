@@ -2,6 +2,7 @@
 # Sourceable Ask JetPakistan AI runtime deploy allowlist (repo-relative paths).
 # shellcheck disable=SC2034
 AI_RUNTIME_DEPLOY_PATHSPECS=(
+  ai-assistant/knowledge
   app/Console/Commands/AiEmbedKeyRotateCommand.php
   app/Console/Commands/AiEmbedTenantStatusCommand.php
   app/Console/Commands/AiEmbedTenantSyncJetPakistanCommand.php
