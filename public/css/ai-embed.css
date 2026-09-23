@@ -1,0 +1,244 @@
+:root {
+    color-scheme: light;
+    --jp-bg: #f8fafc;
+    --jp-panel: #ffffff;
+    --jp-border: #e2e8f0;
+    --jp-text: #0f172a;
+    --jp-muted: #64748b;
+    --jp-brand: #0b3d91;
+    --jp-brand-soft: #e8eef8;
+    --jp-user: #0b3d91;
+    --jp-assistant: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--jp-bg);
+    color: var(--jp-text);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+body {
+    overflow: hidden;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.jp-ai-embed {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-height: 100dvh;
+    background: var(--jp-panel);
+}
+
+.jp-ai-embed__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--jp-border);
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.jp-ai-embed__eyebrow {
+    margin: 0 0 2px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--jp-muted);
+}
+
+.jp-ai-embed__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.jp-ai-embed__header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.jp-ai-embed__main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.jp-ai-embed__status {
+    padding: 10px 16px 0;
+    font-size: 13px;
+    color: var(--jp-muted);
+}
+
+.jp-ai-embed__messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.jp-ai-embed__bubble {
+    max-width: 92%;
+    padding: 12px 14px;
+    border-radius: 16px;
+    line-height: 1.45;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.jp-ai-embed__bubble--user {
+    align-self: flex-end;
+    background: var(--jp-user);
+    color: #fff;
+    border-bottom-right-radius: 6px;
+}
+
+.jp-ai-embed__bubble--assistant,
+.jp-ai-embed__bubble--staff,
+.jp-ai-embed__bubble--system {
+    align-self: flex-start;
+    background: var(--jp-assistant);
+    border: 1px solid var(--jp-border);
+    border-bottom-left-radius: 6px;
+}
+
+.jp-ai-embed__cards {
+    display: grid;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.jp-ai-embed__card {
+    border: 1px solid var(--jp-border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: #fff;
+}
+
+.jp-ai-embed__card-title {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.jp-ai-embed__card-subtitle {
+    margin: 0 0 8px;
+    font-size: 12px;
+    color: var(--jp-muted);
+}
+
+.jp-ai-embed__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.jp-ai-embed__footer {
+    border-top: 1px solid var(--jp-border);
+    padding: 12px 16px 14px;
+    background: #fff;
+}
+
+.jp-ai-embed__form {
+    display: flex;
+    gap: 8px;
+    align-items: end;
+}
+
+.jp-ai-embed__input {
+    flex: 1;
+    resize: none;
+    min-height: 44px;
+    max-height: 120px;
+    padding: 10px 12px;
+    border: 1px solid var(--jp-border);
+    border-radius: 12px;
+    font: inherit;
+}
+
+.jp-ai-embed__input:focus-visible {
+    outline: 2px solid var(--jp-brand);
+    outline-offset: 1px;
+}
+
+.jp-ai-embed__btn {
+    border: 0;
+    border-radius: 999px;
+    padding: 10px 14px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.jp-ai-embed__btn:focus-visible {
+    outline: 2px solid var(--jp-brand);
+    outline-offset: 2px;
+}
+
+.jp-ai-embed__btn--primary {
+    background: var(--jp-brand);
+    color: #fff;
+}
+
+.jp-ai-embed__btn--ghost {
+    background: var(--jp-brand-soft);
+    color: var(--jp-brand);
+    font-size: 12px;
+}
+
+.jp-ai-embed__btn--link {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--jp-brand-soft);
+    color: var(--jp-brand);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.jp-ai-embed__footnote {
+    margin: 8px 0 0;
+    font-size: 11px;
+    color: var(--jp-muted);
+}
+
+.jp-ai-embed.is-busy .jp-ai-embed__input,
+.jp-ai-embed.is-busy .jp-ai-embed__btn--primary {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+@media (max-width: 480px) {
+    .jp-ai-embed__header {
+        padding: 12px;
+    }
+
+    .jp-ai-embed__messages {
+        padding: 12px;
+    }
+}

@@ -18,10 +18,12 @@ use App\Http\Controllers\Frontend\GuestBookingCancellationController;
 use App\Http\Controllers\Frontend\GuestBookingLookupController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\PublicSitemapController;
+use App\Http\Controllers\Api\EmbedAiAssistantController;
 use App\Http\Controllers\Api\PublicAuthController;
 use App\Http\Controllers\Api\PublicAiAssistantController;
 use App\Http\Controllers\Api\PublicSessionController;
 use App\Http\Controllers\Api\PublicContentApiController;
+use App\Http\Controllers\Ai\AiEmbedPageController;
 use App\Http\Controllers\Frontend\SupportController;
 use App\Http\Controllers\Payments\AbhiPayPaymentController;
 use App\Http\Controllers\ProfileController;
@@ -89,6 +91,33 @@ Route::post('/api/public/ai/clear', [PublicAiAssistantController::class, 'clear'
 Route::post('/api/public/ai/handoff', [PublicAiAssistantController::class, 'requestHandoff'])
     ->middleware('throttle:10,1')
     ->name('api.public.ai.handoff');
+
+Route::get('/integrations/ai/{pathToken}', [AiEmbedPageController::class, 'show'])
+    ->middleware(['throttle:60,1', 'ai.embed.frame'])
+    ->where('pathToken', '[A-Za-z0-9_-]+')
+    ->name('ai.embed.show');
+
+Route::prefix('api/embed/ai/{tenant}')
+    ->where(['tenant' => 'jetpakistan'])
+    ->group(function (): void {
+        Route::post('/session', [EmbedAiAssistantController::class, 'session'])
+            ->middleware('throttle:20,1')
+            ->name('api.embed.ai.session');
+        Route::middleware(['ai.embed.session'])->group(function (): void {
+            Route::post('/chat', [EmbedAiAssistantController::class, 'chat'])
+                ->middleware(['throttle:60,1', 'ai.lab.canary.fault'])
+                ->name('api.embed.ai.chat');
+            Route::get('/messages', [EmbedAiAssistantController::class, 'messages'])
+                ->middleware('throttle:60,1')
+                ->name('api.embed.ai.messages');
+            Route::post('/clear', [EmbedAiAssistantController::class, 'clear'])
+                ->middleware('throttle:10,1')
+                ->name('api.embed.ai.clear');
+            Route::post('/handoff', [EmbedAiAssistantController::class, 'requestHandoff'])
+                ->middleware('throttle:10,1')
+                ->name('api.embed.ai.handoff');
+        });
+    });
 
 Route::get('/sitemap.xml', [PublicSitemapController::class, 'index'])->name('sitemap');
 Route::middleware('platform.module:support_system')->group(function (): void {
