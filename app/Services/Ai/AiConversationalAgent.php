@@ -230,6 +230,10 @@ final class AiConversationalAgent
             return null;
         }
 
+        if (! $this->isAcceptableGroundedKnowledgeReply($reply, $sources)) {
+            return null;
+        }
+
         return [
             'mode' => 'LLM_ASSISTED',
             'message' => $reply,
@@ -238,6 +242,53 @@ final class AiConversationalAgent
                 'ANSWER_GROUNDED' => 'YES',
             ]),
         ];
+    }
+
+    /**
+     * Fail-closed grounding: paraphrases OK; invented policies/fees/guarantees rejected.
+     *
+     * @param  list<array{slug?: string, title?: string, excerpt?: string}>  $sources
+     */
+    private function isAcceptableGroundedKnowledgeReply(string $reply, array $sources): bool
+    {
+        $parts = [];
+        foreach ($sources as $source) {
+            $parts[] = trim((string) ($source['title'] ?? ''));
+            $parts[] = trim((string) ($source['excerpt'] ?? ''));
+        }
+        $corpus = mb_strtolower(trim(implode("\n", array_filter($parts, static fn ($p) => $p !== ''))));
+        if ($corpus === '') {
+            return false;
+        }
+
+        $lower = mb_strtolower(trim($reply));
+        if ($lower === '') {
+            return false;
+        }
+
+        // Company-specific claim families — must also appear in approved source text.
+        $gatedPatterns = [
+            '/\brefunds?\b/u',
+            '/\bguarantees?\b/u',
+            '/\bguaranteed\b/u',
+            '/\bwarranty\b/u',
+            '/\bsla\b/u',
+            '/\b(fees?|surcharges?|penalties?)\b/u',
+            '/\bcomplimentary\b/u',
+            '/\bfree cancellation\b/u',
+            '/\binsured\b/u',
+            '/\b\d+\s*%\b/u',
+            '/\bwithin\s+\d+\s*(minutes?|hours?|days?|weeks?|months?)\b/u',
+            '/\bin\s+\d+\s*(minutes?|hours?|days?)\b/u',
+        ];
+
+        foreach ($gatedPatterns as $pattern) {
+            if (preg_match($pattern, $lower) === 1 && preg_match($pattern, $corpus) !== 1) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

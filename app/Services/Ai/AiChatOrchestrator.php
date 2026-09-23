@@ -205,7 +205,7 @@ final class AiChatOrchestrator
                 'status' => 'rate_limited',
                 'message' => "You're sending messages pretty quickly. Please try again in a few seconds.",
                 'retry_after' => $retryAfter,
-                'actions' => $this->defaultActions(),
+                'actions' => $this->resolveResponseActions(),
             ];
         }
         RateLimiter::hit($key, 60);
@@ -246,7 +246,7 @@ final class AiChatOrchestrator
                     'ok' => false,
                     'status' => 'invalid',
                     'message' => 'Please enter a message.',
-                    'actions' => $this->defaultActions(),
+                    'actions' => $this->resolveResponseActions(),
                 ],
             ];
         }
@@ -259,7 +259,7 @@ final class AiChatOrchestrator
                     'status' => 'refused',
                     'mode' => 'STRUCTURED_FALLBACK',
                     'message' => 'I can help with flights, groups, bookings, and payments. Please ask a travel question without special instructions.',
-                    'actions' => $this->defaultActions(),
+                    'actions' => $this->resolveResponseActions(),
                 ],
             ];
         }
@@ -429,7 +429,7 @@ final class AiChatOrchestrator
                         'state' => $conversation->state,
                         'message' => 'AI assistant is temporarily unavailable. Please try again shortly.',
                         'recommendations' => [],
-                        'actions' => $this->defaultActions(),
+                        'actions' => $this->resolveResponseActions(),
                         'meta' => [
                             'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
                             'AI_GROUP_SEARCH_READ_CALLS' => 0,
@@ -468,7 +468,7 @@ final class AiChatOrchestrator
                     'message' => $body,
                     'recommendations' => $conversational['recommendations'] ?? [],
                     'knowledge' => $conversational['knowledge'] ?? [],
-                    'actions' => $conversational['actions'] ?? $this->defaultActions(),
+                    'actions' => $this->tenantSafeActions($conversational['actions'] ?? null),
                     'meta' => $conversational['meta'] ?? $baseMeta,
                 ]);
             }
@@ -540,7 +540,7 @@ final class AiChatOrchestrator
                 'message' => $body,
                 'clarification_options' => $hybrid->clarificationOptions,
                 'recommendations' => [],
-                'actions' => $this->defaultActions(),
+                'actions' => $this->resolveResponseActions(),
                 'meta' => $meta,
             ]);
         }
@@ -573,7 +573,7 @@ final class AiChatOrchestrator
             'state' => $conversation->state,
             'message' => $body,
             'recommendations' => [],
-            'actions' => $this->defaultActions(),
+            'actions' => $this->resolveResponseActions(),
             'meta' => $meta,
         ]);
     }
@@ -850,11 +850,7 @@ final class AiChatOrchestrator
                 'message' => $body,
                 'recommendations' => [],
                 'knowledge' => [],
-                'actions' => [
-                    ['label' => 'Talk to Support', 'action' => 'handoff'],
-                    ['label' => 'Contact Support', 'href' => '/support'],
-                    ['label' => 'FAQ', 'href' => '/faq'],
-                ],
+                'actions' => $this->resolveResponseActions(),
                 'meta' => array_merge($meta, [
                     'intent' => ['intent' => 'knowledge'],
                     'KNOWLEDGE_HITS' => 0,
@@ -895,7 +891,7 @@ final class AiChatOrchestrator
                 'message' => $body,
                 'knowledge' => $hits,
                 'recommendations' => [],
-                'actions' => $this->defaultActions(),
+                'actions' => $this->resolveResponseActions(),
                 'meta' => array_merge($meta, $llm['meta'] ?? [], [
                     'intent' => ['intent' => 'knowledge'],
                     'KNOWLEDGE_SOURCE' => $primary,
@@ -921,7 +917,7 @@ final class AiChatOrchestrator
             'message' => $body,
             'knowledge' => $hits,
             'recommendations' => [],
-            'actions' => $this->defaultActions(),
+            'actions' => $this->resolveResponseActions(),
             'meta' => array_merge($meta, [
                 'intent' => ['intent' => 'knowledge'],
                 'KNOWLEDGE_SOURCE' => $primary,
@@ -1222,7 +1218,7 @@ final class AiChatOrchestrator
             'state' => $conversation->state,
             'message' => $body,
             'recommendations' => [],
-            'actions' => $this->defaultActions(),
+            'actions' => $this->resolveResponseActions(),
             'meta' => array_merge($baseMeta, $fallback['meta'] ?? [
                 'open_domain_category' => $category,
                 'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
@@ -1251,7 +1247,8 @@ final class AiChatOrchestrator
             'state' => $conversation->state,
             'message' => $body,
             'recommendations' => $llm['recommendations'] ?? [],
-            'actions' => $llm['actions'] ?? $this->defaultActions(),
+            // Prefer tool/LLM actions when present, but never fall back to JP-default on generic tenants.
+            'actions' => $this->tenantSafeActions($llm['actions'] ?? null),
             'meta' => $llm['meta'] ?? [],
         ]);
     }
@@ -1359,6 +1356,8 @@ final class AiChatOrchestrator
     }
 
     /**
+     * Public JetPakistan action set (unchanged).
+     *
      * @return list<array{label: string, href?: string, action?: string}>
      */
     private function defaultActions(): array
@@ -1369,6 +1368,95 @@ final class AiChatOrchestrator
             ['label' => 'Manage Booking', 'href' => '/lookup-booking'],
             ['label' => 'Talk to Support', 'action' => 'handoff'],
         ];
+    }
+
+    /**
+     * Tenant-aware response actions. Public JP keeps defaultActions(); embeds only get
+     * capability-backed actions and never invent generic JetPakistan hrefs.
+     *
+     * @return list<array{label: string, href?: string, action?: string}>
+     */
+    private function resolveResponseActions(): array
+    {
+        if (! app()->bound(EmbedRuntimeContext::class)) {
+            return $this->defaultActions();
+        }
+
+        $ctx = app(EmbedRuntimeContext::class);
+        if (! $ctx->isActive()) {
+            return $this->defaultActions();
+        }
+
+        $tenant = $ctx->tenant();
+        $isJetPakistanEmbed = $tenant !== null && $tenant->slug === 'jetpakistan';
+        $actions = [];
+
+        if ($this->embedCapabilityAllows(EmbedTenantCapability::FLIGHT_SEARCH)) {
+            if ($isJetPakistanEmbed) {
+                $actions[] = ['label' => 'Search Flights', 'href' => '/#flight-search'];
+            }
+            // Generic tenants: capability alone is not enough — do not invent JP flight URLs.
+        }
+
+        if ($this->embedCapabilityAllows(EmbedTenantCapability::BOOKING_LOOKUP)) {
+            if ($isJetPakistanEmbed) {
+                $actions[] = ['label' => 'Manage Booking', 'href' => '/lookup-booking'];
+            }
+        }
+
+        // Browse Groups is public-JP only (not an embed capability today).
+
+        if ($this->embedCapabilityAllows(EmbedTenantCapability::SUPPORT_HANDOFF)) {
+            // Action token only — never /support href for generic tenants.
+            $actions[] = ['label' => 'Talk to Support', 'action' => 'handoff'];
+        }
+
+        return $actions;
+    }
+
+    /**
+     * Prefer explicit tool/LLM actions when tenant-safe; otherwise resolve from capabilities.
+     *
+     * @param  list<array{label?: string, href?: string, action?: string}>|null  $fromLlm
+     * @return list<array{label: string, href?: string, action?: string}>
+     */
+    private function tenantSafeActions(?array $fromLlm): array
+    {
+        if (! is_array($fromLlm) || $fromLlm === []) {
+            return $this->resolveResponseActions();
+        }
+
+        if (! app()->bound(EmbedRuntimeContext::class) || ! app(EmbedRuntimeContext::class)->isActive()) {
+            return array_values($fromLlm);
+        }
+
+        $tenant = app(EmbedRuntimeContext::class)->tenant();
+        $isJetPakistanEmbed = $tenant !== null && $tenant->slug === 'jetpakistan';
+
+        $safe = [];
+        foreach ($fromLlm as $action) {
+            if (! is_array($action)) {
+                continue;
+            }
+            $label = trim((string) ($action['label'] ?? ''));
+            if ($label === '') {
+                continue;
+            }
+            $href = isset($action['href']) ? trim((string) $action['href']) : '';
+            if ($href !== '' && ! $isJetPakistanEmbed && preg_match('#(/groups\b|/lookup-booking\b|/support\b|/faq\b|#flight-search)#i', $href) === 1) {
+                continue;
+            }
+            $entry = ['label' => $label];
+            if ($href !== '') {
+                $entry['href'] = $href;
+            }
+            if (isset($action['action']) && is_string($action['action']) && $action['action'] !== '') {
+                $entry['action'] = $action['action'];
+            }
+            $safe[] = $entry;
+        }
+
+        return $safe !== [] ? $safe : $this->resolveResponseActions();
     }
 
     /**

@@ -348,5 +348,58 @@ class ConversationQuality26AiFirstTest extends TestCase
         $this->assertStringNotContainsString('jetpakistan', $body);
         $this->assertStringNotContainsString('group ticketing', $body);
         $this->assertSame('YES', $response->json('meta.LLM_SYNTHESIS'));
+
+        $actions = $response->json('actions');
+        $this->assertIsArray($actions);
+        $labels = array_map(
+            static fn ($a) => mb_strtolower((string) ($a['label'] ?? '')),
+            $actions
+        );
+        $hrefs = array_values(array_filter(array_map(
+            static fn ($a) => (string) ($a['href'] ?? ''),
+            $actions
+        )));
+
+        $this->assertNotContains('search flights', $labels);
+        $this->assertNotContains('browse groups', $labels);
+        $this->assertNotContains('manage booking', $labels);
+        foreach ($hrefs as $href) {
+            $this->assertDoesNotMatchRegularExpression('#(/groups\b|/lookup-booking\b|/support\b|#flight-search)#i', $href);
+        }
+        // SUPPORT_HANDOFF capability alone is insufficient without a live handoff adapter.
+        $this->assertSame([], $actions);
+    }
+
+    public function test_grounded_knowledge_accepts_supported_paraphrase(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            '{"message":"JetPakistan is an online travel platform that helps customers search flights and get travel support."}'
+        ));
+
+        $response = $this->chat(str_repeat('g1', 20), 'What is JetPakistan?');
+        $response->assertOk();
+        $this->assertSame('YES', $response->json('meta.ANSWER_GROUNDED'));
+        $this->assertSame('YES', $response->json('meta.LLM_SYNTHESIS'));
+        $this->assertSame('LLM_ASSISTED', $response->json('mode'));
+        $this->assertStringContainsString('search flights', mb_strtolower((string) $response->json('message')));
+        $this->assertStringNotContainsString('guarantees all refunds', mb_strtolower((string) $response->json('message')));
+    }
+
+    public function test_grounded_knowledge_rejects_unsupported_refund_claim_uses_structured_fallback(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            '{"message":"JetPakistan helps customers search flights and guarantees all refunds within 24 hours."}'
+        ));
+
+        $response = $this->chat(str_repeat('g2', 20), 'What is JetPakistan?');
+        $response->assertOk();
+        $body = mb_strtolower((string) $response->json('message'));
+        $this->assertStringNotContainsString('guarantees all refunds within 24 hours', $body);
+        $this->assertStringNotContainsString('within 24 hours', $body);
+        $this->assertSame('YES', $response->json('meta.ANSWER_GROUNDED'));
+        $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'));
+        $this->assertGreaterThanOrEqual(1, (int) $response->json('meta.KNOWLEDGE_HITS'));
     }
 }
