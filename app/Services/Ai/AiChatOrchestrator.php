@@ -348,29 +348,53 @@ final class AiChatOrchestrator
             'LOCAL_LLM_REQUIRED_FOR_CORE' => false,
         ];
 
-        // Open-domain before lab/LLM so harmless general questions are never swallowed by travel lab.
-        $openDomain = $this->openDomain->tryRespond(
-            $cleanMessage,
-            $this->tenantCapabilityLabels(),
-            $this->assistantBrandName(),
-        );
-        if (is_array($openDomain)) {
-            $assistant = $this->storeMessage($conversation, 'assistant', (string) $openDomain['message'], [
-                'mode' => 'STRUCTURED_FALLBACK',
-                'open_domain' => $openDomain['category'],
-            ]);
+        $brand = $this->assistantBrandName();
+        $capabilities = $this->tenantCapabilityLabels();
+        $openCategory = $this->intentRouter->classifyOpenDomain($cleanMessage);
 
-            return $this->withMessageId($assistant, [
-                'ok' => true,
-                'status' => 'ok',
-                'mode' => 'STRUCTURED_FALLBACK',
-                'conversation_id' => $conversation->public_id,
-                'state' => $conversation->state,
-                'message' => $openDomain['message'],
-                'recommendations' => [],
-                'actions' => $this->defaultActions(),
-                'meta' => array_merge($baseMeta, $openDomain['meta']),
-            ]);
+        // HIGH_RISK: deterministic safety only — never witty brand redirects.
+        if ($openCategory === 'HIGH_RISK') {
+            return $this->replyOpenDomainFallback($conversation, $cleanMessage, $openCategory, $capabilities, $brand, $baseMeta);
+        }
+
+        // JetPakistan / tenant knowledge: RAG first, then LLM synthesis (fallback structured).
+        if ($this->intentRouter->isJetPakistanKnowledgeQuestion($cleanMessage)
+            && $this->embedCapabilityAllows(EmbedTenantCapability::KNOWLEDGE)) {
+            return $this->replyKnowledge($conversation, $cleanMessage, 'STRUCTURED_FALLBACK', $baseMeta);
+        }
+
+        // CURRENT_UNVERIFIED: server-gated — model may phrase limitation; reject fabricated live facts.
+        if ($openCategory === 'CURRENT_UNVERIFIED') {
+            $llm = $this->conversational->tryOpenDomainRespond(
+                $conversation,
+                $cleanMessage,
+                $openCategory,
+                $brand,
+                $capabilities,
+                $baseMeta,
+            );
+            if (is_array($llm) && filled($llm['message'] ?? null)) {
+                return $this->storeLlmAssistantTurn($conversation, $llm);
+            }
+
+            return $this->replyOpenDomainFallback($conversation, $cleanMessage, $openCategory, $capabilities, $brand, $baseMeta);
+        }
+
+        // GENERAL_KNOWLEDGE / OUT_OF_DOMAIN_SAFE / CASUAL: AI-first, structured compositor fallback only.
+        if (in_array($openCategory, ['GENERAL_KNOWLEDGE', 'OUT_OF_DOMAIN_SAFE', 'CASUAL_CONVERSATION'], true)) {
+            $llm = $this->conversational->tryOpenDomainRespond(
+                $conversation,
+                $cleanMessage,
+                $openCategory,
+                $brand,
+                $capabilities,
+                $baseMeta,
+            );
+            if (is_array($llm) && filled($llm['message'] ?? null)) {
+                return $this->storeLlmAssistantTurn($conversation, $llm);
+            }
+
+            return $this->replyOpenDomainFallback($conversation, $cleanMessage, $openCategory, $capabilities, $brand, $baseMeta);
         }
 
         if (
@@ -809,8 +833,12 @@ final class AiChatOrchestrator
     private function replyKnowledge(AiConversation $conversation, string $message, string $mode, array $meta): array
     {
         $hits = $this->knowledge->search($message, 3);
+        $brand = $this->assistantBrandName();
+
         if ($hits === []) {
-            $body = 'I could not find an approved JetPakistan answer for that yet. I can still help with flights, group travel, booking lookup, or connect you to support.';
+            $body = strcasecmp($brand, 'JetPakistan') === 0
+                ? 'I could not find an approved JetPakistan answer for that yet. I can still help with flights, group travel, booking lookup, or connect you to support.'
+                : 'I do not have a verified answer for that in the approved knowledge for '.$brand.'. I can still help with the capabilities this assistant supports.';
             $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => $mode, 'knowledge_hits' => 0]);
 
             return $this->withMessageId($assistant, [
@@ -828,16 +856,57 @@ final class AiChatOrchestrator
                     ['label' => 'FAQ', 'href' => '/faq'],
                 ],
                 'meta' => array_merge($meta, [
+                    'intent' => ['intent' => 'knowledge'],
                     'KNOWLEDGE_HITS' => 0,
                     'ANSWER_GROUNDED' => 'NO',
                     'LLM_SYNTHESIS' => 'NO',
+                    'JETPAKISTAN_FACT_HALLUCINATION' => 0,
+                ]),
+            ]);
+        }
+
+        $slugs = array_values(array_map(static fn ($h) => (string) $h['slug'], $hits));
+        $primary = $slugs[0] ?? 'unknown';
+
+        $llm = $this->conversational->tryGroundedKnowledgeRespond(
+            $conversation,
+            $message,
+            $hits,
+            $brand,
+            array_merge($meta, [
+                'KNOWLEDGE_SOURCE' => $primary,
+                'KNOWLEDGE_HITS' => count($hits),
+            ]),
+        );
+
+        if (is_array($llm) && filled($llm['message'] ?? null)) {
+            $body = (string) $llm['message'];
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+                'mode' => 'LLM_ASSISTED',
+                'knowledge' => $slugs,
+            ]);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'ok',
+                'mode' => 'LLM_ASSISTED',
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'knowledge' => $hits,
+                'recommendations' => [],
+                'actions' => $this->defaultActions(),
+                'meta' => array_merge($meta, $llm['meta'] ?? [], [
+                    'intent' => ['intent' => 'knowledge'],
+                    'KNOWLEDGE_SOURCE' => $primary,
+                    'KNOWLEDGE_HITS' => count($hits),
+                    'ANSWER_GROUNDED' => 'YES',
+                    'LLM_SYNTHESIS' => 'YES',
                 ]),
             ]);
         }
 
         $body = $this->synthesizeGroundedKnowledgeReply($message, $hits);
-        $slugs = array_values(array_map(static fn ($h) => (string) $h['slug'], $hits));
-        $primary = $slugs[0] ?? 'unknown';
         $assistant = $this->storeMessage($conversation, 'assistant', $body, [
             'mode' => $mode,
             'knowledge' => $slugs,
@@ -854,10 +923,11 @@ final class AiChatOrchestrator
             'recommendations' => [],
             'actions' => $this->defaultActions(),
             'meta' => array_merge($meta, [
+                'intent' => ['intent' => 'knowledge'],
                 'KNOWLEDGE_SOURCE' => $primary,
                 'KNOWLEDGE_HITS' => count($hits),
                 'ANSWER_GROUNDED' => 'YES',
-                'LLM_SYNTHESIS' => $mode === 'LLM_ASSISTED' ? 'YES' : 'STRUCTURED',
+                'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
             ]),
         ]);
     }
@@ -1124,6 +1194,68 @@ final class AiChatOrchestrator
     /**
      * @return array<string, mixed>
      */
+    /**
+     * @param  list<string>  $capabilities
+     * @param  array<string, mixed>  $baseMeta
+     * @return array<string, mixed>
+     */
+    private function replyOpenDomainFallback(
+        AiConversation $conversation,
+        string $message,
+        string $category,
+        array $capabilities,
+        string $brand,
+        array $baseMeta,
+    ): array {
+        $fallback = $this->openDomain->fallbackForCategory($message, $category, $capabilities, $brand);
+        $body = (string) ($fallback['message'] ?? 'I can still help with travel questions when you are ready.');
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+            'mode' => 'STRUCTURED_FALLBACK',
+            'open_domain' => $category,
+        ]);
+
+        return $this->withMessageId($assistant, [
+            'ok' => true,
+            'status' => 'ok',
+            'mode' => 'STRUCTURED_FALLBACK',
+            'conversation_id' => $conversation->public_id,
+            'state' => $conversation->state,
+            'message' => $body,
+            'recommendations' => [],
+            'actions' => $this->defaultActions(),
+            'meta' => array_merge($baseMeta, $fallback['meta'] ?? [
+                'open_domain_category' => $category,
+                'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
+            ]),
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $llm
+     * @return array<string, mixed>
+     */
+    private function storeLlmAssistantTurn(AiConversation $conversation, array $llm): array
+    {
+        $body = (string) ($llm['message'] ?? '');
+        $mode = (string) ($llm['mode'] ?? 'LLM_ASSISTED');
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+            'mode' => $mode,
+            'open_domain' => $llm['meta']['open_domain_category'] ?? null,
+        ]);
+
+        return $this->withMessageId($assistant, [
+            'ok' => true,
+            'status' => 'ok',
+            'mode' => $mode,
+            'conversation_id' => $conversation->public_id,
+            'state' => $conversation->state,
+            'message' => $body,
+            'recommendations' => $llm['recommendations'] ?? [],
+            'actions' => $llm['actions'] ?? $this->defaultActions(),
+            'meta' => $llm['meta'] ?? [],
+        ]);
+    }
+
     private function handleConversationalLeadTurn(AiConversation $conversation, string $cleanMessage): array
     {
         $turn = $this->leadService->handleConversationalLeadTurn(

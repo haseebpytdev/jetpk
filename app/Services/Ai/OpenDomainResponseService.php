@@ -3,28 +3,42 @@
 namespace App\Services\Ai;
 
 /**
- * Structured open-domain replies when the conversational LLM is unavailable.
- * Builds brief, varied answers from facts + tenant-aware capability pivots —
- * not a single canned "travel only" refusal, and not verbatim sample scripts.
+ * Deterministic resilience fallback ONLY when the conversational model is
+ * unavailable or returns invalid output. Must not intercept healthy-model turns.
  */
 final class OpenDomainResponseService
 {
     /**
-     * @param  list<string>  $capabilities  e.g. flights, group_travel, booking_lookup, support
+     * Classify then compose a fallback reply. Prefer fallbackForCategory when
+     * the router already classified the turn.
+     *
+     * @param  list<string>  $capabilities
      * @return array{message: string, category: string, meta: array<string, mixed>}|null
      */
     public function tryRespond(string $message, array $capabilities = [], string $brand = 'JetPakistan'): ?array
     {
-        $router = app(ConversationIntentRouter::class);
-        $category = $router->classifyOpenDomain($message);
+        $category = app(ConversationIntentRouter::class)->classifyOpenDomain($message);
         if ($category === null) {
             return null;
         }
 
+        return $this->fallbackForCategory($message, $category, $capabilities, $brand);
+    }
+
+    /**
+     * @param  list<string>  $capabilities
+     * @return array{message: string, category: string, meta: array<string, mixed>}|null
+     */
+    public function fallbackForCategory(
+        string $message,
+        string $category,
+        array $capabilities = [],
+        string $brand = 'JetPakistan',
+    ): ?array {
         $pivot = $this->capabilityPivot($capabilities, $brand);
         $body = match ($category) {
             'GENERAL_KNOWLEDGE' => $this->generalKnowledge($message, $pivot),
-            'OUT_OF_DOMAIN_SAFE' => $this->outOfDomainSafe($message, $pivot, $brand),
+            'OUT_OF_DOMAIN_SAFE' => $this->outOfDomainSafe($message, $pivot, $brand, $capabilities),
             'CURRENT_UNVERIFIED' => $this->currentUnverified($pivot),
             'CASUAL_CONVERSATION' => $this->casual($message, $pivot),
             'HIGH_RISK' => $this->highRisk(),
@@ -41,7 +55,7 @@ final class OpenDomainResponseService
             'meta' => [
                 'open_domain_category' => $category,
                 'ANSWER_GROUNDED' => $category === 'GENERAL_KNOWLEDGE' ? 'MODEL_GENERAL' : 'N/A',
-                'LLM_SYNTHESIS' => 'STRUCTURED_COMPOSITOR',
+                'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
                 'SMART_REDIRECT' => $pivot !== '' ? 'YES' : 'NO',
             ],
         ];
@@ -54,13 +68,15 @@ final class OpenDomainResponseService
     {
         $capabilities = array_values(array_unique(array_filter($capabilities)));
         if ($capabilities === []) {
-            $capabilities = ['flights', 'group_travel', 'booking_assistance', 'support'];
+            // Only invent default JetPakistan capability set for the JetPakistan brand.
+            if (strcasecmp($brand, 'JetPakistan') === 0) {
+                $capabilities = ['flights', 'group_travel', 'booking_assistance', 'support'];
+            } else {
+                return '';
+            }
         }
 
-        // Tenant-aware: never inject JetPakistan services for unrelated brands.
-        $label = $brand === 'JetPakistan' || $brand === ''
-            ? 'JetPakistan'
-            : $brand;
+        $label = $brand !== '' ? $brand : 'this assistant';
 
         $phrases = [];
         if (in_array('flights', $capabilities, true)) {
@@ -73,7 +89,7 @@ final class OpenDomainResponseService
             $phrases[] = 'booking assistance';
         }
         if (in_array('support', $capabilities, true)) {
-            $phrases[] = 'travel support';
+            $phrases[] = 'support';
         }
 
         if ($phrases === []) {
@@ -100,35 +116,38 @@ final class OpenDomainResponseService
             $core = 'Photosynthesis is how plants turn light, water, and carbon dioxide into energy (sugars) and oxygen.';
         }
 
-        return $this->withOptionalPivot($core, $pivot, soft: true);
+        return $this->withOptionalPivot($core, $pivot, true);
     }
 
-    private function outOfDomainSafe(string $message, string $pivot, string $brand): string
+    /**
+     * @param  list<string>  $capabilities
+     */
+    private function outOfDomainSafe(string $message, string $pivot, string $brand, array $capabilities): string
     {
         $lower = mb_strtolower($message);
 
         if (preg_match('/\b(jet|aircraft|airplane)\b/u', $lower) === 1) {
-            $core = "{$brand} doesn't sell aircraft — we help with seats on commercial flights, group ticketing, and travel support.";
+            $core = "{$brand} doesn't sell aircraft.";
 
-            return $this->withOptionalPivot($core, $pivot, soft: true);
+            return $this->withOptionalPivot($core, $pivot, true);
         }
 
         if (preg_match('/pizza/u', $lower) === 1) {
-            $core = "Pizza delivery isn't in my toolset — I'm built for travel help.";
+            $core = "Pizza delivery isn't in my toolset.";
 
-            return $this->withOptionalPivot($core, $pivot, soft: true);
+            return $this->withOptionalPivot($core, $pivot, true);
         }
 
         $core = "That's outside what I can arrange here.";
 
-        return $this->withOptionalPivot($core, $pivot, soft: true);
+        return $this->withOptionalPivot($core, $pivot, true);
     }
 
     private function currentUnverified(string $pivot): string
     {
         $core = "I can't verify live market or news figures through this assistant, so I won't invent a number.";
 
-        return $this->withOptionalPivot($core, $pivot, soft: false);
+        return $this->withOptionalPivot($core, $pivot, false);
     }
 
     private function casual(string $message, string $pivot): string
@@ -136,20 +155,20 @@ final class OpenDomainResponseService
         $lower = mb_strtolower($message);
 
         if (preg_match('/joke/u', $lower) === 1) {
-            $core = 'Why did the suitcase break up with the traveler? It needed space. 😄';
+            $core = 'Why did the suitcase break up with the traveler? It needed space.';
 
-            return $this->withOptionalPivot($core, $pivot, soft: false);
+            return $this->withOptionalPivot($core, $pivot, false);
         }
 
         if (preg_match('/bored/u', $lower) === 1) {
-            $core = "I hear you — want a light distraction, or shall we plan a trip instead?";
+            $core = 'I hear you — want a light distraction, or shall we plan a trip instead?';
 
-            return $this->withOptionalPivot($core, $pivot, soft: false);
+            return $this->withOptionalPivot($core, $pivot, false);
         }
 
-        $core = "Doing well, thanks — ready when you are.";
+        $core = 'Doing well, thanks — ready when you are.';
 
-        return $this->withOptionalPivot($core, $pivot, soft: false);
+        return $this->withOptionalPivot($core, $pivot, false);
     }
 
     private function highRisk(): string

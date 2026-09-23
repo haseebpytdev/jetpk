@@ -108,6 +108,7 @@ class ConversationQuality26Test extends TestCase
         $this->assertSame('what-is-jetpakistan', $turn['response']->json('meta.KNOWLEDGE_SOURCE'));
         $this->assertGreaterThanOrEqual(1, (int) $turn['response']->json('meta.KNOWLEDGE_HITS'));
         $this->assertSame('YES', $turn['response']->json('meta.ANSWER_GROUNDED'));
+        $this->assertSame('FALLBACK_STRUCTURED', $turn['response']->json('meta.LLM_SYNTHESIS'));
         $body = mb_strtolower((string) $turn['response']->json('message'));
         $this->assertStringContainsString('jetpakistan', $body);
         $this->assertStringContainsString('travel', $body);
@@ -141,8 +142,10 @@ class ConversationQuality26Test extends TestCase
             str_contains($body, 'flight')
             || str_contains($body, 'group')
             || str_contains($body, 'travel')
+            || str_contains($body, 'support')
         );
         $this->assertStringNotContainsString('aircraft marketplace', $body);
+        $this->assertSame('FALLBACK_STRUCTURED', $turn['response']->json('meta.LLM_SYNTHESIS'));
         $this->assertSame('YES', $turn['response']->json('meta.SMART_REDIRECT'));
     }
 
