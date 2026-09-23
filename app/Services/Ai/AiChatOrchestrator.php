@@ -30,6 +30,8 @@ final class AiChatOrchestrator
         private readonly AiAssistantBookingLookupTool $bookingLookupTool,
         private readonly CustomerQueryLeadService $leadService,
         private readonly AiCommercialIntentClassifier $intentClassifier,
+        private readonly ConversationIntentRouter $intentRouter,
+        private readonly OpenDomainResponseService $openDomain,
         private readonly ?\App\Services\Ai\Lab\AiLabAdapter $labAdapter = null,
     ) {}
 
@@ -192,13 +194,17 @@ final class AiChatOrchestrator
 
     public function assertRateLimit(string $visitorRaw): ?array
     {
-        $max = (int) config('ota.ai_assistant.anonymous_per_minute', 8);
-        $key = 'ai-chat:'.hash('sha256', $visitorRaw);
+        // Chat-send budget only. Polling /messages must never hit this key.
+        $max = (int) config('ota.ai_assistant.anonymous_per_minute', 30);
+        $key = 'ai-chat-send:'.hash('sha256', $visitorRaw);
         if (RateLimiter::tooManyAttempts($key, $max)) {
+            $retryAfter = max(1, RateLimiter::availableIn($key));
+
             return [
                 'ok' => false,
                 'status' => 'rate_limited',
-                'message' => 'Too many messages. Please wait a moment and try again.',
+                'message' => "You're sending messages pretty quickly. Please try again in a few seconds.",
+                'retry_after' => $retryAfter,
                 'actions' => $this->defaultActions(),
             ];
         }
@@ -218,6 +224,17 @@ final class AiChatOrchestrator
         $clean = strip_tags($raw);
         $clean = html_entity_decode($clean, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $clean = trim(preg_replace("/\0/", '', $clean) ?? $clean);
+        // Strip client coercion artifacts (undefined/null prefixes) and exact doubled paste.
+        $clean = preg_replace('/^(?:undefined|null)+/iu', '', $clean) ?? $clean;
+        $clean = trim($clean);
+        if (mb_strlen($clean) >= 16) {
+            $half = (int) floor(mb_strlen($clean) / 2);
+            $left = mb_substr($clean, 0, $half);
+            $right = mb_substr($clean, $half);
+            if ($left !== '' && $left === $right) {
+                $clean = $left;
+            }
+        }
         if (mb_strlen($clean) > $max) {
             $clean = mb_substr($clean, 0, $max);
         }
@@ -253,9 +270,11 @@ final class AiChatOrchestrator
     /**
      * @return array<string, mixed>
      */
-    public function handleChat(AiConversation $conversation, string $cleanMessage): array
+    public function handleChat(AiConversation $conversation, string $cleanMessage, bool $userMessageAlreadyStored = false): array
     {
-        $this->storeMessage($conversation, 'user', $cleanMessage);
+        if (! $userMessageAlreadyStored) {
+            $this->storeMessage($conversation, 'user', $cleanMessage);
+        }
 
         if (in_array($conversation->state, [
             AiConversation::STATE_WAITING_FOR_HUMAN,
@@ -286,32 +305,74 @@ final class AiChatOrchestrator
         }
 
         $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
-        if ($state['lead_capture_pending'] ?? false) {
-            return $this->handleConversationalLeadTurn($conversation, $cleanMessage);
-        }
 
-        $leadPrompt = null;
-        if ($this->embedCapabilityAllows(EmbedTenantCapability::LEAD_CAPTURE)) {
-            $leadPrompt = $this->leadService->leadCapturePromptPayload(
-                $conversation,
-                $cleanMessage,
-                $this->resolveAuthenticatedUser($conversation),
-            );
-        }
-        if (is_array($leadPrompt)) {
-            $assistant = $this->storeMessage($conversation, 'assistant', (string) $leadPrompt['message'], [
-                'mode' => 'STRUCTURED_FALLBACK',
-            ]);
-
-            return $this->withMessageId($assistant, $leadPrompt);
-        }
-
+        // SECURITY / write guard before lead extraction.
         $lockedWrite = $this->lockedWriteActionRequest($cleanMessage);
         if ($lockedWrite !== null) {
             return $this->replyLockedWriteRefusal($conversation, $lockedWrite);
         }
 
+        // HELP-FIRST lead precedence:
+        // SECURITY → STRONG INTENT / KNOWLEDGE / OPEN-DOMAIN → LEAD EXTRACTION
+        if (($state['lead_capture_pending'] ?? false) && ! $userMessageAlreadyStored) {
+            $this->leadService->extractOpportunisticLeadFields($conversation, $cleanMessage);
+            $conversation->refresh();
+            $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+
+            if ($this->intentRouter->shouldOverrideLeadCapture($cleanMessage)) {
+                // Keep lead pending; continue assisting on this turn.
+            } else {
+                return $this->handleConversationalLeadTurn($conversation, $cleanMessage);
+            }
+        } elseif (! ($state['lead_capture_pending'] ?? false) && $this->embedCapabilityAllows(EmbedTenantCapability::LEAD_CAPTURE)) {
+            $leadPrompt = $this->leadService->leadCapturePromptPayload(
+                $conversation,
+                $cleanMessage,
+                $this->resolveAuthenticatedUser($conversation),
+            );
+            if (is_array($leadPrompt)) {
+                $assistant = $this->storeMessage($conversation, 'assistant', (string) $leadPrompt['message'], [
+                    'mode' => 'STRUCTURED_FALLBACK',
+                ]);
+
+                return $this->withMessageId($assistant, $leadPrompt);
+            }
+            $conversation->refresh();
+        }
+
         $priorState = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+
+        $baseMeta = [
+            'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+            'AI_GROUP_SEARCH_READ_CALLS' => 0,
+            'LOCAL_LLM_REQUIRED_FOR_CORE' => false,
+        ];
+
+        // Open-domain before lab/LLM so harmless general questions are never swallowed by travel lab.
+        $openDomain = $this->openDomain->tryRespond(
+            $cleanMessage,
+            $this->tenantCapabilityLabels(),
+            $this->assistantBrandName(),
+        );
+        if (is_array($openDomain)) {
+            $assistant = $this->storeMessage($conversation, 'assistant', (string) $openDomain['message'], [
+                'mode' => 'STRUCTURED_FALLBACK',
+                'open_domain' => $openDomain['category'],
+            ]);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'ok',
+                'mode' => 'STRUCTURED_FALLBACK',
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $openDomain['message'],
+                'recommendations' => [],
+                'actions' => $this->defaultActions(),
+                'meta' => array_merge($baseMeta, $openDomain['meta']),
+            ]);
+        }
+
         if (
             ! $this->shouldUseStructuredCorePath($cleanMessage, $priorState)
             && $this->shouldUseLabAdapter($conversation)
@@ -392,6 +453,7 @@ final class AiChatOrchestrator
         // Hybrid model-free core when LLM unavailable or did not produce a reply.
         $mode = 'STRUCTURED_FALLBACK';
         $prior = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+
         $hybrid = $this->extractor->extractHybrid($cleanMessage, $prior);
         $intent = $hybrid->intent;
 
@@ -629,6 +691,18 @@ final class AiChatOrchestrator
             return true;
         }
 
+        if ($this->intentRouter->classifyOpenDomain($cleanMessage) !== null) {
+            return true;
+        }
+
+        if ($this->intentRouter->isJetPakistanKnowledgeQuestion($cleanMessage)) {
+            return true;
+        }
+
+        if ($this->intentRouter->hasStrongActionableIntent($cleanMessage)) {
+            return true;
+        }
+
         $lower = mb_strtolower(trim($cleanMessage));
         if (preg_match(
             '/talk to (a )?(person|human)|speak to (a )?(person|human|support|agent)|need to speak to|human (support|agent)|agent please|live agent|connect (me )?to (a )?(human|agent|support)|please connect me to support|handoff/u',
@@ -736,7 +810,7 @@ final class AiChatOrchestrator
     {
         $hits = $this->knowledge->search($message, 3);
         if ($hits === []) {
-            $body = 'I could not find an approved answer for that. Would you like to talk to support?';
+            $body = 'I could not find an approved JetPakistan answer for that yet. I can still help with flights, group travel, booking lookup, or connect you to support.';
             $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => $mode, 'knowledge_hits' => 0]);
 
             return $this->withMessageId($assistant, [
@@ -753,18 +827,20 @@ final class AiChatOrchestrator
                     ['label' => 'Contact Support', 'href' => '/support'],
                     ['label' => 'FAQ', 'href' => '/faq'],
                 ],
-                'meta' => $meta,
+                'meta' => array_merge($meta, [
+                    'KNOWLEDGE_HITS' => 0,
+                    'ANSWER_GROUNDED' => 'NO',
+                    'LLM_SYNTHESIS' => 'NO',
+                ]),
             ]);
         }
 
-        $parts = [];
-        foreach ($hits as $hit) {
-            $parts[] = '**'.$hit['title']."**\n".$hit['excerpt'];
-        }
-        $body = "Here is what I found in JetPakistan help:\n\n".implode("\n\n", $parts);
+        $body = $this->synthesizeGroundedKnowledgeReply($message, $hits);
+        $slugs = array_values(array_map(static fn ($h) => (string) $h['slug'], $hits));
+        $primary = $slugs[0] ?? 'unknown';
         $assistant = $this->storeMessage($conversation, 'assistant', $body, [
             'mode' => $mode,
-            'knowledge' => array_map(static fn ($h) => $h['slug'], $hits),
+            'knowledge' => $slugs,
         ]);
 
         return $this->withMessageId($assistant, [
@@ -777,8 +853,46 @@ final class AiChatOrchestrator
             'knowledge' => $hits,
             'recommendations' => [],
             'actions' => $this->defaultActions(),
-            'meta' => $meta,
+            'meta' => array_merge($meta, [
+                'KNOWLEDGE_SOURCE' => $primary,
+                'KNOWLEDGE_HITS' => count($hits),
+                'ANSWER_GROUNDED' => 'YES',
+                'LLM_SYNTHESIS' => $mode === 'LLM_ASSISTED' ? 'YES' : 'STRUCTURED',
+            ]),
         ]);
+    }
+
+    /**
+     * Natural grounded synthesis from approved knowledge hits (not a hardcoded company blurb).
+     *
+     * @param  list<array{slug: string, title: string, excerpt: string, score?: float}>  $hits
+     */
+    private function synthesizeGroundedKnowledgeReply(string $message, array $hits): string
+    {
+        $primary = $hits[0];
+        $excerpt = trim((string) ($primary['excerpt'] ?? ''));
+        $title = trim((string) ($primary['title'] ?? ''));
+        $slug = (string) ($primary['slug'] ?? '');
+
+        if ($slug === 'what-is-jetpakistan' || str_contains(mb_strtolower($message), 'what is jetpakistan')) {
+            // Compose from approved excerpt — do not invent beyond the source.
+            if ($excerpt !== '') {
+                return $excerpt.(str_ends_with($excerpt, '.') ? '' : '.').' I can also help search flights, explore group travel options, look up a booking, or connect you with support.';
+            }
+        }
+
+        if ($excerpt !== '') {
+            $prefix = $title !== '' ? $title.': ' : '';
+
+            return $prefix.$excerpt;
+        }
+
+        $parts = [];
+        foreach ($hits as $hit) {
+            $parts[] = '**'.$hit['title']."**\n".$hit['excerpt'];
+        }
+
+        return "Here is what I found in JetPakistan help:\n\n".implode("\n\n", $parts);
     }
 
     /**
@@ -1019,6 +1133,11 @@ final class AiChatOrchestrator
             $conversation->visitor_token_hash,
         );
 
+        if (($turn['action'] ?? '') === 'override') {
+            // Topic overrides field collection — assist without re-storing the user turn.
+            return $this->handleChat($conversation->fresh(), $cleanMessage, true);
+        }
+
         $assistant = $this->storeMessage($conversation, 'assistant', (string) ($turn['response']['message'] ?? ''), [
             'mode' => 'STRUCTURED_FALLBACK',
         ]);
@@ -1034,6 +1153,45 @@ final class AiChatOrchestrator
         }
 
         return $payload;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function tenantCapabilityLabels(): array
+    {
+        $ctx = app(EmbedRuntimeContext::class);
+        if ($ctx->isActive()) {
+            $labels = [];
+            if ($this->embedCapabilityAllows(EmbedTenantCapability::FLIGHT_SEARCH)) {
+                $labels[] = 'flights';
+            }
+            if ($this->embedCapabilityAllows(EmbedTenantCapability::BOOKING_LOOKUP)) {
+                $labels[] = 'booking_lookup';
+                $labels[] = 'booking_assistance';
+            }
+            if ($this->embedCapabilityAllows(EmbedTenantCapability::SUPPORT_HANDOFF)) {
+                $labels[] = 'support';
+            }
+            // Never invent JetPakistan-only group redirects for generic tenants.
+            return $labels;
+        }
+
+        return ['flights', 'group_travel', 'booking_assistance', 'support'];
+    }
+
+    private function assistantBrandName(): string
+    {
+        $ctx = app(EmbedRuntimeContext::class);
+        if ($ctx->isActive()) {
+            $tenant = $ctx->tenant();
+            $name = trim((string) ($tenant?->display_name ?: $tenant?->assistant_name ?: ''));
+
+            // Generic embed tenants must not be redirected as JetPakistan.
+            return $name !== '' ? $name : 'this assistant';
+        }
+
+        return 'JetPakistan';
     }
 
     /**

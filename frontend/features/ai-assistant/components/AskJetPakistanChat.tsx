@@ -127,6 +127,22 @@ async function postAi(path: string, body: Record<string, unknown>) {
   return { response, json };
 }
 
+/** Prevent undefined/null coercion and accidental doubled paste from reaching the API. */
+function sanitizeUserOutgoing(text: string): string {
+  let trimmed = String(text ?? "")
+    .replace(/^(?:undefined|null)+/i, "")
+    .trim();
+  if (trimmed.length >= 16) {
+    const half = Math.floor(trimmed.length / 2);
+    const left = trimmed.slice(0, half);
+    const right = trimmed.slice(half);
+    if (left && left === right) {
+      trimmed = left;
+    }
+  }
+  return trimmed;
+}
+
 export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   const titleId = useId();
   const listRef = useRef<HTMLDivElement>(null);
@@ -360,15 +376,16 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   };
 
   const send = async (text: string) => {
-    const trimmed = text.trim();
+    const trimmed = sanitizeUserOutgoing(text);
     if (!trimmed || busy) return;
 
     setBusy(true);
     setError(null);
+    const optimisticId = `u-${Date.now()}`;
     setMessages((previous) => [
       ...previous,
       {
-        id: `u-${Date.now()}`,
+        id: optimisticId,
         role: "user",
         body: trimmed,
       },
@@ -383,6 +400,25 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
 
       if (response.status === 503 || json.status === "unavailable") {
         appendAssistant(json);
+        return;
+      }
+
+      if (response.status === 429 || json.status === "rate_limited") {
+        const retryAfter =
+          typeof json.retry_after === "number"
+            ? json.retry_after
+            : Number(response.headers.get("Retry-After") || 0);
+        const waitHint =
+          retryAfter > 0
+            ? ` Please try again in about ${retryAfter} second${retryAfter === 1 ? "" : "s"}.`
+            : " Please try again in a few seconds.";
+        setError(
+          typeof json.message === "string" && json.message.trim() !== ""
+            ? json.message
+            : `You're sending messages pretty quickly.${waitHint}`,
+        );
+        // Keep the optimistic user bubble (server may not have stored it) and preserve input retry.
+        setInput((current) => (current.trim() === "" ? trimmed : current));
         return;
       }
 

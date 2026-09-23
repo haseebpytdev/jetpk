@@ -237,21 +237,21 @@ class ConversationalLeadCaptureTest extends TestCase
         $this->assertNotEmpty($consent['response']->json('query_reference'));
     }
 
-    public function test_pending_flight_request_resumes_after_consent(): void
+    public function test_pending_flight_request_assists_first_without_blocking_lead_gate(): void
     {
         $this->enablePublicAi();
         $vid = str_repeat('b', 40);
 
         $first = $this->chat($vid, "I'm looking for a Lahore to Dubai flight");
         $cid = $first['conversation_id'];
-        $this->chat($vid, 'Haseeb Asif', $cid);
-        $this->chat($vid, 'lead@example.com 03001234567', $cid);
+        $first['response']->assertOk();
+        // HELP-FIRST: flight assistance must not be blocked by lead capture.
+        $this->assertNotSame('lead_capture_required', $first['response']->json('status'));
+        $body = mb_strtolower((string) $first['response']->json('message'));
+        $this->assertStringNotContainsString('may i start with your name', $body);
 
-        $consent = $this->chat($vid, 'yes', $cid);
-        $consent['response']->assertOk();
-        $this->assertNotEmpty($consent['response']->json('recommendations'));
-        $this->assertSame('LHE', data_get($consent['response']->json(), 'meta.intent.origin'));
-        $this->assertSame('DXB', data_get($consent['response']->json(), 'meta.intent.destination'));
+        $conversation = AiConversation::query()->where('public_id', $cid)->first();
+        $this->assertTrue((bool) data_get($conversation?->shopping_state, 'lead_capture_pending'));
     }
 
     public function test_intake_prompts_and_replies_stored_as_normal_messages(): void
@@ -275,7 +275,7 @@ class ConversationalLeadCaptureTest extends TestCase
         $this->assertSame('Haseeb Asif', $messages[2]->body);
     }
 
-    public function test_authenticated_known_fields_not_re_requested(): void
+    public function test_authenticated_flight_assists_first_and_keeps_lead_soft_pending(): void
     {
         $this->enablePublicAi();
         $user = User::factory()->create([
@@ -294,12 +294,14 @@ class ConversationalLeadCaptureTest extends TestCase
         $cid = (string) $first->json('conversation_id');
 
         $message = mb_strtolower((string) $first->json('message'));
-        $this->assertStringContainsString('contact you', $message);
         $this->assertStringNotContainsString('may i start with your name', $message);
         $this->assertStringNotContainsString('email address and contact number', $message);
+
+        $conversation = AiConversation::query()->where('public_id', $cid)->first();
+        $this->assertTrue((bool) data_get($conversation?->shopping_state, 'lead_capture_pending'));
     }
 
-    public function test_authenticated_missing_phone_asks_only_phone_then_consent(): void
+    public function test_authenticated_missing_phone_assists_first_with_soft_pending_lead(): void
     {
         $this->enablePublicAi();
         $user = User::factory()->create([
@@ -314,8 +316,11 @@ class ConversationalLeadCaptureTest extends TestCase
         $cid = (string) $first->json('conversation_id');
 
         $message = mb_strtolower((string) $first->json('message'));
-        $this->assertStringContainsString('contact number', $message);
         $this->assertStringNotContainsString('may i start with your name', $message);
+
+        $conversation = AiConversation::query()->where('public_id', $cid)->first();
+        $this->assertTrue((bool) data_get($conversation?->shopping_state, 'lead_capture_pending'));
+        $this->assertSame('contact', data_get($conversation?->shopping_state, 'lead_capture_stage'));
     }
 
     public function test_what_is_jetpakistan_returns_useful_information_without_lead_gate(): void

@@ -698,7 +698,11 @@ class PublicAiAssistantTest extends TestCase
 
         $limited->assertStatus(429)
             ->assertJsonPath('status', 'rate_limited');
-        $this->assertStringContainsString('too many', mb_strtolower((string) $limited->json('message')));
+        $this->assertTrue(
+            str_contains(mb_strtolower((string) $limited->json('message')), 'too many')
+            || str_contains(mb_strtolower((string) $limited->json('message')), 'pretty quickly')
+        );
+        $this->assertGreaterThan(0, (int) $limited->json('retry_after'));
     }
 }
 

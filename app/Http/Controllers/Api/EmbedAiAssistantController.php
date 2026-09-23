@@ -114,7 +114,9 @@ class EmbedAiAssistantController extends Controller
             $this->bindConversationToSession($request, $conversation->public_id);
 
             if ($rate = $this->orchestrator->assertRateLimit($visitorRaw)) {
-                return response()->json($rate, 429);
+                $retryAfter = max(1, (int) ($rate['retry_after'] ?? 60));
+
+                return response()->json($rate, 429)->header('Retry-After', (string) $retryAfter);
             }
 
             $sanitized = $this->orchestrator->sanitizeUserMessage($data['message']);

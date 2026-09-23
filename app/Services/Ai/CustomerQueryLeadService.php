@@ -22,6 +22,7 @@ final class CustomerQueryLeadService
 
     public function __construct(
         private readonly AiCommercialIntentClassifier $intentClassifier,
+        private readonly ConversationIntentRouter $intentRouter,
     ) {}
 
     public function findRecentOpenQuery(?string $visitorHash, ?User $user = null, ?int $embedTenantId = null): ?CustomerQuery
@@ -238,6 +239,12 @@ final class CustomerQueryLeadService
     }
 
     /**
+     * HELP-FIRST lead gate.
+     *
+     * When the user already sent a strong actionable / knowledge / open-domain turn,
+     * mark lead capture as soft-pending and return null so assistance continues.
+     * Vague help / soft commercial without a concrete ask may still prompt for a name.
+     *
      * @return array<string, mixed>|null
      */
     public function leadCapturePromptPayload(AiConversation $conversation, string $message, ?User $user = null): ?array
@@ -245,6 +252,14 @@ final class CustomerQueryLeadService
         $user = $user ?? $this->resolveConversationUser($conversation);
 
         if (! $this->needsLeadCapture($conversation, $message, $user)) {
+            return null;
+        }
+
+        // Assist first: do not monopolize the turn when the user already asked for help.
+        if ($this->intentRouter->shouldOverrideLeadCapture($message)) {
+            $this->markLeadCaptureSoftPending($conversation, $message, $user);
+            $this->extractOpportunisticLeadFields($conversation, $message);
+
             return null;
         }
 
@@ -262,6 +277,89 @@ final class CustomerQueryLeadService
             $this->promptForStage($state, $user),
             true,
         );
+    }
+
+    /**
+     * Remember that lead fields are still missing without blocking the current turn.
+     */
+    public function markLeadCaptureSoftPending(AiConversation $conversation, string $message, ?User $user = null): void
+    {
+        $user = $user ?? $this->resolveConversationUser($conversation);
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        $state['lead_capture_pending'] = true;
+        if (trim($message) !== '' && ! isset($state['lead_pending_message'])) {
+            $state['lead_pending_message'] = $message;
+        }
+        $state['lead_capture_fields'] = $this->requiredLeadFields($user);
+        $state = $this->seedLeadContactFromProfile($state, $user);
+        $state['lead_capture_stage'] = $this->resolveLeadCaptureStage($state, $user);
+        $conversation->shopping_state = $state;
+        $conversation->save();
+    }
+
+    /**
+     * Opportunistically pull name/email/phone from a mixed turn without answering for the user.
+     */
+    public function extractOpportunisticLeadFields(AiConversation $conversation, string $message): void
+    {
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        if (! ($state['lead_capture_pending'] ?? false)) {
+            return;
+        }
+
+        $user = $this->resolveConversationUser($conversation);
+        $changed = false;
+
+        $name = $this->extractLeadingName($message);
+        if ($name !== null && ! $this->isValidName((string) ($state['lead_name'] ?? ''))) {
+            $state['lead_name'] = $name;
+            $changed = true;
+        }
+
+        $contact = $this->parseContactFromMessage($message);
+        if (($contact['email'] ?? null) && ! filter_var((string) ($state['lead_email'] ?? ''), FILTER_VALIDATE_EMAIL)) {
+            $state['lead_email'] = mb_strtolower((string) $contact['email']);
+            $changed = true;
+        }
+        if (($contact['phone'] ?? null) && ! $this->isValidPhone((string) ($state['lead_phone'] ?? ''))) {
+            $state['lead_phone'] = trim((string) $contact['phone']);
+            $changed = true;
+        }
+
+        if ($changed) {
+            $state['lead_capture_stage'] = $this->resolveLeadCaptureStage($state, $user);
+            $conversation->shopping_state = $state;
+            $conversation->save();
+        }
+    }
+
+    /**
+     * "Ahmed, I need …" / "I'm Ahmed and I need …" / "My name is Ahmed …"
+     */
+    public function extractLeadingName(string $message): ?string
+    {
+        $message = trim($message);
+        if ($message === '') {
+            return null;
+        }
+
+        if (preg_match('/^(?:i(?:\'m| am)|my name is|this is)\s+([\p{L}][\p{L}\p{M}\s\'\-\.]{1,60}?)(?:,|\s+and\b|\s+[-–—]\s+|\s+i\s+need\b)/ui', $message, $m) === 1) {
+            $candidate = trim($m[1]);
+
+            return $this->isValidName($candidate) && $this->intentRouter->looksLikeBareName($candidate)
+                ? $candidate
+                : null;
+        }
+
+        if (preg_match('/^([\p{L}][\p{L}\p{M}\s\'\-\.]{1,40}),\s+/u', $message, $m) === 1) {
+            $candidate = trim($m[1]);
+
+            return $this->isValidName($candidate) && $this->intentRouter->looksLikeBareName($candidate)
+                ? $candidate
+                : null;
+        }
+
+        return null;
     }
 
     /**
@@ -505,8 +603,29 @@ final class CustomerQueryLeadService
         array $state,
         ?User $user,
     ): array {
+        // Same-turn name + intent: capture name and let orchestrator assist on the rest.
+        $leading = $this->extractLeadingName($message);
+        if ($leading !== null && $this->intentRouter->shouldOverrideLeadCapture($message)) {
+            $state['lead_name'] = $leading;
+            $state['lead_capture_stage'] = $this->resolveLeadCaptureStage($state, $user);
+            $conversation->shopping_state = $state;
+            $conversation->save();
+
+            return [
+                'action' => 'override',
+                'response' => $this->buildConversationalResponse($conversation, '', true),
+            ];
+        }
+
+        if ($this->intentRouter->shouldOverrideLeadCapture($message)) {
+            return [
+                'action' => 'override',
+                'response' => $this->buildConversationalResponse($conversation, '', true),
+            ];
+        }
+
         $name = trim($message);
-        if (! $this->isValidName($name)) {
+        if (! $this->isValidName($name) || ! $this->intentRouter->looksLikeBareName($name)) {
             return [
                 'action' => 'prompt',
                 'response' => $this->buildConversationalResponse(
@@ -547,6 +666,32 @@ final class CustomerQueryLeadService
         array $state,
         ?User $user,
     ): array {
+        // Contact + question in the same turn: capture what we can, then override to answer.
+        if ($this->intentRouter->shouldOverrideLeadCapture($message)
+            || $this->intentRouter->isJetPakistanKnowledgeQuestion($message)
+            || preg_match('/\b(baggage|refund|payment|what|how|where)\b/ui', $message) === 1
+        ) {
+            $parsed = $this->parseContactFromMessage($message);
+            if (($parsed['email'] ?? null)) {
+                $state['lead_email'] = mb_strtolower((string) $parsed['email']);
+            }
+            if (($parsed['phone'] ?? null) && $this->isValidPhone((string) $parsed['phone'])) {
+                $state['lead_phone'] = trim((string) $parsed['phone']);
+            }
+            $state['lead_capture_stage'] = $this->resolveLeadCaptureStage($state, $user);
+            $conversation->shopping_state = $state;
+            $conversation->save();
+
+            if ($this->intentRouter->shouldOverrideLeadCapture($message)
+                || preg_match('/\b(baggage|refund|payment|what|how|where)\b/ui', $message) === 1
+            ) {
+                return [
+                    'action' => 'override',
+                    'response' => $this->buildConversationalResponse($conversation, '', true),
+                ];
+            }
+        }
+
         $parsed = $this->parseContactFromMessage($message);
         $email = $parsed['email'] ?? (string) ($state['lead_email'] ?? '');
         $phone = $parsed['phone'] ?? (string) ($state['lead_phone'] ?? '');
