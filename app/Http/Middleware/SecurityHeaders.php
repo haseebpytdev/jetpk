@@ -15,7 +15,9 @@ class SecurityHeaders
     {
         $response = $next($request);
 
-        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+        if (! $request->attributes->get('ai_embed_framing', false)) {
+            $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+        }
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set(

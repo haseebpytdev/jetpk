@@ -1,0 +1,38 @@
+<!--
+JetPakistan Embed-01 client integration example.
+
+1. Ask JetPakistan to allowlist your HTTPS origin in AI_EMBED_JETPAKISTAN_ALLOWED_ORIGINS.
+2. Embed the iframe on your site. No credentials or secrets belong in this HTML.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JetPakistan AI Embed Example</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 24px; }
+        iframe { width: 100%; max-width: 420px; height: 680px; border: 1px solid #dbe3ef; border-radius: 16px; }
+    </style>
+</head>
+<body>
+    <h1>Client site with JetPakistan AI</h1>
+    <iframe
+        id="jp-ai-frame"
+        src="https://jetpakistan.pk/ai/embed/jetpakistan"
+        title="Ask JetPakistan"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+    ></iframe>
+
+    <script>
+        window.addEventListener("message", function (event) {
+            if (event.origin !== "https://jetpakistan.pk") return;
+            if (!event.data || typeof event.data.type !== "string") return;
+            if (event.data.type === "JP_AI_RESIZE" && event.data.height) {
+                var frame = document.getElementById("jp-ai-frame");
+                if (frame) frame.style.height = Math.min(event.data.height, 900) + "px";
+            }
+        });
+    </script>
+</body>
+</html>

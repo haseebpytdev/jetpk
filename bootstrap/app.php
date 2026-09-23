@@ -12,6 +12,8 @@ use App\Http\Controllers\Developer\DevCpUiVersionsController;
 use App\Http\Controllers\Developer\DeveloperAuthController;
 use App\Http\Controllers\Developer\DeveloperPasswordController;
 use App\Http\Controllers\Developer\PlatformModuleControlController;
+use App\Http\Middleware\ApplyAiEmbedFrameHeaders;
+use App\Http\Middleware\AuthenticateAiEmbedSession;
 use App\Http\Middleware\ApplyAiLabCanaryFaultHeader;
 use App\Http\Middleware\EnsureAccountType;
 use App\Http\Middleware\EnsureDashboardPermission;
@@ -210,6 +212,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'preview.client.persist' => PersistClientPreviewContext::class,
             'client.ui.preview.protect' => ProtectClientUiPreview::class,
             'ai.lab.canary.fault' => ApplyAiLabCanaryFaultHeader::class,
+            'ai.embed.frame' => ApplyAiEmbedFrameHeaders::class,
+            'ai.embed.session' => AuthenticateAiEmbedSession::class,
         ]);
 
         $middleware->prependToPriorityList(
@@ -219,6 +223,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: [
             'payments/abhipay/callback',
+            'api/embed/ai/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

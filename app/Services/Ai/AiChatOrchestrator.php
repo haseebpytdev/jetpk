@@ -99,10 +99,67 @@ final class AiChatOrchestrator
     {
         [$visitorRaw] = $this->resolveVisitorToken($request);
 
+        return $this->findOwnedConversationByVisitor($visitorRaw, $publicId);
+    }
+
+    public function findOwnedConversationByVisitor(string $visitorRaw, string $publicId): ?AiConversation
+    {
         return AiConversation::query()
             ->where('public_id', $publicId)
             ->where('visitor_token_hash', $this->hashVisitor($visitorRaw))
             ->first();
+    }
+
+    /**
+     * Embed transport: resolve conversation without jp_ai_vid cookie access.
+     *
+     * @return array{conversation: ?AiConversation, visitor_raw: string, visitor_hash: string}
+     */
+    public function resolveConversationForVisitor(
+        string $visitorRaw,
+        ?string $publicId = null,
+        bool $createIfMissing = true,
+        string $channel = 'embed',
+        ?int $userId = null,
+    ): array {
+        $hash = $this->hashVisitor($visitorRaw);
+
+        $conversation = null;
+        if (is_string($publicId) && $publicId !== '') {
+            $conversation = AiConversation::query()
+                ->where('public_id', $publicId)
+                ->where('visitor_token_hash', $hash)
+                ->first();
+        }
+
+        if ($conversation === null && $createIfMissing && ($publicId === null || $publicId === '')) {
+            $openQuery = $this->leadService->findRecentOpenQuery($hash, null);
+            if ($openQuery?->conversation !== null) {
+                $conversation = $openQuery->conversation;
+            } else {
+                $conversation = AiConversation::query()->create([
+                    'channel' => $channel,
+                    'visitor_token_hash' => $hash,
+                    'user_id' => $userId,
+                    'state' => AiConversation::STATE_AI_ACTIVE,
+                    'shopping_state' => [],
+                ]);
+            }
+        } elseif ($conversation === null && $createIfMissing) {
+            $conversation = AiConversation::query()->create([
+                'channel' => $channel,
+                'visitor_token_hash' => $hash,
+                'user_id' => $userId,
+                'state' => AiConversation::STATE_AI_ACTIVE,
+                'shopping_state' => [],
+            ]);
+        }
+
+        return [
+            'conversation' => $conversation,
+            'visitor_raw' => $visitorRaw,
+            'visitor_hash' => $hash,
+        ];
     }
 
     /**
@@ -428,13 +485,13 @@ final class AiChatOrchestrator
         );
     }
 
-    public function clearConversation(AiConversation $old, string $visitorHash): AiConversation
+    public function clearConversation(AiConversation $old, string $visitorHash, string $channel = 'web'): AiConversation
     {
         $old->state = AiConversation::STATE_CLOSED;
         $old->save();
 
         $conversation = AiConversation::query()->create([
-            'channel' => 'web',
+            'channel' => $channel,
             'visitor_token_hash' => $visitorHash,
             'user_id' => $old->user_id,
             'state' => AiConversation::STATE_AI_ACTIVE,
