@@ -70,6 +70,43 @@ Flow:
 3. Admin verify payment → single `create/booking` call; idempotent if `supplier_booking_id` already stored in meta.
 4. Failed supplier booking leaves booking in manual review with reconciliation flags.
 
+### Create booking wire (Postman contract)
+
+`POST /api/create/booking` JSON body:
+
+```json
+{
+  "group_id": 1238,
+  "agency_info": {
+    "group_id": 1238,
+    "agent_name": "...",
+    "agency_name": "...",
+    "email": "...",
+    "mobile": "...",
+    "adults": 1,
+    "child": 0,
+    "infant": 0,
+    "agent_notes": null
+  },
+  "booking_details": [
+    {
+      "surname": "...",
+      "given_name": "...",
+      "title": "MR",
+      "passport_no": "...",
+      "dob": "YYYY-MM-DD",
+      "doe": "YYYY-MM-DD"
+    }
+  ]
+}
+```
+
+- Wire field is **`booking_details`**, never `passengers`.
+- Titles: `MR` / `MRS` / `MS` / `CHD` / `INF`.
+- Passenger map: `last_name→surname`, `first_name→given_name`, `passport_number→passport_no`, `date_of_birth→dob`, `passport_expiry→doe`.
+- Documented success response: `{ "error": false, "success": true, "message": "...", "data": { "id": ... } }`. Supplier booking id is taken from **`data.id`** (client unwraps `data` when present).
+- HTTP 200 with `error=true` / `success=false` is treated as failure for create and show.
+
 ## Admin configuration
 
 1. Admin → API Settings → add **Ameer-e-Millat** provider card.

@@ -56,13 +56,35 @@ class AmeerPostPaymentBookingTest extends TestCase
         Http::fake(array_merge($this->revalidationHttpFakes(), [
             'ameer.test/api/create/booking' => function ($request) {
                 $payload = $request->data();
-                $this->assertSame('MR', $payload['passengers'][0]['title']);
-                $this->assertSame('Ali', $payload['passengers'][0]['given_name']);
-                $this->assertSame('Khan', $payload['passengers'][0]['surname']);
+                $this->assertArrayHasKey('booking_details', $payload);
+                $this->assertArrayNotHasKey('passengers', $payload);
+                $this->assertSame(501, $payload['group_id']);
+                $this->assertSame(501, $payload['agency_info']['group_id']);
+                $this->assertSame('MR', $payload['booking_details'][0]['title']);
+                $this->assertSame('Ali', $payload['booking_details'][0]['given_name']);
+                $this->assertSame('Khan', $payload['booking_details'][0]['surname']);
+                $this->assertSame('AB1234567', $payload['booking_details'][0]['passport_no']);
+                $this->assertArrayHasKey('agent_name', $payload['agency_info']);
+                $this->assertArrayHasKey('agency_name', $payload['agency_info']);
+                $this->assertArrayHasKey('email', $payload['agency_info']);
+                $this->assertArrayHasKey('mobile', $payload['agency_info']);
+                $this->assertSame(1, $payload['agency_info']['adults']);
+                $this->assertSame(0, $payload['agency_info']['child']);
+                $this->assertSame(0, $payload['agency_info']['infant']);
+                $this->assertArrayHasKey('agent_notes', $payload['agency_info']);
 
-                return Http::response(['booking_id' => 'BK-9001'], 200);
+                return Http::response([
+                    'error' => false,
+                    'success' => true,
+                    'message' => 'Booking created',
+                    'data' => ['id' => 9001],
+                ], 200);
             },
-            'ameer.test/api/show/booking/BK-9001' => Http::response(['booking_id' => 'BK-9001', 'status' => 'confirmed'], 200),
+            'ameer.test/api/show/booking/9001' => Http::response([
+                'error' => false,
+                'success' => true,
+                'data' => ['id' => 9001, 'status' => 'confirmed'],
+            ], 200),
         ]));
 
         $booking = $this->seedPendingBooking();
@@ -76,17 +98,26 @@ class AmeerPostPaymentBookingTest extends TestCase
         $confirmed = $service->verifyPayment($booking, $admin);
 
         $this->assertSame(GroupBookingStatus::Confirmed, $confirmed->status);
-        $this->assertSame('BK-9001', $confirmed->supplier_reservation_id);
-        $this->assertSame('BK-9001', $confirmed->meta['supplier_booking_id'] ?? null);
+        $this->assertSame('9001', $confirmed->supplier_reservation_id);
+        $this->assertSame('9001', $confirmed->meta['supplier_booking_id'] ?? null);
 
         Http::assertSent(fn ($request): bool => str_contains((string) $request->url(), '/api/create/booking'), 1);
+        Http::assertSent(fn ($request): bool => str_contains((string) $request->url(), '/api/show/booking/9001'));
     }
 
     public function test_verify_payment_retry_does_not_duplicate_create_call(): void
     {
         Http::fake(array_merge($this->revalidationHttpFakes(), [
-            'ameer.test/api/create/booking' => Http::response(['booking_id' => 'BK-9002'], 200),
-            'ameer.test/api/show/booking/BK-9002' => Http::response(['booking_id' => 'BK-9002'], 200),
+            'ameer.test/api/create/booking' => Http::response([
+                'error' => false,
+                'success' => true,
+                'data' => ['id' => 9002],
+            ], 200),
+            'ameer.test/api/show/booking/9002' => Http::response([
+                'error' => false,
+                'success' => true,
+                'data' => ['id' => 9002],
+            ], 200),
         ]));
 
         $booking = $this->seedPendingBooking();
@@ -97,8 +128,8 @@ class AmeerPostPaymentBookingTest extends TestCase
         $booking->refresh();
         $booking->update([
             'status' => GroupBookingStatus::ManualPaymentPendingReview,
-            'meta' => ['supplier_booking_id' => 'BK-9002'],
-            'supplier_reservation_id' => 'BK-9002',
+            'meta' => ['supplier_booking_id' => '9002'],
+            'supplier_reservation_id' => '9002',
         ]);
 
         $service->verifyPayment($booking, $admin);
@@ -106,10 +137,50 @@ class AmeerPostPaymentBookingTest extends TestCase
         Http::assertNotSent(fn ($request): bool => str_contains((string) $request->url(), '/api/create/booking'));
     }
 
-    private function seedPendingBooking(): GroupBooking
+    public function test_agency_info_counts_child_and_infant_passengers(): void
+    {
+        Http::fake(array_merge($this->revalidationHttpFakes(), [
+            'ameer.test/api/create/booking' => function ($request) {
+                $payload = $request->data();
+                $this->assertSame(1, $payload['agency_info']['adults']);
+                $this->assertSame(1, $payload['agency_info']['child']);
+                $this->assertSame(1, $payload['agency_info']['infant']);
+                $this->assertCount(3, $payload['booking_details']);
+                $this->assertSame('CHD', $payload['booking_details'][1]['title']);
+                $this->assertSame('INF', $payload['booking_details'][2]['title']);
+                $this->assertArrayNotHasKey('passengers', $payload);
+
+                return Http::response([
+                    'error' => false,
+                    'success' => true,
+                    'data' => ['id' => 9003],
+                ], 200);
+            },
+            'ameer.test/api/show/booking/9003' => Http::response([
+                'error' => false,
+                'success' => true,
+                'data' => ['id' => 9003],
+            ], 200),
+        ]));
+
+        $booking = $this->seedPendingBooking(withChildAndInfant: true);
+        $admin = User::factory()->create(['account_type' => AccountType::PlatformAdmin]);
+        $service = app(GroupReservationService::class);
+        $service->createReservation($booking);
+        $booking->refresh();
+        $booking->update(['status' => GroupBookingStatus::ManualPaymentPendingReview]);
+
+        $confirmed = $service->verifyPayment($booking, $admin);
+        $this->assertSame('9003', $confirmed->supplier_reservation_id);
+    }
+
+    private function seedPendingBooking(bool $withChildAndInfant = false): GroupBooking
     {
         $this->seed(OtaFoundationSeeder::class);
         $user = User::factory()->create(['account_type' => AccountType::Customer]);
+
+        $seatCount = $withChildAndInfant ? 3 : 1;
+        $total = 99000 * $seatCount;
 
         $inventory = GroupInventory::query()->create([
             'supplier' => 'ameer_e_millat',
@@ -117,7 +188,7 @@ class AmeerPostPaymentBookingTest extends TestCase
             'public_id' => 'AEM-501',
             'title' => 'Ameer post-payment test',
             'sector' => 'SKT-SHJ',
-            'total_seats' => 5,
+            'total_seats' => 10,
             'held_seats' => 0,
             'sold_seats' => 0,
             'price' => 99000,
@@ -127,12 +198,12 @@ class AmeerPostPaymentBookingTest extends TestCase
         ]);
 
         $booking = GroupBooking::query()->create([
-            'reference' => 'GRP-AEM-POSTPAY',
+            'reference' => 'GRP-AEM-POSTPAY'.($withChildAndInfant ? '-MIX' : ''),
             'user_id' => $user->id,
             'group_inventory_id' => $inventory->id,
             'status' => GroupBookingStatus::PendingPassengerDetails,
-            'seat_count' => 1,
-            'total_amount' => 99000,
+            'seat_count' => $seatCount,
+            'total_amount' => $total,
             'currency' => 'PKR',
             'contact_name' => 'Ali Khan',
             'contact_email' => 'ali@example.test',
@@ -155,6 +226,37 @@ class AmeerPostPaymentBookingTest extends TestCase
             'passenger_type' => 'adult',
             'sort_order' => 0,
         ]);
+
+        if ($withChildAndInfant) {
+            GroupBookingPassenger::query()->create([
+                'group_booking_id' => $booking->id,
+                'title' => 'Master',
+                'first_name' => 'Sara',
+                'last_name' => 'Khan',
+                'gender' => 'female',
+                'date_of_birth' => '2018-05-01',
+                'passport_number' => 'CD7654321',
+                'passport_expiry' => '2030-01-01',
+                'nationality' => 'Pakistani',
+                'document_type' => 'passport',
+                'passenger_type' => 'child',
+                'sort_order' => 1,
+            ]);
+            GroupBookingPassenger::query()->create([
+                'group_booking_id' => $booking->id,
+                'title' => 'Infant',
+                'first_name' => 'Omar',
+                'last_name' => 'Khan',
+                'gender' => 'male',
+                'date_of_birth' => '2025-01-01',
+                'passport_number' => 'EF1111111',
+                'passport_expiry' => '2030-01-01',
+                'nationality' => 'Pakistani',
+                'document_type' => 'passport',
+                'passenger_type' => 'infant',
+                'sort_order' => 2,
+            ]);
+        }
 
         return $booking;
     }

@@ -97,7 +97,7 @@ class AmeerEMillatGroupTicketAdapter implements GroupTicketSupplierInterface
 
     public function createSupplierBooking(GroupBooking $booking, GroupInventory $inventory): array
     {
-        $booking->loadMissing(['passengers', 'user']);
+        $booking->loadMissing(['passengers', 'user.currentAgency']);
 
         $groupId = (int) $inventory->supplier_package_id;
         if ($groupId <= 0) {
@@ -110,8 +110,8 @@ class AmeerEMillatGroupTicketAdapter implements GroupTicketSupplierInterface
 
         $payload = [
             'group_id' => $groupId,
-            'passengers' => $this->mapPassengers($booking),
-            'agency_info' => $this->resolveAgencyInfo($booking),
+            'agency_info' => $this->resolveAgencyInfo($booking, $groupId),
+            'booking_details' => $this->mapBookingDetails($booking),
         ];
 
         $createResponse = $this->client->createBooking($payload);
@@ -181,37 +181,113 @@ class AmeerEMillatGroupTicketAdapter implements GroupTicketSupplierInterface
     }
 
     /**
+     * Map JetPakistan passengers to vendor booking_details[] (Postman contract).
+     *
      * @return list<array<string, mixed>>
      */
-    private function mapPassengers(GroupBooking $booking): array
+    private function mapBookingDetails(GroupBooking $booking): array
     {
-        $passengers = [];
+        $details = [];
         foreach ($booking->passengers as $passenger) {
-            $passengers[] = [
+            $details[] = [
+                'surname' => (string) $passenger->last_name,
+                'given_name' => (string) $passenger->first_name,
                 'title' => $this->normalizeTitle($passenger->title, $passenger->passenger_type),
-                'given_name' => $passenger->first_name,
-                'surname' => $passenger->last_name,
-                'passport_no' => $passenger->passport_number,
+                'passport_no' => (string) ($passenger->passport_number ?? ''),
                 'dob' => $passenger->date_of_birth?->format('Y-m-d'),
                 'doe' => $passenger->passport_expiry?->format('Y-m-d'),
             ];
         }
 
-        return $passengers;
+        return $details;
     }
 
     /**
-     * @return array<string, mixed>
+     * Documented agency_info shape from FSD Ameer-e-Millat Postman collection.
+     *
+     * @return array{
+     *     group_id: int,
+     *     agent_name: string,
+     *     agency_name: string,
+     *     email: string,
+     *     mobile: string,
+     *     adults: int,
+     *     child: int,
+     *     infant: int,
+     *     agent_notes: ?string
+     * }
      */
-    private function resolveAgencyInfo(GroupBooking $booking): array
+    private function resolveAgencyInfo(GroupBooking $booking, int $groupId): array
     {
         $user = $booking->user;
+        $counts = $this->countPassengerTypes($booking);
 
-        return array_filter([
-            'name' => $booking->contact_name ?: ($user?->name ?? null),
-            'email' => $booking->contact_email ?: ($user?->email ?? null),
-            'phone' => $booking->contact_phone ?: ($user?->phone ?? null),
-        ], static fn ($value): bool => $value !== null && $value !== '');
+        $agencyName = '';
+        if ($user !== null) {
+            $agency = $user->currentAgency;
+            if ($agency !== null) {
+                $agencyName = trim((string) ($agency->name ?? ''));
+            }
+            if ($agencyName === '' && method_exists($user, 'agentDisplayAgencyName')) {
+                $agencyName = trim((string) $user->agentDisplayAgencyName());
+            }
+        }
+        if ($agencyName === '') {
+            $agencyName = 'JetPakistan';
+        }
+
+        $agentName = trim((string) ($booking->contact_name ?: ($user?->name ?? '')));
+        if ($agentName === '') {
+            $agentName = $agencyName;
+        }
+
+        $email = trim((string) ($booking->contact_email ?: ($user?->email ?? '')));
+        $mobile = trim((string) ($booking->contact_phone ?: ($user?->phone ?? '')));
+
+        return [
+            'group_id' => $groupId,
+            'agent_name' => $agentName,
+            'agency_name' => $agencyName,
+            'email' => $email,
+            'mobile' => $mobile,
+            'adults' => $counts['adults'],
+            'child' => $counts['child'],
+            'infant' => $counts['infant'],
+            'agent_notes' => null,
+        ];
+    }
+
+    /**
+     * @return array{adults: int, child: int, infant: int}
+     */
+    private function countPassengerTypes(GroupBooking $booking): array
+    {
+        $adults = 0;
+        $child = 0;
+        $infant = 0;
+
+        foreach ($booking->passengers as $passenger) {
+            $type = strtolower(trim((string) ($passenger->passenger_type ?? 'adult')));
+            $title = strtoupper(trim((string) ($passenger->title ?? '')));
+
+            if ($type === 'infant' || $type === 'inf' || $title === 'INF') {
+                $infant++;
+            } elseif ($type === 'child' || $type === 'chd' || $title === 'CHD') {
+                $child++;
+            } else {
+                $adults++;
+            }
+        }
+
+        if ($adults + $child + $infant === 0) {
+            $adults = max(1, (int) $booking->seat_count);
+        }
+
+        return [
+            'adults' => $adults,
+            'child' => $child,
+            'infant' => $infant,
+        ];
     }
 
     private function normalizeTitle(?string $title, ?string $passengerType): string
@@ -242,15 +318,17 @@ class AmeerEMillatGroupTicketAdapter implements GroupTicketSupplierInterface
     }
 
     /**
+     * Prefer documented create response data.id (pre- or post-unwrap).
+     *
      * @param  array<string, mixed>  $response
      */
     private function extractBookingId(array $response): string
     {
         $candidates = [
-            $response['booking_id'] ?? null,
+            $response['data']['id'] ?? null,
             $response['id'] ?? null,
             $response['data']['booking_id'] ?? null,
-            $response['data']['id'] ?? null,
+            $response['booking_id'] ?? null,
             $response['booking']['id'] ?? null,
             $response['booking']['booking_id'] ?? null,
         ];
