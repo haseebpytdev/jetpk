@@ -219,6 +219,34 @@ class ConversationQuality26AiFirstTest extends TestCase
         $this->assertSame('STRUCTURED_FALLBACK', $response->json('mode'));
     }
 
+    public function test_current_unverified_rejects_qualitative_news_claim(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            '{"message":"Apple has just announced a major product today.","can_verify_live":false}'
+        ));
+
+        $response = $this->chat(str_repeat('c7', 20), "Any breaking news about Apple right now?");
+        $response->assertOk();
+        $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'));
+        $body = mb_strtolower((string) $response->json('message'));
+        $this->assertStringNotContainsString('has just announced', $body);
+        $this->assertStringContainsString('can\'t verify', $body);
+    }
+
+    public function test_current_unverified_rejects_can_verify_live_true_flag(): void
+    {
+        $this->enablePublicAi();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            '{"message":"I can\'t verify Apple\'s live stock price through this assistant.","can_verify_live":true}'
+        ));
+
+        $response = $this->chat(str_repeat('c8', 20), "What's Apple's stock price right now?");
+        $response->assertOk();
+        $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'));
+        $this->assertSame('CURRENT_UNVERIFIED', $response->json('meta.open_domain_category'));
+    }
+
     public function test_what_is_jetpakistan_uses_rag_then_model_synthesis(): void
     {
         $this->enablePublicAi();
