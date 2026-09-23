@@ -97,8 +97,8 @@ Route::get('/integrations/ai/{pathToken}', [AiEmbedPageController::class, 'show'
     ->where('pathToken', '[A-Za-z0-9_-]+')
     ->name('ai.embed.show');
 
-Route::prefix('api/embed/ai/{tenant}')
-    ->where(['tenant' => 'jetpakistan'])
+Route::prefix('api/embed/ai/{embedKey}')
+    ->where(['embedKey' => '[A-Za-z0-9_-]+'])
     ->group(function (): void {
         Route::post('/session', [EmbedAiAssistantController::class, 'session'])
             ->middleware('throttle:20,1')

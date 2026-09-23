@@ -3,39 +3,46 @@
 namespace App\Http\Controllers\Ai;
 
 use App\Http\Controllers\Controller;
+use App\Models\AiEmbedTenant;
 use App\Services\Ai\AiEmbedSessionService;
+use App\Services\Ai\Embed\EmbedProviderFactory;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class AiEmbedPageController extends Controller
 {
-    private const TENANT = 'jetpakistan';
-
     public function __construct(
         private readonly AiEmbedSessionService $embedSessions,
+        private readonly EmbedProviderFactory $providerFactory,
     ) {}
 
     public function show(Request $request, string $pathToken): Response
     {
-        if (! $this->embedSessions->matchesEntryPath(self::TENANT, $pathToken)) {
+        $tenant = $this->embedSessions->resolveTenantByEmbedKey($pathToken);
+        if ($tenant === null) {
             abort(404);
         }
 
-        if (! $this->embedSessions->isEmbedPageAvailable(self::TENANT)) {
+        if (! $this->embedSessions->isEmbedPageAvailable($tenant)) {
             abort(404);
         }
 
-        $tenantConfig = config('ai_embed.tenants.'.self::TENANT, []);
+        $presentation = $this->providerFactory->tenantConfig($tenant)->presentationConfig();
+        $embedKey = $pathToken;
+        $apiBase = rtrim((string) config('ai_embed.public_base_url', config('app.url')), '/');
 
         return response()->view('ai.embed', [
-            'tenant' => self::TENANT,
-            'displayName' => (string) ($tenantConfig['display_name'] ?? 'JetPakistan'),
-            'assistantName' => (string) ($tenantConfig['assistant_name'] ?? 'Ask JetPakistan'),
-            'sessionEndpoint' => url('/api/embed/ai/'.self::TENANT.'/session'),
-            'chatEndpoint' => url('/api/embed/ai/'.self::TENANT.'/chat'),
-            'messagesEndpoint' => url('/api/embed/ai/'.self::TENANT.'/messages'),
-            'clearEndpoint' => url('/api/embed/ai/'.self::TENANT.'/clear'),
-            'handoffEndpoint' => url('/api/embed/ai/'.self::TENANT.'/handoff'),
+            'tenantPublicId' => $tenant->public_id,
+            'displayName' => $presentation['display_name'] ?? $tenant->display_name,
+            'assistantName' => $presentation['assistant_name'] ?? $tenant->assistant_name,
+            'welcomeText' => $presentation['welcome_text'] ?? '',
+            'logoUrl' => $presentation['logo_url'] ?? null,
+            'themePrimary' => $presentation['theme']['primary'] ?? '#0b5fff',
+            'sessionEndpoint' => $apiBase.'/api/embed/ai/'.$embedKey.'/session',
+            'chatEndpoint' => $apiBase.'/api/embed/ai/'.$embedKey.'/chat',
+            'messagesEndpoint' => $apiBase.'/api/embed/ai/'.$embedKey.'/messages',
+            'clearEndpoint' => $apiBase.'/api/embed/ai/'.$embedKey.'/clear',
+            'handoffEndpoint' => $apiBase.'/api/embed/ai/'.$embedKey.'/handoff',
             'sessionHeader' => (string) config('ai_embed.session_header', 'X-JP-AI-Embed-Session'),
             'parentOriginHeader' => (string) config('ai_embed.parent_origin_header', 'X-JP-AI-Embed-Parent-Origin'),
         ]);

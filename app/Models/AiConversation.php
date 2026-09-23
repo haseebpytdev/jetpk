@@ -20,6 +20,7 @@ class AiConversation extends Model
     protected $fillable = [
         'public_id',
         'channel',
+        'ai_embed_tenant_id',
         'visitor_token_hash',
         'user_id',
         'state',

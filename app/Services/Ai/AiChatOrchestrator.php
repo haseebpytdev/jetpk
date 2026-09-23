@@ -8,6 +8,8 @@ use App\Models\AiHandoffAudit;
 use App\Models\AiMessage;
 use App\Models\CustomerQuery;
 use App\Models\User;
+use App\Services\Ai\Embed\EmbedRuntimeContext;
+use App\Support\Ai\Embed\EmbedTenantCapability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -44,6 +46,7 @@ final class AiChatOrchestrator
             $conversation = AiConversation::query()
                 ->where('public_id', $publicId)
                 ->where('visitor_token_hash', $hash)
+                ->whereNull('ai_embed_tenant_id')
                 ->first();
         }
 
@@ -102,12 +105,19 @@ final class AiChatOrchestrator
         return $this->findOwnedConversationByVisitor($visitorRaw, $publicId);
     }
 
-    public function findOwnedConversationByVisitor(string $visitorRaw, string $publicId): ?AiConversation
+    public function findOwnedConversationByVisitor(string $visitorRaw, string $publicId, ?int $embedTenantId = null): ?AiConversation
     {
-        return AiConversation::query()
+        $query = AiConversation::query()
             ->where('public_id', $publicId)
-            ->where('visitor_token_hash', $this->hashVisitor($visitorRaw))
-            ->first();
+            ->where('visitor_token_hash', $this->hashVisitor($visitorRaw));
+
+        if ($embedTenantId !== null) {
+            $query->where('ai_embed_tenant_id', $embedTenantId);
+        } else {
+            $query->whereNull('ai_embed_tenant_id');
+        }
+
+        return $query->first();
     }
 
     /**
@@ -121,24 +131,23 @@ final class AiChatOrchestrator
         bool $createIfMissing = true,
         string $channel = 'embed',
         ?int $userId = null,
+        ?int $embedTenantId = null,
     ): array {
         $hash = $this->hashVisitor($visitorRaw);
 
         $conversation = null;
         if (is_string($publicId) && $publicId !== '') {
-            $conversation = AiConversation::query()
-                ->where('public_id', $publicId)
-                ->where('visitor_token_hash', $hash)
-                ->first();
+            $conversation = $this->findOwnedConversationByVisitor($visitorRaw, $publicId, $embedTenantId);
         }
 
         if ($conversation === null && $createIfMissing && ($publicId === null || $publicId === '')) {
-            $openQuery = $this->leadService->findRecentOpenQuery($hash, null);
+            $openQuery = $this->leadService->findRecentOpenQuery($hash, null, $embedTenantId);
             if ($openQuery?->conversation !== null) {
                 $conversation = $openQuery->conversation;
             } else {
                 $conversation = AiConversation::query()->create([
                     'channel' => $channel,
+                    'ai_embed_tenant_id' => $embedTenantId,
                     'visitor_token_hash' => $hash,
                     'user_id' => $userId,
                     'state' => AiConversation::STATE_AI_ACTIVE,
@@ -148,6 +157,7 @@ final class AiChatOrchestrator
         } elseif ($conversation === null && $createIfMissing) {
             $conversation = AiConversation::query()->create([
                 'channel' => $channel,
+                'ai_embed_tenant_id' => $embedTenantId,
                 'visitor_token_hash' => $hash,
                 'user_id' => $userId,
                 'state' => AiConversation::STATE_AI_ACTIVE,
@@ -280,11 +290,14 @@ final class AiChatOrchestrator
             return $this->handleConversationalLeadTurn($conversation, $cleanMessage);
         }
 
-        $leadPrompt = $this->leadService->leadCapturePromptPayload(
-            $conversation,
-            $cleanMessage,
-            $this->resolveAuthenticatedUser($conversation),
-        );
+        $leadPrompt = null;
+        if ($this->embedCapabilityAllows(EmbedTenantCapability::LEAD_CAPTURE)) {
+            $leadPrompt = $this->leadService->leadCapturePromptPayload(
+                $conversation,
+                $cleanMessage,
+                $this->resolveAuthenticatedUser($conversation),
+            );
+        }
         if (is_array($leadPrompt)) {
             $assistant = $this->storeMessage($conversation, 'assistant', (string) $leadPrompt['message'], [
                 'mode' => 'STRUCTURED_FALLBACK',
@@ -401,14 +414,26 @@ final class AiChatOrchestrator
         ], $hybrid->toMeta());
 
         if ($intent->intent === 'handoff') {
+            if (! $this->embedCapabilityAllows(EmbedTenantCapability::SUPPORT_HANDOFF)) {
+                return $this->replyCapabilityUnavailable($conversation, $mode, $meta);
+            }
+
             return $this->beginHandoff($conversation, 'user_requested', $mode, $meta);
         }
 
         if ($intent->intent === 'knowledge') {
+            if (! $this->embedCapabilityAllows(EmbedTenantCapability::KNOWLEDGE)) {
+                return $this->replyCapabilityUnavailable($conversation, $mode, $meta);
+            }
+
             return $this->replyKnowledge($conversation, $cleanMessage, $mode, $meta);
         }
 
         if ($intent->intent === 'booking_lookup' || $this->shouldContinueBookingLookup($prior, $cleanMessage)) {
+            if (! $this->embedCapabilityAllows(EmbedTenantCapability::BOOKING_LOOKUP)) {
+                return $this->replyCapabilityUnavailable($conversation, $mode, $meta);
+            }
+
             return $this->replyBookingLookup($conversation, $cleanMessage, $mode, $meta);
         }
 
@@ -436,6 +461,10 @@ final class AiChatOrchestrator
 
         if ($intent->intent === 'flight_search' || ($intent->isSearchable() && $intent->intent !== 'group_search')) {
             if ($intent->origin && $intent->destination) {
+                if (! $this->embedCapabilityAllows(EmbedTenantCapability::FLIGHT_SEARCH)) {
+                    return $this->replyCapabilityUnavailable($conversation, $mode, $meta);
+                }
+
                 return $this->replyFlightSearch($conversation, $intent, $mode, $meta);
             }
         }
@@ -1076,6 +1105,7 @@ final class AiChatOrchestrator
         $query = $this->leadService->findRecentOpenQuery(
             $conversation->visitor_token_hash,
             $this->resolveAuthenticatedUser($conversation),
+            $conversation->ai_embed_tenant_id,
         );
         if ($query === null) {
             return;
@@ -1089,5 +1119,49 @@ final class AiChatOrchestrator
         if (is_array($searchRecord)) {
             $this->leadService->linkSearchEvent($query, $searchRecord);
         }
+    }
+
+    private function embedCapabilityAllows(string $capability): bool
+    {
+        if (! app()->bound(EmbedRuntimeContext::class)) {
+            return true;
+        }
+
+        $ctx = app(EmbedRuntimeContext::class);
+        if (! $ctx->isActive()) {
+            return true;
+        }
+
+        return match ($capability) {
+            EmbedTenantCapability::LEAD_CAPTURE => $ctx->leadCaptureEnabled(),
+            EmbedTenantCapability::KNOWLEDGE => $ctx->knowledgeEnabled(),
+            EmbedTenantCapability::FLIGHT_SEARCH => $ctx->flightSearchEnabled(),
+            EmbedTenantCapability::BOOKING_LOOKUP => $ctx->bookingLookupEnabled(),
+            EmbedTenantCapability::SUPPORT_HANDOFF => $ctx->handoffEnabled(),
+            EmbedTenantCapability::GENERAL_AI => $ctx->tenant()?->hasCapability(EmbedTenantCapability::GENERAL_AI) ?? false,
+            default => false,
+        };
+    }
+
+    /**
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    private function replyCapabilityUnavailable(AiConversation $conversation, string $mode, array $meta): array
+    {
+        $body = 'That capability is not enabled for this assistant.';
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => $mode]);
+
+        return $this->withMessageId($assistant, [
+            'ok' => true,
+            'status' => 'ok',
+            'mode' => $mode,
+            'conversation_id' => $conversation->public_id,
+            'state' => $conversation->state,
+            'message' => $body,
+            'recommendations' => [],
+            'actions' => [],
+            'meta' => $meta,
+        ]);
     }
 }

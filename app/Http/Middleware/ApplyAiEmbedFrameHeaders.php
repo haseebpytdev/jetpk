@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\AiEmbedTenant;
 use App\Services\Ai\AiEmbedSessionService;
 use Closure;
 use Illuminate\Http\Request;
@@ -9,8 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ApplyAiEmbedFrameHeaders
 {
-    private const TENANT = 'jetpakistan';
-
     public function __construct(
         private readonly AiEmbedSessionService $embedSessions,
     ) {}
@@ -21,23 +20,21 @@ class ApplyAiEmbedFrameHeaders
     public function handle(Request $request, Closure $next): Response
     {
         $pathToken = (string) $request->route('pathToken', '');
-        if (! $this->embedSessions->matchesEntryPath(self::TENANT, $pathToken)) {
+        $tenant = $this->embedSessions->resolveTenantByEmbedKey($pathToken);
+        if ($tenant === null) {
             abort(404);
         }
 
         $request->attributes->set('ai_embed_framing', true);
+        $request->attributes->set('ai_embed_tenant_model', $tenant);
 
         $response = $next($request);
 
-        $allowed = config('ai_embed.tenants.'.self::TENANT.'.allowed_origins', []);
         $directives = [];
-
-        if (is_array($allowed)) {
-            foreach ($allowed as $origin) {
-                $normalized = $this->embedSessions->normalizeOrigin((string) $origin);
-                if ($normalized !== null) {
-                    $directives[] = $normalized;
-                }
+        foreach ($tenant->normalizedAllowedOrigins() as $origin) {
+            $normalized = $this->embedSessions->normalizeOrigin($origin);
+            if ($normalized !== null) {
+                $directives[] = $normalized;
             }
         }
 

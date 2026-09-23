@@ -10,10 +10,12 @@ use App\Services\Ai\NullInferenceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Tests\Support\InteractsWithEmbedTenants;
 use Tests\TestCase;
 
 class AiEmbedSecurityTest extends TestCase
 {
+    use InteractsWithEmbedTenants;
     use RefreshDatabase;
 
     private const PARENT = 'https://client.example.com';
@@ -31,26 +33,18 @@ class AiEmbedSecurityTest extends TestCase
      */
     private function enableEmbed(array $extra = []): void
     {
-        config(array_merge([
-            'ai_embed.enabled' => true,
-            'ai_embed.session_ttl_seconds' => 3600,
-            'ai_embed.entry_paths.jetpakistan' => self::ENTRY_PATH,
-            'ai_embed.tenants.jetpakistan.allowed_origins' => [self::PARENT, 'https://www.client.example.com'],
-            'ota.ai_assistant.mode' => 'public',
-            'ota.ai_assistant.enabled' => true,
-            'ota.ai_assistant.hard_allow.master' => true,
-            'ota.ai_assistant.hard_allow.public' => true,
-            'ota.ai_assistant.conversational_enabled' => false,
-            'ota.ai_assistant.optional_llm_assist' => false,
-        ], $extra));
-
-        \App\Models\AiAssistantSetting::query()->delete();
-        app(\App\Services\Ai\AiAssistantSettingsService::class)->get();
+        if (isset($extra['ai_embed.session_ttl_seconds'])) {
+            config(['ai_embed.session_ttl_seconds' => $extra['ai_embed.session_ttl_seconds']]);
+        }
+        $this->enableEmbedTenant(
+            embedKey: self::ENTRY_PATH,
+            allowedOrigins: [self::PARENT, 'https://www.client.example.com'],
+        );
     }
 
     private function createSession(string $parentOrigin = self::PARENT): string
     {
-        $response = $this->postJson('/api/embed/ai/jetpakistan/session', [], [
+        $response = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/session'), [], [
             'X-JP-AI-Embed-Parent-Origin' => $parentOrigin,
         ]);
 
@@ -130,27 +124,33 @@ class AiEmbedSecurityTest extends TestCase
 
     public function test_embed_disabled_returns_not_found(): void
     {
-        config([
-            'ai_embed.enabled' => false,
-            'ai_embed.entry_paths.jetpakistan' => self::ENTRY_PATH,
-            'ai_embed.tenants.jetpakistan.allowed_origins' => [self::PARENT],
-        ]);
+        $this->enableEmbedTenant(embedKey: self::ENTRY_PATH);
+        config(['ai_embed.enabled' => false]);
 
         $this->get($this->embedPageUrl())->assertNotFound();
     }
 
     public function test_embed_missing_path_config_returns_not_found(): void
     {
-        $this->enableEmbed(['ai_embed.entry_paths.jetpakistan' => '']);
+        config(['ai_embed.enabled' => true]);
+        app(\App\Services\Ai\Embed\EmbedTenantManager::class)->upsertTenant(
+            slug: 'no-key-tenant',
+            displayName: 'No Key',
+            assistantName: 'No Key',
+            allowedOrigins: [self::PARENT],
+            capabilities: [],
+            embedEnabled: true,
+            status: \App\Models\AiEmbedTenant::STATUS_ACTIVE,
+        );
 
-        $this->get($this->embedPageUrl())->assertNotFound();
+        $this->get('/integrations/ai/missing-key-token123456')->assertNotFound();
     }
 
     public function test_session_rejects_unknown_parent_origin(): void
     {
         $this->enableEmbed();
 
-        $this->postJson('/api/embed/ai/jetpakistan/session', [], [
+        $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/session'), [], [
             'X-JP-AI-Embed-Parent-Origin' => 'https://evil.example.com',
         ])->assertForbidden()
             ->assertJsonPath('status', 'forbidden');
@@ -169,7 +169,7 @@ class AiEmbedSecurityTest extends TestCase
         $this->enableEmbed();
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
 
-        $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'What is JetPakistan?',
         ], [
             'X-JP-AI-Embed-Parent-Origin' => self::PARENT,
@@ -181,7 +181,7 @@ class AiEmbedSecurityTest extends TestCase
         $this->enableEmbed();
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
 
-        $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'What is JetPakistan?',
         ], [
             'X-JP-AI-Embed-Session' => str_repeat('x', 48),
@@ -196,7 +196,7 @@ class AiEmbedSecurityTest extends TestCase
 
         $token = $this->createSession(self::PARENT);
 
-        $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'What is JetPakistan?',
         ], [
             'X-JP-AI-Embed-Session' => $token,
@@ -210,9 +210,13 @@ class AiEmbedSecurityTest extends TestCase
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
 
         $token = $this->createSession();
-        $this->travel(61)->seconds();
+        $cacheKey = 'ai_embed_sess:'.hash('sha256', $token);
+        $payload = Cache::get($cacheKey);
+        $this->assertIsArray($payload);
+        $payload['expires_at'] = now()->subSeconds(5)->toIso8601String();
+        Cache::put($cacheKey, $payload, now()->subSeconds(1));
 
-        $this->postJson('/api/embed/ai/jetpakistan/chat', [
+        $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
             'message' => 'What is JetPakistan?',
         ], [
             'X-JP-AI-Embed-Session' => $token,
@@ -239,7 +243,7 @@ class AiEmbedSecurityTest extends TestCase
 
         $token = $this->createSession();
 
-        $this->getJson('/api/embed/ai/jetpakistan/messages?conversation_id='.$foreign->public_id, [
+        $this->getJson($this->embedApiPath(self::ENTRY_PATH, '/messages').'?conversation_id='.$foreign->public_id, [
             'X-JP-AI-Embed-Session' => $token,
             'X-JP-AI-Embed-Parent-Origin' => self::PARENT,
         ])->assertForbidden();
@@ -253,8 +257,23 @@ class AiEmbedSecurityTest extends TestCase
         $this->assertNull($service->normalizeOrigin('*'));
         $this->assertNull($service->normalizeOrigin('http://client.example.com'));
         $this->assertSame(self::PARENT, $service->normalizeOrigin(self::PARENT));
-        $this->assertNull($service->normalizeEntryPathToken('short'));
-        $this->assertSame(self::ENTRY_PATH, $service->normalizeEntryPathToken(self::ENTRY_PATH));
+        $resolver = app(\App\Services\Ai\Embed\EmbedTenantResolver::class);
+        $this->assertNull($resolver->normalizeEmbedKey('short'));
+        $this->assertSame(self::ENTRY_PATH, $resolver->normalizeEmbedKey(self::ENTRY_PATH));
+    }
+
+    public function test_chat_rejects_missing_parent_origin_header(): void
+    {
+        $this->enableEmbed();
+        $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
+
+        $token = $this->createSession();
+
+        $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
+            'message' => 'What is JetPakistan?',
+        ], [
+            'X-JP-AI-Embed-Session' => $token,
+        ])->assertForbidden();
     }
 
     public function test_public_ai_routes_remain_unchanged_without_embed_headers(): void

@@ -14,6 +14,7 @@ class CustomerQuery extends Model
         'visitor_token_hash',
         'user_id',
         'ai_conversation_id',
+        'ai_embed_tenant_id',
         'name',
         'email',
         'email_verified',

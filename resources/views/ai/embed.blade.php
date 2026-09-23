@@ -6,13 +6,21 @@
     <meta name="robots" content="noindex, nofollow">
     <title>{{ $assistantName }}</title>
     <link rel="stylesheet" href="{{ asset('css/ai-embed.css') }}?v=1">
+    @if(!empty($themePrimary))
+        <style>:root { --jp-ai-embed-primary: {{ $themePrimary }}; }</style>
+    @endif
 </head>
 <body>
-<div id="jp-ai-embed" class="jp-ai-embed" data-tenant="{{ $tenant }}">
+<div id="jp-ai-embed" class="jp-ai-embed" data-tenant-public-id="{{ $tenantPublicId }}">
     <header class="jp-ai-embed__header">
-        <div>
-            <p class="jp-ai-embed__eyebrow">{{ $displayName }}</p>
-            <h1 class="jp-ai-embed__title">{{ $assistantName }}</h1>
+        <div class="jp-ai-embed__brand">
+            @if(!empty($logoUrl))
+                <img src="{{ $logoUrl }}" alt="" class="jp-ai-embed__logo" width="32" height="32">
+            @endif
+            <div>
+                <p class="jp-ai-embed__eyebrow">{{ $displayName }}</p>
+                <h1 class="jp-ai-embed__title">{{ $assistantName }}</h1>
+            </div>
         </div>
         <div class="jp-ai-embed__header-actions">
             <button type="button" class="jp-ai-embed__btn jp-ai-embed__btn--ghost" id="jp-ai-handoff" hidden>Talk to support</button>
@@ -22,6 +30,9 @@
 
     <main class="jp-ai-embed__main">
         <div id="jp-ai-status" class="jp-ai-embed__status" role="status"></div>
+        @if(!empty($welcomeText))
+            <p class="jp-ai-embed__welcome">{{ $welcomeText }}</p>
+        @endif
         <div id="jp-ai-messages" class="jp-ai-embed__messages" aria-live="polite"></div>
     </main>
 
@@ -44,7 +55,7 @@
 
 <script>
 window.JP_AI_EMBED = {
-    tenant: @json($tenant),
+    tenantPublicId: @json($tenantPublicId),
     sessionEndpoint: @json($sessionEndpoint),
     chatEndpoint: @json($chatEndpoint),
     messagesEndpoint: @json($messagesEndpoint),

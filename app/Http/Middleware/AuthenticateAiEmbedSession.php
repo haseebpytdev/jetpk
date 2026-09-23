@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\AiEmbedTenant;
 use App\Services\Ai\AiEmbedSessionService;
 use Closure;
 use Illuminate\Http\Request;
@@ -23,9 +24,10 @@ class AuthenticateAiEmbedSession
             return $this->deny('unavailable', 'Embed AI is not enabled.', 404);
         }
 
-        $tenant = (string) $request->route('tenant', '');
-        if ($tenant === '' || ! $this->embedSessions->isEnabledForTenant($tenant)) {
-            return $this->deny('forbidden', 'Unknown embed tenant.', 404);
+        $embedKey = (string) $request->route('embedKey', '');
+        $tenant = $this->embedSessions->resolveTenantByEmbedKey($embedKey);
+        if ($tenant === null || ! $this->embedSessions->isTenantSessionReady($tenant)) {
+            return $this->deny('forbidden', 'Unknown embed entry.', 404);
         }
 
         $token = trim((string) $request->header((string) config('ai_embed.session_header', 'X-JP-AI-Embed-Session'), ''));
@@ -35,11 +37,14 @@ class AuthenticateAiEmbedSession
 
         $parentOriginHeader = (string) config('ai_embed.parent_origin_header', 'X-JP-AI-Embed-Parent-Origin');
         $parentOrigin = trim((string) $request->header($parentOriginHeader, ''));
+        if ($parentOrigin === '') {
+            return $this->deny('forbidden', 'Parent origin required.', 403);
+        }
 
         $session = $this->embedSessions->validateToken(
             $tenant,
             $token,
-            $parentOrigin !== '' ? $parentOrigin : null
+            $parentOrigin
         );
 
         if ($session === null) {
@@ -48,7 +53,7 @@ class AuthenticateAiEmbedSession
 
         $request->attributes->set('ai_embed_session', $session);
         $request->attributes->set('ai_embed_token', $token);
-        $request->attributes->set('ai_embed_tenant', $tenant);
+        $request->attributes->set('ai_embed_tenant_model', $tenant);
 
         $this->embedSessions->touchSession($token);
 

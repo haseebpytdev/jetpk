@@ -13,7 +13,31 @@ final class KnowledgeSearchService
     /**
      * @return list<array{slug: string, title: string, excerpt: string, score: float}>
      */
-    public function search(string $query, int $limit = 3): array
+    public function search(string $query, int $limit = 3, ?string $namespace = null): array
+    {
+        if (! (bool) config('ota.ai_assistant.knowledge_enabled', true)) {
+            return [];
+        }
+
+        $ctx = app(\App\Services\Ai\Embed\EmbedRuntimeContext::class);
+        if ($namespace === null && $ctx->isActive() && $ctx->knowledgeProvider() !== null) {
+            return $ctx->knowledgeProvider()->search($query, $limit);
+        }
+
+        $dir = $this->resolveTenantKnowledgeDirectory($namespace);
+        if ($dir === null || ! File::isDirectory($dir)) {
+            return [];
+        }
+
+        return $this->searchDirectory($query, $limit, $dir);
+    }
+
+    /**
+     * JetPakistan canonical root corpus (public Ask + JetPakistan embed tenant only).
+     *
+     * @return list<array{slug: string, title: string, excerpt: string, score: float}>
+     */
+    public function searchJetPakistanCorpus(string $query, int $limit = 3): array
     {
         if (! (bool) config('ota.ai_assistant.knowledge_enabled', true)) {
             return [];
@@ -24,6 +48,33 @@ final class KnowledgeSearchService
             return [];
         }
 
+        return $this->searchDirectory($query, $limit, $dir);
+    }
+
+    /**
+     * Public Ask JetPakistan uses null namespace; tenant-scoped calls must pass a namespace.
+     */
+    private function resolveTenantKnowledgeDirectory(?string $namespace): ?string
+    {
+        $base = base_path('ai-assistant/knowledge');
+
+        if ($namespace === null) {
+            return $base;
+        }
+
+        $safe = preg_replace('/[^a-z0-9_-]/i', '', $namespace) ?? '';
+        if ($safe === '' || strcasecmp($safe, 'jetpakistan') === 0) {
+            return null;
+        }
+
+        return $base.'/'.$safe;
+    }
+
+    /**
+     * @return list<array{slug: string, title: string, excerpt: string, score: float}>
+     */
+    private function searchDirectory(string $query, int $limit, string $dir): array
+    {
         $tokens = $this->tokens($query);
         if ($tokens === []) {
             return [];
@@ -35,7 +86,6 @@ final class KnowledgeSearchService
                 continue;
             }
             $slug = $file->getFilenameWithoutExtension();
-            // Refuse path escape / non-knowledge files.
             if (preg_match('/^[a-z0-9\-_]+$/i', $slug) !== 1) {
                 continue;
             }
