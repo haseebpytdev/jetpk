@@ -241,4 +241,51 @@ class TenantIsolationTest extends TestCase
             'ai_embed_tenant_id' => null,
         ]);
     }
+
+    public function test_embed_clear_preserves_tenant_id_and_blocks_cross_tenant_access(): void
+    {
+        $tenantA = $this->tenantA();
+        $tenantB = $this->tenantB();
+        $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
+
+        $a = $this->sessionFor(self::KEY_A, self::PARENT_A);
+        $chat = $this->postJson($this->embedApiPath(self::KEY_A, '/chat'), [
+            'message' => 'Hello from tenant A before clear',
+        ], $a['headers'])->assertOk();
+        $oldId = (string) $chat->json('conversation_id');
+
+        $clear = $this->postJson($this->embedApiPath(self::KEY_A, '/clear'), [
+            'conversation_id' => $oldId,
+        ], $a['headers'])->assertOk();
+
+        $newId = (string) $clear->json('conversation_id');
+        $this->assertNotSame($oldId, $newId);
+
+        $newConversation = AiConversation::query()->where('public_id', $newId)->first();
+        $this->assertNotNull($newConversation);
+        $this->assertSame('embed', $newConversation->channel);
+        $this->assertSame($tenantA->id, (int) $newConversation->ai_embed_tenant_id);
+
+        $postClear = $this->postJson($this->embedApiPath(self::KEY_A, '/chat'), [
+            'conversation_id' => $newId,
+            'message' => 'Continue after clear',
+        ], $a['headers']);
+        $postClear->assertOk();
+        $this->assertSame($newId, (string) $postClear->json('conversation_id'));
+        $this->assertDatabaseHas('ai_conversations', [
+            'public_id' => $newId,
+            'ai_embed_tenant_id' => $tenantA->id,
+            'channel' => 'embed',
+        ]);
+
+        $b = $this->sessionFor(self::KEY_B, self::PARENT_B);
+        $this->getJson(
+            $this->embedApiPath(self::KEY_B, '/messages').'?conversation_id='.$newId,
+            $b['headers']
+        )->assertForbidden();
+        $this->assertDatabaseMissing('ai_conversations', [
+            'public_id' => $newId,
+            'ai_embed_tenant_id' => $tenantB->id,
+        ]);
+    }
 }

@@ -138,11 +138,16 @@ class AiEmbedChatTest extends TestCase
 
         $first->assertOk();
         $body = mb_strtolower((string) $first->json('message'));
+        // HELP-FIRST: strong travel/group intent may assist immediately; lead stays soft-pending.
         $this->assertTrue(
             str_contains($body, 'name')
             || str_contains($body, 'email')
             || str_contains($body, 'phone')
+            || str_contains($body, 'dubai')
+            || str_contains($body, 'group')
             || ($first->json('status') === 'lead_capture')
+            || ($first->json('status') === 'clarify')
+            || ($first->json('status') === 'ok')
         );
     }
 

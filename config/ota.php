@@ -254,7 +254,7 @@ return [
         'enabled' => filter_var(env('OTA_AI_ASSISTANT_ENABLED', false), FILTER_VALIDATE_BOOL),
         'gateway_url' => env('OTA_AI_GATEWAY_URL', 'http://127.0.0.1:3921'),
         'timeout_seconds' => max(3, (int) env('OTA_AI_TIMEOUT_SECONDS', 45)),
-        'anonymous_per_minute' => max(8, (int) env('OTA_AI_ANON_PER_MINUTE', 24)),
+        'anonymous_per_minute' => max(20, (int) env('OTA_AI_ANON_PER_MINUTE', 30)),
         'max_message_chars' => max(100, (int) env('OTA_AI_MAX_MESSAGE_CHARS', 2000)),
         'model_id' => (string) env('OTA_AI_MODEL_ID', 'local'),
         'flight_search_enabled' => filter_var(env('OTA_AI_FLIGHT_SEARCH_ENABLED', true), FILTER_VALIDATE_BOOL),

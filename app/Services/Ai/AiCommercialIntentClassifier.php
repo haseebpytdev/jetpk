@@ -76,6 +76,14 @@ final class AiCommercialIntentClassifier
         return preg_match('/^(hi|hello|hey|salam|assalam|assalamu alaikum|good morning|good evening|good afternoon)[\s!.?]*$/u', $lower) === 1;
     }
 
+    /**
+     * Public wrapper for lead/open-domain routing (informational / FAQ-style turns).
+     */
+    public function isInformationalPublic(string $message): bool
+    {
+        return $this->isInformationalOnly(mb_strtolower(trim($message)));
+    }
+
     private function isInformationalOnly(string $lower): bool
     {
         $infoPhrases = [

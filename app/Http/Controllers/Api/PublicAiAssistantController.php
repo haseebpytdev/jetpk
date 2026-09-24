@@ -43,7 +43,12 @@ class PublicAiAssistantController extends Controller
         $conversation = $resolved['conversation'];
 
         if ($rate = $this->orchestrator->assertRateLimit($resolved['visitor_raw'])) {
-            return $this->withVisitorCookie(response()->json($rate, 429), $resolved);
+            $retryAfter = max(1, (int) ($rate['retry_after'] ?? 60));
+
+            return $this->withVisitorCookie(
+                response()->json($rate, 429)->header('Retry-After', (string) $retryAfter),
+                $resolved
+            );
         }
 
         $sanitized = $this->orchestrator->sanitizeUserMessage($data['message']);

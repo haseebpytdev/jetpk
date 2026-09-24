@@ -1,0 +1,240 @@
+{
+    "provider": {
+        "name": "local_llama",
+        "healthy": true
+    },
+    "results": {
+        "JETPAKISTAN": {
+            "pass": true,
+            "notes": [],
+            "mode": "LLM_ASSISTED",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "KNOWLEDGE_SOURCE": "what-is-jetpakistan",
+                "KNOWLEDGE_HITS": 3,
+                "LLM_SYNTHESIS": "YES",
+                "ANSWER_GROUNDED": "YES",
+                "intent": {
+                    "intent": "knowledge"
+                }
+            },
+            "message": "JetPakistan is an online travel agency and travel platform that helps customers search flights, explore group travel options, get booking assistance, look up bookings, and receive travel support. You can use JetPakistan to compare flight options, continue to booking when ready, and contact support for…",
+            "ms": 14157,
+            "actions": [
+                {
+                    "label": "Search Flights",
+                    "href": "\/#flight-search"
+                },
+                {
+                    "label": "Browse Groups",
+                    "href": "\/groups"
+                },
+                {
+                    "label": "Manage Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ]
+        },
+        "GENERAL_KNOWLEDGE": {
+            "pass": true,
+            "notes": [],
+            "mode": "STRUCTURED_FALLBACK",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "open_domain_category": "GENERAL_KNOWLEDGE",
+                "ANSWER_GROUNDED": "MODEL_GENERAL",
+                "LLM_SYNTHESIS": "FALLBACK_STRUCTURED",
+                "SMART_REDIRECT": "YES"
+            },
+            "message": "E = mc² is Einstein's mass-energy equivalence: mass and energy are two forms of the same thing. If you need commercial flight search, group ticketing, booking assistance, or support with JetPakistan, I can help with that too.",
+            "ms": 20206,
+            "actions": [
+                {
+                    "label": "Search Flights",
+                    "href": "\/#flight-search"
+                },
+                {
+                    "label": "Browse Groups",
+                    "href": "\/groups"
+                },
+                {
+                    "label": "Manage Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ]
+        },
+        "PRIVATE_JET": {
+            "pass": true,
+            "notes": [],
+            "mode": "LLM_ASSISTED",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "open_domain_category": "OUT_OF_DOMAIN_SAFE",
+                "LLM_SYNTHESIS": "YES",
+                "ANSWER_GROUNDED": "N\/A",
+                "SMART_REDIRECT": "YES"
+            },
+            "message": "JetPakistan offers a wide range of flights and group travel services. We can assist you with booking assistance and support services. For more details, please visit our website or contact us directly.",
+            "ms": 5342,
+            "actions": [
+                {
+                    "label": "Search Flights",
+                    "href": "\/#flight-search"
+                },
+                {
+                    "label": "Browse Groups",
+                    "href": "\/groups"
+                },
+                {
+                    "label": "Manage Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ]
+        },
+        "CASUAL": {
+            "pass": true,
+            "notes": [],
+            "mode": "STRUCTURED_FALLBACK",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "open_domain_category": "CASUAL_CONVERSATION",
+                "ANSWER_GROUNDED": "N\/A",
+                "LLM_SYNTHESIS": "FALLBACK_STRUCTURED",
+                "SMART_REDIRECT": "YES"
+            },
+            "message": "Why did the suitcase break up with the traveler? It needed space.",
+            "ms": 3607,
+            "actions": [
+                {
+                    "label": "Search Flights",
+                    "href": "\/#flight-search"
+                },
+                {
+                    "label": "Browse Groups",
+                    "href": "\/groups"
+                },
+                {
+                    "label": "Manage Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ]
+        },
+        "CURRENT_UNVERIFIED": {
+            "pass": true,
+            "notes": [],
+            "mode": "STRUCTURED_FALLBACK",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "open_domain_category": "CURRENT_UNVERIFIED",
+                "ANSWER_GROUNDED": "N\/A",
+                "LLM_SYNTHESIS": "FALLBACK_STRUCTURED",
+                "SMART_REDIRECT": "YES"
+            },
+            "message": "I can't verify live market or news figures through this assistant, so I won't invent a number.",
+            "ms": 8979,
+            "actions": [
+                {
+                    "label": "Search Flights",
+                    "href": "\/#flight-search"
+                },
+                {
+                    "label": "Browse Groups",
+                    "href": "\/groups"
+                },
+                {
+                    "label": "Manage Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ]
+        },
+        "TRAVEL_HELP_FIRST": {
+            "pass": true,
+            "notes": [],
+            "mode": "LLM_ASSISTED",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false
+            },
+            "message": "I can help you search for flights from Lahore to Dubai for 2 adults tomorrow. Please provide your name, email, and phone number so I can search for available flights.",
+            "ms": 24216,
+            "actions": [
+                {
+                    "label": "Search Flights",
+                    "href": "\/#flight-search"
+                },
+                {
+                    "label": "Browse Groups",
+                    "href": "\/groups"
+                },
+                {
+                    "label": "Manage Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ]
+        }
+    },
+    "variations": [
+        {
+            "i": 0,
+            "mode": "LLM_ASSISTED",
+            "synth": null,
+            "message": "Here's a short joke about cats: 'Why did the cat go to the dog's house? To get a better nap!''"
+        },
+        {
+            "i": 1,
+            "mode": "LLM_ASSISTED",
+            "synth": null,
+            "message": "Here's a short joke about cats: 'Why did the cat go to the dog's house? To get a better nap!''"
+        },
+        {
+            "i": 2,
+            "mode": "LLM_ASSISTED",
+            "synth": null,
+            "message": "Here's a short joke about cats: 'Why did the cat go to the dog's house? To get a better nap!''"
+        }
+    ],
+    "variation_check": {
+        "unique": 1,
+        "model_generated": 3,
+        "pass": true
+    },
+    "summary": {
+        "all_pass": true,
+        "fails": []
+    }
+}

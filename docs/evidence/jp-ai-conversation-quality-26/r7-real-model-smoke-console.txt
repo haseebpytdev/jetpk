@@ -1,0 +1,26 @@
+﻿PROVIDER=local_llama healthy=yes
+JETPAKISTAN pass=YES ms=19931 stored_ok=YES synth=FALLBACK_STRUCTURED
+  in=What is JetPakistan?
+  out=JetPakistan is an online travel agency and travel platform that helps customers search flights, explore group travel options where available, get booking assistance, look up bookings, and receive travel support. You can 
+GENERAL_KNOWLEDGE pass=YES ms=16774 stored_ok=YES synth=FALLBACK_STRUCTURED
+  in=What is E=mc2?
+  out=E = mc┬▓ is Einstein's mass-energy equivalence: mass and energy are two forms of the same thing. If you need commercial flight search, group ticketing, booking assistance, or support with JetPakistan, I can help with that
+PRIVATE_JET pass=YES ms=8954 stored_ok=YES synth=YES
+  in=Where can I buy a jet?
+  out=JetPakistan offers a wide range of flights and group travel services. We can assist you with booking assistance and support services. For more details, please visit our website or contact us directly.
+CASUAL pass=YES ms=3379 stored_ok=YES synth=FALLBACK_STRUCTURED
+  in=Tell me a joke
+  out=Why did the suitcase break up with the traveler? It needed space.
+CURRENT_UNVERIFIED pass=YES ms=5736 stored_ok=YES synth=FALLBACK_STRUCTURED
+  in=What's Apple's stock price right now?
+  out=I can't verify live market or news figures through this assistant, so I won't invent a number.
+TRAVEL_HELP_FIRST pass=YES ms=7580 stored_ok=YES synth=-
+  in=I need Lahore to Dubai tomorrow for 2 adults
+  out=I can help you search for flights from Lahore to Dubai for 2 adults tomorrow. Please provide your name, email, and phone number so I can search for available flights.
+LEGIT_UNDEFINED pass=YES ms=3639 stored_ok=YES synth=YES
+  in=Undefined behavior in C?
+  out=Undefined behavior in C?
+LEGIT_NULL pass=YES ms=18249 stored_ok=YES synth=FALLBACK_STRUCTURED
+  in=Null hypothesis in statistics?
+  out=In statistics, the null hypothesis is the default claim of no effect or no difference that a test tries to reject with evidence. If you need commercial flight search, group ticketing, booking assistance, or support with 
+ALL_PASS=YES

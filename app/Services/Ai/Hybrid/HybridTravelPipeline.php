@@ -318,7 +318,7 @@ final class HybridTravelPipeline
     private function wantsKnowledge(string $normalized, string $original): bool
     {
         return (bool) preg_match(
-            '/what is jetpakistan|what services do you offer|baggage allowance|how does a refund work|how do refunds work|do you offer umrah|how (does |do )?booking|how (can|do) i (contact|check)|contact (jetpakistan )?support|guest booking|customer registration|payment (deadline|process|help)|cancellation|refund policy|saved travelers?|support hours|group ticket|group ticketing|faq|ادائیگی|ریفنڈ|محفوظ مسافر/u',
+            '/what is jetpakistan|what services do you offer|baggage|how does a refund work|how do refunds work|do you offer umrah|how (does |do )?booking|how (can|do) i (contact|check)|contact (jetpakistan )?support|guest booking|customer registration|payment (deadline|process|help)|cancellation|refund policy|saved travelers?|support hours|group ticket|group ticketing|faq|ادائیگی|ریفنڈ|محفوظ مسافر/u',
             $normalized.' '.$original
         );
     }
@@ -326,7 +326,7 @@ final class HybridTravelPipeline
     private function wantsBookingLookup(string $normalized, string $original): bool
     {
         return (bool) preg_match(
-            '/\b(look\s*up|lookup|find|check|track|status\s+of)\s+(my\s+)?(booking|reservation|pnr)\b|\b(my\s+)?booking\s+(reference|ref|status)\b|\bbooking\s+reference\b|\bhelp with an existing booking\b|\bexisting booking\b|\bpnr\b|\bmera\s+booking\b|\bbooking\s+check\b|\bmanage\s+my\s+booking\b/u',
+            '/\b(look\s*up|lookup|find|check|track|status\s+of)\s+(my\s+)?(booking|reservation|pnr)\b|\b(my\s+)?booking\s+(reference|ref|status)\b|\bbooking\s+reference\b|\bhelp with an existing booking\b|\bexisting booking\b|\bpnr\b|\bmera\s+booking\b|\bbooking\s+check\b|\bmanage\s+my\s+booking\b|\b(look\s*up|lookup|check)\s+[A-Z0-9]{5,12}\b/u',
             $normalized.' '.$original
         );
     }

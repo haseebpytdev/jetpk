@@ -21,7 +21,11 @@ class CustomerQueryLeadServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new CustomerQueryLeadService(new AiCommercialIntentClassifier);
+        $classifier = new AiCommercialIntentClassifier;
+        $this->service = new CustomerQueryLeadService(
+            $classifier,
+            new \App\Services\Ai\ConversationIntentRouter($classifier),
+        );
     }
 
     public function test_commercial_intent_requires_lead_capture_for_guest(): void
@@ -94,10 +98,11 @@ class CustomerQueryLeadServiceTest extends TestCase
         $this->assertSame(['contact_consent'], $fields);
 
         $prompt = $this->service->leadCapturePromptPayload($conversation, 'Find flights Lahore to Dubai', $user);
-        $this->assertIsArray($prompt);
-        $this->assertSame('ok', $prompt['status']);
-        $this->assertTrue($prompt['meta']['lead_capture_pending']);
-        $this->assertStringContainsString('contact you', mb_strtolower((string) $prompt['message']));
+        // HELP-FIRST: strong flight intent soft-marks pending and returns null so assistance continues.
+        $this->assertNull($prompt);
+        $conversation->refresh();
+        $this->assertTrue((bool) data_get($conversation->shopping_state, 'lead_capture_pending'));
+        $this->assertSame('consent', data_get($conversation->shopping_state, 'lead_capture_stage'));
     }
 
     public function test_authenticated_user_missing_phone_requires_phone_and_consent(): void
