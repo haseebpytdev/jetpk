@@ -139,6 +139,7 @@ grep -q 'app/Evil/hack.php' <<< "${CHANGED}" && fail "G_unauthorized_path_leaked
 ALLOWLIST_FILE="${SCRIPT_DIR}/ai-runtime-deploy-allowlist.sh"
 for required in \
   ai-assistant/knowledge \
+  ai-assistant/prompts \
   app/Console/Commands/AiEmbedKeyRotateCommand.php \
   app/Console/Commands/AiEmbedTenantStatusCommand.php \
   app/Console/Commands/AiEmbedTenantSyncJetPakistanCommand.php \
