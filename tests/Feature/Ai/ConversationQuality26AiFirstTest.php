@@ -3,6 +3,7 @@
 namespace Tests\Feature\Ai;
 
 use App\Contracts\Ai\InferenceProvider;
+use App\Models\AiMessage;
 use App\Services\Ai\NullInferenceProvider;
 use App\Support\Ai\Embed\EmbedTenantCapability;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -74,6 +75,28 @@ class ConversationQuality26AiFirstTest extends TestCase
         $this->assertSame('GENERAL_KNOWLEDGE', $response->json('meta.open_domain_category'));
         $this->assertSame('LLM_ASSISTED', $response->json('mode'));
         $this->assertGreaterThanOrEqual(1, $scripted->callCount());
+    }
+
+    public function test_terse_educational_topics_route_open_domain_without_mutating_user_text(): void
+    {
+        $this->enablePublicAi();
+        $scripted = new ScriptedInferenceProvider(
+            '{"message":"MODEL_UB: Undefined behavior means the C standard does not define the result."}'
+        );
+        $this->app->instance(InferenceProvider::class, $scripted);
+
+        $message = 'Undefined behavior in C?';
+        $response = $this->chat(str_repeat('t9', 20), $message);
+        $response->assertOk();
+        $this->assertStringContainsString('MODEL_UB', (string) $response->json('message'));
+        $this->assertSame('GENERAL_KNOWLEDGE', $response->json('meta.open_domain_category'));
+        $this->assertSame('YES', $response->json('meta.LLM_SYNTHESIS'));
+
+        $stored = AiMessage::query()
+            ->where('role', 'user')
+            ->orderByDesc('id')
+            ->value('body');
+        $this->assertSame($message, $stored);
     }
 
     public function test_general_knowledge_falls_back_when_model_unavailable(): void
@@ -250,14 +273,15 @@ class ConversationQuality26AiFirstTest extends TestCase
     public function test_what_is_jetpakistan_uses_rag_then_model_synthesis(): void
     {
         $this->enablePublicAi();
+        // Marker stays ≤3 chars so it is not treated as an unsupported material claim token.
         $scripted = new ScriptedInferenceProvider(
-            '{"message":"MODEL_JP: JetPakistan is an online travel agency helping customers search flights and get travel support."}'
+            '{"message":"JPX: JetPakistan is an online travel agency helping customers search flights and get travel support."}'
         );
         $this->app->instance(InferenceProvider::class, $scripted);
 
         $response = $this->chat(str_repeat('m6', 20), 'What is JetPakistan?');
         $response->assertOk();
-        $this->assertStringContainsString('MODEL_JP', (string) $response->json('message'));
+        $this->assertStringContainsString('JPX:', (string) $response->json('message'));
         $this->assertSame('what-is-jetpakistan', $response->json('meta.KNOWLEDGE_SOURCE'));
         $this->assertGreaterThanOrEqual(1, (int) $response->json('meta.KNOWLEDGE_HITS'));
         $this->assertSame('YES', $response->json('meta.ANSWER_GROUNDED'));
@@ -477,6 +501,33 @@ class ConversationQuality26AiFirstTest extends TestCase
             $response->assertOk();
             $body = mb_strtolower((string) $response->json('message'));
             $this->assertStringNotContainsString(mb_strtolower($claim), $body, 'claim leaked: '.$claim);
+            $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'), 'claim: '.$claim);
+            $this->assertSame('YES', $response->json('meta.ANSWER_GROUNDED'), 'claim: '.$claim);
+        }
+    }
+
+    public function test_grounded_knowledge_rejects_unsupported_qualifiers_and_superlatives(): void
+    {
+        $claims = [
+            'JetPakistan is an award-winning online travel platform that helps customers search flights and get travel support.',
+            'JetPakistan is government-approved for flight search and travel support.',
+            'JetPakistan is Pakistan\'s largest travel platform for flight search.',
+            'JetPakistan is the country\'s cheapest booking platform for flights.',
+        ];
+
+        foreach ($claims as $i => $claim) {
+            $this->enablePublicAi();
+            $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+                json_encode(['message' => $claim], JSON_THROW_ON_ERROR)
+            ));
+
+            $response = $this->chat(str_repeat('q'.(string) $i, 20), 'What is JetPakistan?');
+            $response->assertOk();
+            $body = mb_strtolower((string) $response->json('message'));
+            $this->assertStringNotContainsString('award-winning', $body);
+            $this->assertStringNotContainsString('government-approved', $body);
+            $this->assertStringNotContainsString('largest travel platform', $body);
+            $this->assertStringNotContainsString('cheapest booking platform', $body);
             $this->assertSame('FALLBACK_STRUCTURED', $response->json('meta.LLM_SYNTHESIS'), 'claim: '.$claim);
             $this->assertSame('YES', $response->json('meta.ANSWER_GROUNDED'), 'claim: '.$claim);
         }

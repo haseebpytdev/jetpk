@@ -1,0 +1,148 @@
+{
+    "ALL_PASS": true,
+    "results": {
+        "JETPAKISTAN": {
+            "pass": true,
+            "notes": [],
+            "mode": "STRUCTURED_FALLBACK",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "intent": {
+                    "intent": "knowledge"
+                },
+                "KNOWLEDGE_SOURCE": "what-is-jetpakistan",
+                "KNOWLEDGE_HITS": 3,
+                "ANSWER_GROUNDED": "YES",
+                "LLM_SYNTHESIS": "FALLBACK_STRUCTURED"
+            },
+            "message": "JetPakistan is an online travel agency and travel platform that helps customers search flights, explore group travel options where available, get booking assistance, look up bookings, and receive travel support. You can use JetPakistan to compare flight options, continue to booking when ready, and contact support for…. I can also help search flights, explore group travel options, look up a booking, or connect you with support.",
+            "stored_user_body": "What is JetPakistan?",
+            "ms": 19931,
+            "input": "What is JetPakistan?"
+        },
+        "GENERAL_KNOWLEDGE": {
+            "pass": true,
+            "notes": [],
+            "mode": "STRUCTURED_FALLBACK",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "open_domain_category": "GENERAL_KNOWLEDGE",
+                "ANSWER_GROUNDED": "MODEL_GENERAL",
+                "LLM_SYNTHESIS": "FALLBACK_STRUCTURED",
+                "SMART_REDIRECT": "YES"
+            },
+            "message": "E = mc² is Einstein's mass-energy equivalence: mass and energy are two forms of the same thing. If you need commercial flight search, group ticketing, booking assistance, or support with JetPakistan, I can help with that too.",
+            "stored_user_body": "What is E=mc2?",
+            "ms": 16774,
+            "input": "What is E=mc2?"
+        },
+        "PRIVATE_JET": {
+            "pass": true,
+            "notes": [],
+            "mode": "LLM_ASSISTED",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "open_domain_category": "OUT_OF_DOMAIN_SAFE",
+                "LLM_SYNTHESIS": "YES",
+                "ANSWER_GROUNDED": "N\/A",
+                "SMART_REDIRECT": "YES"
+            },
+            "message": "JetPakistan offers a wide range of flights and group travel services. We can assist you with booking assistance and support services. For more details, please visit our website or contact us directly.",
+            "stored_user_body": "Where can I buy a jet?",
+            "ms": 8954,
+            "input": "Where can I buy a jet?"
+        },
+        "CASUAL": {
+            "pass": true,
+            "notes": [],
+            "mode": "STRUCTURED_FALLBACK",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "open_domain_category": "CASUAL_CONVERSATION",
+                "ANSWER_GROUNDED": "N\/A",
+                "LLM_SYNTHESIS": "FALLBACK_STRUCTURED",
+                "SMART_REDIRECT": "YES"
+            },
+            "message": "Why did the suitcase break up with the traveler? It needed space.",
+            "stored_user_body": "Tell me a joke",
+            "ms": 3379,
+            "input": "Tell me a joke"
+        },
+        "CURRENT_UNVERIFIED": {
+            "pass": true,
+            "notes": [],
+            "mode": "STRUCTURED_FALLBACK",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "open_domain_category": "CURRENT_UNVERIFIED",
+                "ANSWER_GROUNDED": "N\/A",
+                "LLM_SYNTHESIS": "FALLBACK_STRUCTURED",
+                "SMART_REDIRECT": "YES"
+            },
+            "message": "I can't verify live market or news figures through this assistant, so I won't invent a number.",
+            "stored_user_body": "What's Apple's stock price right now?",
+            "ms": 5736,
+            "input": "What's Apple's stock price right now?"
+        },
+        "TRAVEL_HELP_FIRST": {
+            "pass": true,
+            "notes": [],
+            "mode": "LLM_ASSISTED",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false
+            },
+            "message": "I can help you search for flights from Lahore to Dubai for 2 adults tomorrow. Please provide your name, email, and phone number so I can search for available flights.",
+            "stored_user_body": "I need Lahore to Dubai tomorrow for 2 adults",
+            "ms": 7580,
+            "input": "I need Lahore to Dubai tomorrow for 2 adults"
+        },
+        "LEGIT_UNDEFINED": {
+            "pass": true,
+            "notes": [],
+            "mode": "LLM_ASSISTED",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "open_domain_category": "GENERAL_KNOWLEDGE",
+                "LLM_SYNTHESIS": "YES",
+                "ANSWER_GROUNDED": "MODEL_GENERAL",
+                "SMART_REDIRECT": "YES"
+            },
+            "message": "Undefined behavior in C?",
+            "stored_user_body": "Undefined behavior in C?",
+            "ms": 3639,
+            "input": "Undefined behavior in C?"
+        },
+        "LEGIT_NULL": {
+            "pass": true,
+            "notes": [],
+            "mode": "STRUCTURED_FALLBACK",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "open_domain_category": "GENERAL_KNOWLEDGE",
+                "ANSWER_GROUNDED": "MODEL_GENERAL",
+                "LLM_SYNTHESIS": "FALLBACK_STRUCTURED",
+                "SMART_REDIRECT": "YES"
+            },
+            "message": "In statistics, the null hypothesis is the default claim of no effect or no difference that a test tries to reject with evidence. If you need commercial flight search, group ticketing, booking assistance, or support with JetPakistan, I can help with that too.",
+            "stored_user_body": "Null hypothesis in statistics?",
+            "ms": 18249,
+            "input": "Null hypothesis in statistics?"
+        }
+    }
+}

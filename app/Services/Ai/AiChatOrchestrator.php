@@ -223,18 +223,9 @@ final class AiChatOrchestrator
         $max = (int) config('ota.ai_assistant.max_message_chars', 2000);
         $clean = strip_tags($raw);
         $clean = html_entity_decode($clean, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        // Preserve semantic user words (including legitimate "undefined"/"null").
+        // Only strip NUL control bytes, then trim and enforce length.
         $clean = trim(preg_replace("/\0/", '', $clean) ?? $clean);
-        // Strip client coercion artifacts (undefined/null prefixes) and exact doubled paste.
-        $clean = preg_replace('/^(?:undefined|null)+/iu', '', $clean) ?? $clean;
-        $clean = trim($clean);
-        if (mb_strlen($clean) >= 16) {
-            $half = (int) floor(mb_strlen($clean) / 2);
-            $left = mb_substr($clean, 0, $half);
-            $right = mb_substr($clean, $half);
-            if ($left !== '' && $left === $right) {
-                $clean = $left;
-            }
-        }
         if (mb_strlen($clean) > $max) {
             $clean = mb_substr($clean, 0, $max);
         }

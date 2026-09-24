@@ -127,20 +127,11 @@ async function postAi(path: string, body: Record<string, unknown>) {
   return { response, json };
 }
 
-/** Prevent undefined/null coercion and accidental doubled paste from reaching the API. */
+/** Normalize outgoing user text without rewriting semantic words. */
 function sanitizeUserOutgoing(text: string): string {
-  let trimmed = String(text ?? "")
-    .replace(/^(?:undefined|null)+/i, "")
+  return String(text ?? "")
+    .replace(/\0/g, "")
     .trim();
-  if (trimmed.length >= 16) {
-    const half = Math.floor(trimmed.length / 2);
-    const left = trimmed.slice(0, half);
-    const right = trimmed.slice(half);
-    if (left && left === right) {
-      trimmed = left;
-    }
-  }
-  return trimmed;
 }
 
 export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {

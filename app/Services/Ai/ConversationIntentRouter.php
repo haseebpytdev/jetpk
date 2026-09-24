@@ -146,6 +146,16 @@ final class ConversationIntentRouter
             return 'GENERAL_KNOWLEDGE';
         }
 
+        // Terse educational topic asks (e.g. "Undefined behavior in C?", "Null hypothesis in statistics?").
+        if (
+            str_ends_with($lower, '?')
+            && ! preg_match('/\b(flight|ticket|fare|booking|pnr|lahore|dubai|travel|umrah|jetpakistan)\b/u', $lower)
+            && ! $this->isJetPakistanKnowledgeQuestion($lower)
+            && ! $this->hasStrongActionableIntent($lower)
+        ) {
+            return 'GENERAL_KNOWLEDGE';
+        }
+
         return null;
     }
 

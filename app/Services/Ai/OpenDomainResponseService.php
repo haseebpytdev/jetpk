@@ -114,6 +114,10 @@ final class OpenDomainResponseService
             $core = 'Pi (π) is the ratio of a circle\'s circumference to its diameter — about 3.14159.';
         } elseif (preg_match('/photosynthesis/u', $lower) === 1) {
             $core = 'Photosynthesis is how plants turn light, water, and carbon dioxide into energy (sugars) and oxygen.';
+        } elseif (preg_match('/\bundefined\b/u', $lower) === 1) {
+            $core = 'In C, undefined behavior means the language standard does not define what the program must do for that case — compilers may assume it never happens.';
+        } elseif (preg_match('/\bnull hypothesis\b|\bhypothesis in statistics\b/u', $lower) === 1) {
+            $core = 'In statistics, the null hypothesis is the default claim of no effect or no difference that a test tries to reject with evidence.';
         }
 
         return $this->withOptionalPivot($core, $pivot, true);

@@ -266,7 +266,7 @@ final class AiConversationalAgent
             return false;
         }
 
-        // Policy / commercial claim families — must also appear in approved source text.
+        // Policy / commercial / hyperbolic claim families — must also appear in approved source text.
         $gatedPatterns = [
             '/\brefunds?\b/u',
             '/\bguarantees?\b/u',
@@ -280,6 +280,10 @@ final class AiConversationalAgent
             '/\b\d+\s*%\b/u',
             '/\bwithin\s+\d+\s*(minutes?|hours?|days?|weeks?|months?)\b/u',
             '/\bin\s+\d+\s*(minutes?|hours?|days?)\b/u',
+            '/\baward[- ]?winning\b/u',
+            '/\bgovernment[- ]?approved\b/u',
+            '/\blargest\b/u',
+            '/\bcheapest\b/u',
         ];
 
         foreach ($gatedPatterns as $pattern) {
@@ -357,11 +361,11 @@ final class AiConversationalAgent
         }
 
         $stop = [
-            'that', 'this', 'with', 'from', 'have', 'help', 'helps', 'helping', 'customers', 'customer',
-            'online', 'platform', 'agency', 'travel', 'also', 'offers', 'offer', 'provides', 'provide',
+            'that', 'this', 'with', 'from', 'have', 'helps', 'helping', 'customers', 'customer',
+            'online', 'also', 'offers', 'offer', 'provides', 'provide',
             'their', 'them', 'than', 'then', 'into', 'about', 'which', 'while', 'where', 'when',
             'your', 'ours', 'does', 'doesn', 'just', 'only', 'more', 'most', 'such', 'ready',
-            'continue', 'general', 'questions', 'compare', 'options', 'available', 'receive', 'get',
+            'continue', 'general', 'questions', 'compare', 'options', 'available',
             'jetpakistan',
         ];
 
@@ -382,15 +386,48 @@ final class AiConversationalAgent
             return false;
         }
 
-        $matched = 0;
+        // Every material content token must be supported (aggregate overlap is insufficient).
         foreach ($content as $token) {
-            if (str_contains($corpusLower, $token)) {
-                $matched++;
+            if (! $this->groundingTokenSupportedByCorpus($token, $corpusLower)) {
+                return false;
             }
         }
 
-        // Conservative: require strong lexical support in approved corpus.
-        return ($matched / count($content)) >= 0.6;
+        return true;
+    }
+
+    private function groundingTokenSupportedByCorpus(string $token, string $corpusLower): bool
+    {
+        if (str_contains($corpusLower, $token)) {
+            return true;
+        }
+
+        foreach ($this->groundingParaphraseAliases($token) as $alias) {
+            if (str_contains($corpusLower, $alias)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Small safe paraphrase map only — not a soft similarity threshold.
+     *
+     * @return list<string>
+     */
+    private function groundingParaphraseAliases(string $token): array
+    {
+        $map = [
+            'receive' => ['get'],
+            'get' => ['receive'],
+            'assistance' => ['help', 'support'],
+            'help' => ['assistance', 'support'],
+            'agency' => ['platform'],
+            'platform' => ['agency'],
+        ];
+
+        return $map[$token] ?? [];
     }
 
     /**

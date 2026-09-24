@@ -67,24 +67,48 @@ class ConversationQuality26Test extends TestCase
         ];
     }
 
-    public function test_no_undefined_prefix_or_duplicate_user_message(): void
+    public function test_legitimate_undefined_and_null_user_messages_are_preserved(): void
     {
         $this->enablePublicAi();
-        $vid = str_repeat('q1', 20);
+        $cases = [
+            'Undefined behavior in C',
+            'Null hypothesis in statistics',
+            'NULL values in SQL',
+            'What does undefined mean?',
+            'What is JetPakistan?',
+            'I need help',
+        ];
 
+        foreach ($cases as $i => $message) {
+            $vid = str_repeat('f'.(string) $i, 20);
+            $turn = $this->chat($vid, $message);
+            $turn['response']->assertOk();
+            $cid = $turn['conversation_id'];
+            $userBodies = AiMessage::query()
+                ->whereHas('conversation', static fn ($q) => $q->where('public_id', $cid))
+                ->where('role', 'user')
+                ->pluck('body')
+                ->all();
+            $this->assertCount(1, $userBodies, 'message: '.$message);
+            $this->assertSame($message, $userBodies[0], 'message: '.$message);
+        }
+    }
+
+    public function test_artifact_coercion_strings_are_not_semantically_rewritten(): void
+    {
+        $this->enablePublicAi();
+        $vid = str_repeat('a9', 20);
+
+        // Server must not heuristically rewrite; UAT/UI must not send these artifacts.
         $turn = $this->chat($vid, 'undefinedWhat is JetPakistan?');
         $turn['response']->assertOk();
         $cid = $turn['conversation_id'];
-
         $userBodies = AiMessage::query()
             ->whereHas('conversation', static fn ($q) => $q->where('public_id', $cid))
             ->where('role', 'user')
             ->pluck('body')
             ->all();
-
-        $this->assertCount(1, $userBodies);
-        $this->assertSame('What is JetPakistan?', $userBodies[0]);
-        $this->assertStringNotContainsString('undefined', $userBodies[0]);
+        $this->assertSame(['undefinedWhat is JetPakistan?'], $userBodies);
 
         $dup = $this->chat($vid, 'I need helpI need help', $cid);
         $dup['response']->assertOk();
@@ -94,7 +118,7 @@ class ConversationQuality26Test extends TestCase
             ->orderBy('id')
             ->pluck('body')
             ->all();
-        $this->assertSame('I need help', $bodies[1] ?? null);
+        $this->assertSame('I need helpI need help', $bodies[1] ?? null);
     }
 
     public function test_what_is_jetpakistan_grounded_knowledge(): void

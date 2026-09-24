@@ -586,6 +586,15 @@ async function waitForComposerInteractive(page, timeoutMs) {
 
 export async function sendMessage(page, text, options = {}) {
   const sendOnce = async () => {
+    // Guard against undefined/null coercion artifacts (e.g. undefined + "What is…").
+    if (typeof text !== "string") {
+      throw new Error(`sendMessage expects a string message, got ${typeof text}`);
+    }
+    const outgoing = text.replace(/\0/g, "").trim();
+    if (outgoing === "") {
+      throw new Error("sendMessage refuses empty message text");
+    }
+
     const input = page
       .locator('[data-testid="ask-jetpakistan-panel"] input[type="text"], [data-testid="ask-jetpakistan-panel"] input')
       .first();
@@ -593,7 +602,8 @@ export async function sendMessage(page, text, options = {}) {
     await waitForComposerInputReady(page, Number(options.inputReadyTimeoutMs ?? 120_000));
 
     const priorAssistantCount = (await readAssistantMessageBodies(page)).length;
-    await input.fill(text);
+    await input.fill("");
+    await input.fill(outgoing);
 
     const chatResponseTimeoutMs = Number(options.chatResponseTimeoutMs ?? 90_000);
     const domTimeoutMs = Number(options.domRenderTimeoutMs ?? options.responseTimeoutMs ?? 15_000);
