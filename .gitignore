@@ -163,4 +163,21 @@ frontend/tsconfig.tsbuildinfo
 # Local workspace artifacts (kept outside repository)
 /UI_test/
 /deployment_packages/
+/deploy_packages/
+/_production_baselines/
 /_dash12-reviewed-untracked-backup/
+
+# Phase 3 topology hygiene — generated/temp/local-only roots
+/tmp/
+/.tmp-*/
+/_jetpk-package-temp/
+/_icons_tmp/
+/_tabler_pkg/
+/urdu-audio-transcriber/
+/11k-s2-upload/
+/test-output.txt
+/soft-nav*.json
+/soft-nav*-console.txt
+/.playwright-cli/
+/docs/maintenance/local-audits/**
+!/docs/maintenance/local-audits/README.md
