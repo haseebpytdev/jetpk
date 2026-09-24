@@ -3,6 +3,7 @@
 namespace Tests\Feature\Ai;
 
 use App\Contracts\Ai\InferenceProvider;
+use App\Models\AiConversation;
 use App\Models\AiMessage;
 use App\Services\Ai\NullInferenceProvider;
 use App\Support\Ai\Embed\EmbedTenantCapability;
@@ -435,18 +436,14 @@ class ConversationQuality26AiFirstTest extends TestCase
         $this->assertNoJetPakistanActionHrefs($chat->json('actions'));
 
         $cid = (string) $chat->json('conversation_id');
+        // Capability alone is insufficient: generic tenants resolve DisabledHandoffProvider.
         $handoff = $this->postJson($this->embedApiPath('client-a-embed-key12', '/handoff'), [
             'conversation_id' => $cid,
         ], $headers)->assertOk();
-        $this->assertSame('waiting_for_human', $handoff->json('status'));
+        $this->assertNotSame('waiting_for_human', $handoff->json('status'));
+        $this->assertNotSame(AiConversation::STATE_WAITING_FOR_HUMAN, $handoff->json('state'));
         $this->assertNoJetPakistanActionHrefs($handoff->json('actions'));
-
-        $waiting = $this->postJson($this->embedApiPath('client-a-embed-key12', '/chat'), [
-            'conversation_id' => $cid,
-            'message' => 'Still waiting — any update?',
-        ], $headers)->assertOk();
-        $this->assertSame('waiting_for_human', $waiting->json('status'));
-        $this->assertNoJetPakistanActionHrefs($waiting->json('actions'));
+        $this->assertStringContainsString('capability', mb_strtolower((string) $handoff->json('message')));
     }
 
     public function test_grounded_knowledge_accepts_supported_paraphrase(): void

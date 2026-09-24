@@ -14,6 +14,7 @@ final class AiAssistantToolExecutor
         private readonly KnowledgeSearchService $knowledge,
         private readonly AiShoppingTools $shopping,
         private readonly AiAssistantBookingLookupTool $bookingLookup,
+        private readonly FlightSearchConfirmationGate $flightConfirmation,
     ) {}
 
     /**
@@ -54,13 +55,19 @@ final class AiAssistantToolExecutor
         $conversation->save();
 
         if ($intent->origin && $intent->destination) {
-            $result = $this->shopping->searchFlights($intent);
+            // Orchestrator-layer confirmation: never execute supplier search from the tool wrapper
+            // until the user affirms the pending snapshot on a later turn.
+            $snapshot = $this->flightConfirmation->buildSnapshot($intent);
+            $this->flightConfirmation->storePending($conversation, $snapshot);
 
             return [
                 'ok' => true,
-                'message' => 'I prepared a flight search for '.$intent->origin.' → '.$intent->destination.'. '.$result['freshness_note'],
-                'recommendations' => $result['recommendations'],
-                'meta' => $result['meta'],
+                'status' => 'confirm',
+                'message' => $this->flightConfirmation->confirmationMessage($snapshot),
+                'recommendations' => [],
+                'requires_confirmation' => true,
+                'confirmation_snapshot' => $snapshot,
+                'meta' => $this->flightConfirmation->confirmationMeta($snapshot),
             ];
         }
 

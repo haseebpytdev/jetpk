@@ -271,7 +271,16 @@ class ConversationQuality26Test extends TestCase
 
         $conversation = AiConversation::query()->where('public_id', $cid)->first();
         $this->assertSame('Ahmed', data_get($conversation?->shopping_state, 'lead_name'));
+        $this->assertSame('LHE', data_get($conversation?->shopping_state, 'origin'));
+        $this->assertSame('DXB', data_get($conversation?->shopping_state, 'destination'));
+        $this->assertSame(2, (int) data_get($conversation?->shopping_state, 'adults'));
+        $this->assertNotNull(data_get($conversation?->shopping_state, 'pending_flight_search_confirmation'));
         $this->assertTrue((bool) data_get($conversation?->shopping_state, 'lead_capture_pending'));
+        $this->assertSame(0, (int) data_get($turn['response']->json(), 'meta.AI_FLIGHT_SEARCH_READ_CALLS'));
+        $this->assertTrue(
+            $turn['response']->json('status') === 'confirm'
+            || (bool) data_get($turn['response']->json(), 'meta.CONFIRMATION_REQUIRED')
+        );
     }
 
     public function test_contact_and_query_same_turn(): void
