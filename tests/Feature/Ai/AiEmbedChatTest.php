@@ -121,9 +121,18 @@ class AiEmbedChatTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('mode', 'STRUCTURED_FALLBACK')
+            ->assertJsonPath('status', 'confirm')
             ->assertJsonPath('meta.intent.origin', 'LHE')
             ->assertJsonPath('meta.intent.destination', 'DXB');
-        $this->assertGreaterThanOrEqual(1, (int) data_get($response->json(), 'meta.AI_FLIGHT_SEARCH_READ_CALLS'));
+        $this->assertSame(0, (int) data_get($response->json(), 'meta.AI_FLIGHT_SEARCH_READ_CALLS'));
+
+        $confirmed = $this->postJson($this->embedApiPath(self::ENTRY_PATH, '/chat'), [
+            'message' => 'Yes, search',
+            'conversation_id' => $response->json('conversation_id'),
+        ], $embed['headers']);
+
+        $confirmed->assertOk()->assertJsonPath('status', 'ok');
+        $this->assertGreaterThanOrEqual(1, (int) data_get($confirmed->json(), 'meta.AI_FLIGHT_SEARCH_READ_CALLS'));
     }
 
     public function test_embed_conversational_lead_capture_reuses_fsm(): void

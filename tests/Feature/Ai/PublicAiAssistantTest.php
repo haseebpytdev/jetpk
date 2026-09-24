@@ -87,17 +87,30 @@ class PublicAiAssistantTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('ok', true)
-            ->assertJsonPath('mode', 'STRUCTURED_FALLBACK');
+            ->assertJsonPath('mode', 'STRUCTURED_FALLBACK')
+            ->assertJsonPath('status', 'confirm');
 
         $this->assertNotEmpty($response->json('conversation_id'));
         $this->assertSame('LHE', data_get($response->json(), 'meta.intent.origin'));
         $this->assertSame('DXB', data_get($response->json(), 'meta.intent.destination'));
-        $recs = $response->json('recommendations') ?? [];
+        $this->assertTrue((bool) data_get($response->json(), 'meta.CONFIRMATION_REQUIRED'));
+        $this->assertSame(0, (int) data_get($response->json(), 'meta.AI_FLIGHT_SEARCH_READ_CALLS'));
+        $this->assertEmpty($response->json('recommendations') ?? []);
+
+        $confirmed = $this->withCookie('jp_ai_vid', $vid)
+            ->postJson('/api/public/ai/chat', [
+                'message' => 'Yes, search',
+                'conversation_id' => $response->json('conversation_id'),
+            ]);
+
+        $confirmed->assertOk()->assertJsonPath('status', 'ok');
+        $recs = $confirmed->json('recommendations') ?? [];
         $this->assertNotEmpty($recs);
         $this->assertStringContainsString('/flights/results', (string) ($recs[0]['view_and_book_url'] ?? ''));
         $this->assertArrayHasKey('price', $recs[0]);
         $this->assertNull($recs[0]['price']);
-        $this->assertGreaterThanOrEqual(1, (int) data_get($response->json(), 'meta.AI_FLIGHT_SEARCH_READ_CALLS'));
+        $this->assertGreaterThanOrEqual(1, (int) data_get($confirmed->json(), 'meta.AI_FLIGHT_SEARCH_READ_CALLS'));
+        $this->assertTrue((bool) data_get($confirmed->json(), 'meta.CONFIRMATION_BEFORE_SEARCH'));
     }
 
     public function test_idor_blocked_on_messages_poll(): void

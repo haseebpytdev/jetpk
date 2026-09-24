@@ -32,6 +32,7 @@ final class AiChatOrchestrator
         private readonly AiCommercialIntentClassifier $intentClassifier,
         private readonly ConversationIntentRouter $intentRouter,
         private readonly OpenDomainResponseService $openDomain,
+        private readonly FlightSearchConfirmationGate $flightConfirmation,
         private readonly ?\App\Services\Ai\Lab\AiLabAdapter $labAdapter = null,
     ) {}
 
@@ -300,8 +301,33 @@ final class AiChatOrchestrator
             return $this->replyLockedWriteRefusal($conversation, $lockedWrite);
         }
 
+        // Explicit handoff outranks lead capture (fresh or pending).
+        if ($this->isExplicitHandoffIntent($cleanMessage)) {
+            if (! $this->embedCapabilityAllows(EmbedTenantCapability::SUPPORT_HANDOFF)) {
+                return $this->replyCapabilityUnavailable(
+                    $conversation,
+                    'STRUCTURED_FALLBACK',
+                    ['AI_FLIGHT_SEARCH_READ_CALLS' => 0, 'AI_GROUP_SEARCH_READ_CALLS' => 0]
+                );
+            }
+            $this->flightConfirmation->clearPending($conversation);
+
+            return $this->beginHandoff(
+                $conversation,
+                'user_requested',
+                'STRUCTURED_FALLBACK',
+                ['AI_FLIGHT_SEARCH_READ_CALLS' => 0, 'AI_GROUP_SEARCH_READ_CALLS' => 0]
+            );
+        }
+
+        // Pending flight confirmation (affirm / cancel / correct) before lead FSM.
+        $pendingConfirm = $this->handlePendingFlightConfirmationTurn($conversation, $cleanMessage);
+        if (is_array($pendingConfirm)) {
+            return $pendingConfirm;
+        }
+
         // HELP-FIRST lead precedence:
-        // SECURITY → STRONG INTENT / KNOWLEDGE / OPEN-DOMAIN → LEAD EXTRACTION
+        // SECURITY → EXPLICIT HANDOFF → CONFIRMATION → STRONG INTENT → LEAD EXTRACTION
         if (($state['lead_capture_pending'] ?? false) && ! $userMessageAlreadyStored) {
             $this->leadService->extractOpportunisticLeadFields($conversation, $cleanMessage);
             $conversation->refresh();
@@ -539,7 +565,7 @@ final class AiChatOrchestrator
                     return $this->replyCapabilityUnavailable($conversation, $mode, $meta);
                 }
 
-                return $this->replyFlightSearch($conversation, $intent, $mode, $meta);
+                return $this->proposeOrExecuteFlightSearch($conversation, $intent, $mode, $meta);
             }
         }
 
@@ -1040,8 +1066,13 @@ final class AiChatOrchestrator
      */
     private function replyFlightSearch(AiConversation $conversation, $intent, string $mode, array $meta): array
     {
+        // Consume any pending confirmation atomically before executing the read-only search.
+        $this->flightConfirmation->clearPending($conversation);
+
         $result = $this->tools->searchFlights($intent);
         $meta['AI_FLIGHT_SEARCH_READ_CALLS'] = (int) ($result['meta']['AI_FLIGHT_SEARCH_READ_CALLS'] ?? 0);
+        $meta['CONFIRMATION_BEFORE_SEARCH'] = true;
+        $meta['confirmation_required'] = false;
         $recs = $result['recommendations'];
         $note = $result['freshness_note'];
 
@@ -1064,12 +1095,197 @@ final class AiChatOrchestrator
             'state' => $conversation->state,
             'message' => $body,
             'recommendations' => $recs,
-            'actions' => [
+            'actions' => $this->tenantSafeActions([
                 ['label' => 'Search Flights', 'href' => '/#flight-search'],
                 ['label' => 'Talk to Support', 'action' => 'handoff'],
-            ],
+            ]),
             'meta' => $meta,
         ]);
+    }
+
+    /**
+     * Propose confirmation for a complete searchable flight intent (no live search yet).
+     *
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    private function proposeOrExecuteFlightSearch(AiConversation $conversation, $intent, string $mode, array $meta): array
+    {
+        $snapshot = $this->flightConfirmation->buildSnapshot($intent);
+        $this->flightConfirmation->storePending($conversation, $snapshot);
+        $body = $this->flightConfirmation->confirmationMessage($snapshot);
+        $meta = $this->flightConfirmation->confirmationMeta($snapshot, $meta);
+
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+            'mode' => $mode,
+            'confirmation_type' => 'flight_search',
+            'confirmation_snapshot' => $snapshot,
+        ]);
+
+        return $this->withMessageId($assistant, [
+            'ok' => true,
+            'status' => 'confirm',
+            'mode' => $mode,
+            'conversation_id' => $conversation->public_id,
+            'state' => $conversation->state,
+            'message' => $body,
+            'requires_confirmation' => true,
+            'confirmation_snapshot' => $snapshot,
+            'recommendations' => [],
+            'actions' => $this->resolveResponseActions(),
+            'meta' => $meta,
+        ]);
+    }
+
+    /**
+     * Handle user reply while a flight search confirmation is pending.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function handlePendingFlightConfirmationTurn(AiConversation $conversation, string $cleanMessage): ?array
+    {
+        $pending = $this->flightConfirmation->pendingSnapshot($conversation);
+        if ($pending === null) {
+            return null;
+        }
+
+        $mode = 'STRUCTURED_FALLBACK';
+        $baseMeta = [
+            'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+            'AI_GROUP_SEARCH_READ_CALLS' => 0,
+            'LOCAL_LLM_REQUIRED_FOR_CORE' => false,
+        ];
+
+        if ($this->flightConfirmation->isAffirmative($cleanMessage)) {
+            $intent = $this->flightConfirmation->intentFromSnapshot($pending);
+            if (! $this->embedCapabilityAllows(EmbedTenantCapability::FLIGHT_SEARCH)) {
+                $this->flightConfirmation->clearPending($conversation);
+
+                return $this->replyCapabilityUnavailable($conversation, $mode, $baseMeta);
+            }
+
+            $meta = array_merge($baseMeta, [
+                'CONFIRMATION_BEFORE_SEARCH' => true,
+                'intent' => $intent->toArray(),
+            ]);
+
+            return $this->replyFlightSearch($conversation, $intent, $mode, $meta);
+        }
+
+        if ($this->flightConfirmation->isNegative($cleanMessage)) {
+            $this->flightConfirmation->clearPending($conversation);
+            $body = 'Okay — I cancelled that search. Tell me if you want a different route or dates.';
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => $mode]);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'ok',
+                'mode' => $mode,
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'recommendations' => [],
+                'actions' => $this->resolveResponseActions(),
+                'meta' => array_merge($baseMeta, [
+                    'CONFIRMATION_REQUIRED' => false,
+                    'confirmation_required' => false,
+                ]),
+            ]);
+        }
+
+        // Material correction: re-parse against prior shopping state (includes pending fields via patch).
+        $prior = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        $hybrid = $this->extractor->extractHybrid($cleanMessage, $prior);
+        $intent = $hybrid->intent;
+        $conversation->shopping_state = $this->extractor->patchState($prior, $intent);
+        $conversation->save();
+
+        if (
+            ($intent->intent === 'flight_search' || $intent->isSearchable())
+            && $intent->origin
+            && $intent->destination
+            && $this->flightConfirmation->isMaterialCorrection($pending, $intent)
+        ) {
+            $snapshot = $this->flightConfirmation->buildSnapshot($intent);
+            $this->flightConfirmation->storePending($conversation, $snapshot);
+            $body = $this->flightConfirmation->confirmationMessage($snapshot);
+            $meta = $this->flightConfirmation->confirmationMeta($snapshot, array_merge($baseMeta, [
+                'intent' => $intent->toArray(),
+                'confirmation_invalidated' => true,
+            ]));
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+                'mode' => $mode,
+                'confirmation_type' => 'flight_search',
+                'confirmation_snapshot' => $snapshot,
+            ]);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'confirm',
+                'mode' => $mode,
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'requires_confirmation' => true,
+                'confirmation_snapshot' => $snapshot,
+                'recommendations' => [],
+                'actions' => $this->resolveResponseActions(),
+                'meta' => $meta,
+            ]);
+        }
+
+        // Ambiguous reply while pending: restate the same confirmation (no search).
+        $body = $this->flightConfirmation->confirmationMessage($pending);
+        $meta = $this->flightConfirmation->confirmationMeta($pending, $baseMeta);
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+            'mode' => $mode,
+            'confirmation_type' => 'flight_search',
+            'confirmation_snapshot' => $pending,
+        ]);
+
+        return $this->withMessageId($assistant, [
+            'ok' => true,
+            'status' => 'confirm',
+            'mode' => $mode,
+            'conversation_id' => $conversation->public_id,
+            'state' => $conversation->state,
+            'message' => $body,
+            'requires_confirmation' => true,
+            'confirmation_snapshot' => $pending,
+            'recommendations' => [],
+            'actions' => $this->resolveResponseActions(),
+            'meta' => $meta,
+        ]);
+    }
+
+    private function isExplicitHandoffIntent(string $message): bool
+    {
+        $lower = mb_strtolower(trim($message));
+        if ($lower === '') {
+            return false;
+        }
+
+        return (bool) preg_match(
+            '/\b('
+            .'talk to (a )?(person|human|support|agent)'
+            .'|speak to (a )?(person|human|support|agent)'
+            .'|need to speak to'
+            .'|human (support|agent)'
+            .'|live agent'
+            .'|real person'
+            .'|human please'
+            .'|staff please'
+            .'|agent please'
+            .'|connect (me )?to (a )?(human|agent|support)'
+            .'|please connect me to support'
+            .'|i need an agent'
+            .'|handoff'
+            .'|insaan se baat'
+            .'|انسانی\s*سپورٹ'
+            .'|انسان سے بات'
+            .')\b/u',
+            $lower
+        );
     }
 
     /**
