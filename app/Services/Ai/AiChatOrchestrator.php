@@ -468,14 +468,20 @@ final class AiChatOrchestrator
             $mode = (string) ($conversational['mode'] ?? 'LLM_ASSISTED');
             $body = (string) ($conversational['message'] ?? '');
             if ($body !== '') {
-                $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+                $status = (string) ($conversational['status'] ?? 'ok');
+                $assistantMeta = [
                     'mode' => $mode,
                     'tool' => $conversational['tool'] ?? null,
-                ]);
+                ];
+                if (! empty($conversational['requires_confirmation'])) {
+                    $assistantMeta['confirmation_type'] = 'flight_search';
+                    $assistantMeta['confirmation_snapshot'] = $conversational['confirmation_snapshot'] ?? null;
+                }
+                $assistant = $this->storeMessage($conversation, 'assistant', $body, $assistantMeta);
 
-                return $this->withMessageId($assistant, [
+                $payload = [
                     'ok' => true,
-                    'status' => 'ok',
+                    'status' => $status !== '' ? $status : 'ok',
                     'mode' => $mode,
                     'conversation_id' => $conversation->public_id,
                     'state' => $conversation->state,
@@ -484,7 +490,13 @@ final class AiChatOrchestrator
                     'knowledge' => $conversational['knowledge'] ?? [],
                     'actions' => $this->tenantSafeActions($conversational['actions'] ?? null),
                     'meta' => $conversational['meta'] ?? $baseMeta,
-                ]);
+                ];
+                if (! empty($conversational['requires_confirmation'])) {
+                    $payload['requires_confirmation'] = true;
+                    $payload['confirmation_snapshot'] = $conversational['confirmation_snapshot'] ?? null;
+                }
+
+                return $this->withMessageId($assistant, $payload);
             }
         }
 

@@ -66,16 +66,20 @@ final class AiConversationalAgent
             }
 
             $toolResult = $this->tools->execute($tool, is_array($parsed['args'] ?? null) ? $parsed['args'] : [], $conversation, $message);
+            $toolMeta = is_array($toolResult['meta'] ?? null) ? $toolResult['meta'] : [];
 
             return [
                 'mode' => 'LLM_ASSISTED',
                 'tool' => $tool,
                 'tool_result' => $toolResult,
+                'status' => (string) ($toolResult['status'] ?? 'ok'),
+                'requires_confirmation' => (bool) ($toolResult['requires_confirmation'] ?? false),
+                'confirmation_snapshot' => $toolResult['confirmation_snapshot'] ?? null,
                 'message' => (string) ($toolResult['message'] ?? ''),
                 'recommendations' => $toolResult['recommendations'] ?? [],
                 'knowledge' => $toolResult['knowledge'] ?? [],
                 'actions' => $toolResult['actions'] ?? [],
-                'meta' => array_merge($meta, ['llm_tool' => $tool]),
+                'meta' => array_merge($meta, $toolMeta, ['llm_tool' => $tool]),
             ];
         }
 
