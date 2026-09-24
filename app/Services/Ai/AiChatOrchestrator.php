@@ -802,6 +802,12 @@ final class AiChatOrchestrator
      */
     private function beginHandoff(AiConversation $conversation, string $reason, string $mode, array $meta): array
     {
+        // Central authorization for every handoff entry (explicit, hybrid, LLM tool, /handoff API).
+        // Model/tool output must never bypass tenant SUPPORT_HANDOFF capability/provider gates.
+        if (! $this->embedCapabilityAllows(EmbedTenantCapability::SUPPORT_HANDOFF)) {
+            return $this->replyCapabilityUnavailable($conversation, $mode, $meta);
+        }
+
         if (! (bool) config('ota.ai_assistant.human_handoff_enabled', true)) {
             $body = 'I could not reach a human agent right now. Please use Contact Support.';
             $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => $mode]);
@@ -1078,7 +1084,7 @@ final class AiChatOrchestrator
      */
     private function replyFlightSearch(AiConversation $conversation, $intent, string $mode, array $meta): array
     {
-        // Consume any pending confirmation atomically before executing the read-only search.
+        // Consume any pending confirmation before executing the read-only search.
         $this->flightConfirmation->clearPending($conversation);
 
         $result = $this->tools->searchFlights($intent);

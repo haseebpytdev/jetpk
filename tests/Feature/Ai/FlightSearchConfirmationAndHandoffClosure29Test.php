@@ -5,12 +5,14 @@ namespace Tests\Feature\Ai;
 use App\Contracts\Ai\InferenceProvider;
 use App\Enums\CustomerQueryStatus;
 use App\Models\AiConversation;
+use App\Models\AiHandoffAudit;
 use App\Models\CustomerQuery;
 use App\Services\Ai\FlightSearchConfirmationGate;
 use App\Services\Ai\NullInferenceProvider;
 use App\Support\Ai\Embed\EmbedTenantCapability;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Tests\Support\Ai\ScriptedInferenceProvider;
 use Tests\Support\InteractsWithEmbedTenants;
 use Tests\TestCase;
 
@@ -355,5 +357,109 @@ class FlightSearchConfirmationAndHandoffClosure29Test extends TestCase
 
         $actions = $response->json('actions') ?? [];
         $this->assertIsArray($actions);
+    }
+
+    public function test_llm_human_handoff_tool_blocked_for_generic_embed_without_provider(): void
+    {
+        $this->enableEmbedTenant(
+            slug: 'client-b',
+            embedKey: 'client-b-llm-handoff-key12',
+            allowedOrigins: ['https://client-b.example.com'],
+            capabilities: [
+                EmbedTenantCapability::GENERAL_AI,
+            ],
+        );
+        config([
+            'ota.ai_assistant.conversational_enabled' => true,
+            'ota.ai_assistant.human_handoff_enabled' => true,
+            'ota.ai_assistant.hard_allow.human_handoff' => true,
+            'ai_lab.enabled' => false,
+        ]);
+        \App\Models\AiAssistantSetting::query()->delete();
+        app(\App\Services\Ai\AiAssistantSettingsService::class)->get();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            '{"action":"tool","tool":"human_handoff","args":{}}'
+        ));
+
+        $session = $this->postJson($this->embedApiPath('client-b-llm-handoff-key12', '/session'), [], [
+            'X-JP-AI-Embed-Parent-Origin' => 'https://client-b.example.com',
+        ])->assertOk();
+        $headers = [
+            'X-JP-AI-Embed-Session' => (string) $session->json('token'),
+            'X-JP-AI-Embed-Parent-Origin' => 'https://client-b.example.com',
+        ];
+
+        $beforeAudits = AiHandoffAudit::query()->count();
+        $response = $this->postJson($this->embedApiPath('client-b-llm-handoff-key12', '/chat'), [
+            'message' => 'Please escalate my request to someone who can help further.',
+        ], $headers);
+
+        $response->assertOk();
+        $this->assertNotSame('waiting_for_human', $response->json('status'));
+        $this->assertNotSame(AiConversation::STATE_WAITING_FOR_HUMAN, $response->json('state'));
+        $this->assertSame($beforeAudits, AiHandoffAudit::query()->count());
+        $this->assertStringContainsString('capability', mb_strtolower((string) $response->json('message')));
+    }
+
+    public function test_llm_human_handoff_tool_allowed_for_jetpakistan_embed_with_provider(): void
+    {
+        $tenant = $this->enableEmbedTenant(
+            slug: 'jetpakistan',
+            embedKey: 'jp-llm-handoff-key12',
+            allowedOrigins: ['https://embed.jetpakistan.pk'],
+        );
+        config([
+            'ota.ai_assistant.conversational_enabled' => true,
+            'ota.ai_assistant.human_handoff_enabled' => true,
+            'ota.ai_assistant.hard_allow.human_handoff' => true,
+            'ai_lab.enabled' => false,
+        ]);
+        \App\Models\AiAssistantSetting::query()->delete();
+        app(\App\Services\Ai\AiAssistantSettingsService::class)->get();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider(
+            '{"action":"tool","tool":"human_handoff","args":{}}'
+        ));
+
+        $session = $this->postJson($this->embedApiPath('jp-llm-handoff-key12', '/session'), [], [
+            'X-JP-AI-Embed-Parent-Origin' => 'https://embed.jetpakistan.pk',
+        ])->assertOk();
+        $token = (string) $session->json('token');
+        $headers = [
+            'X-JP-AI-Embed-Session' => $token,
+            'X-JP-AI-Embed-Parent-Origin' => 'https://embed.jetpakistan.pk',
+        ];
+
+        $sessionPayload = Cache::get('ai_embed_sess:'.hash('sha256', $token));
+        $visitorHash = hash('sha256', (string) ($sessionPayload['visitor_raw'] ?? ''));
+        CustomerQuery::query()->create([
+            'visitor_token_hash' => $visitorHash,
+            'ai_embed_tenant_id' => $tenant->id,
+            'name' => 'JP Embed Guest',
+            'email' => 'jp-embed-guest@example.com',
+            'phone_raw' => '03001234567',
+            'phone_e164' => '+923001234567',
+            'phone_country' => 'PK',
+            'contact_consent' => true,
+            'consent_timestamp' => now(),
+            'consent_source' => 'ask_jetpakistan',
+            'source' => 'ask_jetpakistan',
+            'status' => CustomerQueryStatus::New,
+            'last_activity_at' => now(),
+        ]);
+
+        $beforeAudits = AiHandoffAudit::query()->count();
+        $response = $this->postJson($this->embedApiPath('jp-llm-handoff-key12', '/chat'), [
+            'message' => 'Please escalate my request to someone who can help further.',
+        ], $headers);
+
+        $response->assertOk()
+            ->assertJsonPath('status', 'waiting_for_human')
+            ->assertJsonPath('state', AiConversation::STATE_WAITING_FOR_HUMAN);
+
+        $this->assertSame($beforeAudits + 1, AiHandoffAudit::query()->count());
+        $cid = (string) $response->json('conversation_id');
+        $conversation = AiConversation::query()->where('public_id', $cid)->first();
+        $this->assertNotNull($conversation);
+        $this->assertSame(1, AiHandoffAudit::query()->where('ai_conversation_id', $conversation->id)->count());
     }
 }
