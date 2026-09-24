@@ -1,7 +1,7 @@
 # JetPakistan dedicated server deployment package
 
 **Phase:** JETPK-DEDICATED-SERVER-PACKAGE-BUILD-7J  
-**Package path:** `deploy_packages/jetpk_dedicated/`  
+**Package path:** `docs/deployment/jetpk-dedicated-package/jetpk_dedicated/`  
 **Type:** **Manifest-based** — file lists and scripts only; no application bytes copied into this folder  
 **Deploy target:** Not executed in 7J — upload when explicitly approved
 
