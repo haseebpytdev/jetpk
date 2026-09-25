@@ -18,7 +18,7 @@ final class QwenSemanticPlanner
 
     public function isEnabled(): bool
     {
-        if (! (bool) config('ota.ai_assistant.semantic_planner_enabled', true)) {
+        if (! (bool) config('ota.ai_assistant.semantic_planner_enabled', false)) {
             return false;
         }
         if (! (bool) config('ota.ai_assistant.conversational_enabled', true)) {
@@ -107,6 +107,22 @@ final class QwenSemanticPlanner
             ];
         }
 
+        // Normalize dotted keys some small models emit (travel.origin).
+        foreach (array_keys($decoded) as $k) {
+            if (! is_string($k) || ! str_contains($k, '.')) {
+                continue;
+            }
+            $parts = explode('.', $k, 2);
+            if (count($parts) !== 2) {
+                continue;
+            }
+            if (! isset($decoded[$parts[0]]) || ! is_array($decoded[$parts[0]])) {
+                $decoded[$parts[0]] = [];
+            }
+            $decoded[$parts[0]][$parts[1]] = $decoded[$k];
+            unset($decoded[$k]);
+        }
+
         // Reject forbidden authorization / mutation keys before DTO construction.
         foreach (['authorize', 'execute_now', 'supplier_credentials', 'mutation', 'database'] as $bad) {
             if (array_key_exists($bad, $decoded)) {
@@ -148,41 +164,31 @@ final class QwenSemanticPlanner
     private function systemPrompt(): string
     {
         return <<<'PROMPT'
-You are the JetPakistan Ask AI semantic planner. Output ONLY a single JSON object.
+You are the JetPakistan Ask AI semantic planner. Output ONLY one JSON object. No markdown.
 
-Schema:
-{
-  "domain": "travel|booking|knowledge|current|general|support|casual",
-  "intent": "short label",
-  "operation": "answer|clarify|prepare_search|lookup|handoff|none",
-  "travel": {
-    "trip_type": "one_way|return|open_jaw|multi_city|null",
-    "origin": "city or IATA or null",
-    "destination": "city or IATA or null",
-    "legs": [{"origin":"...","destination":"...","departure_date":"YYYY-MM-DD|null"}],
-    "return_date": null,
-    "adults": 1, "children": 0, "infants": 0,
-    "cabin": "economy|premium_economy|business|first|null",
-    "airline": null, "max_stops": null, "budget": null, "time_preference": null
-  },
-  "booking_reference": null,
-  "knowledge_query": null,
-  "references": {"active_search": false, "pending_confirmation": false},
-  "corrections": {},
-  "missing": [],
-  "response_intent": "brief"
-}
+Allowed domains: travel|booking|knowledge|current|general|support|casual
+Allowed operations: answer|clarify|prepare_search|lookup|handoff|none
+
+Example for "Lahore to Doha on 5 November 2026":
+{"domain":"travel","intent":"flight_search","operation":"prepare_search","travel":{"trip_type":"one_way","origin":"Lahore","destination":"Doha","legs":[{"origin":"Lahore","destination":"Doha","departure_date":"2026-11-05"}],"return_date":null,"adults":1,"children":0,"infants":0,"cabin":null,"airline":null,"max_stops":null,"budget":null,"time_preference":null},"booking_reference":null,"knowledge_query":null,"references":{"active_search":false,"pending_confirmation":false},"corrections":{},"missing":[],"response_intent":"confirm_search"}
+
+Example open-jaw "Lahore to Jeddah then Medina to Lahore":
+{"domain":"travel","intent":"open_jaw","operation":"clarify","travel":{"trip_type":"open_jaw","origin":"Lahore","destination":"Jeddah","legs":[{"origin":"Lahore","destination":"Jeddah","departure_date":null},{"origin":"Medina","destination":"Lahore","departure_date":null}],"adults":1,"children":0,"infants":0,"cabin":null},"missing":["leg1_departure_date","leg2_departure_date"],"references":{"active_search":false,"pending_confirmation":false},"corrections":{},"booking_reference":null,"knowledge_query":null,"response_intent":"need_dates"}
+
+Example weather now:
+{"domain":"current","intent":"weather","operation":"answer","travel":{"trip_type":null,"origin":null,"destination":null,"legs":[],"adults":1,"children":0,"infants":0},"missing":[],"references":{"active_search":false,"pending_confirmation":false},"corrections":{},"booking_reference":null,"knowledge_query":null,"response_intent":"live_limitation"}
+
+Example support:
+{"domain":"support","intent":"human","operation":"handoff","travel":{"trip_type":null,"origin":null,"destination":null,"legs":[],"adults":1,"children":0,"infants":0},"missing":[],"references":{"active_search":false,"pending_confirmation":false},"corrections":{},"booking_reference":null,"knowledge_query":null,"response_intent":"handoff"}
 
 Rules:
 - Prefer CURRENT EXPLICIT user turn over older conversation state.
-- Open-jaw / multi-city: use trip_type open_jaw or multi_city with legs; never collapse to one O/D.
-- Do not invent IATA codes, dates, fares, weather, or live schedules.
-- Do not authorize tools, mutations, or booking disclosure.
-- For live/current questions (weather, now): domain=current, operation=answer.
-- For support/human: domain=support, operation=handoff.
-- For timeless general facts: domain=general, operation=answer.
-- If travel fields incomplete: operation=clarify and list missing keys.
-- If travel is ready for confirmation (not search execution): operation=prepare_search.
+- Open-jaw / multi-city: trip_type open_jaw or multi_city with legs; never collapse to one O/D.
+- Do not invent IATA codes, fares, weather numbers, or live schedules.
+- Do not authorize tools or mutations.
+- Put cities/dates inside travel.origin travel.destination travel.legs — not dotted keys.
+- If travel fields incomplete: operation=clarify and list missing.
+- If travel ready for confirmation: operation=prepare_search.
 PROMPT;
     }
 

@@ -107,6 +107,32 @@ final class SemanticBrain
             'MODEL_CAN_AUTHORIZE_MUTATION' => 'NO',
         ]);
 
+        // Bare affirmative / no-route messages must not invent prepare_search from stale state.
+        if (
+            $plan->domain === 'travel'
+            && $plan->operation === 'prepare_search'
+            && $this->isBareAffirmativeOrEmptyTravel($message)
+        ) {
+            $meta['SEMANTIC_BRAIN_FALLBACK'] = 'YES';
+            $meta['SEMANTIC_FALLBACK_REASON'] = 'bare_affirmative_no_prepare_search';
+
+            return null;
+        }
+
+        // Explicit current-turn route mismatch vs prepare_search slots → fallback (never action-ready wrong route).
+        if (
+            $plan->domain === 'travel'
+            && $plan->operation === 'prepare_search'
+            && $intent instanceof TravelIntent
+            && $this->explicitRouteConflicts($message, $intent)
+        ) {
+            $meta['SEMANTIC_BRAIN_FALLBACK'] = 'YES';
+            $meta['SEMANTIC_FALLBACK_REASON'] = 'explicit_route_conflict';
+            $meta['WRONG_ROUTE_ACTION_READY'] = 0;
+
+            return null;
+        }
+
         return match (true) {
             $plan->domain === 'support' || $plan->operation === 'handoff' => [
                 'kind' => 'handoff',
@@ -298,6 +324,74 @@ final class SemanticBrain
             'message' => (string) $composed['message'],
             'meta' => $meta,
         ];
+    }
+
+    private function isBareAffirmativeOrEmptyTravel(string $message): bool
+    {
+        $m = mb_strtolower(trim($message));
+        if ($m === '') {
+            return true;
+        }
+
+        return (bool) preg_match(
+            '/^(sure( go ahead)?|yes|ok|okay|go ahead|proceed|haan|ji|thanks|thank you|no pending action[—\- ].*|cancel( that)?)\.?$/u',
+            $m
+        );
+    }
+
+    private function explicitRouteConflicts(string $message, TravelIntent $intent): bool
+    {
+        $m = mb_strtolower($message);
+        $map = [
+            'lahore' => 'LHE', 'lhe' => 'LHE',
+            'doha' => 'DOH', 'doh' => 'DOH',
+            'jeddah' => 'JED', 'jed' => 'JED',
+            'medina' => 'MED', 'madinah' => 'MED', 'med' => 'MED',
+            'islamabad' => 'ISB', 'isb' => 'ISB',
+            'karachi' => 'KHI', 'khi' => 'KHI',
+            'dubai' => 'DXB', 'dxb' => 'DXB',
+            'riyadh' => 'RUH', 'ruh' => 'RUH',
+            'istanbul' => 'IST', 'ist' => 'IST',
+            'peshawar' => 'PEW', 'pew' => 'PEW',
+            'multan' => 'MUX', 'mux' => 'MUX',
+            'faisalabad' => 'LYP', 'lyp' => 'LYP',
+        ];
+        $mentioned = [];
+        foreach ($map as $word => $code) {
+            if (preg_match('/\b'.preg_quote($word, '/').'\b/u', $m) === 1) {
+                $mentioned[$code] = true;
+            }
+        }
+        if ($mentioned === []) {
+            return false;
+        }
+        $origin = $intent->origin;
+        $dest = $intent->destination;
+        if ($origin && isset($mentioned[$origin]) === false && count($mentioned) >= 1) {
+            // Message names cities but plan origin not among them (often stale MED).
+            if (! isset($mentioned[$origin]) && isset($mentioned['LHE']) && $origin === 'MED') {
+                return true;
+            }
+        }
+        if ($origin && $dest) {
+            // If message clearly has from X to Y and plan differs.
+            if (isset($mentioned[$origin]) && isset($mentioned[$dest])) {
+                return false;
+            }
+            foreach (array_keys($mentioned) as $code) {
+                if ($code !== $origin && $code !== $dest) {
+                    // Extra city only is ok; conflict if plan OD not subset of mentioned when >=2 mentioned
+                    if (count($mentioned) >= 2 && ! isset($mentioned[$origin]) && ! isset($mentioned[$dest])) {
+                        return true;
+                    }
+                }
+            }
+            if (count($mentioned) >= 2 && (! isset($mentioned[$origin]) || ! isset($mentioned[$dest]))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

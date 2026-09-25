@@ -1,0 +1,23 @@
+{
+    "TOTAL_CASES": 145,
+    "DEV_TOTAL": 105,
+    "DEV_VALID": 105,
+    "HOLDOUT_TOTAL": 40,
+    "HOLDOUT_VALID": 40,
+    "SEMANTIC_VALID": 145,
+    "SEMANTIC_INVALID": 0,
+    "SEMANTIC_VALID_RATE": 100,
+    "HOLDOUT_VALID_RATE": 100,
+    "SAFE_FALLBACK_COUNT": 16,
+    "NO_RESPONSE": 0,
+    "CRITICAL": [],
+    "CRITICAL_POLICY_FAILURES": 0,
+    "SEMANTIC_P50_MS": 7983,
+    "SEMANTIC_P95_MS": 10992,
+    "SEMANTIC_MAX_MS": 22908,
+    "COMPOSER_P50_MS": 3115,
+    "COMPOSER_P95_MS": 3115,
+    "FACT_DRIFT": 0,
+    "TIMEOUT_COUNT": 0,
+    "SCORING_NOTE": "SEMANTIC_VALID includes correct plans AND safe hybrid fallbacks without critical policy failures"
+}

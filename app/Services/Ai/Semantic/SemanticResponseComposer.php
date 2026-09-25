@@ -17,7 +17,7 @@ final class SemanticResponseComposer
 
     public function isEnabled(): bool
     {
-        if (! (bool) config('ota.ai_assistant.semantic_composer_enabled', true)) {
+        if (! (bool) config('ota.ai_assistant.semantic_composer_enabled', false)) {
             return false;
         }
 

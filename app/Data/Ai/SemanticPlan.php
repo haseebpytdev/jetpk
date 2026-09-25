@@ -64,14 +64,48 @@ final class SemanticPlan
      */
     public static function fromModelArray(array $raw): self
     {
-        $domain = strtolower(trim((string) ($raw['domain'] ?? 'general')));
-        if (! in_array($domain, self::DOMAINS, true)) {
-            $domain = 'general';
-        }
-
         $operation = strtolower(trim((string) ($raw['operation'] ?? 'none')));
+        $operationAliases = [
+            'travel' => 'prepare_search',
+            'search' => 'prepare_search',
+            'flight_search' => 'prepare_search',
+            'prepare' => 'prepare_search',
+            'confirm' => 'prepare_search',
+            'ask' => 'clarify',
+            'question' => 'clarify',
+            'help' => 'answer',
+            'respond' => 'answer',
+            'reply' => 'answer',
+            'human' => 'handoff',
+            'support' => 'handoff',
+            'agent' => 'handoff',
+            'booking' => 'lookup',
+            'booking_lookup' => 'lookup',
+        ];
+        if (isset($operationAliases[$operation])) {
+            $operation = $operationAliases[$operation];
+        }
         if (! in_array($operation, self::OPERATIONS, true)) {
             $operation = 'none';
+        }
+
+        $domain = strtolower(trim((string) ($raw['domain'] ?? 'general')));
+        $domainAliases = [
+            'flight' => 'travel',
+            'flights' => 'travel',
+            'weather' => 'current',
+            'live' => 'current',
+            'faq' => 'knowledge',
+            'human' => 'support',
+            'agent' => 'support',
+            'chat' => 'casual',
+            'greeting' => 'casual',
+        ];
+        if (isset($domainAliases[$domain])) {
+            $domain = $domainAliases[$domain];
+        }
+        if (! in_array($domain, self::DOMAINS, true)) {
+            $domain = 'general';
         }
 
         $travel = is_array($raw['travel'] ?? null) ? $raw['travel'] : [];

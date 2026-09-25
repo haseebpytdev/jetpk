@@ -1,0 +1,13 @@
+{
+    "SUPERSEDED_BY": "r2-summary.txt",
+    "NOTE": "r1 failed cert gate; do not use these numbers for READY_FOR_CQ28_PRODUCTION. Trust r2-* only.",
+    "TOTAL_CASES": 145,
+    "DEV_TOTAL": 105,
+    "HOLDOUT_TOTAL": 40,
+    "SEMANTIC_VALID": 133,
+    "SEMANTIC_INVALID": 12,
+    "SEMANTIC_VALID_RATE": 91.72,
+    "CRITICAL_POLICY_FAILURES": 26,
+    "SCORING_NOTE": "SEMANTIC_VALID includes correct plans AND safe hybrid fallbacks without critical policy failures",
+    "SOURCE": "r1-run-console.txt"
+}
