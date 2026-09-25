@@ -20,11 +20,16 @@ namespace App\Data\Ai;
  *   budget: ?float,
  *   time_preference: ?string,
  *   currency: string,
- *   mode: string
+ *   mode: string,
+ *   trip_type: ?string,
+ *   legs: ?list<array{origin: string, destination: string}>
  * }
  */
 final class TravelIntent
 {
+    /**
+     * @param  list<array{origin: string, destination: string}>|null  $legs
+     */
     public function __construct(
         public readonly string $intent,
         public readonly ?string $origin = null,
@@ -41,6 +46,8 @@ final class TravelIntent
         public readonly ?string $timePreference = null,
         public readonly string $currency = 'PKR',
         public readonly string $mode = 'STRUCTURED_FALLBACK',
+        public readonly ?string $tripType = null,
+        public readonly ?array $legs = null,
     ) {}
 
     /**
@@ -78,6 +85,9 @@ final class TravelIntent
         $children = max(0, min(9, (int) ($raw['children'] ?? 0)));
         $infants = max(0, min(9, (int) ($raw['infants'] ?? 0)));
 
+        $legs = self::normalizeLegs($raw['legs'] ?? null);
+        $tripType = self::normalizeTripType($raw['trip_type'] ?? $raw['tripType'] ?? null, $raw, $legs);
+
         return new self(
             intent: $intent,
             origin: self::normalizeAirport($raw['origin'] ?? $raw['origin_text'] ?? null),
@@ -96,6 +106,8 @@ final class TravelIntent
             timePreference: self::normalizeTimePref($raw['time_preference'] ?? $raw['timePreference'] ?? null),
             currency: strtoupper((string) ($raw['currency'] ?? 'PKR')) ?: 'PKR',
             mode: $mode,
+            tripType: $tripType,
+            legs: $legs,
         );
     }
 
@@ -120,14 +132,65 @@ final class TravelIntent
             'time_preference' => $this->timePreference,
             'currency' => $this->currency,
             'mode' => $this->mode,
+            'trip_type' => $this->tripType,
+            'legs' => $this->legs,
         ];
     }
 
     public function isSearchable(): bool
     {
+        if (in_array($this->tripType, ['open_jaw', 'multi_city'], true)) {
+            return false;
+        }
+
         return in_array($this->intent, ['flight_search', 'group_search'], true)
             && $this->origin !== null
             && $this->destination !== null;
+    }
+
+    /**
+     * @param  mixed  $raw
+     * @return list<array{origin: string, destination: string}>|null
+     */
+    private static function normalizeLegs(mixed $raw): ?array
+    {
+        if (! is_array($raw) || $raw === []) {
+            return null;
+        }
+        $legs = [];
+        foreach ($raw as $leg) {
+            if (! is_array($leg)) {
+                continue;
+            }
+            $o = self::normalizeAirport($leg['origin'] ?? null);
+            $d = self::normalizeAirport($leg['destination'] ?? null);
+            if ($o && $d) {
+                $legs[] = ['origin' => $o, 'destination' => $d];
+            }
+        }
+
+        return $legs === [] ? null : $legs;
+    }
+
+    /**
+     * @param  list<array{origin: string, destination: string}>|null  $legs
+     * @param  array<string, mixed>  $raw
+     */
+    private static function normalizeTripType(mixed $value, array $raw, ?array $legs): ?string
+    {
+        if (is_string($value) && $value !== '') {
+            $v = strtolower(trim($value));
+            $allowed = ['one_way', 'return', 'open_jaw', 'multi_city', 'round_trip'];
+            if (in_array($v, $allowed, true)) {
+                return $v === 'round_trip' ? 'return' : $v;
+            }
+        }
+        if (is_array($legs) && count($legs) >= 2) {
+            return 'open_jaw';
+        }
+        $returnDate = self::normalizeDate($raw['return_date'] ?? $raw['returnDate'] ?? null);
+
+        return $returnDate ? 'return' : null;
     }
 
     /** @var array<string, string> */

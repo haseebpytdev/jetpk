@@ -5,7 +5,7 @@ namespace App\Services\Ai\Hybrid;
 final class TravelConstraintResolver
 {
     /**
-     * @return array{max_stops: ?int, ranking: ?string, time_preference: ?string, provenance: array<string, string>}
+     * @return array{max_stops: ?int, ranking: ?string, time_preference: ?string, cabin: ?string, provenance: array<string, string>}
      */
     public function resolve(string $normalized, string $original): array
     {
@@ -13,7 +13,23 @@ final class TravelConstraintResolver
         $maxStops = null;
         $ranking = null;
         $time = null;
+        $cabin = null;
         $hay = $normalized.' '.$original;
+
+        if (preg_match('/\b(business\s*class|business\s*cabin|make (it|that) business)\b/u', $hay) === 1
+            && preg_match('/\b(economy|premium\s*economy|first\s*class)\b/u', $hay) !== 1) {
+            $cabin = 'business';
+            $prov['cabin'] = 'EXPLICIT_USER';
+        } elseif (preg_match('/\b(first\s*class|\bfirst\s*cabin)\b/u', $hay) === 1) {
+            $cabin = 'first';
+            $prov['cabin'] = 'EXPLICIT_USER';
+        } elseif (preg_match('/\b(premium\s*economy)\b/u', $hay) === 1) {
+            $cabin = 'premium_economy';
+            $prov['cabin'] = 'EXPLICIT_USER';
+        } elseif (preg_match('/\b(economy\s*class|\beconomy\b)/u', $hay) === 1) {
+            $cabin = 'economy';
+            $prov['cabin'] = 'EXPLICIT_USER';
+        }
 
         if (preg_match('/\bdirect\b|\bseedhi\b|\bnonstop\b|براہ\s*راست|سیدھا/u', $hay) === 1) {
             $maxStops = 0;
@@ -52,6 +68,7 @@ final class TravelConstraintResolver
             'max_stops' => $maxStops,
             'ranking' => $ranking,
             'time_preference' => $time,
+            'cabin' => $cabin,
             'provenance' => $prov,
         ];
     }

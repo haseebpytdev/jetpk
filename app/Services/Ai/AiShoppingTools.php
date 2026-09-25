@@ -51,7 +51,14 @@ final class AiShoppingTools
 
         $calls = 1;
         $tripType = $intent->returnDate ? 'round_trip' : 'one_way';
-        $depart = $intent->departDate ?: now()->addDays(7)->toDateString();
+        if ($intent->departDate === null || $intent->departDate === '') {
+            return [
+                'recommendations' => [],
+                'meta' => ['AI_FLIGHT_SEARCH_READ_CALLS' => 0],
+                'freshness_note' => 'Need a travel date before opening flight results.',
+            ];
+        }
+        $depart = $intent->departDate;
         $params = array_filter([
             'trip_type' => $tripType,
             'from' => $intent->origin,

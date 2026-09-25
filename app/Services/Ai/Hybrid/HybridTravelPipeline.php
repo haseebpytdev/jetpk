@@ -110,7 +110,54 @@ final class HybridTravelPipeline
             $provenance['intent'] = 'EXPLICIT_USER';
         }
 
+        $openJawLegs = $this->locations->extractOpenJawLegs($normalized, $original);
+        if (is_array($openJawLegs) && count($openJawLegs) >= 2 && $intentName === 'flight_search') {
+            $leg1 = $openJawLegs[0];
+            $leg2 = $openJawLegs[1];
+            $state = array_merge($prior, [
+                'intent' => 'flight_search',
+                'origin' => $leg1['origin'],
+                'destination' => $leg1['destination'],
+                'legs' => $openJawLegs,
+                'trip_type' => 'open_jaw',
+            ]);
+            $msg = 'That sounds like a multi-city / open-jaw itinerary: '
+                .$leg1['origin'].' → '.$leg1['destination']
+                .' then '.$leg2['origin'].' → '.$leg2['destination']
+                .'. Please share the outbound and return (or second-leg) dates, then continue on our multi-city flight search — I will not collapse this into a one-way search.';
+
+            return new HybridParseResult(
+                intent: TravelIntent::fromArray([
+                    'intent' => 'flight_search',
+                    'origin' => $leg1['origin'],
+                    'destination' => $leg1['destination'],
+                    'legs' => $openJawLegs,
+                    'trip_type' => 'open_jaw',
+                    'adults' => isset($prior['adults']) ? (int) $prior['adults'] : 1,
+                    'children' => isset($prior['children']) ? (int) $prior['children'] : 0,
+                    'infants' => isset($prior['infants']) ? (int) $prior['infants'] : 0,
+                    'cabin' => $prior['cabin'] ?? null,
+                ], 'STRUCTURED_FALLBACK'),
+                clarificationRequired: true,
+                clarificationMessage: $msg,
+                provenance: array_merge($provenance, [
+                    'origin' => 'EXPLICIT_USER',
+                    'destination' => 'EXPLICIT_USER',
+                    'trip_type' => 'EXPLICIT_USER',
+                    'OPEN_JAW_DETECTED' => 'YES',
+                    'LEG1' => $leg1['origin'].'-'.$leg1['destination'],
+                    'LEG2' => $leg2['origin'].'-'.$leg2['destination'],
+                    'FALSE_ONE_WAY' => 'NO',
+                ]),
+                language: $language,
+                state: $state,
+                llmBypassed: true,
+            );
+        }
+
         [$origin, $destination, $oAmb, $dAmb, $oOpts, $dOpts] = $this->locations->extractRoute($normalized, $original);
+        $explicitOrigin = $origin !== null;
+        $explicitDestination = $destination !== null;
 
         // Destination-led group phrases: "Dubai groups", "Jeddah group chahiye", "دبئی کے گروپ"
         if ($intentName === 'group_search' && $destination === null && $origin === null && ! $oAmb && ! $dAmb) {
@@ -123,6 +170,7 @@ final class HybridTravelPipeline
             }
         }
 
+        // Explicit current-turn fields outrank inherited state. Only inherit when genuinely absent.
         if ($origin === null && isset($prior['origin'])) {
             $origin = is_string($prior['origin']) ? $prior['origin'] : null;
             if ($origin) {
@@ -138,6 +186,14 @@ final class HybridTravelPipeline
             }
         } elseif ($destination) {
             $provenance['destination'] = $provenance['destination'] ?? 'RESOLVED_MASTER_DATA';
+        }
+
+        // When both O/D are explicit this turn, drop stale opposing route contamination.
+        $explicitRoutePrecedence = false;
+        if ($explicitOrigin && $explicitDestination) {
+            $explicitRoutePrecedence = true;
+            $provenance['EXPLICIT_ROUTE_PRECEDENCE'] = 'PASS';
+            $provenance['STALE_ROUTE_CONTAMINATION'] = '0';
         }
 
         if ($oAmb) {
@@ -201,6 +257,21 @@ final class HybridTravelPipeline
         $provenance = array_merge($provenance, $cons['provenance']);
         $timePref = $cons['time_preference'] ?? ($prior['time_preference'] ?? null);
         $ranking = $cons['ranking'];
+        $cabin = $cons['cabin'] ?? (isset($prior['cabin']) && is_string($prior['cabin']) ? $prior['cabin'] : null);
+        if ($cons['cabin']) {
+            $provenance['cabin'] = $cons['provenance']['cabin'] ?? 'EXPLICIT_USER';
+        }
+
+        $oneWay = preg_match('/\bone[- ]way\b|\boneway\b/u', $normalized) === 1;
+        if ($oneWay) {
+            $returnDate = null;
+            $provenance['trip_type'] = 'EXPLICIT_USER';
+        }
+
+        // When an explicit new route is stated this turn, do not keep a stale return date unless return is also stated.
+        if ($explicitRoutePrecedence && $returnInfo['date'] === null && $oneWay) {
+            $returnDate = null;
+        }
 
         // Confidence gate — never invent route for flight search
         $clarifyRequired = false;
@@ -244,7 +315,8 @@ final class HybridTravelPipeline
             if (! $gate['ok']) {
                 $clarifyRequired = true;
                 $clarifyMessage = $gate['message'] ?? $clarifyMessage;
-                $intentName = 'unknown';
+                // Keep flight_search intent identity in state for follow-ups; gate only blocks execution.
+                $intentName = 'flight_search';
             }
         }
 
@@ -260,8 +332,10 @@ final class HybridTravelPipeline
             $intentName = 'unknown';
         }
 
+        $tripType = $oneWay ? 'one_way' : (is_string($returnDate) ? 'return' : 'one_way');
+
         $payload = [
-            'intent' => $clarifyRequired ? 'unknown' : $intentName,
+            'intent' => $clarifyRequired && ($origin === null || $destination === null) ? 'unknown' : $intentName,
             'origin' => $origin,
             'destination' => $destination,
             'depart_date' => $depart,
@@ -269,11 +343,14 @@ final class HybridTravelPipeline
             'adults' => max(1, min(9, (int) $adults)),
             'children' => max(0, min(9, (int) $children)),
             'infants' => max(0, min(9, (int) $infants)),
+            'cabin' => is_string($cabin) ? $cabin : null,
             'airline' => is_string($airlineCode) ? $airlineCode : null,
             'max_stops' => $maxStops === null ? null : (int) $maxStops,
             'budget' => $budgetAmt === null ? null : (float) $budgetAmt,
             'time_preference' => is_string($timePref) ? $timePref : null,
             'currency' => 'PKR',
+            'trip_type' => $tripType,
+            'legs' => null,
         ];
 
         // Final gate: flight searchable only with resolved O/D
@@ -290,8 +367,23 @@ final class HybridTravelPipeline
         }
 
         $state = array_merge($prior, $intent->toArray());
+        if ($explicitRoutePrecedence) {
+            $state['origin'] = $origin;
+            $state['destination'] = $destination;
+            $state['trip_type'] = $tripType;
+            if ($oneWay) {
+                $state['return_date'] = null;
+            }
+            // Clear stale open-jaw legs when user states a simple route.
+            unset($state['legs']);
+        }
         if ($ranking) {
             $state['ranking_preference'] = $ranking;
+        }
+
+        if ($explicitRoutePrecedence) {
+            $provenance['EXPLICIT_ROUTE_PRECEDENCE'] = 'PASS';
+            $provenance['STALE_ROUTE_CONTAMINATION'] = '0';
         }
 
         return new HybridParseResult(

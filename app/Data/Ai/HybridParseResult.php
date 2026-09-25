@@ -29,7 +29,7 @@ final class HybridParseResult
      */
     public function toMeta(): array
     {
-        return [
+        $meta = [
             'intent' => $this->intent->toArray(),
             'clarification_required' => $this->clarificationRequired,
             'clarification_message' => $this->clarificationMessage,
@@ -40,5 +40,19 @@ final class HybridParseResult
             'llm_bypassed' => $this->llmBypassed,
             'LOCAL_LLM_REQUIRED_FOR_CORE' => false,
         ];
+        foreach ([
+            'OPEN_JAW_DETECTED',
+            'LEG1',
+            'LEG2',
+            'FALSE_ONE_WAY',
+            'EXPLICIT_ROUTE_PRECEDENCE',
+            'STALE_ROUTE_CONTAMINATION',
+        ] as $key) {
+            if (isset($this->provenance[$key])) {
+                $meta[$key] = $this->provenance[$key];
+            }
+        }
+
+        return $meta;
     }
 }

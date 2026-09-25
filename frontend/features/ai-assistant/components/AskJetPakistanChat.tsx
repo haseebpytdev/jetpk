@@ -145,6 +145,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [conversationState, setConversationState] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     try {
@@ -389,8 +390,31 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
         conversation_id: conversationId,
       });
 
+      if (typeof json.conversation_id === "string") {
+        setConversationId(json.conversation_id);
+      }
+      if (typeof json.state === "string") {
+        setConversationState(json.state);
+      }
+
       if (response.status === 503 || json.status === "unavailable") {
         appendAssistant(json);
+        setInput((current) => (current.trim() === "" ? trimmed : current));
+        setError(
+          typeof json.message === "string" && json.message.trim() !== ""
+            ? json.message
+            : "Assistant temporarily unavailable. Please retry.",
+        );
+        return;
+      }
+
+      if (response.status === 409 || json.status === "conflict") {
+        setError(
+          typeof json.message === "string" && json.message.trim() !== ""
+            ? json.message
+            : "Please wait — a previous message is still processing.",
+        );
+        setInput((current) => (current.trim() === "" ? trimmed : current));
         return;
       }
 
@@ -419,12 +443,14 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
             ? json.message
             : "Request failed. Please retry.",
         );
+        setInput((current) => (current.trim() === "" ? trimmed : current));
         return;
       }
 
       appendAssistant(json);
     } catch {
       setError("Network error. Please retry.");
+      setInput((current) => (current.trim() === "" ? trimmed : current));
     } finally {
       setBusy(false);
     }
@@ -443,9 +469,41 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
       const { json } = await postAi("/api/public/ai/handoff", {
         conversation_id: conversationId,
       });
+      if (typeof json.state === "string") {
+        setConversationState(json.state);
+      }
       appendAssistant(json);
     } catch {
       setError("Could not reach the support queue.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const resumeAi = async () => {
+    if (!conversationId || busy) return;
+
+    setBusy(true);
+    setError(null);
+
+    try {
+      const { response, json } = await postAi("/api/public/ai/resume", {
+        conversation_id: conversationId,
+      });
+      if (!response.ok) {
+        setError(
+          typeof json.message === "string"
+            ? json.message
+            : "Could not resume AI. Please retry.",
+        );
+        return;
+      }
+      if (typeof json.state === "string") {
+        setConversationState(json.state);
+      }
+      appendAssistant(json);
+    } catch {
+      setError("Could not resume AI. Please retry.");
     } finally {
       setBusy(false);
     }
@@ -492,6 +550,11 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   const onAction = (action: ChatAction) => {
     if (action.action === "handoff") {
       void handoff();
+      return;
+    }
+
+    if (action.action === "resume_ai") {
+      void resumeAi();
       return;
     }
 
@@ -674,6 +737,16 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
                     >
                       Talk to a person
                     </button>
+                    {conversationState === "WAITING_FOR_HUMAN" ? (
+                      <button
+                        type="button"
+                        onClick={() => void resumeAi()}
+                        disabled={busy}
+                        data-testid="ask-jetpakistan-resume-ai"
+                      >
+                        Resume AI
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -705,6 +778,20 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
                 <span>{error}</span>
                 <button type="button" onClick={() => setError(null)}>
                   Dismiss
+                </button>
+              </div>
+            ) : null}
+
+            {conversationState === "WAITING_FOR_HUMAN" ? (
+              <div className={styles.error} role="status">
+                <span>Support queue is active. AI replies are paused.</span>
+                <button
+                  type="button"
+                  onClick={() => void resumeAi()}
+                  disabled={busy}
+                  data-testid="ask-jetpakistan-resume-ai"
+                >
+                  Resume AI
                 </button>
               </div>
             ) : null}

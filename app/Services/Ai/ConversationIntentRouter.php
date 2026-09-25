@@ -76,6 +76,25 @@ final class ConversationIntentRouter
             return true;
         }
 
+        // Cabin / passenger / trip-shape refinements while shopping.
+        if (preg_match(
+            '/\b(business|economy|premium\s*economy|first)\s*class\b|\bcabin\b|\b(make (it|that) )?(business|economy)\b|\b\d+\s*adults?\b|\bcome back from\b|\bchange (it|that) to\b|\buse \w+ instead\b|\bis (it|that) (business|return|economy)\b|\bwhat date\b/u',
+            $lower
+        ) === 1) {
+            return true;
+        }
+
+        // Date-only answers completing an in-progress flight search (do not treat as lead name).
+        if (preg_match('/\b\d{4}-\d{2}-\d{2}\b/u', $lower) === 1) {
+            return true;
+        }
+        if (preg_match('/\b(\d{1,2})(st|nd|rd|th)?\s+(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t|tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/u', $lower) === 1) {
+            return true;
+        }
+        if (preg_match('/\b(today|tomorrow|next\s+friday|kal|parso)\b/u', $lower) === 1) {
+            return true;
+        }
+
         return false;
     }
 
@@ -107,7 +126,8 @@ final class ConversationIntentRouter
         if (preg_match(
             '/\b(stock price|share price|breaking news|live score|live match|who won|who is winning)\b'.
             '|\b(today\'?s|current)\s+weather\b'.
-            '|\bweather\s+(today|now|tomorrow|in)\b'.
+            '|\bweather\s+(today|now|tomorrow|in|situation)\b'.
+            '|\bweather situation\b'.
             '|\btemperature in\b|\bcurrent (president|prime minister)\b'.
             '|\b(bitcoin|crypto).{0,20}\b(price|today)\b/u',
             $lower

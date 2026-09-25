@@ -64,7 +64,25 @@ class PublicAiAssistantController extends Controller
         }
 
         try {
-            $payload = $this->orchestrator->handleChat($conversation, $sanitized['message']);
+            $lock = \Illuminate\Support\Facades\Cache::lock(
+                'ai:chat:write:'.$conversation->public_id,
+                30
+            );
+            if (! $lock->get()) {
+                return $this->withVisitorCookie(response()->json([
+                    'ok' => false,
+                    'status' => 'conflict',
+                    'message' => 'Another message is still being processed for this chat. Please wait a moment and retry.',
+                    'conversation_id' => $conversation->public_id,
+                    'state' => $conversation->state,
+                ], 409), $resolved);
+            }
+
+            try {
+                $payload = $this->orchestrator->handleChat($conversation, $sanitized['message']);
+            } finally {
+                optional($lock)->release();
+            }
         } catch (\Throwable) {
             return $this->withVisitorCookie($this->unavailable(), $resolved);
         }
@@ -294,6 +312,36 @@ class PublicAiAssistantController extends Controller
         }
 
         $payload = $this->orchestrator->requestHandoff($conversation, $data['reason'] ?? null);
+
+        return $this->withVisitorCookie(response()->json($payload), $resolved);
+    }
+
+    public function resumeAi(Request $request): JsonResponse
+    {
+        if (! $this->eligibility->isEligibleRequest($request)) {
+            return $this->unavailable();
+        }
+
+        $data = $request->validate([
+            'conversation_id' => ['required', 'uuid'],
+        ]);
+
+        [$visitorRaw, $setCookie] = $this->orchestrator->resolveVisitorToken($request);
+        $conversation = $this->orchestrator->findOwnedConversation($request, $data['conversation_id']);
+        $resolved = [
+            'visitor_raw' => $visitorRaw,
+            'set_cookie' => $setCookie || true,
+        ];
+
+        if ($conversation === null) {
+            return $this->withVisitorCookie(response()->json([
+                'ok' => false,
+                'status' => 'forbidden',
+                'message' => 'Conversation not found.',
+            ], 403), $resolved);
+        }
+
+        $payload = $this->orchestrator->resumeAi($conversation, 'user_requested_resume');
 
         return $this->withVisitorCookie(response()->json($payload), $resolved);
     }

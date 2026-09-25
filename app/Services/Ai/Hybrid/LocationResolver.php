@@ -119,6 +119,79 @@ final class LocationResolver
     }
 
     /**
+     * Detect multi-leg / open-jaw itineraries (never collapse to a single O/D pair).
+     *
+     * @return list<array{origin: string, destination: string}>|null
+     */
+    public function extractOpenJawLegs(string $normalized, string $original): ?array
+    {
+        $hay = mb_strtolower($normalized.' '.$original);
+        $legs = [];
+
+        // Prefer explicit "A to B … come back from C to D" / "and then from C to D".
+        if (preg_match(
+            '/\bfrom\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,20}?)\s+to\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,20}?)\s+(?:and\s+then|then|,?\s+and)\s+(?:come\s+back\s+|return\s+)?from\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,20}?)\s+to\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,20}?)\b/u',
+            $hay,
+            $m
+        ) === 1) {
+            $o1 = $this->resolve(trim($m[1]));
+            $d1 = $this->resolve(trim($m[2]));
+            $o2 = $this->resolve(trim($m[3]));
+            $d2 = $this->resolve(trim($m[4]));
+            if ($o1['code'] && $d1['code'] && $o2['code'] && $d2['code']) {
+                $legs = [
+                    ['origin' => $o1['code'], 'destination' => $d1['code']],
+                    ['origin' => $o2['code'], 'destination' => $d2['code']],
+                ];
+            }
+        }
+
+        if (count($legs) < 2 && preg_match_all(
+            '/\bfrom\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+to\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\b/u',
+            $hay,
+            $matches,
+            PREG_SET_ORDER
+        ) >= 2) {
+            $legs = [];
+            foreach ($matches as $m) {
+                $o = $this->resolve(trim($m[1]));
+                $d = $this->resolve(trim($m[2]));
+                if ($o['code'] && $d['code']) {
+                    $legs[] = ['origin' => $o['code'], 'destination' => $d['code']];
+                }
+            }
+        }
+
+        if (count($legs) < 2) {
+            return null;
+        }
+
+        // Deduplicate identical consecutive legs.
+        $unique = [];
+        foreach ($legs as $leg) {
+            $key = $leg['origin'].'-'.$leg['destination'];
+            if (! isset($unique[$key])) {
+                $unique[$key] = $leg;
+            }
+        }
+        $legs = array_values($unique);
+        if (count($legs) < 2) {
+            return null;
+        }
+
+        // Simple round-trip A→B then B→A is not open-jaw.
+        if (
+            count($legs) === 2
+            && $legs[0]['origin'] === $legs[1]['destination']
+            && $legs[0]['destination'] === $legs[1]['origin']
+        ) {
+            return null;
+        }
+
+        return $legs;
+    }
+
+    /**
      * @return array{0: ?string, 1: ?string, origin_ambiguous: bool, dest_ambiguous: bool, origin_options: list<array{label: string, value: string}>, dest_options: list<array{label: string, value: string}>}
      */
     public function extractRoute(string $normalized, string $original): array
@@ -126,6 +199,20 @@ final class LocationResolver
         $originText = null;
         $destText = null;
         $hay = mb_strtolower($normalized.' '.$original);
+
+        // "to Doha from Lahore" / "ticket to Doha from Lahore"
+        if (preg_match('/\bto\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+from\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{2,24}?)(?=\s|$|,|\.|\?|!)/u', $hay, $m) === 1) {
+            $destText = trim($m[1]);
+            $originText = trim($m[2]);
+            $o = $this->resolve($originText);
+            $d = $this->resolve($destText);
+            if ($o['code'] && $d['code']) {
+                return [$o['code'], $d['code'], false, false, [], []];
+            }
+            if ($o['code'] || $d['code'] || $o['ambiguous'] || $d['ambiguous']) {
+                return [$o['code'], $d['code'], $o['ambiguous'], $d['ambiguous'], $o['options'], $d['options']];
+            }
+        }
 
         // "Jeddah flights from LHE" / "Dubai flights from Lahore"
         if (preg_match('/([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+flights?\s+from\s+([a-z]{3}|[a-z\p{Arabic} ]{3,24})/u', $hay, $m) === 1) {
