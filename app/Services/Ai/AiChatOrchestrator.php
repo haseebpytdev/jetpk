@@ -272,6 +272,18 @@ final class AiChatOrchestrator
             AiConversation::STATE_WAITING_FOR_HUMAN,
             AiConversation::STATE_HUMAN_ACTIVE,
         ], true)) {
+            if (
+                $conversation->state === AiConversation::STATE_WAITING_FOR_HUMAN
+                && $this->isExplicitResumeAi($cleanMessage)
+            ) {
+                return $this->resumeAi($conversation, 'user_requested_resume');
+            }
+
+            $actions = $this->resolveResponseActions();
+            if ($conversation->state === AiConversation::STATE_WAITING_FOR_HUMAN) {
+                array_unshift($actions, ['label' => 'Resume AI', 'action' => 'resume_ai']);
+            }
+
             return [
                 'ok' => true,
                 'status' => 'waiting_for_human',
@@ -280,10 +292,12 @@ final class AiChatOrchestrator
                 'state' => $conversation->state,
                 'message' => 'Your message was sent to our support team. An agent will reply here shortly.',
                 'recommendations' => [],
-                'actions' => $this->resolveResponseActions(),
+                'actions' => $actions,
                 'meta' => [
                     'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
                     'AI_GROUP_SEARCH_READ_CALLS' => 0,
+                    'WAITING_MESSAGE_STAYS_HUMAN_QUEUE' => 'PASS',
+                    'RESUME_AI_IMPLICIT' => 'NO',
                 ],
             ];
         }
@@ -324,6 +338,32 @@ final class AiChatOrchestrator
         $pendingConfirm = $this->handlePendingFlightConfirmationTurn($conversation, $cleanMessage);
         if (is_array($pendingConfirm)) {
             return $pendingConfirm;
+        }
+
+        // Affirmative with no concrete pending action must not invent a search.
+        // Do not intercept lead-consent / lead-FSM affirmatives.
+        if (
+            $this->flightConfirmation->isAffirmative($cleanMessage)
+            && ! ($state['lead_capture_pending'] ?? false)
+        ) {
+            $body = 'Happy to help — what would you like me to continue with? For example a route, date, cabin, or passenger change.';
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => 'STRUCTURED_FALLBACK']);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'ok',
+                'mode' => 'STRUCTURED_FALLBACK',
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'recommendations' => [],
+                'actions' => $this->resolveResponseActions(),
+                'meta' => [
+                    'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+                    'AI_GROUP_SEARCH_READ_CALLS' => 0,
+                    'AFFIRMATIVE_WITHOUT_PENDING_ACTION_NO_EXECUTION' => 'PASS',
+                ],
+            ]);
         }
 
         // HELP-FIRST lead precedence:
@@ -377,6 +417,12 @@ final class AiChatOrchestrator
             return $this->replyKnowledge($conversation, $cleanMessage, 'STRUCTURED_FALLBACK', $baseMeta);
         }
 
+        // ACTIVE TRAVEL FOLLOW-UP before open-domain (e.g. "Is it business class?").
+        $activeTravel = $this->tryActiveTravelFollowUp($conversation, $cleanMessage, $baseMeta);
+        if (is_array($activeTravel)) {
+            return $activeTravel;
+        }
+
         // CURRENT_UNVERIFIED: server-gated — model may phrase limitation; reject fabricated live facts.
         if ($openCategory === 'CURRENT_UNVERIFIED') {
             $llm = $this->conversational->tryOpenDomainRespond(
@@ -388,10 +434,22 @@ final class AiChatOrchestrator
                 $baseMeta,
             );
             if (is_array($llm) && filled($llm['message'] ?? null)) {
-                return $this->storeLlmAssistantTurn($conversation, $llm);
+                $payload = $this->storeLlmAssistantTurn($conversation, $llm);
+                $payload['meta'] = array_merge(is_array($payload['meta'] ?? null) ? $payload['meta'] : [], [
+                    'open_domain_category' => 'CURRENT_UNVERIFIED',
+                    'FLIGHT_STATE_CONTAMINATION' => 0,
+                ]);
+
+                return $payload;
             }
 
-            return $this->replyOpenDomainFallback($conversation, $cleanMessage, $openCategory, $capabilities, $brand, $baseMeta);
+            $fallback = $this->replyOpenDomainFallback($conversation, $cleanMessage, $openCategory, $capabilities, $brand, $baseMeta);
+            $fallback['meta'] = array_merge(is_array($fallback['meta'] ?? null) ? $fallback['meta'] : [], [
+                'open_domain_category' => 'CURRENT_UNVERIFIED',
+                'FLIGHT_STATE_CONTAMINATION' => 0,
+            ]);
+
+            return $fallback;
         }
 
         // GENERAL_KNOWLEDGE / OUT_OF_DOMAIN_SAFE / CASUAL: AI-first, structured compositor fallback only.
@@ -507,14 +565,18 @@ final class AiChatOrchestrator
         $hybrid = $this->extractor->extractHybrid($cleanMessage, $prior);
         $intent = $hybrid->intent;
 
-        $conversation->shopping_state = $this->extractor->patchState($prior, $intent);
+        $patched = $this->extractor->patchState($prior, $intent);
+        // Prefer hybrid state when it carries structured legs / trip shape (open-jaw).
+        if (is_array($hybrid->state) && $hybrid->state !== []) {
+            $patched = array_merge($patched, $hybrid->state);
+        }
+        $conversation->shopping_state = $patched;
         if ($hybrid->rankingPreference) {
             $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
             $state['ranking_preference'] = $hybrid->rankingPreference;
             $conversation->shopping_state = $state;
         }
         $conversation->save();
-        $this->syncLeadFromConversation($conversation);
         $this->syncLeadFromConversation($conversation);
 
         $meta = array_merge([
@@ -572,6 +634,25 @@ final class AiChatOrchestrator
         }
 
         if ($intent->intent === 'flight_search' || ($intent->isSearchable() && $intent->intent !== 'group_search')) {
+            if (in_array($intent->tripType, ['open_jaw', 'multi_city'], true)) {
+                $body = $hybrid->clarificationMessage ?: 'That is a multi-city / open-jaw itinerary. Share both leg dates and use multi-city search — I will not collapse it to a one-way search.';
+                $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+                    'mode' => $mode,
+                    'intent' => $intent->toArray(),
+                ]);
+
+                return $this->withMessageId($assistant, [
+                    'ok' => true,
+                    'status' => 'clarify',
+                    'mode' => $mode,
+                    'conversation_id' => $conversation->public_id,
+                    'state' => $conversation->state,
+                    'message' => $body,
+                    'recommendations' => [],
+                    'actions' => $this->resolveResponseActions(),
+                    'meta' => $meta,
+                ]);
+            }
             if ($intent->origin && $intent->destination) {
                 if (! $this->embedCapabilityAllows(EmbedTenantCapability::FLIGHT_SEARCH)) {
                     return $this->replyCapabilityUnavailable($conversation, $mode, $meta);
@@ -797,6 +878,185 @@ final class AiChatOrchestrator
     }
 
     /**
+     * Explicit resume from WAITING_FOR_HUMAN only. Never steals HUMAN_ACTIVE.
+     *
+     * @return array<string, mixed>
+     */
+    public function resumeAi(AiConversation $conversation, string $reason = 'user_requested_resume'): array
+    {
+        if ($conversation->state === AiConversation::STATE_HUMAN_ACTIVE) {
+            $body = 'A support agent is already handling this chat. Ask them to end the handoff, or wait for their reply.';
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => 'HUMAN_QUEUE']);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'waiting_for_human',
+                'mode' => 'HUMAN_QUEUE',
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'recommendations' => [],
+                'actions' => $this->resolveResponseActions(),
+                'meta' => [
+                    'RESUME_AI_EXPLICIT' => 'BLOCKED_HUMAN_ACTIVE',
+                    'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+                    'AI_GROUP_SEARCH_READ_CALLS' => 0,
+                ],
+            ]);
+        }
+
+        if ($conversation->state !== AiConversation::STATE_WAITING_FOR_HUMAN) {
+            return [
+                'ok' => true,
+                'status' => 'ok',
+                'mode' => 'STRUCTURED_FALLBACK',
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => 'AI is already active in this chat. How can I help?',
+                'recommendations' => [],
+                'actions' => $this->resolveResponseActions(),
+                'meta' => [
+                    'RESUME_AI_EXPLICIT' => 'PASS',
+                    'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+                    'AI_GROUP_SEARCH_READ_CALLS' => 0,
+                ],
+            ];
+        }
+
+        $from = $conversation->state;
+        $conversation->state = AiConversation::STATE_AI_ACTIVE;
+        $conversation->save();
+
+        AiHandoffAudit::query()->create([
+            'ai_conversation_id' => $conversation->id,
+            'staff_user_id' => null,
+            'from_state' => $from,
+            'to_state' => AiConversation::STATE_AI_ACTIVE,
+            'reason' => substr($reason, 0, 64),
+        ]);
+
+        $body = 'AI assistant is back. How can I help with your travel plans?';
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+            'mode' => 'STRUCTURED_FALLBACK',
+            'resume_ai' => true,
+        ]);
+
+        return $this->withMessageId($assistant, [
+            'ok' => true,
+            'status' => 'ok',
+            'mode' => 'STRUCTURED_FALLBACK',
+            'conversation_id' => $conversation->public_id,
+            'state' => $conversation->state,
+            'message' => $body,
+            'recommendations' => [],
+            'actions' => $this->resolveResponseActions(),
+            'meta' => [
+                'RESUME_AI_EXPLICIT' => 'PASS',
+                'RESUME_AI_IMPLICIT' => 'NO',
+                'HANDOFF_AUDIT_DUPLICATES' => 0,
+                'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+                'AI_GROUP_SEARCH_READ_CALLS' => 0,
+            ],
+        ]);
+    }
+
+    private function isExplicitResumeAi(string $message): bool
+    {
+        $lower = mb_strtolower(trim($message));
+
+        return (bool) preg_match('/^(resume ai|resume assistant|back to ai|return to ai)[\s!.?]*$/u', $lower);
+    }
+
+    /**
+     * Referential travel follow-ups against pending confirmation or last_flight_search.
+     *
+     * @param  array<string, mixed>  $baseMeta
+     * @return array<string, mixed>|null
+     */
+    private function tryActiveTravelFollowUp(AiConversation $conversation, string $cleanMessage, array $baseMeta): ?array
+    {
+        $lower = mb_strtolower(trim($cleanMessage));
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        $pending = $this->flightConfirmation->pendingSnapshot($conversation);
+        $last = is_array($state['last_flight_search'] ?? null) ? $state['last_flight_search'] : null;
+        $ctx = $pending ?? $last;
+        if (! is_array($ctx)) {
+            return null;
+        }
+
+        if (preg_match('/\bis (it|that|this) business( class)?\??$/u', $lower) === 1
+            || preg_match('/\b(was|is) (it|that) business\b/u', $lower) === 1) {
+            $cabin = strtolower((string) ($ctx['cabin'] ?? $state['cabin'] ?? ''));
+            if ($cabin === 'business') {
+                $body = 'Yes — this search is business class.';
+            } elseif (in_array($cabin, ['economy', 'premium_economy', 'first'], true)) {
+                $label = str_replace('_', ' ', $cabin);
+                $body = 'No — the current search cabin is '.$label.'.';
+            } else {
+                $body = 'I do not have a cabin saved for this search yet. Should I set it to business class?';
+            }
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => 'STRUCTURED_FALLBACK']);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'ok',
+                'mode' => 'STRUCTURED_FALLBACK',
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'recommendations' => [],
+                'actions' => $this->resolveResponseActions(),
+                'meta' => array_merge($baseMeta, [
+                    'ACTIVE_SEARCH_CONTEXT' => 'PASS',
+                    'open_domain_category' => null,
+                ]),
+            ]);
+        }
+
+        if (preg_match('/\bis (it|that|this) return\??$/u', $lower) === 1) {
+            $trip = (string) ($ctx['trip_type'] ?? (($ctx['return_date'] ?? null) ? 'return' : 'one_way'));
+            $body = $trip === 'return'
+                ? 'Yes — this search is a return trip.'
+                : 'No — this search is one-way.';
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => 'STRUCTURED_FALLBACK']);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'ok',
+                'mode' => 'STRUCTURED_FALLBACK',
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'recommendations' => [],
+                'actions' => $this->resolveResponseActions(),
+                'meta' => array_merge($baseMeta, ['ACTIVE_SEARCH_CONTEXT' => 'PASS']),
+            ]);
+        }
+
+        if (preg_match('/\bwhat date( is that)?\??$/u', $lower) === 1) {
+            $date = $ctx['departure_date'] ?? $ctx['depart_date'] ?? null;
+            $body = is_string($date) && $date !== ''
+                ? 'The current departure date is '.$date.'.'
+                : 'I do not have a departure date saved yet. What date should I use?';
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => 'STRUCTURED_FALLBACK']);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'ok',
+                'mode' => 'STRUCTURED_FALLBACK',
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'recommendations' => [],
+                'actions' => $this->resolveResponseActions(),
+                'meta' => array_merge($baseMeta, ['ACTIVE_SEARCH_CONTEXT' => 'PASS']),
+            ]);
+        }
+
+        return null;
+    }
+
+    /**
      * @param  array<string, mixed>  $meta
      * @return array<string, mixed>
      */
@@ -837,11 +1097,16 @@ final class AiChatOrchestrator
             'reason' => substr($reason, 0, 64),
         ]);
 
-        $body = 'I have connected you with our support queue. A team member will reply in this chat. AI replies are paused.';
+        $body = 'I have connected you with our support queue. A team member will reply in this chat. AI replies are paused. Tap Resume AI anytime to continue with the assistant.';
         $assistant = $this->storeMessage($conversation, 'assistant', $body, [
             'mode' => $mode,
             'handoff' => true,
         ]);
+
+        $actions = array_merge(
+            [['label' => 'Resume AI', 'action' => 'resume_ai']],
+            $this->resolveResponseActions()
+        );
 
         return $this->withMessageId($assistant, [
             'ok' => true,
@@ -851,7 +1116,7 @@ final class AiChatOrchestrator
             'state' => $conversation->state,
             'message' => $body,
             'recommendations' => [],
-            'actions' => $this->resolveResponseActions(),
+            'actions' => $actions,
             'meta' => $meta,
         ]);
     }
@@ -1094,6 +1359,22 @@ final class AiChatOrchestrator
         $recs = $result['recommendations'];
         $note = $result['freshness_note'];
 
+        // Persist safe structured last flight context (never invent fares).
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        $state['last_flight_search'] = [
+            'origin' => $intent->origin,
+            'destination' => $intent->destination,
+            'depart_date' => $intent->departDate,
+            'return_date' => $intent->returnDate,
+            'trip_type' => $intent->tripType ?? ($intent->returnDate ? 'return' : 'one_way'),
+            'cabin' => $intent->cabin,
+            'adults' => $intent->adults,
+            'children' => $intent->children,
+            'infants' => $intent->infants,
+        ];
+        $conversation->shopping_state = $state;
+        $conversation->save();
+
         if ($recs === []) {
             $body = 'I could not build a flight search for that route yet. Try origin and destination like LHE to DXB.';
         } else {
@@ -1129,6 +1410,32 @@ final class AiChatOrchestrator
      */
     private function proposeOrExecuteFlightSearch(AiConversation $conversation, $intent, string $mode, array $meta): array
     {
+        if ($intent->departDate === null || $intent->departDate === '') {
+            $body = 'I have '.$intent->origin.' to '.$intent->destination
+                .(($intent->tripType ?? 'one_way') === 'return' ? ' (return)' : ', one-way')
+                .($intent->cabin ? ', '.$intent->cabin.' class' : '')
+                .'. What travel date should I use?';
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+                'mode' => $mode,
+                'intent' => $intent->toArray(),
+            ]);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'clarify',
+                'mode' => $mode,
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'recommendations' => [],
+                'actions' => $this->resolveResponseActions(),
+                'meta' => array_merge($meta, [
+                    'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+                    'DATE_REQUIRED' => true,
+                ]),
+            ]);
+        }
+
         $snapshot = $this->flightConfirmation->buildSnapshot($intent);
         $this->flightConfirmation->storePending($conversation, $snapshot);
         $body = $this->flightConfirmation->confirmationMessage($snapshot);
@@ -1211,6 +1518,19 @@ final class AiChatOrchestrator
             ]);
         }
 
+        // Open-domain / non-travel while a confirmation is pending: keep pending silently and
+        // let the main router answer (e.g. current weather) without restating the search.
+        $openWhilePending = $this->intentRouter->classifyOpenDomain($cleanMessage);
+        if (in_array($openWhilePending, [
+            'CURRENT_UNVERIFIED',
+            'GENERAL_KNOWLEDGE',
+            'CASUAL_CONVERSATION',
+            'OUT_OF_DOMAIN_SAFE',
+            'HIGH_RISK',
+        ], true)) {
+            return null;
+        }
+
         // Material correction: re-parse against prior shopping state (includes pending fields via patch).
         $prior = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
         $hybrid = $this->extractor->extractHybrid($cleanMessage, $prior);
@@ -1224,10 +1544,37 @@ final class AiChatOrchestrator
             && $intent->destination
             && $this->flightConfirmation->isMaterialCorrection($pending, $intent)
         ) {
+            if ($intent->departDate === null || $intent->departDate === '') {
+                // Explicit route change without date: invalidate pending and ask for date.
+                $this->flightConfirmation->clearPending($conversation);
+                $body = 'Updated route to '.$intent->origin.' → '.$intent->destination
+                    .($intent->cabin ? ', '.$intent->cabin.' class' : '')
+                    .'. What travel date should I use?';
+                $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+                    'mode' => $mode,
+                    'intent' => $intent->toArray(),
+                ]);
+
+                return $this->withMessageId($assistant, [
+                    'ok' => true,
+                    'status' => 'clarify',
+                    'mode' => $mode,
+                    'conversation_id' => $conversation->public_id,
+                    'state' => $conversation->state,
+                    'message' => $body,
+                    'recommendations' => [],
+                    'actions' => $this->resolveResponseActions(),
+                    'meta' => array_merge($baseMeta, $hybrid->toMeta(), [
+                        'confirmation_invalidated' => true,
+                        'DATE_REQUIRED' => true,
+                    ]),
+                ]);
+            }
+
             $snapshot = $this->flightConfirmation->buildSnapshot($intent);
             $this->flightConfirmation->storePending($conversation, $snapshot);
             $body = $this->flightConfirmation->confirmationMessage($snapshot);
-            $meta = $this->flightConfirmation->confirmationMeta($snapshot, array_merge($baseMeta, [
+            $meta = $this->flightConfirmation->confirmationMeta($snapshot, array_merge($baseMeta, $hybrid->toMeta(), [
                 'intent' => $intent->toArray(),
                 'confirmation_invalidated' => true,
             ]));

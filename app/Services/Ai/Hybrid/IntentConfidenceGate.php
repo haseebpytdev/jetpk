@@ -33,6 +33,11 @@ final class IntentConfidenceGate
             }
         }
 
+        // Conversational search must never invent a silent fallback travel date.
+        if ($departDate === null || $departDate === '') {
+            return ['ok' => false, 'message' => 'What travel date should I use for '.$origin.' to '.$destination.'?'];
+        }
+
         return ['ok' => true, 'message' => null];
     }
 }

@@ -21,6 +21,12 @@ final class ConversationStatePatcher
                 continue;
             }
             if ($value === null) {
+                if ($key === 'legs' && in_array($intent->tripType, ['one_way', 'return'], true)) {
+                    unset($next['legs']);
+                }
+                if ($key === 'return_date' && $intent->tripType === 'one_way') {
+                    $next['return_date'] = null;
+                }
                 continue;
             }
             if ($key === 'adults' && $value === 1 && isset($prior['adults']) && (int) $prior['adults'] > 1

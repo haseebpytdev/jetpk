@@ -18,7 +18,8 @@ final class FlightSearchConfirmationGate
      */
     public function buildSnapshot(TravelIntent $intent): array
     {
-        $tripType = $intent->returnDate ? 'return' : 'one_way';
+        $tripType = $intent->tripType
+            ?? ($intent->returnDate ? 'return' : 'one_way');
 
         return [
             'origin' => $intent->origin,
@@ -33,6 +34,7 @@ final class FlightSearchConfirmationGate
             'airline' => $intent->airline,
             'max_stops' => $intent->maxStops,
             'currency' => $intent->currency ?? 'PKR',
+            'legs' => $intent->legs,
         ];
     }
 
@@ -89,6 +91,8 @@ final class FlightSearchConfirmationGate
             'airline' => $snapshot['airline'] ?? null,
             'max_stops' => $snapshot['max_stops'] ?? null,
             'currency' => $snapshot['currency'] ?? 'PKR',
+            'trip_type' => $snapshot['trip_type'] ?? null,
+            'legs' => $snapshot['legs'] ?? null,
             'mode' => 'STRUCTURED_FALLBACK',
         ], 'STRUCTURED_FALLBACK');
     }
@@ -101,7 +105,7 @@ final class FlightSearchConfirmationGate
         }
 
         return (bool) preg_match(
-            '/^(yes|yep|yeah|yup|ok|okay|sure|confirm|correct|go ahead|please (search|do)|search( now)?|that\'?s right|haan|ji|yes please|yes,? search)[\s!.?]*$/u',
+            '/^(yes|yep|yeah|yup|ok|okay|sure|confirm|correct|go ahead|sure,? go ahead|please (search|do)|search( now)?|that\'?s right|haan|ji|yes please|yes,? search)[\s!.?]*$/u',
             $lower
         );
     }
@@ -161,8 +165,15 @@ final class FlightSearchConfirmationGate
     {
         $origin = (string) ($snapshot['origin'] ?? '?');
         $destination = (string) ($snapshot['destination'] ?? '?');
-        $trip = (($snapshot['trip_type'] ?? 'one_way') === 'return') ? 'return' : 'one-way';
-        $date = (string) ($snapshot['departure_date'] ?? 'your selected date');
+        $tripRaw = (string) ($snapshot['trip_type'] ?? 'one_way');
+        $trip = match ($tripRaw) {
+            'return' => 'return',
+            'open_jaw' => 'open-jaw',
+            'multi_city' => 'multi-city',
+            default => 'one-way',
+        };
+        $date = $snapshot['departure_date'] ?? null;
+        $dateLabel = is_string($date) && $date !== '' ? $date : null;
         $adults = (int) ($snapshot['adults'] ?? 1);
         $adultLabel = $adults === 1 ? '1 adult' : $adults.' adults';
         $extra = '';
@@ -174,8 +185,24 @@ final class FlightSearchConfirmationGate
         if ($infants > 0) {
             $extra .= ', '.$infants.' '.($infants === 1 ? 'infant' : 'infants');
         }
+        $cabin = $snapshot['cabin'] ?? null;
+        $cabinLabel = is_string($cabin) && $cabin !== ''
+            ? str_replace('_', ' ', $cabin).' class'
+            : null;
 
-        return "Just to confirm: {$origin} to {$destination}, {$trip}, {$date}, for {$adultLabel}{$extra}. Shall I search?";
+        $parts = ["{$origin} to {$destination}", $trip];
+        if ($dateLabel !== null) {
+            $parts[] = $dateLabel;
+        }
+        if (($snapshot['return_date'] ?? null) && $tripRaw === 'return') {
+            $parts[] = 'return '.(string) $snapshot['return_date'];
+        }
+        if ($cabinLabel !== null) {
+            $parts[] = $cabinLabel;
+        }
+        $parts[] = $adultLabel.$extra;
+
+        return 'Just to confirm: '.implode(', ', $parts).'. Shall I search?';
     }
 
     /**

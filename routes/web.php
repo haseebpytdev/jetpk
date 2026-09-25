@@ -91,6 +91,9 @@ Route::post('/api/public/ai/clear', [PublicAiAssistantController::class, 'clear'
 Route::post('/api/public/ai/handoff', [PublicAiAssistantController::class, 'requestHandoff'])
     ->middleware('throttle:10,1')
     ->name('api.public.ai.handoff');
+Route::post('/api/public/ai/resume', [PublicAiAssistantController::class, 'resumeAi'])
+    ->middleware('throttle:10,1')
+    ->name('api.public.ai.resume');
 
 Route::get('/integrations/ai/{pathToken}', [AiEmbedPageController::class, 'show'])
     ->middleware(['throttle:60,1', 'ai.embed.frame'])
