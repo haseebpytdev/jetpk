@@ -68,7 +68,7 @@ try {
     if (Test-Path "storage/app/audits/jetpk-9h-b/branding-consumption-matrix.jsonl") {
         Remove-Item "storage/app/audits/jetpk-9h-b/branding-consumption-matrix.jsonl" -Force
     }
-    npx playwright test -c playwright.jetpk-9h-b.config.ts
+    npx playwright test -c tests/e2e/playwright/configs/playwright.jetpk-9h-b.config.ts
     $exit = $LASTEXITCODE
 
     if ($DestroyFixtures) {

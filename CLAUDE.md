@@ -4,6 +4,8 @@
 
 This repository is the standalone JetPakistan Laravel OTA.
 
+**Canonical workspace only:** `C:\Users\khadi\ota-jetpk`. Do not create sibling JetPakistan directories, external audit folders, or extra worktrees for routine work. Obey the permanent hygiene policy in [`docs/maintenance/REPOSITORY-HYGIENE-POLICY.md`](docs/maintenance/REPOSITORY-HYGIENE-POLICY.md) and the hard rules in `AGENTS.md` (Repository and production hygiene). Do not use `git clean -fdx` / `git reset --hard` for cosmetic cleanup. UNKNOWN = HOLD. Clean does not mean empty.
+
 Claude may work on:
 
 - public JetPakistan pages

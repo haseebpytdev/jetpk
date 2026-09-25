@@ -93,6 +93,8 @@ Thumbs.db
 node_modules/
 /test-results/
 /playwright-report/
+/coverage/
+/**/coverage/
 /blob-report/
 /storage/test-results/
 /playwright/.cache/
@@ -166,6 +168,9 @@ frontend/tsconfig.tsbuildinfo
 /deploy_packages/
 /_production_baselines/
 /_dash12-reviewed-untracked-backup/
+
+# Consolidation evidence (local-only)
+/.recovery/
 
 # Phase 3 topology hygiene — generated/temp/local-only roots
 /tmp/
