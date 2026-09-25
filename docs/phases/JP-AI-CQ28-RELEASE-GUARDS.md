@@ -1,0 +1,26 @@
+# JP-AI-CQ28 Release Guards
+
+AUTHORIZED_SHA_BASE=386b3aa78ef5aef89aed4341eac9f3eb548ef5f9
+BRANCH=work/jp-ai-cq28-qwen-semantic-brain-35
+
+DEPLOYED=NO
+PRODUCTION_UPLOAD=NO
+AI_EMBED_ENABLED=false
+EXTERNAL_EMBED_ACTIVE=NO
+READY_FOR_IFRAME_ACTIVATION=NO
+
+QWEN_RUNTIME_ACTIVE=NO
+REAL_MODEL_EVAL=TEMPORARILY_BLOCKED
+READY_FOR_CQ28_PRODUCTION=NO
+
+MODEL_CAN_AUTHORIZE_MUTATION=NO
+MODEL_DIRECT_TOOL_AUTHORITY=NO
+SERVER_AUTHORITY=YES
+HYBRID_FALLBACK=YES
+
+Do not deploy until:
+1. Localhost Qwen OpenAI-compatible gateway is healthy on configured OTA_AI_GATEWAY_URL
+2. OTA_AI_CONVERSATIONAL_ENABLED=true with correct OTA_AI_MODEL_ID
+3. Real-model semantic eval ≥100 turns recorded
+4. Explicit production authorization for CQ28 deploy (separate phase)
+5. READY_FOR_CQ28_PRODUCTION may only flip after (1)–(4)
