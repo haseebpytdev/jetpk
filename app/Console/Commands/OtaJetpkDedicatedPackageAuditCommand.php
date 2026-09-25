@@ -235,8 +235,8 @@ class OtaJetpkDedicatedPackageAuditCommand extends Command
 
         $this->newLine();
         $this->info('Deploy package folder');
-        $packageReadme = base_path('deploy_packages/jetpk_dedicated/README_JETPK_DEPLOYMENT.md');
-        $this->line(File::exists($packageReadme) ? '  deploy_packages/jetpk_dedicated/ — present (manifest-based)' : '  deploy_packages/jetpk_dedicated/ — MISSING');
+        $packageReadme = base_path('docs/deployment/jetpk-dedicated-package/jetpk_dedicated/README_JETPK_DEPLOYMENT.md');
+        $this->line(File::exists($packageReadme) ? '  docs/deployment/jetpk-dedicated-package/jetpk_dedicated/ — present (manifest-based)' : '  docs/deployment/jetpk-dedicated-package/jetpk_dedicated/ — MISSING');
 
         $this->newLine();
         $this->info('Manifest reference');

@@ -3,6 +3,27 @@
 ## Main Instruction
 Work precisely. Use the smallest safe change. Do not rewrite unrelated code.
 
+## Repository and production hygiene (mandatory)
+
+Full policy: [`docs/maintenance/REPOSITORY-HYGIENE-POLICY.md`](docs/maintenance/REPOSITORY-HYGIENE-POLICY.md).
+
+Hard rules (do not weaken):
+
+- **Canonical workspace only:** `C:\Users\khadi\ota-jetpk`. Do **not** create sibling `ota-jetpk-*` / `jetpk-*` folders, external audits, temporary clones, or extra worktrees unless the owner explicitly authorizes exceptional recovery.
+- **Approved temp only:** `.recovery/` (recovery evidence), `docs/maintenance/local-audits/` (ignored local audits), Laravel `storage/`, and test source under `tests/` / `tests/e2e/`.
+- **Top-level = current architecture only** (Laravel, `frontend/`, `dashboard/`, AI runtime, tests, ops, docs). No permanent root dirs for phases, themes, template kits, one-off tools, screenshots, package staging, ZIPs, or audit dumps.
+- **Git history is the archive.** Do not keep retired code via `legacy/` / `old/` / `templates-source/` style trees. **UNKNOWN = HOLD.**
+- **UI authority:** `frontend/` and `dashboard/` are canonical Next apps. Keep Laravel Blade/resources only when currently required (email, errors, ops, active Vite).
+- **Dependencies:** install from lockfiles; never commit `vendor/` / `node_modules/` / `.next/`.
+- **Generated output** stays ignored and disposable. Fix tool paths or `.gitignore` instead of accepting root pollution.
+- **Playwright:** prefer `tests/e2e/playwright/`; at most one root entrypoint.
+- **Worktrees:** default none. Any exceptional worktree needs PURPOSE/BRANCH/OWNER/CREATED_DATE/RETIREMENT_CONDITION and must be retired with Git-aware removal after unique work is preserved.
+- **No broad destructive cleanup** (`git clean -fdx`, `git reset --hard`, bulk wildcards) to “look clean.”
+- **Secrets never committed.** Backups on production = **PROTECTED** until an explicit retention policy exists.
+- **Post-task gate:** report `NEW_TOP_LEVEL_DIRECTORIES`, `NEW_EXTERNAL_WORKTREES`, unexplained generated artifacts; expected `NEW_EXTERNAL_WORKTREES=0`.
+- **Production:** cleanup is independent of local cleanup; never delete active runtime, `.env`, persistent data, deploy markers, or required rollback material. Prefer rotate→recreate→validate for sensitive caches.
+- **Clean ≠ empty.** When cleanliness conflicts with uncertain current work, **preservation wins**.
+
 ## Supplier API canonical mapping
 - **PIA NDC = Hitit / Crane 20.1.**
 - **AirBlue NDC/API = Zapways only.**

@@ -54,6 +54,7 @@ final class JetpkMasterTraceAuditService
         'node_modules/',
         '_jetpk-package-temp/',
         '_production_baselines/',
+        'docs/maintenance/production-baselines/',
         '11k-s2-upload/',
         'storage/framework/',
         'storage/logs/',
