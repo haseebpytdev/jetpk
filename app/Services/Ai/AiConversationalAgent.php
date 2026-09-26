@@ -139,8 +139,24 @@ final class AiConversationalAgent
             ['role' => 'user', 'content' => (string) json_encode($payload, JSON_UNESCAPED_UNICODE)],
         ], 280);
 
+        $latency = max(0, (int) ($result['latency_ms'] ?? 0));
+        $attemptMeta = [
+            'OPEN_DOMAIN_LATENCY_MS' => $latency,
+            'open_domain_category' => $category,
+        ];
+
         if (! ($result['ok'] ?? false)) {
-            return null;
+            // Provider call attempted — expose latency for honest TOTAL_MODEL_LATENCY accounting.
+            return [
+                'mode' => null,
+                'message' => '',
+                'latency_ms' => $latency,
+                'calls' => 1,
+                'meta' => array_merge($meta, $attemptMeta, [
+                    'OPEN_DOMAIN_FALLBACK' => 'YES',
+                    'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
+                ]),
+            ];
         }
 
         $content = (string) ($result['content'] ?? '');
@@ -150,30 +166,69 @@ final class AiConversationalAgent
             : (string) ($this->extractMessage($content) ?? '');
 
         if ($reply === '') {
-            return null;
+            return [
+                'mode' => null,
+                'message' => '',
+                'latency_ms' => $latency,
+                'calls' => 1,
+                'meta' => array_merge($meta, $attemptMeta, [
+                    'OPEN_DOMAIN_FALLBACK' => 'YES',
+                    'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
+                ]),
+            ];
         }
 
         if ($category === 'CURRENT_UNVERIFIED') {
             // Prefer schema flag but never trust it alone — fail closed on uncertain text.
             if (is_array($parsed) && array_key_exists('can_verify_live', $parsed) && $parsed['can_verify_live'] !== false) {
-                return null;
+                return [
+                    'mode' => null,
+                    'message' => '',
+                    'latency_ms' => $latency,
+                    'calls' => 1,
+                    'meta' => array_merge($meta, $attemptMeta, [
+                        'OPEN_DOMAIN_FALLBACK' => 'YES',
+                        'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
+                    ]),
+                ];
             }
             if (! $this->isAcceptableCurrentUnverifiedReply($reply)) {
-                return null;
+                return [
+                    'mode' => null,
+                    'message' => '',
+                    'latency_ms' => $latency,
+                    'calls' => 1,
+                    'meta' => array_merge($meta, $attemptMeta, [
+                        'OPEN_DOMAIN_FALLBACK' => 'YES',
+                        'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
+                        'HALLUCINATED_LIVE_FACT' => 'NO',
+                    ]),
+                ];
             }
         }
 
         if (strcasecmp($brand, 'JetPakistan') !== 0
             && preg_match('/\bjetpakistan\b/ui', $reply) === 1) {
-            return null;
+            return [
+                'mode' => null,
+                'message' => '',
+                'latency_ms' => $latency,
+                'calls' => 1,
+                'meta' => array_merge($meta, $attemptMeta, [
+                    'OPEN_DOMAIN_FALLBACK' => 'YES',
+                    'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
+                ]),
+            ];
         }
 
         return [
             'mode' => 'LLM_ASSISTED',
             'message' => $reply,
-            'meta' => array_merge($meta, [
-                'open_domain_category' => $category,
+            'latency_ms' => $latency,
+            'calls' => 1,
+            'meta' => array_merge($meta, $attemptMeta, [
                 'LLM_SYNTHESIS' => 'YES',
+                'OPEN_DOMAIN_FALLBACK' => 'NO',
                 'ANSWER_GROUNDED' => $category === 'GENERAL_KNOWLEDGE' ? 'MODEL_GENERAL' : 'N/A',
                 'SMART_REDIRECT' => $capabilities !== [] ? 'YES' : 'NO',
             ]),

@@ -7,6 +7,7 @@ use App\Data\Ai\TravelIntent;
 use App\Services\Ai\Hybrid\AirlineResolver;
 use App\Services\Ai\Hybrid\DateExpressionResolver;
 use App\Services\Ai\Hybrid\LocationResolver;
+use App\Services\Ai\Hybrid\PassengerExpressionResolver;
 use App\Services\Ai\TravelIntentCanonicalizer;
 use Carbon\Carbon;
 
@@ -20,6 +21,7 @@ final class SemanticPlanValidator
         private readonly DateExpressionResolver $dates,
         private readonly AirlineResolver $airlines,
         private readonly TravelIntentCanonicalizer $canonicalizer,
+        private readonly PassengerExpressionResolver $passengers,
     ) {}
 
     /**
@@ -50,17 +52,57 @@ final class SemanticPlanValidator
         $origin = $this->resolveAirport($plan->origin, $rejects);
         $destination = $this->resolveAirport($plan->destination, $rejects);
 
+        // Current-turn explicit multi-leg authority (independent of Qwen).
+        $explicitLegs = $this->locations->extractOpenJawLegs(
+            mb_strtolower($userMessage),
+            $userMessage
+        );
+        $tripTypeForced = null;
+        $stale = 0;
         $legs = [];
-        foreach ($plan->legs as $leg) {
-            $o = $this->resolveAirport($leg['origin'] ?? null, $rejects);
-            $d = $this->resolveAirport($leg['destination'] ?? null, $rejects);
-            $dd = $this->resolveDate($leg['departure_date'] ?? null, $rejects);
-            if ($o || $d || $dd) {
+
+        if (is_array($explicitLegs) && count($explicitLegs) >= 2) {
+            foreach ($explicitLegs as $leg) {
                 $legs[] = [
-                    'origin' => $o,
-                    'destination' => $d,
-                    'departure_date' => $dd,
+                    'origin' => $leg['origin'],
+                    'destination' => $leg['destination'],
+                    'departure_date' => null,
                 ];
+            }
+            // Preserve matching plan leg dates when sectors match; never keep rewritten sectors.
+            foreach ($plan->legs as $i => $planLeg) {
+                if (! isset($legs[$i])) {
+                    break;
+                }
+                $poRaw = is_string($planLeg['origin'] ?? null) ? trim((string) $planLeg['origin']) : '';
+                $pdRaw = is_string($planLeg['destination'] ?? null) ? trim((string) $planLeg['destination']) : '';
+                $po = $poRaw !== '' ? ($this->locations->resolve($poRaw)['code'] ?? null) : null;
+                $pd = $pdRaw !== '' ? ($this->locations->resolve($pdRaw)['code'] ?? null) : null;
+                if ($po && $pd
+                    && $legs[$i]['origin'] === $po
+                    && $legs[$i]['destination'] === $pd) {
+                    $silentRejects = [];
+                    $pdd = $this->resolveDate($planLeg['departure_date'] ?? null, $silentRejects);
+                    if ($pdd) {
+                        $legs[$i]['departure_date'] = $pdd;
+                    }
+                }
+            }
+            $tripTypeForced = 'open_jaw';
+            $origin = $legs[0]['origin'];
+            $destination = $legs[0]['destination'];
+        } else {
+            foreach ($plan->legs as $leg) {
+                $o = $this->resolveAirport($leg['origin'] ?? null, $rejects);
+                $d = $this->resolveAirport($leg['destination'] ?? null, $rejects);
+                $dd = $this->resolveDate($leg['departure_date'] ?? null, $rejects);
+                if ($o || $d || $dd) {
+                    $legs[] = [
+                        'origin' => $o,
+                        'destination' => $d,
+                        'departure_date' => $dd,
+                    ];
+                }
             }
         }
 
@@ -98,14 +140,17 @@ final class SemanticPlanValidator
             }
         }
 
+        if ($tripTypeForced !== null) {
+            $tripType = $tripTypeForced;
+        }
+
         if (count($legs) >= 2 && $tripType === null) {
             $tripType = 'open_jaw';
         }
 
         // Explicit current-turn route wins over stale prior origin/destination.
-        $explicitRoute = $this->messageImpliesExplicitRoute($userMessage);
-        $stale = 0;
-        if ($explicitRoute && $origin && $destination) {
+        $explicitRoute = $this->messageImpliesExplicitRoute($userMessage) || $tripTypeForced !== null;
+        if ($explicitRoute && $origin && $destination && $tripTypeForced === null) {
             $priorO = isset($priorState['origin']) ? strtoupper((string) $priorState['origin']) : null;
             $priorD = isset($priorState['destination']) ? strtoupper((string) $priorState['destination']) : null;
             if ($priorO && $priorO !== $origin && $origin === $priorO) {
@@ -116,6 +161,26 @@ final class SemanticPlanValidator
                 // Good — plan differs from prior.
                 $stale = 0;
             }
+        }
+
+        // Server-authoritative passenger normalization (relational pair + explicit counts).
+        $pax = $this->passengers->resolve(mb_strtolower($userMessage), $userMessage);
+        $adults = $plan->adults;
+        $children = $plan->children;
+        $infants = $plan->infants;
+        if ($pax['adults'] !== null) {
+            $adultProv = (string) ($pax['provenance']['adults'] ?? '');
+            if ($adultProv === 'EXPLICIT_USER') {
+                $adults = (int) $pax['adults'];
+            } elseif ($adultProv === 'RELATIONAL_PAIR' && ($adults === null || (int) $adults <= 1)) {
+                $adults = (int) $pax['adults'];
+            }
+        }
+        if ($pax['children'] !== null) {
+            $children = (int) $pax['children'];
+        }
+        if ($pax['infants'] !== null) {
+            $infants = (int) $pax['infants'];
         }
 
         if ($plan->domain === 'travel' && in_array($plan->operation, ['prepare_search', 'clarify'], true)) {
@@ -168,9 +233,9 @@ final class SemanticPlanValidator
             'destination' => $destination,
             'depart_date' => $depart,
             'return_date' => $return,
-            'adults' => $plan->adults,
-            'children' => $plan->children,
-            'infants' => $plan->infants,
+            'adults' => $adults,
+            'children' => $children,
+            'infants' => $infants,
             'cabin' => $cabin,
             'airline' => $airline,
             'max_stops' => $plan->maxStops,

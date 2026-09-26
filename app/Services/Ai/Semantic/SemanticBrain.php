@@ -5,7 +5,11 @@ namespace App\Services\Ai\Semantic;
 use App\Data\Ai\SemanticPlan;
 use App\Data\Ai\TravelIntent;
 use App\Models\AiConversation;
+use App\Services\Ai\AiConversationalAgent;
+use App\Services\Ai\ConversationIntentRouter;
 use App\Services\Ai\FlightSearchConfirmationGate;
+use App\Services\Ai\Hybrid\HybridTravelPipeline;
+use App\Services\Ai\OpenDomainResponseService;
 use App\Services\Ai\TravelIntentExtractor;
 
 /**
@@ -20,6 +24,10 @@ final class SemanticBrain
         private readonly SemanticResponseComposer $composer,
         private readonly FlightSearchConfirmationGate $flightConfirmation,
         private readonly TravelIntentExtractor $extractor,
+        private readonly OpenDomainResponseService $openDomain,
+        private readonly ConversationIntentRouter $intentRouter,
+        private readonly HybridTravelPipeline $hybrid,
+        private readonly AiConversationalAgent $conversational,
     ) {}
 
     public function isEnabled(): bool
@@ -144,20 +152,56 @@ final class SemanticBrain
             return ['kind' => 'fallback', 'meta' => $meta];
         }
 
+        $brand = is_string($context['brand'] ?? null) ? (string) $context['brand'] : 'JetPakistan';
+        $capabilities = is_array($context['capabilities'] ?? null)
+            ? array_values(array_filter($context['capabilities'], static fn ($c): bool => is_string($c) && $c !== ''))
+            : [];
+
         return match (true) {
+            $this->messageWantsBookingLookup($message)
+                || $plan->domain === 'booking'
+                || $plan->operation === 'lookup' => [
+                    'kind' => 'booking_lookup',
+                    'meta' => $meta,
+                ],
+            // Server live-data gate outranks Qwen domain labels and general answering.
+            $this->shouldAnswerCurrentUnverified($message, $plan) => $this->currentUnverified(
+                $conversation,
+                $message,
+                $plan,
+                $meta,
+                $calls,
+                $semanticLatency,
+                $composerLatency
+            ),
+            $this->shouldAnswerGeneralKnowledge($message, $plan) => $this->generalAnswer(
+                $conversation,
+                $message,
+                $plan,
+                $meta,
+                $calls,
+                $semanticLatency,
+                $brand,
+                $capabilities,
+            ),
             $plan->domain === 'support' || $plan->operation === 'handoff' => [
                 'kind' => 'handoff',
                 'meta' => $meta,
             ],
             $plan->domain === 'current' => $this->currentUnverified($conversation, $message, $plan, $meta, $calls, $semanticLatency, $composerLatency),
-            $plan->domain === 'general' || $plan->domain === 'casual' => $this->generalAnswer($conversation, $message, $plan, $meta, $calls, $semanticLatency),
+            $plan->domain === 'general' || $plan->domain === 'casual' => $this->generalAnswer(
+                $conversation,
+                $message,
+                $plan,
+                $meta,
+                $calls,
+                $semanticLatency,
+                $brand,
+                $capabilities,
+            ),
             $plan->domain === 'knowledge' => [
                 'kind' => 'knowledge',
                 'query' => $plan->knowledgeQuery ?: $message,
-                'meta' => $meta,
-            ],
-            $plan->domain === 'booking' || $plan->operation === 'lookup' => [
-                'kind' => 'booking_lookup',
                 'meta' => $meta,
             ],
             $plan->domain === 'travel' => $this->travelPath(
@@ -325,6 +369,10 @@ final class SemanticBrain
     }
 
     /**
+     * Harmless general/casual answers: Qwen open-domain primary; OpenDomainResponseService fallback only.
+     * Does not use SemanticResponseComposer as a knowledge generator (composer remains OFF).
+     *
+     * @param  list<string>  $capabilities
      * @param  array<string, mixed>  $meta
      * @return array<string, mixed>
      */
@@ -335,20 +383,129 @@ final class SemanticBrain
         array $meta,
         int $calls,
         int $semanticLatency,
+        string $brand = 'JetPakistan',
+        array $capabilities = [],
     ): array {
-        $fallback = 'Happy to help with that. For live travel prices or JetPakistan bookings I can also search flights once you share a route and date.';
-        $composed = $this->composer->compose($conversation, $message, $plan, [
-            'domain' => 'general',
-            'response_intent' => $plan->responseIntent,
-        ], $fallback);
-        $meta = $this->withComposerMeta($meta, $calls, $semanticLatency, $composed);
+        $category = $this->intentRouter->classifyOpenDomain($message)
+            ?? (in_array($plan->domain, ['casual'], true) ? 'CASUAL_CONVERSATION' : 'GENERAL_KNOWLEDGE');
+
+        // Never answer live/current through the general path.
+        if ($category === 'CURRENT_UNVERIFIED' || $category === 'HIGH_RISK') {
+            return $this->currentUnverified(
+                $conversation,
+                $message,
+                $plan,
+                $meta,
+                $calls,
+                $semanticLatency,
+                0
+            );
+        }
+
+        $openCalls = 0;
+        $openLatency = 0;
+        $llm = $this->conversational->tryOpenDomainRespond(
+            $conversation,
+            $message,
+            $category,
+            $brand,
+            $capabilities,
+            $meta,
+        );
+
+        if (is_array($llm)) {
+            $openLatency = max(0, (int) ($llm['latency_ms'] ?? data_get($llm, 'meta.OPEN_DOMAIN_LATENCY_MS', 0)));
+            $openCalls = max(0, (int) ($llm['calls'] ?? 0));
+        }
+
+        if (is_array($llm) && filled($llm['message'] ?? null)) {
+            $body = (string) $llm['message'];
+            $meta = array_merge($meta, is_array($llm['meta'] ?? null) ? $llm['meta'] : []);
+            $meta['MODEL_CALLS'] = $calls + $openCalls;
+            $meta['SEMANTIC_LATENCY_MS'] = $semanticLatency;
+            $meta['OPEN_DOMAIN_LATENCY_MS'] = $openLatency;
+            $meta['COMPOSER_LATENCY_MS'] = 0;
+            $meta['TOTAL_MODEL_LATENCY_MS'] = $semanticLatency + $openLatency;
+            $meta['FINAL_RESPONSE_SOURCE'] = 'QWEN_OPEN_DOMAIN';
+            $meta['LLM_SYNTHESIS'] = 'YES';
+            $meta['open_domain_category'] = $category;
+            $meta['OPEN_DOMAIN_FALLBACK'] = 'NO';
+
+            return [
+                'kind' => 'answer',
+                'status' => 'ok',
+                'message' => $body,
+                'meta' => $meta,
+            ];
+        }
+
+        // Resilience only — never primary encyclopedia. Deterministic fallback is not a model call,
+        // but any attempted open-domain provider call/latency remains in the totals.
+        $structured = $this->openDomain->fallbackForCategory($message, $category, $capabilities, $brand);
+        $fallback = is_array($structured) && filled($structured['message'] ?? null)
+            ? (string) $structured['message']
+            : 'Happy to help with that. For live travel prices or JetPakistan bookings I can also search flights once you share a route and date.';
+
+        if (is_array($llm) && is_array($llm['meta'] ?? null)) {
+            $meta = array_merge($meta, $llm['meta']);
+        }
+        $meta['MODEL_CALLS'] = $calls + $openCalls;
+        $meta['SEMANTIC_LATENCY_MS'] = $semanticLatency;
+        $meta['OPEN_DOMAIN_LATENCY_MS'] = $openLatency;
+        $meta['COMPOSER_LATENCY_MS'] = 0;
+        $meta['TOTAL_MODEL_LATENCY_MS'] = $semanticLatency + $openLatency;
+        $meta['FINAL_RESPONSE_SOURCE'] = 'OPEN_DOMAIN_FALLBACK';
+        $meta['OPEN_DOMAIN_FALLBACK'] = 'YES';
+        if (is_array($structured) && is_array($structured['meta'] ?? null)) {
+            $meta = array_merge($meta, $structured['meta']);
+        }
+        $meta['open_domain_category'] = $category;
+        $meta['LLM_SYNTHESIS'] = 'FALLBACK_STRUCTURED';
+        $meta['OPEN_DOMAIN_FALLBACK'] = 'YES';
 
         return [
             'kind' => 'answer',
             'status' => 'ok',
-            'message' => (string) $composed['message'],
+            'message' => $fallback,
             'meta' => $meta,
         ];
+    }
+
+    private function messageWantsBookingLookup(string $message): bool
+    {
+        return $this->hybrid->detectBookingLookup($message);
+    }
+
+    private function shouldAnswerGeneralKnowledge(string $message, SemanticPlan $plan): bool
+    {
+        // Never hijack explicit support handoff or booking operation plans.
+        if ($plan->operation === 'handoff' || $plan->domain === 'support' || $plan->domain === 'booking') {
+            return false;
+        }
+
+        // Live/current always wins — even if Qwen labeled the turn general/knowledge.
+        if ($this->intentRouter->classifyOpenDomain($message) === 'CURRENT_UNVERIFIED') {
+            return false;
+        }
+
+        $category = $this->intentRouter->classifyOpenDomain($message);
+        if ($category === 'GENERAL_KNOWLEDGE' || $category === 'CASUAL_CONVERSATION' || $category === 'OUT_OF_DOMAIN_SAFE') {
+            // Qwen often mislabels harmless general questions as tenant knowledge.
+            if (in_array($plan->domain, ['knowledge', 'general', 'casual'], true)) {
+                return ! $this->intentRouter->isJetPakistanKnowledgeQuestion($message);
+            }
+        }
+
+        return false;
+    }
+
+    private function shouldAnswerCurrentUnverified(string $message, SemanticPlan $plan): bool
+    {
+        if ($this->intentRouter->classifyOpenDomain($message) === 'CURRENT_UNVERIFIED') {
+            return true;
+        }
+
+        return $plan->domain === 'current';
     }
 
     private function isBareAffirmativeOrEmptyTravel(string $message): bool

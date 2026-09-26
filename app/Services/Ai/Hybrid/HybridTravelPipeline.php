@@ -56,18 +56,19 @@ final class HybridTravelPipeline
             );
         }
 
-        if ($this->wantsHandoff($normalized, $original)) {
+        // Booking lookup outranks generic support when the turn is clearly a booking retrieve/status request.
+        if ($this->detectBookingLookup($message)) {
             return new HybridParseResult(
-                intent: TravelIntent::fromArray(['intent' => 'handoff'], 'STRUCTURED_FALLBACK'),
+                intent: TravelIntent::fromArray(['intent' => 'booking_lookup'], 'STRUCTURED_FALLBACK'),
                 language: $language,
                 provenance: ['intent' => 'EXPLICIT_USER'],
                 state: $prior,
             );
         }
 
-        if ($this->wantsBookingLookup($normalized, $original)) {
+        if ($this->wantsHandoff($normalized, $original)) {
             return new HybridParseResult(
-                intent: TravelIntent::fromArray(['intent' => 'booking_lookup'], 'STRUCTURED_FALLBACK'),
+                intent: TravelIntent::fromArray(['intent' => 'handoff'], 'STRUCTURED_FALLBACK'),
                 language: $language,
                 provenance: ['intent' => 'EXPLICIT_USER'],
                 state: $prior,
@@ -114,13 +115,24 @@ final class HybridTravelPipeline
         if (is_array($openJawLegs) && count($openJawLegs) >= 2 && $intentName === 'flight_search') {
             $leg1 = $openJawLegs[0];
             $leg2 = $openJawLegs[1];
-            $state = array_merge($prior, [
+            $pax = $this->passengers->resolve($normalized, $original);
+            $adults = $pax['adults'] ?? (isset($prior['adults']) ? (int) $prior['adults'] : 1);
+            $children = $pax['children'] ?? (isset($prior['children']) ? (int) $prior['children'] : 0);
+            $infants = $pax['infants'] ?? (isset($prior['infants']) ? (int) $prior['infants'] : 0);
+            // Explicit multi-city this turn replaces stale one-way O/D state.
+            $state = [
                 'intent' => 'flight_search',
                 'origin' => $leg1['origin'],
                 'destination' => $leg1['destination'],
                 'legs' => $openJawLegs,
                 'trip_type' => 'open_jaw',
-            ]);
+                'adults' => max(1, min(9, (int) $adults)),
+                'children' => max(0, min(8, (int) $children)),
+                'infants' => max(0, min(4, (int) $infants)),
+            ];
+            if (isset($prior['cabin'])) {
+                $state['cabin'] = $prior['cabin'];
+            }
             $msg = 'That sounds like a multi-city / open-jaw itinerary: '
                 .$leg1['origin'].' → '.$leg1['destination']
                 .' then '.$leg2['origin'].' → '.$leg2['destination']
@@ -133,9 +145,9 @@ final class HybridTravelPipeline
                     'destination' => $leg1['destination'],
                     'legs' => $openJawLegs,
                     'trip_type' => 'open_jaw',
-                    'adults' => isset($prior['adults']) ? (int) $prior['adults'] : 1,
-                    'children' => isset($prior['children']) ? (int) $prior['children'] : 0,
-                    'infants' => isset($prior['infants']) ? (int) $prior['infants'] : 0,
+                    'adults' => max(1, min(9, (int) $adults)),
+                    'children' => max(0, min(8, (int) $children)),
+                    'infants' => max(0, min(4, (int) $infants)),
                     'cabin' => $prior['cabin'] ?? null,
                 ], 'STRUCTURED_FALLBACK'),
                 clarificationRequired: true,
@@ -399,6 +411,16 @@ final class HybridTravelPipeline
         );
     }
 
+    /**
+     * Public booking-lookup intent detector for SemanticBrain precedence.
+     */
+    public function detectBookingLookup(string $message): bool
+    {
+        $norm = $this->normalizer->normalize($message);
+
+        return $this->wantsBookingLookup($norm['normalized'], $norm['original']);
+    }
+
     private function wantsHandoff(string $normalized, string $original): bool
     {
         return (bool) preg_match(
@@ -418,7 +440,17 @@ final class HybridTravelPipeline
     private function wantsBookingLookup(string $normalized, string $original): bool
     {
         return (bool) preg_match(
-            '/\b(look\s*up|lookup|find|check|track|status\s+of)\s+(my\s+)?(booking|reservation|pnr)\b|\b(my\s+)?booking\s+(reference|ref|status)\b|\bbooking\s+reference\b|\bhelp with an existing booking\b|\bexisting booking\b|\bpnr\b|\bmera\s+booking\b|\bbooking\s+check\b|\bmanage\s+my\s+booking\b|\b(look\s*up|lookup|check)\s+[A-Z0-9]{5,12}\b/u',
+            '/\b(look\s*up|lookup|find|check|track|status\s+of|see|retrieve|get|show|where\s+is)\s+(my\s+)?(booking|reservation|pnr)\b'
+            .'|\b(my\s+)?booking\s+(reference|ref|status)\b'
+            .'|\bbooking\s+(status|reference)\b'
+            .'|\bhelp with an existing booking\b'
+            .'|\bpnr\b'
+            .'|\bmera\s+booking\b'
+            .'|\bbooking\s+check\b'
+            .'|\bmanage\s+my\s+booking\b'
+            .'|\b(retrieve|get)\s+my\s+reservation\b'
+            .'|\bi\s+want\s+to\s+see\s+my\s+booking\b'
+            .'|\b(look\s*up|lookup|check)\s+[A-Z0-9]{5,12}\b/u',
             $normalized.' '.$original
         );
     }

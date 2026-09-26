@@ -144,6 +144,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showThinking, setShowThinking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [conversationState, setConversationState] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(() => {
@@ -157,6 +158,35 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const lastPollId = useRef(0);
+  const thinkingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const THINKING_DELAY_MS = 280;
+
+  const clearThinkingTimer = useCallback(() => {
+    if (thinkingTimerRef.current !== null) {
+      clearTimeout(thinkingTimerRef.current);
+      thinkingTimerRef.current = null;
+    }
+  }, []);
+
+  const beginBusy = useCallback(() => {
+    setBusy(true);
+    clearThinkingTimer();
+    // Avoid flicker on very fast replies; show thinking for requests that linger.
+    thinkingTimerRef.current = setTimeout(() => {
+      setShowThinking(true);
+    }, THINKING_DELAY_MS);
+  }, [clearThinkingTimer]);
+
+  const endBusy = useCallback(() => {
+    clearThinkingTimer();
+    setShowThinking(false);
+    setBusy(false);
+  }, [clearThinkingTimer]);
+
+  useEffect(() => {
+    return () => clearThinkingTimer();
+  }, [clearThinkingTimer]);
 
   const scrollToEnd = useCallback(() => {
     const el = listRef.current;
@@ -216,7 +246,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
 
     scrollToEnd();
     window.setTimeout(() => inputRef.current?.focus(), 80);
-  }, [messages, open, scrollToEnd]);
+  }, [messages, open, showThinking, scrollToEnd]);
 
   useEffect(() => {
     if (!enabled || !open || !conversationId) return;
@@ -371,7 +401,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
     const trimmed = sanitizeUserOutgoing(text);
     if (!trimmed || busy) return;
 
-    setBusy(true);
+    beginBusy();
     setError(null);
     const optimisticId = `u-${Date.now()}`;
     setMessages((previous) => [
@@ -452,7 +482,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
       setError("Network error. Please retry.");
       setInput((current) => (current.trim() === "" ? trimmed : current));
     } finally {
-      setBusy(false);
+      endBusy();
     }
   };
 
@@ -462,7 +492,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
       return;
     }
 
-    setBusy(true);
+    beginBusy();
     setError(null);
 
     try {
@@ -476,14 +506,14 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
     } catch {
       setError("Could not reach the support queue.");
     } finally {
-      setBusy(false);
+      endBusy();
     }
   };
 
   const resumeAi = async () => {
     if (!conversationId || busy) return;
 
-    setBusy(true);
+    beginBusy();
     setError(null);
 
     try {
@@ -505,13 +535,13 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
     } catch {
       setError("Could not resume AI. Please retry.");
     } finally {
-      setBusy(false);
+      endBusy();
     }
   };
 
   const clearChat = async () => {
     setMenuOpen(false);
-    setBusy(true);
+    beginBusy();
     setError(null);
 
     try {
@@ -543,7 +573,7 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
     } catch {
       setError("Could not clear the conversation.");
     } finally {
-      setBusy(false);
+      endBusy();
     }
   };
 
@@ -760,15 +790,23 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
               />
             ))}
 
-            {busy ? (
-              <div className={styles.typingRow} aria-live="polite" aria-label="Ask JetPakistan is thinking">
+            {showThinking ? (
+              <div
+                className={styles.typingRow}
+                aria-live="polite"
+                aria-label="Ask JetPakistan is thinking"
+                data-testid="ask-jetpakistan-thinking"
+              >
                 <div className={styles.messageAvatar} aria-hidden="true">
                   <PlaneIcon />
                 </div>
                 <div className={styles.typingBubble}>
-                  <span />
-                  <span />
-                  <span />
+                  <span className={styles.thinkingLabel}>Ask JetPakistan is thinking</span>
+                  <span className={styles.typingDots} aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                  </span>
                 </div>
               </div>
             ) : null}
