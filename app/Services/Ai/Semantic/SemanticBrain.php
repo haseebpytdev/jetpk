@@ -28,7 +28,8 @@ final class SemanticBrain
     }
 
     /**
-     * Attempt semantic primary path. Returns null to signal hybrid fallback.
+     * Attempt semantic primary path.
+     * Returns a handled result array, or kind=fallback with telemetry for hybrid continuation.
      *
      * @param  array<string, mixed>  $baseMeta
      * @param  array<string, mixed>  $context
@@ -60,8 +61,12 @@ final class SemanticBrain
         if ($planResult['plan'] === null) {
             $telemetry['SEMANTIC_BRAIN_FALLBACK'] = 'YES';
             $telemetry['SEMANTIC_FALLBACK_REASON'] = (string) ($planResult['error'] ?? 'null_plan');
+            $telemetry['FINAL_RESPONSE_SOURCE'] = 'SEMANTIC_FALLBACK';
 
-            return null; // orchestrator hybrid
+            return [
+                'kind' => 'fallback',
+                'meta' => array_merge($baseMeta, $telemetry),
+            ];
         }
 
         /** @var SemanticPlan $plan */
@@ -77,8 +82,12 @@ final class SemanticBrain
             $telemetry['SEMANTIC_BRAIN_FALLBACK'] = 'YES';
             $telemetry['SEMANTIC_FALLBACK_REASON'] = 'invalid_plan';
             $telemetry['validator_rejects'] = $validated['rejects'];
+            $telemetry['FINAL_RESPONSE_SOURCE'] = 'SEMANTIC_FALLBACK';
 
-            return null;
+            return [
+                'kind' => 'fallback',
+                'meta' => array_merge($baseMeta, $telemetry),
+            ];
         }
 
         $telemetry['SEMANTIC_BRAIN_VALID'] = 'YES';
@@ -115,8 +124,9 @@ final class SemanticBrain
         ) {
             $meta['SEMANTIC_BRAIN_FALLBACK'] = 'YES';
             $meta['SEMANTIC_FALLBACK_REASON'] = 'bare_affirmative_no_prepare_search';
+            $meta['FINAL_RESPONSE_SOURCE'] = 'SEMANTIC_FALLBACK';
 
-            return null;
+            return ['kind' => 'fallback', 'meta' => $meta];
         }
 
         // Explicit current-turn route mismatch vs prepare_search slots → fallback (never action-ready wrong route).
@@ -129,8 +139,9 @@ final class SemanticBrain
             $meta['SEMANTIC_BRAIN_FALLBACK'] = 'YES';
             $meta['SEMANTIC_FALLBACK_REASON'] = 'explicit_route_conflict';
             $meta['WRONG_ROUTE_ACTION_READY'] = 0;
+            $meta['FINAL_RESPONSE_SOURCE'] = 'SEMANTIC_FALLBACK';
 
-            return null;
+            return ['kind' => 'fallback', 'meta' => $meta];
         }
 
         return match (true) {
@@ -159,7 +170,14 @@ final class SemanticBrain
                 $calls,
                 $semanticLatency,
             ),
-            default => null,
+            default => [
+                'kind' => 'fallback',
+                'meta' => array_merge($meta, [
+                    'SEMANTIC_BRAIN_FALLBACK' => 'YES',
+                    'SEMANTIC_FALLBACK_REASON' => 'unsupported_domain',
+                    'FINAL_RESPONSE_SOURCE' => 'SEMANTIC_FALLBACK',
+                ]),
+            ],
         };
     }
 
@@ -179,7 +197,14 @@ final class SemanticBrain
         int $semanticLatency,
     ): array {
         if (! $intent instanceof TravelIntent) {
-            return ['kind' => 'fallback', 'meta' => array_merge($meta, ['SEMANTIC_BRAIN_FALLBACK' => 'YES'])];
+            return [
+                'kind' => 'fallback',
+                'meta' => array_merge($meta, [
+                    'SEMANTIC_BRAIN_FALLBACK' => 'YES',
+                    'SEMANTIC_FALLBACK_REASON' => 'travel_intent_missing',
+                    'FINAL_RESPONSE_SOURCE' => 'SEMANTIC_FALLBACK',
+                ]),
+            ];
         }
 
         $tripType = $intent->tripType ?? $plan->tripType;

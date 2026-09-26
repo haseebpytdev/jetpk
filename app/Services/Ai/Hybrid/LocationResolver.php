@@ -325,6 +325,16 @@ final class LocationResolver
             if (count($found) >= 2) {
                 return [$found[0], $found[1], false, false, [], []];
             }
+            // Single-city destination correction while shopping / pending confirm:
+            // "Actually make that Doha instead", "change it to Doha", "use Doha instead".
+            if (count($found) === 1) {
+                if (
+                    preg_match('/\b(make (it|that)|change (it|that) to|switch (it |that )?to|use)\b/u', $clean) === 1
+                    || preg_match('/\binstead\b/u', $clean) === 1
+                ) {
+                    return [null, $found[0], false, false, [], []];
+                }
+            }
             foreach (array_keys(self::AMBIGUOUS) as $city) {
                 if (str_contains($clean, $city)) {
                     $r = $this->resolve($city);

@@ -1,14 +1,16 @@
-# JP-AI-CQ28 Release Guards (updated CQ28-36)
+# JP-AI-CQ28 Release Guards (updated CQ28-39)
 
-AUTHORIZED_SHA_BASE=386b3aa78ef5aef89aed4341eac9f3eb548ef5f9
-BRANCH=work/jp-ai-cq28-qwen-semantic-brain-35
-PR=29
+AUTHORIZED_SHA_BASE=1602ec2969ce15d17dd3bb92750cece48d4c6de2
+BRANCH=work/jp-ai-cq28-semantic-fallback-order-39
+PR=(pending)
 
 DEPLOYED=NO
 PRODUCTION_UPLOAD=NO
+PRODUCTION_QWEN=OFF
 AI_EMBED_ENABLED=false
 EXTERNAL_EMBED_ACTIVE=NO
 READY_FOR_IFRAME_ACTIVATION=NO
+READY_FOR_LIVE_QWEN_RETRY=YES
 
 # Fail-closed defaults (code)
 OTA_AI_SEMANTIC_PLANNER_ENABLED_DEFAULT=false
@@ -19,22 +21,15 @@ PUBLIC_OTA_AI_CONVERSATIONAL_ENABLED=false
 PUBLIC_OTA_AI_SEMANTIC_PLANNER_ENABLED=false
 PUBLIC_OTA_AI_SEMANTIC_COMPOSER_ENABLED=false
 
-# Cert runtime (localhost only; not public traffic)
-# Authoritative cert run = r2 (r1 FAIL 91.72%/CRITICAL=26 superseded)
-QWEN_RUNTIME_ACTIVE=YES
-REAL_MODEL_EVAL=PASS
-SEMANTIC_VALID_RATE=100
-HOLDOUT_RATE=100
-CRITICAL_POLICY_FAILURES=0
-SAFE_FALLBACK_COUNT=16
-SCORING=hybrid-safe (100% != strict clean-plan rate)
-PERFORMANCE_GATE=HOLD
-READY_FOR_CQ28_PRODUCTION=YES
+# ORDER-39 local real-model gate (tunnel only; prod flags untouched)
+QWEN_RUNTIME_ACTIVE=STOPPED_AFTER_GATE
+REAL_MODEL_10X_LOCAL=PASS
+LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK=0
 
 MODEL_CAN_AUTHORIZE_MUTATION=NO
 MODEL_DIRECT_TOOL_AUTHORITY=NO
 SERVER_AUTHORITY=YES
 HYBRID_FALLBACK=YES
 
-Do not enable public conversational/semantic until explicit controlled deploy phase.
+Do not enable public conversational/semantic until explicit controlled deploy/canary phase.
 Do not activate iframe in this PR.

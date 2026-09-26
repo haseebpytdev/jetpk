@@ -415,6 +415,8 @@ final class AiChatOrchestrator
         }
 
         // CQ28: Qwen semantic planner primary after hard security/state gates.
+        $semanticFallbackMeta = [];
+        $skipLegacyLlmAfterSemanticTravelFallback = false;
         if ($this->semanticBrain->isEnabled()) {
             $semantic = $this->semanticBrain->tryHandle(
                 $conversation,
@@ -429,9 +431,25 @@ final class AiChatOrchestrator
                 ],
             );
             if (is_array($semantic)) {
-                $handled = $this->applySemanticResult($conversation, $cleanMessage, $semantic, $baseMeta);
-                if (is_array($handled)) {
-                    return $handled;
+                $kind = (string) ($semantic['kind'] ?? '');
+                if ($kind === 'fallback') {
+                    $semanticFallbackMeta = is_array($semantic['meta'] ?? null) ? $semantic['meta'] : [];
+                    $baseMeta = array_merge($baseMeta, $semanticFallbackMeta);
+                    // Strong actionable travel: never hand authority to legacy LLM tool-naming after semantic attempt.
+                    if ($this->intentRouter->hasStrongActionableIntent($cleanMessage)) {
+                        $skipLegacyLlmAfterSemanticTravelFallback = true;
+                        $baseMeta['LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK'] = 0;
+                    }
+                } else {
+                    $handled = $this->applySemanticResult($conversation, $cleanMessage, $semantic, $baseMeta);
+                    if (is_array($handled)) {
+                        return $handled;
+                    }
+                    // Empty-body confirm/clarify etc. — preserve meta if present.
+                    if (is_array($semantic['meta'] ?? null)) {
+                        $semanticFallbackMeta = $semantic['meta'];
+                        $baseMeta = array_merge($baseMeta, $semanticFallbackMeta);
+                    }
                 }
             }
         }
@@ -541,48 +559,56 @@ final class AiChatOrchestrator
             'AI_GROUP_SEARCH_READ_CALLS' => 0,
             'LOCAL_LLM_REQUIRED_FOR_CORE' => false,
         ];
+        if ($semanticFallbackMeta !== []) {
+            $baseMeta = array_merge($baseMeta, $semanticFallbackMeta);
+        }
 
         // Legacy LLM tool-naming path only when semantic planner did not produce a plan
-        // (or is disabled). Preferred authority remains SemanticBrain + server policy.
-        $conversational = $this->conversational->tryHandle($conversation, $cleanMessage, $baseMeta);
-        if (is_array($conversational)) {
-            if (! empty($conversational['handoff'])) {
-                return $this->beginHandoff($conversation, 'llm_requested', 'LLM_ASSISTED', $baseMeta);
-            }
-
-            $mode = (string) ($conversational['mode'] ?? 'LLM_ASSISTED');
-            $body = (string) ($conversational['message'] ?? '');
-            if ($body !== '') {
-                $status = (string) ($conversational['status'] ?? 'ok');
-                $assistantMeta = [
-                    'mode' => $mode,
-                    'tool' => $conversational['tool'] ?? null,
-                ];
-                if (! empty($conversational['requires_confirmation'])) {
-                    $assistantMeta['confirmation_type'] = 'flight_search';
-                    $assistantMeta['confirmation_snapshot'] = $conversational['confirmation_snapshot'] ?? null;
-                }
-                $assistant = $this->storeMessage($conversation, 'assistant', $body, $assistantMeta);
-
-                $payload = [
-                    'ok' => true,
-                    'status' => $status !== '' ? $status : 'ok',
-                    'mode' => $mode,
-                    'conversation_id' => $conversation->public_id,
-                    'state' => $conversation->state,
-                    'message' => $body,
-                    'recommendations' => $conversational['recommendations'] ?? [],
-                    'knowledge' => $conversational['knowledge'] ?? [],
-                    'actions' => $this->tenantSafeActions($conversational['actions'] ?? null),
-                    'meta' => $conversational['meta'] ?? $baseMeta,
-                ];
-                if (! empty($conversational['requires_confirmation'])) {
-                    $payload['requires_confirmation'] = true;
-                    $payload['confirmation_snapshot'] = $conversational['confirmation_snapshot'] ?? null;
+        // (or is disabled). After a semantic attempt on strong travel, skip LLM and use hybrid.
+        // Preferred authority remains SemanticBrain + server policy.
+        if (! $skipLegacyLlmAfterSemanticTravelFallback) {
+            $conversational = $this->conversational->tryHandle($conversation, $cleanMessage, $baseMeta);
+            if (is_array($conversational)) {
+                if (! empty($conversational['handoff'])) {
+                    return $this->beginHandoff($conversation, 'llm_requested', 'LLM_ASSISTED', $baseMeta);
                 }
 
-                return $this->withMessageId($assistant, $payload);
+                $mode = (string) ($conversational['mode'] ?? 'LLM_ASSISTED');
+                $body = (string) ($conversational['message'] ?? '');
+                if ($body !== '') {
+                    $status = (string) ($conversational['status'] ?? 'ok');
+                    $assistantMeta = [
+                        'mode' => $mode,
+                        'tool' => $conversational['tool'] ?? null,
+                    ];
+                    if (! empty($conversational['requires_confirmation'])) {
+                        $assistantMeta['confirmation_type'] = 'flight_search';
+                        $assistantMeta['confirmation_snapshot'] = $conversational['confirmation_snapshot'] ?? null;
+                    }
+                    $assistant = $this->storeMessage($conversation, 'assistant', $body, $assistantMeta);
+
+                    $payload = [
+                        'ok' => true,
+                        'status' => $status !== '' ? $status : 'ok',
+                        'mode' => $mode,
+                        'conversation_id' => $conversation->public_id,
+                        'state' => $conversation->state,
+                        'message' => $body,
+                        'recommendations' => $conversational['recommendations'] ?? [],
+                        'knowledge' => $conversational['knowledge'] ?? [],
+                        'actions' => $this->tenantSafeActions($conversational['actions'] ?? null),
+                        'meta' => array_merge($baseMeta, is_array($conversational['meta'] ?? null) ? $conversational['meta'] : []),
+                    ];
+                    if (! empty($conversational['requires_confirmation'])) {
+                        $payload['requires_confirmation'] = true;
+                        $payload['confirmation_snapshot'] = $conversational['confirmation_snapshot'] ?? null;
+                    }
+
+                    return $this->withMessageId($assistant, $payload);
+                }
             }
+        } else {
+            $baseMeta['LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK'] = 0;
         }
 
         // Hybrid model-free core when LLM unavailable or did not produce a reply.
@@ -606,7 +632,8 @@ final class AiChatOrchestrator
         $conversation->save();
         $this->syncLeadFromConversation($conversation);
 
-        $meta = array_merge([
+        // Preserve CQ28 semantic-fallback telemetry (SEMANTIC_BRAIN_*, LEGACY_LLM_AFTER_*).
+        $meta = array_merge($baseMeta, [
             'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
             'AI_GROUP_SEARCH_READ_CALLS' => 0,
             'LOCAL_LLM_REQUIRED_FOR_CORE' => false,
