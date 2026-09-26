@@ -2,7 +2,8 @@
 
 AUTHORIZED_SHA_BASE=1602ec2969ce15d17dd3bb92750cece48d4c6de2
 BRANCH=work/jp-ai-cq28-semantic-fallback-order-39
-PR=(pending)
+COMMIT=7cb700edd55724da5dff4d5f62c16e6bb68febd9
+PR=NO
 
 DEPLOYED=NO
 PRODUCTION_UPLOAD=NO
