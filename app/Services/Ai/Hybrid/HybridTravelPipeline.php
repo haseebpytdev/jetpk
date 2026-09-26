@@ -21,6 +21,7 @@ final class HybridTravelPipeline
         private readonly TravelConstraintResolver $constraints,
         private readonly ClarificationBuilder $clarifications,
         private readonly IntentConfidenceGate $confidenceGate,
+        private readonly ServerTravelSignals $travelSignals,
     ) {}
 
     /**
@@ -221,8 +222,29 @@ final class HybridTravelPipeline
         }
 
         $priorDepart = isset($prior['depart_date']) && is_string($prior['depart_date']) ? $prior['depart_date'] : null;
-        $departInfo = $this->dates->resolveDepart($normalized, $original, $now, $priorDepart);
-        $returnInfo = $this->dates->resolveReturn($normalized, $original, $now);
+        $tripDates = $this->travelSignals->resolveTripDates($original, $now, $priorDepart);
+        $departInfo = [
+            'date' => $tripDates['depart_date'],
+            'clarify' => false,
+            'clarify_message' => null,
+            'provenance' => $tripDates['depart_provenance'],
+        ];
+        // Preserve legacy one-day-later / month-clarify semantics when pair extract found nothing.
+        if ($departInfo['date'] === null && ! $tripDates['return_explicit']) {
+            $departInfo = $this->dates->resolveDepart($normalized, $original, $now, $priorDepart);
+        }
+        $returnInfo = [
+            'date' => $tripDates['return_date'],
+            'clarify' => false,
+            'clarify_message' => null,
+            'provenance' => $tripDates['return_provenance'],
+        ];
+        if ($returnInfo['date'] === null && ! $tripDates['depart_explicit']) {
+            $legacyReturn = $this->dates->resolveReturn($normalized, $original, $now);
+            if (is_string($legacyReturn['date'] ?? null) || ! empty($legacyReturn['clarify'])) {
+                $returnInfo = $legacyReturn;
+            }
+        }
 
         if ($departInfo['clarify']) {
             return $this->clarify((string) $departInfo['clarify_message'], [], $language, $prior, $provenance);
@@ -238,8 +260,13 @@ final class HybridTravelPipeline
             $provenance['depart_date'] = 'INHERITED_CONVERSATION_STATE';
         }
 
-        $returnDate = $returnInfo['date'] ?? ($prior['return_date'] ?? null);
-        if (is_string($returnDate) && $returnInfo['provenance']) {
+        $returnDate = $returnInfo['date'] ?? null;
+        // Do not inherit prior return when English return cue is present without a stated return date.
+        $returnCue = $this->travelSignals->explicitReturnTripCue($original);
+        if ($returnDate === null && ! $returnCue) {
+            $returnDate = $prior['return_date'] ?? null;
+        }
+        if (is_string($returnDate) && ($returnInfo['provenance'] ?? null)) {
             $provenance['return_date'] = $returnInfo['provenance'];
         }
 
@@ -281,8 +308,19 @@ final class HybridTravelPipeline
         }
 
         // When an explicit new route is stated this turn, do not keep a stale return date unless return is also stated.
-        if ($explicitRoutePrecedence && $returnInfo['date'] === null && $oneWay) {
-            $returnDate = null;
+        if ($explicitRoutePrecedence && ($returnInfo['date'] ?? null) === null && ($oneWay || ! $returnCue)) {
+            if ($oneWay || ! $returnCue) {
+                // Keep null return for one_way; for return cue leave null and clarify below.
+                if ($oneWay) {
+                    $returnDate = null;
+                } elseif (! $returnCue) {
+                    $returnDate = null;
+                }
+            }
+        }
+        if ($returnCue && ! $oneWay) {
+            $provenance['EXPLICIT_RETURN_TRIP_CUE'] = 'YES';
+            $provenance['trip_type'] = 'EXPLICIT_USER';
         }
 
         // Confidence gate — never invent route for flight search
@@ -344,7 +382,25 @@ final class HybridTravelPipeline
             $intentName = 'unknown';
         }
 
-        $tripType = $oneWay ? 'one_way' : (is_string($returnDate) ? 'return' : 'one_way');
+        $tripType = $oneWay
+            ? 'one_way'
+            : (($returnCue || is_string($returnDate)) ? 'return' : 'one_way');
+
+        // CQ42-R3: return cue without return_date must clarify — never confirm as one_way.
+        if ($tripType === 'return' && ! is_string($returnDate) && $intentName === 'flight_search') {
+            $clarifyRequired = true;
+            $routeLabel = trim(($origin ?? '').' to '.($destination ?? ''));
+            if ($depart === null) {
+                $clarifyMessage = 'What departure date should I use'
+                    .($routeLabel !== ' to ' ? " for {$routeLabel}" : '')
+                    .'?';
+            } else {
+                $clarifyMessage = 'What return date should I use'
+                    .($routeLabel !== ' to ' ? " for {$routeLabel}" : '')
+                    .'?';
+            }
+            $provenance['RETURN_DATE_REQUIRED'] = 'YES';
+        }
 
         $payload = [
             'intent' => $clarifyRequired && ($origin === null || $destination === null) ? 'unknown' : $intentName,

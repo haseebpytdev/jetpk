@@ -2,6 +2,8 @@
 
 namespace App\Services\Ai;
 
+use App\Services\Ai\Hybrid\ServerTravelSignals;
+
 /**
  * Conversation-level intent signals for HELP-FIRST lead capture and open-domain routing.
  * Advisory for conversation flow — server policy remains authoritative for tools/writes.
@@ -10,6 +12,7 @@ final class ConversationIntentRouter
 {
     public function __construct(
         private readonly AiCommercialIntentClassifier $commercial,
+        private readonly ServerTravelSignals $travelSignals,
     ) {}
 
     public function shouldOverrideLeadCapture(string $message): bool
@@ -60,10 +63,14 @@ final class ConversationIntentRouter
             return true;
         }
 
-        // Route-like travel requests (cities/airports + motion words or dates/pax).
+        // Route-like travel requests — master-data aliases via shared server signal (dubay/lahor/…).
+        $route = $this->travelSignals->explicitTravelRoute($message);
+        if ($route['explicit']) {
+            return true;
+        }
         if (
-            preg_match('/\b(lahore|karachi|islamabad|dubai|jeddah|london|doha|lhe|dxb|khi|isb|jed)\b/u', $lower) === 1
-            && preg_match('/\b(to|from|se|flight|flights|ticket|tomorrow|today|adults?|passengers?|people)\b/u', $lower) === 1
+            preg_match('/\b(lahore|lahor|karachi|islamabad|dubai|dubay|jeddah|london|doha|lhe|dxb|khi|isb|jed)\b/u', $lower) === 1
+            && preg_match('/\b(to|from|se|flight|flights|ticket|tomorrow|today|adults?|passengers?|people|wapis|wapas)\b/u', $lower) === 1
         ) {
             return true;
         }

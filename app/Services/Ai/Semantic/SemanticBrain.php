@@ -9,6 +9,7 @@ use App\Services\Ai\AiConversationalAgent;
 use App\Services\Ai\ConversationIntentRouter;
 use App\Services\Ai\FlightSearchConfirmationGate;
 use App\Services\Ai\Hybrid\HybridTravelPipeline;
+use App\Services\Ai\Hybrid\ServerTravelSignals;
 use App\Services\Ai\OpenDomainResponseService;
 use App\Services\Ai\TravelIntentExtractor;
 
@@ -28,6 +29,7 @@ final class SemanticBrain
         private readonly ConversationIntentRouter $intentRouter,
         private readonly HybridTravelPipeline $hybrid,
         private readonly AiConversationalAgent $conversational,
+        private readonly ServerTravelSignals $travelSignals,
     ) {}
 
     public function isEnabled(): bool
@@ -245,6 +247,30 @@ final class SemanticBrain
             )
         ) {
             $meta['SERVER_OVERRIDES_QWEN_OPEN_DOMAIN'] = 'YES';
+        }
+
+        // CQ42-R3: server-proven explicit travel route outranks Qwen-only support/booking/general.
+        $routeSignal = $this->travelSignals->explicitTravelRoute($message);
+        if ($routeSignal['explicit']) {
+            $meta['SERVER_EXPLICIT_TRAVEL_ROUTE'] = 'YES';
+            $meta['SERVER_SINGLE_ROUTE'] = $meta['SERVER_SINGLE_ROUTE'] ?? $routeSignal['server_single_route'];
+        }
+        $qwenNonTravelHijack = in_array($plan->domain, ['support', 'booking', 'general', 'casual'], true)
+            || in_array($plan->operation, ['handoff', 'lookup'], true);
+        $explicitUserHandoffOrBooking = $this->messageWantsHandoff($message) || $this->messageWantsBookingLookup($message);
+        if (
+            $routeSignal['explicit']
+            && $qwenNonTravelHijack
+            && ! $explicitUserHandoffOrBooking
+            && ! in_array($serverOpen, ['HIGH_RISK', 'CURRENT_UNVERIFIED', 'GENERAL_KNOWLEDGE', 'CASUAL_CONVERSATION', 'OUT_OF_DOMAIN_SAFE'], true)
+        ) {
+            $meta['SERVER_ROUTE_OVERRIDES_QWEN_DOMAIN'] = 'YES';
+            $meta['SEMANTIC_BRAIN_FALLBACK'] = 'YES';
+            $meta['SEMANTIC_FALLBACK_REASON'] = 'server_explicit_travel_route_override';
+            $meta['FINAL_RESPONSE_SOURCE'] = 'SEMANTIC_FALLBACK';
+            $meta['LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK'] = 0;
+
+            return ['kind' => 'fallback', 'meta' => $meta];
         }
 
         return match (true) {
