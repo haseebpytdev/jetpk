@@ -1,0 +1,42 @@
+{
+    "http_status": 200,
+    "latency_ms": 4419.5,
+    "conversation_id": "07cb50c5-9948-4c03-816e-39d4c6189202",
+    "message": "Of course — I can help you check a booking. Please send your booking reference and the email or phone number used when you booked.",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+        "SEMANTIC_BRAIN_CALLED": "YES",
+        "SEMANTIC_BRAIN_VALID": "YES",
+        "SEMANTIC_BRAIN_FALLBACK": "NO",
+        "MODEL_ID": "local",
+        "MODEL_CALLS": 1,
+        "SEMANTIC_LATENCY_MS": 4367,
+        "COMPOSER_LATENCY_MS": 0,
+        "TOTAL_MODEL_LATENCY_MS": 4367,
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "SEMANTIC_INTENT": "human",
+        "SERVER_OPERATION": "handoff",
+        "SEMANTIC_DOMAIN": "support",
+        "STALE_ROUTE_CONTAMINATION": 0,
+        "QWEN_SEMANTIC_VALID": "YES",
+        "TOOL_EXECUTED": "NONE",
+        "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+        "intent": {
+            "intent": "booking_lookup"
+        }
+    },
+    "actions": [
+        {
+            "label": "Lookup Booking",
+            "href": "\/lookup-booking"
+        },
+        {
+            "label": "Talk to Support",
+            "action": "handoff"
+        }
+    ],
+    "state": "AI_ACTIVE",
+    "mode": "in_process_orchestrator"
+}

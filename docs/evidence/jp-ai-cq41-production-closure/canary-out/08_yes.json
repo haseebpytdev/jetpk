@@ -1,0 +1,75 @@
+{
+  "http_status": 200,
+  "latency_ms": 1228.5,
+  "conversation_id": "d393210e-8b69-41cb-a2e9-8ec4f67f9edd",
+  "message": "I prepared a flight search for LHE → DXB. Fares change quickly. Open View & Book to see current prices — I do not invent fares.",
+  "meta": {
+    "AI_FLIGHT_SEARCH_READ_CALLS": 1,
+    "AI_GROUP_SEARCH_READ_CALLS": 0,
+    "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+    "CONFIRMATION_BEFORE_SEARCH": true,
+    "intent": {
+      "intent": "flight_search",
+      "origin": "LHE",
+      "destination": "DXB",
+      "depart_date": "2026-11-06",
+      "return_date": null,
+      "adults": 2,
+      "children": 0,
+      "infants": 0,
+      "cabin": null,
+      "airline": null,
+      "max_stops": null,
+      "budget": null,
+      "time_preference": null,
+      "currency": "PKR",
+      "mode": "STRUCTURED_FALLBACK",
+      "trip_type": "one_way",
+      "legs": [
+        {
+          "origin": "LHE",
+          "destination": "DXB"
+        }
+      ]
+    },
+    "confirmation_required": false
+  },
+  "actions": [
+    {
+      "label": "Search Flights",
+      "href": "/#flight-search"
+    },
+    {
+      "label": "Talk to Support",
+      "action": "handoff"
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "flight-search-LHE-DXB",
+      "type": "flight_search",
+      "title": "LHE → DXB",
+      "subtitle": "Depart 2026-11-06",
+      "labels": [
+        "BEST_MATCH"
+      ],
+      "view_and_book_url": "/flights/results?trip_type=one_way&from=LHE&to=DXB&depart=2026-11-06&adults=2&children=0&infants=0&cabin=economy",
+      "results_url": "/flights/results?trip_type=one_way&from=LHE&to=DXB&depart=2026-11-06&adults=2&children=0&infants=0&cabin=economy",
+      "price": null,
+      "currency": "PKR"
+    }
+  ],
+  "state": "AI_ACTIVE",
+  "checks": {
+    "affirmed": true,
+    "search_or_progress": true
+  },
+  "full_meta_keys": [
+    "AI_FLIGHT_SEARCH_READ_CALLS",
+    "AI_GROUP_SEARCH_READ_CALLS",
+    "CONFIRMATION_BEFORE_SEARCH",
+    "LOCAL_LLM_REQUIRED_FOR_CORE",
+    "confirmation_required",
+    "intent"
+  ]
+}

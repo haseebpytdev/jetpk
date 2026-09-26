@@ -157,15 +157,38 @@ final class SemanticBrain
             ? array_values(array_filter($context['capabilities'], static fn ($c): bool => is_string($c) && $c !== ''))
             : [];
 
+        // Server open-domain classification is authoritative; Qwen domain/operation is advisory.
+        $serverOpen = $this->intentRouter->classifyOpenDomain($message);
+        $meta['SERVER_OPEN_DOMAIN_CATEGORY'] = $serverOpen;
+        $meta['QWEN_DOMAIN'] = $plan->domain;
+        $meta['QWEN_OPERATION'] = $plan->operation;
+        if (
+            $serverOpen !== null
+            && (
+                in_array($plan->domain, ['booking', 'support', 'current'], true)
+                || in_array($plan->operation, ['lookup', 'handoff'], true)
+            )
+            && ! (
+                ($serverOpen === 'CURRENT_UNVERIFIED' && $plan->domain === 'current')
+                || ($serverOpen === 'GENERAL_KNOWLEDGE' && in_array($plan->domain, ['general', 'casual', 'knowledge'], true))
+            )
+        ) {
+            $meta['SERVER_OVERRIDES_QWEN_OPEN_DOMAIN'] = 'YES';
+        }
+
         return match (true) {
-            $this->messageWantsBookingLookup($message)
-                || $plan->domain === 'booking'
-                || $plan->operation === 'lookup' => [
-                    'kind' => 'booking_lookup',
-                    'meta' => $meta,
-                ],
-            // Server live-data gate outranks Qwen domain labels and general answering.
-            $this->shouldAnswerCurrentUnverified($message, $plan) => $this->currentUnverified(
+            // Explicit user booking text only — Qwen domain=booking / operation=lookup cannot invent booking flow.
+            $this->messageWantsBookingLookup($message) => [
+                'kind' => 'booking_lookup',
+                'meta' => $meta,
+            ],
+            // Explicit user handoff text only — Qwen support/handoff cannot invent handoff.
+            $this->messageWantsHandoff($message) => [
+                'kind' => 'handoff',
+                'meta' => $meta,
+            ],
+            // Server live-data / high-risk gates outrank every Qwen label.
+            $serverOpen === 'CURRENT_UNVERIFIED' => $this->currentUnverified(
                 $conversation,
                 $message,
                 $plan,
@@ -174,7 +197,7 @@ final class SemanticBrain
                 $semanticLatency,
                 $composerLatency
             ),
-            $this->shouldAnswerGeneralKnowledge($message, $plan) => $this->generalAnswer(
+            $serverOpen === 'HIGH_RISK' => $this->generalAnswer(
                 $conversation,
                 $message,
                 $plan,
@@ -184,8 +207,24 @@ final class SemanticBrain
                 $brand,
                 $capabilities,
             ),
+            // Server general/casual/out-of-domain outranks Qwen booking/support/current mislabels.
+            in_array($serverOpen, ['GENERAL_KNOWLEDGE', 'CASUAL_CONVERSATION', 'OUT_OF_DOMAIN_SAFE'], true) => $this->generalAnswer(
+                $conversation,
+                $message,
+                $plan,
+                $meta,
+                $calls,
+                $semanticLatency,
+                $brand,
+                $capabilities,
+            ),
+            // Advisory Qwen paths only when the server did not claim an open-domain family.
             $plan->domain === 'support' || $plan->operation === 'handoff' => [
                 'kind' => 'handoff',
+                'meta' => $meta,
+            ],
+            $plan->domain === 'booking' || $plan->operation === 'lookup' => [
+                'kind' => 'booking_lookup',
                 'meta' => $meta,
             ],
             $plan->domain === 'current' => $this->currentUnverified($conversation, $message, $plan, $meta, $calls, $semanticLatency, $composerLatency),
@@ -349,10 +388,12 @@ final class SemanticBrain
         int $semanticLatency,
         int $composerLatency,
     ): array {
-        $fallback = 'I do not have an approved live weather data source right now, so I cannot verify current conditions. I can still help with flights or JetPakistan travel questions.';
+        $topic = $this->intentRouter->classifyCurrentTopic($message);
+        $fallback = $this->currentUnverifiedLimitationMessage($topic);
         $composed = $this->composer->compose($conversation, $message, $plan, [
             'live_provider' => false,
             'category' => 'CURRENT_UNVERIFIED',
+            'current_topic' => $topic,
         ], $fallback);
         $meta = $this->withComposerMeta($meta, $calls, $semanticLatency, $composed);
 
@@ -362,10 +403,22 @@ final class SemanticBrain
             'message' => (string) $composed['message'],
             'meta' => array_merge($meta, [
                 'open_domain_category' => 'CURRENT_UNVERIFIED',
+                'CURRENT_TOPIC' => $topic,
                 'FLIGHT_STATE_CONTAMINATION' => 0,
                 'HALLUCINATED_LIVE_FACT' => 'NO',
             ]),
         ];
+    }
+
+    private function currentUnverifiedLimitationMessage(string $topic): string
+    {
+        return match ($topic) {
+            'weather' => "I don't have an approved live weather source available here, so I can't verify the current conditions. I can still help with flights or JetPakistan travel questions.",
+            'news' => "I don't have an approved live news source available here, so I can't verify today's news. I can still help with flights or JetPakistan travel questions.",
+            'market' => "I don't have an approved live market-data source available here, so I can't verify the current price. I can still help with flights or JetPakistan travel questions.",
+            'sports' => "I don't have an approved live sports-data source available here, so I can't verify the current result or score. I can still help with flights or JetPakistan travel questions.",
+            default => "I don't have an approved live data source for that request, so I can't verify the current information. I can still help with flights or JetPakistan travel questions.",
+        };
     }
 
     /**
@@ -390,7 +443,7 @@ final class SemanticBrain
             ?? (in_array($plan->domain, ['casual'], true) ? 'CASUAL_CONVERSATION' : 'GENERAL_KNOWLEDGE');
 
         // Never answer live/current through the general path.
-        if ($category === 'CURRENT_UNVERIFIED' || $category === 'HIGH_RISK') {
+        if ($category === 'CURRENT_UNVERIFIED') {
             return $this->currentUnverified(
                 $conversation,
                 $message,
@@ -444,7 +497,11 @@ final class SemanticBrain
         $structured = $this->openDomain->fallbackForCategory($message, $category, $capabilities, $brand);
         $fallback = is_array($structured) && filled($structured['message'] ?? null)
             ? (string) $structured['message']
-            : 'Happy to help with that. For live travel prices or JetPakistan bookings I can also search flights once you share a route and date.';
+            : (
+                $category === 'GENERAL_KNOWLEDGE'
+                    ? "I couldn't produce a reliable general answer just now. Ask again, or I can help with JetPakistan flights and bookings."
+                    : 'Happy to help with that. For live travel prices or JetPakistan bookings I can also search flights once you share a route and date.'
+            );
 
         if (is_array($llm) && is_array($llm['meta'] ?? null)) {
             $meta = array_merge($meta, $llm['meta']);
@@ -476,36 +533,9 @@ final class SemanticBrain
         return $this->hybrid->detectBookingLookup($message);
     }
 
-    private function shouldAnswerGeneralKnowledge(string $message, SemanticPlan $plan): bool
+    private function messageWantsHandoff(string $message): bool
     {
-        // Never hijack explicit support handoff or booking operation plans.
-        if ($plan->operation === 'handoff' || $plan->domain === 'support' || $plan->domain === 'booking') {
-            return false;
-        }
-
-        // Live/current always wins — even if Qwen labeled the turn general/knowledge.
-        if ($this->intentRouter->classifyOpenDomain($message) === 'CURRENT_UNVERIFIED') {
-            return false;
-        }
-
-        $category = $this->intentRouter->classifyOpenDomain($message);
-        if ($category === 'GENERAL_KNOWLEDGE' || $category === 'CASUAL_CONVERSATION' || $category === 'OUT_OF_DOMAIN_SAFE') {
-            // Qwen often mislabels harmless general questions as tenant knowledge.
-            if (in_array($plan->domain, ['knowledge', 'general', 'casual'], true)) {
-                return ! $this->intentRouter->isJetPakistanKnowledgeQuestion($message);
-            }
-        }
-
-        return false;
-    }
-
-    private function shouldAnswerCurrentUnverified(string $message, SemanticPlan $plan): bool
-    {
-        if ($this->intentRouter->classifyOpenDomain($message) === 'CURRENT_UNVERIFIED') {
-            return true;
-        }
-
-        return $plan->domain === 'current';
+        return $this->hybrid->detectHandoff($message);
     }
 
     private function isBareAffirmativeOrEmptyTravel(string $message): bool

@@ -130,11 +130,17 @@ final class ConversationIntentRouter
             '|\bweather situation\b'.
             '|\b(right\s+now|currently).{0,40}\bweather\b'.
             '|\btemperature in\b|\bcurrent (president|prime minister)\b'.
-            '|\b(bitcoin|crypto).{0,24}\b(price|today|right\s+now)\b'.
+            '|\b(bitcoin|btc|crypto).{0,24}\b(price|today|right\s+now|now)\b'.
+            '|\b(price of|how much is)\s+(bitcoin|btc|aapl|apple|ethereum|eth)\b'.
+            '|\b(aapl|apple).{0,24}\b(stock|share)?\s*(price|right\s+now|now)\b'.
+            '|\bcurrent stock price\b'.
             '|\b(latest|breaking|today\'?s)\s+news\b'.
-            '|\bnews\s+(today|right\s+now)\b'.
+            '|\bnews\s+(today|right\s+now|now)\b'.
             '|\bhappened in the news\b'.
-            '|\bcurrent stock price\b/u',
+            '|\bwho won the match\b'.
+            '|\blive\s+score\b'.
+            '|\bdubai\s+weather\b'.
+            '|\bweather\s+in\s+\w+/u',
             $lower
         ) === 1) {
             return 'CURRENT_UNVERIFIED';
@@ -182,6 +188,31 @@ final class ConversationIntentRouter
         }
 
         return null;
+    }
+
+    /**
+     * Topic hint for CURRENT_UNVERIFIED limitation wording.
+     *
+     * @return 'weather'|'news'|'market'|'sports'|'generic'
+     */
+    public function classifyCurrentTopic(string $message): string
+    {
+        $lower = mb_strtolower(trim($message));
+
+        if (preg_match('/\b(weather|temperature|forecast|raining|humidity)\b/u', $lower) === 1) {
+            return 'weather';
+        }
+        if (preg_match('/\b(news|headline|breaking)\b/u', $lower) === 1) {
+            return 'news';
+        }
+        if (preg_match('/\b(stock|share price|bitcoin|btc|crypto|aapl|market|ethereum|eth|price right now|how much is)\b/u', $lower) === 1) {
+            return 'market';
+        }
+        if (preg_match('/\b(score|match|who won|sports?|game)\b/u', $lower) === 1) {
+            return 'sports';
+        }
+
+        return 'generic';
     }
 
     public function looksLikeBareName(string $message): bool

@@ -1,0 +1,169 @@
+{
+  "http": 200,
+  "ms": 1414.1079999972135,
+  "body": {
+    "ok": true,
+    "enabled": true,
+    "gateway": "healthy",
+    "provider": "local_llama",
+    "mode": "LLM_ASSISTED",
+    "assistant_mode": "public",
+    "status": {
+      "mode": "public",
+      "runtime_on": true,
+      "public_enabled": true,
+      "internal_canary_enabled": false,
+      "language_engine": "hybrid_model_free",
+      "local_llm_required": false,
+      "flight_tool": true,
+      "group_tool": true,
+      "knowledge": true,
+      "human_handoff": true,
+      "admin": {
+        "master_enabled": true,
+        "lab_adapter_enabled": true,
+        "rag_enabled": true,
+        "human_handoff_enabled": true,
+        "learning_queue_enabled": true,
+        "internal_canary_enabled": true,
+        "flight_search_read_only_enabled": true,
+        "audience_mode": "public"
+      },
+      "env_hard": {
+        "master": true,
+        "lab_adapter": true,
+        "rag": true,
+        "human_handoff": true,
+        "learning_queue": true,
+        "internal_canary": true,
+        "flight_search_read_only": true,
+        "public": true
+      },
+      "effective": {
+        "master_enabled": true,
+        "lab_adapter_enabled": true,
+        "rag_enabled": true,
+        "human_handoff_enabled": true,
+        "learning_queue_enabled": true,
+        "internal_canary_enabled": true,
+        "flight_search_read_only_enabled": true,
+        "audience_mode": "public",
+        "public_enabled": true,
+        "runtime_on": true
+      },
+      "control_matrix": {
+        "master_enabled": {
+          "label": "Master AI assistant",
+          "configured": true,
+          "effective": true,
+          "blocked_by": null
+        },
+        "lab_adapter_enabled": {
+          "label": "AI lab adapter",
+          "configured": true,
+          "effective": true,
+          "blocked_by": null
+        },
+        "rag_enabled": {
+          "label": "RAG",
+          "configured": true,
+          "effective": true,
+          "blocked_by": null
+        },
+        "human_handoff_enabled": {
+          "label": "Support handoff",
+          "configured": true,
+          "effective": true,
+          "blocked_by": null
+        },
+        "learning_queue_enabled": {
+          "label": "Learning / failure logging",
+          "configured": true,
+          "effective": true,
+          "blocked_by": null
+        },
+        "internal_canary_enabled": {
+          "label": "Internal canary",
+          "configured": true,
+          "effective": true,
+          "blocked_by": null
+        },
+        "flight_search_read_only_enabled": {
+          "label": "QA read-only flight search",
+          "configured": true,
+          "effective": true,
+          "blocked_by": null
+        }
+      },
+      "hard_locked_writes": [
+        {
+          "key": "booking",
+          "label": "Booking",
+          "locked": true,
+          "activatable": false
+        },
+        {
+          "key": "hold",
+          "label": "Hold",
+          "locked": true,
+          "activatable": false
+        },
+        {
+          "key": "create_pnr",
+          "label": "Create PNR",
+          "locked": true,
+          "activatable": false
+        },
+        {
+          "key": "issue_ticket",
+          "label": "Issue ticket",
+          "locked": true,
+          "activatable": false
+        },
+        {
+          "key": "payment",
+          "label": "Payment",
+          "locked": true,
+          "activatable": false
+        },
+        {
+          "key": "cancel",
+          "label": "Cancel",
+          "locked": true,
+          "activatable": false
+        },
+        {
+          "key": "refund",
+          "label": "Refund",
+          "locked": true,
+          "activatable": false
+        },
+        {
+          "key": "void",
+          "label": "Void",
+          "locked": true,
+          "activatable": false
+        },
+        {
+          "key": "exchange",
+          "label": "Exchange",
+          "locked": true,
+          "activatable": false
+        },
+        {
+          "key": "live_supplier_write",
+          "label": "Live supplier write",
+          "locked": true,
+          "activatable": false
+        }
+      ],
+      "public_beta": false
+    },
+    "ai_lab_gateway": {
+      "healthy": true,
+      "resolved_host": "127.0.0.1",
+      "resolved_port": "8765",
+      "fault_mode": "NORMAL"
+    }
+  }
+}

@@ -39,7 +39,7 @@ final class OpenDomainResponseService
         $body = match ($category) {
             'GENERAL_KNOWLEDGE' => $this->generalKnowledge($message, $pivot),
             'OUT_OF_DOMAIN_SAFE' => $this->outOfDomainSafe($message, $pivot, $brand, $capabilities),
-            'CURRENT_UNVERIFIED' => $this->currentUnverified($pivot),
+            'CURRENT_UNVERIFIED' => $this->currentUnverified($message, $pivot),
             'CASUAL_CONVERSATION' => $this->casual($message, $pivot),
             'HIGH_RISK' => $this->highRisk(),
             default => null,
@@ -105,7 +105,7 @@ final class OpenDomainResponseService
     private function generalKnowledge(string $message, string $pivot): string
     {
         $lower = mb_strtolower($message);
-        $core = 'Happy to share a quick note on that.';
+        $core = null;
 
         if (preg_match('/e\s*=\s*mc/u', $lower) === 1) {
             $core = "E = mc² is Einstein's mass-energy equivalence: mass and energy are two forms of the same thing.";
@@ -117,12 +117,21 @@ final class OpenDomainResponseService
             $core = 'Pi (π) is the ratio of a circle\'s circumference to its diameter — about 3.14159.';
         } elseif (preg_match('/photosynthesis/u', $lower) === 1) {
             $core = 'Photosynthesis is how plants turn light, water, and carbon dioxide into energy (sugars) and oxygen.';
+        } elseif (preg_match('/\bgravity\b/u', $lower) === 1) {
+            $core = 'Gravity is the attractive force between masses — it keeps planets in orbit and gives objects weight on Earth.';
         } elseif (preg_match('/\bwhat is an api\b|\bexplain what an api is\b|\bwhat(\'s| is) an api\b/u', $lower) === 1) {
             $core = 'An API (Application Programming Interface) is a defined way for software systems to talk to each other — requesting data or actions through agreed endpoints and formats.';
         } elseif (preg_match('/\bundefined\b/u', $lower) === 1) {
             $core = 'In C, undefined behavior means the language standard does not define what the program must do for that case — compilers may assume it never happens.';
         } elseif (preg_match('/\bnull hypothesis\b|\bhypothesis in statistics\b/u', $lower) === 1) {
             $core = 'In statistics, the null hypothesis is the default claim of no effect or no difference that a test tries to reject with evidence.';
+        }
+
+        // Transparent resilience — do not pretend a canned filler is a complete answer.
+        if ($core === null) {
+            $core = "I couldn't produce a reliable general answer just now. Ask again, or I can help with JetPakistan flights and bookings.";
+
+            return $core;
         }
 
         return $this->withOptionalPivot($core, $pivot, true);
@@ -152,9 +161,16 @@ final class OpenDomainResponseService
         return $this->withOptionalPivot($core, $pivot, true);
     }
 
-    private function currentUnverified(string $pivot): string
+    private function currentUnverified(string $message, string $pivot): string
     {
-        $core = "I can't verify live market or news figures through this assistant, so I won't invent a number.";
+        $topic = app(ConversationIntentRouter::class)->classifyCurrentTopic($message);
+        $core = match ($topic) {
+            'weather' => "I don't have an approved live weather source available here, so I can't verify the current conditions.",
+            'news' => "I don't have an approved live news source available here, so I can't verify today's news.",
+            'market' => "I don't have an approved live market-data source available here, so I can't verify the current price.",
+            'sports' => "I don't have an approved live sports-data source available here, so I can't verify the current result or score.",
+            default => "I don't have an approved live data source for that request, so I can't verify the current information.",
+        };
 
         return $this->withOptionalPivot($core, $pivot, false);
     }

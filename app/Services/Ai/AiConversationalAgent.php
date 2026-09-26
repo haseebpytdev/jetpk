@@ -118,7 +118,9 @@ final class AiConversationalAgent
             'task' => 'open_domain_respond',
             'category' => $category,
             'brand_name' => $brand,
-            'assistant_identity' => $brand.' AI travel assistant',
+            'assistant_identity' => $category === 'GENERAL_KNOWLEDGE' || $category === 'CASUAL_CONVERSATION'
+                ? $brand.' AI assistant'
+                : $brand.' AI travel assistant',
             'enabled_capabilities' => array_values($capabilities),
             'message' => $message,
             'history' => $this->buildHistory($conversation),
@@ -126,6 +128,9 @@ final class AiConversationalAgent
                 'brief' => true,
                 'redirect_only_to_enabled_capabilities' => true,
                 'never_mention_other_brands' => true,
+                'answer_stable_general_knowledge' => $category === 'GENERAL_KNOWLEDGE',
+                'capabilities_do_not_forbid_general_knowledge' => true,
+                'never_refuse_solely_because_non_travel' => $category === 'GENERAL_KNOWLEDGE',
                 'no_live_unverified_facts' => $category === 'CURRENT_UNVERIFIED',
                 'current_unverified_message_must_be_limitation_only' => $category === 'CURRENT_UNVERIFIED',
                 'prefer_schema' => $category === 'CURRENT_UNVERIFIED'
@@ -143,10 +148,10 @@ final class AiConversationalAgent
         $attemptMeta = [
             'OPEN_DOMAIN_LATENCY_MS' => $latency,
             'open_domain_category' => $category,
+            'OPEN_DOMAIN_ATTEMPTED' => 'YES',
         ];
 
         if (! ($result['ok'] ?? false)) {
-            // Provider call attempted — expose latency for honest TOTAL_MODEL_LATENCY accounting.
             return [
                 'mode' => null,
                 'message' => '',
@@ -154,14 +159,30 @@ final class AiConversationalAgent
                 'calls' => 1,
                 'meta' => array_merge($meta, $attemptMeta, [
                     'OPEN_DOMAIN_FALLBACK' => 'YES',
+                    'OPEN_DOMAIN_REJECT_REASON' => ($result['error'] ?? null) ? 'provider_error' : 'provider_unhealthy',
                     'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
                 ]),
             ];
         }
 
         $content = (string) ($result['content'] ?? '');
+        if (trim($content) === '') {
+            return [
+                'mode' => null,
+                'message' => '',
+                'latency_ms' => $latency,
+                'calls' => 1,
+                'meta' => array_merge($meta, $attemptMeta, [
+                    'OPEN_DOMAIN_FALLBACK' => 'YES',
+                    'OPEN_DOMAIN_REJECT_REASON' => 'empty_output',
+                    'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
+                ]),
+            ];
+        }
+
         $parsed = $this->decodeJsonObject($content);
-        $reply = is_array($parsed)
+        $jsonValid = is_array($parsed);
+        $reply = $jsonValid
             ? trim((string) ($parsed['message'] ?? ''))
             : (string) ($this->extractMessage($content) ?? '');
 
@@ -173,13 +194,13 @@ final class AiConversationalAgent
                 'calls' => 1,
                 'meta' => array_merge($meta, $attemptMeta, [
                     'OPEN_DOMAIN_FALLBACK' => 'YES',
+                    'OPEN_DOMAIN_REJECT_REASON' => $jsonValid ? 'empty_message' : 'invalid_json',
                     'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
                 ]),
             ];
         }
 
         if ($category === 'CURRENT_UNVERIFIED') {
-            // Prefer schema flag but never trust it alone — fail closed on uncertain text.
             if (is_array($parsed) && array_key_exists('can_verify_live', $parsed) && $parsed['can_verify_live'] !== false) {
                 return [
                     'mode' => null,
@@ -188,6 +209,7 @@ final class AiConversationalAgent
                     'calls' => 1,
                     'meta' => array_merge($meta, $attemptMeta, [
                         'OPEN_DOMAIN_FALLBACK' => 'YES',
+                        'OPEN_DOMAIN_REJECT_REASON' => 'can_verify_live_invalid',
                         'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
                     ]),
                 ];
@@ -200,11 +222,26 @@ final class AiConversationalAgent
                     'calls' => 1,
                     'meta' => array_merge($meta, $attemptMeta, [
                         'OPEN_DOMAIN_FALLBACK' => 'YES',
+                        'OPEN_DOMAIN_REJECT_REASON' => 'live_fact_rejected',
                         'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
                         'HALLUCINATED_LIVE_FACT' => 'NO',
                     ]),
                 ];
             }
+        }
+
+        if ($category === 'GENERAL_KNOWLEDGE' && $this->isTravelOnlyRefusal($reply)) {
+            return [
+                'mode' => null,
+                'message' => '',
+                'latency_ms' => $latency,
+                'calls' => 1,
+                'meta' => array_merge($meta, $attemptMeta, [
+                    'OPEN_DOMAIN_FALLBACK' => 'YES',
+                    'OPEN_DOMAIN_REJECT_REASON' => 'travel_refusal',
+                    'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
+                ]),
+            ];
         }
 
         if (strcasecmp($brand, 'JetPakistan') !== 0
@@ -216,6 +253,7 @@ final class AiConversationalAgent
                 'calls' => 1,
                 'meta' => array_merge($meta, $attemptMeta, [
                     'OPEN_DOMAIN_FALLBACK' => 'YES',
+                    'OPEN_DOMAIN_REJECT_REASON' => 'brand_leak_rejected',
                     'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
                 ]),
             ];
@@ -229,6 +267,8 @@ final class AiConversationalAgent
             'meta' => array_merge($meta, $attemptMeta, [
                 'LLM_SYNTHESIS' => 'YES',
                 'OPEN_DOMAIN_FALLBACK' => 'NO',
+                'OPEN_DOMAIN_REJECT_REASON' => 'accepted',
+                'OPEN_DOMAIN_ACCEPTED' => 'YES',
                 'ANSWER_GROUNDED' => $category === 'GENERAL_KNOWLEDGE' ? 'MODEL_GENERAL' : 'N/A',
                 'SMART_REDIRECT' => $capabilities !== [] ? 'YES' : 'NO',
             ]),
@@ -542,6 +582,27 @@ final class AiConversationalAgent
         }
 
         return $trimmed;
+    }
+
+    /**
+     * Reject travel-scope refusals that violate the GENERAL_KNOWLEDGE contract.
+     */
+    private function isTravelOnlyRefusal(string $reply): bool
+    {
+        $lower = mb_strtolower(trim($reply));
+        if ($lower === '') {
+            return false;
+        }
+
+        return preg_match(
+            '/\b(only (help|assist) (you )?(with )?(flight|travel|booking)|restricted to (flight|travel)|'.
+            'cannot answer (this|that|non[- ]?travel)|purpose is to help you with flight|'.
+            'travel (bookings?|questions?) only|i (can\'?t|cannot) (help|answer).{0,60}'.
+            '(non[- ]?travel|general knowledge|that question)|'.
+            'i (am|\'m) (only|just) (a )?travel (assistant|bot)|'.
+            'outside (my|the) (travel )?scope)\b/u',
+            $lower
+        ) === 1;
     }
 
     /**

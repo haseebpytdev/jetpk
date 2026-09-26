@@ -1,0 +1,84 @@
+{
+  "http_status": 200,
+  "latency_ms": 9511.9,
+  "conversation_id": "47e72af8-6efe-4a34-8c23-5370a36f72e9",
+  "message": "That looks like a multi-city / open-jaw itinerary (LHE-JED then MED-LHE). Share both leg dates and use multi-city search — I will not collapse it to a one-way search.",
+  "meta": {
+    "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+    "AI_GROUP_SEARCH_READ_CALLS": 0,
+    "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+    "SEMANTIC_BRAIN_CALLED": "YES",
+    "SEMANTIC_BRAIN_VALID": "YES",
+    "SEMANTIC_BRAIN_FALLBACK": "NO",
+    "MODEL_ID": "local",
+    "MODEL_CALLS": 1,
+    "SEMANTIC_LATENCY_MS": 8547,
+    "COMPOSER_LATENCY_MS": 0,
+    "TOTAL_MODEL_LATENCY_MS": 8547,
+    "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+    "SEMANTIC_INTENT": "open_jaw",
+    "SERVER_OPERATION": "clarify",
+    "SEMANTIC_DOMAIN": "travel",
+    "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+    "STALE_ROUTE_CONTAMINATION": 0,
+    "QWEN_SEMANTIC_VALID": "YES",
+    "TOOL_EXECUTED": "NONE",
+    "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+    "OPEN_JAW_DETECTED": "YES",
+    "LEG1": "LHE-JED",
+    "LEG2": "MED-LHE",
+    "FALSE_ONE_WAY": "NO"
+  },
+  "actions": [
+    {
+      "label": "Search Flights",
+      "href": "/#flight-search"
+    },
+    {
+      "label": "Browse Groups",
+      "href": "/groups"
+    },
+    {
+      "label": "Manage Booking",
+      "href": "/lookup-booking"
+    },
+    {
+      "label": "Talk to Support",
+      "action": "handoff"
+    }
+  ],
+  "recommendations": [],
+  "state": "AI_ACTIVE",
+  "checks": {
+    "lhe_jed": true,
+    "med_lhe": true,
+    "not_jed_med_collapse": true,
+    "not_one_way_collapse": true
+  },
+  "full_meta_keys": [
+    "AI_FLIGHT_SEARCH_READ_CALLS",
+    "AI_GROUP_SEARCH_READ_CALLS",
+    "COMPOSER_LATENCY_MS",
+    "EXPLICIT_ROUTE_PRECEDENCE",
+    "FALSE_ONE_WAY",
+    "FINAL_RESPONSE_SOURCE",
+    "LEG1",
+    "LEG2",
+    "LOCAL_LLM_REQUIRED_FOR_CORE",
+    "MODEL_CALLS",
+    "MODEL_CAN_AUTHORIZE_MUTATION",
+    "MODEL_ID",
+    "OPEN_JAW_DETECTED",
+    "QWEN_SEMANTIC_VALID",
+    "SEMANTIC_BRAIN_CALLED",
+    "SEMANTIC_BRAIN_FALLBACK",
+    "SEMANTIC_BRAIN_VALID",
+    "SEMANTIC_DOMAIN",
+    "SEMANTIC_INTENT",
+    "SEMANTIC_LATENCY_MS",
+    "SERVER_OPERATION",
+    "STALE_ROUTE_CONTAMINATION",
+    "TOOL_EXECUTED",
+    "TOTAL_MODEL_LATENCY_MS"
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "http_status": 200,
+  "latency_ms": 4605.0,
+  "conversation_id": "ee12a213-a481-471f-ae60-d9f8d2ea654d",
+  "message": "Updated route to LHE → JED. What travel date should I use?",
+  "meta": {
+    "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+    "AI_GROUP_SEARCH_READ_CALLS": 0,
+    "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+    "intent": {
+      "intent": "flight_search",
+      "origin": "LHE",
+      "destination": "JED",
+      "depart_date": null,
+      "return_date": null,
+      "adults": 1,
+      "children": 0,
+      "infants": 0,
+      "cabin": null,
+      "airline": null,
+      "max_stops": null,
+      "budget": null,
+      "time_preference": null,
+      "currency": "PKR",
+      "mode": "STRUCTURED_FALLBACK",
+      "trip_type": "open_jaw",
+      "legs": [
+        {
+          "origin": "LHE",
+          "destination": "JED"
+        },
+        {
+          "origin": "MED",
+          "destination": "LHE"
+        }
+      ]
+    },
+    "clarification_required": true,
+    "clarification_message": "That sounds like a multi-city / open-jaw itinerary: LHE → JED then MED → LHE. Please share the outbound and return (or second-leg) dates, then continue on our multi-city flight search — I will not collapse this into a one-way search.",
+    "clarification_options": [],
+    "provenance": {
+      "intent": "EXPLICIT_USER",
+      "origin": "EXPLICIT_USER",
+      "destination": "EXPLICIT_USER",
+      "trip_type": "EXPLICIT_USER",
+      "OPEN_JAW_DETECTED": "YES",
+      "LEG1": "LHE-JED",
+      "LEG2": "MED-LHE",
+      "FALSE_ONE_WAY": "NO"
+    },
+    "ranking_preference": null,
+    "language": "en",
+    "llm_bypassed": true,
+    "OPEN_JAW_DETECTED": "YES",
+    "LEG1": "LHE-JED",
+    "LEG2": "MED-LHE",
+    "FALSE_ONE_WAY": "NO",
+    "confirmation_invalidated": true,
+    "DATE_REQUIRED": true
+  },
+  "actions": [
+    {
+      "label": "Search Flights",
+      "href": "/#flight-search"
+    },
+    {
+      "label": "Browse Groups",
+      "href": "/groups"
+    },
+    {
+      "label": "Manage Booking",
+      "href": "/lookup-booking"
+    },
+    {
+      "label": "Talk to Support",
+      "action": "handoff"
+    }
+  ],
+  "recommendations": [],
+  "state": "AI_ACTIVE",
+  "checks": {
+    "lhe_jed": true,
+    "med_lhe": false,
+    "WRONG_ROUTE_ACTION_READY": false
+  },
+  "full_meta_keys": [
+    "AI_FLIGHT_SEARCH_READ_CALLS",
+    "AI_GROUP_SEARCH_READ_CALLS",
+    "DATE_REQUIRED",
+    "FALSE_ONE_WAY",
+    "LEG1",
+    "LEG2",
+    "LOCAL_LLM_REQUIRED_FOR_CORE",
+    "OPEN_JAW_DETECTED",
+    "clarification_message",
+    "clarification_options",
+    "clarification_required",
+    "confirmation_invalidated",
+    "intent",
+    "language",
+    "llm_bypassed",
+    "provenance",
+    "ranking_preference"
+  ]
+}
