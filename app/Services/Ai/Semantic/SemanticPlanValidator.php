@@ -39,7 +39,15 @@ final class SemanticPlanValidator
     public function validate(SemanticPlan $plan, array $priorState, string $userMessage): array
     {
         $rejects = [];
-        $missing = $plan->missing;
+        // Qwen missing[] is advisory only for travel completeness slots — server rebuilds those.
+        $travelCompletenessSlots = [
+            'origin', 'destination', 'departure_date', 'return_date',
+            'leg1_departure_date', 'leg2_departure_date', 'leg3_departure_date',
+        ];
+        $missing = array_values(array_filter(
+            $plan->missing,
+            static fn (string $m): bool => ! in_array($m, $travelCompletenessSlots, true)
+        ));
 
         // Forbidden ops already constrained by DTO allowlist; re-check raw for injection.
         $raw = $plan->raw;
@@ -159,9 +167,12 @@ final class SemanticPlanValidator
         }
         $return = $this->resolveDate($plan->returnDate, $rejects);
 
-        // Apply demotion trip_type after return date is known.
+        // CQ42-R2.1: English return/round-trip cue ≠ Roman-Urdu wapis/wapas.
+        $explicitReturnCue = $this->messageImpliesExplicitReturnTripCue($userMessage);
+
+        // Apply demotion trip_type after return date / return cue are known.
         if ($falseOpenJawDemoted) {
-            $tripTypeForced = $return !== null ? 'return' : 'one_way';
+            $tripTypeForced = ($explicitReturnCue || $return !== null) ? 'return' : 'one_way';
         }
 
         $cabin = $this->normalizeCabin($plan->cabin, $rejects);
@@ -187,6 +198,14 @@ final class SemanticPlanValidator
 
         if ($tripTypeForced !== null) {
             $tripType = $tripTypeForced;
+        }
+
+        // Server-authoritative English return/round-trip wording (never from wapis/wapas alone).
+        if (
+            $explicitReturnCue
+            && ! in_array($tripType, ['open_jaw', 'multi_city'], true)
+        ) {
+            $tripType = 'return';
         }
 
         if (count($legs) >= 2 && $tripType === null) {
@@ -240,6 +259,10 @@ final class SemanticPlanValidator
             if ($depart === null && ! in_array($tripType, ['open_jaw', 'multi_city'], true)) {
                 $missing[] = 'departure_date';
             }
+            // Server-owned: return trip cannot be actionable without return_date.
+            if ($tripType === 'return' && $return === null) {
+                $missing[] = 'return_date';
+            }
             if (in_array($tripType, ['open_jaw', 'multi_city'], true)) {
                 if (count($legs) < 2) {
                     $rejects[] = 'open_jaw_requires_two_legs';
@@ -265,6 +288,7 @@ final class SemanticPlanValidator
                 'stale_route_contamination' => $stale,
                 'false_open_jaw_demoted' => $falseOpenJawDemoted,
                 'server_single_route' => $serverSingleRoute,
+                'explicit_return_trip_cue' => $explicitReturnCue,
             ];
         }
 
@@ -303,9 +327,32 @@ final class SemanticPlanValidator
             'QWEN_SEMANTIC'
         );
 
-        // Rebuild plan-facing missing after canonicalize.
-        if ($plan->domain === 'travel' && $plan->operation === 'prepare_search') {
-            if (! $intent->isSearchable() && ! in_array($intent->tripType, ['open_jaw', 'multi_city'], true)) {
+        // Post-canonicalize server authority: do not inherit prior return_date incorrectly.
+        $needsRebuild = false;
+        $intentData = $intent->toArray();
+        if ($tripType === 'one_way' && ($intentData['return_date'] ?? null) !== null) {
+            $intentData['return_date'] = null;
+            $intentData['trip_type'] = 'one_way';
+            $needsRebuild = true;
+        }
+        // Fresh English return/round-trip cue without a stated return date must clarify —
+        // never treat prior shopping_state return_date as satisfying this turn.
+        if ($explicitReturnCue && $return === null && ($intentData['return_date'] ?? null) !== null) {
+            $intentData['return_date'] = null;
+            $intentData['trip_type'] = 'return';
+            $needsRebuild = true;
+        }
+        if ($needsRebuild) {
+            $intent = TravelIntent::fromArray($intentData, 'QWEN_SEMANTIC');
+        }
+
+        // Rebuild travel completeness missing after canonicalize (server-owned; drop stale Qwen slots).
+        if ($plan->domain === 'travel' && in_array($plan->operation, ['prepare_search', 'clarify'], true)) {
+            $missing = array_values(array_filter(
+                $missing,
+                static fn (string $m): bool => ! in_array($m, $travelCompletenessSlots, true)
+            ));
+            if (! in_array($intent->tripType, ['open_jaw', 'multi_city'], true)) {
                 if ($intent->origin === null) {
                     $missing[] = 'origin';
                 }
@@ -314,6 +361,17 @@ final class SemanticPlanValidator
                 }
                 if ($intent->departDate === null) {
                     $missing[] = 'departure_date';
+                }
+            }
+            if ($intent->tripType === 'return' && $intent->returnDate === null) {
+                $missing[] = 'return_date';
+            }
+            if (in_array($intent->tripType, ['open_jaw', 'multi_city'], true)) {
+                $intentLegs = is_array($intent->legs) ? $intent->legs : [];
+                foreach ($intentLegs as $i => $leg) {
+                    if (($leg['departure_date'] ?? null) === null && ($legs[$i]['departure_date'] ?? null) === null) {
+                        $missing[] = 'leg'.($i + 1).'_departure_date';
+                    }
                 }
             }
         }
@@ -328,6 +386,7 @@ final class SemanticPlanValidator
             'stale_route_contamination' => $stale,
             'false_open_jaw_demoted' => $falseOpenJawDemoted,
             'server_single_route' => $serverSingleRoute,
+            'explicit_return_trip_cue' => $explicitReturnCue,
         ];
     }
 
@@ -435,5 +494,26 @@ final class SemanticPlanValidator
             'lhe|doh|jed|med|isb|khi|dxb)\b/u',
             $m
         );
+    }
+
+    /**
+     * English return / round-trip trip-shape cue.
+     * Does NOT treat Roman-Urdu wapis/wapas as round-trip.
+     */
+    private function messageImpliesExplicitReturnTripCue(string $message): bool
+    {
+        $m = mb_strtolower(trim($message));
+        if ($m === '') {
+            return false;
+        }
+        // Roman-Urdu reverse-route wording is route direction, not English round-trip.
+        if (preg_match('/\b(wapis|wapas)\b|واپس/u', $m) === 1) {
+            return false;
+        }
+
+        return preg_match(
+            '/\bround[\s-]?trips?\b|\breturn\s+tickets?\b|\breturn\s+flights?\b|\breturn\b/u',
+            $m
+        ) === 1;
     }
 }

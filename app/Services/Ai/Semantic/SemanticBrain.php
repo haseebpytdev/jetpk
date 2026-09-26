@@ -151,6 +151,9 @@ final class SemanticBrain
         if (! empty($validated['server_single_route'])) {
             $telemetry['SERVER_SINGLE_ROUTE'] = (string) $validated['server_single_route'];
         }
+        if (! empty($validated['explicit_return_trip_cue'])) {
+            $telemetry['EXPLICIT_RETURN_TRIP_CUE'] = 'YES';
+        }
 
         $intent = $validated['intent'];
         $missing = $validated['missing'];
@@ -397,7 +400,13 @@ final class SemanticBrain
             ];
         }
 
-        if ($missing !== [] || $plan->operation === 'clarify' || ! $intent->isSearchable() || $intent->departDate === null) {
+        if (
+            $missing !== []
+            || $plan->operation === 'clarify'
+            || ! $intent->isSearchable()
+            || $intent->departDate === null
+            || ($tripType === 'return' && $intent->returnDate === null)
+        ) {
             $ask = $this->clarifyTravelMessage($missing, $intent);
             $composed = $this->composer->compose($conversation, $message, $plan, [
                 'origin' => $intent->origin,
@@ -412,7 +421,10 @@ final class SemanticBrain
                 'status' => 'clarify',
                 'message' => (string) $composed['message'],
                 'intent' => $intent->toArray(),
-                'meta' => array_merge($meta, ['AI_FLIGHT_SEARCH_READ_CALLS' => 0]),
+                'meta' => array_merge($meta, [
+                    'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+                    'RETURN_DATE_REQUIRED' => ($tripType === 'return' && $intent->returnDate === null) ? 'YES' : 'NO',
+                ]),
             ];
         }
 
@@ -749,13 +761,21 @@ final class SemanticBrain
      */
     private function clarifyTravelMessage(array $missing, TravelIntent $intent): string
     {
-        if (in_array('departure_date', $missing, true) || $intent->departDate === null) {
+        // Prefer resolved intent state over stale advisory missing[] entries.
+        if ($intent->departDate === null) {
             $route = trim(($intent->origin ?? '').' to '.($intent->destination ?? ''));
             $cabin = $intent->cabin ? ' in '.str_replace('_', ' ', $intent->cabin) : '';
 
             return 'What departure date should I use'
                 .($route !== ' to ' ? " for {$route}" : '')
                 .$cabin
+                .'?';
+        }
+        if ($intent->tripType === 'return' && $intent->returnDate === null) {
+            $route = trim(($intent->origin ?? '').' to '.($intent->destination ?? ''));
+
+            return 'What return date should I use'
+                .($route !== ' to ' ? " for {$route}" : '')
                 .'?';
         }
         if ($missing !== []) {

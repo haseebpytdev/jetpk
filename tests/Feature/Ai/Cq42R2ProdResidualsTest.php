@@ -113,7 +113,18 @@ class Cq42R2ProdResidualsTest extends TestCase
             'response_intent' => 'need_dates',
         ];
 
-        return (string) json_encode(array_replace_recursive($base, $overrides), JSON_UNESCAPED_UNICODE);
+        $merged = array_replace_recursive($base, $overrides);
+        // array_replace_recursive does not clear list values with [] — force list overrides.
+        foreach (['missing', 'references'] as $listKey) {
+            if (array_key_exists($listKey, $overrides)) {
+                $merged[$listKey] = $overrides[$listKey];
+            }
+        }
+        if (isset($overrides['travel']['legs'])) {
+            $merged['travel']['legs'] = $overrides['travel']['legs'];
+        }
+
+        return (string) json_encode($merged, JSON_UNESCAPED_UNICODE);
     }
 
     public function test_plain_text_general_knowledge_accepted_without_json(): void
@@ -369,6 +380,152 @@ class Cq42R2ProdResidualsTest extends TestCase
         $this->assertMatchesRegularExpression('/LHE|Lahore/i', $body);
         $this->assertMatchesRegularExpression('/DXB|Dubai/i', $body);
         $this->assertSame(0, (int) ($turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS') ?? 0));
+        // Dated return should be confirmation-ready (or an explicit confirm ask).
+        $confirmed = (bool) $turn['response']->json('meta.CONFIRMATION_REQUIRED')
+            || (bool) $turn['response']->json('meta.confirmation_required')
+            || (bool) $turn['response']->json('requires_confirmation')
+            || str_contains($body, 'confirm')
+            || str_contains($body, 'shall i');
+        $this->assertTrue($confirmed, 'dated return should ask confirmation, got: '.$body);
+    }
+
+    public function test_english_return_without_date_stays_return_and_clarifies(): void
+    {
+        $this->enableSemanticAi();
+        $cases = [
+            'Lahore to Dubai return',
+            'Lahore to Dubai return ticket',
+            'Lahore to Dubai round trip',
+            'Lahore to Dubai tomorrow return',
+            'Lahore to Dubai round trip tomorrow',
+        ];
+
+        $i = 0;
+        foreach ($cases as $message) {
+            // Qwen may mislabel as open_jaw or one_way — server must keep return + ask for return_date.
+            $this->rebindInference(new ScriptedInferenceProvider([
+                $this->planJson([
+                    'intent' => 'open_jaw',
+                    'operation' => 'prepare_search',
+                    'travel' => [
+                        'trip_type' => 'open_jaw',
+                        'origin' => 'LHE',
+                        'destination' => 'DXB',
+                        'legs' => [
+                            ['origin' => 'LHE', 'destination' => 'DXB', 'departure_date' => null],
+                            ['origin' => 'DXB', 'destination' => 'LHE', 'departure_date' => null],
+                        ],
+                        'return_date' => null,
+                        'adults' => 1,
+                    ],
+                    'missing' => [],
+                ]),
+            ]));
+
+            $turn = $this->chat(str_repeat('r2ret', 12).sprintf('%02d', $i), $message);
+            $turn['response']->assertOk();
+            $body = mb_strtolower((string) $turn['response']->json('message'));
+            $this->assertStringNotContainsString('open-jaw', $body, $message);
+            $this->assertNotSame('YES', $turn['response']->json('meta.OPEN_JAW_DETECTED'), $message);
+            $this->assertSame('YES', $turn['response']->json('meta.EXPLICIT_RETURN_TRIP_CUE'), $message);
+            $intent = $turn['response']->json('intent') ?? [];
+            $this->assertSame('return', $intent['trip_type'] ?? null, $message);
+            $this->assertNull($intent['return_date'] ?? null, $message);
+            $this->assertFalse((bool) ($turn['response']->json('meta.CONFIRMATION_REQUIRED') ?? false), $message);
+            $this->assertFalse((bool) ($turn['response']->json('meta.confirmation_required') ?? false), $message);
+            $this->assertSame('clarify', $turn['response']->json('status'), $message);
+            $this->assertSame('YES', $turn['response']->json('meta.RETURN_DATE_REQUIRED'), $message);
+            $this->assertSame(0, (int) ($turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS') ?? 0), $message);
+            $i++;
+        }
+    }
+
+    public function test_validator_english_return_cue_not_demoted_to_one_way(): void
+    {
+        $validator = app(SemanticPlanValidator::class);
+        $plan = SemanticPlan::fromModelArray([
+            'domain' => 'travel',
+            'intent' => 'open_jaw',
+            'operation' => 'clarify',
+            'travel' => [
+                'trip_type' => 'open_jaw',
+                'origin' => 'Lahore',
+                'destination' => 'Dubai',
+                'legs' => [
+                    ['origin' => 'LHE', 'destination' => 'DXB', 'departure_date' => null],
+                    ['origin' => 'DXB', 'destination' => 'LHE', 'departure_date' => null],
+                ],
+                'return_date' => null,
+                'adults' => 1,
+            ],
+            'missing' => [],
+            'response_intent' => 'need_dates',
+        ]);
+
+        $validated = $validator->validate($plan, [], 'Lahore to Dubai return');
+        $this->assertTrue($validated['valid']);
+        $this->assertTrue($validated['explicit_return_trip_cue']);
+        $this->assertTrue($validated['false_open_jaw_demoted']);
+        $this->assertSame('return', $validated['intent']->tripType);
+        $this->assertNull($validated['intent']->returnDate);
+        $this->assertContains('return_date', $validated['missing']);
+    }
+
+    public function test_validator_english_return_does_not_inherit_prior_return_date(): void
+    {
+        $validator = app(SemanticPlanValidator::class);
+        $plan = SemanticPlan::fromModelArray([
+            'domain' => 'travel',
+            'intent' => 'flight_search',
+            'operation' => 'clarify',
+            'travel' => [
+                'trip_type' => 'return',
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'legs' => [['origin' => 'LHE', 'destination' => 'DXB', 'departure_date' => null]],
+                'return_date' => null,
+                'adults' => 1,
+            ],
+            'missing' => [],
+        ]);
+
+        $validated = $validator->validate(
+            $plan,
+            ['origin' => 'LHE', 'destination' => 'DXB', 'return_date' => '2026-11-20', 'trip_type' => 'return'],
+            'Lahore to Dubai return'
+        );
+        $this->assertTrue($validated['valid']);
+        $this->assertTrue($validated['explicit_return_trip_cue']);
+        $this->assertSame('return', $validated['intent']->tripType);
+        $this->assertNull($validated['intent']->returnDate);
+        $this->assertContains('return_date', $validated['missing']);
+    }
+
+    public function test_validator_wapis_still_one_way_not_english_return(): void
+    {
+        $validator = app(SemanticPlanValidator::class);
+        $plan = SemanticPlan::fromModelArray([
+            'domain' => 'travel',
+            'intent' => 'open_jaw',
+            'operation' => 'clarify',
+            'travel' => [
+                'trip_type' => 'open_jaw',
+                'origin' => 'Dubai',
+                'destination' => 'Lahore',
+                'legs' => [
+                    ['origin' => 'DXB', 'destination' => 'LHE', 'departure_date' => null],
+                    ['origin' => 'LHE', 'destination' => 'DXB', 'departure_date' => null],
+                ],
+                'adults' => 1,
+            ],
+            'missing' => [],
+        ]);
+
+        $validated = $validator->validate($plan, [], 'Dubai se Lahore wapis');
+        $this->assertTrue($validated['valid']);
+        $this->assertFalse($validated['explicit_return_trip_cue']);
+        $this->assertSame('one_way', $validated['intent']->tripType);
+        $this->assertNotContains('return_date', $validated['missing']);
     }
 
     public function test_high_risk_still_deterministic_no_qwen_open_domain(): void

@@ -1191,6 +1191,9 @@ final class AiChatOrchestrator
                 'actions' => $this->resolveResponseActions(),
                 'meta' => $meta,
             ];
+            if (isset($semantic['intent']) && is_array($semantic['intent'])) {
+                $payload['intent'] = $semantic['intent'];
+            }
             if (! empty($semantic['requires_confirmation'])) {
                 $payload['requires_confirmation'] = true;
                 $payload['confirmation_snapshot'] = $semantic['confirmation_snapshot'] ?? null;
