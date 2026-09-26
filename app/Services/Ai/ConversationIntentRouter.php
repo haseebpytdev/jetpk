@@ -126,10 +126,15 @@ final class ConversationIntentRouter
         if (preg_match(
             '/\b(stock price|share price|breaking news|live score|live match|who won|who is winning)\b'.
             '|\b(today\'?s|current)\s+weather\b'.
-            '|\bweather\s+(today|now|tomorrow|in|situation)\b'.
+            '|\bweather\s+(today|now|tomorrow|in|situation|right\s+now)\b'.
             '|\bweather situation\b'.
+            '|\b(right\s+now|currently).{0,40}\bweather\b'.
             '|\btemperature in\b|\bcurrent (president|prime minister)\b'.
-            '|\b(bitcoin|crypto).{0,20}\b(price|today)\b/u',
+            '|\b(bitcoin|crypto).{0,24}\b(price|today|right\s+now)\b'.
+            '|\b(latest|breaking|today\'?s)\s+news\b'.
+            '|\bnews\s+(today|right\s+now)\b'.
+            '|\bhappened in the news\b'.
+            '|\bcurrent stock price\b/u',
             $lower
         ) === 1) {
             return 'CURRENT_UNVERIFIED';
@@ -157,9 +162,9 @@ final class ConversationIntentRouter
             return 'GENERAL_KNOWLEDGE';
         }
 
-        // Harmless what/where/who educational questions without travel markers.
+        // Harmless what/where/who/why/how/explain educational questions without travel markers.
         if (
-            preg_match('/^(what|where|who|why|how)\b/u', $lower) === 1
+            preg_match('/^(what|where|who|why|how|explain|describe|define)\b/u', $lower) === 1
             && ! preg_match('/\b(flight|ticket|fare|booking|pnr|lahore|dubai|travel|umrah)\b/u', $lower)
             && ! $this->isJetPakistanKnowledgeQuestion($lower)
         ) {

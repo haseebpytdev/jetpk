@@ -58,16 +58,20 @@ Close five confirmed Live Canary 40 / manual production UAT residuals without we
 
 ## Tests executed
 
-- CQ41 feature + open-jaw smoke + Order-39 + Brain28 + HybridTravelPipeline: **49 pass**
-- Broader AI filter: 126 pass / 3 unrelated fail (missing corpus fixtures; unrelated admin overview)
+- Initial CQ41 core: **49 pass**
+- CQ41-R1 (CQ41 + Order-39 + Brain28 + Hybrid + open-jaw smoke + CQ26 AI-first): **77 pass / 597 assertions**
+- GITHUB_PHPUNIT: **SKIPPED_NO_VENDOR** (release-guards green ≠ local PHPUnit)
 
 ## Real Qwen
 
-Local llama-server `:3921` unavailable this run → real-model metrics N/A.
+Local llama-server `:3921` unavailable → `REAL_QWEN_RUNS=0`, `REAL_QWEN_STATUS=UNAVAILABLE`.
 
 ## Status
 
 - CQ41_LOCAL_CLOSURE: **PASS** for scripted residuals 1–4 + Order-39; residual 5 **CODE_PASS** (no automated FE test)
+- CQ41-R1: general knowledge primary path corrected to Qwen `tryOpenDomainRespond`; OpenDomain is fallback-only; CURRENT_UNVERIFIED server gate strengthened; holdout matrix added
+- LOCAL_PHPUNIT (R1): **77 pass**
+- GITHUB_PHPUNIT: **SKIPPED_NO_VENDOR** (release-guards does not execute vendor PHPUnit)
 - PRODUCTION_VERIFIED: **NO**
 - PERMANENT_QWEN: **HOLD**
 - IFRAME_PILOT: **HOLD**

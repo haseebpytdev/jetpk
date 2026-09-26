@@ -269,23 +269,184 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
         $this->assertSame(0, (int) $second['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'));
     }
 
-    public function test_general_knowledge_photosynthesis(): void
+    private function knowledgeMislabelPlan(string $query = 'general'): string
     {
-        $this->enableSemanticAi();
-        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider($this->planJson([
+        return $this->planJson([
             'domain' => 'knowledge',
             'intent' => 'faq',
             'operation' => 'answer',
-            'knowledge_query' => 'photosynthesis',
+            'knowledge_query' => $query,
             'travel' => ['trip_type' => null, 'origin' => null, 'destination' => null, 'legs' => [], 'adults' => 1],
             'response_intent' => 'answer',
-        ])));
+        ]);
+    }
+
+    private function rebindInference(InferenceProvider $provider): void
+    {
+        $this->app->instance(InferenceProvider::class, $provider);
+        // Consumers capture provider at resolve-time — flush so each scripted queue is fresh.
+        foreach ([
+            \App\Services\Ai\Semantic\SemanticBrain::class,
+            \App\Services\Ai\Semantic\QwenSemanticPlanner::class,
+            \App\Services\Ai\Semantic\SemanticResponseComposer::class,
+            \App\Services\Ai\AiConversationalAgent::class,
+            \App\Services\Ai\AiChatOrchestrator::class,
+        ] as $abstract) {
+            $this->app->forgetInstance($abstract);
+        }
+    }
+
+    public function test_general_knowledge_qwen_primary_not_canned_only(): void
+    {
+        $this->enableSemanticAi();
+        $this->assertFalse((bool) config('ota.ai_assistant.semantic_composer_enabled'));
+
+        $scripted = new ScriptedInferenceProvider([
+            $this->knowledgeMislabelPlan('photosynthesis'),
+            '{"message":"QWEN_PRIMARY: Photosynthesis is how plants convert light energy into chemical energy, producing sugars and oxygen."}',
+        ]);
+        $this->rebindInference($scripted);
 
         $turn = $this->chat(str_repeat('gk1', 20), 'What is photosynthesis?');
         $turn['response']->assertOk();
+        $body = (string) $turn['response']->json('message');
+        $this->assertStringContainsString('QWEN_PRIMARY', $body);
+        $this->assertStringNotContainsString('could not find an approved JetPakistan answer', $body);
+        $this->assertSame('YES', $turn['response']->json('meta.LLM_SYNTHESIS'));
+        $this->assertSame('NO', $turn['response']->json('meta.OPEN_DOMAIN_FALLBACK'));
+        $this->assertSame('GENERAL_KNOWLEDGE', $turn['response']->json('meta.open_domain_category'));
+        $this->assertSame(0, (int) $turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'));
+        $this->assertGreaterThanOrEqual(2, $scripted->callCount());
+    }
+
+    public function test_general_knowledge_holdouts_use_qwen_not_quick_note(): void
+    {
+        $this->enableSemanticAi();
+        $holdouts = [
+            'What is gravity?' => 'QWEN_GK: Gravity is the attractive force between masses.',
+            'Why is the sky blue?' => 'QWEN_GK: The sky looks blue because of Rayleigh scattering of sunlight.',
+            'What is DNA?' => 'QWEN_GK: DNA is the molecule that stores genetic instructions in living cells.',
+            'How does Wi-Fi work?' => 'QWEN_GK: Wi-Fi sends data using radio waves between devices and an access point.',
+            'What causes tides?' => 'QWEN_GK: Tides are mainly caused by the Moon\'s gravitational pull on Earth\'s oceans.',
+            'Explain recursion simply.' => 'QWEN_GK: Recursion is when a process solves a problem by calling a smaller version of itself.',
+            'What is the difference between RAM and storage?' => 'QWEN_GK: RAM is fast short-term memory; storage keeps data long-term.',
+            'Why do airplanes fly?' => 'QWEN_GK: Airplanes fly because wing shape and airflow create lift greater than weight.',
+            'What is the capital of Japan?' => 'QWEN_GK: Tokyo is the capital of Japan.',
+            'Explain what an API is.' => 'QWEN_GK: An API is a defined interface that lets software systems request data or actions.',
+        ];
+
+        $i = 0;
+        foreach ($holdouts as $question => $answer) {
+            $this->rebindInference(new ScriptedInferenceProvider([
+                $this->knowledgeMislabelPlan('holdout'),
+                json_encode(['message' => $answer], JSON_UNESCAPED_UNICODE),
+            ]));
+
+            $turn = $this->chat(str_repeat('gh', 18).sprintf('%02d', $i), $question);
+            $turn['response']->assertOk();
+            $body = (string) $turn['response']->json('message');
+            $this->assertStringContainsString('QWEN_GK', $body, $question);
+            $this->assertStringNotContainsString('Happy to share a quick note on that', $body, $question);
+            $this->assertStringNotContainsString('could not find an approved JetPakistan answer', $body, $question);
+            $this->assertSame('YES', $turn['response']->json('meta.LLM_SYNTHESIS'), $question);
+            $this->assertSame('NO', $turn['response']->json('meta.OPEN_DOMAIN_FALLBACK'), $question);
+            $this->assertNotSame('WAITING_FOR_HUMAN', $turn['response']->json('state'), $question);
+            $this->assertSame(0, (int) $turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'), $question);
+            $i++;
+        }
+    }
+
+    public function test_general_knowledge_invalid_qwen_falls_back_structured(): void
+    {
+        $this->enableSemanticAi();
+        $this->rebindInference(new ScriptedInferenceProvider([
+            $this->knowledgeMislabelPlan('gravity'),
+            '{invalid-json-not-an-object',
+        ]));
+
+        $turn = $this->chat(str_repeat('gk2', 20), 'What is gravity?');
+        $turn['response']->assertOk();
+        $this->assertSame('FALLBACK_STRUCTURED', $turn['response']->json('meta.LLM_SYNTHESIS'));
+        $this->assertSame('YES', $turn['response']->json('meta.OPEN_DOMAIN_FALLBACK'));
+        $this->assertSame('GENERAL_KNOWLEDGE', $turn['response']->json('meta.open_domain_category'));
+        $this->assertNotSame('LLM_ASSISTED', $turn['response']->json('mode'));
+        $this->assertSame(0, (int) $turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'));
+    }
+
+    public function test_general_knowledge_provider_unavailable_falls_back(): void
+    {
+        $this->enableSemanticAi();
+        $this->rebindInference(new ScriptedInferenceProvider(
+            $this->knowledgeMislabelPlan('dna'),
+            false,
+        ));
+
+        $turn = $this->chat(str_repeat('gk3', 20), 'What is DNA?');
+        $turn['response']->assertOk();
+        // Unhealthy provider: semantic planner fails → orchestrator open-domain fallback path.
         $body = mb_strtolower((string) $turn['response']->json('message'));
-        $this->assertStringContainsString('photosynthesis', $body);
+        $this->assertNotSame('', $body);
         $this->assertStringNotContainsString('could not find an approved jetpakistan answer', $body);
+        $this->assertSame(0, (int) ($turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS') ?? 0));
+    }
+
+    public function test_current_live_gates_server_authoritative(): void
+    {
+        $this->enableSemanticAi();
+        $cases = [
+            'What is the weather in Dubai right now?',
+            'What is the weather in Dubai today?',
+            'What happened in the news today?',
+            'What is the latest news today?',
+            'Who won the match today?',
+            'What is Bitcoin\'s price right now?',
+            'What is the current stock price of Apple?',
+        ];
+
+        foreach ($cases as $i => $msg) {
+            // Qwen wrongly labels as general — server must still CURRENT_UNVERIFIED.
+            $this->rebindInference(new ScriptedInferenceProvider([
+                $this->planJson([
+                    'domain' => 'general',
+                    'intent' => 'answer',
+                    'operation' => 'answer',
+                    'travel' => ['trip_type' => null, 'origin' => null, 'destination' => null, 'legs' => []],
+                ]),
+                '{"message":"It is 34°C in Dubai and Apple stock is $190 with Bitcoin at $67000."}',
+            ]));
+
+            $turn = $this->chat(str_repeat('cu', 18).sprintf('%02d', $i), $msg);
+            $turn['response']->assertOk();
+            $this->assertSame('CURRENT_UNVERIFIED', $turn['response']->json('meta.open_domain_category'), $msg);
+            $body = (string) $turn['response']->json('message');
+            $this->assertDoesNotMatchRegularExpression('/\d{1,3}\s*°/', $body, $msg);
+            $this->assertStringNotContainsString('67000', $body, $msg);
+            $this->assertStringNotContainsString('$190', $body, $msg);
+            $this->assertSame('NO', $turn['response']->json('meta.HALLUCINATED_LIVE_FACT') ?? 'NO', $msg);
+        }
+    }
+
+    public function test_latest_emirates_fare_does_not_fabricate_price(): void
+    {
+        $this->enableSemanticAi();
+        $this->app->instance(InferenceProvider::class, new ScriptedInferenceProvider($this->planJson([
+            'domain' => 'travel',
+            'operation' => 'clarify',
+            'travel' => [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'adults' => 1,
+                'airline' => 'Emirates',
+                'legs' => [['origin' => 'LHE', 'destination' => 'DXB', 'departure_date' => null]],
+            ],
+            'missing' => ['departure_date'],
+        ])));
+
+        $turn = $this->chat(str_repeat('lf1', 20), 'What is the latest Emirates fare Lahore to Dubai?');
+        $turn['response']->assertOk();
+        $body = mb_strtolower((string) $turn['response']->json('message'));
+        $this->assertDoesNotMatchRegularExpression('/\b(pkr|rs\.?|usd)\s*\d{3,}/i', $body);
+        $this->assertDoesNotMatchRegularExpression('/\b\d{4,6}\s*(pkr|rs)\b/i', $body);
         $this->assertSame(0, (int) $turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'));
     }
 

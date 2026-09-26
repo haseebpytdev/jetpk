@@ -56,6 +56,7 @@ final class OpenDomainResponseService
                 'open_domain_category' => $category,
                 'ANSWER_GROUNDED' => $category === 'GENERAL_KNOWLEDGE' ? 'MODEL_GENERAL' : 'N/A',
                 'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
+                'OPEN_DOMAIN_FALLBACK' => 'YES',
                 'SMART_REDIRECT' => $pivot !== '' ? 'YES' : 'NO',
             ],
         ];

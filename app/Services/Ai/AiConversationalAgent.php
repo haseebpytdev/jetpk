@@ -174,6 +174,7 @@ final class AiConversationalAgent
             'meta' => array_merge($meta, [
                 'open_domain_category' => $category,
                 'LLM_SYNTHESIS' => 'YES',
+                'OPEN_DOMAIN_FALLBACK' => 'NO',
                 'ANSWER_GROUNDED' => $category === 'GENERAL_KNOWLEDGE' ? 'MODEL_GENERAL' : 'N/A',
                 'SMART_REDIRECT' => $capabilities !== [] ? 'YES' : 'NO',
             ]),
