@@ -1,0 +1,107 @@
+{
+  "http_status": 200,
+  "latency_ms": 4397.0,
+  "conversation_id": "5df06e78-419b-4939-8dff-d263842276b9",
+  "message": "Just to confirm: LHE to DOH, one-way, 2026-10-02, 3 adults. Shall I search?",
+  "meta": {
+    "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+    "AI_GROUP_SEARCH_READ_CALLS": 0,
+    "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+    "intent": {
+      "intent": "flight_search",
+      "origin": "LHE",
+      "destination": "DOH",
+      "depart_date": "2026-10-02",
+      "return_date": null,
+      "adults": 3,
+      "children": 0,
+      "infants": 0,
+      "cabin": null,
+      "airline": null,
+      "max_stops": null,
+      "budget": null,
+      "time_preference": null,
+      "currency": "PKR",
+      "mode": "STRUCTURED_FALLBACK",
+      "trip_type": "one_way",
+      "legs": null
+    },
+    "clarification_required": false,
+    "clarification_message": null,
+    "clarification_options": [],
+    "provenance": {
+      "intent": "EXPLICIT_USER",
+      "origin": "INHERITED_CONVERSATION_STATE",
+      "destination": "INHERITED_CONVERSATION_STATE",
+      "depart_date": "INHERITED_CONVERSATION_STATE",
+      "adults": "EXPLICIT_USER"
+    },
+    "ranking_preference": null,
+    "language": "en",
+    "llm_bypassed": true,
+    "confirmation_invalidated": true,
+    "CONFIRMATION_REQUIRED": true,
+    "confirmation_required": true,
+    "confirmation_type": "flight_search",
+    "CONFIRMATION_BEFORE_SEARCH": true,
+    "CONFIRMATION_SNAPSHOT": {
+      "origin": "LHE",
+      "destination": "DOH",
+      "departure_date": "2026-10-02",
+      "return_date": null,
+      "trip_type": "one_way",
+      "adults": 3,
+      "children": 0,
+      "infants": 0,
+      "cabin": null,
+      "airline": null,
+      "max_stops": null,
+      "currency": "PKR",
+      "legs": null
+    }
+  },
+  "actions": [
+    {
+      "label": "Search Flights",
+      "href": "/#flight-search"
+    },
+    {
+      "label": "Browse Groups",
+      "href": "/groups"
+    },
+    {
+      "label": "Manage Booking",
+      "href": "/lookup-booking"
+    },
+    {
+      "label": "Talk to Support",
+      "action": "handoff"
+    }
+  ],
+  "recommendations": [],
+  "state": "AI_ACTIVE",
+  "checks": {
+    "doh": true,
+    "adults_3": true,
+    "confirmation": true
+  },
+  "full_meta_keys": [
+    "AI_FLIGHT_SEARCH_READ_CALLS",
+    "AI_GROUP_SEARCH_READ_CALLS",
+    "CONFIRMATION_BEFORE_SEARCH",
+    "CONFIRMATION_REQUIRED",
+    "CONFIRMATION_SNAPSHOT",
+    "LOCAL_LLM_REQUIRED_FOR_CORE",
+    "clarification_message",
+    "clarification_options",
+    "clarification_required",
+    "confirmation_invalidated",
+    "confirmation_required",
+    "confirmation_type",
+    "intent",
+    "language",
+    "llm_bypassed",
+    "provenance",
+    "ranking_preference"
+  ]
+}

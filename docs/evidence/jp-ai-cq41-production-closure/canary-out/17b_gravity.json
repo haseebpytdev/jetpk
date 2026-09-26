@@ -1,0 +1,87 @@
+{
+  "http_status": 200,
+  "latency_ms": 15054.5,
+  "conversation_id": "05138f66-c548-4fe0-b6a9-d12a36025561",
+  "message": "Happy to share a quick note on that. If you need commercial flight search, group ticketing, booking assistance, or support with JetPakistan, I can help with that too.",
+  "meta": {
+    "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+    "AI_GROUP_SEARCH_READ_CALLS": 0,
+    "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+    "SEMANTIC_BRAIN_CALLED": "YES",
+    "SEMANTIC_BRAIN_VALID": "YES",
+    "SEMANTIC_BRAIN_FALLBACK": "NO",
+    "MODEL_ID": "local",
+    "MODEL_CALLS": 2,
+    "SEMANTIC_LATENCY_MS": 2447,
+    "COMPOSER_LATENCY_MS": 0,
+    "TOTAL_MODEL_LATENCY_MS": 14269,
+    "FINAL_RESPONSE_SOURCE": "OPEN_DOMAIN_FALLBACK",
+    "SEMANTIC_INTENT": "clarify",
+    "SERVER_OPERATION": "clarify",
+    "SEMANTIC_DOMAIN": "knowledge",
+    "STALE_ROUTE_CONTAMINATION": 0,
+    "QWEN_SEMANTIC_VALID": "YES",
+    "TOOL_EXECUTED": "NONE",
+    "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+    "OPEN_DOMAIN_LATENCY_MS": 11822,
+    "open_domain_category": "GENERAL_KNOWLEDGE",
+    "OPEN_DOMAIN_FALLBACK": "YES",
+    "LLM_SYNTHESIS": "FALLBACK_STRUCTURED",
+    "ANSWER_GROUNDED": "MODEL_GENERAL",
+    "SMART_REDIRECT": "YES"
+  },
+  "actions": [
+    {
+      "label": "Search Flights",
+      "href": "/#flight-search"
+    },
+    {
+      "label": "Browse Groups",
+      "href": "/groups"
+    },
+    {
+      "label": "Manage Booking",
+      "href": "/lookup-booking"
+    },
+    {
+      "label": "Talk to Support",
+      "action": "handoff"
+    }
+  ],
+  "recommendations": [],
+  "state": "AI_ACTIVE",
+  "checks": {
+    "useful_answer": false,
+    "not_canned_miss": false,
+    "FINAL_RESPONSE_SOURCE": "OPEN_DOMAIN_FALLBACK",
+    "OPEN_DOMAIN_FALLBACK": "YES",
+    "latency_accounting_ok": null
+  },
+  "full_meta_keys": [
+    "AI_FLIGHT_SEARCH_READ_CALLS",
+    "AI_GROUP_SEARCH_READ_CALLS",
+    "ANSWER_GROUNDED",
+    "COMPOSER_LATENCY_MS",
+    "FINAL_RESPONSE_SOURCE",
+    "LLM_SYNTHESIS",
+    "LOCAL_LLM_REQUIRED_FOR_CORE",
+    "MODEL_CALLS",
+    "MODEL_CAN_AUTHORIZE_MUTATION",
+    "MODEL_ID",
+    "OPEN_DOMAIN_FALLBACK",
+    "OPEN_DOMAIN_LATENCY_MS",
+    "QWEN_SEMANTIC_VALID",
+    "SEMANTIC_BRAIN_CALLED",
+    "SEMANTIC_BRAIN_FALLBACK",
+    "SEMANTIC_BRAIN_VALID",
+    "SEMANTIC_DOMAIN",
+    "SEMANTIC_INTENT",
+    "SEMANTIC_LATENCY_MS",
+    "SERVER_OPERATION",
+    "SMART_REDIRECT",
+    "STALE_ROUTE_CONTAMINATION",
+    "TOOL_EXECUTED",
+    "TOTAL_MODEL_LATENCY_MS",
+    "open_domain_category"
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "http_status": 200,
+  "latency_ms": 1125.9,
+  "conversation_id": "8652f762-761e-4a01-a623-ecbee8d0abeb",
+  "message": "Just to confirm: DXB to LHE, one-way, 2026-09-27, 2 adults. Shall I search?",
+  "meta": {
+    "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+    "AI_GROUP_SEARCH_READ_CALLS": 0,
+    "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+    "intent": {
+      "intent": "flight_search",
+      "origin": "DXB",
+      "destination": "LHE",
+      "depart_date": "2026-09-27",
+      "return_date": null,
+      "adults": 2,
+      "children": 0,
+      "infants": 0,
+      "cabin": null,
+      "airline": null,
+      "max_stops": null,
+      "budget": null,
+      "time_preference": null,
+      "currency": "PKR",
+      "mode": "STRUCTURED_FALLBACK",
+      "trip_type": "one_way",
+      "legs": null
+    },
+    "clarification_required": false,
+    "clarification_message": null,
+    "clarification_options": [],
+    "provenance": {
+      "intent": "INHERITED_CONVERSATION_STATE",
+      "origin": "RESOLVED_MASTER_DATA",
+      "destination": "RESOLVED_MASTER_DATA",
+      "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+      "STALE_ROUTE_CONTAMINATION": "0",
+      "depart_date": "INHERITED_CONVERSATION_STATE"
+    },
+    "ranking_preference": null,
+    "language": "ru",
+    "llm_bypassed": true,
+    "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+    "STALE_ROUTE_CONTAMINATION": "0",
+    "confirmation_invalidated": true,
+    "CONFIRMATION_REQUIRED": true,
+    "confirmation_required": true,
+    "confirmation_type": "flight_search",
+    "CONFIRMATION_BEFORE_SEARCH": true,
+    "CONFIRMATION_SNAPSHOT": {
+      "origin": "DXB",
+      "destination": "LHE",
+      "departure_date": "2026-09-27",
+      "return_date": null,
+      "trip_type": "one_way",
+      "adults": 2,
+      "children": 0,
+      "infants": 0,
+      "cabin": null,
+      "airline": null,
+      "max_stops": null,
+      "currency": "PKR",
+      "legs": null
+    }
+  },
+  "actions": [
+    {
+      "label": "Search Flights",
+      "href": "/#flight-search"
+    },
+    {
+      "label": "Browse Groups",
+      "href": "/groups"
+    },
+    {
+      "label": "Manage Booking",
+      "href": "/lookup-booking"
+    },
+    {
+      "label": "Talk to Support",
+      "action": "handoff"
+    }
+  ],
+  "recommendations": [],
+  "state": "AI_ACTIVE",
+  "checks": {
+    "dxb_to_lhe": true,
+    "direction_ok": true
+  },
+  "full_meta_keys": [
+    "AI_FLIGHT_SEARCH_READ_CALLS",
+    "AI_GROUP_SEARCH_READ_CALLS",
+    "CONFIRMATION_BEFORE_SEARCH",
+    "CONFIRMATION_REQUIRED",
+    "CONFIRMATION_SNAPSHOT",
+    "EXPLICIT_ROUTE_PRECEDENCE",
+    "LOCAL_LLM_REQUIRED_FOR_CORE",
+    "STALE_ROUTE_CONTAMINATION",
+    "clarification_message",
+    "clarification_options",
+    "clarification_required",
+    "confirmation_invalidated",
+    "confirmation_required",
+    "confirmation_type",
+    "intent",
+    "language",
+    "llm_bypassed",
+    "provenance",
+    "ranking_preference"
+  ]
+}

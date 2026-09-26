@@ -1,0 +1,79 @@
+{
+  "http_status": 200,
+  "latency_ms": 6963.4,
+  "conversation_id": "352da0cd-0791-4039-a89d-39f264bac592",
+  "message": "I have connected you with our support queue. A team member will reply in this chat. AI replies are paused. Tap Resume AI anytime to continue with the assistant.",
+  "meta": {
+    "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+    "AI_GROUP_SEARCH_READ_CALLS": 0,
+    "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+    "SEMANTIC_BRAIN_CALLED": "YES",
+    "SEMANTIC_BRAIN_VALID": "YES",
+    "SEMANTIC_BRAIN_FALLBACK": "NO",
+    "MODEL_ID": "local",
+    "MODEL_CALLS": 1,
+    "SEMANTIC_LATENCY_MS": 4830,
+    "COMPOSER_LATENCY_MS": 0,
+    "TOTAL_MODEL_LATENCY_MS": 4830,
+    "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+    "SEMANTIC_INTENT": "clarify",
+    "SERVER_OPERATION": "handoff",
+    "SEMANTIC_DOMAIN": "support",
+    "STALE_ROUTE_CONTAMINATION": 0,
+    "QWEN_SEMANTIC_VALID": "YES",
+    "TOOL_EXECUTED": "NONE",
+    "MODEL_CAN_AUTHORIZE_MUTATION": "NO"
+  },
+  "actions": [
+    {
+      "label": "Resume AI",
+      "action": "resume_ai"
+    },
+    {
+      "label": "Search Flights",
+      "href": "/#flight-search"
+    },
+    {
+      "label": "Browse Groups",
+      "href": "/groups"
+    },
+    {
+      "label": "Manage Booking",
+      "href": "/lookup-booking"
+    },
+    {
+      "label": "Talk to Support",
+      "action": "handoff"
+    }
+  ],
+  "recommendations": [],
+  "state": "WAITING_FOR_HUMAN",
+  "checks": {
+    "useful_answer": true,
+    "not_canned_miss": true,
+    "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+    "OPEN_DOMAIN_FALLBACK": null,
+    "latency_accounting_ok": null
+  },
+  "full_meta_keys": [
+    "AI_FLIGHT_SEARCH_READ_CALLS",
+    "AI_GROUP_SEARCH_READ_CALLS",
+    "COMPOSER_LATENCY_MS",
+    "FINAL_RESPONSE_SOURCE",
+    "LOCAL_LLM_REQUIRED_FOR_CORE",
+    "MODEL_CALLS",
+    "MODEL_CAN_AUTHORIZE_MUTATION",
+    "MODEL_ID",
+    "QWEN_SEMANTIC_VALID",
+    "SEMANTIC_BRAIN_CALLED",
+    "SEMANTIC_BRAIN_FALLBACK",
+    "SEMANTIC_BRAIN_VALID",
+    "SEMANTIC_DOMAIN",
+    "SEMANTIC_INTENT",
+    "SEMANTIC_LATENCY_MS",
+    "SERVER_OPERATION",
+    "STALE_ROUTE_CONTAMINATION",
+    "TOOL_EXECUTED",
+    "TOTAL_MODEL_LATENCY_MS"
+  ]
+}

@@ -421,10 +421,20 @@ final class HybridTravelPipeline
         return $this->wantsBookingLookup($norm['normalized'], $norm['original']);
     }
 
+    /**
+     * Public human-handoff intent detector for SemanticBrain precedence.
+     */
+    public function detectHandoff(string $message): bool
+    {
+        $norm = $this->normalizer->normalize($message);
+
+        return $this->wantsHandoff($norm['normalized'], $norm['original']);
+    }
+
     private function wantsHandoff(string $normalized, string $original): bool
     {
         return (bool) preg_match(
-            '/talk to (a )?(person|human)|speak to (a )?(person|human|support|agent)|need to speak to|human (support|agent)|agent please|live agent|real person|human please|staff please|talk to support|connect (me )?to (a )?(human|agent|support)|handoff|insaan se baat|انسانی\s*سپورٹ|انسان سے بات/u',
+            '/talk to (a )?(person|human)|speak to (a )?(person|human|support|agent)|need to speak to|human (support|agent)|agent please|live agent|real person|human please|staff please|talk to support|connect (me )?to (a )?(human|agent|support)|i need a human|handoff|insaan se baat|انسانی\s*سپورٹ|انسان سے بات/u',
             $normalized.' '.$original
         );
     }

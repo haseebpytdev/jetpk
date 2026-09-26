@@ -1,0 +1,110 @@
+{
+  "http_status": 200,
+  "latency_ms": 8728.6,
+  "conversation_id": "d393210e-8b69-41cb-a2e9-8ec4f67f9edd",
+  "message": "Just to confirm: LHE to DXB, one-way, 2026-11-06, 2 adults. Shall I search?",
+  "meta": {
+    "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+    "AI_GROUP_SEARCH_READ_CALLS": 0,
+    "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+    "SEMANTIC_BRAIN_CALLED": "YES",
+    "SEMANTIC_BRAIN_VALID": "YES",
+    "SEMANTIC_BRAIN_FALLBACK": "NO",
+    "MODEL_ID": "local",
+    "MODEL_CALLS": 1,
+    "SEMANTIC_LATENCY_MS": 7487,
+    "COMPOSER_LATENCY_MS": 0,
+    "TOTAL_MODEL_LATENCY_MS": 7487,
+    "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+    "SEMANTIC_INTENT": "prepare_search",
+    "SERVER_OPERATION": "prepare_search",
+    "SEMANTIC_DOMAIN": "travel",
+    "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+    "STALE_ROUTE_CONTAMINATION": 0,
+    "QWEN_SEMANTIC_VALID": "YES",
+    "TOOL_EXECUTED": "NONE",
+    "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+    "CONFIRMATION_REQUIRED": true,
+    "confirmation_required": true,
+    "confirmation_type": "flight_search",
+    "CONFIRMATION_BEFORE_SEARCH": true,
+    "CONFIRMATION_SNAPSHOT": {
+      "origin": "LHE",
+      "destination": "DXB",
+      "departure_date": "2026-11-06",
+      "return_date": null,
+      "trip_type": "one_way",
+      "adults": 2,
+      "children": 0,
+      "infants": 0,
+      "cabin": null,
+      "airline": null,
+      "max_stops": null,
+      "currency": "PKR",
+      "legs": [
+        {
+          "origin": "LHE",
+          "destination": "DXB"
+        }
+      ]
+    },
+    "PRE_CONFIRM_SEARCH_CALLS": 0,
+    "SEMANTIC_PLAN_VALID": "YES"
+  },
+  "actions": [
+    {
+      "label": "Search Flights",
+      "href": "/#flight-search"
+    },
+    {
+      "label": "Browse Groups",
+      "href": "/groups"
+    },
+    {
+      "label": "Manage Booking",
+      "href": "/lookup-booking"
+    },
+    {
+      "label": "Talk to Support",
+      "action": "handoff"
+    }
+  ],
+  "recommendations": [],
+  "state": "AI_ACTIVE",
+  "checks": {
+    "route_lhe_dxb": true,
+    "adults_2": true,
+    "confirmation": true,
+    "search_before_confirmation": false,
+    "pii_first": false
+  },
+  "full_meta_keys": [
+    "AI_FLIGHT_SEARCH_READ_CALLS",
+    "AI_GROUP_SEARCH_READ_CALLS",
+    "COMPOSER_LATENCY_MS",
+    "CONFIRMATION_BEFORE_SEARCH",
+    "CONFIRMATION_REQUIRED",
+    "CONFIRMATION_SNAPSHOT",
+    "EXPLICIT_ROUTE_PRECEDENCE",
+    "FINAL_RESPONSE_SOURCE",
+    "LOCAL_LLM_REQUIRED_FOR_CORE",
+    "MODEL_CALLS",
+    "MODEL_CAN_AUTHORIZE_MUTATION",
+    "MODEL_ID",
+    "PRE_CONFIRM_SEARCH_CALLS",
+    "QWEN_SEMANTIC_VALID",
+    "SEMANTIC_BRAIN_CALLED",
+    "SEMANTIC_BRAIN_FALLBACK",
+    "SEMANTIC_BRAIN_VALID",
+    "SEMANTIC_DOMAIN",
+    "SEMANTIC_INTENT",
+    "SEMANTIC_LATENCY_MS",
+    "SEMANTIC_PLAN_VALID",
+    "SERVER_OPERATION",
+    "STALE_ROUTE_CONTAMINATION",
+    "TOOL_EXECUTED",
+    "TOTAL_MODEL_LATENCY_MS",
+    "confirmation_required",
+    "confirmation_type"
+  ]
+}

@@ -1,0 +1,69 @@
+{
+    "http_status": 200,
+    "latency_ms": 6283.6,
+    "conversation_id": "6e6aef48-b47a-4f98-bd3e-6448afebf4e7",
+    "message": "Just to confirm: LHE to DXB, one-way, 2026-11-05, 1 adult. Shall I search?",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+        "SEMANTIC_BRAIN_CALLED": "YES",
+        "SEMANTIC_BRAIN_VALID": "YES",
+        "SEMANTIC_BRAIN_FALLBACK": "NO",
+        "MODEL_ID": "local",
+        "MODEL_CALLS": 1,
+        "SEMANTIC_LATENCY_MS": 6221,
+        "COMPOSER_LATENCY_MS": 0,
+        "TOTAL_MODEL_LATENCY_MS": 6221,
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "SEMANTIC_INTENT": "lookup",
+        "SERVER_OPERATION": "prepare_search",
+        "SEMANTIC_DOMAIN": "travel",
+        "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+        "STALE_ROUTE_CONTAMINATION": 0,
+        "QWEN_SEMANTIC_VALID": "YES",
+        "TOOL_EXECUTED": "NONE",
+        "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+        "CONFIRMATION_REQUIRED": true,
+        "confirmation_required": true,
+        "confirmation_type": "flight_search",
+        "CONFIRMATION_BEFORE_SEARCH": true,
+        "CONFIRMATION_SNAPSHOT": {
+            "origin": "LHE",
+            "destination": "DXB",
+            "departure_date": "2026-11-05",
+            "return_date": null,
+            "trip_type": "one_way",
+            "adults": 1,
+            "children": 0,
+            "infants": 0,
+            "cabin": null,
+            "airline": "EK",
+            "max_stops": null,
+            "currency": "PKR",
+            "legs": null
+        },
+        "PRE_CONFIRM_SEARCH_CALLS": 0,
+        "SEMANTIC_PLAN_VALID": "YES"
+    },
+    "actions": [
+        {
+            "label": "Search Flights",
+            "href": "\/#flight-search"
+        },
+        {
+            "label": "Browse Groups",
+            "href": "\/groups"
+        },
+        {
+            "label": "Manage Booking",
+            "href": "\/lookup-booking"
+        },
+        {
+            "label": "Talk to Support",
+            "action": "handoff"
+        }
+    ],
+    "state": "AI_ACTIVE",
+    "mode": "in_process_orchestrator"
+}
