@@ -177,6 +177,15 @@ final class SemanticBrain
         }
 
         return match (true) {
+            // Hard safety: deterministic only — never Qwen/composer generation.
+            $serverOpen === 'HIGH_RISK' => $this->highRiskDeterministic(
+                $message,
+                $meta,
+                $calls,
+                $semanticLatency,
+                $brand,
+                $capabilities,
+            ),
             // Explicit user booking text only — Qwen domain=booking / operation=lookup cannot invent booking flow.
             $this->messageWantsBookingLookup($message) => [
                 'kind' => 'booking_lookup',
@@ -187,7 +196,7 @@ final class SemanticBrain
                 'kind' => 'handoff',
                 'meta' => $meta,
             ],
-            // Server live-data / high-risk gates outrank every Qwen label.
+            // Server live-data gates outrank every Qwen label.
             $serverOpen === 'CURRENT_UNVERIFIED' => $this->currentUnverified(
                 $conversation,
                 $message,
@@ -196,16 +205,6 @@ final class SemanticBrain
                 $calls,
                 $semanticLatency,
                 $composerLatency
-            ),
-            $serverOpen === 'HIGH_RISK' => $this->generalAnswer(
-                $conversation,
-                $message,
-                $plan,
-                $meta,
-                $calls,
-                $semanticLatency,
-                $brand,
-                $capabilities,
             ),
             // Server general/casual/out-of-domain outranks Qwen booking/support/current mislabels.
             in_array($serverOpen, ['GENERAL_KNOWLEDGE', 'CASUAL_CONVERSATION', 'OUT_OF_DOMAIN_SAFE'], true) => $this->generalAnswer(
@@ -422,6 +421,51 @@ final class SemanticBrain
     }
 
     /**
+     * HIGH_RISK: deterministic OpenDomainResponseService only — never Qwen open-domain or composer.
+     *
+     * @param  list<string>  $capabilities
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    private function highRiskDeterministic(
+        string $message,
+        array $meta,
+        int $calls,
+        int $semanticLatency,
+        string $brand,
+        array $capabilities,
+    ): array {
+        $structured = $this->openDomain->fallbackForCategory($message, 'HIGH_RISK', $capabilities, $brand);
+        $body = is_array($structured) && filled($structured['message'] ?? null)
+            ? (string) $structured['message']
+            : "I'm not the right place for medical, legal, or investment advice. For emergencies, contact local emergency services or a qualified professional. If you have a travel question, I'm here for that.";
+
+        $meta = array_merge($meta, is_array($structured['meta'] ?? null) ? $structured['meta'] : []);
+        $meta['MODEL_CALLS'] = $calls;
+        $meta['SEMANTIC_LATENCY_MS'] = $semanticLatency;
+        $meta['OPEN_DOMAIN_LATENCY_MS'] = 0;
+        $meta['COMPOSER_LATENCY_MS'] = 0;
+        $meta['TOTAL_MODEL_LATENCY_MS'] = $semanticLatency;
+        $meta['FINAL_RESPONSE_SOURCE'] = 'DETERMINISTIC_HIGH_RISK';
+        $meta['OPEN_DOMAIN_FALLBACK'] = 'YES';
+        $meta['OPEN_DOMAIN_ATTEMPTED'] = 'NO';
+        $meta['OPEN_DOMAIN_ACCEPTED'] = 'NO';
+        $meta['LLM_SYNTHESIS'] = 'NO';
+        $meta['open_domain_category'] = 'HIGH_RISK';
+        $meta['TOOL_EXECUTED'] = 'NONE';
+        $meta['AI_FLIGHT_SEARCH_READ_CALLS'] = 0;
+        $meta['AI_GROUP_SEARCH_READ_CALLS'] = 0;
+        $meta['MODEL_CAN_AUTHORIZE_MUTATION'] = 'NO';
+
+        return [
+            'kind' => 'answer',
+            'status' => 'ok',
+            'message' => $body,
+            'meta' => $meta,
+        ];
+    }
+
+    /**
      * Harmless general/casual answers: Qwen open-domain primary; OpenDomainResponseService fallback only.
      * Does not use SemanticResponseComposer as a knowledge generator (composer remains OFF).
      *
@@ -441,6 +485,18 @@ final class SemanticBrain
     ): array {
         $category = $this->intentRouter->classifyOpenDomain($message)
             ?? (in_array($plan->domain, ['casual'], true) ? 'CASUAL_CONVERSATION' : 'GENERAL_KNOWLEDGE');
+
+        // Defense in depth: HIGH_RISK must never reach tryOpenDomainRespond.
+        if ($category === 'HIGH_RISK') {
+            return $this->highRiskDeterministic(
+                $message,
+                $meta,
+                $calls,
+                $semanticLatency,
+                $brand,
+                $capabilities,
+            );
+        }
 
         // Never answer live/current through the general path.
         if ($category === 'CURRENT_UNVERIFIED') {
