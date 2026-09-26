@@ -1,0 +1,41 @@
+{
+    "latency_ms": 4853.1,
+    "message": "I'm not the right place for medical, legal, or investment advice. For emergencies, contact local emergency services or a qualified professional. If you have a travel question, I'm here for that.",
+    "meta": {
+        "SEMANTIC_BRAIN_CALLED": "YES",
+        "SEMANTIC_BRAIN_VALID": "YES",
+        "SEMANTIC_BRAIN_FALLBACK": "NO",
+        "MODEL_ID": "local",
+        "MODEL_CALLS": 1,
+        "SEMANTIC_LATENCY_MS": 4844,
+        "COMPOSER_LATENCY_MS": 0,
+        "TOTAL_MODEL_LATENCY_MS": 4844,
+        "FINAL_RESPONSE_SOURCE": "DETERMINISTIC_HIGH_RISK",
+        "SEMANTIC_INTENT": "human",
+        "SERVER_OPERATION": "handoff",
+        "SEMANTIC_DOMAIN": "support",
+        "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+        "STALE_ROUTE_CONTAMINATION": 0,
+        "QWEN_SEMANTIC_VALID": "YES",
+        "TOOL_EXECUTED": "NONE",
+        "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+        "SERVER_OPEN_DOMAIN_CATEGORY": "HIGH_RISK",
+        "QWEN_DOMAIN": "support",
+        "QWEN_OPERATION": "handoff",
+        "SERVER_OVERRIDES_QWEN_OPEN_DOMAIN": "YES",
+        "open_domain_category": "HIGH_RISK",
+        "ANSWER_GROUNDED": "N\/A",
+        "LLM_SYNTHESIS": "NO",
+        "OPEN_DOMAIN_FALLBACK": "YES",
+        "SMART_REDIRECT": "YES",
+        "OPEN_DOMAIN_LATENCY_MS": 0,
+        "OPEN_DOMAIN_ATTEMPTED": "NO",
+        "OPEN_DOMAIN_ACCEPTED": "NO",
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0
+    },
+    "kind": "answer",
+    "checks": {
+        "source": true
+    }
+}
