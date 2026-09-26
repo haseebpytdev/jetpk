@@ -49,6 +49,46 @@ final class SemanticBrain
         array $baseMeta,
         array $context,
     ): ?array {
+        $brand = is_string($context['brand'] ?? null) ? (string) $context['brand'] : 'JetPakistan';
+        $capabilities = is_array($context['capabilities'] ?? null)
+            ? array_values(array_filter($context['capabilities'], static fn ($c): bool => is_string($c) && $c !== ''))
+            : [];
+
+        // CQ42-R2: server-classified plain open-domain bypasses the travel semantic planner
+        // (one Qwen call). Does not bypass booking/handoff/HIGH_RISK/CURRENT/travel.
+        $serverOpenEarly = $this->intentRouter->classifyOpenDomain($message);
+        if (
+            in_array($serverOpenEarly, ['GENERAL_KNOWLEDGE', 'CASUAL_CONVERSATION', 'OUT_OF_DOMAIN_SAFE'], true)
+            && ! $this->messageWantsBookingLookup($message)
+            && ! $this->messageWantsHandoff($message)
+        ) {
+            $meta = array_merge($baseMeta, [
+                'SEMANTIC_BRAIN_CALLED' => 'NO',
+                'SEMANTIC_PLANNER_BYPASSED' => 'YES',
+                'SEMANTIC_BRAIN_VALID' => 'N/A',
+                'SEMANTIC_BRAIN_FALLBACK' => 'NO',
+                'MODEL_ID' => (string) config('ota.ai_assistant.model_id', 'local'),
+                'MODEL_CALLS' => 0,
+                'SEMANTIC_LATENCY_MS' => 0,
+                'COMPOSER_LATENCY_MS' => 0,
+                'TOTAL_MODEL_LATENCY_MS' => 0,
+                'SERVER_OPEN_DOMAIN_CATEGORY' => $serverOpenEarly,
+                'TOOL_EXECUTED' => 'NONE',
+                'MODEL_CAN_AUTHORIZE_MUTATION' => 'NO',
+            ]);
+
+            return $this->generalAnswer(
+                $conversation,
+                $message,
+                null,
+                $meta,
+                0,
+                0,
+                $brand,
+                $capabilities,
+            );
+        }
+
         $planResult = $this->planner->plan($conversation, $message, $context);
         $calls = (int) ($planResult['calls'] ?? 0);
         $semanticLatency = (int) ($planResult['latency_ms'] ?? 0);
@@ -103,6 +143,17 @@ final class SemanticBrain
             $telemetry['EXPLICIT_ROUTE_PRECEDENCE'] = 'PASS';
         }
         $telemetry['STALE_ROUTE_CONTAMINATION'] = (int) $validated['stale_route_contamination'];
+        if (! empty($validated['false_open_jaw_demoted'])) {
+            $telemetry['FALSE_OPEN_JAW'] = 0;
+            $telemetry['MODEL_CANNOT_INVENT_SECOND_LEG'] = 'PASS';
+            $telemetry['FALSE_OPEN_JAW_DEMOTED'] = 'YES';
+        }
+        if (! empty($validated['server_single_route'])) {
+            $telemetry['SERVER_SINGLE_ROUTE'] = (string) $validated['server_single_route'];
+        }
+        if (! empty($validated['explicit_return_trip_cue'])) {
+            $telemetry['EXPLICIT_RETURN_TRIP_CUE'] = 'YES';
+        }
 
         $intent = $validated['intent'];
         $missing = $validated['missing'];
@@ -113,9 +164,29 @@ final class SemanticBrain
             if (in_array($intent->tripType, ['open_jaw', 'multi_city'], true) && is_array($intent->legs)) {
                 $patched['legs'] = $intent->legs;
                 $patched['trip_type'] = $intent->tripType;
+            } else {
+                // Clear invented multi-leg contamination from prior open-jaw / Qwen reciprocal legs.
+                unset($patched['legs']);
+                if ($intent->tripType) {
+                    $patched['trip_type'] = $intent->tripType;
+                }
             }
             $conversation->shopping_state = $patched;
             $conversation->save();
+
+            $pending = $this->flightConfirmation->pendingSnapshot($conversation);
+            if (
+                is_array($pending)
+                && $intent->origin
+                && $intent->destination
+                && (
+                    strtoupper((string) ($pending['origin'] ?? '')) !== strtoupper($intent->origin)
+                    || strtoupper((string) ($pending['destination'] ?? '')) !== strtoupper($intent->destination)
+                )
+            ) {
+                $this->flightConfirmation->clearPending($conversation);
+                $telemetry['OLD_CONFIRMATION_INVALIDATED'] = 'YES';
+            }
         }
 
         $meta = array_merge($baseMeta, $telemetry, [
@@ -329,7 +400,13 @@ final class SemanticBrain
             ];
         }
 
-        if ($missing !== [] || $plan->operation === 'clarify' || ! $intent->isSearchable() || $intent->departDate === null) {
+        if (
+            $missing !== []
+            || $plan->operation === 'clarify'
+            || ! $intent->isSearchable()
+            || $intent->departDate === null
+            || ($tripType === 'return' && $intent->returnDate === null)
+        ) {
             $ask = $this->clarifyTravelMessage($missing, $intent);
             $composed = $this->composer->compose($conversation, $message, $plan, [
                 'origin' => $intent->origin,
@@ -344,7 +421,10 @@ final class SemanticBrain
                 'status' => 'clarify',
                 'message' => (string) $composed['message'],
                 'intent' => $intent->toArray(),
-                'meta' => array_merge($meta, ['AI_FLIGHT_SEARCH_READ_CALLS' => 0]),
+                'meta' => array_merge($meta, [
+                    'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+                    'RETURN_DATE_REQUIRED' => ($tripType === 'return' && $intent->returnDate === null) ? 'YES' : 'NO',
+                ]),
             ];
         }
 
@@ -476,7 +556,7 @@ final class SemanticBrain
     private function generalAnswer(
         AiConversation $conversation,
         string $message,
-        SemanticPlan $plan,
+        ?SemanticPlan $plan,
         array $meta,
         int $calls,
         int $semanticLatency,
@@ -484,7 +564,7 @@ final class SemanticBrain
         array $capabilities = [],
     ): array {
         $category = $this->intentRouter->classifyOpenDomain($message)
-            ?? (in_array($plan->domain, ['casual'], true) ? 'CASUAL_CONVERSATION' : 'GENERAL_KNOWLEDGE');
+            ?? (($plan !== null && in_array($plan->domain, ['casual'], true)) ? 'CASUAL_CONVERSATION' : 'GENERAL_KNOWLEDGE');
 
         // Defense in depth: HIGH_RISK must never reach tryOpenDomainRespond.
         if ($category === 'HIGH_RISK') {
@@ -500,6 +580,14 @@ final class SemanticBrain
 
         // Never answer live/current through the general path.
         if ($category === 'CURRENT_UNVERIFIED') {
+            if ($plan === null) {
+                $meta['SEMANTIC_BRAIN_FALLBACK'] = 'YES';
+                $meta['SEMANTIC_FALLBACK_REASON'] = 'current_without_plan';
+                $meta['FINAL_RESPONSE_SOURCE'] = 'SEMANTIC_FALLBACK';
+
+                return ['kind' => 'fallback', 'meta' => $meta];
+            }
+
             return $this->currentUnverified(
                 $conversation,
                 $message,
@@ -527,10 +615,11 @@ final class SemanticBrain
             $openCalls = max(0, (int) ($llm['calls'] ?? 0));
         }
 
-        if (is_array($llm) && filled($llm['message'] ?? null)) {
+        if (is_array($llm) && filled($llm['message'] ?? null) && ($llm['meta']['OPEN_DOMAIN_FALLBACK'] ?? 'NO') === 'NO') {
             $body = (string) $llm['message'];
             $meta = array_merge($meta, is_array($llm['meta'] ?? null) ? $llm['meta'] : []);
             $meta['MODEL_CALLS'] = $calls + $openCalls;
+            $meta['GENERAL_MODEL_CALLS'] = $calls + $openCalls;
             $meta['SEMANTIC_LATENCY_MS'] = $semanticLatency;
             $meta['OPEN_DOMAIN_LATENCY_MS'] = $openLatency;
             $meta['COMPOSER_LATENCY_MS'] = 0;
@@ -546,6 +635,11 @@ final class SemanticBrain
                 'message' => $body,
                 'meta' => $meta,
             ];
+        }
+
+        // Provider attempted but rejected — keep reject reason; still try structured fallback body.
+        if (is_array($llm)) {
+            $meta = array_merge($meta, is_array($llm['meta'] ?? null) ? $llm['meta'] : []);
         }
 
         // Resilience only — never primary encyclopedia. Deterministic fallback is not a model call,
@@ -667,13 +761,21 @@ final class SemanticBrain
      */
     private function clarifyTravelMessage(array $missing, TravelIntent $intent): string
     {
-        if (in_array('departure_date', $missing, true) || $intent->departDate === null) {
+        // Prefer resolved intent state over stale advisory missing[] entries.
+        if ($intent->departDate === null) {
             $route = trim(($intent->origin ?? '').' to '.($intent->destination ?? ''));
             $cabin = $intent->cabin ? ' in '.str_replace('_', ' ', $intent->cabin) : '';
 
             return 'What departure date should I use'
                 .($route !== ' to ' ? " for {$route}" : '')
                 .$cabin
+                .'?';
+        }
+        if ($intent->tripType === 'return' && $intent->returnDate === null) {
+            $route = trim(($intent->origin ?? '').' to '.($intent->destination ?? ''));
+
+            return 'What return date should I use'
+                .($route !== ' to ' ? " for {$route}" : '')
                 .'?';
         }
         if ($missing !== []) {

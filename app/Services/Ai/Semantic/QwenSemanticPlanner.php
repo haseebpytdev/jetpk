@@ -184,6 +184,7 @@ Example support:
 Rules:
 - Prefer CURRENT EXPLICIT user turn over older conversation state.
 - Open-jaw / multi-city: trip_type open_jaw or multi_city with legs; never collapse to one O/D.
+- "X se Y wapis/wapas" (or "X to Y return" without a second sector) is ONE route X→Y — NOT open-jaw. Never invent a reciprocal Y→X second leg.
 - Do not invent IATA codes, fares, weather numbers, or live schedules.
 - Do not authorize tools or mutations.
 - Put cities/dates inside travel.origin travel.destination travel.legs — not dotted keys.

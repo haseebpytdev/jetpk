@@ -1,0 +1,107 @@
+{
+    "latency_ms": 5643.7,
+    "conversation_id": "00dfff30-50d6-4e1c-bbcd-dd2aa09cd690",
+    "message": "Just to confirm: LHE to DXB, one-way, 2026-09-27, 2 adults. Shall I search?",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+        "SEMANTIC_BRAIN_CALLED": "YES",
+        "SEMANTIC_BRAIN_VALID": "NO",
+        "SEMANTIC_BRAIN_FALLBACK": "YES",
+        "MODEL_ID": "local",
+        "MODEL_CALLS": 1,
+        "SEMANTIC_LATENCY_MS": 5599,
+        "COMPOSER_LATENCY_MS": 0,
+        "TOTAL_MODEL_LATENCY_MS": 5599,
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC_FALLBACK",
+        "SEMANTIC_INTENT": "open_jaw",
+        "SERVER_OPERATION": "prepare_search",
+        "SEMANTIC_DOMAIN": "travel",
+        "SEMANTIC_FALLBACK_REASON": "invalid_plan",
+        "validator_rejects": [
+            "open_jaw_requires_two_legs"
+        ],
+        "LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK": 0,
+        "llm_bypassed": true,
+        "provenance": {
+            "intent": "EXPLICIT_USER",
+            "origin": "RESOLVED_MASTER_DATA",
+            "destination": "RESOLVED_MASTER_DATA",
+            "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+            "STALE_ROUTE_CONTAMINATION": "0",
+            "depart_date": "DETERMINISTIC_NORMALIZATION",
+            "adults": "EXPLICIT_USER"
+        },
+        "intent": {
+            "intent": "flight_search",
+            "origin": "LHE",
+            "destination": "DXB",
+            "depart_date": "2026-09-27",
+            "return_date": null,
+            "adults": 2,
+            "children": 0,
+            "infants": 0,
+            "cabin": null,
+            "airline": null,
+            "max_stops": null,
+            "budget": null,
+            "time_preference": null,
+            "currency": "PKR",
+            "mode": "STRUCTURED_FALLBACK",
+            "trip_type": "one_way",
+            "legs": null
+        },
+        "clarification_required": false,
+        "clarification_message": null,
+        "clarification_options": [],
+        "ranking_preference": null,
+        "language": "ru",
+        "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+        "STALE_ROUTE_CONTAMINATION": "0",
+        "CONFIRMATION_REQUIRED": true,
+        "confirmation_required": true,
+        "confirmation_type": "flight_search",
+        "CONFIRMATION_BEFORE_SEARCH": true,
+        "CONFIRMATION_SNAPSHOT": {
+            "origin": "LHE",
+            "destination": "DXB",
+            "departure_date": "2026-09-27",
+            "return_date": null,
+            "trip_type": "one_way",
+            "adults": 2,
+            "children": 0,
+            "infants": 0,
+            "cabin": null,
+            "airline": null,
+            "max_stops": null,
+            "currency": "PKR",
+            "legs": null
+        }
+    },
+    "state": "AI_ACTIVE",
+    "actions": [
+        {
+            "label": "Search Flights",
+            "href": "\/#flight-search"
+        },
+        {
+            "label": "Browse Groups",
+            "href": "\/groups"
+        },
+        {
+            "label": "Manage Booking",
+            "href": "\/lookup-booking"
+        },
+        {
+            "label": "Talk to Support",
+            "action": "handoff"
+        }
+    ],
+    "status": "confirm",
+    "mode": "STRUCTURED_FALLBACK",
+    "checks": {
+        "no_search_preconfirm": true,
+        "legacy0": true
+    }
+}

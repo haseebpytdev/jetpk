@@ -114,6 +114,12 @@ final class AiConversationalAgent
             return null;
         }
 
+        $plainTextCategory = in_array($category, [
+            'GENERAL_KNOWLEDGE',
+            'CASUAL_CONVERSATION',
+            'OUT_OF_DOMAIN_SAFE',
+        ], true);
+
         $payload = [
             'task' => 'open_domain_respond',
             'category' => $category,
@@ -133,9 +139,10 @@ final class AiConversationalAgent
                 'never_refuse_solely_because_non_travel' => $category === 'GENERAL_KNOWLEDGE',
                 'no_live_unverified_facts' => $category === 'CURRENT_UNVERIFIED',
                 'current_unverified_message_must_be_limitation_only' => $category === 'CURRENT_UNVERIFIED',
+                'response_format' => $plainTextCategory ? 'plain_text' : 'json',
                 'prefer_schema' => $category === 'CURRENT_UNVERIFIED'
                     ? ['message' => 'string', 'can_verify_live' => false]
-                    : ['message' => 'string'],
+                    : ($plainTextCategory ? null : ['message' => 'string']),
             ],
         ];
 
@@ -149,6 +156,7 @@ final class AiConversationalAgent
             'OPEN_DOMAIN_LATENCY_MS' => $latency,
             'open_domain_category' => $category,
             'OPEN_DOMAIN_ATTEMPTED' => 'YES',
+            'OPEN_DOMAIN_RESPONSE_FORMAT' => $plainTextCategory ? 'plain_text' : 'json',
         ];
 
         if (! ($result['ok'] ?? false)) {
@@ -180,13 +188,40 @@ final class AiConversationalAgent
             ];
         }
 
-        $parsed = $this->decodeJsonObject($content);
-        $jsonValid = is_array($parsed);
-        $reply = $jsonValid
-            ? trim((string) ($parsed['message'] ?? ''))
-            : (string) ($this->extractMessage($content) ?? '');
+        $parsed = null;
+        $jsonValid = false;
+        if ($plainTextCategory) {
+            $reply = (string) ($this->extractPlainTextAnswer($content) ?? '');
+        } else {
+            $parsed = $this->decodeJsonObject($content);
+            $jsonValid = is_array($parsed);
+            $reply = $jsonValid
+                ? trim((string) ($parsed['message'] ?? ''))
+                : (string) ($this->extractMessage($content) ?? '');
+        }
 
         if ($reply === '') {
+            $rejectMeta = [
+                'OPEN_DOMAIN_FALLBACK' => 'YES',
+                'OPEN_DOMAIN_REJECT_REASON' => $plainTextCategory
+                    ? 'empty_message'
+                    : ($jsonValid ? 'empty_message' : 'invalid_json'),
+                'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
+            ];
+            if (! $plainTextCategory && ! $jsonValid) {
+                $rejectMeta = array_merge($rejectMeta, $this->sanitizedOpenDomainDiagnostics($content, $result));
+            }
+
+            return [
+                'mode' => null,
+                'message' => '',
+                'latency_ms' => $latency,
+                'calls' => 1,
+                'meta' => array_merge($meta, $attemptMeta, $rejectMeta),
+            ];
+        }
+
+        if ($this->looksLikeToolOrActionPayload($reply)) {
             return [
                 'mode' => null,
                 'message' => '',
@@ -194,7 +229,7 @@ final class AiConversationalAgent
                 'calls' => 1,
                 'meta' => array_merge($meta, $attemptMeta, [
                     'OPEN_DOMAIN_FALLBACK' => 'YES',
-                    'OPEN_DOMAIN_REJECT_REASON' => $jsonValid ? 'empty_message' : 'invalid_json',
+                    'OPEN_DOMAIN_REJECT_REASON' => 'tool_action_payload_rejected',
                     'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
                 ]),
             ];
@@ -564,7 +599,48 @@ final class AiConversationalAgent
             return trim((string) File::get($path));
         }
 
-        return 'Return JSON only: {"message":"..."}';
+        return 'For GENERAL_KNOWLEDGE return plain text. For CURRENT_UNVERIFIED return JSON {"message":"...","can_verify_live":false}.';
+    }
+
+    /**
+     * Accept plain prose for GENERAL_KNOWLEDGE / casual / out-of-domain.
+     * If the model still wraps JSON, prefer the message field; otherwise treat
+     * prose (including formerly-rejected `{`-prefixed malformed blobs after strip) as text.
+     */
+    private function extractPlainTextAnswer(string $content): ?string
+    {
+        $trimmed = trim($content);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        // Optional markdown fence
+        if (preg_match('/^```(?:json|text|plaintext)?\s*([\s\S]*?)\s*```$/u', $trimmed, $m) === 1) {
+            $trimmed = trim($m[1]);
+        }
+
+        $parsed = $this->decodeJsonObject($trimmed);
+        if (is_array($parsed)) {
+            $reply = trim((string) ($parsed['message'] ?? ''));
+            if ($reply !== '') {
+                return $reply;
+            }
+        }
+
+        // Malformed JSON-looking output: try to pull a "message" string without full decode.
+        if (preg_match('/"message"\s*:\s*"((?:\\\\.|[^"\\\\])*)"/u', $trimmed, $m) === 1) {
+            $pulled = trim(stripcslashes($m[1]));
+            if ($pulled !== '') {
+                return $pulled;
+            }
+        }
+
+        // Do not treat unparseable `{...` blobs as plain answers (avoids invalid_json masquerading).
+        if (str_starts_with($trimmed, '{')) {
+            return null;
+        }
+
+        return $trimmed;
     }
 
     private function extractMessage(string $content): ?string
@@ -582,6 +658,50 @@ final class AiConversationalAgent
         }
 
         return $trimmed;
+    }
+
+    /**
+     * Reject model output that looks like tool/action authority rather than an answer.
+     */
+    private function looksLikeToolOrActionPayload(string $reply): bool
+    {
+        $lower = mb_strtolower(trim($reply));
+        if ($lower === '') {
+            return false;
+        }
+
+        if (preg_match('/^\s*\{[\s\S]*"(?:tool|tools|action|actions|function|functions|execute_now|authorize)"\s*:/u', $reply) === 1) {
+            return true;
+        }
+
+        return preg_match(
+            '/\b(execute_now|authorize_mutation|supplier_credentials|call_tool|tool_call)\b/u',
+            $lower
+        ) === 1;
+    }
+
+    /**
+     * Sanitized structural diagnostics for failed CURRENT/json open-domain parses (no raw body).
+     *
+     * @param  array<string, mixed>  $result
+     * @return array<string, mixed>
+     */
+    private function sanitizedOpenDomainDiagnostics(string $content, array $result): array
+    {
+        $trimmed = trim($content);
+        $first = $trimmed !== '' ? mb_substr(ltrim($trimmed), 0, 1) : '';
+        $last = $trimmed !== '' ? mb_substr(rtrim($trimmed), -1) : '';
+
+        return [
+            'RAW_OUTPUT_LENGTH' => mb_strlen($content),
+            'RAW_OUTPUT_FIRST_NONSPACE_CHAR' => $first,
+            'RAW_OUTPUT_LAST_NONSPACE_CHAR' => $last,
+            'HAS_JSON_FENCE' => preg_match('/^```/u', $trimmed) === 1 ? 'YES' : 'NO',
+            'HAS_MESSAGE_KEY' => str_contains($content, '"message"') ? 'YES' : 'NO',
+            'JSON_DECODE_ERROR_CLASS' => 'invalid_json',
+            'FINISH_REASON_IF_PROVIDER_EXPOSES_IT' => $result['finish_reason'] ?? $result['meta']['finish_reason'] ?? null,
+            'OUTPUT_TRUNCATED_IF_KNOWN' => ($result['truncated'] ?? $result['meta']['truncated'] ?? null) ? 'YES' : 'NO',
+        ];
     }
 
     /**

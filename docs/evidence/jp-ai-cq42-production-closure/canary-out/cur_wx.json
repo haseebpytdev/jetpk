@@ -1,0 +1,65 @@
+{
+    "latency_ms": 4594.9,
+    "conversation_id": "85acc818-06dc-4c9c-b323-ff967f21bbb6",
+    "message": "I don't have an approved live weather source available here, so I can't verify the current conditions. I can still help with flights or JetPakistan travel questions.",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+        "SEMANTIC_BRAIN_CALLED": "YES",
+        "SEMANTIC_BRAIN_VALID": "YES",
+        "SEMANTIC_BRAIN_FALLBACK": "NO",
+        "MODEL_ID": "local",
+        "MODEL_CALLS": 1,
+        "SEMANTIC_LATENCY_MS": 4531,
+        "COMPOSER_LATENCY_MS": 0,
+        "TOTAL_MODEL_LATENCY_MS": 4531,
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "SEMANTIC_INTENT": "weather",
+        "SERVER_OPERATION": "answer",
+        "SEMANTIC_DOMAIN": "current",
+        "STALE_ROUTE_CONTAMINATION": 0,
+        "QWEN_SEMANTIC_VALID": "YES",
+        "TOOL_EXECUTED": "NONE",
+        "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+        "SERVER_OPEN_DOMAIN_CATEGORY": "CURRENT_UNVERIFIED",
+        "QWEN_DOMAIN": "current",
+        "QWEN_OPERATION": "answer",
+        "open_domain_category": "CURRENT_UNVERIFIED",
+        "CURRENT_TOPIC": "weather",
+        "FLIGHT_STATE_CONTAMINATION": 0,
+        "HALLUCINATED_LIVE_FACT": "NO"
+    },
+    "state": "AI_ACTIVE",
+    "actions": [
+        {
+            "label": "Search Flights",
+            "href": "\/#flight-search"
+        },
+        {
+            "label": "Browse Groups",
+            "href": "\/groups"
+        },
+        {
+            "label": "Manage Booking",
+            "href": "\/lookup-booking"
+        },
+        {
+            "label": "Talk to Support",
+            "action": "handoff"
+        }
+    ],
+    "status": "ok",
+    "mode": "QWEN_SEMANTIC",
+    "server_classify": "CURRENT_UNVERIFIED",
+    "expected_topic": "weather",
+    "checks": {
+        "category_current": true,
+        "topic_ok": true,
+        "not_booking": true,
+        "not_handoff": true,
+        "no_fabricated_price": true,
+        "wording_ok": true,
+        "not_wrong_weather_label": true
+    }
+}

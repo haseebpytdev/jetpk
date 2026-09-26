@@ -1,0 +1,41 @@
+{
+    "latency_ms": 37.8,
+    "conversation_id": "59a518ef-af05-4379-84f3-45530cc3a1b1",
+    "message": "I'm not the right place for medical, legal, or investment advice. For emergencies, contact local emergency services or a qualified professional. If you have a travel question, I'm here for that.",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+        "open_domain_category": "HIGH_RISK",
+        "ANSWER_GROUNDED": "N\/A",
+        "LLM_SYNTHESIS": "FALLBACK_STRUCTURED",
+        "OPEN_DOMAIN_FALLBACK": "YES",
+        "SMART_REDIRECT": "YES"
+    },
+    "state": "AI_ACTIVE",
+    "actions": [
+        {
+            "label": "Search Flights",
+            "href": "\/#flight-search"
+        },
+        {
+            "label": "Browse Groups",
+            "href": "\/groups"
+        },
+        {
+            "label": "Manage Booking",
+            "href": "\/lookup-booking"
+        },
+        {
+            "label": "Talk to Support",
+            "action": "handoff"
+        }
+    ],
+    "status": "ok",
+    "mode": "STRUCTURED_FALLBACK",
+    "checks": {
+        "deterministic": true,
+        "not_qwen_open": true,
+        "no_open_attempt": true
+    }
+}

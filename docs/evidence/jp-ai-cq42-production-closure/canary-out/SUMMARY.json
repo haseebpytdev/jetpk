@@ -1,0 +1,21 @@
+{
+    "GENERAL_KNOWLEDGE": "PASS",
+    "gk_pass": 8,
+    "gk_total": 8,
+    "OPEN_DOMAIN_ATTEMPTS": 6,
+    "OPEN_DOMAIN_QWEN_SUCCESS": 1,
+    "OPEN_DOMAIN_FALLBACKS": 6,
+    "OPEN_DOMAIN_REJECTION_REASONS": [
+        "invalid_json",
+        "unknown"
+    ],
+    "OPEN_DOMAIN_ACCEPT_RATE": 0.167,
+    "SEMANTIC_P50_MS": 5771,
+    "SEMANTIC_P95_MS": 13368,
+    "OPEN_DOMAIN_P50_MS": 12368,
+    "OPEN_DOMAIN_P95_MS": 21159,
+    "TOTAL_P50_MS": 13368,
+    "TOTAL_P95_MS": 24139,
+    "TOTAL_MAX_MS": 24139,
+    "runtime_sha": "01dbe7cf5ba79280420d7b2274db6b2b3fb0f8e3"
+}

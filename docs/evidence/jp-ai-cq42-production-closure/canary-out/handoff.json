@@ -1,0 +1,37 @@
+{
+    "latency_ms": 28.5,
+    "conversation_id": "c3397787-c520-440f-a054-f692401a9937",
+    "message": "I have connected you with our support queue. A team member will reply in this chat. AI replies are paused. Tap Resume AI anytime to continue with the assistant.",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0
+    },
+    "state": "WAITING_FOR_HUMAN",
+    "actions": [
+        {
+            "label": "Resume AI",
+            "action": "resume_ai"
+        },
+        {
+            "label": "Search Flights",
+            "href": "\/#flight-search"
+        },
+        {
+            "label": "Browse Groups",
+            "href": "\/groups"
+        },
+        {
+            "label": "Manage Booking",
+            "href": "\/lookup-booking"
+        },
+        {
+            "label": "Talk to Support",
+            "action": "handoff"
+        }
+    ],
+    "status": "waiting_for_human",
+    "mode": "STRUCTURED_FALLBACK",
+    "checks": {
+        "handoff": true
+    }
+}

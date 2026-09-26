@@ -434,7 +434,9 @@ final class HybridTravelPipeline
     private function wantsHandoff(string $normalized, string $original): bool
     {
         return (bool) preg_match(
-            '/talk to (a )?(person|human)|speak to (a )?(person|human|support|agent)|need to speak to|human (support|agent)|agent please|live agent|real person|human please|staff please|talk to support|connect (me )?to (a )?(human|agent|support)|i need a human|handoff|insaan se baat|انسانی\s*سپورٹ|انسان سے بات/u',
+            '/talk to (a )?(person|human)|speak to (a )?(person|human|support|agent)|need to speak to|human (support|agent)|agent please|live agent|real person|human please|staff please|talk to support|connect (me )?to (a )?(human|agent|support)|i need a human|handoff|insaan se baat|انسانی\s*سپورٹ|انسان سے بات|'.
+            'someone on your (team|staff)|can someone .{0,40}\b(handle|help)\b|'.
+            'get me (a )?(human|agent|person)|transfer (me )?to (support|agent|human)/u',
             $normalized.' '.$original
         );
     }

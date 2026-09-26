@@ -1,0 +1,68 @@
+{
+    "latency_ms": 10778.2,
+    "conversation_id": "ac943ca5-d5d5-4ea8-8cde-67ea6ade2e84",
+    "message": "The sky is blue because of the way sunlight interacts with Earth's atmosphere. When sunlight hits the Earth's atmosphere, it scatters in different directions. Blue light scatters more than other colors, which is why the sky appears blue to the naked eye. This is a natural phenomenon that occurs due to the way light interacts with the atmosphere.",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+        "SEMANTIC_BRAIN_CALLED": "YES",
+        "SEMANTIC_BRAIN_VALID": "YES",
+        "SEMANTIC_BRAIN_FALLBACK": "NO",
+        "MODEL_ID": "local",
+        "MODEL_CALLS": 2,
+        "SEMANTIC_LATENCY_MS": 5771,
+        "COMPOSER_LATENCY_MS": 0,
+        "TOTAL_MODEL_LATENCY_MS": 10699,
+        "FINAL_RESPONSE_SOURCE": "QWEN_OPEN_DOMAIN",
+        "SEMANTIC_INTENT": "weather",
+        "SERVER_OPERATION": "answer",
+        "SEMANTIC_DOMAIN": "current",
+        "STALE_ROUTE_CONTAMINATION": 0,
+        "QWEN_SEMANTIC_VALID": "YES",
+        "TOOL_EXECUTED": "NONE",
+        "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+        "SERVER_OPEN_DOMAIN_CATEGORY": "GENERAL_KNOWLEDGE",
+        "QWEN_DOMAIN": "current",
+        "QWEN_OPERATION": "answer",
+        "SERVER_OVERRIDES_QWEN_OPEN_DOMAIN": "YES",
+        "OPEN_DOMAIN_LATENCY_MS": 4928,
+        "open_domain_category": "GENERAL_KNOWLEDGE",
+        "OPEN_DOMAIN_ATTEMPTED": "YES",
+        "LLM_SYNTHESIS": "YES",
+        "OPEN_DOMAIN_FALLBACK": "NO",
+        "OPEN_DOMAIN_REJECT_REASON": "accepted",
+        "OPEN_DOMAIN_ACCEPTED": "YES",
+        "ANSWER_GROUNDED": "MODEL_GENERAL",
+        "SMART_REDIRECT": "YES"
+    },
+    "state": "AI_ACTIVE",
+    "actions": [
+        {
+            "label": "Search Flights",
+            "href": "\/#flight-search"
+        },
+        {
+            "label": "Browse Groups",
+            "href": "\/groups"
+        },
+        {
+            "label": "Manage Booking",
+            "href": "\/lookup-booking"
+        },
+        {
+            "label": "Talk to Support",
+            "action": "handoff"
+        }
+    ],
+    "status": "ok",
+    "mode": "QWEN_SEMANTIC",
+    "server_classify": "GENERAL_KNOWLEDGE",
+    "checks": {
+        "useful": true,
+        "not_booking": true,
+        "not_handoff": true,
+        "not_current_refusal": true,
+        "qwen_ok": true
+    }
+}

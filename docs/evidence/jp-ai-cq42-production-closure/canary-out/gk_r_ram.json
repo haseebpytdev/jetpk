@@ -1,0 +1,39 @@
+{
+    "latency_ms": 34520.5,
+    "conversation_id": "a03a80a2-b022-48b6-945e-8cebd32b625c",
+    "message": "I couldn't produce a reliable general answer just now. Ask again, or I can help with JetPakistan flights and bookings.",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+        "SEMANTIC_BRAIN_CALLED": "YES",
+        "SEMANTIC_BRAIN_VALID": "NO",
+        "SEMANTIC_BRAIN_FALLBACK": "YES",
+        "MODEL_ID": "local",
+        "MODEL_CALLS": 1,
+        "SEMANTIC_LATENCY_MS": 22014,
+        "COMPOSER_LATENCY_MS": 0,
+        "TOTAL_MODEL_LATENCY_MS": 22014,
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC_FALLBACK",
+        "SEMANTIC_FALLBACK_REASON": "invalid_json",
+        "open_domain_category": "GENERAL_KNOWLEDGE",
+        "ANSWER_GROUNDED": "MODEL_GENERAL",
+        "LLM_SYNTHESIS": "FALLBACK_STRUCTURED",
+        "OPEN_DOMAIN_FALLBACK": "YES",
+        "SMART_REDIRECT": "YES"
+    },
+    "state": "AI_ACTIVE",
+    "mode": "STRUCTURED_FALLBACK",
+    "checks": {
+        "actual_answer": false,
+        "qwen_accept": false,
+        "reject": null,
+        "src": "SEMANTIC_FALLBACK",
+        "od_attempted": null,
+        "SERVER_OPEN_DOMAIN_CATEGORY": null,
+        "SEMANTIC_LATENCY_MS": 22014,
+        "OPEN_DOMAIN_LATENCY_MS": null,
+        "TOTAL_MODEL_LATENCY_MS": 22014,
+        "MODEL_CALLS": 1
+    }
+}
