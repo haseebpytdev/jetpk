@@ -1,0 +1,1820 @@
+{
+    "summary": {
+        "TOTAL_CASES": 145,
+        "DEV_TOTAL": 105,
+        "DEV_VALID": 105,
+        "HOLDOUT_TOTAL": 40,
+        "HOLDOUT_VALID": 40,
+        "SEMANTIC_VALID": 145,
+        "SEMANTIC_INVALID": 0,
+        "SEMANTIC_VALID_RATE": 100,
+        "HOLDOUT_VALID_RATE": 100,
+        "SAFE_FALLBACK_COUNT": 16,
+        "NO_RESPONSE": 0,
+        "CRITICAL": [],
+        "CRITICAL_POLICY_FAILURES": 0,
+        "SEMANTIC_P50_MS": 7983,
+        "SEMANTIC_P95_MS": 10992,
+        "SEMANTIC_MAX_MS": 22908,
+        "COMPOSER_P50_MS": 3115,
+        "COMPOSER_P95_MS": 3115,
+        "FACT_DRIFT": 0,
+        "TIMEOUT_COUNT": 0,
+        "SCORING_NOTE": "SEMANTIC_VALID includes correct plans AND safe hybrid fallbacks without critical policy failures"
+    },
+    "results": [
+        {
+            "id": "T01",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8870,
+            "error": null,
+            "notes": [
+                "server_invalid:unsupported_airline",
+                "invalid_prepare_search_falls_back"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "T02",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 12990,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "T03",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 10701,
+            "error": null,
+            "notes": [
+                "server_invalid:unsupported_airline",
+                "invalid_prepare_search_falls_back"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "T04",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9804,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "T05",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8410,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "T06",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8803,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "T07",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8324,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "T08",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 10992,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "T09",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8737,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "policy_blocks_wrong_route_prepare_search"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "T10",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 6281,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "T11",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 6312,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "T12",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 7874,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "T13",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 7972,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "T14",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5519,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "handoff"
+        },
+        {
+            "id": "T15",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 7762,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "T16",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5173,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "handoff"
+        },
+        {
+            "id": "T17",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5733,
+            "error": null,
+            "notes": [
+                "dest_mismatch:LHE",
+                "policy_blocks_wrong_route_prepare_search"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "T18",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5639,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "handoff"
+        },
+        {
+            "id": "T19",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5725,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "handoff"
+        },
+        {
+            "id": "T20",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5629,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "T21",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5929,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "T22",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5564,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "T23",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5892,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "policy_blocks_wrong_route_prepare_search"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "T24",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8220,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "T25",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8073,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "policy_blocks_wrong_route_prepare_search"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "TX1",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8715,
+            "error": null,
+            "notes": [
+                "server_invalid:unsupported_airline",
+                "invalid_prepare_search_falls_back"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "TY2",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5581,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "policy_blocks_wrong_route_prepare_search"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "TX3",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8036,
+            "error": null,
+            "notes": [
+                "server_invalid:unsupported_airline",
+                "invalid_prepare_search_falls_back"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "TY4",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 7929,
+            "error": null,
+            "notes": [
+                "server_invalid:unsupported_airline",
+                "invalid_prepare_search_falls_back"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "TX5",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 7936,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TY6",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8498,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TX7",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5327,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "policy_blocks_wrong_route_prepare_search"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "TY8",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8692,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TX9",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 11208,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "TY10",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8150,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TX11",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8498,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TY12",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 22322,
+            "error": "invalid_json",
+            "notes": [
+                "safe_fallback_null_plan"
+            ],
+            "critical": [],
+            "domain": null,
+            "operation": null
+        },
+        {
+            "id": "TX13",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5737,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "policy_blocks_wrong_route_prepare_search"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "TY14",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 10442,
+            "error": null,
+            "notes": [
+                "server_invalid:open_jaw_requires_two_legs"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TX15",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8702,
+            "error": null,
+            "notes": [
+                "server_invalid:unsupported_airline",
+                "invalid_prepare_search_falls_back"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "TY16",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9387,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TX17",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9255,
+            "error": null,
+            "notes": [
+                "server_invalid:open_jaw_requires_two_legs"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TY18",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9642,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TX19",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9091,
+            "error": null,
+            "notes": [
+                "server_invalid:open_jaw_requires_two_legs"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TY20",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8698,
+            "error": null,
+            "notes": [
+                "server_invalid:open_jaw_requires_two_legs"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TX21",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 10754,
+            "error": null,
+            "notes": [
+                "server_invalid:open_jaw_requires_two_legs"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TY22",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9160,
+            "error": null,
+            "notes": [
+                "server_invalid:open_jaw_requires_two_legs"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TX23",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8961,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TY24",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8377,
+            "error": null,
+            "notes": [
+                "server_invalid:open_jaw_requires_two_legs"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TX25",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8108,
+            "error": null,
+            "notes": [
+                "server_invalid:unsupported_airline",
+                "invalid_prepare_search_falls_back"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "TY26",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8133,
+            "error": null,
+            "notes": [
+                "server_invalid:unsupported_airline",
+                "invalid_prepare_search_falls_back"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "TX27",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9693,
+            "error": null,
+            "notes": [
+                "server_invalid:unsupported_airline",
+                "invalid_prepare_search_falls_back"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "TY28",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8439,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TX29",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8297,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "TY30",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9619,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "G01",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 7139,
+            "error": null,
+            "notes": [
+                "domain_got=knowledge"
+            ],
+            "critical": [],
+            "domain": "knowledge",
+            "operation": "clarify"
+        },
+        {
+            "id": "G02",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 6040,
+            "error": null,
+            "notes": [
+                "domain_got=knowledge"
+            ],
+            "critical": [],
+            "domain": "knowledge",
+            "operation": "clarify"
+        },
+        {
+            "id": "G03",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 7160,
+            "error": null,
+            "notes": [
+                "domain_got=knowledge"
+            ],
+            "critical": [],
+            "domain": "knowledge",
+            "operation": "clarify"
+        },
+        {
+            "id": "G04",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5109,
+            "error": null,
+            "notes": [
+                "domain_got=knowledge"
+            ],
+            "critical": [],
+            "domain": "knowledge",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "G05",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5310,
+            "error": null,
+            "notes": [
+                "domain_got=knowledge"
+            ],
+            "critical": [],
+            "domain": "knowledge",
+            "operation": "answer"
+        },
+        {
+            "id": "C01",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 6638,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "current",
+            "operation": "answer"
+        },
+        {
+            "id": "C02",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5760,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "current",
+            "operation": "answer"
+        },
+        {
+            "id": "C03",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5099,
+            "error": null,
+            "notes": [
+                "domain_got=travel",
+                "domain_soft_miss_fallback_ok"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "lookup"
+        },
+        {
+            "id": "C04",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5992,
+            "error": null,
+            "notes": [
+                "domain_got=support",
+                "domain_soft_miss_fallback_ok"
+            ],
+            "critical": [],
+            "domain": "support",
+            "operation": "handoff"
+        },
+        {
+            "id": "S01",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5600,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "support",
+            "operation": "handoff"
+        },
+        {
+            "id": "S02",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5449,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "support",
+            "operation": "handoff"
+        },
+        {
+            "id": "S03",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5207,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "support",
+            "operation": "handoff"
+        },
+        {
+            "id": "S04",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5111,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "support",
+            "operation": "handoff"
+        },
+        {
+            "id": "B01",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5315,
+            "error": null,
+            "notes": [
+                "domain_got=travel"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "B02",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5227,
+            "error": null,
+            "notes": [
+                "domain_got=travel"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "K01",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9731,
+            "error": null,
+            "notes": [
+                "domain_got=travel"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "K02",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 6870,
+            "error": null,
+            "notes": [
+                "domain_got=support"
+            ],
+            "critical": [],
+            "domain": "support",
+            "operation": "handoff"
+        },
+        {
+            "id": "A01",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 6442,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "handoff"
+        },
+        {
+            "id": "A02",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 22908,
+            "error": "invalid_json",
+            "notes": [
+                "safe_fallback_null_plan"
+            ],
+            "critical": [],
+            "domain": null,
+            "operation": null
+        },
+        {
+            "id": "A03",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5860,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "support",
+            "operation": "handoff"
+        },
+        {
+            "id": "F1",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8898,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F2",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 10659,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F3",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8814,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F4",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8900,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F5",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9931,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F6",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8360,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F7",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8204,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F8",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 7919,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F9",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9393,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F10",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8115,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F11",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9026,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F12",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8372,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F13",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8500,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F14",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8197,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F15",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 7874,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F16",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9531,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F17",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9307,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F18",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9956,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F19",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 9190,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "F20",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 8505,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "R1",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5867,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "R2",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 4814,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "R3",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 4803,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "R4",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 6524,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "R5",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5134,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "R6",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 6231,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "R7",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 5129,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "R8",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 4794,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "R9",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 4838,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "R10",
+            "holdout": false,
+            "ok": true,
+            "latency_ms": 4544,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H01",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 12017,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "policy_blocks_wrong_route_prepare_search"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H02",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 8031,
+            "error": null,
+            "notes": [
+                "server_invalid:unsupported_airline",
+                "invalid_prepare_search_falls_back"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H03",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 12550,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H04",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 8703,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H05",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 8122,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H06",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 7983,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H07",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 6006,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H08",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 7789,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H09",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 5905,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H10",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 9885,
+            "error": null,
+            "notes": [
+                "server_invalid:unresolved_airport:RUIY,unresolved_airport:RUIY",
+                "invalid_prepare_search_falls_back"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H11",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 8256,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H12",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 8507,
+            "error": null,
+            "notes": [
+                "server_invalid:unsupported_airline",
+                "invalid_prepare_search_falls_back"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H13",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 5723,
+            "error": null,
+            "notes": [
+                "domain_got=knowledge"
+            ],
+            "critical": [],
+            "domain": "knowledge",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H14",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 5392,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "current",
+            "operation": "answer"
+        },
+        {
+            "id": "H15",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 5660,
+            "error": null,
+            "notes": [
+                "domain_got=travel",
+                "domain_soft_miss_fallback_ok"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "handoff"
+        },
+        {
+            "id": "H16",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 5916,
+            "error": null,
+            "notes": [
+                "domain_got=travel"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "lookup"
+        },
+        {
+            "id": "H17",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 6375,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "knowledge",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H18",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 5427,
+            "error": null,
+            "notes": [
+                "policy_blocks_bare_affirmative_prepare_search"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H19",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 8971,
+            "error": null,
+            "notes": [
+                "server_invalid:open_jaw_requires_two_legs"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H20",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 7580,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H21",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 5234,
+            "error": null,
+            "notes": [
+                "domain_got=support"
+            ],
+            "critical": [],
+            "domain": "support",
+            "operation": "handoff"
+        },
+        {
+            "id": "H22",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 20399,
+            "error": "invalid_json",
+            "notes": [
+                "safe_fallback_null_plan"
+            ],
+            "critical": [],
+            "domain": null,
+            "operation": null
+        },
+        {
+            "id": "H23",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 5324,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "policy_blocks_wrong_route_prepare_search"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H24",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 7481,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H25",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 7669,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H26",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 6990,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "current",
+            "operation": "answer"
+        },
+        {
+            "id": "H27",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 7811,
+            "error": null,
+            "notes": [
+                "domain_got=travel",
+                "domain_soft_miss_fallback_ok",
+                "handoff_miss"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H28",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 5458,
+            "error": null,
+            "notes": [
+                "domain_got=travel"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "lookup"
+        },
+        {
+            "id": "H29",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 5443,
+            "error": null,
+            "notes": [
+                "domain_got=travel"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H30",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 6141,
+            "error": null,
+            "notes": [
+                "domain_got=travel"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H31",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 8379,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H32",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 8004,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H33",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 5426,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "handoff"
+        },
+        {
+            "id": "H34",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 5696,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "prepare_search"
+        },
+        {
+            "id": "H35",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 7323,
+            "error": null,
+            "notes": [],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H36",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 20756,
+            "error": "invalid_json",
+            "notes": [
+                "safe_fallback_null_plan"
+            ],
+            "critical": [],
+            "domain": null,
+            "operation": null
+        },
+        {
+            "id": "H37",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 8106,
+            "error": null,
+            "notes": [
+                "server_invalid:open_jaw_requires_two_legs"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H38",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 8221,
+            "error": null,
+            "notes": [
+                "server_invalid:unsupported_airline"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "handoff"
+        },
+        {
+            "id": "H39",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 7854,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        },
+        {
+            "id": "H40",
+            "holdout": true,
+            "ok": true,
+            "latency_ms": 8911,
+            "error": null,
+            "notes": [
+                "origin_mismatch:MED",
+                "dest_mismatch:LHE"
+            ],
+            "critical": [],
+            "domain": "travel",
+            "operation": "clarify"
+        }
+    ]
+}

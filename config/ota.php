@@ -267,5 +267,8 @@ return [
         'optional_llm_assist' => filter_var(env('OTA_AI_OPTIONAL_LLM_ASSIST', false), FILTER_VALIDATE_BOOL),
         /** Conversational LLM layer with approved tools; falls back to hybrid parser when unavailable. */
         'conversational_enabled' => filter_var(env('OTA_AI_CONVERSATIONAL_ENABLED', true), FILTER_VALIDATE_BOOL),
+        // CQ28: fail-closed — must be explicitly enabled with conversational runtime.
+        'semantic_planner_enabled' => filter_var(env('OTA_AI_SEMANTIC_PLANNER_ENABLED', false), FILTER_VALIDATE_BOOL),
+        'semantic_composer_enabled' => filter_var(env('OTA_AI_SEMANTIC_COMPOSER_ENABLED', false), FILTER_VALIDATE_BOOL),
     ],
 ];

@@ -9,6 +9,7 @@ use App\Models\AiMessage;
 use App\Models\CustomerQuery;
 use App\Models\User;
 use App\Services\Ai\Embed\EmbedRuntimeContext;
+use App\Services\Ai\Semantic\SemanticBrain;
 use App\Support\Ai\Embed\EmbedTenantCapability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -16,6 +17,7 @@ use Illuminate\Support\Str;
 
 /**
  * Public AI chat orchestration: visitor cookie, rate limits, handoff, tools, soft degrade.
+ * CQ28: after hard gates, Qwen semantic brain is primary; hybrid is fallback.
  */
 final class AiChatOrchestrator
 {
@@ -33,6 +35,7 @@ final class AiChatOrchestrator
         private readonly ConversationIntentRouter $intentRouter,
         private readonly OpenDomainResponseService $openDomain,
         private readonly FlightSearchConfirmationGate $flightConfirmation,
+        private readonly SemanticBrain $semanticBrain,
         private readonly ?\App\Services\Ai\Lab\AiLabAdapter $labAdapter = null,
     ) {}
 
@@ -411,6 +414,28 @@ final class AiChatOrchestrator
             return $this->replyOpenDomainFallback($conversation, $cleanMessage, $openCategory, $capabilities, $brand, $baseMeta);
         }
 
+        // CQ28: Qwen semantic planner primary after hard security/state gates.
+        if ($this->semanticBrain->isEnabled()) {
+            $semantic = $this->semanticBrain->tryHandle(
+                $conversation,
+                $cleanMessage,
+                $baseMeta,
+                [
+                    'shopping_state' => is_array($conversation->shopping_state) ? $conversation->shopping_state : [],
+                    'pending_confirmation' => $this->flightConfirmation->pendingSnapshot($conversation),
+                    'last_flight_search' => (is_array($conversation->shopping_state) ? ($conversation->shopping_state['last_flight_search'] ?? null) : null),
+                    'brand' => $brand,
+                    'capabilities' => $capabilities,
+                ],
+            );
+            if (is_array($semantic)) {
+                $handled = $this->applySemanticResult($conversation, $cleanMessage, $semantic, $baseMeta);
+                if (is_array($handled)) {
+                    return $handled;
+                }
+            }
+        }
+
         // JetPakistan / tenant knowledge: RAG first, then LLM synthesis (fallback structured).
         if ($this->intentRouter->isJetPakistanKnowledgeQuestion($cleanMessage)
             && $this->embedCapabilityAllows(EmbedTenantCapability::KNOWLEDGE)) {
@@ -517,6 +542,8 @@ final class AiChatOrchestrator
             'LOCAL_LLM_REQUIRED_FOR_CORE' => false,
         ];
 
+        // Legacy LLM tool-naming path only when semantic planner did not produce a plan
+        // (or is disabled). Preferred authority remains SemanticBrain + server policy.
         $conversational = $this->conversational->tryHandle($conversation, $cleanMessage, $baseMeta);
         if (is_array($conversational)) {
             if (! empty($conversational['handoff'])) {
@@ -1060,6 +1087,94 @@ final class AiChatOrchestrator
      * @param  array<string, mixed>  $meta
      * @return array<string, mixed>
      */
+    /**
+     * Apply a SemanticBrain result to an HTTP payload. Returns null to continue hybrid fallback.
+     *
+     * @param  array<string, mixed>  $semantic
+     * @param  array<string, mixed>  $baseMeta
+     * @return array<string, mixed>|null
+     */
+    private function applySemanticResult(
+        AiConversation $conversation,
+        string $cleanMessage,
+        array $semantic,
+        array $baseMeta,
+    ): ?array {
+        $kind = (string) ($semantic['kind'] ?? '');
+        $meta = is_array($semantic['meta'] ?? null) ? $semantic['meta'] : $baseMeta;
+        $mode = 'QWEN_SEMANTIC';
+
+        if ($kind === 'fallback' || $kind === '') {
+            return null;
+        }
+
+        if ($kind === 'handoff') {
+            if (! $this->embedCapabilityAllows(EmbedTenantCapability::SUPPORT_HANDOFF)) {
+                return $this->replyCapabilityUnavailable($conversation, $mode, $meta);
+            }
+            $this->flightConfirmation->clearPending($conversation);
+
+            return $this->beginHandoff($conversation, 'semantic_requested', $mode, $meta);
+        }
+
+        if ($kind === 'knowledge') {
+            if (! $this->embedCapabilityAllows(EmbedTenantCapability::KNOWLEDGE)) {
+                return $this->replyCapabilityUnavailable($conversation, $mode, $meta);
+            }
+
+            return $this->replyKnowledge(
+                $conversation,
+                (string) ($semantic['query'] ?? $cleanMessage),
+                $mode,
+                $meta
+            );
+        }
+
+        if ($kind === 'booking_lookup') {
+            if (! $this->embedCapabilityAllows(EmbedTenantCapability::BOOKING_LOOKUP)) {
+                return $this->replyCapabilityUnavailable($conversation, $mode, $meta);
+            }
+
+            return $this->replyBookingLookup($conversation, $cleanMessage, $mode, $meta);
+        }
+
+        if (in_array($kind, ['clarify', 'confirm', 'answer'], true)) {
+            $body = trim((string) ($semantic['message'] ?? ''));
+            if ($body === '') {
+                return null;
+            }
+            $status = (string) ($semantic['status'] ?? ($kind === 'confirm' ? 'confirm' : ($kind === 'clarify' ? 'clarify' : 'ok')));
+            $assistantMeta = ['mode' => $mode];
+            if (! empty($semantic['requires_confirmation'])) {
+                $assistantMeta['confirmation_type'] = 'flight_search';
+                $assistantMeta['confirmation_snapshot'] = $semantic['confirmation_snapshot'] ?? null;
+            }
+            if (isset($semantic['intent']) && is_array($semantic['intent'])) {
+                $assistantMeta['intent'] = $semantic['intent'];
+            }
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, $assistantMeta);
+            $payload = [
+                'ok' => true,
+                'status' => $status,
+                'mode' => $mode,
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'recommendations' => [],
+                'actions' => $this->resolveResponseActions(),
+                'meta' => $meta,
+            ];
+            if (! empty($semantic['requires_confirmation'])) {
+                $payload['requires_confirmation'] = true;
+                $payload['confirmation_snapshot'] = $semantic['confirmation_snapshot'] ?? null;
+            }
+
+            return $this->withMessageId($assistant, $payload);
+        }
+
+        return null;
+    }
+
     private function beginHandoff(AiConversation $conversation, string $reason, string $mode, array $meta): array
     {
         // Central authorization for every handoff entry (explicit, hybrid, LLM tool, /handoff API).
