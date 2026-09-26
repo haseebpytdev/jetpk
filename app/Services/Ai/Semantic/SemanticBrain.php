@@ -413,13 +413,17 @@ final class SemanticBrain
             $meta,
         );
 
+        if (is_array($llm)) {
+            $openLatency = max(0, (int) ($llm['latency_ms'] ?? data_get($llm, 'meta.OPEN_DOMAIN_LATENCY_MS', 0)));
+            $openCalls = max(0, (int) ($llm['calls'] ?? 0));
+        }
+
         if (is_array($llm) && filled($llm['message'] ?? null)) {
-            // tryOpenDomainRespond uses InferenceProvider; count as an additional model call.
-            $openCalls = 1;
             $body = (string) $llm['message'];
             $meta = array_merge($meta, is_array($llm['meta'] ?? null) ? $llm['meta'] : []);
             $meta['MODEL_CALLS'] = $calls + $openCalls;
             $meta['SEMANTIC_LATENCY_MS'] = $semanticLatency;
+            $meta['OPEN_DOMAIN_LATENCY_MS'] = $openLatency;
             $meta['COMPOSER_LATENCY_MS'] = 0;
             $meta['TOTAL_MODEL_LATENCY_MS'] = $semanticLatency + $openLatency;
             $meta['FINAL_RESPONSE_SOURCE'] = 'QWEN_OPEN_DOMAIN';
@@ -435,16 +439,21 @@ final class SemanticBrain
             ];
         }
 
-        // Resilience only — never primary encyclopedia.
+        // Resilience only — never primary encyclopedia. Deterministic fallback is not a model call,
+        // but any attempted open-domain provider call/latency remains in the totals.
         $structured = $this->openDomain->fallbackForCategory($message, $category, $capabilities, $brand);
         $fallback = is_array($structured) && filled($structured['message'] ?? null)
             ? (string) $structured['message']
             : 'Happy to help with that. For live travel prices or JetPakistan bookings I can also search flights once you share a route and date.';
 
+        if (is_array($llm) && is_array($llm['meta'] ?? null)) {
+            $meta = array_merge($meta, $llm['meta']);
+        }
         $meta['MODEL_CALLS'] = $calls + $openCalls;
         $meta['SEMANTIC_LATENCY_MS'] = $semanticLatency;
+        $meta['OPEN_DOMAIN_LATENCY_MS'] = $openLatency;
         $meta['COMPOSER_LATENCY_MS'] = 0;
-        $meta['TOTAL_MODEL_LATENCY_MS'] = $semanticLatency;
+        $meta['TOTAL_MODEL_LATENCY_MS'] = $semanticLatency + $openLatency;
         $meta['FINAL_RESPONSE_SOURCE'] = 'OPEN_DOMAIN_FALLBACK';
         $meta['OPEN_DOMAIN_FALLBACK'] = 'YES';
         if (is_array($structured) && is_array($structured['meta'] ?? null)) {
@@ -452,6 +461,7 @@ final class SemanticBrain
         }
         $meta['open_domain_category'] = $category;
         $meta['LLM_SYNTHESIS'] = 'FALLBACK_STRUCTURED';
+        $meta['OPEN_DOMAIN_FALLBACK'] = 'YES';
 
         return [
             'kind' => 'answer',
