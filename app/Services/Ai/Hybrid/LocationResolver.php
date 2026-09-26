@@ -221,6 +221,23 @@ final class LocationResolver
         $destText = null;
         $hay = mb_strtolower($normalized.' '.$original);
 
+        // "Dubai se Lahore wapis/wapas" / "A to B return" — single explicit route; trailing
+        // return cue must NOT invent a second reciprocal leg (CQ42-R2).
+        if (preg_match(
+            '/\b([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+(?:to|→|->|se)\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+(?:wapis|wapas|return|واپس)\b/u',
+            $hay,
+            $m
+        ) === 1) {
+            $o = $this->resolve(trim($m[1]));
+            $d = $this->resolve(trim($m[2]));
+            if ($o['code'] && $d['code']) {
+                return [$o['code'], $d['code'], false, false, [], []];
+            }
+            if ($o['code'] || $d['code'] || $o['ambiguous'] || $d['ambiguous']) {
+                return [$o['code'], $d['code'], $o['ambiguous'], $d['ambiguous'], $o['options'], $d['options']];
+            }
+        }
+
         // "to Doha from Lahore" / "ticket to Doha from Lahore"
         if (preg_match('/\bto\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+from\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{2,24}?)(?=\s|$|,|\.|\?|!)/u', $hay, $m) === 1) {
             $destText = trim($m[1]);
@@ -293,7 +310,7 @@ final class LocationResolver
         } elseif (preg_match('/\bfrom\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)\s+to\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)(?=\s+(?:on|for|under|direct|cheapest|sasti|tomorrow|today|\d)|$|,|\.|\?|!)/u', $clean, $m) === 1) {
             $originText = trim($m[1]);
             $destText = trim($m[2]);
-        } elseif (preg_match('/([a-z]+(?:\s+[a-z]+){0,3}?)\s+(?:to|→|->|se)\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)(?=\s+(?:on|for|under|direct|cheapest|sasti|jaldi|emirates|saudia|tomorrow|today|\d)|$|,|\.|\?|!)/u', $clean, $m) === 1) {
+        } elseif (preg_match('/([a-z]+(?:\s+[a-z]+){0,3}?)\s+(?:to|→|->|se)\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)(?=\s+(?:on|for|under|direct|cheapest|sasti|jaldi|emirates|saudia|tomorrow|today|wapis|wapas|return|\d)|$|,|\.|\?|!)/u', $clean, $m) === 1) {
             $originText = trim($m[1]);
             $destText = trim($m[2]);
         } elseif (preg_match('/([\p{Arabic}][\p{Arabic}\s]{1,30}?)\s*سے\s*([\p{Arabic}][\p{Arabic}\s]{1,30}?)(?:\s|$|براہ)/u', $original, $m) === 1) {

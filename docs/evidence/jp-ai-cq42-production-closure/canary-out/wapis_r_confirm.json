@@ -1,0 +1,12 @@
+{
+    "latency_ms": 25.9,
+    "conversation_id": "5ef76937-4887-4b62-81e0-5f5c33ca8271",
+    "message": "Happy to help — what would you like me to continue with? For example a route, date, cabin, or passenger change.",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "AFFIRMATIVE_WITHOUT_PENDING_ACTION_NO_EXECUTION": "PASS"
+    },
+    "state": "AI_ACTIVE",
+    "mode": "STRUCTURED_FALLBACK"
+}

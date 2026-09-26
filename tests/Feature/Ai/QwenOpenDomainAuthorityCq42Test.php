@@ -170,15 +170,9 @@ class QwenOpenDomainAuthorityCq42Test extends TestCase
     public function test_server_general_authority_beats_qwen_current_for_gravity(): void
     {
         $this->enableSemanticAi();
+        // CQ42-R2: server GK bypasses planner — only open-domain content is consumed.
         $this->rebindInference(new ScriptedInferenceProvider([
-            $this->planJson([
-                'domain' => 'current',
-                'intent' => 'answer',
-                'operation' => 'answer',
-                'travel' => ['trip_type' => null, 'origin' => null, 'destination' => null, 'legs' => [], 'adults' => 1],
-                'response_intent' => 'answer',
-            ]),
-            '{"message":"QWEN_GK: Gravity is the attractive force between masses."}',
+            'QWEN_GK: Gravity is the attractive force between masses.',
         ]));
 
         $turn = $this->chat(str_repeat('c42c', 16), 'What is gravity?');
@@ -190,20 +184,15 @@ class QwenOpenDomainAuthorityCq42Test extends TestCase
         $this->assertSame('GENERAL_KNOWLEDGE', $turn['response']->json('meta.open_domain_category'));
         $this->assertSame('QWEN_OPEN_DOMAIN', $turn['response']->json('meta.FINAL_RESPONSE_SOURCE'));
         $this->assertSame('NO', $turn['response']->json('meta.OPEN_DOMAIN_FALLBACK'));
+        $this->assertSame('NO', $turn['response']->json('meta.SEMANTIC_BRAIN_CALLED'));
+        $this->assertSame(1, (int) $turn['response']->json('meta.MODEL_CALLS'));
     }
 
     public function test_server_general_authority_beats_qwen_support_for_sky(): void
     {
         $this->enableSemanticAi();
         $this->rebindInference(new ScriptedInferenceProvider([
-            $this->planJson([
-                'domain' => 'support',
-                'intent' => 'handoff',
-                'operation' => 'handoff',
-                'travel' => ['trip_type' => null, 'origin' => null, 'destination' => null, 'legs' => [], 'adults' => 1],
-                'response_intent' => 'answer',
-            ]),
-            '{"message":"QWEN_GK: The sky looks blue because of Rayleigh scattering."}',
+            'QWEN_GK: The sky looks blue because of Rayleigh scattering.',
         ]));
 
         $turn = $this->chat(str_repeat('c42d', 16), 'Why is the sky blue?');
@@ -217,14 +206,7 @@ class QwenOpenDomainAuthorityCq42Test extends TestCase
     {
         $this->enableSemanticAi();
         $this->rebindInference(new ScriptedInferenceProvider([
-            $this->planJson([
-                'domain' => 'booking',
-                'intent' => 'lookup',
-                'operation' => 'lookup',
-                'travel' => ['trip_type' => null, 'origin' => null, 'destination' => null, 'legs' => [], 'adults' => 1],
-                'response_intent' => 'answer',
-            ]),
-            '{"message":"QWEN_GK: Wi-Fi sends data using radio waves between devices and an access point."}',
+            'QWEN_GK: Wi-Fi sends data using radio waves between devices and an access point.',
         ]));
 
         $turn = $this->chat(str_repeat('c42e', 16), 'How does Wi-Fi work?');
@@ -239,14 +221,7 @@ class QwenOpenDomainAuthorityCq42Test extends TestCase
     {
         $this->enableSemanticAi();
         $this->rebindInference(new ScriptedInferenceProvider([
-            $this->planJson([
-                'domain' => 'general',
-                'intent' => 'answer',
-                'operation' => 'answer',
-                'travel' => ['trip_type' => null, 'origin' => null, 'destination' => null, 'legs' => [], 'adults' => 1],
-                'response_intent' => 'answer',
-            ]),
-            '{"message":"I cannot answer this question because my purpose is to help you with flight bookings only."}',
+            'I cannot answer this question because my purpose is to help you with flight bookings only.',
         ]));
 
         $turn = $this->chat(str_repeat('c42f', 16), 'What is DNA?');

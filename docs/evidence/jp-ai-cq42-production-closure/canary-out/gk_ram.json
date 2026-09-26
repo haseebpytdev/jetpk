@@ -1,0 +1,65 @@
+{
+    "latency_ms": 29350.3,
+    "conversation_id": "8208a02f-e4da-4c9c-9e20-f9ae2d6931de",
+    "message": "I couldn't produce a reliable general answer just now. Ask again, or I can help with JetPakistan flights and bookings.",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+        "SEMANTIC_BRAIN_CALLED": "YES",
+        "SEMANTIC_BRAIN_VALID": "NO",
+        "SEMANTIC_BRAIN_FALLBACK": "YES",
+        "MODEL_ID": "local",
+        "MODEL_CALLS": 1,
+        "SEMANTIC_LATENCY_MS": 13368,
+        "COMPOSER_LATENCY_MS": 0,
+        "TOTAL_MODEL_LATENCY_MS": 13368,
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC_FALLBACK",
+        "SEMANTIC_INTENT": "clarify",
+        "SERVER_OPERATION": "clarify",
+        "SEMANTIC_DOMAIN": "knowledge",
+        "SEMANTIC_FALLBACK_REASON": "invalid_plan",
+        "validator_rejects": [
+            "invented_iata:RAM",
+            "unresolved_airport:storage",
+            "invented_iata:RAM",
+            "unresolved_airport:storage",
+            "unresolved_airport:storage",
+            "invented_iata:RAM"
+        ],
+        "open_domain_category": "GENERAL_KNOWLEDGE",
+        "ANSWER_GROUNDED": "MODEL_GENERAL",
+        "LLM_SYNTHESIS": "FALLBACK_STRUCTURED",
+        "OPEN_DOMAIN_FALLBACK": "YES",
+        "SMART_REDIRECT": "YES"
+    },
+    "state": "AI_ACTIVE",
+    "actions": [
+        {
+            "label": "Search Flights",
+            "href": "\/#flight-search"
+        },
+        {
+            "label": "Browse Groups",
+            "href": "\/groups"
+        },
+        {
+            "label": "Manage Booking",
+            "href": "\/lookup-booking"
+        },
+        {
+            "label": "Talk to Support",
+            "action": "handoff"
+        }
+    ],
+    "status": "ok",
+    "mode": "STRUCTURED_FALLBACK",
+    "server_classify": "GENERAL_KNOWLEDGE",
+    "checks": {
+        "useful": true,
+        "not_booking": true,
+        "not_handoff": true,
+        "not_current_refusal": true,
+        "qwen_ok": false
+    }
+}

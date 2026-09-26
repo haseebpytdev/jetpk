@@ -170,6 +170,12 @@ final class TravelIntentCanonicalizer
         }
         if (isset($raw['trip_type']) && is_string($raw['trip_type']) && $raw['trip_type'] !== '') {
             $out['trip_type'] = $raw['trip_type'];
+            // CQ42-R2: explicit one_way/return must not inherit prior open-jaw legs.
+            if (in_array($raw['trip_type'], ['one_way', 'return'], true)) {
+                $out['legs'] = (isset($raw['legs']) && is_array($raw['legs']) && $raw['legs'] !== [])
+                    ? $raw['legs']
+                    : null;
+            }
         }
 
         // Confidence gate: do not allow searchable intent without resolved O/D

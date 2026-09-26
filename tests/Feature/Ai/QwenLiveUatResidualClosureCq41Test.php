@@ -302,8 +302,7 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
         $this->assertFalse((bool) config('ota.ai_assistant.semantic_composer_enabled'));
 
         $scripted = new ScriptedInferenceProvider([
-            $this->knowledgeMislabelPlan('photosynthesis'),
-            '{"message":"QWEN_PRIMARY: Photosynthesis is how plants convert light energy into chemical energy, producing sugars and oxygen."}',
+            'QWEN_PRIMARY: Photosynthesis is how plants convert light energy into chemical energy, producing sugars and oxygen.',
         ]);
         $this->rebindInference($scripted);
 
@@ -316,7 +315,9 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
         $this->assertSame('NO', $turn['response']->json('meta.OPEN_DOMAIN_FALLBACK'));
         $this->assertSame('GENERAL_KNOWLEDGE', $turn['response']->json('meta.open_domain_category'));
         $this->assertSame(0, (int) $turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'));
-        $this->assertGreaterThanOrEqual(2, $scripted->callCount());
+        $this->assertSame('NO', $turn['response']->json('meta.SEMANTIC_BRAIN_CALLED'));
+        $this->assertSame(1, (int) $turn['response']->json('meta.MODEL_CALLS'));
+        $this->assertSame(1, $scripted->callCount());
     }
 
     public function test_general_knowledge_holdouts_use_qwen_not_quick_note(): void
@@ -338,8 +339,7 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
         $i = 0;
         foreach ($holdouts as $question => $answer) {
             $this->rebindInference(new ScriptedInferenceProvider([
-                $this->knowledgeMislabelPlan('holdout'),
-                json_encode(['message' => $answer], JSON_UNESCAPED_UNICODE),
+                $answer,
             ]));
 
             $turn = $this->chat(str_repeat('gh', 18).sprintf('%02d', $i), $question);
@@ -352,6 +352,7 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
             $this->assertSame('NO', $turn['response']->json('meta.OPEN_DOMAIN_FALLBACK'), $question);
             $this->assertNotSame('WAITING_FOR_HUMAN', $turn['response']->json('state'), $question);
             $this->assertSame(0, (int) $turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'), $question);
+            $this->assertSame(1, (int) $turn['response']->json('meta.GENERAL_MODEL_CALLS'), $question);
             $i++;
         }
     }
@@ -360,7 +361,6 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
     {
         $this->enableSemanticAi();
         $this->rebindInference(new ScriptedInferenceProvider([
-            $this->knowledgeMislabelPlan('gravity'),
             '{invalid-json-not-an-object',
         ]));
 
@@ -373,18 +373,17 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
         $this->assertSame(0, (int) $turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'));
     }
 
-    public function test_open_domain_latency_telemetry_sums_both_qwen_calls(): void
+    public function test_open_domain_latency_telemetry_single_qwen_call_after_planner_bypass(): void
     {
         $this->enableSemanticAi();
         $this->assertFalse((bool) config('ota.ai_assistant.semantic_composer_enabled'));
 
         $scripted = new ScriptedInferenceProvider(
             [
-                $this->knowledgeMislabelPlan('gravity'),
-                '{"message":"QWEN_LAT: Gravity attracts masses toward each other."}',
+                'QWEN_LAT: Gravity attracts masses toward each other.',
             ],
             true,
-            [111, 222],
+            [222],
         );
         $this->rebindInference($scripted);
 
@@ -392,12 +391,14 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
         $turn['response']->assertOk();
         $this->assertStringContainsString('QWEN_LAT', (string) $turn['response']->json('message'));
         $this->assertSame('NO', $turn['response']->json('meta.OPEN_DOMAIN_FALLBACK'));
-        $this->assertSame(111, (int) $turn['response']->json('meta.SEMANTIC_LATENCY_MS'));
+        $this->assertSame(0, (int) $turn['response']->json('meta.SEMANTIC_LATENCY_MS'));
         $this->assertSame(222, (int) $turn['response']->json('meta.OPEN_DOMAIN_LATENCY_MS'));
         $this->assertSame(0, (int) $turn['response']->json('meta.COMPOSER_LATENCY_MS'));
-        $this->assertSame(333, (int) $turn['response']->json('meta.TOTAL_MODEL_LATENCY_MS'));
-        $this->assertSame(2, (int) $turn['response']->json('meta.MODEL_CALLS'));
-        $this->assertSame(2, $scripted->callCount());
+        $this->assertSame(222, (int) $turn['response']->json('meta.TOTAL_MODEL_LATENCY_MS'));
+        $this->assertSame(1, (int) $turn['response']->json('meta.MODEL_CALLS'));
+        $this->assertSame(1, (int) $turn['response']->json('meta.GENERAL_MODEL_CALLS'));
+        $this->assertSame(1, $scripted->callCount());
+        $this->assertSame('NO', $turn['response']->json('meta.SEMANTIC_BRAIN_CALLED'));
     }
 
     public function test_open_domain_fallback_preserves_attempted_latency_without_fake_success_call(): void
@@ -405,11 +406,10 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
         $this->enableSemanticAi();
         $scripted = new ScriptedInferenceProvider(
             [
-                $this->knowledgeMislabelPlan('gravity'),
                 '{invalid-json-not-an-object',
             ],
             true,
-            [50, 75],
+            [75],
         );
         $this->rebindInference($scripted);
 
@@ -417,12 +417,12 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
         $turn['response']->assertOk();
         $this->assertSame('YES', $turn['response']->json('meta.OPEN_DOMAIN_FALLBACK'));
         $this->assertSame('FALLBACK_STRUCTURED', $turn['response']->json('meta.LLM_SYNTHESIS'));
-        $this->assertSame(50, (int) $turn['response']->json('meta.SEMANTIC_LATENCY_MS'));
+        $this->assertSame(0, (int) $turn['response']->json('meta.SEMANTIC_LATENCY_MS'));
         $this->assertSame(75, (int) $turn['response']->json('meta.OPEN_DOMAIN_LATENCY_MS'));
-        $this->assertSame(125, (int) $turn['response']->json('meta.TOTAL_MODEL_LATENCY_MS'));
-        // Planner + attempted open-domain call; deterministic fallback itself is not an extra model call.
-        $this->assertSame(2, (int) $turn['response']->json('meta.MODEL_CALLS'));
-        $this->assertSame(2, $scripted->callCount());
+        $this->assertSame(75, (int) $turn['response']->json('meta.TOTAL_MODEL_LATENCY_MS'));
+        // Planner bypassed; only the attempted open-domain call counts.
+        $this->assertSame(1, (int) $turn['response']->json('meta.MODEL_CALLS'));
+        $this->assertSame(1, $scripted->callCount());
         $this->assertStringNotContainsString('QWEN_LAT', (string) $turn['response']->json('message'));
     }
 
@@ -430,13 +430,13 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
     {
         $this->enableSemanticAi();
         $this->rebindInference(new ScriptedInferenceProvider(
-            $this->knowledgeMislabelPlan('dna'),
+            ['unused'],
             false,
         ));
 
         $turn = $this->chat(str_repeat('gk3', 20), 'What is DNA?');
         $turn['response']->assertOk();
-        // Unhealthy provider: semantic planner fails → orchestrator open-domain fallback path.
+        // Unhealthy provider on plain-text GK path → structured fallback.
         $body = mb_strtolower((string) $turn['response']->json('message'));
         $this->assertNotSame('', $body);
         $this->assertStringNotContainsString('could not find an approved jetpakistan answer', $body);

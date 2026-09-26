@@ -177,6 +177,16 @@ final class ConversationIntentRouter
             return 'GENERAL_KNOWLEDGE';
         }
 
+        // Soft human/support asks must not be treated as GENERAL_KNOWLEDGE (planner/handoff path).
+        if (preg_match(
+            '/\b(someone on your (team|staff)|talk to (a )?(person|human|support|agent)|'.
+            'speak to (a )?(person|human|support|agent)|live agent|real person|handoff|'.
+            'customer service|get me (a )?(human|agent))\b/u',
+            $lower
+        ) === 1) {
+            return null;
+        }
+
         // Terse educational topic asks (e.g. "Undefined behavior in C?", "Null hypothesis in statistics?").
         if (
             str_ends_with($lower, '?')

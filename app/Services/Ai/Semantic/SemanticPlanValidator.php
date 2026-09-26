@@ -60,6 +60,8 @@ final class SemanticPlanValidator
         $tripTypeForced = null;
         $stale = 0;
         $legs = [];
+        $falseOpenJawDemoted = false;
+        $serverSingleRoute = null;
 
         if (is_array($explicitLegs) && count($explicitLegs) >= 2) {
             foreach ($explicitLegs as $leg) {
@@ -92,17 +94,55 @@ final class SemanticPlanValidator
             $origin = $legs[0]['origin'];
             $destination = $legs[0]['destination'];
         } else {
+            // CQ42-R2: server single-route authority — Qwen must not invent reciprocal open-jaw legs.
+            $route = $this->locations->extractRoute(mb_strtolower($userMessage), $userMessage);
+            $serverOrigin = is_string($route[0] ?? null) ? (string) $route[0] : null;
+            $serverDestination = is_string($route[1] ?? null) ? (string) $route[1] : null;
+            $hasServerSingleRoute = $serverOrigin !== null && $serverOrigin !== ''
+                && $serverDestination !== null && $serverDestination !== '';
+
+            $qwenLegs = [];
             foreach ($plan->legs as $leg) {
                 $o = $this->resolveAirport($leg['origin'] ?? null, $rejects);
                 $d = $this->resolveAirport($leg['destination'] ?? null, $rejects);
                 $dd = $this->resolveDate($leg['departure_date'] ?? null, $rejects);
                 if ($o || $d || $dd) {
-                    $legs[] = [
+                    $qwenLegs[] = [
                         'origin' => $o,
                         'destination' => $d,
                         'departure_date' => $dd,
                     ];
                 }
+            }
+
+            if ($hasServerSingleRoute) {
+                $origin = $serverOrigin;
+                $destination = $serverDestination;
+                $serverSingleRoute = $serverOrigin.'-'.$serverDestination;
+                $qwenTrip = is_string($plan->tripType) ? strtolower((string) $plan->tripType) : null;
+                if ($qwenTrip === 'round_trip') {
+                    $qwenTrip = 'return';
+                }
+                $inventedMulti = count($qwenLegs) >= 2
+                    || in_array($qwenTrip, ['open_jaw', 'multi_city'], true);
+                if ($inventedMulti) {
+                    $falseOpenJawDemoted = true;
+                    $legs = [];
+                    // Preserve genuine return when a return date is present; otherwise one_way.
+                    // "X se Y wapis" alone does not invent a second leg.
+                } elseif (count($qwenLegs) === 1
+                    && ($qwenLegs[0]['origin'] ?? null) === $serverOrigin
+                    && ($qwenLegs[0]['destination'] ?? null) === $serverDestination) {
+                    $legs = $qwenLegs;
+                } else {
+                    $legs = [[
+                        'origin' => $serverOrigin,
+                        'destination' => $serverDestination,
+                        'departure_date' => $qwenLegs[0]['departure_date'] ?? null,
+                    ]];
+                }
+            } else {
+                $legs = $qwenLegs;
             }
         }
 
@@ -118,6 +158,11 @@ final class SemanticPlanValidator
             $depart = $legs[0]['departure_date'];
         }
         $return = $this->resolveDate($plan->returnDate, $rejects);
+
+        // Apply demotion trip_type after return date is known.
+        if ($falseOpenJawDemoted) {
+            $tripTypeForced = $return !== null ? 'return' : 'one_way';
+        }
 
         $cabin = $this->normalizeCabin($plan->cabin, $rejects);
         $airline = null;
@@ -218,6 +263,8 @@ final class SemanticPlanValidator
                 'missing' => $missing,
                 'explicit_route_precedence' => $explicitRoute,
                 'stale_route_contamination' => $stale,
+                'false_open_jaw_demoted' => $falseOpenJawDemoted,
+                'server_single_route' => $serverSingleRoute,
             ];
         }
 
@@ -279,6 +326,8 @@ final class SemanticPlanValidator
             'missing' => array_values(array_unique($missing)),
             'explicit_route_precedence' => $explicitRoute,
             'stale_route_contamination' => $stale,
+            'false_open_jaw_demoted' => $falseOpenJawDemoted,
+            'server_single_route' => $serverSingleRoute,
         ];
     }
 
@@ -381,7 +430,9 @@ final class SemanticPlanValidator
         $m = mb_strtolower($message);
 
         return (bool) preg_match(
-            '/\b(from|to|into|out of|fly|flight|ticket|lahore|doha|jeddah|medina|islamabad|karachi|lhe|doh|jed|med|isb|khi)\b/u',
+            '/\b(from|to|into|out of|fly|flight|ticket|se|wapis|wapas|return|'.
+            'lahore|lahor|doha|jeddah|medina|islamabad|karachi|dubai|dubay|'.
+            'lhe|doh|jed|med|isb|khi|dxb)\b/u',
             $m
         );
     }
