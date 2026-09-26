@@ -5,7 +5,10 @@ namespace App\Services\Ai\Semantic;
 use App\Data\Ai\SemanticPlan;
 use App\Data\Ai\TravelIntent;
 use App\Models\AiConversation;
+use App\Services\Ai\ConversationIntentRouter;
 use App\Services\Ai\FlightSearchConfirmationGate;
+use App\Services\Ai\Hybrid\HybridTravelPipeline;
+use App\Services\Ai\OpenDomainResponseService;
 use App\Services\Ai\TravelIntentExtractor;
 
 /**
@@ -20,6 +23,9 @@ final class SemanticBrain
         private readonly SemanticResponseComposer $composer,
         private readonly FlightSearchConfirmationGate $flightConfirmation,
         private readonly TravelIntentExtractor $extractor,
+        private readonly OpenDomainResponseService $openDomain,
+        private readonly ConversationIntentRouter $intentRouter,
+        private readonly HybridTravelPipeline $hybrid,
     ) {}
 
     public function isEnabled(): bool
@@ -145,6 +151,29 @@ final class SemanticBrain
         }
 
         return match (true) {
+            $this->messageWantsBookingLookup($message)
+                || $plan->domain === 'booking'
+                || $plan->operation === 'lookup' => [
+                    'kind' => 'booking_lookup',
+                    'meta' => $meta,
+                ],
+            $this->shouldAnswerGeneralKnowledge($message, $plan) => $this->generalAnswer(
+                $conversation,
+                $message,
+                $plan,
+                $meta,
+                $calls,
+                $semanticLatency
+            ),
+            $this->shouldAnswerCurrentUnverified($message, $plan) => $this->currentUnverified(
+                $conversation,
+                $message,
+                $plan,
+                $meta,
+                $calls,
+                $semanticLatency,
+                $composerLatency
+            ),
             $plan->domain === 'support' || $plan->operation === 'handoff' => [
                 'kind' => 'handoff',
                 'meta' => $meta,
@@ -154,10 +183,6 @@ final class SemanticBrain
             $plan->domain === 'knowledge' => [
                 'kind' => 'knowledge',
                 'query' => $plan->knowledgeQuery ?: $message,
-                'meta' => $meta,
-            ],
-            $plan->domain === 'booking' || $plan->operation === 'lookup' => [
-                'kind' => 'booking_lookup',
                 'meta' => $meta,
             ],
             $plan->domain === 'travel' => $this->travelPath(
@@ -336,12 +361,19 @@ final class SemanticBrain
         int $calls,
         int $semanticLatency,
     ): array {
-        $fallback = 'Happy to help with that. For live travel prices or JetPakistan bookings I can also search flights once you share a route and date.';
+        $structured = $this->openDomain->tryRespond($message);
+        $fallback = is_array($structured) && filled($structured['message'] ?? null)
+            ? (string) $structured['message']
+            : 'Happy to help with that. For live travel prices or JetPakistan bookings I can also search flights once you share a route and date.';
         $composed = $this->composer->compose($conversation, $message, $plan, [
             'domain' => 'general',
             'response_intent' => $plan->responseIntent,
+            'open_domain_category' => is_array($structured) ? ($structured['category'] ?? 'GENERAL_KNOWLEDGE') : 'GENERAL_KNOWLEDGE',
         ], $fallback);
         $meta = $this->withComposerMeta($meta, $calls, $semanticLatency, $composed);
+        if (is_array($structured) && is_array($structured['meta'] ?? null)) {
+            $meta = array_merge($meta, $structured['meta']);
+        }
 
         return [
             'kind' => 'answer',
@@ -349,6 +381,38 @@ final class SemanticBrain
             'message' => (string) $composed['message'],
             'meta' => $meta,
         ];
+    }
+
+    private function messageWantsBookingLookup(string $message): bool
+    {
+        return $this->hybrid->detectBookingLookup($message);
+    }
+
+    private function shouldAnswerGeneralKnowledge(string $message, SemanticPlan $plan): bool
+    {
+        // Never hijack explicit support handoff or booking operation plans.
+        if ($plan->operation === 'handoff' || $plan->domain === 'support' || $plan->domain === 'booking') {
+            return false;
+        }
+
+        $category = $this->intentRouter->classifyOpenDomain($message);
+        if ($category === 'GENERAL_KNOWLEDGE' || $category === 'CASUAL_CONVERSATION' || $category === 'OUT_OF_DOMAIN_SAFE') {
+            // Qwen often mislabels harmless general questions as tenant knowledge.
+            if (in_array($plan->domain, ['knowledge', 'general', 'casual'], true)) {
+                return ! $this->intentRouter->isJetPakistanKnowledgeQuestion($message);
+            }
+        }
+
+        return false;
+    }
+
+    private function shouldAnswerCurrentUnverified(string $message, SemanticPlan $plan): bool
+    {
+        if ($this->intentRouter->classifyOpenDomain($message) === 'CURRENT_UNVERIFIED') {
+            return true;
+        }
+
+        return $plan->domain === 'current';
     }
 
     private function isBareAffirmativeOrEmptyTravel(string $message): bool

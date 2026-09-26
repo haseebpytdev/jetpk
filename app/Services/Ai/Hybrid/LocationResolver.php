@@ -35,6 +35,7 @@ final class LocationResolver
         'peshawar' => 'PEW', 'pew' => 'PEW', 'پشاور' => 'PEW', 'peshawr' => 'PEW',
         'sharjah' => 'SHJ', 'shj' => 'SHJ', 'شارجہ' => 'SHJ',
         'istanbul' => 'IST', 'ist' => 'IST', 'استنبول' => 'IST',
+        'ankara' => 'ESB', 'esb' => 'ESB',
         'toronto' => 'YYZ', 'yyz' => 'YYZ',
         'manchester' => 'MAN', 'man' => 'MAN',
         'heathrow' => 'LHR', 'lhr' => 'LHR', 'gatwick' => 'LGW', 'lgw' => 'LGW',
@@ -52,7 +53,7 @@ final class LocationResolver
     ];
 
     private const KNOWN_IATA = [
-        'LHE', 'ISB', 'KHI', 'PEW', 'MUX', 'LYP', 'DXB', 'JED', 'RUH', 'MED', 'DOH', 'IST',
+        'LHE', 'ISB', 'KHI', 'PEW', 'MUX', 'LYP', 'DXB', 'JED', 'RUH', 'MED', 'DOH', 'IST', 'ESB',
         'LHR', 'LGW', 'MAN', 'YYZ', 'SHJ', 'AUH', 'MCT', 'BKK', 'KUL', 'JFK', 'EWR', 'LGA',
     ];
 
@@ -146,8 +147,28 @@ final class LocationResolver
             }
         }
 
+        // "Lahore to Jeddah then Medina to Lahore" / "LHE to JED then MED to LHE"
+        // (no leading "from" — common live UAT phrasing).
+        // Do not use a bare [a-z]{3} alternative first — it steals city prefixes ("Lah" from Lahore).
+        if (count($legs) < 2 && preg_match(
+            '/\b([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+to\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+(?:and\s+then|then)\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+to\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\b/u',
+            $hay,
+            $m
+        ) === 1) {
+            $o1 = $this->resolve(trim($m[1]));
+            $d1 = $this->resolve(trim($m[2]));
+            $o2 = $this->resolve(trim($m[3]));
+            $d2 = $this->resolve(trim($m[4]));
+            if ($o1['code'] && $d1['code'] && $o2['code'] && $d2['code']) {
+                $legs = [
+                    ['origin' => $o1['code'], 'destination' => $d1['code']],
+                    ['origin' => $o2['code'], 'destination' => $d2['code']],
+                ];
+            }
+        }
+
         if (count($legs) < 2 && preg_match_all(
-            '/\bfrom\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+to\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\b/u',
+            '/\b(?:from\s+)?([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+to\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\b/u',
             $hay,
             $matches,
             PREG_SET_ORDER

@@ -110,10 +110,14 @@ final class OpenDomainResponseService
             $core = "E = mc² is Einstein's mass-energy equivalence: mass and energy are two forms of the same thing.";
         } elseif (preg_match('/capital of france/u', $lower) === 1) {
             $core = 'Paris is the capital of France.';
+        } elseif (preg_match('/capital of japan/u', $lower) === 1) {
+            $core = 'Tokyo is the capital of Japan.';
         } elseif (preg_match('/\bpi\b/u', $lower) === 1) {
             $core = 'Pi (π) is the ratio of a circle\'s circumference to its diameter — about 3.14159.';
         } elseif (preg_match('/photosynthesis/u', $lower) === 1) {
             $core = 'Photosynthesis is how plants turn light, water, and carbon dioxide into energy (sugars) and oxygen.';
+        } elseif (preg_match('/\bwhat is an api\b|\bexplain what an api is\b|\bwhat(\'s| is) an api\b/u', $lower) === 1) {
+            $core = 'An API (Application Programming Interface) is a defined way for software systems to talk to each other — requesting data or actions through agreed endpoints and formats.';
         } elseif (preg_match('/\bundefined\b/u', $lower) === 1) {
             $core = 'In C, undefined behavior means the language standard does not define what the program must do for that case — compilers may assume it never happens.';
         } elseif (preg_match('/\bnull hypothesis\b|\bhypothesis in statistics\b/u', $lower) === 1) {

@@ -589,14 +589,28 @@
 
 .typingBubble {
   display: flex;
-  gap: 4px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
   padding: 13px 15px;
   border: 1px solid #e0e8e4;
   border-radius: 15px;
   background: #f5f8f7;
 }
 
-.typingBubble span {
+.thinkingLabel {
+  color: #3f5a50;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.typingDots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.typingBubble .typingDots span {
   width: 6px;
   height: 6px;
   border-radius: 999px;
@@ -604,11 +618,11 @@
   animation: typing 1s infinite ease-in-out;
 }
 
-.typingBubble span:nth-child(2) {
+.typingBubble .typingDots span:nth-child(2) {
   animation-delay: 120ms;
 }
 
-.typingBubble span:nth-child(3) {
+.typingBubble .typingDots span:nth-child(3) {
   animation-delay: 240ms;
 }
 
@@ -918,7 +932,7 @@
     transition: none;
   }
 
-  .typingBubble span {
+  .typingBubble .typingDots span {
     animation: none;
   }
 }

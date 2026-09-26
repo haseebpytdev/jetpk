@@ -160,7 +160,17 @@ final class TravelIntentCanonicalizer
             'time_preference' => $merged['time_preference'] ?? $prior['time_preference'] ?? null,
             'currency' => $merged['currency'] ?? $prior['currency'] ?? 'PKR',
             'clarification_required' => $clarification,
+            'trip_type' => $merged['trip_type'] ?? $prior['trip_type'] ?? null,
+            'legs' => $merged['legs'] ?? $prior['legs'] ?? null,
         ];
+
+        // Explicit current-turn multi-leg / open-jaw must not be dropped by prior merge.
+        if (isset($raw['legs']) && is_array($raw['legs']) && $raw['legs'] !== []) {
+            $out['legs'] = $raw['legs'];
+        }
+        if (isset($raw['trip_type']) && is_string($raw['trip_type']) && $raw['trip_type'] !== '') {
+            $out['trip_type'] = $raw['trip_type'];
+        }
 
         // Confidence gate: do not allow searchable intent without resolved O/D
         if (in_array($out['intent'], ['flight_search', 'group_search'], true)

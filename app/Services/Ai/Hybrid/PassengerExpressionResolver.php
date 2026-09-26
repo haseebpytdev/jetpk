@@ -29,6 +29,13 @@ final class PassengerExpressionResolver
             $prov['adults'] = 'EXPLICIT_USER';
         }
 
+        // Relational pair inference only when no explicit adult count was stated.
+        // Covers safe companion phrases; never invents children or larger parties.
+        if ($adults === null && $this->impliesTwoAdults($hay, $original)) {
+            $adults = 2;
+            $prov['adults'] = 'RELATIONAL_PAIR';
+        }
+
         if (preg_match('/(\d+)\s*(child|children|kids?|bacha)\b/iu', $hay, $m) === 1
             || preg_match('/(aik|ek|one|ایک)\s*(bacha|child|بچہ)/u', $hay, $m) === 1) {
             $children = is_numeric($m[1] ?? null) ? (int) $m[1] : 1;
@@ -57,5 +64,32 @@ final class PassengerExpressionResolver
             'infants' => $infants,
             'provenance' => $prov,
         ];
+    }
+
+    /**
+     * Safe two-adult companion phrases (speaker + spouse/partner, or us-two).
+     * Explicit numeric adult counts must already have taken precedence upstream.
+     */
+    private function impliesTwoAdults(string $hay, string $original): bool
+    {
+        $text = mb_strtolower($hay.' '.$original);
+
+        if (preg_match(
+            '/\b('
+            .'me\s+and\s+my\s+(wife|husband|partner|spouse)'
+            .'|me,?\s+my\s+(wife|husband|partner|spouse)'
+            .'|my\s+(wife|husband|partner|spouse)\s+and\s+i'
+            .'|myself\s+and\s+my\s+(wife|husband|partner|spouse)'
+            .'|my\s+(wife|husband|partner|spouse)\s+and\s+myself'
+            .'|both\s+of\s+us'
+            .'|us\s+two'
+            .'|the\s+two\s+of\s+us'
+            .')\b/u',
+            $text
+        ) === 1) {
+            return true;
+        }
+
+        return false;
     }
 }
