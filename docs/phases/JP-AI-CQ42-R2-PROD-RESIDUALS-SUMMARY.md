@@ -69,8 +69,10 @@ None.
 
 ## Tests executed
 ```
-php vendor/bin/phpunit --filter "Cq42R2ProdResiduals|QwenOpenDomainAuthorityCq42|QwenLiveUatResidualClosureCq41|QwenSemanticBrain28"
+php vendor/bin/phpunit --filter "Cq42R2ProdResiduals|QwenOpenDomainAuthorityCq42|QwenLiveUatResidualClosureCq41|QwenSemanticBrain28|QwenSemanticFallbackOrder39"
 ```
+Final pre-merge combined gate: **61 passed / 0 failed / 675 assertions** (includes Order-39).
+Evidence: `docs/evidence/jp-ai-cq42-r2-prod-residuals/02-final-combined-gate.md`.
 
 ## Known limitations
 - Real Qwen not exercised in this loop; production certification pending post-merge deploy.
@@ -85,7 +87,8 @@ php vendor/bin/phpunit --filter "Cq42R2ProdResiduals|QwenOpenDomainAuthorityCq42
 Revert this branch / revert merge commit; restore prior open-domain JSON-only prompt and validator behavior.
 
 ## Final status
+CQ42_R2_ENGINEERING_CLOSURE=PASS
 READY_FOR_REVIEW=YES
-READY_FOR_MERGE=NO
+READY_FOR_MERGE=YES
 READY_FOR_DEPLOY=NO
 PRODUCTION_VERIFIED=NO
