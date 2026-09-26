@@ -1,0 +1,19 @@
+{
+    "message": "dubay se lahor wapis",
+    "classify": null,
+    "status": "ok",
+    "src": null,
+    "cue": null,
+    "ret_req": null,
+    "oj": null,
+    "route": null,
+    "fb": null,
+    "intent": null,
+    "body": "Sure. May I start with your name, please?",
+    "meta": {
+        "lead_capture_pending": true,
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0
+    },
+    "requires_confirmation": false
+}

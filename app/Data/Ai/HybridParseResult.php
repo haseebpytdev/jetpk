@@ -47,6 +47,8 @@ final class HybridParseResult
             'FALSE_ONE_WAY',
             'EXPLICIT_ROUTE_PRECEDENCE',
             'STALE_ROUTE_CONTAMINATION',
+            'EXPLICIT_RETURN_TRIP_CUE',
+            'RETURN_DATE_REQUIRED',
         ] as $key) {
             if (isset($this->provenance[$key])) {
                 $meta[$key] = $this->provenance[$key];

@@ -1,0 +1,85 @@
+{
+    "latency_ms": 10538.6,
+    "conversation_id": "0ee08887-da34-4c5d-b045-dacb2430d3ce",
+    "message": "Just to confirm: LHE to DXB, one-way, 2026-11-08, 1 adult. Shall I search?",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+        "SEMANTIC_BRAIN_CALLED": "YES",
+        "SEMANTIC_BRAIN_VALID": "YES",
+        "SEMANTIC_BRAIN_FALLBACK": "NO",
+        "MODEL_ID": "local",
+        "MODEL_CALLS": 1,
+        "SEMANTIC_LATENCY_MS": 10433,
+        "COMPOSER_LATENCY_MS": 0,
+        "TOTAL_MODEL_LATENCY_MS": 10433,
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "SEMANTIC_INTENT": "prepare_search",
+        "SERVER_OPERATION": "prepare_search",
+        "SEMANTIC_DOMAIN": "travel",
+        "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+        "STALE_ROUTE_CONTAMINATION": 0,
+        "SERVER_SINGLE_ROUTE": "LHE-DXB",
+        "QWEN_SEMANTIC_VALID": "YES",
+        "TOOL_EXECUTED": "NONE",
+        "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+        "SERVER_OPEN_DOMAIN_CATEGORY": null,
+        "QWEN_DOMAIN": "travel",
+        "QWEN_OPERATION": "prepare_search",
+        "CONFIRMATION_REQUIRED": true,
+        "confirmation_required": true,
+        "confirmation_type": "flight_search",
+        "CONFIRMATION_BEFORE_SEARCH": true,
+        "CONFIRMATION_SNAPSHOT": {
+            "origin": "LHE",
+            "destination": "DXB",
+            "departure_date": "2026-11-08",
+            "return_date": null,
+            "trip_type": "one_way",
+            "adults": 1,
+            "children": 0,
+            "infants": 0,
+            "cabin": null,
+            "airline": null,
+            "max_stops": null,
+            "currency": "PKR",
+            "legs": [
+                {
+                    "origin": "LHE",
+                    "destination": "DXB"
+                }
+            ]
+        },
+        "PRE_CONFIRM_SEARCH_CALLS": 0,
+        "SEMANTIC_PLAN_VALID": "YES"
+    },
+    "intent": {
+        "intent": "flight_search",
+        "origin": "LHE",
+        "destination": "DXB",
+        "depart_date": "2026-11-08",
+        "return_date": null,
+        "adults": 1,
+        "children": 0,
+        "infants": 0,
+        "cabin": null,
+        "airline": null,
+        "max_stops": null,
+        "budget": null,
+        "time_preference": null,
+        "currency": "PKR",
+        "mode": "QWEN_SEMANTIC",
+        "trip_type": "one_way",
+        "legs": [
+            {
+                "origin": "LHE",
+                "destination": "DXB"
+            }
+        ]
+    },
+    "state": "AI_ACTIVE",
+    "status": "confirm",
+    "mode": "QWEN_SEMANTIC",
+    "requires_confirmation": true
+}

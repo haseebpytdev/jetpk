@@ -1,0 +1,17 @@
+{
+    "latency_ms": 44.8,
+    "conversation_id": "4a67826b-bc66-46d3-a3f4-45409e456fba",
+    "message": "I have connected you with our support queue. A team member will reply in this chat. AI replies are paused. Tap Resume AI anytime to continue with the assistant.",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0
+    },
+    "intent": null,
+    "state": "WAITING_FOR_HUMAN",
+    "status": "waiting_for_human",
+    "mode": "STRUCTURED_FALLBACK",
+    "requires_confirmation": false,
+    "checks": {
+        "handoff": true
+    }
+}
