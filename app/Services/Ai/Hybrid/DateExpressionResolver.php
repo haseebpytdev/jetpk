@@ -96,12 +96,22 @@ final class DateExpressionResolver
     }
 
     /**
+     * Shared return-date cue (optional "on") + date token capture group 1.
+     * Consumed by resolveReturn and ServerTravelSignals strip — do not duplicate.
+     */
+    public function returnDateCueRegex(): string
+    {
+        return '/(?:,?\s*)?(?:return(?:ing)?(?:\s+date)?|wapas|make it return)(?:\s+on)?\s+'
+            .'(\d{1,2}\s+[A-Za-z]+|\d{4}-\d{2}-\d{2}|\d{1,2}(?:st|nd|rd|th)?)/iu';
+    }
+
+    /**
      * @return array{date: ?string, clarify: bool, clarify_message: ?string, provenance: ?string}
      */
     public function resolveReturn(string $normalized, string $original, ?Carbon $now = null): array
     {
         $now ??= Carbon::now();
-        if (preg_match('/(?:return(?:ing)?|wapas|make it return)\s+(\d{1,2}\s+\w+|\d{4}-\d{2}-\d{2}|\d{1,2}(?:st|nd|rd|th)?)/i', $normalized, $m) === 1
+        if (preg_match($this->returnDateCueRegex(), $normalized, $m) === 1
             || preg_match('/\b(\d{1,2})\s+ko\s+wapas\b/u', $normalized, $m) === 1) {
             try {
                 $token = $m[1];

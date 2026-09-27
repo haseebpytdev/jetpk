@@ -201,15 +201,66 @@ final class AiConversationalAgent
         }
 
         if ($reply === '') {
+            $rejectReason = $plainTextCategory
+                ? 'empty_message'
+                : ($jsonValid ? 'empty_message' : 'invalid_json');
             $rejectMeta = [
                 'OPEN_DOMAIN_FALLBACK' => 'YES',
-                'OPEN_DOMAIN_REJECT_REASON' => $plainTextCategory
-                    ? 'empty_message'
-                    : ($jsonValid ? 'empty_message' : 'invalid_json'),
+                'OPEN_DOMAIN_REJECT_REASON' => $rejectReason,
                 'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
             ];
             if (! $plainTextCategory && ! $jsonValid) {
                 $rejectMeta = array_merge($rejectMeta, $this->sanitizedOpenDomainDiagnostics($content, $result));
+            }
+
+            // CQ42-R3: one bounded GENERAL_KNOWLEDGE retry on empty_message only.
+            if ($category === 'GENERAL_KNOWLEDGE' && $rejectReason === 'empty_message') {
+                $retryPayload = $payload;
+                $retryPayload['policy']['retry_plain_text_only'] = true;
+                $retryPayload['instruction'] = 'Reply in plain text only. Write 1–3 concise sentences. No JSON. No tool or action payload.';
+                $retryResult = $this->provider->complete([
+                    ['role' => 'system', 'content' => $this->openDomainSystemPrompt()],
+                    ['role' => 'user', 'content' => (string) json_encode($retryPayload, JSON_UNESCAPED_UNICODE)],
+                ], 280);
+                $retryLatency = max(0, (int) ($retryResult['latency_ms'] ?? 0));
+                $retryMeta = [
+                    'OPEN_DOMAIN_RETRY' => 'YES',
+                    'OPEN_DOMAIN_RETRY_REASON' => 'empty_message',
+                    'OPEN_DOMAIN_FIRST_ATTEMPT_LATENCY_MS' => $latency,
+                    'OPEN_DOMAIN_RETRY_LATENCY_MS' => $retryLatency,
+                    'OPEN_DOMAIN_LATENCY_MS' => $latency + $retryLatency,
+                    'GENERAL_MODEL_CALLS' => 2,
+                ];
+                if (($retryResult['ok'] ?? false) && trim((string) ($retryResult['content'] ?? '')) !== '') {
+                    $retryContent = (string) $retryResult['content'];
+                    $retryReply = (string) ($this->extractPlainTextAnswer($retryContent) ?? '');
+                    $retryValidation = $this->validateGeneralKnowledgeReply($retryReply, $brand);
+                    if ($retryValidation['accepted']) {
+                        return [
+                            'mode' => 'LLM_ASSISTED',
+                            'message' => $retryReply,
+                            'latency_ms' => $latency + $retryLatency,
+                            'calls' => 2,
+                            'meta' => array_merge($meta, $attemptMeta, $retryMeta, [
+                                'OPEN_DOMAIN_FALLBACK' => 'NO',
+                                'OPEN_DOMAIN_REJECT_REASON' => 'accepted',
+                                'OPEN_DOMAIN_ACCEPTED' => 'YES',
+                                'ANSWER_GROUNDED' => 'MODEL_GENERAL',
+                                'FINAL_RESPONSE_SOURCE' => 'QWEN_OPEN_DOMAIN',
+                                'LLM_SYNTHESIS' => 'MODEL',
+                            ]),
+                        ];
+                    }
+                    $rejectMeta['OPEN_DOMAIN_REJECT_REASON'] = (string) ($retryValidation['reject_reason'] ?? 'empty_message');
+                }
+
+                return [
+                    'mode' => null,
+                    'message' => '',
+                    'latency_ms' => $latency + $retryLatency,
+                    'calls' => 2,
+                    'meta' => array_merge($meta, $attemptMeta, $rejectMeta, $retryMeta),
+                ];
             }
 
             return [
@@ -217,7 +268,44 @@ final class AiConversationalAgent
                 'message' => '',
                 'latency_ms' => $latency,
                 'calls' => 1,
-                'meta' => array_merge($meta, $attemptMeta, $rejectMeta),
+                'meta' => array_merge($meta, $attemptMeta, $rejectMeta, [
+                    'GENERAL_MODEL_CALLS' => 1,
+                ]),
+            ];
+        }
+
+        // CQ42-R3.1: one shared GK safety path for first attempt and retry.
+        if ($category === 'GENERAL_KNOWLEDGE') {
+            $gkValidation = $this->validateGeneralKnowledgeReply($reply, $brand);
+            if (! $gkValidation['accepted']) {
+                return [
+                    'mode' => null,
+                    'message' => '',
+                    'latency_ms' => $latency,
+                    'calls' => 1,
+                    'meta' => array_merge($meta, $attemptMeta, [
+                        'OPEN_DOMAIN_FALLBACK' => 'YES',
+                        'OPEN_DOMAIN_REJECT_REASON' => (string) ($gkValidation['reject_reason'] ?? 'empty_message'),
+                        'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
+                        'GENERAL_MODEL_CALLS' => 1,
+                    ]),
+                ];
+            }
+
+            return [
+                'mode' => 'LLM_ASSISTED',
+                'message' => $reply,
+                'latency_ms' => $latency,
+                'calls' => 1,
+                'meta' => array_merge($meta, $attemptMeta, [
+                    'LLM_SYNTHESIS' => 'YES',
+                    'OPEN_DOMAIN_FALLBACK' => 'NO',
+                    'OPEN_DOMAIN_REJECT_REASON' => 'accepted',
+                    'OPEN_DOMAIN_ACCEPTED' => 'YES',
+                    'ANSWER_GROUNDED' => 'MODEL_GENERAL',
+                    'SMART_REDIRECT' => $capabilities !== [] ? 'YES' : 'NO',
+                    'GENERAL_MODEL_CALLS' => 1,
+                ]),
             ];
         }
 
@@ -265,20 +353,6 @@ final class AiConversationalAgent
             }
         }
 
-        if ($category === 'GENERAL_KNOWLEDGE' && $this->isTravelOnlyRefusal($reply)) {
-            return [
-                'mode' => null,
-                'message' => '',
-                'latency_ms' => $latency,
-                'calls' => 1,
-                'meta' => array_merge($meta, $attemptMeta, [
-                    'OPEN_DOMAIN_FALLBACK' => 'YES',
-                    'OPEN_DOMAIN_REJECT_REASON' => 'travel_refusal',
-                    'LLM_SYNTHESIS' => 'FALLBACK_STRUCTURED',
-                ]),
-            ];
-        }
-
         if (strcasecmp($brand, 'JetPakistan') !== 0
             && preg_match('/\bjetpakistan\b/ui', $reply) === 1) {
             return [
@@ -304,10 +378,35 @@ final class AiConversationalAgent
                 'OPEN_DOMAIN_FALLBACK' => 'NO',
                 'OPEN_DOMAIN_REJECT_REASON' => 'accepted',
                 'OPEN_DOMAIN_ACCEPTED' => 'YES',
-                'ANSWER_GROUNDED' => $category === 'GENERAL_KNOWLEDGE' ? 'MODEL_GENERAL' : 'N/A',
+                'ANSWER_GROUNDED' => 'N/A',
                 'SMART_REDIRECT' => $capabilities !== [] ? 'YES' : 'NO',
+                'GENERAL_MODEL_CALLS' => 1,
             ]),
         ];
+    }
+
+    /**
+     * Shared GENERAL_KNOWLEDGE post-generation safety (first attempt + empty_message retry).
+     *
+     * @return array{accepted: bool, reject_reason: ?string}
+     */
+    private function validateGeneralKnowledgeReply(string $reply, string $brand): array
+    {
+        if (trim($reply) === '') {
+            return ['accepted' => false, 'reject_reason' => 'empty_message'];
+        }
+        if ($this->looksLikeToolOrActionPayload($reply)) {
+            return ['accepted' => false, 'reject_reason' => 'tool_action_payload_rejected'];
+        }
+        if ($this->isTravelOnlyRefusal($reply)) {
+            return ['accepted' => false, 'reject_reason' => 'travel_refusal'];
+        }
+        if (strcasecmp($brand, 'JetPakistan') !== 0
+            && preg_match('/\bjetpakistan\b/ui', $reply) === 1) {
+            return ['accepted' => false, 'reject_reason' => 'brand_leak_rejected'];
+        }
+
+        return ['accepted' => true, 'reject_reason' => null];
     }
 
     /**

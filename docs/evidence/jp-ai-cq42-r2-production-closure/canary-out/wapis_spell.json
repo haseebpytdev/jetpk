@@ -1,0 +1,23 @@
+{
+    "latency_ms": 51.2,
+    "conversation_id": "bcb420ac-60ad-4565-b0d7-0f0932dfaa2b",
+    "message": "Sure. May I start with your name, please?",
+    "meta": {
+        "lead_capture_pending": true,
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0
+    },
+    "intent": null,
+    "state": "AI_ACTIVE",
+    "status": "ok",
+    "mode": "STRUCTURED_FALLBACK",
+    "requires_confirmation": false,
+    "checks": {
+        "route_dxb_lhe": false,
+        "not_open_jaw": true,
+        "server_route": true,
+        "no_search": true,
+        "false_open_jaw_zero": true,
+        "trip_not_english_return_forced": true
+    }
+}

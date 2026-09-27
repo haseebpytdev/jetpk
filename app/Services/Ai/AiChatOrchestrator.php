@@ -371,6 +371,7 @@ final class AiChatOrchestrator
 
         // HELP-FIRST lead precedence:
         // SECURITY → EXPLICIT HANDOFF → CONFIRMATION → STRONG INTENT → LEAD EXTRACTION
+        $leadCaptureOverridden = false;
         if (($state['lead_capture_pending'] ?? false) && ! $userMessageAlreadyStored) {
             $this->leadService->extractOpportunisticLeadFields($conversation, $cleanMessage);
             $conversation->refresh();
@@ -378,6 +379,7 @@ final class AiChatOrchestrator
 
             if ($this->intentRouter->shouldOverrideLeadCapture($cleanMessage)) {
                 // Keep lead pending; continue assisting on this turn.
+                $leadCaptureOverridden = true;
             } else {
                 return $this->handleConversationalLeadTurn($conversation, $cleanMessage);
             }
@@ -404,6 +406,9 @@ final class AiChatOrchestrator
             'AI_GROUP_SEARCH_READ_CALLS' => 0,
             'LOCAL_LLM_REQUIRED_FOR_CORE' => false,
         ];
+        if ($leadCaptureOverridden) {
+            $baseMeta['LEAD_CAPTURE_OVERRIDDEN'] = 'YES';
+        }
 
         $brand = $this->assistantBrandName();
         $capabilities = $this->tenantCapabilityLabels();
@@ -1577,6 +1582,31 @@ final class AiChatOrchestrator
                 'meta' => array_merge($meta, [
                     'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
                     'DATE_REQUIRED' => true,
+                    'RETURN_DATE_REQUIRED' => (($intent->tripType ?? '') === 'return') ? 'YES' : 'NO',
+                ]),
+            ]);
+        }
+
+        // Server-owned: return trip cannot confirm/search without return_date.
+        if (($intent->tripType ?? '') === 'return' && ($intent->returnDate === null || $intent->returnDate === '')) {
+            $body = 'What return date should I use for '.$intent->origin.' to '.$intent->destination.'?';
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+                'mode' => $mode,
+                'intent' => $intent->toArray(),
+            ]);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'clarify',
+                'mode' => $mode,
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'recommendations' => [],
+                'actions' => $this->resolveResponseActions(),
+                'meta' => array_merge($meta, [
+                    'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+                    'RETURN_DATE_REQUIRED' => 'YES',
                 ]),
             ]);
         }

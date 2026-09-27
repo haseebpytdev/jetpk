@@ -1,0 +1,41 @@
+{
+    "latency_ms": 4724.9,
+    "conversation_id": "9a90f7df-c8f5-4e19-90c6-8c6f8f0fde6f",
+    "message": "Of course — I can help you check a booking. Please send your booking reference and the email or phone number used when you booked.",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+        "SEMANTIC_BRAIN_CALLED": "YES",
+        "SEMANTIC_BRAIN_VALID": "YES",
+        "SEMANTIC_BRAIN_FALLBACK": "NO",
+        "MODEL_ID": "local",
+        "MODEL_CALLS": 1,
+        "SEMANTIC_LATENCY_MS": 4627,
+        "COMPOSER_LATENCY_MS": 0,
+        "TOTAL_MODEL_LATENCY_MS": 4627,
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "SEMANTIC_INTENT": "human",
+        "SERVER_OPERATION": "handoff",
+        "SEMANTIC_DOMAIN": "support",
+        "STALE_ROUTE_CONTAMINATION": 0,
+        "QWEN_SEMANTIC_VALID": "YES",
+        "TOOL_EXECUTED": "NONE",
+        "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+        "SERVER_OPEN_DOMAIN_CATEGORY": null,
+        "QWEN_DOMAIN": "support",
+        "QWEN_OPERATION": "handoff",
+        "intent": {
+            "intent": "booking_lookup"
+        }
+    },
+    "intent": null,
+    "state": "AI_ACTIVE",
+    "status": "clarify",
+    "mode": "QWEN_SEMANTIC",
+    "requires_confirmation": false,
+    "checks": {
+        "verification": true,
+        "no_leak": true
+    }
+}

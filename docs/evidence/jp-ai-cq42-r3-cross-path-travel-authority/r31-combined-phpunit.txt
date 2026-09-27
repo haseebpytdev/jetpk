@@ -1,0 +1,97 @@
+PHPUnit 12.5.24 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.3.30
+Configuration: C:\Users\khadi\ota-jetpk\phpunit.xml
+
+Time: 06:06.991, Memory: 100.00 MB
+
+Cq42R2Prod Residuals (Tests\Feature\Ai\Cq42R2ProdResiduals)
+ ✔ Plain text general knowledge accepted without json
+ ✔ General holdouts plain text matrix
+ ✔ Extract route wapis single dxb lhe
+ ✔ Validator demotes qwen invented reciprocal open jaw
+ ✔ Wapis chat not open jaw clarify
+ ✔ Wapas variant and contaminated prior open jaw
+ ✔ Real open jaw non regression
+ ✔ Return trip non regression
+ ✔ English return without date stays return and clarifies
+ ✔ Validator english return cue not demoted to one way
+ ✔ Validator english return does not inherit prior return date
+ ✔ Validator wapis still one way not english return
+ ✔ High risk still deterministic no qwen open domain
+
+Cq42R3Cross Path Travel Authority (Tests\Feature\Ai\Cq42R3CrossPathTravelAuthority)
+ ✔ Server signals route and dates
+ ✔ Qwen support handoff cannot hijack wapas route
+ ✔ Qwen booking cannot hijack explicit travel route
+ ✔ Explicit user handoff still wins
+ ✔ Help first alias travel overrides pending lead
+ ✔ Bare name lead non regression
+ ✔ Hybrid return cue on invalid json fallback
+ ✔ Hybrid dated return confirmation on invalid json
+ ✔ Semantic dated return overrides qwen null return
+ ✔ Hybrid pipeline return cue unit
+ ✔ Invalid json spelling alias not handoff
+ ✔ Return on date semantic overrides qwen null return
+ ✔ Return on date hybrid invalid json confirmation
+ ✔ Return only on date followup preserves prior depart
+ ✔ Gk retry brand leak rejected
+ ✔ Gk retry tool payload rejected
+ ✔ Gk retry success telemetry
+ ✔ Gk no retry outside empty message
+
+Qwen Live Uat Residual Closure Cq41 (Tests\Feature\Ai\QwenLiveUatResidualClosureCq41)
+ ✔ Relational passenger me and my wife adults two
+ ✔ Explicit adult count outranks relational pair
+ ✔ Live wife prompt confirms two adults no search
+ ✔ Explicit open jaw legs not rewritten
+ ✔ Semantic contradictory open jaw legs canonicalized
+ ✔ Stale one way state yields to explicit open jaw
+ ✔ General knowledge qwen primary not canned only
+ ✔ General knowledge holdouts use qwen not quick note
+ ✔ General knowledge invalid qwen falls back structured
+ ✔ Open domain latency telemetry single qwen call after planner bypass
+ ✔ Open domain fallback preserves attempted latency without fake success call
+ ✔ General knowledge provider unavailable falls back
+ ✔ Current live gates server authoritative
+ ✔ Latest emirates fare does not fabricate price
+ ✔ Current weather remains source limited
+ ✔ Booking lookup not generic handoff
+ ✔ Talk to support still handoffs
+ ✔ Cross precedence wife doha then three adults
+ ✔ Order39 valid qwen confirms
+ ✔ Order39 forced fallback skips legacy llm
+
+Qwen Open Domain Authority Cq42 (Tests\Feature\Ai\QwenOpenDomainAuthorityCq42)
+ ✔ Server current authority beats qwen booking lookup
+ ✔ Server current authority beats qwen support handoff for news
+ ✔ Server general authority beats qwen current for gravity
+ ✔ Server general authority beats qwen support for sky
+ ✔ Server general authority beats qwen booking for wifi
+ ✔ Travel refusal from qwen is rejected not shown
+ ✔ Explicit booking still routes verification
+ ✔ Explicit handoff still works
+ ✔ Current topic classifier holdouts
+ ✔ Order39 non regression primary confirmation
+ ✔ Relational and open jaw non regression
+ ✔ High risk is deterministic never calls qwen open domain
+
+Qwen Semantic Brain28 (Tests\Feature\Ai\QwenSemanticBrain28)
+ ✔ Valid plan requires confirmation before search
+ ✔ Open jaw semantic plan not collapsed
+ ✔ Invalid json falls back without frozen turn
+ ✔ Invented iata rejected falls back
+ ✔ Forbidden execute now key rejected
+ ✔ Current weather no hallucinated temp
+ ✔ Handoff via semantic plan
+ ✔ Explicit route overrides stale context
+ ✔ Missing date asks only for date
+
+Qwen Semantic Fallback Order39 (Tests\Feature\Ai\QwenSemanticFallbackOrder39)
+ ✔ Exact primary valid qwen confirms without pii first
+ ✔ Exact primary forced semantic failure goes hybrid not llm
+ ✔ Lead pending plus invalid semantic still hybrid confirms
+ ✔ Non travel semantic fallback may still use open domain paths
+
+OK (76 tests, 791 assertions)
+{"tool":"phpunit","result":"passed","tests":76,"passed":76,"assertions":791,"duration_ms":367148}

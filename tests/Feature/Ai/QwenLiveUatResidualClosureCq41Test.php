@@ -407,6 +407,8 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
         $scripted = new ScriptedInferenceProvider(
             [
                 '{invalid-json-not-an-object',
+                // CQ42-R3 may bound-retry GENERAL_KNOWLEDGE empty_message once.
+                '{invalid-json-not-an-object',
             ],
             true,
             [75],
@@ -418,11 +420,13 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
         $this->assertSame('YES', $turn['response']->json('meta.OPEN_DOMAIN_FALLBACK'));
         $this->assertSame('FALLBACK_STRUCTURED', $turn['response']->json('meta.LLM_SYNTHESIS'));
         $this->assertSame(0, (int) $turn['response']->json('meta.SEMANTIC_LATENCY_MS'));
-        $this->assertSame(75, (int) $turn['response']->json('meta.OPEN_DOMAIN_LATENCY_MS'));
-        $this->assertSame(75, (int) $turn['response']->json('meta.TOTAL_MODEL_LATENCY_MS'));
-        // Planner bypassed; only the attempted open-domain call counts.
-        $this->assertSame(1, (int) $turn['response']->json('meta.MODEL_CALLS'));
-        $this->assertSame(1, $scripted->callCount());
+        $odLatency = (int) $turn['response']->json('meta.OPEN_DOMAIN_LATENCY_MS');
+        $calls = (int) $turn['response']->json('meta.MODEL_CALLS');
+        // Without retry: 75/1. With empty_message retry: 150/2.
+        $this->assertContains($odLatency, [75, 150]);
+        $this->assertContains($calls, [1, 2]);
+        $this->assertSame($odLatency, (int) $turn['response']->json('meta.TOTAL_MODEL_LATENCY_MS'));
+        $this->assertSame($calls, $scripted->callCount());
         $this->assertStringNotContainsString('QWEN_LAT', (string) $turn['response']->json('message'));
     }
 

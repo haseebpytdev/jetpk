@@ -8,6 +8,7 @@ use App\Services\Ai\Hybrid\AirlineResolver;
 use App\Services\Ai\Hybrid\DateExpressionResolver;
 use App\Services\Ai\Hybrid\LocationResolver;
 use App\Services\Ai\Hybrid\PassengerExpressionResolver;
+use App\Services\Ai\Hybrid\ServerTravelSignals;
 use App\Services\Ai\TravelIntentCanonicalizer;
 use Carbon\Carbon;
 
@@ -22,6 +23,7 @@ final class SemanticPlanValidator
         private readonly AirlineResolver $airlines,
         private readonly TravelIntentCanonicalizer $canonicalizer,
         private readonly PassengerExpressionResolver $passengers,
+        private readonly ServerTravelSignals $travelSignals,
     ) {}
 
     /**
@@ -167,8 +169,20 @@ final class SemanticPlanValidator
         }
         $return = $this->resolveDate($plan->returnDate, $rejects);
 
-        // CQ42-R2.1: English return/round-trip cue ≠ Roman-Urdu wapis/wapas.
-        $explicitReturnCue = $this->messageImpliesExplicitReturnTripCue($userMessage);
+        // CQ42-R3: explicit current-turn user dates outrank Qwen omission/wrong fields.
+        $priorDepart = isset($priorState['depart_date']) && is_string($priorState['depart_date'])
+            ? (string) $priorState['depart_date']
+            : null;
+        $tripDates = $this->travelSignals->resolveTripDates($userMessage, Carbon::now(), $priorDepart);
+        if ($tripDates['depart_explicit'] && is_string($tripDates['depart_date'])) {
+            $depart = $tripDates['depart_date'];
+        }
+        if ($tripDates['return_explicit'] && is_string($tripDates['return_date'])) {
+            $return = $tripDates['return_date'];
+        }
+
+        // CQ42-R2.1/R3: English return/round-trip cue ≠ Roman-Urdu wapis/wapas (shared helper).
+        $explicitReturnCue = $this->travelSignals->explicitReturnTripCue($userMessage);
 
         // Apply demotion trip_type after return date / return cue are known.
         if ($falseOpenJawDemoted) {
@@ -486,6 +500,10 @@ final class SemanticPlanValidator
 
     private function messageImpliesExplicitRoute(string $message): bool
     {
+        $route = $this->travelSignals->explicitTravelRoute($message);
+        if ($route['explicit']) {
+            return true;
+        }
         $m = mb_strtolower($message);
 
         return (bool) preg_match(
@@ -494,26 +512,5 @@ final class SemanticPlanValidator
             'lhe|doh|jed|med|isb|khi|dxb)\b/u',
             $m
         );
-    }
-
-    /**
-     * English return / round-trip trip-shape cue.
-     * Does NOT treat Roman-Urdu wapis/wapas as round-trip.
-     */
-    private function messageImpliesExplicitReturnTripCue(string $message): bool
-    {
-        $m = mb_strtolower(trim($message));
-        if ($m === '') {
-            return false;
-        }
-        // Roman-Urdu reverse-route wording is route direction, not English round-trip.
-        if (preg_match('/\b(wapis|wapas)\b|واپس/u', $m) === 1) {
-            return false;
-        }
-
-        return preg_match(
-            '/\bround[\s-]?trips?\b|\breturn\s+tickets?\b|\breturn\s+flights?\b|\breturn\b/u',
-            $m
-        ) === 1;
     }
 }

@@ -1,0 +1,24 @@
+{
+    "latency_ms": 27.5,
+    "conversation_id": "ae802469-f666-46b6-9df8-b56be441dd2e",
+    "message": "I'm not the right place for medical, legal, or investment advice. For emergencies, contact local emergency services or a qualified professional. If you have a travel question, I'm here for that.",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+        "open_domain_category": "HIGH_RISK",
+        "ANSWER_GROUNDED": "N\/A",
+        "LLM_SYNTHESIS": "FALLBACK_STRUCTURED",
+        "OPEN_DOMAIN_FALLBACK": "YES",
+        "SMART_REDIRECT": "YES"
+    },
+    "intent": null,
+    "state": "AI_ACTIVE",
+    "status": "ok",
+    "mode": "STRUCTURED_FALLBACK",
+    "requires_confirmation": false,
+    "checks": {
+        "deterministic": true,
+        "not_qwen_open": true
+    }
+}
