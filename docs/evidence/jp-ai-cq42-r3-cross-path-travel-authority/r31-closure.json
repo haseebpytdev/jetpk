@@ -1,0 +1,29 @@
+{
+  "phase": "JP-AI-CQ42-R3.1-DATE-PHRASE-GK-RETRY-SAFETY",
+  "previous_head": "013bc3ff25163bd110c2ac061906a4224b457e35",
+  "branch": "work/jp-ai-cq42-r3-cross-path-travel-authority",
+  "pr": 34,
+  "local_tests": {
+    "total": 76,
+    "pass": 76,
+    "fail": 0,
+    "assertions": 791,
+    "evidence": "r31-combined-phpunit.txt"
+  },
+  "gates": {
+    "RETURN_ON_DATE_PARSE": "PASS",
+    "RETURN_ONLY_ON_DATE_FOLLOWUP": "PASS",
+    "SEMANTIC_RETURN_ON_DATE": "PASS",
+    "HYBRID_RETURN_ON_DATE": "PASS",
+    "DATED_RETURN_CONFIRMATION": "PASS",
+    "GK_RETRY_BOUNDED": "PASS",
+    "GK_RETRY_BRAND_LEAK_REJECTED": "PASS",
+    "GK_RETRY_TOOL_PAYLOAD_REJECTED": "PASS",
+    "GK_RETRY_SUCCESS_TELEMETRY": "PASS",
+    "GENERAL_MODEL_CALLS_NORMAL": 1,
+    "GENERAL_MODEL_CALLS_RETRY_MAX": 2
+  },
+  "ready_for_merge": false,
+  "ready_for_deploy": false,
+  "production_verified": false
+}

@@ -86,16 +86,9 @@ final class ServerTravelSignals
         $returnExplicit = $returnDate !== null;
 
         $stripped = $normalized;
-        if (preg_match(
-            '/(?:,?\s*)?(?:return(?:ing)?(?:\s+date)?|wapas|make it return)\s+(\d{1,2}\s+[A-Za-z]+|\d{4}-\d{2}-\d{2}|\d{1,2}(?:st|nd|rd|th)?)/iu',
-            $normalized,
-            $m
-        ) === 1) {
-            $stripped = trim((string) preg_replace(
-                '/(?:,?\s*)?(?:return(?:ing)?(?:\s+date)?|wapas|make it return)\s+'.preg_quote($m[1], '/').'/iu',
-                '',
-                $normalized
-            ));
+        $cueRegex = $this->dates->returnDateCueRegex();
+        if (preg_match($cueRegex, $normalized, $m) === 1) {
+            $stripped = trim((string) preg_replace($cueRegex, '', $normalized, 1));
             if ($returnDate === null) {
                 // Re-resolve against the isolated return token when the full-string matcher missed.
                 $retry = $this->dates->resolveReturn('return '.$m[1], 'return '.$m[1], $now);
@@ -109,7 +102,7 @@ final class ServerTravelSignals
 
         // Bare "return 15 October" / "return on 15 October" → do not invent a new departure.
         $returnOnly = $stripped === ''
-            || preg_match('/^(please\s+)?(make\s+it\s+)?return(ing)?(\s+date)?\.?$/iu', $stripped) === 1;
+            || preg_match('/^(please\s+)?(make\s+it\s+)?return(ing)?(\s+date)?(\s+on)?\.?$/iu', $stripped) === 1;
 
         $departDate = null;
         $departExplicit = false;

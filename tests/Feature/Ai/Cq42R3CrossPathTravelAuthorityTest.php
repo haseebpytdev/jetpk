@@ -138,9 +138,19 @@ class Cq42R3CrossPathTravelAuthorityTest extends TestCase
         $this->assertTrue($dates['depart_explicit']);
         $this->assertTrue($dates['return_explicit']);
 
+        $datesOn = $signals->resolveTripDates('Lahore to Dubai on 10 October, return on 15 October');
+        $this->assertSame('2026-10-10', $datesOn['depart_date']);
+        $this->assertSame('2026-10-15', $datesOn['return_date']);
+        $this->assertTrue($datesOn['depart_explicit']);
+        $this->assertTrue($datesOn['return_explicit']);
+
         $follow = $signals->resolveTripDates('return 15 October', null, '2026-10-10');
         $this->assertNull($follow['depart_date']);
         $this->assertSame('2026-10-15', $follow['return_date']);
+
+        $followOn = $signals->resolveTripDates('return on 15 October', null, '2026-10-10');
+        $this->assertNull($followOn['depart_date'], 'return-on follow-up must not rewrite departure');
+        $this->assertSame('2026-10-15', $followOn['return_date']);
     }
 
     public function test_qwen_support_handoff_cannot_hijack_wapas_route(): void
@@ -358,5 +368,215 @@ class Cq42R3CrossPathTravelAuthorityTest extends TestCase
         $this->assertStringNotContainsString('your name', $body);
         $this->assertNotSame('YES', $turn['response']->json('meta.OPEN_JAW_DETECTED'));
         $this->assertSame(0, (int) ($turn['response']->json('meta.LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK') ?? 0));
+    }
+
+    public function test_return_on_date_semantic_overrides_qwen_null_return(): void
+    {
+        $validator = app(SemanticPlanValidator::class);
+        $plan = SemanticPlan::fromModelArray([
+            'domain' => 'travel',
+            'intent' => 'flight_search',
+            'operation' => 'prepare_search',
+            'travel' => [
+                'trip_type' => 'return',
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'legs' => [['origin' => 'LHE', 'destination' => 'DXB', 'departure_date' => '2026-10-10']],
+                'return_date' => null,
+                'adults' => 1,
+            ],
+            'missing' => ['return_date'],
+        ]);
+        $validated = $validator->validate(
+            $plan,
+            [],
+            'Lahore to Dubai on 10 October, return on 15 October'
+        );
+        $this->assertTrue($validated['valid']);
+        $this->assertSame('return', $validated['intent']->tripType);
+        $this->assertSame('2026-10-10', $validated['intent']->departDate);
+        $this->assertSame('2026-10-15', $validated['intent']->returnDate);
+        $this->assertNotContains('return_date', $validated['missing']);
+    }
+
+    public function test_return_on_date_hybrid_invalid_json_confirmation(): void
+    {
+        $this->enableSemanticAi();
+        $this->rebindInference(new ScriptedInferenceProvider(['not-valid-json{{{']));
+
+        $turn = $this->chat(
+            str_repeat('r3h', 16),
+            'Lahore to Dubai on 10 October, return on 15 October'
+        );
+        $turn['response']->assertOk();
+        $this->assertSame(0, (int) ($turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS') ?? 0));
+        $intent = $turn['response']->json('intent')
+            ?? ($turn['response']->json('meta.intent') ?? []);
+        $this->assertSame('return', $intent['trip_type'] ?? null);
+        $this->assertSame('2026-10-10', $intent['depart_date'] ?? null);
+        $this->assertSame('2026-10-15', $intent['return_date'] ?? null);
+        $confirmed = (bool) $turn['response']->json('requires_confirmation')
+            || (bool) ($turn['response']->json('meta.CONFIRMATION_REQUIRED') ?? false)
+            || str_contains(mb_strtolower((string) $turn['response']->json('message')), 'confirm')
+            || str_contains(mb_strtolower((string) $turn['response']->json('message')), 'shall i');
+        $this->assertTrue($confirmed);
+    }
+
+    public function test_return_only_on_date_followup_preserves_prior_depart(): void
+    {
+        $validator = app(SemanticPlanValidator::class);
+        $plan = SemanticPlan::fromModelArray([
+            'domain' => 'travel',
+            'intent' => 'flight_search',
+            'operation' => 'prepare_search',
+            'travel' => [
+                'trip_type' => 'return',
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'legs' => [['origin' => 'LHE', 'destination' => 'DXB', 'departure_date' => null]],
+                'return_date' => null,
+                'adults' => 1,
+            ],
+            'missing' => [],
+        ]);
+        $validated = $validator->validate(
+            $plan,
+            [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => '2026-10-10',
+                'trip_type' => 'return',
+            ],
+            'return on 15 October'
+        );
+        $this->assertSame('2026-10-10', $validated['intent']->departDate);
+        $this->assertSame('2026-10-15', $validated['intent']->returnDate);
+        $this->assertSame('return', $validated['intent']->tripType);
+    }
+
+    public function test_gk_retry_brand_leak_rejected(): void
+    {
+        $this->enableSemanticAi();
+        $scripted = new ScriptedInferenceProvider([
+            '{"message":""}',
+            'JetPakistan can help you with this general question.',
+        ], true, [11, 22]);
+        $this->rebindInference($scripted);
+
+        $conversation = AiConversation::query()->create([
+            'public_id' => (string) \Illuminate\Support\Str::uuid(),
+            'visitor_token_hash' => hash('sha256', str_repeat('r3i', 16)),
+            'channel' => 'web',
+            'state' => AiConversation::STATE_AI_ACTIVE,
+        ]);
+        $agent = app(\App\Services\Ai\AiConversationalAgent::class);
+        $result = $agent->tryOpenDomainRespond(
+            $conversation,
+            'What is a stock?',
+            'GENERAL_KNOWLEDGE',
+            'Acme Travel Desk',
+            ['flights'],
+            []
+        );
+
+        $this->assertIsArray($result);
+        $this->assertNull($result['mode']);
+        $this->assertSame('YES', $result['meta']['OPEN_DOMAIN_FALLBACK'] ?? null);
+        $this->assertSame('brand_leak_rejected', $result['meta']['OPEN_DOMAIN_REJECT_REASON'] ?? null);
+        $this->assertSame('YES', $result['meta']['OPEN_DOMAIN_RETRY'] ?? null);
+        $this->assertSame('empty_message', $result['meta']['OPEN_DOMAIN_RETRY_REASON'] ?? null);
+        $this->assertSame(2, (int) ($result['meta']['GENERAL_MODEL_CALLS'] ?? 0));
+        $this->assertSame(2, $scripted->callCount());
+        $this->assertSame('', (string) ($result['message'] ?? ''));
+    }
+
+    public function test_gk_retry_tool_payload_rejected(): void
+    {
+        $this->enableSemanticAi();
+        $scripted = new ScriptedInferenceProvider([
+            '{"message":""}',
+            'I will call_tool execute_now to look that up.',
+        ], true, [5, 7]);
+        $this->rebindInference($scripted);
+
+        $conversation = AiConversation::query()->create([
+            'public_id' => (string) \Illuminate\Support\Str::uuid(),
+            'visitor_token_hash' => hash('sha256', str_repeat('r3j', 16)),
+            'channel' => 'web',
+            'state' => AiConversation::STATE_AI_ACTIVE,
+        ]);
+        $agent = app(\App\Services\Ai\AiConversationalAgent::class);
+        $result = $agent->tryOpenDomainRespond(
+            $conversation,
+            'What is gravity?',
+            'GENERAL_KNOWLEDGE',
+            'JetPakistan',
+            ['flights'],
+            []
+        );
+
+        $this->assertIsArray($result);
+        $this->assertNull($result['mode']);
+        $this->assertSame('YES', $result['meta']['OPEN_DOMAIN_FALLBACK'] ?? null);
+        $this->assertSame('tool_action_payload_rejected', $result['meta']['OPEN_DOMAIN_REJECT_REASON'] ?? null);
+        $this->assertSame('YES', $result['meta']['OPEN_DOMAIN_RETRY'] ?? null);
+        $this->assertSame(2, (int) ($result['calls'] ?? 0));
+        $this->assertSame(2, $scripted->callCount());
+    }
+
+    public function test_gk_retry_success_telemetry(): void
+    {
+        $this->enableSemanticAi();
+        $scripted = new ScriptedInferenceProvider([
+            '{"message":""}',
+            'A stock is a share of ownership in a company.',
+        ], true, [15, 25]);
+        $this->rebindInference($scripted);
+
+        $turn = $this->chat(str_repeat('r3k', 16), 'What is a stock?');
+        $turn['response']->assertOk();
+        $this->assertSame('YES', $turn['response']->json('meta.OPEN_DOMAIN_RETRY'));
+        $this->assertSame('empty_message', $turn['response']->json('meta.OPEN_DOMAIN_RETRY_REASON'));
+        $this->assertNotNull($turn['response']->json('meta.OPEN_DOMAIN_FIRST_ATTEMPT_LATENCY_MS'));
+        $this->assertNotNull($turn['response']->json('meta.OPEN_DOMAIN_RETRY_LATENCY_MS'));
+        $this->assertSame(2, (int) $turn['response']->json('meta.GENERAL_MODEL_CALLS'));
+        $this->assertSame(2, (int) $turn['response']->json('meta.MODEL_CALLS'));
+        $this->assertSame('NO', $turn['response']->json('meta.OPEN_DOMAIN_FALLBACK'));
+        $this->assertSame('YES', $turn['response']->json('meta.OPEN_DOMAIN_ACCEPTED'));
+        $this->assertSame('accepted', $turn['response']->json('meta.OPEN_DOMAIN_REJECT_REASON'));
+        $this->assertSame('QWEN_OPEN_DOMAIN', $turn['response']->json('meta.FINAL_RESPONSE_SOURCE'));
+        $this->assertSame('MODEL_GENERAL', $turn['response']->json('meta.ANSWER_GROUNDED'));
+        $this->assertSame(2, $scripted->callCount());
+    }
+
+    public function test_gk_no_retry_outside_empty_message(): void
+    {
+        $this->enableSemanticAi();
+        $scripted = new ScriptedInferenceProvider([
+            'I will call_tool execute_now to look that up.',
+        ]);
+        $this->rebindInference($scripted);
+
+        $conversation = AiConversation::query()->create([
+            'public_id' => (string) \Illuminate\Support\Str::uuid(),
+            'visitor_token_hash' => hash('sha256', str_repeat('r3l', 16)),
+            'channel' => 'web',
+            'state' => AiConversation::STATE_AI_ACTIVE,
+        ]);
+        $agent = app(\App\Services\Ai\AiConversationalAgent::class);
+        $result = $agent->tryOpenDomainRespond(
+            $conversation,
+            'What is gravity?',
+            'GENERAL_KNOWLEDGE',
+            'JetPakistan',
+            ['flights'],
+            []
+        );
+
+        $this->assertIsArray($result);
+        $this->assertSame('tool_action_payload_rejected', $result['meta']['OPEN_DOMAIN_REJECT_REASON'] ?? null);
+        $this->assertNotSame('YES', $result['meta']['OPEN_DOMAIN_RETRY'] ?? null);
+        $this->assertSame(1, $scripted->callCount());
+        $this->assertSame(1, (int) ($result['meta']['GENERAL_MODEL_CALLS'] ?? 0));
     }
 }

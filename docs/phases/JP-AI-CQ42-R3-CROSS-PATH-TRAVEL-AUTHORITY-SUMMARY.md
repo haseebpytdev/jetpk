@@ -47,9 +47,21 @@ Close four CQ42-R2 production-blocking residuals: Qwen support hijack of wapas, 
 
 ## Tests executed
 ```
-php vendor/bin/phpunit --filter "Cq42R3CrossPathTravelAuthority|Cq42R2ProdResiduals|QwenOpenDomainAuthorityCq42|QwenLiveUatResidualClosureCq41|QwenSemanticFallbackOrder39|QwenSemanticBrain28"
+php vendor/bin/phpunit tests/Feature/Ai/Cq42R3CrossPathTravelAuthorityTest.php \
+  tests/Feature/Ai/Cq42R2ProdResidualsTest.php \
+  tests/Feature/Ai/QwenOpenDomainAuthorityCq42Test.php \
+  tests/Feature/Ai/QwenLiveUatResidualClosureCq41Test.php \
+  tests/Feature/Ai/QwenSemanticFallbackOrder39Test.php \
+  tests/Feature/Ai/QwenSemanticBrain28Test.php
 ```
-72 passed / 0 failed / 745 assertions.
+R3 local: 72 passed / 0 failed / 745 assertions.
+R3.1 local: 76 passed / 0 failed / 791 assertions (`docs/evidence/jp-ai-cq42-r3-cross-path-travel-authority/r31-combined-phpunit.txt`).
+
+## CQ42-R3.1 addendum (same PR #34)
+Narrow review blockers closed without new PR:
+
+1. **Return date grammar** — shared `DateExpressionResolver::returnDateCueRegex()` accepts optional `on` (`return on 15 October`, `returning on …`, `return date on …`). `ServerTravelSignals::resolveTripDates()` strips the full cue before departure parsing so return-only follow-ups never rewrite `depart_date`.
+2. **GK retry validation** — `AiConversationalAgent::validateGeneralKnowledgeReply()` is the single post-generation path for first attempt and `empty_message` retry (non-empty, tool/action, travel-only refusal, tenant brand-leak). Retry success now records `OPEN_DOMAIN_ACCEPTED` / `ANSWER_GROUNDED`.
 
 ## Final status
 READY_FOR_REVIEW=YES
