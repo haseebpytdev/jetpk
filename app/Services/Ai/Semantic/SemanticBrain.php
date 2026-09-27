@@ -426,9 +426,20 @@ final class SemanticBrain
             ];
         }
 
+        // Qwen operation=clarify is advisory. When the server has already completed a
+        // searchable return (both dates + OD), proceed to confirmation instead of a
+        // generic "share origin/destination/date" clarify (CQ42-R3 production residual).
+        $serverCompleteSearchable = $intent->isSearchable()
+            && $intent->departDate !== null
+            && $intent->origin !== null
+            && $intent->destination !== null
+            && $missing === []
+            && ($tripType !== 'return' || $intent->returnDate !== null);
+        $advisoryClarify = $plan->operation === 'clarify' && ! $serverCompleteSearchable;
+
         if (
             $missing !== []
-            || $plan->operation === 'clarify'
+            || $advisoryClarify
             || ! $intent->isSearchable()
             || $intent->departDate === null
             || ($tripType === 'return' && $intent->returnDate === null)

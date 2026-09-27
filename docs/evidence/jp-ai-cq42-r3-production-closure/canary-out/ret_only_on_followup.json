@@ -1,0 +1,71 @@
+{
+    "latency_ms": 10800.8,
+    "conversation_id": "bbafd7b7-b19f-4d9b-9953-6e6e9af286c8",
+    "message": "Please share origin and destination cities (for example Lahore to Dubai).",
+    "meta": {
+        "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+        "AI_GROUP_SEARCH_READ_CALLS": 0,
+        "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+        "SEMANTIC_BRAIN_CALLED": "YES",
+        "SEMANTIC_BRAIN_VALID": "NO",
+        "SEMANTIC_BRAIN_FALLBACK": "YES",
+        "MODEL_ID": "local",
+        "MODEL_CALLS": 1,
+        "SEMANTIC_LATENCY_MS": 10672,
+        "COMPOSER_LATENCY_MS": 0,
+        "TOTAL_MODEL_LATENCY_MS": 10672,
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC_FALLBACK",
+        "SEMANTIC_INTENT": "open_jaw",
+        "SERVER_OPERATION": "clarify",
+        "SEMANTIC_DOMAIN": "travel",
+        "SEMANTIC_FALLBACK_REASON": "invalid_plan",
+        "validator_rejects": [
+            "open_jaw_requires_two_legs"
+        ],
+        "LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK": 0,
+        "llm_bypassed": true,
+        "provenance": {
+            "intent": "EXPLICIT_USER",
+            "return_date": "DETERMINISTIC_NORMALIZATION",
+            "EXPLICIT_RETURN_TRIP_CUE": "YES",
+            "trip_type": "EXPLICIT_USER"
+        },
+        "intent": {
+            "intent": "unknown",
+            "origin": null,
+            "destination": null,
+            "depart_date": null,
+            "return_date": "2026-10-15",
+            "adults": 1,
+            "children": 0,
+            "infants": 0,
+            "cabin": null,
+            "airline": null,
+            "max_stops": null,
+            "budget": null,
+            "time_preference": null,
+            "currency": "PKR",
+            "mode": "STRUCTURED_FALLBACK",
+            "trip_type": "return",
+            "legs": null
+        },
+        "clarification_required": true,
+        "clarification_message": "Please share origin and destination cities (for example Lahore to Dubai).",
+        "clarification_options": [],
+        "ranking_preference": null,
+        "language": "en",
+        "EXPLICIT_RETURN_TRIP_CUE": "YES"
+    },
+    "intent": null,
+    "state": "AI_ACTIVE",
+    "status": "clarify",
+    "mode": "STRUCTURED_FALLBACK",
+    "requires_confirmation": false,
+    "checks": {
+        "depart_preserved": false,
+        "return_set": false,
+        "not_rewritten_depart": true,
+        "trip_return": true,
+        "no_search": true
+    }
+}
