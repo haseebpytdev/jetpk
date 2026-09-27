@@ -63,6 +63,12 @@ final class ConversationIntentRouter
             return true;
         }
 
+        // Shared progressive travel authority (destination-led / origin-only / refinements).
+        $progressive = $this->travelSignals->progressiveTravelAuthority($message);
+        if ($progressive['active'] || $progressive['explicit_route'] || $progressive['travel_start'] || $progressive['travel_refinement']) {
+            return true;
+        }
+
         // Route-like travel requests — master-data aliases via shared server signal (dubay/lahor/…).
         $route = $this->travelSignals->explicitTravelRoute($message);
         if ($route['explicit']) {
@@ -70,7 +76,7 @@ final class ConversationIntentRouter
         }
         if (
             preg_match('/\b(lahore|lahor|karachi|islamabad|dubai|dubay|jeddah|london|doha|lhe|dxb|khi|isb|jed)\b/u', $lower) === 1
-            && preg_match('/\b(to|from|se|flight|flights|ticket|tomorrow|today|adults?|passengers?|people|wapis|wapas)\b/u', $lower) === 1
+            && preg_match('/\b(to|from|se|flight|flights|ticket|tomorrow|today|adults?|passengers?|people|wapis|wapas|jana)\b/u', $lower) === 1
         ) {
             return true;
         }
@@ -85,7 +91,7 @@ final class ConversationIntentRouter
 
         // Cabin / passenger / trip-shape refinements while shopping.
         if (preg_match(
-            '/\b(business|economy|premium\s*economy|first)\s*class\b|\bcabin\b|\b(make (it|that) )?(business|economy)\b|\b\d+\s*adults?\b|\bcome back from\b|\bchange (it|that) to\b|\buse \w+ instead\b|\bis (it|that) (business|return|economy)\b|\bwhat date\b/u',
+            '/\b(business|economy|premium\s*economy|first)\s*class\b|\bcabin\b|\b(make (it|that) )?(business|economy)\b|\b\d+\s*adults?\b|\bhum\s+dono\b|\bham\s+dono\b|\bcome back (from|on)\b|\bchange (it|that) to\b|\buse \w+ instead\b|\bis (it|that) (business|return|economy)\b|\bwhat date\b/u',
             $lower
         ) === 1) {
             return true;
@@ -103,6 +109,16 @@ final class ConversationIntentRouter
         }
 
         return false;
+    }
+
+    /**
+     * Travel refinement / progressive start must outrank lead FSM field interpretation.
+     */
+    public function isTravelAuthorityTurn(string $message, ?array $priorState = null): bool
+    {
+        $auth = $this->travelSignals->progressiveTravelAuthority($message, $priorState);
+
+        return $auth['active'] || $auth['travel_start'] || $auth['travel_refinement'];
     }
 
     public function isJetPakistanKnowledgeQuestion(string $message): bool
@@ -239,7 +255,8 @@ final class ConversationIntentRouter
         return mb_strlen($name) >= 2
             && mb_strlen($name) <= 80
             && preg_match('/^[\p{L}\p{M}\s\'\-\.]+$/u', $name) === 1
-            && preg_match('/\b(to|from|flight|need|email|phone|tomorrow|help|what|where|how)\b/ui', $name) !== 1
-            && str_word_count($name) <= 4;
+            && preg_match('/\b(to|from|flight|need|want|email|phone|tomorrow|help|what|where|how|make|change|switch|actually|again|adults?|class|business|economy|kal|hum|dono|wapis|wapas|return|sunday|monday|friday|dubai|doha|lahore|jana)\b/ui', $name) !== 1
+            && str_word_count($name) <= 4
+            && ! $this->isTravelAuthorityTurn($name);
     }
 }

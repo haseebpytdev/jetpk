@@ -84,9 +84,12 @@ final class PassengerExpressionResolver
             .'|both\s+of\s+us'
             .'|us\s+two'
             .'|the\s+two\s+of\s+us'
+            .'|hum\s+dono'
+            .'|ham\s+dono'
             .')\b/u',
             $text
-        ) === 1) {
+        ) === 1
+            || preg_match('/ہم\s*دونوں/u', $original) === 1) {
             return true;
         }
 

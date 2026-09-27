@@ -1,0 +1,35 @@
+{
+  "phase": "JP-AI-CQ43-R1.1-BOOKING-DETOUR-API-CONTRACT",
+  "branch": "work/jp-ai-cq43-r1-progressive-conversation-authority",
+  "previous_head": "76bf9fcbad566857bfdc9b6f957858c58a871fcc",
+  "parent_phase": "JP-AI-CQ43-R1-PROGRESSIVE-CONVERSATION-AUTHORITY",
+  "cq43_r1_1_local_closure": "PASS",
+  "booking_public_contract": "PASS",
+  "booking_tests": {
+    "public_ai_assistant_plus_presenter": {
+      "total": 21,
+      "passed": 21,
+      "failed": 0,
+      "assertions": 153
+    }
+  },
+  "combined_gate": {
+    "total": 113,
+    "passed": 113,
+    "failed": 0,
+    "assertions": 1124
+  },
+  "gates": {
+    "BOOKING_PUBLIC_CONTRACT": "PASS",
+    "BOOKING_NOT_FOUND_STATUS": "PASS",
+    "BOOKING_TOP_LEVEL_PAYLOAD": "PASS",
+    "BOOKING_PRESENTER_PAYLOAD": "PASS",
+    "BOOKING_MID_TRIP": "PASS",
+    "TRAVEL_STATE_PRESERVED_AFTER_BOOKING": "PASS",
+    "BOOKING_DETOUR_PRESERVES_PAX": "PASS",
+    "BOOKING_IDENTITY_BYPASS": 0,
+    "BOOKING_DATA_LEAK": 0
+  },
+  "deploy": "NO",
+  "pii": "none"
+}

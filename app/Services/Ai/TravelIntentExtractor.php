@@ -50,6 +50,16 @@ final class TravelIntentExtractor
         return $this->patcher->merge($prior, $intent);
     }
 
+    public function detectBookingLookup(string $message): bool
+    {
+        return $this->hybrid->detectBookingLookup($message);
+    }
+
+    public function detectHandoff(string $message): bool
+    {
+        return $this->hybrid->detectHandoff($message);
+    }
+
     /**
      * Reserved optional assist — disabled unless config enables it. Never used for fare/tool authority.
      *

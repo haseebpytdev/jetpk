@@ -327,13 +327,37 @@ final class AiChatOrchestrator
                     ['AI_FLIGHT_SEARCH_READ_CALLS' => 0, 'AI_GROUP_SEARCH_READ_CALLS' => 0]
                 );
             }
-            $this->flightConfirmation->clearPending($conversation);
-
+            // Preserve pending confirmation / shopping travel fields across explicit handoff.
             return $this->beginHandoff(
                 $conversation,
                 'user_requested',
                 'STRUCTURED_FALLBACK',
                 ['AI_FLIGHT_SEARCH_READ_CALLS' => 0, 'AI_GROUP_SEARCH_READ_CALLS' => 0]
+            );
+        }
+
+        // Explicit booking lookup BEFORE pending flight confirmation (CQ43-R1).
+        if ($this->extractor->detectBookingLookup($cleanMessage)) {
+            return $this->replyBookingLookup(
+                $conversation,
+                $cleanMessage,
+                'STRUCTURED_FALLBACK',
+                ['AI_FLIGHT_SEARCH_READ_CALLS' => 0, 'AI_GROUP_SEARCH_READ_CALLS' => 0, 'BOOKING_DETOUR' => 'YES']
+            );
+        }
+
+        // Resume travel shopping after a booking detour.
+        if ($this->isResumeTravelSearchIntent($cleanMessage, $state)) {
+            return $this->replyResumeTravelAfterBookingDetour($conversation, $cleanMessage);
+        }
+
+        // Continue booking verification without mutating travel shopping fields.
+        if ($this->shouldContinueBookingLookup($state, $cleanMessage)) {
+            return $this->replyBookingLookup(
+                $conversation,
+                $cleanMessage,
+                'STRUCTURED_FALLBACK',
+                ['AI_FLIGHT_SEARCH_READ_CALLS' => 0, 'AI_GROUP_SEARCH_READ_CALLS' => 0, 'BOOKING_DETOUR' => 'YES']
             );
         }
 
@@ -369,19 +393,26 @@ final class AiChatOrchestrator
             ]);
         }
 
-        // HELP-FIRST lead precedence:
-        // SECURITY → EXPLICIT HANDOFF → CONFIRMATION → STRONG INTENT → LEAD EXTRACTION
+        // HELP-FIRST lead precedence (CQ43-R1):
+        // SECURITY → EXPLICIT HANDOFF → EXPLICIT BOOKING → PENDING CONFIRM → TRAVEL AUTHORITY → opportunistic lead → LEAD FSM
         $leadCaptureOverridden = false;
         if (($state['lead_capture_pending'] ?? false) && ! $userMessageAlreadyStored) {
-            $this->leadService->extractOpportunisticLeadFields($conversation, $cleanMessage);
-            $conversation->refresh();
-            $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+            $travelAuthority = $this->intentRouter->isTravelAuthorityTurn($cleanMessage, $state)
+                || $this->intentRouter->shouldOverrideLeadCapture($cleanMessage);
 
-            if ($this->intentRouter->shouldOverrideLeadCapture($cleanMessage)) {
-                // Keep lead pending; continue assisting on this turn.
+            if ($travelAuthority) {
+                // Assist travel THIS turn; never steal travel text as lead_name first.
                 $leadCaptureOverridden = true;
             } else {
-                return $this->handleConversationalLeadTurn($conversation, $cleanMessage);
+                $this->leadService->extractOpportunisticLeadFields($conversation, $cleanMessage);
+                $conversation->refresh();
+                $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+
+                if ($this->intentRouter->shouldOverrideLeadCapture($cleanMessage)) {
+                    $leadCaptureOverridden = true;
+                } else {
+                    return $this->handleConversationalLeadTurn($conversation, $cleanMessage);
+                }
             }
         } elseif (! ($state['lead_capture_pending'] ?? false) && $this->embedCapabilityAllows(EmbedTenantCapability::LEAD_CAPTURE)) {
             $leadPrompt = $this->leadService->leadCapturePromptPayload(
@@ -1413,8 +1444,34 @@ final class AiChatOrchestrator
     private function replyBookingLookup(AiConversation $conversation, string $message, string $mode, array $meta): array
     {
         $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+
+        // Preserve active travel shopping under a nested detour flag — never overwrite O/D/pax.
+        if (empty($state['booking_detour_active'])) {
+            $state['booking_detour_active'] = true;
+            $state['travel_snapshot_before_booking'] = [
+                'origin' => $state['origin'] ?? null,
+                'destination' => $state['destination'] ?? null,
+                'depart_date' => $state['depart_date'] ?? null,
+                'return_date' => $state['return_date'] ?? null,
+                'trip_type' => $state['trip_type'] ?? null,
+                'adults' => $state['adults'] ?? null,
+                'children' => $state['children'] ?? null,
+                'infants' => $state['infants'] ?? null,
+                'cabin' => $state['cabin'] ?? null,
+                'intent' => $state['intent'] ?? null,
+            ];
+        }
+
         $state = $this->bookingLookupTool->patchState($state, $message);
-        $state['intent'] = 'booking_lookup';
+        // Keep travel intent intact; booking lives under detour flags only.
+        if (! isset($state['intent']) || $state['intent'] === 'booking_lookup') {
+            $snapIntent = $state['travel_snapshot_before_booking']['intent'] ?? null;
+            if (is_string($snapIntent) && $snapIntent !== '' && $snapIntent !== 'booking_lookup') {
+                $state['intent'] = $snapIntent;
+            } elseif (($state['origin'] ?? null) && ($state['destination'] ?? null)) {
+                $state['intent'] = 'flight_search';
+            }
+        }
         $conversation->shopping_state = $state;
         $conversation->save();
 
@@ -1437,8 +1494,10 @@ final class AiChatOrchestrator
         } else {
             $lookup = $this->bookingLookupTool->lookup($reference, $email, $phone);
             $body = (string) ($lookup['message'] ?? 'Lookup complete.');
-            $status = ($lookup['found'] ?? false) ? 'ok' : 'not_found';
-            $bookingPayload = $lookup['booking'] ?? null;
+            $found = (bool) ($lookup['found'] ?? false);
+            // Completed verification: ok when found, not_found when absent — never demote to clarify.
+            $status = $found ? 'ok' : 'not_found';
+            $bookingPayload = $found ? ($lookup['booking'] ?? null) : null;
         }
 
         $assistant = $this->storeMessage($conversation, 'assistant', $body, [
@@ -1450,9 +1509,12 @@ final class AiChatOrchestrator
                 'booking_phone' => $phone,
             ],
             'booking' => $bookingPayload,
+            'booking_detour' => true,
         ]);
 
         $meta['intent'] = ['intent' => 'booking_lookup'];
+        $meta['BOOKING_DETOUR'] = 'YES';
+        $meta['BOOKING_DETOUR_PRESERVES_TRAVEL_STATE'] = 'PASS';
         if (is_array($bookingPayload)) {
             $meta['booking_lookup'] = $bookingPayload;
         }
@@ -1479,7 +1541,12 @@ final class AiChatOrchestrator
      */
     private function shouldContinueBookingLookup(array $prior, string $message): bool
     {
-        if (($prior['intent'] ?? '') === 'booking_lookup') {
+        if (! empty($prior['booking_detour_active']) || ($prior['intent'] ?? '') === 'booking_lookup') {
+            // Travel resume phrases exit the booking detour.
+            if ($this->isResumeTravelSearchIntent($message, $prior)) {
+                return false;
+            }
+
             return true;
         }
 
@@ -1491,6 +1558,95 @@ final class AiChatOrchestrator
             || preg_match('/\b(?:\+?92|0)3[0-9]{9}\b/', $message) === 1
             || preg_match('/\b(reference|ref|pnr)\s*(is|:)?\s*[A-Z0-9]{5,12}\b/i', $message) === 1
             || preg_match('/\b[A-Z0-9]{5,12}\b/u', $message) === 1;
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     */
+    private function isResumeTravelSearchIntent(string $message, array $state): bool
+    {
+        if (empty($state['booking_detour_active']) && empty($state['travel_snapshot_before_booking'])) {
+            return false;
+        }
+
+        $lower = mb_strtolower(trim($message));
+
+        return preg_match(
+            '/\b(back to (my )?(dubai |flight |travel )?search|resume (my )?(flight |dubai )?search|continue (my )?(flight |dubai )?search)\b/u',
+            $lower
+        ) === 1;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function replyResumeTravelAfterBookingDetour(AiConversation $conversation, string $cleanMessage): array
+    {
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        $snap = is_array($state['travel_snapshot_before_booking'] ?? null) ? $state['travel_snapshot_before_booking'] : [];
+        foreach (['origin', 'destination', 'depart_date', 'return_date', 'trip_type', 'adults', 'children', 'infants', 'cabin', 'intent'] as $key) {
+            if (array_key_exists($key, $snap) && $snap[$key] !== null && $snap[$key] !== '') {
+                $state[$key] = $snap[$key];
+            }
+        }
+        unset($state['booking_detour_active'], $state['travel_snapshot_before_booking']);
+        // Clear booking verification fields so they do not leak into travel turns.
+        unset($state['booking_reference'], $state['booking_email'], $state['booking_phone']);
+        $conversation->shopping_state = $state;
+        $conversation->save();
+
+        $pending = $this->flightConfirmation->pendingSnapshot($conversation);
+        if (is_array($pending)) {
+            $body = 'Back to your flight search. '.$this->flightConfirmation->confirmationMessage($pending);
+            $meta = $this->flightConfirmation->confirmationMeta($pending, [
+                'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+                'AI_GROUP_SEARCH_READ_CALLS' => 0,
+                'TRAVEL_STATE_PRESERVED_AFTER_BOOKING' => 'PASS',
+                'BOOKING_DETOUR_PRESERVES_PAX' => 'PASS',
+            ]);
+            $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+                'mode' => 'STRUCTURED_FALLBACK',
+                'confirmation_type' => 'flight_search',
+                'confirmation_snapshot' => $pending,
+            ]);
+
+            return $this->withMessageId($assistant, [
+                'ok' => true,
+                'status' => 'confirm',
+                'mode' => 'STRUCTURED_FALLBACK',
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'requires_confirmation' => true,
+                'confirmation_snapshot' => $pending,
+                'recommendations' => [],
+                'actions' => $this->resolveResponseActions(),
+                'meta' => $meta,
+            ]);
+        }
+
+        $origin = (string) ($state['origin'] ?? '');
+        $dest = (string) ($state['destination'] ?? '');
+        $body = ($origin !== '' && $dest !== '')
+            ? 'Back to your '.$origin.' → '.$dest.' search. What would you like to change?'
+            : 'Back to your flight search. What would you like to continue with?';
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, ['mode' => 'STRUCTURED_FALLBACK']);
+
+        return $this->withMessageId($assistant, [
+            'ok' => true,
+            'status' => 'ok',
+            'mode' => 'STRUCTURED_FALLBACK',
+            'conversation_id' => $conversation->public_id,
+            'state' => $conversation->state,
+            'message' => $body,
+            'recommendations' => [],
+            'actions' => $this->resolveResponseActions(),
+            'meta' => [
+                'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+                'AI_GROUP_SEARCH_READ_CALLS' => 0,
+                'TRAVEL_STATE_PRESERVED_AFTER_BOOKING' => 'PASS',
+            ],
+        ]);
     }
 
     /**
@@ -1703,6 +1859,11 @@ final class AiChatOrchestrator
             'OUT_OF_DOMAIN_SAFE',
             'HIGH_RISK',
         ], true)) {
+            return null;
+        }
+
+        // Booking / handoff detours are handled before this method; never treat as flight correction.
+        if ($this->extractor->detectBookingLookup($cleanMessage) || $this->extractor->detectHandoff($cleanMessage)) {
             return null;
         }
 

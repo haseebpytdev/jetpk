@@ -126,7 +126,8 @@ final class LocationResolver
      */
     public function extractOpenJawLegs(string $normalized, string $original): ?array
     {
-        $hay = mb_strtolower($normalized.' '.$original);
+        // Single scan string — never concatenate normalized+original (synthetic self-pair risk).
+        $hay = $this->scanHaystack($normalized, $original);
         $legs = [];
 
         // Prefer explicit "A to B … come back from C to D" / "and then from C to D".
@@ -190,6 +191,10 @@ final class LocationResolver
         // Deduplicate identical consecutive legs.
         $unique = [];
         foreach ($legs as $leg) {
+            // Drop synthetic same-airport legs unless user explicitly typed them elsewhere.
+            if ($leg['origin'] === $leg['destination']) {
+                continue;
+            }
             $key = $leg['origin'].'-'.$leg['destination'];
             if (! isset($unique[$key])) {
                 $unique[$key] = $leg;
@@ -213,13 +218,107 @@ final class LocationResolver
     }
 
     /**
+     * Progressive role-aware O/D (CQ43-R1). Never invents O=D from a single city token.
+     *
+     * @return array{
+     *   origin: ?string,
+     *   destination: ?string,
+     *   origin_explicit: bool,
+     *   destination_explicit: bool,
+     *   explicit_route: bool,
+     *   origin_only: bool,
+     *   destination_only: bool,
+     *   origin_ambiguous: bool,
+     *   dest_ambiguous: bool,
+     *   origin_options: list<array{label: string, value: string}>,
+     *   dest_options: list<array{label: string, value: string}>
+     * }
+     */
+    public function extractProgressiveOd(string $normalized, string $original): array
+    {
+        [$o, $d, $oAmb, $dAmb, $oOpts, $dOpts] = $this->extractRoute($normalized, $original);
+        $originExplicit = $o !== null;
+        $destExplicit = $d !== null;
+        $explicitRoute = $originExplicit && $destExplicit;
+        $originOnly = $originExplicit && ! $destExplicit;
+        $destinationOnly = $destExplicit && ! $originExplicit;
+
+        return [
+            'origin' => $o,
+            'destination' => $d,
+            'origin_explicit' => $originExplicit,
+            'destination_explicit' => $destExplicit,
+            'explicit_route' => $explicitRoute,
+            'origin_only' => $originOnly,
+            'destination_only' => $destinationOnly,
+            'origin_ambiguous' => $oAmb,
+            'dest_ambiguous' => $dAmb,
+            'origin_options' => $oOpts,
+            'dest_options' => $dOpts,
+        ];
+    }
+
+    /**
+     * Prefer one scan string. Concatenating normalized+original creates synthetic
+     * "Lahore from Lahore" self-pairs (CQ43 LHE-LHE).
+     */
+    private function scanHaystack(string $normalized, string $original): string
+    {
+        $n = mb_strtolower(trim($normalized));
+        $o = mb_strtolower(trim($original));
+        if ($n === '' && $o === '') {
+            return '';
+        }
+        if ($n === '' || $n === $o) {
+            return $o !== '' ? $o : $n;
+        }
+
+        // Prefer normalized (language-normalized) for Latin/Roman-Urdu patterns.
+        return $n !== '' ? $n : $o;
+    }
+
+    /**
      * @return array{0: ?string, 1: ?string, origin_ambiguous: bool, dest_ambiguous: bool, origin_options: list<array{label: string, value: string}>, dest_options: list<array{label: string, value: string}>}
      */
     public function extractRoute(string $normalized, string $original): array
     {
         $originText = null;
         $destText = null;
-        $hay = mb_strtolower($normalized.' '.$original);
+        $hay = $this->scanHaystack($normalized, $original);
+        $origLower = mb_strtolower(trim($original));
+
+        // Origin-only follow-ups BEFORE "DEST from ORIGIN" (CQ43-R1).
+        // "from Lahore" / "Lahore se" must not self-pair into LHE→LHE.
+        if (preg_match('/^(?:please\s+)?(?:flights?\s+)?from\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)(?:\s*[,.?!]*)?$/u', $hay, $m) === 1
+            || preg_match('/^([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+se(?:\s*[,.?!]*)?$/u', $hay, $m) === 1) {
+            $o = $this->resolve(trim($m[1]));
+            if ($o['code'] || $o['ambiguous']) {
+                return [$o['code'], null, $o['ambiguous'], false, $o['options'], []];
+            }
+        }
+
+        // Destination-led starts: "I need Dubai", "flights to Dubai", "to Dubai", "Dubai jana hai".
+        if (preg_match('/^(?:i\s+)?(?:need|want|looking\s+for)\s+(?:flights?\s+(?:to\s+)?)?([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)(?:\s*[,.?!]*)?$/u', $hay, $m) === 1
+            || preg_match('/^(?:flights?\s+)?to\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)(?:\s*[,.?!]*)?$/u', $hay, $m) === 1
+            || preg_match('/^([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+jana\s+hai(?:\s*[,.?!]*)?$/u', $hay, $m) === 1
+            || preg_match('/^([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+jana\s+hai(?:\s*[,.?!]*)?$/u', $origLower, $m) === 1) {
+            $token = trim($m[1]);
+            if (! preg_match('/\b(help|assistance|support|ticket|fare|booking|human|agent)\b/u', $token)) {
+                $d = $this->resolve($token);
+                if ($d['code'] || $d['ambiguous']) {
+                    return [null, $d['code'], false, $d['ambiguous'], [], $d['options']];
+                }
+            }
+        }
+
+        // Active-travel destination corrections: "Make it Doha", "actually Dubai again".
+        if (preg_match('/\b(?:make\s+(?:it|that)|change\s+(?:it|that)\s+to|switch\s+(?:it\s+|that\s+)?to|use)\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)(?:\s+instead)?(?:\s*[,.?!]*)?$/u', $hay, $m) === 1
+            || preg_match('/\bactually\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+again(?:\s*[,.?!]*)?$/u', $hay, $m) === 1) {
+            $d = $this->resolve(trim($m[1]));
+            if ($d['code'] || $d['ambiguous']) {
+                return [null, $d['code'], false, $d['ambiguous'], [], $d['options']];
+            }
+        }
 
         // "Dubai se Lahore wapis/wapas" / "A to B return" — single explicit route; trailing
         // return cue must NOT invent a second reciprocal leg (CQ42-R2).
@@ -244,10 +343,10 @@ final class LocationResolver
             $originText = trim($m[2]);
             $o = $this->resolve($originText);
             $d = $this->resolve($destText);
-            if ($o['code'] && $d['code']) {
+            if ($o['code'] && $d['code'] && $o['code'] !== $d['code']) {
                 return [$o['code'], $d['code'], false, false, [], []];
             }
-            if ($o['code'] || $d['code'] || $o['ambiguous'] || $d['ambiguous']) {
+            if (($o['code'] || $d['code'] || $o['ambiguous'] || $d['ambiguous']) && $o['code'] !== $d['code']) {
                 return [$o['code'], $d['code'], $o['ambiguous'], $d['ambiguous'], $o['options'], $d['options']];
             }
         }
@@ -260,22 +359,27 @@ final class LocationResolver
             if (! preg_match('/\b(please|find|show|need|want|get)\b/u', $destText)) {
                 $o = $this->resolve($originText);
                 $d = $this->resolve($destText);
-                if ($o['code'] && $d['code']) {
+                if ($o['code'] && $d['code'] && $o['code'] !== $d['code']) {
                     return [$o['code'], $d['code'], false, false, [], []];
                 }
-                if ($o['code'] || $d['code'] || $o['ambiguous'] || $d['ambiguous']) {
+                if (($o['code'] || $d['code'] || $o['ambiguous'] || $d['ambiguous']) && $o['code'] !== $d['code']) {
                     return [$o['code'], $d['code'], $o['ambiguous'], $d['ambiguous'], $o['options'], $d['options']];
                 }
             }
         }
 
-        // "Bangkok from Islamabad" / "Dubai from Lahore"
+        // "Bangkok from Islamabad" / "Dubai from Lahore" — require distinct cities.
         if (preg_match('/([a-z\p{Arabic} ]{3,24}?)\s+from\s+([a-z]{3}|[a-z\p{Arabic} ]{3,24})(?:\s|$|,|\.|on|for|tomorrow|today)/u', $hay, $m) === 1) {
             $destText = trim($m[1]);
             $originText = trim($m[2]);
             if (! preg_match('/\b(please|find|show|need|want|get|flights?)\b/u', $destText)) {
                 $o = $this->resolve($originText);
                 $d = $this->resolve($destText);
+                // Reject synthetic self-pairs (same token duplicated via scan artifacts).
+                if ($o['code'] && $d['code'] && $o['code'] === $d['code']) {
+                    // Origin-only salvage: treat as "from ORIGIN".
+                    return [$o['code'], null, false, false, [], []];
+                }
                 if ($o['code'] && $d['code']) {
                     return [$o['code'], $d['code'], false, false, [], []];
                 }
@@ -336,10 +440,10 @@ final class LocationResolver
                 }
             }
         } else {
-            // Connector-free left-to-right by message position
+            // Connector-free left-to-right by message position (single scan — no concat).
             $ordered = self::CITY_TO_IATA;
             uksort($ordered, static fn ($a, $b) => mb_strlen((string) $b) <=> mb_strlen((string) $a));
-            $scan = $clean.' '.$original;
+            $scan = $this->scanHaystack($clean, $original);
             $hits = [];
             foreach ($ordered as $alias => $code) {
                 if ($alias === '' || mb_strlen((string) $alias) < 3) {
@@ -369,6 +473,7 @@ final class LocationResolver
                 if (
                     preg_match('/\b(make (it|that)|change (it|that) to|switch (it |that )?to|use)\b/u', $clean) === 1
                     || preg_match('/\binstead\b/u', $clean) === 1
+                    || preg_match('/\bactually\b.*\bagain\b/u', $clean) === 1
                 ) {
                     return [null, $found[0], false, false, [], []];
                 }
@@ -384,6 +489,18 @@ final class LocationResolver
 
         $o = $this->resolve($originText);
         $d = $this->resolve($destText);
+
+        // Partial / synthetic same-city pair salvage: keep origin only unless user typed O=D explicitly.
+        if ($o['code'] && $d['code'] && $o['code'] === $d['code']) {
+            $explicitSameAirport = preg_match(
+                '/\b'.preg_quote(mb_strtolower((string) ($originText ?? '')), '/').'\s*(?:to|→|->|se)\s*'.preg_quote(mb_strtolower((string) ($destText ?? '')), '/').'\b/u',
+                $hay
+            ) === 1
+                || preg_match('/\b([a-z]{3})\s*(?:to|→|->|se)\s*\1\b/u', $hay) === 1;
+            if (! $explicitSameAirport) {
+                return [$o['code'], null, false, false, [], []];
+            }
+        }
 
         return [
             $o['code'],

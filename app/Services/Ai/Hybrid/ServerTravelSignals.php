@@ -14,6 +14,8 @@ final class ServerTravelSignals
         private readonly LanguageNormalizer $normalizer,
         private readonly LocationResolver $locations,
         private readonly DateExpressionResolver $dates,
+        private readonly PassengerExpressionResolver $passengers,
+        private readonly TravelConstraintResolver $constraints,
     ) {}
 
     /**
@@ -26,17 +28,105 @@ final class ServerTravelSignals
      */
     public function explicitTravelRoute(string $message): array
     {
-        $norm = $this->normalizer->normalize($message);
-        $route = $this->locations->extractRoute($norm['normalized'], $norm['original']);
-        $origin = is_string($route[0] ?? null) && $route[0] !== '' ? (string) $route[0] : null;
-        $destination = is_string($route[1] ?? null) && $route[1] !== '' ? (string) $route[1] : null;
-        $explicit = $origin !== null && $destination !== null;
+        $auth = $this->progressiveTravelAuthority($message);
 
         return [
-            'explicit' => $explicit,
+            'explicit' => $auth['explicit_route'],
+            'origin' => $auth['origin'],
+            'destination' => $auth['destination'],
+            'server_single_route' => $auth['explicit_route'] && $auth['origin'] && $auth['destination']
+                ? $auth['origin'].'-'.$auth['destination']
+                : null,
+        ];
+    }
+
+    /**
+     * Progressive travel authority for destination-led / origin-only / refinements (CQ43-R1).
+     *
+     * @param  array<string, mixed>|null  $priorState
+     * @return array{
+     *   active: bool,
+     *   explicit_route: bool,
+     *   origin: ?string,
+     *   destination: ?string,
+     *   origin_explicit: bool,
+     *   destination_explicit: bool,
+     *   travel_start: bool,
+     *   travel_refinement: bool,
+     *   date_refinement: bool,
+     *   pax_refinement: bool,
+     *   cabin_refinement: bool,
+     *   return_refinement: bool,
+     *   origin_only: bool,
+     *   destination_only: bool
+     * }
+     */
+    public function progressiveTravelAuthority(string $message, ?array $priorState = null): array
+    {
+        $norm = $this->normalizer->normalize($message);
+        $od = $this->locations->extractProgressiveOd($norm['normalized'], $norm['original']);
+        $lower = mb_strtolower(trim($message));
+
+        $hasActiveTravel = is_array($priorState)
+            && (
+                (isset($priorState['origin']) && is_string($priorState['origin']) && $priorState['origin'] !== '')
+                || (isset($priorState['destination']) && is_string($priorState['destination']) && $priorState['destination'] !== '')
+                || ! empty($priorState['flight_search_pending_confirmation'])
+                || (isset($priorState['intent']) && in_array($priorState['intent'], ['flight_search', 'group_search'], true))
+            );
+
+        $dateRefinement = $this->isDateRefinement($lower, $norm['normalized']);
+        $returnRefinement = $this->isReturnRefinement($lower, $norm['normalized'], $hasActiveTravel);
+        $paxRefinement = $this->isPaxRefinement($norm['normalized'], $norm['original']);
+        $cabinRefinement = $this->isCabinRefinement($norm['normalized'], $norm['original']);
+
+        $travelStart = $od['destination_only'] || $od['explicit_route']
+            || ($od['origin_only'] && $hasActiveTravel);
+        $travelRefinement = $hasActiveTravel && (
+            $od['origin_only']
+            || $od['destination_only']
+            || $od['explicit_route']
+            || $dateRefinement
+            || $returnRefinement
+            || $paxRefinement
+            || $cabinRefinement
+        );
+
+        $active = $od['explicit_route']
+            || $od['origin_only']
+            || $od['destination_only']
+            || $travelStart
+            || $travelRefinement
+            || $dateRefinement
+            || $returnRefinement
+            || $paxRefinement
+            || $cabinRefinement;
+
+        // Merge progressive slots with prior when role-partial.
+        $origin = $od['origin'];
+        $destination = $od['destination'];
+        if ($od['origin_only'] && $destination === null && is_array($priorState)) {
+            $destination = is_string($priorState['destination'] ?? null) ? (string) $priorState['destination'] : null;
+        }
+        if ($od['destination_only'] && $origin === null && is_array($priorState)) {
+            $origin = is_string($priorState['origin'] ?? null) ? (string) $priorState['origin'] : null;
+        }
+
+        return [
+            'active' => $active,
+            'explicit_route' => $od['explicit_route'],
             'origin' => $origin,
             'destination' => $destination,
-            'server_single_route' => $explicit ? $origin.'-'.$destination : null,
+            'origin_explicit' => $od['origin_explicit'],
+            'destination_explicit' => $od['destination_explicit'],
+            'travel_start' => $travelStart || $od['destination_only'] || $od['explicit_route'],
+            'travel_refinement' => $travelRefinement,
+            'date_refinement' => $dateRefinement,
+            'pax_refinement' => $paxRefinement,
+            'cabin_refinement' => $cabinRefinement,
+            'return_refinement' => $returnRefinement,
+            'origin_only' => $od['origin_only'],
+            'destination_only' => $od['destination_only'],
         ];
     }
 
@@ -51,7 +141,16 @@ final class ServerTravelSignals
             return false;
         }
         if (preg_match('/\b(wapis|wapas)\b|واپس/u', $m) === 1) {
+            // Bare wapis with a weekday / date and no fresh A→B route = contextual return.
+            if ($this->isContextualWapisReturn($m)) {
+                return true;
+            }
+
             return false;
+        }
+
+        if (preg_match('/\b(come|coming)\s+back\s+on\b/u', $m) === 1) {
+            return true;
         }
 
         return preg_match(
@@ -81,7 +180,7 @@ final class ServerTravelSignals
         $normalized = $norm['normalized'];
         $original = $norm['original'];
 
-        $returnInfo = $this->dates->resolveReturn($normalized, $original, $now);
+        $returnInfo = $this->dates->resolveReturn($normalized, $original, $now, $priorDepart);
         $returnDate = is_string($returnInfo['date'] ?? null) ? (string) $returnInfo['date'] : null;
         $returnExplicit = $returnDate !== null;
 
@@ -91,7 +190,7 @@ final class ServerTravelSignals
             $stripped = trim((string) preg_replace($cueRegex, '', $normalized, 1));
             if ($returnDate === null) {
                 // Re-resolve against the isolated return token when the full-string matcher missed.
-                $retry = $this->dates->resolveReturn('return '.$m[1], 'return '.$m[1], $now);
+                $retry = $this->dates->resolveReturn('return '.$m[1], 'return '.$m[1], $now, $priorDepart);
                 if (is_string($retry['date'] ?? null)) {
                     $returnDate = (string) $retry['date'];
                     $returnExplicit = true;
@@ -102,7 +201,8 @@ final class ServerTravelSignals
 
         // Bare "return 15 October" / "return on 15 October" → do not invent a new departure.
         $returnOnly = $stripped === ''
-            || preg_match('/^(please\s+)?(make\s+it\s+)?return(ing)?(\s+date)?(\s+on)?\.?$/iu', $stripped) === 1;
+            || preg_match('/^(please\s+)?(make\s+it\s+)?(return(ing)?|come\s+back|wapis|wapas)(\s+date)?(\s+on)?\.?$/iu', $stripped) === 1
+            || preg_match('/^(?:i\s+also\s+need\s+to\s+)?(?:come|coming)\s+back(\s+on)?\.?$/iu', $stripped) === 1;
 
         $departDate = null;
         $departExplicit = false;
@@ -124,5 +224,72 @@ final class ServerTravelSignals
             'depart_provenance' => $departProv,
             'return_provenance' => is_string($returnInfo['provenance'] ?? null) ? (string) $returnInfo['provenance'] : null,
         ];
+    }
+
+    private function isDateRefinement(string $lower, string $normalized): bool
+    {
+        if (preg_match('/\b\d{4}-\d{2}-\d{2}\b/u', $lower) === 1) {
+            return true;
+        }
+        if (preg_match('/\b(\d{1,2})(st|nd|rd|th)?\s+(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t|tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/u', $lower) === 1) {
+            return true;
+        }
+        if (preg_match('/\b(today|tomorrow|next\s+friday|next\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)|kal|parso)\b/u', $lower) === 1) {
+            return true;
+        }
+
+        return preg_match('/\b(today|tomorrow|kal|parso|next\s+friday)\b/u', $normalized) === 1;
+    }
+
+    private function isReturnRefinement(string $lower, string $normalized, bool $hasActiveTravel): bool
+    {
+        if (preg_match('/\b(come|coming)\s+back\s+on\b/u', $lower) === 1) {
+            return true;
+        }
+        if (preg_match('/\breturn(\s+on|\s+date)?\b/u', $lower) === 1
+            && ! preg_match('/\b([a-z]{3}|[a-z ]{3,20})\s+(?:to|se)\s+([a-z]{3}|[a-z ]{3,20})\s+return\b/u', $lower)) {
+            return true;
+        }
+        if ($hasActiveTravel && $this->isContextualWapisReturn($lower)) {
+            return true;
+        }
+
+        return preg_match($this->dates->returnDateCueRegex(), $normalized) === 1;
+    }
+
+    private function isContextualWapisReturn(string $lower): bool
+    {
+        // Fresh "A se B wapis" is directional one-way — not contextual return.
+        if (preg_match('/\b([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+(?:to|se)\s+([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+(?:wapis|wapas)\b/u', $lower) === 1) {
+            return false;
+        }
+
+        return preg_match(
+            '/\b(wapis|wapas)\s+(?:on\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday|\d{1,2}\s+[a-z]+|\d{4}-\d{2}-\d{2})\b/u',
+            $lower
+        ) === 1
+            || preg_match(
+                '/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\s+(wapis|wapas)\b/u',
+                $lower
+            ) === 1;
+    }
+
+    private function isPaxRefinement(string $normalized, string $original): bool
+    {
+        if (preg_match('/\b\d+\s*adults?\b|\bhum\s+dono\b|\bham\s+dono\b/u', $normalized.' '.$original) === 1) {
+            return true;
+        }
+        $pax = $this->passengers->resolve($normalized, $original);
+
+        return ($pax['adults'] ?? null) !== null
+            || ($pax['children'] ?? null) !== null
+            || ($pax['infants'] ?? null) !== null;
+    }
+
+    private function isCabinRefinement(string $normalized, string $original): bool
+    {
+        $cons = $this->constraints->resolve($normalized, $original);
+
+        return is_string($cons['cabin'] ?? null) && $cons['cabin'] !== '';
     }
 }

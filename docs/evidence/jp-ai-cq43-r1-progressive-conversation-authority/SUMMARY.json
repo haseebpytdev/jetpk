@@ -1,0 +1,68 @@
+{
+  "phase": "JP-AI-CQ43-R1-PROGRESSIVE-CONVERSATION-AUTHORITY",
+  "branch": "work/jp-ai-cq43-r1-progressive-conversation-authority",
+  "start_sha": "46e70041c3250dc241ab5172f2825db3b356247f",
+  "pr39_merged": "46e70041c3250dc241ab5172f2825db3b356247f",
+  "cq43_r1_local_closure": "PASS",
+  "local_tests": {
+    "total": 91,
+    "passed": 91,
+    "failed": 0,
+    "assertions": 952,
+    "suites": [
+      "Cq43R1ProgressiveConversationAuthorityTest",
+      "Cq42R3CrossPathTravelAuthorityTest",
+      "Cq42R2ProdResidualsTest",
+      "QwenOpenDomainAuthorityCq42Test",
+      "QwenLiveUatResidualClosureCq41Test",
+      "QwenSemanticFallbackOrder39Test",
+      "QwenSemanticBrain28Test"
+    ]
+  },
+  "gates": {
+    "PROGRESSIVE_SEARCH": "PASS",
+    "CORRECTION_CHAIN": "PASS",
+    "PARTIAL_ROUTE_CANNOT_SELF_PAIR": "PASS",
+    "LHE_LHE_SYNTHETIC_ROUTE": 0,
+    "ROMAN_URDU_PROGRESSIVE": "PASS",
+    "RELATIONAL_HUM_DONO": "PASS",
+    "CONTEXTUAL_WAPIS_RETURN": "PASS",
+    "FRESH_WAPIS_DIRECTION": "PASS",
+    "ONEWAY_TO_RETURN": "PASS",
+    "BOOKING_MID_TRIP": "PASS",
+    "TRAVEL_STATE_PRESERVED_AFTER_BOOKING": "PASS",
+    "BOOKING_DETOUR_PRESERVES_PAX": "PASS",
+    "QWEN_MODEL_ONLY_HANDOFF": 0,
+    "EXPLICIT_HANDOFF_NON_REGRESSION": "PASS",
+    "TRAVEL_REFINEMENT_OVERRIDES_LEAD_FSM": "PASS",
+    "LEAD_TRAVEL_TEXT_CAPTURED_AS_NAME": 0,
+    "BARE_NAME_LEAD_NON_REGRESSION": "PASS",
+    "SEARCH_BEFORE_CONFIRMATION": 0
+  },
+  "shopping_state_snapshots": {
+    "progressive_english_final": {
+      "origin": "LHE",
+      "destination": "DXB",
+      "adults": 3,
+      "cabin": "business",
+      "trip_type": "one_way"
+    },
+    "roman_urdu_final": {
+      "origin": "LHE",
+      "destination": "DXB",
+      "depart_date": "2026-09-28",
+      "adults": 2,
+      "trip_type": "return",
+      "return_date": "2026-10-04"
+    },
+    "booking_detour": {
+      "before": {"origin": "LHE", "destination": "DXB", "depart_date": "2026-10-02", "adults": 2},
+      "during_booking": {"origin": "LHE", "destination": "DXB", "depart_date": "2026-10-02", "adults": 2, "booking_detour_active": true},
+      "after_resume": {"origin": "LHE", "destination": "DXB", "adults": 2, "pending_confirmation": true}
+    }
+  },
+  "real_qwen_available": "NO",
+  "browser_network_residual": "DEFERRED_FOR_PRODUCTION_REPRO",
+  "deploy": "NO",
+  "pii": "none"
+}

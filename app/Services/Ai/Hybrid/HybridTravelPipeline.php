@@ -102,8 +102,9 @@ final class HybridTravelPipeline
             $intentName = 'group_search';
         }
         $isRefine = $prior !== [] && (
-            preg_match('/\b(one day later|aik din baad|only direct|under |wapas|return |Emirates|airline)\b/u', $normalized) === 1
-            || preg_match('/ایک دن بعد|براہ راست/u', $original) === 1
+            preg_match('/\b(one day later|aik din baad|only direct|under |wapas|wapis|return |Emirates|airline|hum\s+dono|ham\s+dono|come\s+back|kal|adults?|business|economy)\b/u', $normalized) === 1
+            || preg_match('/ایک دن بعد|براہ راست|ہم\s*دونوں/u', $original) === 1
+            || $this->travelSignals->progressiveTravelAuthority($original, $prior)['travel_refinement']
         );
         if ($isRefine) {
             $intentName = $intentName === 'group_search' ? 'group_search' : 'flight_search';
@@ -240,15 +241,13 @@ final class HybridTravelPipeline
             'provenance' => $tripDates['return_provenance'],
         ];
         if ($returnInfo['date'] === null && ! $tripDates['depart_explicit']) {
-            $legacyReturn = $this->dates->resolveReturn($normalized, $original, $now);
+            $legacyReturn = $this->dates->resolveReturn($normalized, $original, $now, $priorDepart);
             if (is_string($legacyReturn['date'] ?? null) || ! empty($legacyReturn['clarify'])) {
                 $returnInfo = $legacyReturn;
             }
         }
 
-        if ($departInfo['clarify']) {
-            return $this->clarify((string) $departInfo['clarify_message'], [], $language, $prior, $provenance);
-        }
+        // Contextual return date (come back / wapis Sunday) counts as return cue.
         if ($returnInfo['clarify']) {
             return $this->clarify((string) $returnInfo['clarify_message'], [], $language, $prior, $provenance);
         }
@@ -262,7 +261,9 @@ final class HybridTravelPipeline
 
         $returnDate = $returnInfo['date'] ?? null;
         // Do not inherit prior return when English return cue is present without a stated return date.
-        $returnCue = $this->travelSignals->explicitReturnTripCue($original);
+        $returnCue = $this->travelSignals->explicitReturnTripCue($original)
+            || is_string($returnDate)
+            || ($tripDates['return_explicit'] ?? false);
         if ($returnDate === null && ! $returnCue) {
             $returnDate = $prior['return_date'] ?? null;
         }
@@ -330,7 +331,13 @@ final class HybridTravelPipeline
 
         if ($intentName === 'flight_search') {
             if ($origin === null || $destination === null) {
-                $c = $this->clarifications->route();
+                if ($destination !== null && $origin === null) {
+                    $c = $this->clarifications->originForDestination($destination);
+                } elseif ($origin !== null && $destination === null) {
+                    $c = $this->clarifications->destinationForOrigin($origin);
+                } else {
+                    $c = $this->clarifications->route();
+                }
                 $clarifyRequired = true;
                 $clarifyMessage = $c['message'];
                 $intentName = 'unknown';
@@ -435,6 +442,16 @@ final class HybridTravelPipeline
         }
 
         $state = array_merge($prior, $intent->toArray());
+        // Progressive partial O/D must persist even when clarify asks for the missing role.
+        if ($explicitOrigin) {
+            $state['origin'] = $origin;
+        }
+        if ($explicitDestination) {
+            $state['destination'] = $destination;
+        }
+        if ($explicitOrigin || $explicitDestination) {
+            $state['intent'] = 'flight_search';
+        }
         if ($explicitRoutePrecedence) {
             $state['origin'] = $origin;
             $state['destination'] = $destination;
