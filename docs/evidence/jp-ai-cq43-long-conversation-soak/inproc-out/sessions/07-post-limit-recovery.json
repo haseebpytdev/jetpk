@@ -1,0 +1,31 @@
+{
+    "session": "07-post-limit-recovery",
+    "turns": [
+        {
+            "rate_limited": false,
+            "http_status": 200,
+            "latency_ms": 8.9,
+            "conversation_id": "61b3dd5e-5e7c-4caf-a53d-99241f1e3f37",
+            "visitor_hash": "1c8ec00d947d9dcaf2dd4f4dc28127e8b560896f1139003b7fe382eb8a10f5cc",
+            "status": "waiting_for_human",
+            "state": "WAITING_FOR_HUMAN",
+            "mode": "HUMAN_QUEUE",
+            "message": "Your message was sent to our support team. An agent will reply here shortly.",
+            "requires_confirmation": false,
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "WAITING_MESSAGE_STAYS_HUMAN_QUEUE": "PASS",
+                "RESUME_AI_IMPLICIT": "NO"
+            },
+            "intent": null,
+            "shopping_state": [],
+            "pending_confirmation": null,
+            "ts": "2026-09-27T09:34:34+00:00",
+            "user_message": "continue after limit",
+            "search_calls": 0
+        }
+    ],
+    "POST_LIMIT_RECOVERY": "PASS",
+    "prior_cid": "61b3dd5e-5e7c-4caf-a53d-99241f1e3f37"
+}
