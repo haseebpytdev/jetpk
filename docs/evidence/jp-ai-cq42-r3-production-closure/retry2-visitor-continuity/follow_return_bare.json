@@ -1,0 +1,19 @@
+{
+    "status": "ok",
+    "requires_confirmation": false,
+    "conversation_id": "792dece4-383d-4261-9c2e-8b755f882bc6",
+    "src": "SEMANTIC",
+    "fb": null,
+    "op": "answer",
+    "route": null,
+    "search": 0,
+    "intent": [],
+    "body": "I don't have an approved live data source for that request, so I can't verify the current information. I can still help with flights or JetPakistan travel questions.",
+    "meta_subset": {
+        "RETURN_DATE_REQUIRED": null,
+        "EXPLICIT_RETURN_TRIP_CUE": "YES",
+        "FALSE_OPEN_JAW_DEMOTED": null,
+        "CONFIRMATION_REQUIRED": null,
+        "LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK": 0
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "status": "clarify",
+    "state": "AI_ACTIVE",
+    "confirm": false,
+    "route": "DXB-LHE",
+    "override": "YES",
+    "search": 0,
+    "calls": 1,
+    "src": "SEMANTIC_FALLBACK",
+    "fb": null,
+    "rej": null,
+    "retry": null,
+    "intent": [],
+    "body": "What travel date should I use for DXB to LHE?",
+    "empty": false
+}

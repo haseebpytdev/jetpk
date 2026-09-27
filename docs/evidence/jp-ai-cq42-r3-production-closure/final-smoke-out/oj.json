@@ -1,0 +1,16 @@
+{
+    "status": "clarify",
+    "state": "AI_ACTIVE",
+    "confirm": false,
+    "route": "MED-LHE",
+    "override": null,
+    "search": 0,
+    "calls": 1,
+    "src": "SEMANTIC",
+    "fb": null,
+    "rej": null,
+    "retry": null,
+    "intent": [],
+    "body": "That looks like a multi-city \/ open-jaw itinerary (LHE-JED then MED-LHE). Share both leg dates and use multi-city search — I will not collapse it to a one-way search.",
+    "empty": false
+}

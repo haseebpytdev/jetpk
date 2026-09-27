@@ -1,0 +1,16 @@
+{
+    "status": "clarify",
+    "state": "AI_ACTIVE",
+    "confirm": false,
+    "route": null,
+    "override": null,
+    "search": 0,
+    "calls": 1,
+    "src": "SEMANTIC",
+    "fb": null,
+    "rej": null,
+    "retry": null,
+    "intent": [],
+    "body": "Of course — I can help you check a booking. Please send your booking reference and the email or phone number used when you booked.",
+    "empty": false
+}

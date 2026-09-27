@@ -1,0 +1,16 @@
+{
+    "status": "ok",
+    "state": "AI_ACTIVE",
+    "confirm": false,
+    "route": null,
+    "override": null,
+    "search": 0,
+    "calls": 1,
+    "src": "SEMANTIC",
+    "fb": null,
+    "rej": null,
+    "retry": null,
+    "intent": [],
+    "body": "I don't have an approved live market-data source available here, so I can't verify the current price. I can still help with flights or JetPakistan travel questions.",
+    "empty": false
+}

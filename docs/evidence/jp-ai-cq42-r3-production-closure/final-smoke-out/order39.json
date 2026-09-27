@@ -1,0 +1,16 @@
+{
+    "status": "confirm",
+    "state": "AI_ACTIVE",
+    "confirm": true,
+    "route": null,
+    "override": null,
+    "search": 0,
+    "calls": 1,
+    "src": "SEMANTIC_FALLBACK",
+    "fb": null,
+    "rej": null,
+    "retry": null,
+    "intent": [],
+    "body": "Just to confirm: LHE to DXB, one-way, 2026-09-28, 2 adults. Shall I search?",
+    "empty": false
+}

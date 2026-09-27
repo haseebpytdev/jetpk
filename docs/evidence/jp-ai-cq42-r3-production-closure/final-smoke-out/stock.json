@@ -1,0 +1,16 @@
+{
+    "status": "ok",
+    "state": "AI_ACTIVE",
+    "confirm": false,
+    "route": null,
+    "override": null,
+    "search": 0,
+    "calls": 2,
+    "src": "QWEN_OPEN_DOMAIN",
+    "fb": "NO",
+    "rej": "accepted",
+    "retry": "YES",
+    "intent": [],
+    "body": "A stock is a financial instrument representing a company's equity, used to measure its value and price.",
+    "empty": false
+}

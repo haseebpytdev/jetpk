@@ -1,0 +1,30 @@
+{
+    "status": "confirm",
+    "requires_confirmation": true,
+    "conversation_id": "9de09095-dea7-4d83-93cc-de8af2043526",
+    "visitor_hash": "2ca64d8e37b3b167b8049822707d841f5b31391f07fc99a33ab62eda685fd2b9",
+    "src": "SEMANTIC",
+    "fb": null,
+    "op": "prepare_search",
+    "search": 0,
+    "intent": {
+        "intent": "flight_search",
+        "origin": "LHE",
+        "destination": "DXB",
+        "depart_date": "2026-10-10",
+        "return_date": "2026-10-15",
+        "adults": 1,
+        "children": 0,
+        "infants": 0,
+        "cabin": null,
+        "airline": null,
+        "max_stops": null,
+        "budget": null,
+        "time_preference": null,
+        "currency": "PKR",
+        "mode": "QWEN_SEMANTIC",
+        "trip_type": "return",
+        "legs": null
+    },
+    "body": "Just to confirm: LHE to DXB, return, 2026-10-10, return 2026-10-15, 1 adult. Shall I search?"
+}

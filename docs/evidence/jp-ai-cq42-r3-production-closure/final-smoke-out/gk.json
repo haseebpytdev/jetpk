@@ -1,0 +1,16 @@
+{
+    "status": "ok",
+    "state": "AI_ACTIVE",
+    "confirm": false,
+    "route": null,
+    "override": null,
+    "search": 0,
+    "calls": 1,
+    "src": "QWEN_OPEN_DOMAIN",
+    "fb": "NO",
+    "rej": "accepted",
+    "retry": null,
+    "intent": [],
+    "body": "Gravity is the force that attracts objects toward the center of a planet or star.",
+    "empty": false
+}
