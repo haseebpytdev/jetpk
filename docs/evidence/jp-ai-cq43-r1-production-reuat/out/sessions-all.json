@@ -1,0 +1,1887 @@
+{
+    "progressive_english": [
+        {
+            "user": "I need Dubai",
+            "status": "clarify",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": null,
+                "destination": "DXB",
+                "depart_date": null,
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 1,
+                "cabin": null,
+                "lead_name": null,
+                "legs": null
+            },
+            "message": "What departure date should I use for to DXB?"
+        },
+        {
+            "user": "from Lahore",
+            "status": "clarify",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": null,
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 1,
+                "cabin": null,
+                "lead_name": null,
+                "legs": null
+            },
+            "message": "What travel date should I use for LHE to DXB?"
+        },
+        {
+            "user": "next Friday",
+            "status": "confirm",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 1,
+                "cabin": null,
+                "lead_name": null,
+                "legs": null
+            },
+            "message": "Just to confirm: LHE to DXB, one-way, 2026-10-02, 1 adult. Shall I search?"
+        },
+        {
+            "user": "2 adults",
+            "status": "confirm",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "cabin": null,
+                "lead_name": null,
+                "legs": null
+            },
+            "message": "Just to confirm: LHE to DXB, one-way, 2026-10-02, 2 adults. Shall I search?"
+        },
+        {
+            "user": "economy",
+            "status": "confirm",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "cabin": "economy",
+                "lead_name": null,
+                "legs": null
+            },
+            "message": "Just to confirm: LHE to DXB, one-way, 2026-10-02, economy class, 2 adults. Shall I search?"
+        },
+        {
+            "user": "Make it Doha",
+            "status": "confirm",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DOH",
+                "depart_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "cabin": "economy",
+                "lead_name": null,
+                "legs": null
+            },
+            "message": "Just to confirm: LHE to DOH, one-way, 2026-10-02, economy class, 2 adults. Shall I search?"
+        },
+        {
+            "user": "actually Dubai again",
+            "status": "confirm",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "cabin": "economy",
+                "lead_name": null,
+                "legs": null
+            },
+            "message": "Just to confirm: LHE to DXB, one-way, 2026-10-02, economy class, 2 adults. Shall I search?"
+        },
+        {
+            "user": "3 adults",
+            "status": "confirm",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 3,
+                "cabin": "economy",
+                "lead_name": null,
+                "legs": null
+            },
+            "message": "Just to confirm: LHE to DXB, one-way, 2026-10-02, economy class, 3 adults. Shall I search?"
+        },
+        {
+            "user": "business class",
+            "status": "confirm",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 3,
+                "cabin": "business",
+                "lead_name": null,
+                "legs": null
+            },
+            "message": "Just to confirm: LHE to DXB, one-way, 2026-10-02, business class, 3 adults. Shall I search?"
+        }
+    ],
+    "roman_urdu": [
+        {
+            "user": "Dubai jana hai",
+            "status": "clarify",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": null,
+                "destination": "DXB",
+                "depart_date": null,
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 1
+            },
+            "message": "Where are you travelling from for DXB?"
+        },
+        {
+            "user": "Lahore se",
+            "status": "clarify",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": null,
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 1
+            },
+            "message": "What travel date should I use for LHE to DXB?"
+        },
+        {
+            "user": "kal",
+            "status": "confirm",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-28",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 1
+            },
+            "message": "Just to confirm: LHE to DXB, one-way, 2026-09-28, 1 adult. Shall I search?"
+        },
+        {
+            "user": "hum dono",
+            "status": "confirm",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-28",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2
+            },
+            "message": "Just to confirm: LHE to DXB, one-way, 2026-09-28, 2 adults. Shall I search?"
+        },
+        {
+            "user": "wapis Sunday",
+            "status": "confirm",
+            "state": "AI_ACTIVE",
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-28",
+                "return_date": "2026-10-04",
+                "trip_type": "return",
+                "adults": 2
+            },
+            "message": "Just to confirm: LHE to DXB, return, 2026-09-28, return 2026-10-04, 2 adults. Shall I search?"
+        }
+    ],
+    "fresh_wapis": {
+        "ok": true,
+        "conversation_id": "f0f02dda-3d28-4a0e-a91d-8645803706a9",
+        "status": "clarify",
+        "message": "What departure date should I use for DXB to LHE?",
+        "booking": null,
+        "requires_confirmation": false,
+        "shopping_state": {
+            "lead_capture_pending": true,
+            "lead_pending_message": "Dubai se Lahore wapis",
+            "lead_capture_fields": [
+                "name",
+                "email",
+                "phone",
+                "contact_consent"
+            ],
+            "lead_capture_stage": "name",
+            "intent": "flight_search",
+            "origin": "DXB",
+            "destination": "LHE",
+            "return_date": null,
+            "adults": 1,
+            "children": 0,
+            "infants": 0,
+            "currency": "PKR",
+            "trip_type": "one_way"
+        },
+        "pending": null,
+        "meta": {
+            "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+            "AI_GROUP_SEARCH_READ_CALLS": 0,
+            "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+            "SEMANTIC_BRAIN_CALLED": "YES",
+            "SEMANTIC_BRAIN_VALID": "YES",
+            "SEMANTIC_BRAIN_FALLBACK": "NO",
+            "MODEL_ID": "local",
+            "MODEL_CALLS": 1,
+            "SEMANTIC_LATENCY_MS": 10191,
+            "COMPOSER_LATENCY_MS": 0,
+            "TOTAL_MODEL_LATENCY_MS": 10191,
+            "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+            "SEMANTIC_INTENT": "open_jaw",
+            "SERVER_OPERATION": "clarify",
+            "SEMANTIC_DOMAIN": "travel",
+            "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+            "STALE_ROUTE_CONTAMINATION": 0,
+            "FALSE_OPEN_JAW": 0,
+            "MODEL_CANNOT_INVENT_SECOND_LEG": "PASS",
+            "FALSE_OPEN_JAW_DEMOTED": "YES",
+            "SERVER_SINGLE_ROUTE": "DXB-LHE",
+            "QWEN_SEMANTIC_VALID": "YES",
+            "TOOL_EXECUTED": "NONE",
+            "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+            "SERVER_OPEN_DOMAIN_CATEGORY": null,
+            "QWEN_DOMAIN": "travel",
+            "QWEN_OPERATION": "clarify",
+            "SERVER_EXPLICIT_TRAVEL_ROUTE": "YES",
+            "SERVER_ACTIVE_TRAVEL_CONTEXT": "YES",
+            "SERVER_TRAVEL_REFINEMENT": "YES",
+            "RETURN_DATE_REQUIRED": "NO"
+        },
+        "state": "AI_ACTIVE",
+        "actions": [
+            {
+                "label": "Search Flights",
+                "href": "\/#flight-search"
+            },
+            {
+                "label": "Browse Groups",
+                "href": "\/groups"
+            },
+            {
+                "label": "Manage Booking",
+                "href": "\/lookup-booking"
+            },
+            {
+                "label": "Talk to Support",
+                "action": "handoff"
+            }
+        ]
+    },
+    "oneway_to_return": [
+        {
+            "ok": true,
+            "conversation_id": "e6db3f59-08dc-4db8-b580-1b970d6f663f",
+            "status": "confirm",
+            "message": "Just to confirm: KHI to JED, one-way, 2026-10-03, 1 adult. Shall I search?",
+            "booking": null,
+            "requires_confirmation": true,
+            "shopping_state": {
+                "lead_capture_pending": true,
+                "lead_pending_message": "Karachi to Jeddah on 3 October for 1 adult",
+                "lead_capture_fields": [
+                    "name",
+                    "email",
+                    "phone",
+                    "contact_consent"
+                ],
+                "lead_capture_stage": "name",
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "JED",
+                "depart_date": "2026-10-03",
+                "return_date": null,
+                "adults": 1,
+                "children": 0,
+                "infants": 0,
+                "currency": "PKR",
+                "trip_type": "one_way",
+                "pending_flight_search_confirmation": {
+                    "origin": "KHI",
+                    "destination": "JED",
+                    "departure_date": "2026-10-03",
+                    "return_date": null,
+                    "trip_type": "one_way",
+                    "adults": 1,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": null,
+                    "airline": null,
+                    "max_stops": null,
+                    "currency": "PKR",
+                    "legs": null
+                }
+            },
+            "pending": {
+                "origin": "KHI",
+                "destination": "JED",
+                "departure_date": "2026-10-03",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 1,
+                "children": 0,
+                "infants": 0,
+                "cabin": null,
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": null
+            },
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "SEMANTIC_BRAIN_CALLED": "YES",
+                "SEMANTIC_BRAIN_VALID": "YES",
+                "SEMANTIC_BRAIN_FALLBACK": "NO",
+                "MODEL_ID": "local",
+                "MODEL_CALLS": 1,
+                "SEMANTIC_LATENCY_MS": 7360,
+                "COMPOSER_LATENCY_MS": 0,
+                "TOTAL_MODEL_LATENCY_MS": 7360,
+                "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+                "SEMANTIC_INTENT": "open_jaw",
+                "SERVER_OPERATION": "clarify",
+                "SEMANTIC_DOMAIN": "travel",
+                "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+                "STALE_ROUTE_CONTAMINATION": 0,
+                "FALSE_OPEN_JAW": 0,
+                "MODEL_CANNOT_INVENT_SECOND_LEG": "PASS",
+                "FALSE_OPEN_JAW_DEMOTED": "YES",
+                "SERVER_SINGLE_ROUTE": "KHI-JED",
+                "QWEN_SEMANTIC_VALID": "YES",
+                "TOOL_EXECUTED": "NONE",
+                "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+                "SERVER_OPEN_DOMAIN_CATEGORY": null,
+                "QWEN_DOMAIN": "travel",
+                "QWEN_OPERATION": "clarify",
+                "SERVER_EXPLICIT_TRAVEL_ROUTE": "YES",
+                "SERVER_ACTIVE_TRAVEL_CONTEXT": "YES",
+                "SERVER_TRAVEL_REFINEMENT": "YES",
+                "CONFIRMATION_REQUIRED": true,
+                "confirmation_required": true,
+                "confirmation_type": "flight_search",
+                "CONFIRMATION_BEFORE_SEARCH": true,
+                "CONFIRMATION_SNAPSHOT": {
+                    "origin": "KHI",
+                    "destination": "JED",
+                    "departure_date": "2026-10-03",
+                    "return_date": null,
+                    "trip_type": "one_way",
+                    "adults": 1,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": null,
+                    "airline": null,
+                    "max_stops": null,
+                    "currency": "PKR",
+                    "legs": null
+                },
+                "PRE_CONFIRM_SEARCH_CALLS": 0,
+                "SEMANTIC_PLAN_VALID": "YES"
+            },
+            "state": "AI_ACTIVE",
+            "actions": [
+                {
+                    "label": "Search Flights",
+                    "href": "\/#flight-search"
+                },
+                {
+                    "label": "Browse Groups",
+                    "href": "\/groups"
+                },
+                {
+                    "label": "Manage Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ]
+        },
+        {
+            "ok": true,
+            "conversation_id": "e6db3f59-08dc-4db8-b580-1b970d6f663f",
+            "status": "confirm",
+            "message": "Just to confirm: KHI to JED, return, 2026-10-03, return 2026-10-04, 1 adult. Shall I search?",
+            "booking": null,
+            "requires_confirmation": true,
+            "shopping_state": {
+                "lead_capture_pending": true,
+                "lead_pending_message": "Karachi to Jeddah on 3 October for 1 adult",
+                "lead_capture_fields": [
+                    "name",
+                    "email",
+                    "phone",
+                    "contact_consent"
+                ],
+                "lead_capture_stage": "name",
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "JED",
+                "depart_date": "2026-10-03",
+                "return_date": "2026-10-04",
+                "adults": 1,
+                "children": 0,
+                "infants": 0,
+                "currency": "PKR",
+                "trip_type": "return",
+                "pending_flight_search_confirmation": {
+                    "origin": "KHI",
+                    "destination": "JED",
+                    "departure_date": "2026-10-03",
+                    "return_date": "2026-10-04",
+                    "trip_type": "return",
+                    "adults": 1,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": null,
+                    "airline": null,
+                    "max_stops": null,
+                    "currency": "PKR",
+                    "legs": null
+                }
+            },
+            "pending": {
+                "origin": "KHI",
+                "destination": "JED",
+                "departure_date": "2026-10-03",
+                "return_date": "2026-10-04",
+                "trip_type": "return",
+                "adults": 1,
+                "children": 0,
+                "infants": 0,
+                "cabin": null,
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": null
+            },
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "intent": {
+                    "intent": "flight_search",
+                    "origin": "KHI",
+                    "destination": "JED",
+                    "depart_date": "2026-10-03",
+                    "return_date": "2026-10-04",
+                    "adults": 1,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": null,
+                    "airline": null,
+                    "max_stops": null,
+                    "budget": null,
+                    "time_preference": null,
+                    "currency": "PKR",
+                    "mode": "STRUCTURED_FALLBACK",
+                    "trip_type": "return",
+                    "legs": null
+                },
+                "clarification_required": false,
+                "clarification_message": null,
+                "clarification_options": [],
+                "provenance": {
+                    "intent": "INHERITED_CONVERSATION_STATE",
+                    "origin": "INHERITED_CONVERSATION_STATE",
+                    "destination": "INHERITED_CONVERSATION_STATE",
+                    "depart_date": "INHERITED_CONVERSATION_STATE",
+                    "return_date": "DETERMINISTIC_NORMALIZATION",
+                    "EXPLICIT_RETURN_TRIP_CUE": "YES",
+                    "trip_type": "EXPLICIT_USER"
+                },
+                "ranking_preference": null,
+                "language": "en",
+                "llm_bypassed": true,
+                "EXPLICIT_RETURN_TRIP_CUE": "YES",
+                "confirmation_invalidated": true,
+                "CONFIRMATION_REQUIRED": true,
+                "confirmation_required": true,
+                "confirmation_type": "flight_search",
+                "CONFIRMATION_BEFORE_SEARCH": true,
+                "CONFIRMATION_SNAPSHOT": {
+                    "origin": "KHI",
+                    "destination": "JED",
+                    "departure_date": "2026-10-03",
+                    "return_date": "2026-10-04",
+                    "trip_type": "return",
+                    "adults": 1,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": null,
+                    "airline": null,
+                    "max_stops": null,
+                    "currency": "PKR",
+                    "legs": null
+                }
+            },
+            "state": "AI_ACTIVE",
+            "actions": [
+                {
+                    "label": "Search Flights",
+                    "href": "\/#flight-search"
+                },
+                {
+                    "label": "Browse Groups",
+                    "href": "\/groups"
+                },
+                {
+                    "label": "Manage Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ]
+        }
+    ],
+    "booking_detour": {
+        "before": {
+            "shopping": {
+                "lead_capture_pending": true,
+                "lead_pending_message": "Lahore to Dubai on 2 October for 2 adults economy",
+                "lead_capture_fields": [
+                    "name",
+                    "email",
+                    "phone",
+                    "contact_consent"
+                ],
+                "lead_capture_stage": "name",
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-02",
+                "return_date": null,
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": "economy",
+                "currency": "PKR",
+                "trip_type": "one_way",
+                "airline": null,
+                "max_stops": null,
+                "budget": null,
+                "time_preference": null,
+                "mode": "STRUCTURED_FALLBACK",
+                "pending_flight_search_confirmation": {
+                    "origin": "LHE",
+                    "destination": "DXB",
+                    "departure_date": "2026-10-02",
+                    "return_date": null,
+                    "trip_type": "one_way",
+                    "adults": 2,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": "economy",
+                    "airline": null,
+                    "max_stops": null,
+                    "currency": "PKR",
+                    "legs": null
+                }
+            },
+            "pending": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": "economy",
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": null
+            }
+        },
+        "booking_turn": {
+            "status": "clarify",
+            "booking": null,
+            "message": "Of course — I can help you check a booking. Please send your booking reference and the email or phone number used when you booked.",
+            "actions": [
+                {
+                    "label": "Lookup Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ],
+            "shopping": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-02",
+                "adults": 2,
+                "intent": "flight_search",
+                "booking_detour_active": true
+            },
+            "pending": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": "economy",
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": null
+            }
+        }
+    },
+    "booking_not_found": [
+        {
+            "ok": true,
+            "conversation_id": "5ad98d90-acef-401d-91b9-6fcf0067cb0c",
+            "status": "clarify",
+            "message": "Thanks. What email or phone number was used for booking ZZZNOBOOK1? JetPakistan verifies your ownership before showing booking details.",
+            "booking": null,
+            "requires_confirmation": false,
+            "shopping_state": {
+                "lead_capture_pending": true,
+                "lead_pending_message": "Lahore to Dubai on 2 October for 2 adults economy",
+                "lead_capture_fields": [
+                    "name",
+                    "email",
+                    "phone",
+                    "contact_consent"
+                ],
+                "lead_capture_stage": "name",
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-02",
+                "return_date": null,
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": "economy",
+                "currency": "PKR",
+                "trip_type": "one_way",
+                "airline": null,
+                "max_stops": null,
+                "budget": null,
+                "time_preference": null,
+                "mode": "STRUCTURED_FALLBACK",
+                "pending_flight_search_confirmation": {
+                    "origin": "LHE",
+                    "destination": "DXB",
+                    "departure_date": "2026-10-02",
+                    "return_date": null,
+                    "trip_type": "one_way",
+                    "adults": 2,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": "economy",
+                    "airline": null,
+                    "max_stops": null,
+                    "currency": "PKR",
+                    "legs": null
+                },
+                "booking_detour_active": true,
+                "travel_snapshot_before_booking": {
+                    "origin": "LHE",
+                    "destination": "DXB",
+                    "depart_date": "2026-10-02",
+                    "return_date": null,
+                    "trip_type": "one_way",
+                    "adults": 2,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": "economy",
+                    "intent": "flight_search"
+                },
+                "booking_reference": "ZZZNOBOOK1"
+            },
+            "pending": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": "economy",
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": null
+            },
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "BOOKING_DETOUR": "YES",
+                "intent": {
+                    "intent": "booking_lookup"
+                },
+                "BOOKING_DETOUR_PRESERVES_TRAVEL_STATE": "PASS"
+            },
+            "state": "AI_ACTIVE",
+            "actions": [
+                {
+                    "label": "Lookup Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ]
+        },
+        {
+            "ok": true,
+            "conversation_id": "5ad98d90-acef-401d-91b9-6fcf0067cb0c",
+            "status": "not_found",
+            "message": "I could not find a booking matching those details. Please double-check your reference and contact information.",
+            "booking": null,
+            "requires_confirmation": false,
+            "shopping_state": {
+                "lead_capture_pending": true,
+                "lead_pending_message": "Lahore to Dubai on 2 October for 2 adults economy",
+                "lead_capture_fields": [
+                    "name",
+                    "email",
+                    "phone",
+                    "contact_consent"
+                ],
+                "lead_capture_stage": "name",
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-02",
+                "return_date": null,
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": "economy",
+                "currency": "PKR",
+                "trip_type": "one_way",
+                "airline": null,
+                "max_stops": null,
+                "budget": null,
+                "time_preference": null,
+                "mode": "STRUCTURED_FALLBACK",
+                "pending_flight_search_confirmation": {
+                    "origin": "LHE",
+                    "destination": "DXB",
+                    "departure_date": "2026-10-02",
+                    "return_date": null,
+                    "trip_type": "one_way",
+                    "adults": 2,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": "economy",
+                    "airline": null,
+                    "max_stops": null,
+                    "currency": "PKR",
+                    "legs": null
+                },
+                "booking_detour_active": true,
+                "travel_snapshot_before_booking": {
+                    "origin": "LHE",
+                    "destination": "DXB",
+                    "depart_date": "2026-10-02",
+                    "return_date": null,
+                    "trip_type": "one_way",
+                    "adults": 2,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": "economy",
+                    "intent": "flight_search"
+                },
+                "booking_reference": "ZZZNOBOOK1",
+                "booking_email": "nobody-cq43@example.com"
+            },
+            "pending": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": "economy",
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": null
+            },
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "BOOKING_DETOUR": "YES",
+                "intent": {
+                    "intent": "booking_lookup"
+                },
+                "BOOKING_DETOUR_PRESERVES_TRAVEL_STATE": "PASS"
+            },
+            "state": "AI_ACTIVE",
+            "actions": [
+                {
+                    "label": "Lookup Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ]
+        }
+    ],
+    "booking_resume": {
+        "ok": true,
+        "conversation_id": "5ad98d90-acef-401d-91b9-6fcf0067cb0c",
+        "status": "confirm",
+        "message": "Back to your flight search. Just to confirm: LHE to DXB, one-way, 2026-10-02, economy class, 2 adults. Shall I search?",
+        "booking": null,
+        "requires_confirmation": true,
+        "shopping_state": {
+            "lead_capture_pending": true,
+            "lead_pending_message": "Lahore to Dubai on 2 October for 2 adults economy",
+            "lead_capture_fields": [
+                "name",
+                "email",
+                "phone",
+                "contact_consent"
+            ],
+            "lead_capture_stage": "name",
+            "intent": "flight_search",
+            "origin": "LHE",
+            "destination": "DXB",
+            "depart_date": "2026-10-02",
+            "return_date": null,
+            "adults": 2,
+            "children": 0,
+            "infants": 0,
+            "cabin": "economy",
+            "currency": "PKR",
+            "trip_type": "one_way",
+            "airline": null,
+            "max_stops": null,
+            "budget": null,
+            "time_preference": null,
+            "mode": "STRUCTURED_FALLBACK",
+            "pending_flight_search_confirmation": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": "economy",
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": null
+            }
+        },
+        "pending": {
+            "origin": "LHE",
+            "destination": "DXB",
+            "departure_date": "2026-10-02",
+            "return_date": null,
+            "trip_type": "one_way",
+            "adults": 2,
+            "children": 0,
+            "infants": 0,
+            "cabin": "economy",
+            "airline": null,
+            "max_stops": null,
+            "currency": "PKR",
+            "legs": null
+        },
+        "meta": {
+            "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+            "AI_GROUP_SEARCH_READ_CALLS": 0,
+            "TRAVEL_STATE_PRESERVED_AFTER_BOOKING": "PASS",
+            "BOOKING_DETOUR_PRESERVES_PAX": "PASS",
+            "CONFIRMATION_REQUIRED": true,
+            "confirmation_required": true,
+            "confirmation_type": "flight_search",
+            "CONFIRMATION_BEFORE_SEARCH": true,
+            "CONFIRMATION_SNAPSHOT": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-10-02",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": "economy",
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": null
+            }
+        },
+        "state": "AI_ACTIVE",
+        "actions": [
+            {
+                "label": "Search Flights",
+                "href": "\/#flight-search"
+            },
+            {
+                "label": "Browse Groups",
+                "href": "\/groups"
+            },
+            {
+                "label": "Manage Booking",
+                "href": "\/lookup-booking"
+            },
+            {
+                "label": "Talk to Support",
+                "action": "handoff"
+            }
+        ]
+    },
+    "explicit_handoff": [
+        {
+            "ok": true,
+            "conversation_id": "e89df2c1-9813-469b-b728-bd456eb8307b",
+            "status": "confirm",
+            "message": "Just to confirm: LHE to DXB, one-way, 2026-10-10, 2 adults. Shall I search?",
+            "booking": null,
+            "requires_confirmation": true,
+            "shopping_state": {
+                "lead_capture_pending": true,
+                "lead_pending_message": "Lahore to Dubai on 10 October for 2 adults",
+                "lead_capture_fields": [
+                    "name",
+                    "email",
+                    "phone",
+                    "contact_consent"
+                ],
+                "lead_capture_stage": "name",
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-10",
+                "return_date": null,
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "currency": "PKR",
+                "trip_type": "one_way",
+                "pending_flight_search_confirmation": {
+                    "origin": "LHE",
+                    "destination": "DXB",
+                    "departure_date": "2026-10-10",
+                    "return_date": null,
+                    "trip_type": "one_way",
+                    "adults": 2,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": null,
+                    "airline": null,
+                    "max_stops": null,
+                    "currency": "PKR",
+                    "legs": [
+                        {
+                            "origin": "LHE",
+                            "destination": "DXB"
+                        }
+                    ]
+                }
+            },
+            "pending": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-10-10",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": null,
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": [
+                    {
+                        "origin": "LHE",
+                        "destination": "DXB"
+                    }
+                ]
+            },
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "SEMANTIC_BRAIN_CALLED": "YES",
+                "SEMANTIC_BRAIN_VALID": "YES",
+                "SEMANTIC_BRAIN_FALLBACK": "NO",
+                "MODEL_ID": "local",
+                "MODEL_CALLS": 1,
+                "SEMANTIC_LATENCY_MS": 6619,
+                "COMPOSER_LATENCY_MS": 0,
+                "TOTAL_MODEL_LATENCY_MS": 6619,
+                "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+                "SEMANTIC_INTENT": "prepare_search",
+                "SERVER_OPERATION": "prepare_search",
+                "SEMANTIC_DOMAIN": "travel",
+                "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+                "STALE_ROUTE_CONTAMINATION": 0,
+                "SERVER_SINGLE_ROUTE": "LHE-DXB",
+                "QWEN_SEMANTIC_VALID": "YES",
+                "TOOL_EXECUTED": "NONE",
+                "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+                "SERVER_OPEN_DOMAIN_CATEGORY": null,
+                "QWEN_DOMAIN": "travel",
+                "QWEN_OPERATION": "prepare_search",
+                "SERVER_EXPLICIT_TRAVEL_ROUTE": "YES",
+                "SERVER_ACTIVE_TRAVEL_CONTEXT": "YES",
+                "SERVER_TRAVEL_REFINEMENT": "YES",
+                "CONFIRMATION_REQUIRED": true,
+                "confirmation_required": true,
+                "confirmation_type": "flight_search",
+                "CONFIRMATION_BEFORE_SEARCH": true,
+                "CONFIRMATION_SNAPSHOT": {
+                    "origin": "LHE",
+                    "destination": "DXB",
+                    "departure_date": "2026-10-10",
+                    "return_date": null,
+                    "trip_type": "one_way",
+                    "adults": 2,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": null,
+                    "airline": null,
+                    "max_stops": null,
+                    "currency": "PKR",
+                    "legs": [
+                        {
+                            "origin": "LHE",
+                            "destination": "DXB"
+                        }
+                    ]
+                },
+                "PRE_CONFIRM_SEARCH_CALLS": 0,
+                "SEMANTIC_PLAN_VALID": "YES"
+            },
+            "state": "AI_ACTIVE",
+            "actions": [
+                {
+                    "label": "Search Flights",
+                    "href": "\/#flight-search"
+                },
+                {
+                    "label": "Browse Groups",
+                    "href": "\/groups"
+                },
+                {
+                    "label": "Manage Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ]
+        },
+        {
+            "ok": true,
+            "conversation_id": "e89df2c1-9813-469b-b728-bd456eb8307b",
+            "status": "waiting_for_human",
+            "message": "I have connected you with our support queue. A team member will reply in this chat. AI replies are paused. Tap Resume AI anytime to continue with the assistant.",
+            "booking": null,
+            "requires_confirmation": false,
+            "shopping_state": {
+                "lead_capture_pending": true,
+                "lead_pending_message": "Lahore to Dubai on 10 October for 2 adults",
+                "lead_capture_fields": [
+                    "name",
+                    "email",
+                    "phone",
+                    "contact_consent"
+                ],
+                "lead_capture_stage": "name",
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-10",
+                "return_date": null,
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "currency": "PKR",
+                "trip_type": "one_way",
+                "pending_flight_search_confirmation": {
+                    "origin": "LHE",
+                    "destination": "DXB",
+                    "departure_date": "2026-10-10",
+                    "return_date": null,
+                    "trip_type": "one_way",
+                    "adults": 2,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": null,
+                    "airline": null,
+                    "max_stops": null,
+                    "currency": "PKR",
+                    "legs": [
+                        {
+                            "origin": "LHE",
+                            "destination": "DXB"
+                        }
+                    ]
+                }
+            },
+            "pending": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-10-10",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": null,
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": [
+                    {
+                        "origin": "LHE",
+                        "destination": "DXB"
+                    }
+                ]
+            },
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0
+            },
+            "state": "WAITING_FOR_HUMAN",
+            "actions": [
+                {
+                    "label": "Resume AI",
+                    "action": "resume_ai"
+                },
+                {
+                    "label": "Search Flights",
+                    "href": "\/#flight-search"
+                },
+                {
+                    "label": "Browse Groups",
+                    "href": "\/groups"
+                },
+                {
+                    "label": "Manage Booking",
+                    "href": "\/lookup-booking"
+                },
+                {
+                    "label": "Talk to Support",
+                    "action": "handoff"
+                }
+            ]
+        }
+    ],
+    "handoff_resume": {
+        "ok": true,
+        "conversation_id": "e89df2c1-9813-469b-b728-bd456eb8307b",
+        "status": "ok",
+        "message": "AI assistant is back. How can I help with your travel plans?",
+        "booking": null,
+        "requires_confirmation": false,
+        "shopping_state": {
+            "lead_capture_pending": true,
+            "lead_pending_message": "Lahore to Dubai on 10 October for 2 adults",
+            "lead_capture_fields": [
+                "name",
+                "email",
+                "phone",
+                "contact_consent"
+            ],
+            "lead_capture_stage": "name",
+            "intent": "flight_search",
+            "origin": "LHE",
+            "destination": "DXB",
+            "depart_date": "2026-10-10",
+            "return_date": null,
+            "adults": 2,
+            "children": 0,
+            "infants": 0,
+            "currency": "PKR",
+            "trip_type": "one_way",
+            "pending_flight_search_confirmation": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-10-10",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": null,
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": [
+                    {
+                        "origin": "LHE",
+                        "destination": "DXB"
+                    }
+                ]
+            }
+        },
+        "pending": {
+            "origin": "LHE",
+            "destination": "DXB",
+            "departure_date": "2026-10-10",
+            "return_date": null,
+            "trip_type": "one_way",
+            "adults": 2,
+            "children": 0,
+            "infants": 0,
+            "cabin": null,
+            "airline": null,
+            "max_stops": null,
+            "currency": "PKR",
+            "legs": [
+                {
+                    "origin": "LHE",
+                    "destination": "DXB"
+                }
+            ]
+        },
+        "meta": {
+            "RESUME_AI_EXPLICIT": "PASS",
+            "RESUME_AI_IMPLICIT": "NO",
+            "HANDOFF_AUDIT_DUPLICATES": 0,
+            "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+            "AI_GROUP_SEARCH_READ_CALLS": 0
+        },
+        "state": "AI_ACTIVE",
+        "actions": [
+            {
+                "label": "Search Flights",
+                "href": "\/#flight-search"
+            },
+            {
+                "label": "Browse Groups",
+                "href": "\/groups"
+            },
+            {
+                "label": "Manage Booking",
+                "href": "\/lookup-booking"
+            },
+            {
+                "label": "Talk to Support",
+                "action": "handoff"
+            }
+        ]
+    },
+    "order39": {
+        "ok": true,
+        "conversation_id": "9b3d670b-0263-47c5-8e1c-6fe069ce36b8",
+        "status": "confirm",
+        "message": "Just to confirm: LHE to DXB, one-way, 2026-09-28, 2 adults. Shall I search?",
+        "booking": null,
+        "requires_confirmation": true,
+        "shopping_state": {
+            "lead_capture_pending": true,
+            "lead_pending_message": "Lahore to Dubai tomorrow for 2 adults",
+            "lead_capture_fields": [
+                "name",
+                "email",
+                "phone",
+                "contact_consent"
+            ],
+            "lead_capture_stage": "name",
+            "intent": "flight_search",
+            "origin": "LHE",
+            "destination": "DXB",
+            "depart_date": "2026-09-28",
+            "return_date": null,
+            "adults": 2,
+            "children": 0,
+            "infants": 0,
+            "currency": "PKR",
+            "trip_type": "one_way",
+            "pending_flight_search_confirmation": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-09-28",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": null,
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": [
+                    {
+                        "origin": "LHE",
+                        "destination": "DXB"
+                    }
+                ]
+            }
+        },
+        "pending": {
+            "origin": "LHE",
+            "destination": "DXB",
+            "departure_date": "2026-09-28",
+            "return_date": null,
+            "trip_type": "one_way",
+            "adults": 2,
+            "children": 0,
+            "infants": 0,
+            "cabin": null,
+            "airline": null,
+            "max_stops": null,
+            "currency": "PKR",
+            "legs": [
+                {
+                    "origin": "LHE",
+                    "destination": "DXB"
+                }
+            ]
+        },
+        "meta": {
+            "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+            "AI_GROUP_SEARCH_READ_CALLS": 0,
+            "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+            "SEMANTIC_BRAIN_CALLED": "YES",
+            "SEMANTIC_BRAIN_VALID": "YES",
+            "SEMANTIC_BRAIN_FALLBACK": "NO",
+            "MODEL_ID": "local",
+            "MODEL_CALLS": 1,
+            "SEMANTIC_LATENCY_MS": 7701,
+            "COMPOSER_LATENCY_MS": 0,
+            "TOTAL_MODEL_LATENCY_MS": 7701,
+            "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+            "SEMANTIC_INTENT": "prepare_search",
+            "SERVER_OPERATION": "prepare_search",
+            "SEMANTIC_DOMAIN": "travel",
+            "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+            "STALE_ROUTE_CONTAMINATION": 0,
+            "SERVER_SINGLE_ROUTE": "LHE-DXB",
+            "QWEN_SEMANTIC_VALID": "YES",
+            "TOOL_EXECUTED": "NONE",
+            "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+            "SERVER_OPEN_DOMAIN_CATEGORY": null,
+            "QWEN_DOMAIN": "travel",
+            "QWEN_OPERATION": "prepare_search",
+            "SERVER_EXPLICIT_TRAVEL_ROUTE": "YES",
+            "SERVER_ACTIVE_TRAVEL_CONTEXT": "YES",
+            "SERVER_TRAVEL_REFINEMENT": "YES",
+            "CONFIRMATION_REQUIRED": true,
+            "confirmation_required": true,
+            "confirmation_type": "flight_search",
+            "CONFIRMATION_BEFORE_SEARCH": true,
+            "CONFIRMATION_SNAPSHOT": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-09-28",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": null,
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": [
+                    {
+                        "origin": "LHE",
+                        "destination": "DXB"
+                    }
+                ]
+            },
+            "PRE_CONFIRM_SEARCH_CALLS": 0,
+            "SEMANTIC_PLAN_VALID": "YES"
+        },
+        "state": "AI_ACTIVE",
+        "actions": [
+            {
+                "label": "Search Flights",
+                "href": "\/#flight-search"
+            },
+            {
+                "label": "Browse Groups",
+                "href": "\/groups"
+            },
+            {
+                "label": "Manage Booking",
+                "href": "\/lookup-booking"
+            },
+            {
+                "label": "Talk to Support",
+                "action": "handoff"
+            }
+        ]
+    },
+    "wapas": {
+        "ok": true,
+        "conversation_id": "35ced800-38ba-4052-9bfb-0284cf979027",
+        "status": "clarify",
+        "message": "What departure date should I use for DXB to LHE?",
+        "booking": null,
+        "requires_confirmation": false,
+        "shopping_state": {
+            "lead_capture_pending": true,
+            "lead_pending_message": "Dubai se Lahore wapas",
+            "lead_capture_fields": [
+                "name",
+                "email",
+                "phone",
+                "contact_consent"
+            ],
+            "lead_capture_stage": "name",
+            "intent": "flight_search",
+            "origin": "DXB",
+            "destination": "LHE",
+            "return_date": null,
+            "adults": 1,
+            "children": 0,
+            "infants": 0,
+            "currency": "PKR",
+            "trip_type": "one_way"
+        },
+        "pending": null,
+        "meta": {
+            "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+            "AI_GROUP_SEARCH_READ_CALLS": 0,
+            "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+            "SEMANTIC_BRAIN_CALLED": "YES",
+            "SEMANTIC_BRAIN_VALID": "YES",
+            "SEMANTIC_BRAIN_FALLBACK": "NO",
+            "MODEL_ID": "local",
+            "MODEL_CALLS": 1,
+            "SEMANTIC_LATENCY_MS": 8858,
+            "COMPOSER_LATENCY_MS": 0,
+            "TOTAL_MODEL_LATENCY_MS": 8858,
+            "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+            "SEMANTIC_INTENT": "open_jaw",
+            "SERVER_OPERATION": "clarify",
+            "SEMANTIC_DOMAIN": "travel",
+            "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+            "STALE_ROUTE_CONTAMINATION": 0,
+            "FALSE_OPEN_JAW": 0,
+            "MODEL_CANNOT_INVENT_SECOND_LEG": "PASS",
+            "FALSE_OPEN_JAW_DEMOTED": "YES",
+            "SERVER_SINGLE_ROUTE": "DXB-LHE",
+            "QWEN_SEMANTIC_VALID": "YES",
+            "TOOL_EXECUTED": "NONE",
+            "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+            "SERVER_OPEN_DOMAIN_CATEGORY": null,
+            "QWEN_DOMAIN": "travel",
+            "QWEN_OPERATION": "clarify",
+            "SERVER_EXPLICIT_TRAVEL_ROUTE": "YES",
+            "SERVER_ACTIVE_TRAVEL_CONTEXT": "YES",
+            "SERVER_TRAVEL_REFINEMENT": "YES",
+            "RETURN_DATE_REQUIRED": "NO"
+        },
+        "state": "AI_ACTIVE",
+        "actions": [
+            {
+                "label": "Search Flights",
+                "href": "\/#flight-search"
+            },
+            {
+                "label": "Browse Groups",
+                "href": "\/groups"
+            },
+            {
+                "label": "Manage Booking",
+                "href": "\/lookup-booking"
+            },
+            {
+                "label": "Talk to Support",
+                "action": "handoff"
+            }
+        ]
+    },
+    "return_on_date": {
+        "ok": true,
+        "conversation_id": "7bd2ab8a-55ab-4eea-9ddd-6d528a85e00a",
+        "status": "confirm",
+        "message": "Just to confirm: LHE to DXB, return, 2026-10-10, return 2026-10-15, 1 adult. Shall I search?",
+        "booking": null,
+        "requires_confirmation": true,
+        "shopping_state": {
+            "lead_capture_pending": true,
+            "lead_pending_message": "Lahore to Dubai on 10 October, return on 15 October",
+            "lead_capture_fields": [
+                "name",
+                "email",
+                "phone",
+                "contact_consent"
+            ],
+            "lead_capture_stage": "name",
+            "intent": "flight_search",
+            "origin": "LHE",
+            "destination": "DXB",
+            "depart_date": "2026-10-10",
+            "return_date": "2026-10-15",
+            "adults": 1,
+            "children": 0,
+            "infants": 0,
+            "currency": "PKR",
+            "trip_type": "return",
+            "pending_flight_search_confirmation": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-10-10",
+                "return_date": "2026-10-15",
+                "trip_type": "return",
+                "adults": 1,
+                "children": 0,
+                "infants": 0,
+                "cabin": null,
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": null
+            }
+        },
+        "pending": {
+            "origin": "LHE",
+            "destination": "DXB",
+            "departure_date": "2026-10-10",
+            "return_date": "2026-10-15",
+            "trip_type": "return",
+            "adults": 1,
+            "children": 0,
+            "infants": 0,
+            "cabin": null,
+            "airline": null,
+            "max_stops": null,
+            "currency": "PKR",
+            "legs": null
+        },
+        "meta": {
+            "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+            "AI_GROUP_SEARCH_READ_CALLS": 0,
+            "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+            "SEMANTIC_BRAIN_CALLED": "YES",
+            "SEMANTIC_BRAIN_VALID": "YES",
+            "SEMANTIC_BRAIN_FALLBACK": "NO",
+            "MODEL_ID": "local",
+            "MODEL_CALLS": 1,
+            "SEMANTIC_LATENCY_MS": 8182,
+            "COMPOSER_LATENCY_MS": 0,
+            "TOTAL_MODEL_LATENCY_MS": 8182,
+            "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+            "SEMANTIC_INTENT": "open_jaw",
+            "SERVER_OPERATION": "prepare_search",
+            "SEMANTIC_DOMAIN": "travel",
+            "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+            "STALE_ROUTE_CONTAMINATION": 0,
+            "FALSE_OPEN_JAW": 0,
+            "MODEL_CANNOT_INVENT_SECOND_LEG": "PASS",
+            "FALSE_OPEN_JAW_DEMOTED": "YES",
+            "SERVER_SINGLE_ROUTE": "LHE-DXB",
+            "EXPLICIT_RETURN_TRIP_CUE": "YES",
+            "QWEN_SEMANTIC_VALID": "YES",
+            "TOOL_EXECUTED": "NONE",
+            "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+            "SERVER_OPEN_DOMAIN_CATEGORY": null,
+            "QWEN_DOMAIN": "travel",
+            "QWEN_OPERATION": "prepare_search",
+            "SERVER_EXPLICIT_TRAVEL_ROUTE": "YES",
+            "SERVER_ACTIVE_TRAVEL_CONTEXT": "YES",
+            "SERVER_TRAVEL_REFINEMENT": "YES",
+            "CONFIRMATION_REQUIRED": true,
+            "confirmation_required": true,
+            "confirmation_type": "flight_search",
+            "CONFIRMATION_BEFORE_SEARCH": true,
+            "CONFIRMATION_SNAPSHOT": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "departure_date": "2026-10-10",
+                "return_date": "2026-10-15",
+                "trip_type": "return",
+                "adults": 1,
+                "children": 0,
+                "infants": 0,
+                "cabin": null,
+                "airline": null,
+                "max_stops": null,
+                "currency": "PKR",
+                "legs": null
+            },
+            "PRE_CONFIRM_SEARCH_CALLS": 0,
+            "SEMANTIC_PLAN_VALID": "YES"
+        },
+        "state": "AI_ACTIVE",
+        "actions": [
+            {
+                "label": "Search Flights",
+                "href": "\/#flight-search"
+            },
+            {
+                "label": "Browse Groups",
+                "href": "\/groups"
+            },
+            {
+                "label": "Manage Booking",
+                "href": "\/lookup-booking"
+            },
+            {
+                "label": "Talk to Support",
+                "action": "handoff"
+            }
+        ]
+    },
+    "open_jaw": {
+        "ok": true,
+        "conversation_id": "f9bd581c-16c4-4c2b-8486-a0d6046e7e8b",
+        "status": "clarify",
+        "message": "That looks like a multi-city \/ open-jaw itinerary (LHE-JED then MED-LHE). Share both leg dates and use multi-city search — I will not collapse it to a one-way search.",
+        "booking": null,
+        "requires_confirmation": false,
+        "shopping_state": {
+            "lead_capture_pending": true,
+            "lead_pending_message": "Lahore to Jeddah then Medina to Lahore",
+            "lead_capture_fields": [
+                "name",
+                "email",
+                "phone",
+                "contact_consent"
+            ],
+            "lead_capture_stage": "name",
+            "intent": "flight_search",
+            "origin": "LHE",
+            "destination": "JED",
+            "adults": 1,
+            "children": 0,
+            "infants": 0,
+            "currency": "PKR",
+            "trip_type": "open_jaw",
+            "legs": [
+                {
+                    "origin": "LHE",
+                    "destination": "JED"
+                },
+                {
+                    "origin": "MED",
+                    "destination": "LHE"
+                }
+            ]
+        },
+        "pending": null,
+        "meta": {
+            "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+            "AI_GROUP_SEARCH_READ_CALLS": 0,
+            "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+            "SEMANTIC_BRAIN_CALLED": "YES",
+            "SEMANTIC_BRAIN_VALID": "YES",
+            "SEMANTIC_BRAIN_FALLBACK": "NO",
+            "MODEL_ID": "local",
+            "MODEL_CALLS": 1,
+            "SEMANTIC_LATENCY_MS": 8652,
+            "COMPOSER_LATENCY_MS": 0,
+            "TOTAL_MODEL_LATENCY_MS": 8652,
+            "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+            "SEMANTIC_INTENT": "open_jaw",
+            "SERVER_OPERATION": "clarify",
+            "SEMANTIC_DOMAIN": "travel",
+            "EXPLICIT_ROUTE_PRECEDENCE": "PASS",
+            "STALE_ROUTE_CONTAMINATION": 0,
+            "QWEN_SEMANTIC_VALID": "YES",
+            "TOOL_EXECUTED": "NONE",
+            "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+            "SERVER_OPEN_DOMAIN_CATEGORY": null,
+            "QWEN_DOMAIN": "travel",
+            "QWEN_OPERATION": "clarify",
+            "SERVER_EXPLICIT_TRAVEL_ROUTE": "YES",
+            "SERVER_ACTIVE_TRAVEL_CONTEXT": "YES",
+            "SERVER_TRAVEL_REFINEMENT": "YES",
+            "SERVER_SINGLE_ROUTE": "MED-LHE",
+            "OPEN_JAW_DETECTED": "YES",
+            "LEG1": "LHE-JED",
+            "LEG2": "MED-LHE",
+            "FALSE_ONE_WAY": "NO"
+        },
+        "state": "AI_ACTIVE",
+        "actions": [
+            {
+                "label": "Search Flights",
+                "href": "\/#flight-search"
+            },
+            {
+                "label": "Browse Groups",
+                "href": "\/groups"
+            },
+            {
+                "label": "Manage Booking",
+                "href": "\/lookup-booking"
+            },
+            {
+                "label": "Talk to Support",
+                "action": "handoff"
+            }
+        ]
+    },
+    "gk": {
+        "ok": true,
+        "conversation_id": "4468f74c-97d3-4afb-bc05-4a2056d9f7e2",
+        "status": "ok",
+        "message": "Gravity is the force that attracts objects toward the center of a planet or star.",
+        "booking": null,
+        "requires_confirmation": false,
+        "shopping_state": [],
+        "pending": null,
+        "meta": {
+            "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+            "AI_GROUP_SEARCH_READ_CALLS": 0,
+            "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+            "SEMANTIC_BRAIN_CALLED": "NO",
+            "SEMANTIC_PLANNER_BYPASSED": "YES",
+            "SEMANTIC_BRAIN_VALID": "N\/A",
+            "SEMANTIC_BRAIN_FALLBACK": "NO",
+            "MODEL_ID": "local",
+            "MODEL_CALLS": 1,
+            "SEMANTIC_LATENCY_MS": 0,
+            "COMPOSER_LATENCY_MS": 0,
+            "TOTAL_MODEL_LATENCY_MS": 2558,
+            "SERVER_OPEN_DOMAIN_CATEGORY": "GENERAL_KNOWLEDGE",
+            "TOOL_EXECUTED": "NONE",
+            "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+            "OPEN_DOMAIN_LATENCY_MS": 2558,
+            "open_domain_category": "GENERAL_KNOWLEDGE",
+            "OPEN_DOMAIN_ATTEMPTED": "YES",
+            "OPEN_DOMAIN_RESPONSE_FORMAT": "plain_text",
+            "LLM_SYNTHESIS": "YES",
+            "OPEN_DOMAIN_FALLBACK": "NO",
+            "OPEN_DOMAIN_REJECT_REASON": "accepted",
+            "OPEN_DOMAIN_ACCEPTED": "YES",
+            "ANSWER_GROUNDED": "MODEL_GENERAL",
+            "SMART_REDIRECT": "YES",
+            "GENERAL_MODEL_CALLS": 1,
+            "FINAL_RESPONSE_SOURCE": "QWEN_OPEN_DOMAIN"
+        },
+        "state": "AI_ACTIVE",
+        "actions": [
+            {
+                "label": "Search Flights",
+                "href": "\/#flight-search"
+            },
+            {
+                "label": "Browse Groups",
+                "href": "\/groups"
+            },
+            {
+                "label": "Manage Booking",
+                "href": "\/lookup-booking"
+            },
+            {
+                "label": "Talk to Support",
+                "action": "handoff"
+            }
+        ]
+    },
+    "current": {
+        "ok": true,
+        "conversation_id": "16f08498-79fb-4edb-95c4-04ba4914bfbd",
+        "status": "ok",
+        "message": "I don't have an approved live market-data source available here, so I can't verify the current price. I can still help with flights or JetPakistan travel questions.",
+        "booking": null,
+        "requires_confirmation": false,
+        "shopping_state": [],
+        "pending": null,
+        "meta": {
+            "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+            "AI_GROUP_SEARCH_READ_CALLS": 0,
+            "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+            "SEMANTIC_BRAIN_CALLED": "YES",
+            "SEMANTIC_BRAIN_VALID": "YES",
+            "SEMANTIC_BRAIN_FALLBACK": "NO",
+            "MODEL_ID": "local",
+            "MODEL_CALLS": 1,
+            "SEMANTIC_LATENCY_MS": 4665,
+            "COMPOSER_LATENCY_MS": 0,
+            "TOTAL_MODEL_LATENCY_MS": 4665,
+            "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+            "SEMANTIC_INTENT": "lookup",
+            "SERVER_OPERATION": "lookup",
+            "SEMANTIC_DOMAIN": "current",
+            "STALE_ROUTE_CONTAMINATION": 0,
+            "QWEN_SEMANTIC_VALID": "YES",
+            "TOOL_EXECUTED": "NONE",
+            "MODEL_CAN_AUTHORIZE_MUTATION": "NO",
+            "SERVER_OPEN_DOMAIN_CATEGORY": "CURRENT_UNVERIFIED",
+            "QWEN_DOMAIN": "current",
+            "QWEN_OPERATION": "lookup",
+            "open_domain_category": "CURRENT_UNVERIFIED",
+            "CURRENT_TOPIC": "market",
+            "FLIGHT_STATE_CONTAMINATION": 0,
+            "HALLUCINATED_LIVE_FACT": "NO"
+        },
+        "state": "AI_ACTIVE",
+        "actions": [
+            {
+                "label": "Search Flights",
+                "href": "\/#flight-search"
+            },
+            {
+                "label": "Browse Groups",
+                "href": "\/groups"
+            },
+            {
+                "label": "Manage Booking",
+                "href": "\/lookup-booking"
+            },
+            {
+                "label": "Talk to Support",
+                "action": "handoff"
+            }
+        ]
+    }
+}

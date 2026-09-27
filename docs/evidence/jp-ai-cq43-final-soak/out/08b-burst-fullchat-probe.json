@@ -1,0 +1,248 @@
+{
+    "FIRST_RATE_LIMIT_TURN": null,
+    "RATE_LIMIT_HTTP_STATUS": null,
+    "RATE_LIMIT_GRACEFUL": "FAIL",
+    "BURST_SEND_COUNT": 40,
+    "turns": [
+        {
+            "i": 1,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 2,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 3,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 4,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 5,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 6,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 7,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 8,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 9,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 10,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 11,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 12,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 13,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 14,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 15,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 16,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 17,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 18,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 19,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 20,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 21,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 22,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 23,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 24,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 25,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 26,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 27,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 28,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 29,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 30,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 31,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 32,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 33,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 34,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 35,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 36,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 37,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 38,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 39,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        },
+        {
+            "i": 40,
+            "rate_limited": false,
+            "status": "clarify",
+            "mode": "LAB_CONSULTANT_V1"
+        }
+    ]
+}
