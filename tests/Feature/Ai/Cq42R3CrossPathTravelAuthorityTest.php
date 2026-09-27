@@ -356,6 +356,46 @@ class Cq42R3CrossPathTravelAuthorityTest extends TestCase
         $this->assertFalse($dated->clarificationRequired);
     }
 
+    public function test_return_on_followup_demotes_qwen_reciprocal_open_jaw(): void
+    {
+        $validator = app(SemanticPlanValidator::class);
+        $plan = SemanticPlan::fromModelArray([
+            'domain' => 'travel',
+            'intent' => 'flight_search',
+            'operation' => 'clarify',
+            'travel' => [
+                'trip_type' => 'open_jaw',
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'legs' => [
+                    ['origin' => 'LHE', 'destination' => 'DXB', 'departure_date' => '2026-10-10'],
+                    ['origin' => 'DXB', 'destination' => 'LHE', 'departure_date' => '2026-10-15'],
+                ],
+                'return_date' => null,
+                'adults' => 1,
+            ],
+            'missing' => [],
+        ]);
+        $validated = $validator->validate(
+            $plan,
+            [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => '2026-10-10',
+                'trip_type' => 'return',
+            ],
+            'return on 15 October'
+        );
+        $this->assertTrue($validated['valid'], json_encode($validated['rejects'] ?? []));
+        $this->assertTrue($validated['false_open_jaw_demoted'] ?? false);
+        $this->assertSame('return', $validated['intent']->tripType);
+        $this->assertSame('LHE', $validated['intent']->origin);
+        $this->assertSame('DXB', $validated['intent']->destination);
+        $this->assertSame('2026-10-10', $validated['intent']->departDate);
+        $this->assertSame('2026-10-15', $validated['intent']->returnDate);
+        $this->assertTrue($validated['intent']->legs === null || $validated['intent']->legs === []);
+    }
+
     public function test_qwen_clarify_does_not_block_complete_dated_return_confirm(): void
     {
         $this->enableSemanticAi();

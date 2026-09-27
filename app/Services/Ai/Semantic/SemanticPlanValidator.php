@@ -184,6 +184,42 @@ final class SemanticPlanValidator
         // CQ42-R2.1/R3: English return/round-trip cue ≠ Roman-Urdu wapis/wapas (shared helper).
         $explicitReturnCue = $this->travelSignals->explicitReturnTripCue($userMessage);
 
+        // CQ42-R3 production: return-date-only follow-up ("return on 15 October") must not
+        // accept Qwen reciprocal open-jaw when the user did not state a multi-leg route.
+        $currentRoute = $this->travelSignals->explicitTravelRoute($userMessage);
+        $returnOnlyFollowUp = ! ($currentRoute['explicit'] ?? false)
+            && $tripDates['return_explicit']
+            && ! $tripDates['depart_explicit'];
+        $qwenTripLower = is_string($plan->tripType) ? strtolower((string) $plan->tripType) : null;
+        if ($qwenTripLower === 'round_trip') {
+            $qwenTripLower = 'return';
+        }
+        if (
+            $returnOnlyFollowUp
+            && (
+                count($legs) >= 2
+                || in_array($qwenTripLower, ['open_jaw', 'multi_city'], true)
+            )
+        ) {
+            $falseOpenJawDemoted = true;
+            $legs = [];
+            if ($origin === null && isset($priorState['origin']) && is_string($priorState['origin'])) {
+                $resolvedOrigin = $this->resolveAirport((string) $priorState['origin'], $rejects);
+                if ($resolvedOrigin !== null) {
+                    $origin = $resolvedOrigin;
+                }
+            }
+            if ($destination === null && isset($priorState['destination']) && is_string($priorState['destination'])) {
+                $resolvedDestination = $this->resolveAirport((string) $priorState['destination'], $rejects);
+                if ($resolvedDestination !== null) {
+                    $destination = $resolvedDestination;
+                }
+            }
+            if ($depart === null && is_string($priorDepart) && $priorDepart !== '') {
+                $depart = $priorDepart;
+            }
+        }
+
         // Apply demotion trip_type after return date / return cue are known.
         if ($falseOpenJawDemoted) {
             $tripTypeForced = ($explicitReturnCue || $return !== null) ? 'return' : 'one_way';
