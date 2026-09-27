@@ -249,26 +249,39 @@ final class SemanticBrain
             $meta['SERVER_OVERRIDES_QWEN_OPEN_DOMAIN'] = 'YES';
         }
 
-        // CQ42-R3: server-proven explicit travel route outranks Qwen-only support/booking/general.
+        // CQ42-R3 / CQ43-R1: server progressive travel authority outranks Qwen non-travel labels.
         $routeSignal = $this->travelSignals->explicitTravelRoute($message);
-        if ($routeSignal['explicit']) {
-            $meta['SERVER_EXPLICIT_TRAVEL_ROUTE'] = 'YES';
-            $meta['SERVER_SINGLE_ROUTE'] = $meta['SERVER_SINGLE_ROUTE'] ?? $routeSignal['server_single_route'];
+        $progressive = $this->travelSignals->progressiveTravelAuthority(
+            $message,
+            is_array($conversation->shopping_state) ? $conversation->shopping_state : null,
+        );
+        if ($routeSignal['explicit'] || $progressive['active']) {
+            $meta['SERVER_EXPLICIT_TRAVEL_ROUTE'] = $routeSignal['explicit'] ? 'YES' : 'NO';
+            $meta['SERVER_ACTIVE_TRAVEL_CONTEXT'] = $progressive['active'] && (
+                (isset($conversation->shopping_state['origin']) && $conversation->shopping_state['origin'])
+                || (isset($conversation->shopping_state['destination']) && $conversation->shopping_state['destination'])
+            ) ? 'YES' : ($progressive['travel_start'] ? 'YES' : 'NO');
+            $meta['SERVER_TRAVEL_REFINEMENT'] = $progressive['travel_refinement'] ? 'YES' : 'NO';
+            if ($routeSignal['server_single_route']) {
+                $meta['SERVER_SINGLE_ROUTE'] = $meta['SERVER_SINGLE_ROUTE'] ?? $routeSignal['server_single_route'];
+            }
         }
         $qwenNonTravelHijack = in_array($plan->domain, ['support', 'booking', 'general', 'casual'], true)
             || in_array($plan->operation, ['handoff', 'lookup'], true);
         $explicitUserHandoffOrBooking = $this->messageWantsHandoff($message) || $this->messageWantsBookingLookup($message);
         if (
-            $routeSignal['explicit']
+            ($routeSignal['explicit'] || $progressive['active'] || $progressive['travel_refinement'])
             && $qwenNonTravelHijack
             && ! $explicitUserHandoffOrBooking
             && ! in_array($serverOpen, ['HIGH_RISK', 'CURRENT_UNVERIFIED', 'GENERAL_KNOWLEDGE', 'CASUAL_CONVERSATION', 'OUT_OF_DOMAIN_SAFE'], true)
         ) {
             $meta['SERVER_ROUTE_OVERRIDES_QWEN_DOMAIN'] = 'YES';
+            $meta['SERVER_TRAVEL_OVERRIDES_QWEN_DOMAIN'] = 'YES';
             $meta['SEMANTIC_BRAIN_FALLBACK'] = 'YES';
-            $meta['SEMANTIC_FALLBACK_REASON'] = 'server_explicit_travel_route_override';
+            $meta['SEMANTIC_FALLBACK_REASON'] = 'server_progressive_travel_authority_override';
             $meta['FINAL_RESPONSE_SOURCE'] = 'SEMANTIC_FALLBACK';
             $meta['LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK'] = 0;
+            $meta['QWEN_SUPPORT_HANDOFF_AUTHORITY'] = 'NO';
 
             return ['kind' => 'fallback', 'meta' => $meta];
         }
@@ -288,10 +301,10 @@ final class SemanticBrain
                 'kind' => 'booking_lookup',
                 'meta' => $meta,
             ],
-            // Explicit user handoff text only — Qwen support/handoff cannot invent handoff.
+            // Explicit user handoff text only — Qwen support/handoff cannot invent handoff (CQ43-R1).
             $this->messageWantsHandoff($message) => [
                 'kind' => 'handoff',
-                'meta' => $meta,
+                'meta' => array_merge($meta, ['QWEN_SUPPORT_HANDOFF_AUTHORITY' => 'NO']),
             ],
             // Server live-data gates outrank every Qwen label.
             $serverOpen === 'CURRENT_UNVERIFIED' => $this->currentUnverified(
@@ -314,14 +327,24 @@ final class SemanticBrain
                 $brand,
                 $capabilities,
             ),
-            // Advisory Qwen paths only when the server did not claim an open-domain family.
-            $plan->domain === 'support' || $plan->operation === 'handoff' => [
-                'kind' => 'handoff',
-                'meta' => $meta,
+            // Qwen support/handoff / booking/lookup are advisory only — never state transitions.
+            ($plan->domain === 'support' || $plan->operation === 'handoff') && ! $this->messageWantsHandoff($message) => [
+                'kind' => 'fallback',
+                'meta' => array_merge($meta, [
+                    'QWEN_SUPPORT_HANDOFF_AUTHORITY' => 'NO',
+                    'QWEN_MODEL_ONLY_HANDOFF' => 0,
+                    'SEMANTIC_BRAIN_FALLBACK' => 'YES',
+                    'SEMANTIC_FALLBACK_REASON' => 'qwen_handoff_requires_explicit_user_intent',
+                    'FINAL_RESPONSE_SOURCE' => 'SEMANTIC_FALLBACK',
+                ]),
             ],
-            $plan->domain === 'booking' || $plan->operation === 'lookup' => [
-                'kind' => 'booking_lookup',
-                'meta' => $meta,
+            ($plan->domain === 'booking' || $plan->operation === 'lookup') && ! $this->messageWantsBookingLookup($message) => [
+                'kind' => 'fallback',
+                'meta' => array_merge($meta, [
+                    'SEMANTIC_BRAIN_FALLBACK' => 'YES',
+                    'SEMANTIC_FALLBACK_REASON' => 'qwen_booking_requires_explicit_user_intent',
+                    'FINAL_RESPONSE_SOURCE' => 'SEMANTIC_FALLBACK',
+                ]),
             ],
             $plan->domain === 'current' => $this->currentUnverified($conversation, $message, $plan, $meta, $calls, $semanticLatency, $composerLatency),
             $plan->domain === 'general' || $plan->domain === 'casual' => $this->generalAnswer(

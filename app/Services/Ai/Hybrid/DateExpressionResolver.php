@@ -49,16 +49,16 @@ final class DateExpressionResolver
             ];
         }
 
-        if (preg_match('/\btoday\b|\baaj\b|آج/u', $normalized.$original) === 1) {
+        if (preg_match('/\btoday\b|\baaj\b|آج/u', $normalized.' '.$original) === 1) {
             return $this->ok($now->toDateString(), 'DETERMINISTIC_NORMALIZATION');
         }
-        if (preg_match('/\btomorrow\b|\bkal\b|کل/u', $normalized.$original) === 1) {
+        if (preg_match('/\btomorrow\b|\bkal\b|کل/u', $normalized.' '.$original) === 1) {
             return $this->ok($now->copy()->addDay()->toDateString(), 'DETERMINISTIC_NORMALIZATION');
         }
-        if (preg_match('/\bparso\b|پرسوں|day after tomorrow/u', $normalized.$original) === 1) {
+        if (preg_match('/\bparso\b|پرسوں|day after tomorrow/u', $normalized.' '.$original) === 1) {
             return $this->ok($now->copy()->addDays(2)->toDateString(), 'DETERMINISTIC_NORMALIZATION');
         }
-        if (preg_match('/next\s+friday|aglay\s+jumay|aglay\s+jumma|اگلے\s+جمعہ/u', $normalized.$original) === 1) {
+        if (preg_match('/next\s+friday|aglay\s+jumay|aglay\s+jumma|اگلے\s+جمعہ/u', $normalized.' '.$original) === 1) {
             return $this->ok($now->copy()->next(Carbon::FRIDAY)->toDateString(), 'DETERMINISTIC_NORMALIZATION');
         }
         if (preg_match('/next\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/u', $normalized, $m) === 1) {
@@ -101,18 +101,33 @@ final class DateExpressionResolver
      */
     public function returnDateCueRegex(): string
     {
-        return '/(?:,?\s*)?(?:return(?:ing)?(?:\s+date)?|wapas|make it return)(?:\s+on)?\s+'
-            .'(\d{1,2}\s+[A-Za-z]+|\d{4}-\d{2}-\d{2}|\d{1,2}(?:st|nd|rd|th)?)/iu';
+        return '/(?:,?\s*)?(?:'
+            .'(?:i\s+also\s+need\s+to\s+)?(?:come|coming)\s+back'
+            .'|return(?:ing)?(?:\s+date)?'
+            .'|wapis|wapas|make it return'
+            .')(?:\s+on)?\s+'
+            .'('
+            .'(?:next\s+)?(?:sunday|monday|tuesday|wednesday|thursday|friday|saturday)'
+            .'|\d{1,2}\s+[A-Za-z]+'
+            .'|\d{4}-\d{2}-\d{2}'
+            .'|\d{1,2}(?:st|nd|rd|th)?'
+            .')/iu';
     }
 
     /**
      * @return array{date: ?string, clarify: bool, clarify_message: ?string, provenance: ?string}
      */
-    public function resolveReturn(string $normalized, string $original, ?Carbon $now = null): array
+    public function resolveReturn(string $normalized, string $original, ?Carbon $now = null, ?string $priorDepart = null): array
     {
         $now ??= Carbon::now();
+        $anchor = $now->copy()->startOfDay();
+        if (is_string($priorDepart) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $priorDepart) === 1) {
+            $anchor = Carbon::parse($priorDepart)->startOfDay();
+        }
+
         if (preg_match($this->returnDateCueRegex(), $normalized, $m) === 1
-            || preg_match('/\b(\d{1,2})\s+ko\s+wapas\b/u', $normalized, $m) === 1) {
+            || preg_match('/\b(\d{1,2})\s+ko\s+wapas\b/u', $normalized, $m) === 1
+            || preg_match('/\b(?:wapis|wapas)\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/iu', $normalized, $m) === 1) {
             try {
                 $token = $m[1];
                 if (preg_match('/^\d{1,2}(?:st|nd|rd|th)?$/i', $token) === 1) {
@@ -133,8 +148,26 @@ final class DateExpressionResolver
                         'provenance' => null,
                     ];
                 }
+                if (preg_match('/^(?:next\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)$/i', $token, $wm) === 1) {
+                    // First matching weekday strictly AFTER outbound departure (or now).
+                    $dt = $anchor->copy()->next($wm[1]);
+                    if (! $dt->gt($anchor)) {
+                        $dt->addWeek();
+                    }
+
+                    return [
+                        'date' => $dt->toDateString(),
+                        'clarify' => false,
+                        'clarify_message' => null,
+                        'provenance' => 'DETERMINISTIC_NORMALIZATION',
+                    ];
+                }
                 $dt = Carbon::parse($token.' '.$now->year);
-                if ($dt->isPast()) {
+                if (is_string($priorDepart) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $priorDepart) === 1) {
+                    while ($dt->lte(Carbon::parse($priorDepart)->startOfDay())) {
+                        $dt->addYear();
+                    }
+                } elseif ($dt->isPast()) {
                     $dt->addYear();
                 }
 

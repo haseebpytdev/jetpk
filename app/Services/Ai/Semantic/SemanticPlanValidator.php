@@ -153,6 +153,36 @@ final class SemanticPlanValidator
                 }
             } else {
                 $legs = $qwenLegs;
+                // CQ43-R1: progressive partial O/D — do not accept Qwen-invented opposite role.
+                $progressive = $this->travelSignals->progressiveTravelAuthority($userMessage, $priorState);
+                if ($progressive['destination_only'] && is_string($progressive['destination'])) {
+                    $destination = $progressive['destination'];
+                    $origin = null;
+                    if (isset($priorState['origin']) && is_string($priorState['origin']) && $priorState['origin'] !== '') {
+                        $resolvedOrigin = $this->resolveAirport((string) $priorState['origin'], $rejects);
+                        if ($resolvedOrigin !== null) {
+                            $origin = $resolvedOrigin;
+                        }
+                    }
+                    $legs = [];
+                } elseif ($progressive['origin_only'] && is_string($progressive['origin'])) {
+                    $origin = $progressive['origin'];
+                    if ($destination === null && isset($priorState['destination']) && is_string($priorState['destination'])) {
+                        $resolvedDestination = $this->resolveAirport((string) $priorState['destination'], $rejects);
+                        if ($resolvedDestination !== null) {
+                            $destination = $resolvedDestination;
+                        }
+                    }
+                    $legs = $origin && $destination
+                        ? [['origin' => $origin, 'destination' => $destination, 'departure_date' => null]]
+                        : [];
+                } elseif ($progressive['destination_explicit'] && is_string($progressive['destination'])
+                    && ! $progressive['origin_explicit']) {
+                    $destination = $progressive['destination'];
+                    if (! isset($priorState['origin'])) {
+                        $origin = null;
+                    }
+                }
             }
         }
 

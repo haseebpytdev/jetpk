@@ -38,4 +38,20 @@ final class ClarificationBuilder
             'options' => [],
         ];
     }
+
+    public function originForDestination(string $destination): array
+    {
+        return [
+            'message' => 'Where are you travelling from for '.$destination.'?',
+            'options' => [],
+        ];
+    }
+
+    public function destinationForOrigin(string $origin): array
+    {
+        return [
+            'message' => 'Where would you like to go from '.$origin.'?',
+            'options' => [],
+        ];
+    }
 }

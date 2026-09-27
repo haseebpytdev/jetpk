@@ -255,9 +255,11 @@ final class CustomerQueryLeadService
             return null;
         }
 
-        // Assist first: do not monopolize the turn when the user already asked for help.
-        if ($this->intentRouter->shouldOverrideLeadCapture($message)) {
+        // Assist first: soft-pending lead; never monopolize progressive travel turns.
+        if ($this->intentRouter->shouldOverrideLeadCapture($message)
+            || $this->intentRouter->isTravelAuthorityTurn($message, is_array($conversation->shopping_state) ? $conversation->shopping_state : null)) {
             $this->markLeadCaptureSoftPending($conversation, $message, $user);
+            // Do not extract travel text as a name on soft-pending start.
             $this->extractOpportunisticLeadFields($conversation, $message);
 
             return null;
@@ -304,6 +306,29 @@ final class CustomerQueryLeadService
     {
         $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
         if (! ($state['lead_capture_pending'] ?? false)) {
+            return;
+        }
+
+        // Travel/refinement authority must never be interpreted as a lead name (CQ43-R1).
+        if ($this->intentRouter->isTravelAuthorityTurn($message, $state)
+            || $this->intentRouter->shouldOverrideLeadCapture($message)) {
+            // Still allow explicit email/phone capture from mixed turns.
+            $contact = $this->parseContactFromMessage($message);
+            $changed = false;
+            if (($contact['email'] ?? null) && ! filter_var((string) ($state['lead_email'] ?? ''), FILTER_VALIDATE_EMAIL)) {
+                $state['lead_email'] = mb_strtolower((string) $contact['email']);
+                $changed = true;
+            }
+            if (($contact['phone'] ?? null) && ! $this->isValidPhone((string) ($state['lead_phone'] ?? ''))) {
+                $state['lead_phone'] = trim((string) $contact['phone']);
+                $changed = true;
+            }
+            if ($changed) {
+                $state['lead_capture_stage'] = $this->resolveLeadCaptureStage($state, $this->resolveConversationUser($conversation));
+                $conversation->shopping_state = $state;
+                $conversation->save();
+            }
+
             return;
         }
 
