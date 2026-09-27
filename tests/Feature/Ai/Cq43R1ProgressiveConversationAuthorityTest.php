@@ -513,6 +513,14 @@ class Cq43R1ProgressiveConversationAuthorityTest extends TestCase
         $this->assertStringContainsString('booking', $body);
         $this->assertStringNotContainsString('confirm', $body);
         $this->assertFalse((bool) $booking['response']->json('requires_confirmation'));
+        // CQ43-R1.1 public booking contract during detour.
+        $this->assertSame('clarify', $booking['response']->json('status'));
+        $this->assertNull($booking['response']->json('booking'));
+        $actions = $booking['response']->json('actions');
+        $this->assertIsArray($actions);
+        $labels = array_map(static fn ($a) => is_array($a) ? (string) ($a['label'] ?? '') : '', $actions);
+        $this->assertContains('Lookup Booking', $labels);
+        $this->assertContains('Talk to Support', $labels);
 
         $afterBooking = $this->reloadState($conv->public_id);
         $this->assertSame('LHE', $afterBooking['origin'] ?? null);
@@ -536,6 +544,61 @@ class Cq43R1ProgressiveConversationAuthorityTest extends TestCase
             || $resume['response']->json('status') === 'confirm');
         $this->assertSame($before['origin'] ?? null, $afterResume['origin'] ?? null);
         $this->assertSame($before['adults'] ?? null, $afterResume['adults'] ?? null);
+    }
+
+    public function test_booking_public_contract_not_found_and_ok_payload(): void
+    {
+        $this->enableSemanticAi([
+            'ota.ai_assistant.conversational_enabled' => false,
+            'ota.ai_assistant.optional_llm_assist' => false,
+            'ota.ai_assistant.semantic_planner_enabled' => false,
+        ]);
+        $this->rebindInference(new ScriptedInferenceProvider([
+            $this->planJson(['operation' => 'clarify']),
+        ]));
+
+        $agency = \App\Models\Agency::factory()->create();
+        $booking = \App\Models\Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'booking_reference' => 'CQ43R1OK1',
+            'status' => \App\Enums\BookingStatus::PaymentPending,
+        ]);
+        \App\Models\BookingContact::query()->create([
+            'booking_id' => $booking->id,
+            'email' => 'cq43r1-ok@example.com',
+            'phone' => '+923001112233',
+        ]);
+
+        $vid = str_repeat('cq43c', 8);
+
+        // A. Incomplete
+        $incomplete = $this->chat($vid, 'Check my booking');
+        $incomplete['response']->assertOk()
+            ->assertJsonPath('status', 'clarify')
+            ->assertJsonPath('booking', null);
+        $cid = $incomplete['conversation_id'];
+
+        // B. Wrong verified details → not_found + booking=null
+        $this->chat($vid, 'Reference CQ43R1OK1', $cid);
+        $wrong = $this->chat($vid, 'My email is wrong@example.com', $cid);
+        $wrong['response']->assertOk()
+            ->assertJsonPath('status', 'not_found')
+            ->assertJsonPath('booking', null);
+        $this->assertStringNotContainsString('cq43r1-ok@example.com', (string) $wrong['response']->json('message'));
+
+        // C. Successful verified lookup on a fresh conversation
+        $vid2 = str_repeat('cq43d', 8);
+        $ok1 = $this->chat($vid2, 'Look up my booking please');
+        $cid2 = $ok1['conversation_id'];
+        $this->chat($vid2, 'Reference CQ43R1OK1', $cid2);
+        $ok = $this->chat($vid2, 'My email is cq43r1-ok@example.com', $cid2);
+        $ok['response']->assertOk()->assertJsonPath('status', 'ok');
+        $payload = $ok['response']->json('booking');
+        $this->assertIsArray($payload);
+        $this->assertArrayHasKey('booking_reference', $payload);
+        $this->assertSame('CQ43R1OK1', strtoupper((string) ($payload['booking_reference'] ?? '')));
+        $this->assertArrayNotHasKey('found', $payload);
+        $this->assertArrayNotHasKey('ok', $payload);
     }
 
     public function test_fresh_wapis_control_via_chat(): void

@@ -1494,16 +1494,26 @@ final class AiChatOrchestrator
         } else {
             $lookup = $this->bookingLookupTool->lookup($reference, $email, $phone);
             $body = (string) ($lookup['message'] ?? 'Lookup complete.');
-            $status = ! empty($lookup['found']) ? 'ok' : 'clarify';
-            $bookingPayload = $lookup;
+            $found = (bool) ($lookup['found'] ?? false);
+            // Completed verification: ok when found, not_found when absent — never demote to clarify.
+            $status = $found ? 'ok' : 'not_found';
+            $bookingPayload = $found ? ($lookup['booking'] ?? null) : null;
         }
 
         $assistant = $this->storeMessage($conversation, 'assistant', $body, [
             'mode' => $mode,
+            'intent' => [
+                'intent' => 'booking_lookup',
+                'booking_reference' => $reference,
+                'booking_email' => $email,
+                'booking_phone' => $phone,
+            ],
+            'booking' => $bookingPayload,
             'booking_detour' => true,
         ]);
 
         $meta['intent'] = ['intent' => 'booking_lookup'];
+        $meta['BOOKING_DETOUR'] = 'YES';
         $meta['BOOKING_DETOUR_PRESERVES_TRAVEL_STATE'] = 'PASS';
         if (is_array($bookingPayload)) {
             $meta['booking_lookup'] = $bookingPayload;
@@ -1517,7 +1527,11 @@ final class AiChatOrchestrator
             'state' => $conversation->state,
             'message' => $body,
             'recommendations' => [],
-            'actions' => $this->resolveResponseActions(),
+            'booking' => $bookingPayload,
+            'actions' => [
+                ['label' => 'Lookup Booking', 'href' => '/lookup-booking'],
+                ['label' => 'Talk to Support', 'action' => 'handoff'],
+            ],
             'meta' => $meta,
         ]);
     }
