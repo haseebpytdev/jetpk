@@ -1,0 +1,28 @@
+﻿PREVIOUS_RUNTIME_SHA=9a2182f5bf5380491ff091d3f572c98898c727bc
+AUTHORIZED_SHA=03be054d59ddfe0c412368437162009b09c0b7b7
+DEPLOYED_RUNTIME_SHA=03be054d59ddfe0c412368437162009b09c0b7b7
+DEPLOY_MARKER=03be054d59ddfe0c412368437162009b09c0b7b7
+BACKUP_PATH=/home/pkjetp/backups/jetpk-ai-runtime-20260927T080207Z
+RELEASE_PATH=/home/pkjetp/releases/jetpk-ai-runtime-03be054d59ddfe0c412368437162009b09c0b7b7-20260927T080207Z
+FINAL_DEPLOY_STATUS=PASS
+PROTECTED_AI_DEPLOY=PASS
+CHANGED_PATH_COUNT=9
+REPO_USED=/home/pkjetp/jetpk_git_writable
+NOTE=Canonical jetpk_git had root-owned objects blocking fetch; used writable reference clone for REPO.
+
+CONFIG_PARITY:
+conversational_enabled=true (ota.ai_assistant.conversational_enabled)
+semantic_planner_enabled=true (ota.ai_assistant.semantic_planner_enabled)
+semantic_composer_enabled=false (ota.ai_assistant.semantic_composer_enabled)
+ai_embed.enabled=false (ai_embed.enabled)
+
+DEPLOYED_FILES:
+app/Services/Ai/Semantic/SemanticBrain.php
+app/Services/Ai/Semantic/SemanticPlanValidator.php
+app/Services/Ai/AiConversationalAgent.php
+app/Services/Ai/ConversationIntentRouter.php
+app/Services/Ai/Hybrid/HybridTravelPipeline.php
+app/Services/Ai/Hybrid/DateExpressionResolver.php
+app/Services/Ai/Hybrid/ServerTravelSignals.php
+app/Services/Ai/AiChatOrchestrator.php
+app/Data/Ai/HybridParseResult.php

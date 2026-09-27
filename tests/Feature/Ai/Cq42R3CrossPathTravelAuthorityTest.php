@@ -356,6 +356,49 @@ class Cq42R3CrossPathTravelAuthorityTest extends TestCase
         $this->assertFalse($dated->clarificationRequired);
     }
 
+    public function test_qwen_clarify_does_not_block_complete_dated_return_confirm(): void
+    {
+        $this->enableSemanticAi();
+        $this->rebindInference(new ScriptedInferenceProvider([
+            $this->planJson([
+                'domain' => 'travel',
+                'intent' => 'flight_search',
+                'operation' => 'clarify',
+                'travel' => [
+                    'trip_type' => 'return',
+                    'origin' => 'LHE',
+                    'destination' => 'DXB',
+                    'legs' => [
+                        ['origin' => 'LHE', 'destination' => 'DXB', 'departure_date' => '2026-10-10'],
+                        ['origin' => 'DXB', 'destination' => 'LHE', 'departure_date' => null],
+                    ],
+                    'return_date' => null,
+                    'adults' => 1,
+                ],
+                'missing' => ['return_date'],
+                'response_intent' => 'need_dates',
+            ]),
+        ]));
+
+        $turn = $this->chat(
+            str_repeat('r3m', 16),
+            'Lahore to Dubai on 10 October, return 15 October'
+        );
+        $turn['response']->assertOk();
+        $this->assertSame(0, (int) ($turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS') ?? 0));
+        $intent = $turn['response']->json('intent')
+            ?? ($turn['response']->json('meta.intent') ?? []);
+        $this->assertSame('return', $intent['trip_type'] ?? null);
+        $this->assertSame('2026-10-10', $intent['depart_date'] ?? null);
+        $this->assertSame('2026-10-15', $intent['return_date'] ?? null);
+        $confirmed = (bool) $turn['response']->json('requires_confirmation')
+            || (bool) ($turn['response']->json('meta.CONFIRMATION_REQUIRED') ?? false)
+            || str_contains(mb_strtolower((string) $turn['response']->json('message')), 'confirm')
+            || str_contains(mb_strtolower((string) $turn['response']->json('message')), 'shall i');
+        $this->assertTrue($confirmed);
+        $this->assertNotSame('clarify', $turn['response']->json('status'));
+    }
+
     public function test_invalid_json_spelling_alias_not_handoff(): void
     {
         $this->enableSemanticAi();
