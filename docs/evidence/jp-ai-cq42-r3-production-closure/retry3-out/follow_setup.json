@@ -1,0 +1,30 @@
+{
+    "status": "clarify",
+    "requires_confirmation": false,
+    "conversation_id": "3070d115-1ebc-4d40-a85c-e4a116d719b1",
+    "visitor_hash": "2ca64d8e37b3b167b8049822707d841f5b31391f07fc99a33ab62eda685fd2b9",
+    "src": "SEMANTIC",
+    "fb": null,
+    "op": "clarify",
+    "search": 0,
+    "intent": {
+        "intent": "flight_search",
+        "origin": "LHE",
+        "destination": "DXB",
+        "depart_date": "2026-10-10",
+        "return_date": null,
+        "adults": 1,
+        "children": 0,
+        "infants": 0,
+        "cabin": null,
+        "airline": null,
+        "max_stops": null,
+        "budget": null,
+        "time_preference": null,
+        "currency": "PKR",
+        "mode": "QWEN_SEMANTIC",
+        "trip_type": "return",
+        "legs": null
+    },
+    "body": "What return date should I use for LHE to DXB?"
+}
