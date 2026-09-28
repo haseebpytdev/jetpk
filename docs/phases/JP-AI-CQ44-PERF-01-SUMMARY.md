@@ -26,7 +26,7 @@ Skip Qwen when shared server authorities fully resolve material travel refinemen
 - CQ44_PERF_01_STATUS=PASS
 - Unnecessary Qwen refinements bypassed (origin/date/pax/cabin/dest/return)
 - Dest-led, explicit route, open-jaw, GK/CURRENT remain active
-- PHPUnit 144/144, 1400 assertions
+- PHPUnit 144/144, 1402 assertions (see `phpunit-out.txt`)
 - Frontend continuity 11/11 + typecheck PASS
 - No deploy; runtime stays `24dbf524`
 
