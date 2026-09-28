@@ -1,0 +1,12 @@
+{
+  "CONFIRMATION_REFRESH_AFTER_STOP_CHANGE": "PASS",
+  "mechanism": "FlightSearchConfirmationGate::isMaterialCorrection compares max_stops; orchestrator re-stores pending snapshot via buildSnapshot after hybrid extract",
+  "SEARCH_BEFORE_CONFIRMATION": 0,
+  "after_direct_only": {
+    "pending.max_stops": 0,
+    "shopping_state.max_stops": 0,
+    "origin": "KHI",
+    "destination": "JED"
+  },
+  "note": "confirmationMessage UI string may omit stop wording; snapshot field is authoritative for refresh gate"
+}

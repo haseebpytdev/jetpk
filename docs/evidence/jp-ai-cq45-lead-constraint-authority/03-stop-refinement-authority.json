@@ -1,0 +1,27 @@
+{
+  "STOP_REFINEMENT_AUTHORITY": "PASS",
+  "implementation": "ServerTravelSignals::progressiveTravelAuthority + deterministicAuthorityComplete",
+  "source_of_truth": "TravelConstraintResolver::resolve",
+  "max_stops_zero_safe": true,
+  "signals": {
+    "direct only": {"stop_refinement": true, "active": true, "travel_start": false, "max_stops": 0},
+    "nonstop": {"stop_refinement": true, "max_stops": 0},
+    "nonstop only": {"stop_refinement": true, "max_stops": 0},
+    "seedhi": {"stop_refinement": true, "max_stops": 0},
+    "one stop": {"stop_refinement": true, "max_stops": 1},
+    "one stop only": {"stop_refinement": true, "max_stops": 1},
+    "1 stop": {"stop_refinement": true, "max_stops": 1},
+    "Ahmed": {"stop_refinement": false}
+  },
+  "deterministic": {
+    "simple_active_travel": "class stop_refinement, complete=true, MODEL_CALLS=0",
+    "prior_open_jaw": "complete=false reason=prior_multi_leg_requires_semantic; progressive active/stop_refinement still true so lead not poisoned"
+  },
+  "DIRECT_ONLY_MODEL_CALLS": 0,
+  "NONSTOP_MODEL_CALLS": 0,
+  "ONE_STOP_MODEL_CALLS": 0,
+  "DIRECT_ONLY_MAX_STOPS": 0,
+  "NONSTOP_MAX_STOPS": 0,
+  "ONE_STOP_MAX_STOPS": 1,
+  "ROMAN_URDU_STOP_REFINEMENT": "PASS (seedhi via existing resolver)"
+}

@@ -1,0 +1,22 @@
+{
+  "DIRECT_ONLY_HISTORICAL_REPRO": "PASS",
+  "DIRECT_ONLY_FALSE_LEAD_CAPTURE": 0,
+  "sequence": [
+    "seed KHI→JED dated + 2 adults + pending confirmation",
+    "lead_capture_stage=name",
+    "lead_name=null",
+    "user: direct only"
+  ],
+  "after": {
+    "lead_name": null,
+    "lead_capture_stage": "name",
+    "max_stops": 0,
+    "origin": "KHI",
+    "destination": "JED",
+    "adults": 2,
+    "pending_max_stops": 0,
+    "MODEL_CALLS": 0,
+    "SEARCH_CALLS": 0
+  },
+  "test": "Tests\\Feature\\Ai\\Cq45LeadConstraintAuthorityTest::test_direct_only_historical_repro_does_not_capture_lead_name"
+}

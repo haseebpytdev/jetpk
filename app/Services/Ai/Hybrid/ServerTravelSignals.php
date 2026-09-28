@@ -57,6 +57,7 @@ final class ServerTravelSignals
      *   pax_refinement: bool,
      *   cabin_refinement: bool,
      *   return_refinement: bool,
+     *   stop_refinement: bool,
      *   origin_only: bool,
      *   destination_only: bool
      * }
@@ -80,6 +81,11 @@ final class ServerTravelSignals
         $paxRefinement = $this->isPaxRefinement($norm['normalized'], $norm['original']);
         $cabinRefinement = $this->isCabinRefinement($norm['normalized'], $norm['original']);
 
+        // CQ45: stop-count / directness from TravelConstraintResolver (max_stops=0 is valid).
+        $constraints = $this->constraints->resolve($norm['normalized'], $norm['original']);
+        $stopRefinement = array_key_exists('max_stops', $constraints)
+            && $constraints['max_stops'] !== null;
+
         $travelStart = $od['destination_only'] || $od['explicit_route']
             || ($od['origin_only'] && $hasActiveTravel);
         $travelRefinement = $hasActiveTravel && (
@@ -90,6 +96,7 @@ final class ServerTravelSignals
             || $returnRefinement
             || $paxRefinement
             || $cabinRefinement
+            || $stopRefinement
         );
 
         $active = $od['explicit_route']
@@ -100,7 +107,8 @@ final class ServerTravelSignals
             || $dateRefinement
             || $returnRefinement
             || $paxRefinement
-            || $cabinRefinement;
+            || $cabinRefinement
+            || $stopRefinement;
 
         // Merge progressive slots with prior when role-partial.
         $origin = $od['origin'];
@@ -125,6 +133,7 @@ final class ServerTravelSignals
             'pax_refinement' => $paxRefinement,
             'cabin_refinement' => $cabinRefinement,
             'return_refinement' => $returnRefinement,
+            'stop_refinement' => $stopRefinement,
             'origin_only' => $od['origin_only'],
             'destination_only' => $od['destination_only'],
             'origin_ambiguous' => (bool) ($od['origin_ambiguous'] ?? false),
@@ -304,6 +313,16 @@ final class ServerTravelSignals
                 return ['complete' => false, 'reason' => 'return_unresolved', 'classes' => [], 'authority' => $authority];
             }
             $classes[] = 'return_refinement';
+        }
+
+        // CQ45: stop-count / directness after prior_multi_leg_requires_semantic blocker.
+        if (! empty($authority['stop_refinement'])) {
+            $cons = $this->constraints->resolve($norm['normalized'], $norm['original']);
+            // max_stops=0 (direct) is a valid explicit value — never use truthiness.
+            if (! array_key_exists('max_stops', $cons) || $cons['max_stops'] === null) {
+                return ['complete' => false, 'reason' => 'stop_unresolved', 'classes' => [], 'authority' => $authority];
+            }
+            $classes[] = 'stop_refinement';
         }
 
         if ($classes === []) {

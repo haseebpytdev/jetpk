@@ -196,7 +196,7 @@ class ServerTravelSignalsDeterministicAuthorityTest extends TestCase
             ],
         ];
 
-        foreach (['next Friday', 'from Lahore', 'Make it Doha', 'wapis Sunday'] as $msg) {
+        foreach (['next Friday', 'from Lahore', 'Make it Doha', 'wapis Sunday', 'direct only'] as $msg) {
             $r = $signals->deterministicAuthorityComplete($msg, $prior);
             $this->assertFalse($r['complete'], "Expected incomplete for prior multi-leg: {$msg}");
             $this->assertSame(
@@ -245,5 +245,56 @@ class ServerTravelSignalsDeterministicAuthorityTest extends TestCase
         $this->assertTrue($ret['complete']);
         $this->assertContains('return_refinement', $ret['classes']);
         $this->assertNotSame('prior_multi_leg_requires_semantic', $ret['reason']);
+    }
+
+    public function test_cq45_stop_refinement_complete_on_simple_active_travel(): void
+    {
+        $signals = app(ServerTravelSignals::class);
+        $prior = [
+            'origin' => 'KHI',
+            'destination' => 'JED',
+            'depart_date' => '2026-10-06',
+            'intent' => 'flight_search',
+            'trip_type' => 'one_way',
+            'adults' => 2,
+        ];
+
+        foreach (['direct only', 'nonstop', 'seedhi'] as $msg) {
+            $r = $signals->deterministicAuthorityComplete($msg, $prior);
+            $this->assertTrue($r['complete'], $msg);
+            $this->assertContains('stop_refinement', $r['classes'], $msg);
+            $this->assertTrue($r['authority']['stop_refinement'], $msg);
+        }
+
+        $one = $signals->deterministicAuthorityComplete('one stop only', $prior);
+        $this->assertTrue($one['complete']);
+        $this->assertContains('stop_refinement', $one['classes']);
+
+        // Ranking/time are not stop_refinement (CQ45 scope).
+        foreach (['cheapest', 'fastest', 'morning'] as $msg) {
+            $a = $signals->progressiveTravelAuthority($msg, $prior);
+            $this->assertFalse($a['stop_refinement'], $msg);
+        }
+    }
+
+    public function test_cq45_prior_open_jaw_direct_keeps_semantic(): void
+    {
+        $signals = app(ServerTravelSignals::class);
+        $prior = [
+            'origin' => 'LHE',
+            'destination' => 'JED',
+            'intent' => 'flight_search',
+            'trip_type' => 'open_jaw',
+            'legs' => [
+                ['origin' => 'LHE', 'destination' => 'JED'],
+                ['origin' => 'MED', 'destination' => 'LHE'],
+            ],
+        ];
+
+        $r = $signals->deterministicAuthorityComplete('direct only', $prior);
+        $this->assertFalse($r['complete']);
+        $this->assertSame('prior_multi_leg_requires_semantic', $r['reason']);
+        $this->assertTrue($r['authority']['stop_refinement']);
+        $this->assertTrue($r['authority']['active']);
     }
 }
