@@ -1,0 +1,42 @@
+{
+    "CURRENT_SAFE_REFUSAL_SERVER_AUTHORITY_COMPLETE": "YES",
+    "cases": [
+        {
+            "message": "What is Bitcoin's price right now?",
+            "SERVER_OPEN_DOMAIN_CATEGORY": "CURRENT_UNVERIFIED",
+            "CURRENT_SIGNAL": "YES",
+            "CURRENT_TOPIC": "market",
+            "APPROVED_LIVE_SOURCE_AVAILABLE": "NO",
+            "QWEN_ROLE_IF_CALLED": "planner_then_currentUnverified_or_fallback_same_safe_text",
+            "NOTES": "Server can refuse without Qwen; SemanticBrain does not early-bypass CURRENT (unlike GK\/CASUAL\/OOD)."
+        },
+        {
+            "message": "What is gold price right now?",
+            "SERVER_OPEN_DOMAIN_CATEGORY": "GENERAL_KNOWLEDGE",
+            "CURRENT_SIGNAL": "NO",
+            "CURRENT_TOPIC": "market",
+            "APPROVED_LIVE_SOURCE_AVAILABLE": "NO",
+            "QWEN_ROLE_IF_CALLED": "open_domain_respond_or_gk_path",
+            "NOTES": null
+        },
+        {
+            "message": "What's USD to PKR right now?",
+            "SERVER_OPEN_DOMAIN_CATEGORY": null,
+            "CURRENT_SIGNAL": "NO",
+            "CURRENT_TOPIC": "generic",
+            "APPROVED_LIVE_SOURCE_AVAILABLE": "NO",
+            "QWEN_ROLE_IF_CALLED": "unknown",
+            "NOTES": null
+        },
+        {
+            "message": "What's the weather in Dubai right now?",
+            "SERVER_OPEN_DOMAIN_CATEGORY": "CURRENT_UNVERIFIED",
+            "CURRENT_SIGNAL": "YES",
+            "CURRENT_TOPIC": "weather",
+            "APPROVED_LIVE_SOURCE_AVAILABLE": "NO",
+            "QWEN_ROLE_IF_CALLED": "planner_then_currentUnverified_or_fallback_same_safe_text",
+            "NOTES": null
+        }
+    ],
+    "product_note": "SemanticBrain::currentUnverified sets live_provider=false for all topics; no approved Bitcoin\/market provider."
+}

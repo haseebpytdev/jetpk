@@ -1,0 +1,21 @@
+RUNTIME_SHA=a0e616747a95d632f270a6edafc3f6e8d9230fca
+DEPLOY_MARKER=a0e616747a95d632f270a6edafc3f6e8d9230fca
+EXPLICIT_AUDIT done authority_complete_fields=7 reason=no_active_travel
+CURRENT_AUDIT complete=YES
+EXPLICIT[0] calls=1 total=13184 sem=12900 fb=invalid_json od=ISB->DXB 2026-10-05
+EXPLICIT[1] calls=1 total=7629 sem=7524 fb= od=LHE->DXB 2026-10-05
+EXPLICIT[2] calls=1 total=13313 sem=13240 fb=invalid_json od=ISB->DXB 2026-10-05
+EXPLICIT[3] calls=1 total=9182 sem=9068 fb= od=KHI->JED 2026-09-29
+EXPLICIT[4] calls=1 total=10178 sem=10072 fb= od=DXB->LHE 2026-09-29
+EXPLICIT[5] calls=1 total=9836 sem=9742 fb=invalid_json od=ISB->DXB 2026-09-29
+CURRENT[0] calls=1 total=5579 sem=5514 fb= src=SEMANTIC
+CURRENT[1] calls=1 total=3951 sem=3871 fb= src=SEMANTIC
+CURRENT[2] calls=1 total=4177 sem=4132 fb= src=SEMANTIC
+CURRENT[3] calls=1 total=6810 sem=6767 fb= src=SEMANTIC
+CURRENT[4] calls=1 total=4506 sem=4460 fb= src=SEMANTIC
+PROBE Now Islamabad to Dubai next Monday shape=VALID_JSON_OBJECT err=null lat=15531
+PROBE What is Bitcoin's price right now? shape=VALID_JSON_OBJECT err=null lat=5536
+PROBE Lahore to Dubai next Monday shape=VALID_JSON_OBJECT err=null lat=6976
+SUMMARY written
+{"explicit":{"n":6,"valid_rate":0.5,"invalid_json_rate":0.5,"invalid_plan_rate":0,"p50_ms":9836,"p95_ms":13313,"max_ms":13313,"sem_p50_ms":9742,"sem_p95_ms":13240,"avg_qwen_wait_failed_ms":11961,"avg_hybrid_est_failed_ms":150,"qwen_wait_share_of_failed":0.988},"current":{"n":5,"valid_rate":1,"invalid_json_rate":0,"invalid_plan_rate":0,"p50_ms":4506,"p95_ms":6810,"max_ms":6810,"sem_p50_ms":4460,"sem_p95_ms":6767,"avg_qwen_wait_failed_ms":null,"avg_hybrid_est_failed_ms":null,"qwen_wait_share_of_failed":null},"inv_class":"chat_invalid_json","counters":{"SEARCH_BEFORE_CONFIRMATION":0,"SUPPLIER_MUTATIONS":0,"BOOKING_MUTATIONS":0,"PAYMENT_MUTATIONS":0,"HTTP_500":0,"MODEL_CRASHES":0,"UNEXPECTED_RATE_LIMITS":0,"SILENT_EMPTY_TURNS":0}}
+DONE out=/tmp/cq44-perf02-out
