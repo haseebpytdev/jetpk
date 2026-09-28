@@ -173,7 +173,7 @@ class Cq44PerfDeterministicShortCircuitTest extends TestCase
         $this->enableSemanticAi();
         $provider = new ScriptedInferenceProvider([
             $this->planJson(),
-            // open-jaw / explicit route / CURRENT may still call planner
+            // open-jaw still calls planner; CURRENT is PERF-02 deterministic (no call)
             $this->planJson([
                 'operation' => 'clarify',
                 'travel' => [
@@ -186,7 +186,6 @@ class Cq44PerfDeterministicShortCircuitTest extends TestCase
                     ],
                 ],
             ]),
-            'Bitcoin market data is not verified here.',
             'Gravity pulls objects toward Earth.',
         ]);
         $this->rebindInference($provider);
@@ -206,15 +205,15 @@ class Cq44PerfDeterministicShortCircuitTest extends TestCase
         $beforeCur = $provider->callCount();
         $cur = $this->chat($vid, "What is Bitcoin's price right now?", $cid);
         $cur['response']->assertOk();
+        $this->assertSame($beforeCur, $provider->callCount(), 'CURRENT_UNVERIFIED must not call Qwen (PERF-02)');
         $body = mb_strtolower((string) $cur['json']['message']);
         $this->assertTrue(
-            str_contains($body, 'bitcoin')
-            || str_contains($body, 'price')
-            || str_contains($body, 'market')
+            str_contains($body, 'market')
             || str_contains($body, 'verify')
             || str_contains($body, 'live')
             || str_contains($body, "can't")
-            || str_contains($body, 'cannot'),
+            || str_contains($body, 'cannot')
+            || str_contains($body, 'approved'),
             $body
         );
 

@@ -118,7 +118,9 @@ class QwenSemanticBrain28Test extends TestCase
         $turn['response']->assertOk();
         $this->assertSame('confirm', $turn['response']->json('status'));
         $this->assertSame(0, (int) $turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'));
-        $this->assertSame('YES', $turn['response']->json('meta.SEMANTIC_BRAIN_VALID'));
+        // CQ44-PERF-02: dated clear A→B may short-circuit before planner (VALID=N/A).
+        $valid = (string) $turn['response']->json('meta.SEMANTIC_BRAIN_VALID');
+        $this->assertContains($valid, ['YES', 'N/A']);
         $this->assertSame('business', $turn['response']->json('confirmation_snapshot.cabin'));
         $this->assertLessThanOrEqual(2, $scripted->callCount());
     }

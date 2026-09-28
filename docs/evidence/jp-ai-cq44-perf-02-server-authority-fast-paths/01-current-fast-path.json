@@ -1,0 +1,27 @@
+{
+  "CURRENT_DETERMINISTIC_FAST_PATH": "PASS",
+  "implementation": "SemanticBrain::currentUnverifiedDeterministic via OpenDomainResponseService::fallbackForCategory",
+  "bitcoin": {
+    "message": "What is Bitcoin's price right now?",
+    "MODEL_CALLS": 0,
+    "CURRENT_TOPIC": "market",
+    "FINAL_RESPONSE_SOURCE": "DETERMINISTIC_CURRENT_UNVERIFIED",
+    "HALLUCINATED_LIVE_FACT": "NO"
+  },
+  "weather": {
+    "message": "What's the weather in Dubai right now?",
+    "MODEL_CALLS": 0,
+    "CURRENT_TOPIC": "weather",
+    "FINAL_RESPONSE_SOURCE": "DETERMINISTIC_CURRENT_UNVERIFIED"
+  },
+  "precedence": {
+    "booking_lookup_blocked": true,
+    "handoff_blocked": true,
+    "travel_authority_turn_blocked": true
+  },
+  "non_expansion": {
+    "gold": "not forced into DETERMINISTIC_CURRENT_UNVERIFIED",
+    "usd_pkr": "not forced into DETERMINISTIC_CURRENT_UNVERIFIED",
+    "gravity_gk": "open-domain path preserved"
+  }
+}

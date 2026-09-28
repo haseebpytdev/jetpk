@@ -120,14 +120,22 @@ class QwenSemanticFallbackOrder39Test extends TestCase
 
         $turn = $this->chat(str_repeat('p1', 20), self::PRIMARY);
         $turn['response']->assertOk();
-        $this->assertSame('QWEN_SEMANTIC', $turn['response']->json('mode'));
+        // CQ44-PERF-02: dated clear A→B confirms via STRUCTURED_FALLBACK (server authority).
+        // Pre-PERF-02 path was QWEN_SEMANTIC when planner ran.
+        $mode = (string) $turn['response']->json('mode');
+        $this->assertContains($mode, ['QWEN_SEMANTIC', 'STRUCTURED_FALLBACK']);
         $this->assertSame('confirm', $turn['response']->json('status'));
         $this->assertSame(0, (int) $turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'));
-        $this->assertSame('YES', $turn['response']->json('meta.SEMANTIC_BRAIN_CALLED'));
-        $this->assertSame('YES', $turn['response']->json('meta.SEMANTIC_BRAIN_VALID'));
-        $this->assertSame('YES', $turn['response']->json('meta.QWEN_SEMANTIC_VALID'));
-        $this->assertNotSame('YES', $turn['response']->json('meta.SEMANTIC_BRAIN_FALLBACK'));
-        $this->assertNotSame('LLM_ASSISTED', $turn['response']->json('mode'));
+        if ($mode === 'QWEN_SEMANTIC') {
+            $this->assertSame('YES', $turn['response']->json('meta.SEMANTIC_BRAIN_CALLED'));
+            $this->assertSame('YES', $turn['response']->json('meta.SEMANTIC_BRAIN_VALID'));
+            $this->assertSame('YES', $turn['response']->json('meta.QWEN_SEMANTIC_VALID'));
+            $this->assertNotSame('YES', $turn['response']->json('meta.SEMANTIC_BRAIN_FALLBACK'));
+        } else {
+            $this->assertSame('YES', $turn['response']->json('meta.SEMANTIC_PLANNER_BYPASSED'));
+            $this->assertSame(0, $scripted->callCount());
+        }
+        $this->assertNotSame('LLM_ASSISTED', $mode);
         $this->assertNotPiiFirst($turn['response']);
 
         $snap = $turn['response']->json('confirmation_snapshot');
@@ -144,7 +152,7 @@ class QwenSemanticFallbackOrder39Test extends TestCase
     public function test_exact_primary_forced_semantic_failure_goes_hybrid_not_llm(): void
     {
         $this->enablePlannerConversational();
-        // Call 1: semantic planner invalid JSON. Call 2 would be legacy LLM PII bait if not skipped.
+        // Pre-PERF-02: invalid JSON then hybrid. PERF-02: dated A→B bypasses planner entirely.
         $scripted = new ScriptedInferenceProvider([
             'NOT_JSON{{{',
             'I need your name, email, and phone number to create a contactable inquiry before I can help.',
@@ -156,14 +164,12 @@ class QwenSemanticFallbackOrder39Test extends TestCase
         $this->assertSame('STRUCTURED_FALLBACK', $turn['response']->json('mode'));
         $this->assertSame('confirm', $turn['response']->json('status'));
         $this->assertSame(0, (int) $turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'));
-        $this->assertSame('YES', $turn['response']->json('meta.SEMANTIC_BRAIN_CALLED'));
-        $this->assertSame('NO', $turn['response']->json('meta.SEMANTIC_BRAIN_VALID'));
-        $this->assertSame('YES', $turn['response']->json('meta.SEMANTIC_BRAIN_FALLBACK'));
-        $this->assertNotEmpty((string) $turn['response']->json('meta.SEMANTIC_FALLBACK_REASON'));
         $this->assertSame(0, (int) $turn['response']->json('meta.LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK'));
         $this->assertNotSame('LLM_ASSISTED', $turn['response']->json('mode'));
         $this->assertNotPiiFirst($turn['response']);
-        $this->assertSame(1, $scripted->callCount(), 'legacy conversational path must not call the model after semantic travel fallback');
+        // Bypass = 0 calls; legacy invalid-json path = 1 planner call then hybrid.
+        $this->assertLessThanOrEqual(1, $scripted->callCount());
+        $this->assertSame(0, $scripted->callCount(), 'PERF-02 dated A→B must not call Qwen or legacy LLM');
 
         $snap = $turn['response']->json('confirmation_snapshot');
         $this->assertIsArray($snap);
@@ -198,12 +204,10 @@ class QwenSemanticFallbackOrder39Test extends TestCase
         $this->assertSame('STRUCTURED_FALLBACK', $turn['response']->json('mode'));
         $this->assertSame('confirm', $turn['response']->json('status'));
         $this->assertSame(0, (int) $turn['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'));
-        $this->assertSame('YES', $turn['response']->json('meta.SEMANTIC_BRAIN_CALLED'));
-        $this->assertSame('YES', $turn['response']->json('meta.SEMANTIC_BRAIN_FALLBACK'));
         $this->assertSame(0, (int) $turn['response']->json('meta.LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK'));
         $this->assertNotSame('LLM_ASSISTED', $turn['response']->json('mode'));
         $this->assertNotPiiFirst($turn['response']);
-        $this->assertSame(1, $scripted->callCount());
+        $this->assertSame(0, $scripted->callCount(), 'PERF-02 dated A→B bypasses planner under lead-pending');
 
         $conversation->refresh();
         $this->assertTrue((bool) data_get($conversation->shopping_state, 'lead_capture_pending'));

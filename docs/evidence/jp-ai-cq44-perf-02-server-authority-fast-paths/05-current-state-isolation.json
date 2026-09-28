@@ -1,0 +1,18 @@
+{
+  "CURRENT_MID_TRIP": "PASS",
+  "TRAVEL_STATE_PRESERVED_AFTER_CURRENT": "PASS",
+  "preserved_fields": [
+    "origin",
+    "destination",
+    "depart_date",
+    "return_date",
+    "trip_type",
+    "adults",
+    "children",
+    "infants",
+    "cabin",
+    "legs",
+    "pending_confirmation"
+  ],
+  "back_to_my_flight": "original travel state intact"
+}
