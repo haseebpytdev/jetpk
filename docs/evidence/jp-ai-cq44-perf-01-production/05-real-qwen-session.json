@@ -1,0 +1,9 @@
+{
+  "source": "out/sessions/05-real-qwen-session.json",
+  "AFTER_PRIMARY_TURNS": 41,
+  "AFTER_QWEN_MODEL_CALLS": 4,
+  "AFTER_QWEN_CALL_RATE": "4/41",
+  "DETERMINISTIC_BYPASS_TURNS": 16,
+  "comparable_to": "CQ43 primary 42-turn human-paced sequence (modeled closely; 41 turns executed)",
+  "note": "Burst/rate traffic excluded. Semantic latency only for SEMANTIC_BRAIN_CALLED=YES samples."
+}

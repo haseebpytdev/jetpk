@@ -1,0 +1,21 @@
+{
+  "BEFORE_SEMANTIC_FALLBACK_COUNT": 4,
+  "AFTER_SEMANTIC_FALLBACK_COUNT": 2,
+  "note": "Excludes deterministic_authority_complete short-circuit (not a failure fallback).",
+  "events": [
+    {
+      "USER_MESSAGE": "Make it Doha",
+      "LATENCY": 10135,
+      "REASON": "invalid_plan",
+      "FINAL_RESULT": "Just to confirm: LHE to DOH, one-way, 2026-10-02, 1 adult. Shall I search?",
+      "session": "prior open-jaw refinement (essential Qwen path)"
+    },
+    {
+      "USER_MESSAGE": "Now Islamabad to Dubai next Monday",
+      "LATENCY": 36410,
+      "REASON": "invalid_json",
+      "FINAL_RESULT": "Just to confirm: ISB to DXB, one-way, 2026-10-05, economy class, 2 adults. Shall I search?",
+      "session": "explicit route control / primary"
+    }
+  ]
+}

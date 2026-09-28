@@ -1,0 +1,18 @@
+{
+  "session": "01-focused-bypass",
+  "source": "out/sessions/01-focused-bypass.json",
+  "PROD_BYPASS_ORIGIN_FOLLOWUP": "PASS",
+  "PROD_BYPASS_DATE": "PASS",
+  "PROD_BYPASS_PAX": "PASS",
+  "PROD_BYPASS_CABIN": "PASS",
+  "PROD_BYPASS_DESTINATION_CORRECTION": "PASS",
+  "PROD_BYPASS_CONTEXTUAL_RETURN": "PASS",
+  "PROD_BYPASS_HUM_DONO": "PASS",
+  "PROD_BYPASS_HUM_DONO_NOTE": "adults already 2 after prior pax turn; MODEL_CALLS=0; confirmation snapshot adults=2",
+  "FROM_LAHORE_INVALID_PLAN_TAX_REMOVED": "PASS",
+  "paths": {
+    "from Lahore": "semantic_deterministic (DETERMINISTIC_AUTHORITY_COMPLETE)",
+    "next Friday": "semantic_deterministic",
+    "2 adults / economy / dest / return": "hybrid_pending_authority (MODEL_CALLS=0, llm_bypassed after confirmation-ready OD+date)"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "DESTINATION_LED_QWEN_CONTROL": "PASS",
+  "EXPLICIT_ROUTE_QWEN_CONTROL": "PASS",
+  "OPEN_JAW_CURRENT_TURN_QWEN": "PASS",
+  "SIMPLE_RETURN_CONTEXTUAL_DATE_BYPASS": "PASS",
+  "GENERAL_KNOWLEDGE_QWEN": "PASS",
+  "CURRENT_UNVERIFIED_QWEN": "PASS",
+  "notes": "Explicit route control used fresh conversation (no pending confirmation) so SemanticBrain/Qwen remained reachable."
+}
