@@ -1,0 +1,7 @@
+{
+  "PRIOR_OPEN_JAW_DATE_QWEN": "PASS",
+  "PRIOR_OPEN_JAW_REFINEMENT_QWEN": "PASS",
+  "OPEN_JAW_CURRENT_TURN_QWEN": "PASS",
+  "source": "out/sessions/03-multileg-guard.json",
+  "note": "Prior trip_type=open_jaw + legs>=2 forced; next Friday and Make it Doha each increased MODEL_CALLS."
+}

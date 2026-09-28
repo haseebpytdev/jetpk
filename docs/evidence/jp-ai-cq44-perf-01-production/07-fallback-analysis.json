@@ -1,0 +1,31 @@
+{
+  "PRIMARY_SESSION_SEMANTIC_FALLBACK_COUNT": 1,
+  "ALL_PRODUCTION_CONTROL_FALLBACK_COUNT": 2,
+  "primary_run2": [
+    {
+      "USER_MESSAGE": "What is Bitcoin's price right now?",
+      "SESSION": "primary-run2",
+      "LATENCY": 21826,
+      "REASON": "invalid_json",
+      "SAFE_FINAL_RESULT": "Declined live price; no fabricated market data"
+    }
+  ],
+  "control_sessions_run1_preserved": [
+    {
+      "USER_MESSAGE": "Make it Doha",
+      "SESSION": "prior-open-jaw-control",
+      "LATENCY": 10135,
+      "REASON": "invalid_plan",
+      "SAFE_FINAL_RESULT": "Confirm LHE-DOH via hybrid fallback"
+    },
+    {
+      "USER_MESSAGE": "Now Islamabad to Dubai next Monday",
+      "SESSION": "explicit-route-control",
+      "LATENCY": 36410,
+      "REASON": "invalid_json",
+      "SAFE_FINAL_RESULT": "Confirm ISB-DXB via hybrid fallback",
+      "EXPLICIT_ROUTE_OUTLIER": true
+    }
+  ],
+  "note": "Primary p95 uses RUN2 primary user turns only. Control outliers reported separately under ALL_MEASURED_PERF_CONTROL_TURNS_GT_30S."
+}

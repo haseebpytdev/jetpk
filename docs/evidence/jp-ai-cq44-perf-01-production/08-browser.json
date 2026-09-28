@@ -1,0 +1,131 @@
+﻿{
+  "host": "https://jetpakistan.pk/",
+  "viewId": "ae8b76",
+  "BROWSER_TURNS": 15,
+  "BROWSER_CONTINUITY": "PASS",
+  "BROWSER_DUPLICATE_TURNS": 0,
+  "BROWSER_SILENT_TURNS": 0,
+  "SERVER_200_WIDGET_OMIT_COUNT": 0,
+  "turns": [
+    {
+      "turn": 1,
+      "user_message": "I need Dubai",
+      "assistant_replied": true,
+      "assistant_reply": "Where are you travelling from for DXB?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 2,
+      "user_message": "from Lahore",
+      "assistant_replied": true,
+      "assistant_reply": "What travel date should I use for LHE to DXB?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 3,
+      "user_message": "next Friday",
+      "assistant_replied": true,
+      "assistant_reply": "Just to confirm: LHE to DXB, one-way, 2026-10-02, 1 adult. Shall I search?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 4,
+      "user_message": "2 adults",
+      "assistant_replied": true,
+      "assistant_reply": "Just to confirm: LHE to DXB, one-way, 2026-10-02, 2 adults. Shall I search?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 5,
+      "user_message": "economy",
+      "assistant_replied": true,
+      "assistant_reply": "Just to confirm: LHE to DXB, one-way, 2026-10-02, economy class, 2 adults. Shall I search?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 6,
+      "user_message": "Make it Doha",
+      "assistant_replied": true,
+      "assistant_reply": "Just to confirm: LHE to DOH, one-way, 2026-10-02, economy class, 2 adults. Shall I search?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 7,
+      "user_message": "actually Dubai again",
+      "assistant_replied": true,
+      "assistant_reply": "Just to confirm: LHE to DXB, one-way, 2026-10-02, economy class, 2 adults. Shall I search?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 8,
+      "user_message": "hum dono",
+      "assistant_replied": true,
+      "assistant_reply": "Just to confirm: LHE to DXB, one-way, 2026-10-02, economy class, 2 adults. Shall I search?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 9,
+      "user_message": "wapis Sunday",
+      "assistant_replied": true,
+      "assistant_reply": "Just to confirm: LHE to DXB, return, 2026-10-02, return 2026-10-04, economy class, 2 adults. Shall I search?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 10,
+      "user_message": "What is gravity?",
+      "assistant_replied": true,
+      "assistant_reply": "Gravity is the force that pulls objects toward the center of a mass.",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 11,
+      "user_message": "What is Bitcoin's price right now?",
+      "assistant_replied": true,
+      "assistant_reply": "I don't have an approved live market-data source available here, so I can't verify the current price. I can still help with flights or JetPakistan travel questions.",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 12,
+      "user_message": "Now Islamabad to Dubai next Monday",
+      "assistant_replied": true,
+      "assistant_reply": "Just to confirm: ISB to DXB, one-way, 2026-10-05, economy class, 2 adults. Shall I search?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 13,
+      "user_message": "2 adults",
+      "assistant_replied": true,
+      "assistant_reply": "Just to confirm: ISB to DXB, one-way, 2026-10-05, economy class, 2 adults. Shall I search?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 14,
+      "user_message": "economy",
+      "assistant_replied": true,
+      "assistant_reply": "Just to confirm: ISB to DXB, one-way, 2026-10-05, economy class, 2 adults. Shall I search?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    },
+    {
+      "turn": 15,
+      "user_message": "back to my flight",
+      "assistant_replied": true,
+      "assistant_reply": "Just to confirm: ISB to DXB, one-way, 2026-10-05, economy class, 2 adults. Shall I search?",
+      "duplicate_bubbles": false,
+      "silent_turn": false
+    }
+  ]
+}
