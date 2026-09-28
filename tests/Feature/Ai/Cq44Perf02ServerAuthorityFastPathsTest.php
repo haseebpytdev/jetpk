@@ -492,4 +492,77 @@ class Cq44Perf02ServerAuthorityFastPathsTest extends TestCase
             (array) data_get($t['json'], 'meta.DETERMINISTIC_AUTHORITY_CLASSES')
         );
     }
+
+    public function test_via_route_keeps_qwen_english_and_iata(): void
+    {
+        $this->enableSemanticAi();
+        $provider = new ScriptedInferenceProvider([
+            $this->planJson(['operation' => 'clarify', 'missing' => ['via_leg']]),
+            $this->planJson(['operation' => 'clarify', 'missing' => ['via_leg']]),
+            $this->planJson(['operation' => 'clarify', 'missing' => ['via_leg']]),
+        ]);
+        $this->rebindInference($provider);
+
+        $vid = str_repeat('p021', 8);
+        $cid = null;
+        foreach ([
+            'Lahore to Dubai via Doha next Monday',
+            'LHE to DXB via DOH next Monday',
+            'Lahore to Dubai through Doha next Monday',
+        ] as $msg) {
+            $before = $provider->callCount();
+            $t = $this->chat($vid, $msg, $cid);
+            $t['response']->assertOk();
+            $cid = $t['conversation_id'];
+            $this->assertGreaterThan($before, $provider->callCount(), "Via/through must keep Qwen: {$msg}");
+            $this->assertNotContains(
+                'explicit_route_complete',
+                (array) data_get($t['json'], 'meta.DETERMINISTIC_AUTHORITY_CLASSES'),
+                $msg
+            );
+        }
+    }
+
+    public function test_airline_constrained_explicit_route_still_bypasses(): void
+    {
+        $this->enableSemanticAi();
+        $provider = new ScriptedInferenceProvider(['SHOULD_NOT_BE_CALLED']);
+        $this->rebindInference($provider);
+
+        $vid = str_repeat('p02k', 8);
+        $t = $this->chat($vid, 'Lahore to Dubai on Emirates next Monday', null);
+        $t['response']->assertOk();
+        $this->assertSame(0, $provider->callCount());
+        $this->assertContains(
+            'explicit_route_complete',
+            (array) data_get($t['json'], 'meta.DETERMINISTIC_AUTHORITY_CLASSES')
+        );
+        $state = $this->reloadState($t['conversation_id']);
+        $this->assertSame('LHE', $state['origin'] ?? null);
+        $this->assertSame('DXB', $state['destination'] ?? null);
+        $this->assertSame('2026-10-05', $state['depart_date'] ?? null);
+        $airline = $state['airline'] ?? data_get($t['json'], 'confirmation_snapshot.airline');
+        $this->assertNotNull($airline, 'Emirates constraint should be captured by Hybrid');
+    }
+
+    public function test_direct_explicit_route_preserves_max_stops(): void
+    {
+        $this->enableSemanticAi();
+        $provider = new ScriptedInferenceProvider(['SHOULD_NOT_BE_CALLED']);
+        $this->rebindInference($provider);
+
+        $vid = str_repeat('p02d', 8);
+        $t = $this->chat($vid, 'Lahore to Dubai direct next Monday', null);
+        $t['response']->assertOk();
+        $this->assertSame(0, $provider->callCount());
+        $this->assertContains(
+            'explicit_route_complete',
+            (array) data_get($t['json'], 'meta.DETERMINISTIC_AUTHORITY_CLASSES')
+        );
+        $state = $this->reloadState($t['conversation_id']);
+        $this->assertSame('LHE', $state['origin'] ?? null);
+        $this->assertSame('DXB', $state['destination'] ?? null);
+        $this->assertSame('2026-10-05', $state['depart_date'] ?? null);
+        $this->assertSame(0, (int) ($state['max_stops'] ?? -1), 'direct constraint must not be silently lost');
+    }
 }

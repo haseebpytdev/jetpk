@@ -121,6 +121,36 @@ class ServerTravelSignalsDeterministicAuthorityTest extends TestCase
         $this->assertContains('explicit_route_complete', $r['classes']);
     }
 
+    public function test_via_and_through_block_explicit_route_complete(): void
+    {
+        $signals = app(ServerTravelSignals::class);
+        foreach ([
+            'Lahore to Dubai via Doha next Monday',
+            'LHE to DXB via DOH next Monday',
+            'Lahore to Dubai through Doha next Monday',
+            'Lahore to Dubai connecting in Doha next Monday',
+            'Lahore to Dubai with a stopover in Doha next Monday',
+        ] as $msg) {
+            $r = $signals->deterministicAuthorityComplete($msg, null);
+            $this->assertFalse($r['complete'], "Expected incomplete for multi-location: {$msg}");
+            $this->assertSame('multi_location_requires_semantic', $r['reason'], $msg);
+            $this->assertNotContains('explicit_route_complete', $r['classes'] ?? []);
+        }
+    }
+
+    public function test_airline_and_direct_tokens_do_not_block_explicit_route_complete(): void
+    {
+        $signals = app(ServerTravelSignals::class);
+        foreach ([
+            'Lahore to Dubai on Emirates next Monday',
+            'Lahore to Dubai direct next Monday',
+        ] as $msg) {
+            $r = $signals->deterministicAuthorityComplete($msg, null);
+            $this->assertTrue($r['complete'], "Expected complete for: {$msg}");
+            $this->assertContains('explicit_route_complete', $r['classes']);
+        }
+    }
+
     public function test_explicit_route_without_date_keeps_qwen(): void
     {
         $signals = app(ServerTravelSignals::class);

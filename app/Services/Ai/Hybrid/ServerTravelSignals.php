@@ -185,6 +185,21 @@ final class ServerTravelSignals
             && empty($currentDates['return_explicit'])
             && ! $this->explicitReturnTripCue($message)
         ) {
+            // CQ44-PERF-02.1: simple A→B fast path cannot silently drop a third
+            // resolved routing location (via / through / stopover / etc.).
+            $routeMentions = $this->locations->resolvedLocationMentions(
+                $norm['normalized'],
+                $norm['original']
+            );
+            if (count($routeMentions) > 2) {
+                return [
+                    'complete' => false,
+                    'reason' => 'multi_location_requires_semantic',
+                    'classes' => [],
+                    'authority' => $authority,
+                ];
+            }
+
             return [
                 'complete' => true,
                 'reason' => 'deterministic_authority_complete',
