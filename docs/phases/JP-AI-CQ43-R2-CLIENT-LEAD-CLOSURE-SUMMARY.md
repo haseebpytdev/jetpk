@@ -113,7 +113,7 @@ Revert the application PR / redeploy prior SHA `e5640c10` (or post-#41 main with
 ## Commit SHA
 
 Application R2: `6a8afd7ef829e198e3201e4bc5240040abd6a3ed`  
-R2.1 tip: (filled after push)
+R2.1 tip: `fb33c9cbfdfb4d3f696e31c5c5a2efb7e2334d59`
 
 ## Final status
 
