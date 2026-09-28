@@ -1,0 +1,25 @@
+{
+  "method": "CQ43 primary soak audit vs PERF-01 short-circuit policy + ScriptedInferenceProvider feature proof",
+  "BEFORE_QWEN_CALL_RATE": "10/42 primary SEMANTIC_BRAIN_CALLED travel/open-domain turns",
+  "AFTER_QWEN_CALL_RATE": "PROJECTED: simple one-way/return refinements bypass; prior multi-leg/open-jaw refinements keep Qwen (PERF-01.1); original CQ43 10-call audit sample unchanged",
+  "feature_test_proof": {
+    "destination_led_calls": 1,
+    "refinement_calls_after": 0,
+    "prior_open_jaw_date_qwen": "callCount increases",
+    "prior_open_jaw_refinement_qwen": "callCount increases",
+    "simple_return_contextual_date_bypass": "callCount unchanged",
+    "suite": "Cq44PerfDeterministicShortCircuitTest"
+  },
+  "BEFORE_SEMANTIC_P50_MS": 11185,
+  "BEFORE_SEMANTIC_P95_MS": 22542,
+  "AFTER_SEMANTIC_P50_MS": "N/A_REAL_QWEN_NOT_RERUN",
+  "AFTER_SEMANTIC_P95_MS": "N/A_REAL_QWEN_NOT_RERUN",
+  "BEFORE_TOTAL_P50_MS": 8006,
+  "BEFORE_TOTAL_P95_MS": 13150,
+  "AFTER_TOTAL_P50_MS": "N/A_REAL_QWEN_NOT_RERUN",
+  "AFTER_TOTAL_P95_MS": "N/A_REAL_QWEN_NOT_RERUN",
+  "TURNS_GT_20S_BEFORE": 1,
+  "TURNS_GT_20S_AFTER_PROJECTED": 0,
+  "TURNS_GT_30S_AFTER": 0,
+  "note": "Real-Qwen production re-soak deferred until review/deploy authorization. Deterministic scenarios now MODEL_CALLS=0 locally."
+}

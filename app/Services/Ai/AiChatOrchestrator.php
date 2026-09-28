@@ -500,6 +500,13 @@ final class AiChatOrchestrator
                         $skipLegacyLlmAfterSemanticTravelFallback = true;
                         $baseMeta['LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK'] = 0;
                     }
+                    // CQ44-PERF-01: deterministic short-circuit must stay on hybrid (no legacy LLM).
+                    if (($semanticFallbackMeta['DETERMINISTIC_AUTHORITY_COMPLETE'] ?? '') === 'YES'
+                        || ($semanticFallbackMeta['SEMANTIC_FALLBACK_REASON'] ?? '') === 'deterministic_authority_complete'
+                    ) {
+                        $skipLegacyLlmAfterSemanticTravelFallback = true;
+                        $baseMeta['LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK'] = 0;
+                    }
                 } else {
                     $handled = $this->applySemanticResult($conversation, $cleanMessage, $semantic, $baseMeta);
                     if (is_array($handled)) {

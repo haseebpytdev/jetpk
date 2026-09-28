@@ -127,6 +127,153 @@ final class ServerTravelSignals
             'return_refinement' => $returnRefinement,
             'origin_only' => $od['origin_only'],
             'destination_only' => $od['destination_only'],
+            'origin_ambiguous' => (bool) ($od['origin_ambiguous'] ?? false),
+            'dest_ambiguous' => (bool) ($od['dest_ambiguous'] ?? false),
+        ];
+    }
+
+    /**
+     * CQ44-PERF-01: true when shared server authorities fully resolve a material
+     * refinement against active travel context — Qwen planner may be skipped.
+     *
+     * @param  array<string, mixed>|null  $priorState
+     * @return array{
+     *   complete: bool,
+     *   reason: string,
+     *   classes: list<string>,
+     *   authority: array<string, mixed>
+     * }
+     */
+    public function deterministicAuthorityComplete(string $message, ?array $priorState = null): array
+    {
+        $norm = $this->normalizer->normalize($message);
+        $authority = $this->progressiveTravelAuthority($message, $priorState);
+        $classes = [];
+
+        $hasActiveTravel = is_array($priorState)
+            && (
+                (isset($priorState['origin']) && is_string($priorState['origin']) && $priorState['origin'] !== '')
+                || (isset($priorState['destination']) && is_string($priorState['destination']) && $priorState['destination'] !== '')
+                || ! empty($priorState['flight_search_pending_confirmation'])
+                || (isset($priorState['intent']) && in_array($priorState['intent'], ['flight_search', 'group_search'], true))
+            );
+
+        if (! $hasActiveTravel) {
+            return ['complete' => false, 'reason' => 'no_active_travel', 'classes' => [], 'authority' => $authority];
+        }
+
+        $openJaw = $this->locations->extractOpenJawLegs($norm['normalized'], $norm['original']);
+        if (is_array($openJaw) && count($openJaw) >= 2) {
+            return ['complete' => false, 'reason' => 'open_jaw_multi_leg', 'classes' => [], 'authority' => $authority];
+        }
+
+        // CQ44-PERF-01.1: prior open-jaw / multi-leg state makes bare refinements
+        // ambiguous (which leg?). Keep Qwen — do not short-circuit.
+        $priorLegs = is_array($priorState) ? ($priorState['legs'] ?? null) : null;
+        $priorMultiLeg = is_array($priorState) && (
+            ($priorState['trip_type'] ?? null) === 'open_jaw'
+            || (is_array($priorLegs) && count($priorLegs) >= 2)
+        );
+        if ($priorMultiLeg) {
+            return [
+                'complete' => false,
+                'reason' => 'prior_multi_leg_requires_semantic',
+                'classes' => [],
+                'authority' => $authority,
+            ];
+        }
+
+        if (! empty($authority['origin_ambiguous']) || ! empty($authority['dest_ambiguous'])) {
+            return ['complete' => false, 'reason' => 'ambiguous_location', 'classes' => [], 'authority' => $authority];
+        }
+
+        // Fresh explicit A→B (or dest-led start) keeps Qwen — not a refinement short-circuit.
+        if (! empty($authority['explicit_route'])) {
+            return ['complete' => false, 'reason' => 'explicit_route_keep_qwen', 'classes' => [], 'authority' => $authority];
+        }
+        if (! empty($authority['destination_only']) && ! (
+            is_array($priorState)
+            && isset($priorState['origin'])
+            && is_string($priorState['origin'])
+            && $priorState['origin'] !== ''
+        )) {
+            return ['complete' => false, 'reason' => 'destination_led_start', 'classes' => [], 'authority' => $authority];
+        }
+
+        $priorDepart = is_array($priorState) && is_string($priorState['depart_date'] ?? null)
+            ? (string) $priorState['depart_date']
+            : null;
+
+        // Origin follow-up: "from Lahore" / "Lahore se" with prior destination.
+        if (! empty($authority['origin_only'])
+            && is_string($authority['origin'] ?? null)
+            && $authority['origin'] !== ''
+            && is_string($authority['destination'] ?? null)
+            && $authority['destination'] !== ''
+            && strtoupper((string) $authority['origin']) !== strtoupper((string) $authority['destination'])
+        ) {
+            $classes[] = 'origin_followup';
+        }
+
+        // Destination correction with prior origin: "Make it Doha".
+        if (! empty($authority['destination_only'])
+            && is_string($authority['destination'] ?? null)
+            && $authority['destination'] !== ''
+            && is_string($authority['origin'] ?? null)
+            && $authority['origin'] !== ''
+            && strtoupper((string) $authority['origin']) !== strtoupper((string) $authority['destination'])
+        ) {
+            $classes[] = 'destination_correction';
+        }
+
+        if (! empty($authority['date_refinement'])) {
+            $dates = $this->resolveTripDates($message, null, $priorDepart);
+            if (! empty($dates['depart_explicit']) && is_string($dates['depart_date'] ?? null)) {
+                $classes[] = 'date_refinement';
+            } elseif (! empty($dates['return_explicit']) && is_string($dates['return_date'] ?? null)) {
+                $classes[] = 'date_refinement';
+            } else {
+                return ['complete' => false, 'reason' => 'date_unresolved', 'classes' => [], 'authority' => $authority];
+            }
+        }
+
+        if (! empty($authority['pax_refinement'])) {
+            $pax = $this->passengers->resolve($norm['normalized'], $norm['original']);
+            if (($pax['adults'] ?? null) === null
+                && ($pax['children'] ?? null) === null
+                && ($pax['infants'] ?? null) === null
+            ) {
+                return ['complete' => false, 'reason' => 'pax_unresolved', 'classes' => [], 'authority' => $authority];
+            }
+            $classes[] = 'pax_refinement';
+        }
+
+        if (! empty($authority['cabin_refinement'])) {
+            $cons = $this->constraints->resolve($norm['normalized'], $norm['original']);
+            if (! is_string($cons['cabin'] ?? null) || $cons['cabin'] === '') {
+                return ['complete' => false, 'reason' => 'cabin_unresolved', 'classes' => [], 'authority' => $authority];
+            }
+            $classes[] = 'cabin_refinement';
+        }
+
+        if (! empty($authority['return_refinement'])) {
+            $dates = $this->resolveTripDates($message, null, $priorDepart);
+            if (empty($dates['return_explicit']) || ! is_string($dates['return_date'] ?? null)) {
+                // English "come back on Sunday" / contextual wapis must resolve a return date.
+                return ['complete' => false, 'reason' => 'return_unresolved', 'classes' => [], 'authority' => $authority];
+            }
+            $classes[] = 'return_refinement';
+        }
+
+        if ($classes === []) {
+            return ['complete' => false, 'reason' => 'no_material_refinement', 'classes' => [], 'authority' => $authority];
+        }
+
+        return [
+            'complete' => true,
+            'reason' => 'deterministic_authority_complete',
+            'classes' => array_values(array_unique($classes)),
+            'authority' => $authority,
         ];
     }
 
