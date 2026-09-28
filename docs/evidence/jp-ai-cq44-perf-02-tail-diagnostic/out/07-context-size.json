@@ -1,0 +1,38 @@
+{
+    "destination_led": {
+        "message": "I need Dubai",
+        "SYSTEM_PROMPT_CHARS": 2807,
+        "SCHEMA_CHARS": 1768,
+        "CONVERSATION_CONTEXT_CHARS": 0,
+        "SHOPPING_STATE_CHARS": 2,
+        "USER_PAYLOAD_CHARS": 387,
+        "TOTAL_REQUEST_CHARS": 3194
+    },
+    "explicit_route": {
+        "message": "Now Islamabad to Dubai next Monday",
+        "SYSTEM_PROMPT_CHARS": 2807,
+        "SCHEMA_CHARS": 1768,
+        "CONVERSATION_CONTEXT_CHARS": 0,
+        "SHOPPING_STATE_CHARS": 2,
+        "USER_PAYLOAD_CHARS": 409,
+        "TOTAL_REQUEST_CHARS": 3216
+    },
+    "current": {
+        "message": "What is Bitcoin's price right now?",
+        "SYSTEM_PROMPT_CHARS": 2807,
+        "SCHEMA_CHARS": 1768,
+        "CONVERSATION_CONTEXT_CHARS": 0,
+        "SHOPPING_STATE_CHARS": 2,
+        "USER_PAYLOAD_CHARS": 409,
+        "TOTAL_REQUEST_CHARS": 3216
+    },
+    "open_jaw": {
+        "message": "Lahore to Jeddah then Medina to Lahore",
+        "SYSTEM_PROMPT_CHARS": 2807,
+        "SCHEMA_CHARS": 1768,
+        "CONVERSATION_CONTEXT_CHARS": 0,
+        "SHOPPING_STATE_CHARS": 2,
+        "USER_PAYLOAD_CHARS": 413,
+        "TOTAL_REQUEST_CHARS": 3220
+    }
+}

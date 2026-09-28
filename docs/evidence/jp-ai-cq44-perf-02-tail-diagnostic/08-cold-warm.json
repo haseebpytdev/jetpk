@@ -1,0 +1,16 @@
+{
+    "note": "Not true post-idle cold start; relative first-vs-subsequent under continuous diagnostic load. llama-server was already warm from prior production traffic.",
+    "explicit_route": {
+        "COLD_SAMPLE_MS": 13184,
+        "WARM_SAMPLE_1_MS": 7629,
+        "WARM_SAMPLE_2_MS": 13313,
+        "WARM_SAMPLE_3_MS": 9182
+    },
+    "current": {
+        "COLD_SAMPLE_MS": 5579,
+        "WARM_SAMPLE_1_MS": 3951,
+        "WARM_SAMPLE_2_MS": 4177,
+        "WARM_SAMPLE_3_MS": 6810,
+        "WARM_SAMPLE_4_MS": 4506
+    }
+}

@@ -1,0 +1,92 @@
+[
+    {
+        "message": "What is Bitcoin's price right now?",
+        "latency_ms": 4774,
+        "SEMANTIC_LATENCY_MS": 4667,
+        "MODEL_CALLS": 1,
+        "SEMANTIC_FALLBACK_REASON": "",
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "message_out": "I don't have an approved live market-data source available here, so I can't verify the current price. I can still help with flights or JetPakistan travel questi"
+    },
+    {
+        "message": "What is Bitcoin's price right now?",
+        "latency_ms": 3348,
+        "SEMANTIC_LATENCY_MS": 3305,
+        "MODEL_CALLS": 1,
+        "SEMANTIC_FALLBACK_REASON": "",
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "message_out": "I don't have an approved live market-data source available here, so I can't verify the current price. I can still help with flights or JetPakistan travel questi"
+    },
+    {
+        "message": "What is Bitcoin's price right now?",
+        "latency_ms": 6449,
+        "SEMANTIC_LATENCY_MS": 6406,
+        "MODEL_CALLS": 1,
+        "SEMANTIC_FALLBACK_REASON": "",
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "message_out": "I don't have an approved live market-data source available here, so I can't verify the current price. I can still help with flights or JetPakistan travel questi"
+    },
+    {
+        "message": "What is Bitcoin's price right now?",
+        "latency_ms": 3949,
+        "SEMANTIC_LATENCY_MS": 3883,
+        "MODEL_CALLS": 1,
+        "SEMANTIC_FALLBACK_REASON": "",
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "message_out": "I don't have an approved live market-data source available here, so I can't verify the current price. I can still help with flights or JetPakistan travel questi"
+    },
+    {
+        "message": "What is Bitcoin's price right now?",
+        "latency_ms": 4053,
+        "SEMANTIC_LATENCY_MS": 4008,
+        "MODEL_CALLS": 1,
+        "SEMANTIC_FALLBACK_REASON": "",
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "message_out": "I don't have an approved live market-data source available here, so I can't verify the current price. I can still help with flights or JetPakistan travel questi"
+    },
+    {
+        "message": "Now Islamabad to Dubai next Monday",
+        "latency_ms": 11270,
+        "SEMANTIC_LATENCY_MS": 11199,
+        "MODEL_CALLS": 1,
+        "SEMANTIC_FALLBACK_REASON": "",
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "message_out": "Just to confirm: ISB to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"
+    },
+    {
+        "message": "Now Islamabad to Dubai next Monday",
+        "latency_ms": 5685,
+        "SEMANTIC_LATENCY_MS": 5632,
+        "MODEL_CALLS": 1,
+        "SEMANTIC_FALLBACK_REASON": "",
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "message_out": "Just to confirm: ISB to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"
+    },
+    {
+        "message": "Now Islamabad to Dubai next Monday",
+        "latency_ms": 5552,
+        "SEMANTIC_LATENCY_MS": 5508,
+        "MODEL_CALLS": 1,
+        "SEMANTIC_FALLBACK_REASON": "",
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "message_out": "Just to confirm: ISB to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"
+    },
+    {
+        "message": "Now Islamabad to Dubai next Monday",
+        "latency_ms": 5961,
+        "SEMANTIC_LATENCY_MS": 5916,
+        "MODEL_CALLS": 1,
+        "SEMANTIC_FALLBACK_REASON": "",
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "message_out": "Just to confirm: ISB to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"
+    },
+    {
+        "message": "Now Islamabad to Dubai next Monday",
+        "latency_ms": 5643,
+        "SEMANTIC_LATENCY_MS": 5600,
+        "MODEL_CALLS": 1,
+        "SEMANTIC_FALLBACK_REASON": "",
+        "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+        "message_out": "Just to confirm: ISB to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"
+    }
+]

@@ -1,0 +1,137 @@
+[
+    {
+        "message": "Now Islamabad to Dubai next Monday",
+        "PROMPT_CHARS": 3216,
+        "CONTEXT_MESSAGE_COUNT": 0,
+        "INPUT_TOKEN_COUNT": 813,
+        "OUTPUT_TOKEN_COUNT": 143,
+        "MODEL_LATENCY_MS": 15531,
+        "PLANNER_RESULT": {
+            "valid_json": true,
+            "error": null,
+            "has_plan": true,
+            "latency_ms": 15531
+        },
+        "RAW_SHAPE": {
+            "class": "VALID_JSON_OBJECT",
+            "length": 545,
+            "brace_open": 5,
+            "brace_close": 5,
+            "notes": [
+                "keys:domain,intent,operation,travel,booking_reference,knowledge_query,references,corrections,missing,response_intent"
+            ],
+            "prefix": "{\"domain\":\"travel\",\"intent\":\"open_jaw\",\"operation\":\"prepare_search\",\"travel\":{\"trip_type\":\"open_jaw\",\"origin\":\"Islamabad",
+            "suffix": "mation\":false},\"corrections\":{},\"missing\":[],\"response_intent\":\"confirm_search\"}"
+        },
+        "USAGE": {
+            "completion_tokens": 143,
+            "prompt_tokens": 813,
+            "total_tokens": 956,
+            "prompt_tokens_details": {
+                "cached_tokens": 260
+            }
+        },
+        "TIMINGS": {
+            "cache_n": 260,
+            "prompt_n": 553,
+            "prompt_ms": 6319.455,
+            "prompt_per_token_ms": 11.42758589511754,
+            "prompt_per_second": 87.5075461412416,
+            "predicted_n": 143,
+            "predicted_ms": 9198.267,
+            "predicted_per_token_ms": 64.77652816901409,
+            "predicted_per_second": 15.43769059976189
+        },
+        "finish_reason": "stop"
+    },
+    {
+        "message": "What is Bitcoin's price right now?",
+        "PROMPT_CHARS": 3216,
+        "CONTEXT_MESSAGE_COUNT": 0,
+        "INPUT_TOKEN_COUNT": 815,
+        "OUTPUT_TOKEN_COUNT": 108,
+        "MODEL_LATENCY_MS": 5536,
+        "PLANNER_RESULT": {
+            "valid_json": true,
+            "error": null,
+            "has_plan": true,
+            "latency_ms": 5536
+        },
+        "RAW_SHAPE": {
+            "class": "VALID_JSON_OBJECT",
+            "length": 428,
+            "brace_open": 4,
+            "brace_close": 4,
+            "notes": [
+                "keys:domain,intent,operation,travel,missing,references,corrections,booking_reference,knowledge_query,response_intent"
+            ],
+            "prefix": "{\"domain\":\"current\",\"intent\":\"lookup\",\"operation\":\"lookup\",\"travel\":{\"trip_type\":null,\"origin\":null,\"destination\":null,\"",
+            "suffix": "king_reference\":null,\"knowledge_query\":null,\"response_intent\":\"live_limitation\"}"
+        },
+        "USAGE": {
+            "completion_tokens": 108,
+            "prompt_tokens": 815,
+            "total_tokens": 923,
+            "prompt_tokens_details": {
+                "cached_tokens": 719
+            }
+        },
+        "TIMINGS": {
+            "cache_n": 719,
+            "prompt_n": 96,
+            "prompt_ms": 1034.569,
+            "prompt_per_token_ms": 10.776760416666667,
+            "prompt_per_second": 92.79226421823967,
+            "predicted_n": 108,
+            "predicted_ms": 4487.647,
+            "predicted_per_token_ms": 41.9406261682243,
+            "predicted_per_second": 23.843230093632588
+        },
+        "finish_reason": "stop"
+    },
+    {
+        "message": "Lahore to Dubai next Monday",
+        "PROMPT_CHARS": 3209,
+        "CONTEXT_MESSAGE_COUNT": 0,
+        "INPUT_TOKEN_COUNT": 814,
+        "OUTPUT_TOKEN_COUNT": 143,
+        "MODEL_LATENCY_MS": 6976,
+        "PLANNER_RESULT": {
+            "valid_json": true,
+            "error": null,
+            "has_plan": true,
+            "latency_ms": 6976
+        },
+        "RAW_SHAPE": {
+            "class": "VALID_JSON_OBJECT",
+            "length": 543,
+            "brace_open": 5,
+            "brace_close": 5,
+            "notes": [
+                "keys:domain,intent,operation,travel,booking_reference,knowledge_query,references,corrections,missing,response_intent"
+            ],
+            "prefix": "{\"domain\":\"travel\",\"intent\":\"flight_search\",\"operation\":\"prepare_search\",\"travel\":{\"trip_type\":\"one_way\",\"origin\":\"Lahor",
+            "suffix": "mation\":false},\"corrections\":{},\"missing\":[],\"response_intent\":\"confirm_search\"}"
+        },
+        "USAGE": {
+            "completion_tokens": 143,
+            "prompt_tokens": 814,
+            "total_tokens": 957,
+            "prompt_tokens_details": {
+                "cached_tokens": 719
+            }
+        },
+        "TIMINGS": {
+            "cache_n": 719,
+            "prompt_n": 95,
+            "prompt_ms": 1044.468,
+            "prompt_per_token_ms": 10.9944,
+            "prompt_per_second": 90.95539547405951,
+            "predicted_n": 143,
+            "predicted_ms": 5919.405,
+            "predicted_per_token_ms": 41.68595070422535,
+            "predicted_per_second": 23.988897532775677
+        },
+        "finish_reason": "stop"
+    }
+]

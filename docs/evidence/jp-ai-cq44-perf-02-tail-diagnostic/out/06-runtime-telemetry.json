@@ -1,0 +1,33 @@
+{
+    "QUEUE_LATENCY_AVAILABLE": "NO",
+    "PROMPT_EVAL_AVAILABLE": "YES",
+    "GENERATION_LATENCY_AVAILABLE": "YES",
+    "TOKEN_TELEMETRY_AVAILABLE": "YES",
+    "COLD_WARM_TELEMETRY_AVAILABLE": "PARTIAL_RELATIVE_ONLY",
+    "METRICS_ENDPOINT": "UNKNOWN",
+    "SLOT_COUNT": 4,
+    "SINGLE_SLOT_SERIALIZATION": "UNKNOWN",
+    "CPU_MEM_BEFORE": "9.6 17.1 2098852",
+    "CPU_MEM_AFTER": "9.8 17.1 2098852",
+    "RAM_MB_AVAILABLE_HOST": "8392",
+    "CONCURRENCY_EFFECT": "N\/A",
+    "probe_usage_sample": {
+        "completion_tokens": 143,
+        "prompt_tokens": 813,
+        "total_tokens": 956,
+        "prompt_tokens_details": {
+            "cached_tokens": 260
+        }
+    },
+    "probe_timings_sample": {
+        "cache_n": 260,
+        "prompt_n": 553,
+        "prompt_ms": 6319.455,
+        "prompt_per_token_ms": 11.42758589511754,
+        "prompt_per_second": 87.5075461412416,
+        "predicted_n": 143,
+        "predicted_ms": 9198.267,
+        "predicted_per_token_ms": 64.77652816901409,
+        "predicted_per_second": 15.43769059976189
+    }
+}

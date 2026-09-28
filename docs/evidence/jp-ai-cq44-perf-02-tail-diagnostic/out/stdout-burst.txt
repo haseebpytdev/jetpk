@@ -1,0 +1,11 @@
+BURST What is Bitcoin's price right now? #0 fb= total=4774 sem=4667
+BURST What is Bitcoin's price right now? #1 fb= total=3348 sem=3305
+BURST What is Bitcoin's price right now? #2 fb= total=6449 sem=6406
+BURST What is Bitcoin's price right now? #3 fb= total=3949 sem=3883
+BURST What is Bitcoin's price right now? #4 fb= total=4053 sem=4008
+BURST Now Islamabad to Dubai next Monday #0 fb= total=11270 sem=11199
+BURST Now Islamabad to Dubai next Monday #1 fb= total=5685 sem=5632
+BURST Now Islamabad to Dubai next Monday #2 fb= total=5552 sem=5508
+BURST Now Islamabad to Dubai next Monday #3 fb= total=5961 sem=5916
+BURST Now Islamabad to Dubai next Monday #4 fb= total=5643 sem=5600
+INVALID_JSON_COUNT=0/10
