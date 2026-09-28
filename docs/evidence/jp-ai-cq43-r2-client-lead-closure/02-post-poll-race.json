@@ -1,0 +1,21 @@
+{
+  "POST_POLL_SAME_ID_DEDUP": "PASS",
+  "cases": {
+    "A_post_first": {
+      "sequence": ["POST message_id=101", "poll message_id=101"],
+      "expected_render_count": 1,
+      "result": "PASS"
+    },
+    "B_poll_first": {
+      "sequence": ["poll message_id=102", "POST message_id=102"],
+      "expected_render_count": 1,
+      "result": "PASS"
+    },
+    "C_distinct_ids_same_body": {
+      "sequence": ["id=103 same body", "id=104 same body"],
+      "expected_render_count": 2,
+      "result": "PASS"
+    }
+  },
+  "lastPollId": "advances from observed numeric server IDs only; body text not used"
+}

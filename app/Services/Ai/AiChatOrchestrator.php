@@ -361,10 +361,20 @@ final class AiChatOrchestrator
             );
         }
 
-        // Pending flight confirmation (affirm / cancel / correct) before lead FSM.
-        $pendingConfirm = $this->handlePendingFlightConfirmationTurn($conversation, $cleanMessage);
-        if (is_array($pendingConfirm)) {
-            return $pendingConfirm;
+        // Unambiguous pending-lead fields (bare name / contact) outrank ambiguous
+        // confirmation restates, but never steal affirmatives or travel refinements (CQ43-R2).
+        $unambiguousPendingLead = $this->leadService->isUnambiguousPendingLeadInput(
+            $conversation,
+            $cleanMessage
+        );
+
+        // Pending flight confirmation (affirm / cancel / correct) before lead FSM,
+        // unless the turn is an unambiguous lead-stage field.
+        if (! $unambiguousPendingLead) {
+            $pendingConfirm = $this->handlePendingFlightConfirmationTurn($conversation, $cleanMessage);
+            if (is_array($pendingConfirm)) {
+                return $pendingConfirm;
+            }
         }
 
         // Affirmative with no concrete pending action must not invent a search.
@@ -393,8 +403,8 @@ final class AiChatOrchestrator
             ]);
         }
 
-        // HELP-FIRST lead precedence (CQ43-R1):
-        // SECURITY → EXPLICIT HANDOFF → EXPLICIT BOOKING → PENDING CONFIRM → TRAVEL AUTHORITY → opportunistic lead → LEAD FSM
+        // HELP-FIRST lead precedence (CQ43-R1/R2):
+        // SECURITY → EXPLICIT HANDOFF → EXPLICIT BOOKING → UNAMBIGUOUS PENDING LEAD → PENDING CONFIRM → TRAVEL AUTHORITY → opportunistic lead → LEAD FSM
         $leadCaptureOverridden = false;
         if (($state['lead_capture_pending'] ?? false) && ! $userMessageAlreadyStored) {
             $travelAuthority = $this->intentRouter->isTravelAuthorityTurn($cleanMessage, $state)

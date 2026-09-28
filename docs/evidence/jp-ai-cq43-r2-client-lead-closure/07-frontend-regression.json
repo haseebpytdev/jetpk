@@ -1,0 +1,16 @@
+{
+  "FRONTEND_TESTS_TOTAL": 11,
+  "FRONTEND_TESTS_PASS": 11,
+  "FRONTEND_TESTS_FAIL": 0,
+  "command": "node frontend/tests/ask-jetpakistan-chat-continuity.test.mjs",
+  "gates": {
+    "BODY_DEDUP_REMOVED": "PASS",
+    "SERVER_ID_IDENTITY": "PASS",
+    "SAME_BODY_DISTINCT_IDS_RENDERED": "PASS",
+    "POST_POLL_SAME_ID_DEDUP": "PASS",
+    "CLIENT_MESSAGE_IDENTITY": "PASS",
+    "THINKING_BUSY_CLEARS": "PASS",
+    "CONVERSATION_ID_UNCHANGED_CONTRACT": "PASS",
+    "MESSAGE_POLLING_WORKS": "PASS"
+  }
+}

@@ -300,6 +300,60 @@ final class CustomerQueryLeadService
     }
 
     /**
+     * Narrow stage-aware lead input that must reach the lead FSM even when a flight
+     * confirmation snapshot is pending. Does NOT cover bare "yes" (confirmation stays authoritative).
+     */
+    public function isUnambiguousPendingLeadInput(AiConversation $conversation, string $message): bool
+    {
+        $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        if (! ($state['lead_capture_pending'] ?? false)) {
+            return false;
+        }
+
+        $pending = $state[FlightSearchConfirmationGate::STATE_KEY] ?? null;
+        if (! is_array($pending)) {
+            return false;
+        }
+
+        $clean = trim($message);
+        if ($clean === '') {
+            return false;
+        }
+
+        // Affirmative/negative confirmation replies stay with the confirmation gate.
+        $gate = app(FlightSearchConfirmationGate::class);
+        if ($gate->isAffirmative($clean) || $gate->isNegative($clean)) {
+            return false;
+        }
+
+        // Travel refinements / progressive travel must never be stolen as lead fields.
+        if ($this->intentRouter->isTravelAuthorityTurn($clean, $state)
+            || $this->intentRouter->shouldOverrideLeadCapture($clean)) {
+            return false;
+        }
+
+        $stage = (string) ($state['lead_capture_stage'] ?? 'name');
+
+        if ($stage === 'name') {
+            return $this->isValidName($clean) && $this->intentRouter->looksLikeBareName($clean);
+        }
+
+        if ($stage === 'contact') {
+            $parsed = $this->parseContactFromMessage($clean);
+            $email = $parsed['email'] ?? null;
+            $phone = $parsed['phone'] ?? null;
+
+            $hasEmail = is_string($email) && filter_var($email, FILTER_VALIDATE_EMAIL);
+            $hasPhone = is_string($phone) && $this->isValidPhone($phone);
+
+            return $hasEmail || $hasPhone;
+        }
+
+        // Consent stage: bare yes/no conflict with confirmation — never bypass here.
+        return false;
+    }
+
+    /**
      * Opportunistically pull name/email/phone from a mixed turn without answering for the user.
      */
     public function extractOpportunisticLeadFields(AiConversation $conversation, string $message): void

@@ -1,0 +1,17 @@
+{
+  "CLIENT_MESSAGE_IDENTITY": "PASS",
+  "BODY_DEDUP_REMOVED": "PASS",
+  "SERVER_ID_IDENTITY": "PASS",
+  "SAME_BODY_DISTINCT_IDS_RENDERED": "PASS",
+  "canonical_identity": "server message_id",
+  "removed": [
+    "appendAssistant duplicateBody gate",
+    "poll merge duplicateBody gate"
+  ],
+  "kept": [
+    "appendAssistantById id equality",
+    "mergePolledAssistantsById known.has(id)"
+  ],
+  "helper": "frontend/features/ai-assistant/lib/assistantMessageIdentity.ts",
+  "component": "frontend/features/ai-assistant/components/AskJetPakistanChat.tsx"
+}

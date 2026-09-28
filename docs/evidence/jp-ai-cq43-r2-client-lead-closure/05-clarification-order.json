@@ -1,0 +1,14 @@
+{
+  "SERVER_CLARIFICATION_SLOT_PRIORITY": "PASS",
+  "DESTINATION_LED_PROMPT_ORDER": "PASS",
+  "ORIGIN_ONLY_PROMPT_ORDER": "PASS",
+  "ROUTE_COMPLETE_DATE_PROMPT": "PASS",
+  "priority": ["origin", "destination", "depart_date", "return_date", "remaining_missing"],
+  "examples": {
+    "I need Dubai": "Where are you travelling from for DXB?",
+    "from Lahore": "Where would you like to go from LHE?",
+    "Lahore to Dubai": "What departure date should I use for LHE to DXB?"
+  },
+  "qwen_missing_advisory_only": true,
+  "locus": "SemanticBrain::clarifyTravelMessage"
+}
