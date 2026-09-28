@@ -2,7 +2,10 @@
   "FRONTEND_TESTS_TOTAL": 11,
   "FRONTEND_TESTS_PASS": 11,
   "FRONTEND_TESTS_FAIL": 0,
+  "FRONTEND_TYPECHECK": "PASS",
+  "FRONTEND_RENDERED_WIDGET_TEST": "DEFERRED_TO_PRODUCTION_REUAT",
   "command": "node frontend/tests/ask-jetpakistan-chat-continuity.test.mjs",
+  "typecheck_command": "npm run typecheck",
   "gates": {
     "BODY_DEDUP_REMOVED": "PASS",
     "SERVER_ID_IDENTITY": "PASS",
@@ -12,5 +15,6 @@
     "THINKING_BUSY_CLEARS": "PASS",
     "CONVERSATION_ID_UNCHANGED_CONTRACT": "PASS",
     "MESSAGE_POLLING_WORKS": "PASS"
-  }
+  },
+  "note": "Node continuity test proves ID-merge behavior; not a full rendered Playwright widget test."
 }

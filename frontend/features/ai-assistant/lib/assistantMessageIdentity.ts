@@ -1,16 +1,16 @@
-export type IdentityChatMessage = {
+export type IdentityChatRole = "user" | "assistant" | "staff" | "system";
+
+type IdentityBase = {
   id: string;
-  role: "user" | "assistant" | "staff" | "system" | string;
+  role: IdentityChatRole;
   body: string;
-  recommendations?: unknown;
-  actions?: unknown;
 };
 
-type IncomingAssistant = {
+type IncomingAssistant<T extends IdentityBase> = {
   id: string;
   body: string;
-  recommendations?: unknown;
-  actions?: unknown;
+  recommendations?: T extends { recommendations?: infer R } ? R : never;
+  actions?: T extends { actions?: infer A } ? A : never;
 };
 
 type PolledMessage = {
@@ -24,10 +24,10 @@ type PolledMessage = {
 };
 
 /** Append assistant by server message_id only (POST /chat, handoff, resume). */
-export function appendAssistantById(
-  previous: IdentityChatMessage[],
-  incoming: IncomingAssistant,
-): IdentityChatMessage[] {
+export function appendAssistantById<T extends IdentityBase>(
+  previous: T[],
+  incoming: IncomingAssistant<T>,
+): T[] {
   if (previous.some((message) => message.id === incoming.id)) {
     return previous;
   }
@@ -38,18 +38,20 @@ export function appendAssistantById(
       id: incoming.id,
       role: "assistant",
       body: incoming.body,
-      recommendations: incoming.recommendations,
-      actions: incoming.actions,
-    },
+      ...(incoming.recommendations !== undefined
+        ? { recommendations: incoming.recommendations }
+        : {}),
+      ...(incoming.actions !== undefined ? { actions: incoming.actions } : {}),
+    } as T,
   ];
 }
 
 /** Merge polled assistants by server id only — identical bodies with distinct ids both render. */
-export function mergePolledAssistantsById(
-  previous: IdentityChatMessage[],
+export function mergePolledAssistantsById<T extends IdentityBase>(
+  previous: T[],
   incoming: PolledMessage[],
   hooks: { advanceLastPollId?: (id: number) => void } = {},
-): IdentityChatMessage[] {
+): T[] {
   const known = new Set(previous.map((message) => message.id));
   const next = [...previous];
 
@@ -64,14 +66,24 @@ export function mergePolledAssistantsById(
       continue;
     }
 
+    const role: IdentityChatRole =
+      message.role === "user" ||
+      message.role === "assistant" ||
+      message.role === "staff" ||
+      message.role === "system"
+        ? message.role
+        : "assistant";
+
     known.add(id);
     next.push({
       id,
-      role: (message.role as IdentityChatMessage["role"]) || "assistant",
+      role,
       body: message.body,
-      recommendations: message.meta?.recommendations,
-      actions: message.meta?.actions,
-    });
+      ...(message.meta?.recommendations !== undefined
+        ? { recommendations: message.meta.recommendations }
+        : {}),
+      ...(message.meta?.actions !== undefined ? { actions: message.meta.actions } : {}),
+    } as T);
   }
 
   return next;

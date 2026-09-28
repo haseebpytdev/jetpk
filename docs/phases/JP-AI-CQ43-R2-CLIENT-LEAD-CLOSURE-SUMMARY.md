@@ -22,6 +22,7 @@ Close three CQ43 long-conversation residuals without redesigning travel architec
 - Narrow `isUnambiguousPendingLeadInput` precedence before pending confirmation handling.
 - Fix `SemanticBrain::clarifyTravelMessage` slot priority.
 - Frontend continuity regression + backend R2 feature tests + evidence pack.
+- **R2.1:** capture explicit leading-name / email / phone on travel-authority mixed turns; Closure29 mixed name+travel non-regression.
 
 ## Excluded scope
 
@@ -42,6 +43,7 @@ Close three CQ43 long-conversation residuals without redesigning travel architec
 1. **WIDGET_OMIT** — client `duplicateBody` gates in `appendAssistant` and poll merge.
 2. **BARE_NAME** — `handlePendingFlightConfirmationTurn` ran before lead FSM for unambiguous name/contact stage input.
 3. **PROMPT_ORDER** — server clarification builder ordered date ahead of OD slots.
+4. **MIXED_NAME_TRAVEL (R2.1)** — travel-authority path skipped opportunistic extract / `extractLeadingName`, so `"I'm Ahmed and I need…"` lost `lead_name` while still assisting travel.
 
 ## Exact files changed
 
@@ -69,6 +71,7 @@ None.
 - Lead service predicate for unambiguous pending-lead input (name/contact only).
 - Orchestrator: skip pending-confirm handler only for that predicate.
 - SemanticBrain clarification priority: origin → destination → depart → return → remaining.
+- R2.1: `extractOpportunisticLeadFields` travel-authority branch captures `extractLeadingName` + contact; orchestrator runs opportunistic extract before pending-confirm and strips explicit name delimiters for travel parsers.
 
 ## Frontend changes
 
@@ -77,13 +80,13 @@ None.
 ## Tests executed
 
 - `node frontend/tests/ask-jetpakistan-chat-continuity.test.mjs` — 11/11 PASS
-- PHPUnit primary AI suite — 120/120 PASS (1185 assertions)
-- `Cq43R2ClientLeadClosureTest` — 8/8 PASS
-- `AiAssistantBookingChatPresenterTest` — 1/1 PASS
+- `npm run typecheck` (frontend) — PASS
+- PHPUnit R2.1 combined (includes Closure29) — **135/135 PASS, 1324 assertions**
+- `FlightSearchConfirmationAndHandoffClosure29Test::test_name_and_travel_intent_both_persist_before_confirmation` — PASS
 
 ## Assertion counts
 
-Backend primary + R2 + presenter ≈ 1260 assertions; frontend continuity gates 11.
+BACKEND_TESTS_TOTAL=135 BACKEND_TESTS_PASS=135 BACKEND_ASSERTIONS=1324; FRONTEND_TESTS=11/11.
 
 ## Screenshots
 
@@ -96,7 +99,7 @@ N/A for this phase.
 ## Known limitations
 
 - CQ43 long-conversation soak gate remains FAIL until production redeploy + re-soak.
-- Pre-existing `FlightSearchConfirmationAndHandoffClosure29Test::test_name_and_travel_intent_both_persist_before_confirmation` fails on main without R2 (documented; not introduced here).
+- Frontend rendered-widget Playwright proof deferred to production re-UAT (`FRONTEND_RENDERED_WIDGET_TEST=DEFERRED_TO_PRODUCTION_REUAT`); Node continuity test covers ID merge behavior, not a full browser render.
 
 ## Risks
 
@@ -109,11 +112,13 @@ Revert the application PR / redeploy prior SHA `e5640c10` (or post-#41 main with
 
 ## Commit SHA
 
-`6a8afd7ef829e198e3201e4bc5240040abd6a3ed`
+Application R2: `6a8afd7ef829e198e3201e4bc5240040abd6a3ed`  
+R2.1 tip: (filled after push)
 
 ## Final status
 
 CQ43_R2_LOCAL_CLOSURE=PASS  
+CLOSURE29_MIXED_NAME_TRAVEL=PASS  
 READY_FOR_REVIEW=YES  
 READY_FOR_MERGE=NO  
 READY_FOR_DEPLOY=NO  

@@ -231,7 +231,7 @@ class Cq43R2ClientLeadClosureTest extends TestCase
         $this->enableSemanticAi();
         $this->rebindInference(new ScriptedInferenceProvider(array_fill(
             0,
-            8,
+            16,
             $this->planJson(['operation' => 'clarify'])
         )));
 
@@ -239,7 +239,20 @@ class Cq43R2ClientLeadClosureTest extends TestCase
         $conv = $this->seedPendingConfirmWithLeadName($vid);
         $cid = $conv->public_id;
 
-        foreach (['Make it Doha', '3 adults', 'business class', 'next Monday'] as $phrase) {
+        $phrases = [
+            'Make it Doha',
+            'actually Dubai again',
+            'next Friday',
+            'next Monday',
+            '2 adults',
+            '3 adults',
+            'business class',
+            'hum dono',
+            'wapis Sunday',
+            'from Lahore',
+            'Lahore se',
+        ];
+        foreach ($phrases as $phrase) {
             $turn = $this->chat($vid, $phrase, $cid);
             $turn['response']->assertOk();
             $state = $this->reloadState($cid);
@@ -247,6 +260,95 @@ class Cq43R2ClientLeadClosureTest extends TestCase
             $this->assertNull($state['lead_name'] ?? null, 'LEAD_TRAVEL_TEXT_CAPTURED_AS_NAME for '.$phrase);
             $this->assertSame(0, (int) data_get($turn['response']->json(), 'meta.AI_FLIGHT_SEARCH_READ_CALLS'), $phrase);
         }
+    }
+
+    public function test_explicit_leading_name_with_travel_mixed_turns(): void
+    {
+        $this->enableSemanticAi();
+        $this->rebindInference(new ScriptedInferenceProvider(array_fill(
+            0,
+            10,
+            $this->planJson(['operation' => 'clarify'])
+        )));
+
+        $vid = str_repeat('cq43r21', 6);
+
+        // A — explicit leading name + full travel → name + pending confirm, no search.
+        $help = $this->chat($vid, 'I need help');
+        $help['response']->assertOk();
+        $cid = $help['conversation_id'];
+        $this->assertTrue((bool) data_get($this->reloadState($cid), 'lead_capture_pending'));
+
+        $mixed = $this->chat(
+            $vid,
+            "I'm Ahmed and I need Lahore to Dubai tomorrow for 2 adults",
+            $cid
+        );
+        $mixed['response']->assertOk();
+        $this->assertSame(0, (int) data_get($mixed['response']->json(), 'meta.AI_FLIGHT_SEARCH_READ_CALLS'));
+        $sA = $this->reloadState($cid);
+        $this->assertSame('Ahmed', $sA['lead_name'] ?? null);
+        $this->assertSame('LHE', $sA['origin'] ?? null);
+        $this->assertSame('DXB', $sA['destination'] ?? null);
+        $this->assertSame(2, (int) ($sA['adults'] ?? 0));
+        $this->assertNotNull($sA[FlightSearchConfirmationGate::STATE_KEY] ?? null);
+
+        // B — My name is Ali + destination correction.
+        $vidB = str_repeat('cq43r2b2', 5);
+        $convB = AiConversation::query()->create([
+            'public_id' => (string) Str::uuid(),
+            'visitor_token_hash' => hash('sha256', $vidB),
+            'channel' => 'web',
+            'state' => AiConversation::STATE_AI_ACTIVE,
+            'shopping_state' => [
+                'intent' => 'flight_search',
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => '2026-10-02',
+                'adults' => 2,
+                'cabin' => 'economy',
+                'lead_capture_pending' => true,
+                'lead_capture_stage' => 'name',
+                'lead_capture_fields' => ['name', 'email', 'phone', 'contact_consent'],
+            ],
+        ]);
+        $gate = app(FlightSearchConfirmationGate::class);
+        $gate->storePending($convB, $gate->buildSnapshot(TravelIntent::fromArray([
+            'intent' => 'flight_search',
+            'origin' => 'LHE',
+            'destination' => 'DXB',
+            'depart_date' => '2026-10-02',
+            'adults' => 2,
+            'cabin' => 'economy',
+            'trip_type' => 'one_way',
+        ], 'STRUCTURED_FALLBACK')));
+
+        $ali = $this->chat($vidB, 'My name is Ali and make it Doha', $convB->public_id);
+        $ali['response']->assertOk();
+        $sB = $this->reloadState($convB->public_id);
+        $this->assertSame('Ali', $sB['lead_name'] ?? null);
+        $this->assertSame('DOH', $sB['destination'] ?? null);
+
+        // C/D/E — travel-only must not invent lead_name.
+        $vidC = str_repeat('cq43r2c2', 5);
+        $convC = $this->seedPendingConfirmWithLeadName($vidC);
+        foreach (['Make it Doha', 'next Friday', 'hum dono'] as $phrase) {
+            $turn = $this->chat($vidC, $phrase, $convC->public_id);
+            $turn['response']->assertOk();
+            $this->assertNull($this->reloadState($convC->public_id)['lead_name'] ?? null, $phrase);
+        }
+        $afterHum = $this->reloadState($convC->public_id);
+        $this->assertSame(2, (int) ($afterHum['adults'] ?? 0));
+
+        // F — "Ahmed, I need Dubai"
+        $vidF = str_repeat('cq43r2f2', 5);
+        $helpF = $this->chat($vidF, 'I need help');
+        $cidF = $helpF['conversation_id'];
+        $comma = $this->chat($vidF, 'Ahmed, I need Dubai', $cidF);
+        $comma['response']->assertOk();
+        $sF = $this->reloadState($cidF);
+        $this->assertSame('Ahmed', $sF['lead_name'] ?? null);
+        $this->assertSame('DXB', $sF['destination'] ?? null);
     }
 
     public function test_bare_yes_confirmation_authority_with_lead_pending(): void

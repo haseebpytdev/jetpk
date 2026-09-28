@@ -1,0 +1,34 @@
+{
+  "CQ43_R2_1": true,
+  "PREVIOUS_HEAD": "19a14058c7ebc392d59f9350466dc65de5004f54",
+  "ROOT_CAUSE_MIXED_NAME_TRAVEL": "travelAuthority arm skipped extractOpportunisticLeadFields; travel-authority branch inside extractor also skipped extractLeadingName; pending-confirm early return blocked later opportunistic capture",
+  "CLOSURE29_MIXED_NAME_TRAVEL": "PASS",
+  "closure29_test": "FlightSearchConfirmationAndHandoffClosure29Test::test_name_and_travel_intent_both_persist_before_confirmation",
+  "EXPLICIT_LEADING_NAME_WITH_TRAVEL": "PASS",
+  "EXPLICIT_CONTACT_WITH_TRAVEL": "PASS",
+  "BARE_NAME_LEAD_NON_REGRESSION": "PASS",
+  "PENDING_CONFIRMATION_PRESERVED_AFTER_NAME": "PASS",
+  "LEAD_CONTACT_DURING_CONFIRMATION": "PASS",
+  "BARE_YES_CONFIRMATION_AUTHORITY": "PASS",
+  "TRAVEL_REFINEMENT_OVERRIDES_LEAD_FSM": "PASS",
+  "LEAD_TRAVEL_TEXT_CAPTURED_AS_NAME": 0,
+  "fix": {
+    "CustomerQueryLeadService::extractOpportunisticLeadFields": "travel-authority branch also captures extractLeadingName + email/phone",
+    "CustomerQueryLeadService::messageWithoutExplicitLeadingName": "strip delimiter so travel OD parsers see the request",
+    "AiChatOrchestrator": "call opportunistic extract (and strip) before pending-confirm; keep travelAuthority override"
+  },
+  "backend_combined": {
+    "BACKEND_TESTS_TOTAL": 135,
+    "BACKEND_TESTS_PASS": 135,
+    "BACKEND_TESTS_FAIL": 0,
+    "BACKEND_ASSERTIONS": 1324,
+    "artifact": "storage/framework/phpunit-cq43r21-combined-out.txt"
+  },
+  "frontend": {
+    "FRONTEND_TESTS_TOTAL": 11,
+    "FRONTEND_TESTS_PASS": 11,
+    "FRONTEND_TESTS_FAIL": 0,
+    "FRONTEND_TYPECHECK": "PASS",
+    "FRONTEND_RENDERED_WIDGET_TEST": "DEFERRED_TO_PRODUCTION_REUAT"
+  }
+}

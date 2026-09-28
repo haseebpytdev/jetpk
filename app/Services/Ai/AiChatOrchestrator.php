@@ -361,6 +361,16 @@ final class AiChatOrchestrator
             );
         }
 
+        // CQ43-R2.1: explicit leading-name / email / phone may appear on the same turn
+        // as a travel correction that pending-confirm handles and returns early.
+        if (($state['lead_capture_pending'] ?? false) && ! $userMessageAlreadyStored) {
+            $this->leadService->extractOpportunisticLeadFields($conversation, $cleanMessage);
+            $conversation->refresh();
+            $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+            // Travel parsers must see the request without the explicit name delimiter.
+            $cleanMessage = $this->leadService->messageWithoutExplicitLeadingName($cleanMessage);
+        }
+
         // Unambiguous pending-lead fields (bare name / contact) outrank ambiguous
         // confirmation restates, but never steal affirmatives or travel refinements (CQ43-R2).
         $unambiguousPendingLead = $this->leadService->isUnambiguousPendingLeadInput(
@@ -411,7 +421,11 @@ final class AiChatOrchestrator
                 || $this->intentRouter->shouldOverrideLeadCapture($cleanMessage);
 
             if ($travelAuthority) {
-                // Assist travel THIS turn; never steal travel text as lead_name first.
+                // Assist travel THIS turn. Opportunistic extractor only accepts explicit
+                // leading-name / email / phone on travel-authority turns (CQ43-R2.1).
+                $this->leadService->extractOpportunisticLeadFields($conversation, $cleanMessage);
+                $conversation->refresh();
+                $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
                 $leadCaptureOverridden = true;
             } else {
                 $this->leadService->extractOpportunisticLeadFields($conversation, $cleanMessage);

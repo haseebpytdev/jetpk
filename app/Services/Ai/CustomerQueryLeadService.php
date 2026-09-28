@@ -363,12 +363,20 @@ final class CustomerQueryLeadService
             return;
         }
 
-        // Travel/refinement authority must never be interpreted as a lead name (CQ43-R1).
+        // Travel/refinement authority must never treat arbitrary text as a name (CQ43-R1).
+        // Explicit leading-name / email / phone delimiters are still safe (CQ43-R2.1).
         if ($this->intentRouter->isTravelAuthorityTurn($message, $state)
             || $this->intentRouter->shouldOverrideLeadCapture($message)) {
-            // Still allow explicit email/phone capture from mixed turns.
-            $contact = $this->parseContactFromMessage($message);
+            $user = $this->resolveConversationUser($conversation);
             $changed = false;
+
+            $leading = $this->extractLeadingName($message);
+            if ($leading !== null && ! $this->isValidName((string) ($state['lead_name'] ?? ''))) {
+                $state['lead_name'] = $leading;
+                $changed = true;
+            }
+
+            $contact = $this->parseContactFromMessage($message);
             if (($contact['email'] ?? null) && ! filter_var((string) ($state['lead_email'] ?? ''), FILTER_VALIDATE_EMAIL)) {
                 $state['lead_email'] = mb_strtolower((string) $contact['email']);
                 $changed = true;
@@ -378,7 +386,7 @@ final class CustomerQueryLeadService
                 $changed = true;
             }
             if ($changed) {
-                $state['lead_capture_stage'] = $this->resolveLeadCaptureStage($state, $this->resolveConversationUser($conversation));
+                $state['lead_capture_stage'] = $this->resolveLeadCaptureStage($state, $user);
                 $conversation->shopping_state = $state;
                 $conversation->save();
             }
@@ -439,6 +447,41 @@ final class CustomerQueryLeadService
         }
 
         return null;
+    }
+
+    /**
+     * Strip an explicit leading-name delimiter so travel OD/refinement parsers see the request.
+     * No-op when extractLeadingName() does not match (CQ43-R2.1).
+     */
+    public function messageWithoutExplicitLeadingName(string $message): string
+    {
+        $message = trim($message);
+        if ($this->extractLeadingName($message) === null) {
+            return $message;
+        }
+
+        if (preg_match(
+            '/^(?:i(?:\'m| am)|my name is|this is)\s+[\p{L}][\p{L}\p{M}\s\'\-\.]{1,60}?(?:,|\s+and\b|\s+[-–—]\s+)(?:\s*)/ui',
+            $message,
+            $m
+        ) === 1) {
+            return trim(mb_substr($message, mb_strlen($m[0])));
+        }
+
+        // "I'm Ahmed I need …" (no and/comma) — keep the "I need …" travel cue.
+        if (preg_match(
+            '/^(?:i(?:\'m| am)|my name is|this is)\s+[\p{L}][\p{L}\p{M}\s\'\-\.]{1,60}?(?=\s+i\s+need\b)/ui',
+            $message,
+            $m
+        ) === 1) {
+            return trim(mb_substr($message, mb_strlen($m[0])));
+        }
+
+        if (preg_match('/^[\p{L}][\p{L}\p{M}\s\'\-\.]{1,40},\s+/u', $message, $m) === 1) {
+            return trim(mb_substr($message, mb_strlen($m[0])));
+        }
+
+        return $message;
     }
 
     /**
