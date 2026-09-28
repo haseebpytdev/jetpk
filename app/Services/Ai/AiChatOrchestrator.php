@@ -361,10 +361,30 @@ final class AiChatOrchestrator
             );
         }
 
-        // Pending flight confirmation (affirm / cancel / correct) before lead FSM.
-        $pendingConfirm = $this->handlePendingFlightConfirmationTurn($conversation, $cleanMessage);
-        if (is_array($pendingConfirm)) {
-            return $pendingConfirm;
+        // CQ43-R2.1: explicit leading-name / email / phone may appear on the same turn
+        // as a travel correction that pending-confirm handles and returns early.
+        if (($state['lead_capture_pending'] ?? false) && ! $userMessageAlreadyStored) {
+            $this->leadService->extractOpportunisticLeadFields($conversation, $cleanMessage);
+            $conversation->refresh();
+            $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+            // Travel parsers must see the request without the explicit name delimiter.
+            $cleanMessage = $this->leadService->messageWithoutExplicitLeadingName($cleanMessage);
+        }
+
+        // Unambiguous pending-lead fields (bare name / contact) outrank ambiguous
+        // confirmation restates, but never steal affirmatives or travel refinements (CQ43-R2).
+        $unambiguousPendingLead = $this->leadService->isUnambiguousPendingLeadInput(
+            $conversation,
+            $cleanMessage
+        );
+
+        // Pending flight confirmation (affirm / cancel / correct) before lead FSM,
+        // unless the turn is an unambiguous lead-stage field.
+        if (! $unambiguousPendingLead) {
+            $pendingConfirm = $this->handlePendingFlightConfirmationTurn($conversation, $cleanMessage);
+            if (is_array($pendingConfirm)) {
+                return $pendingConfirm;
+            }
         }
 
         // Affirmative with no concrete pending action must not invent a search.
@@ -393,15 +413,19 @@ final class AiChatOrchestrator
             ]);
         }
 
-        // HELP-FIRST lead precedence (CQ43-R1):
-        // SECURITY → EXPLICIT HANDOFF → EXPLICIT BOOKING → PENDING CONFIRM → TRAVEL AUTHORITY → opportunistic lead → LEAD FSM
+        // HELP-FIRST lead precedence (CQ43-R1/R2):
+        // SECURITY → EXPLICIT HANDOFF → EXPLICIT BOOKING → UNAMBIGUOUS PENDING LEAD → PENDING CONFIRM → TRAVEL AUTHORITY → opportunistic lead → LEAD FSM
         $leadCaptureOverridden = false;
         if (($state['lead_capture_pending'] ?? false) && ! $userMessageAlreadyStored) {
             $travelAuthority = $this->intentRouter->isTravelAuthorityTurn($cleanMessage, $state)
                 || $this->intentRouter->shouldOverrideLeadCapture($cleanMessage);
 
             if ($travelAuthority) {
-                // Assist travel THIS turn; never steal travel text as lead_name first.
+                // Assist travel THIS turn. Opportunistic extractor only accepts explicit
+                // leading-name / email / phone on travel-authority turns (CQ43-R2.1).
+                $this->leadService->extractOpportunisticLeadFields($conversation, $cleanMessage);
+                $conversation->refresh();
+                $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
                 $leadCaptureOverridden = true;
             } else {
                 $this->leadService->extractOpportunisticLeadFields($conversation, $cleanMessage);

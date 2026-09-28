@@ -9,6 +9,7 @@
     "start:smoke": "node scripts/start-smoke.mjs",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "test:ask-jetpakistan-chat-continuity": "node tests/ask-jetpakistan-chat-continuity.test.mjs",
     "test:jp-ops-02-api-errors": "node tests/regression/jp-ops-02-api-errors.test.mjs",
     "test:jp-ops-02-csrf-replay": "node tests/regression/jp-ops-02-csrf-replay.test.mjs",
     "test:jp-ops-02-client-security": "node tests/regression/run-jp-ops-02-client-security.mjs",

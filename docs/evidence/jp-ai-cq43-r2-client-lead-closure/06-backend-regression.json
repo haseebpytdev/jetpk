@@ -1,0 +1,27 @@
+{
+  "BACKEND_TESTS_TOTAL": 135,
+  "BACKEND_TESTS_PASS": 135,
+  "BACKEND_TESTS_FAIL": 0,
+  "BACKEND_ASSERTIONS": 1324,
+  "suites": {
+    "Cq43R1ProgressiveConversationAuthorityTest": "PASS",
+    "Cq43R2ClientLeadClosureTest": "PASS",
+    "FlightSearchConfirmationAndHandoffClosure29Test": "PASS",
+    "Cq42R3CrossPathTravelAuthorityTest": "PASS",
+    "Cq42R2ProdResidualsTest": "PASS",
+    "QwenOpenDomainAuthorityCq42Test": "PASS",
+    "QwenLiveUatResidualClosureCq41Test": "PASS",
+    "QwenSemanticFallbackOrder39Test": "PASS",
+    "QwenSemanticBrain28Test": "PASS",
+    "PublicAiAssistantTest": "PASS",
+    "AiAssistantBookingChatPresenterTest": "PASS",
+    "combined_r21": {
+      "tests": 135,
+      "passed": 135,
+      "assertions": 1324,
+      "artifact": "storage/framework/phpunit-cq43r21-combined-out.txt"
+    }
+  },
+  "MESSAGE_ID_CONTRACT": "PASS",
+  "CLOSURE29_MIXED_NAME_TRAVEL": "PASS"
+}

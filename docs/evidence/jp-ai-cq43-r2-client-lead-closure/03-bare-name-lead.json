@@ -1,0 +1,18 @@
+{
+  "BARE_NAME_LEAD_NON_REGRESSION": "PASS",
+  "PENDING_CONFIRMATION_PRESERVED_AFTER_NAME": "PASS",
+  "SEARCH_CALLS": 0,
+  "fixture": {
+    "turn1": "Lahore to Dubai tomorrow for 2 adults economy",
+    "turn2": "Ali Khan",
+    "expected_lead_name": "Ali Khan",
+    "pending_preserved": {
+      "origin": "LHE",
+      "destination": "DXB",
+      "adults": 2
+    }
+  },
+  "predicate": "CustomerQueryLeadService::isUnambiguousPendingLeadInput",
+  "orchestrator_order": "security → handoff → booking → unambiguous pending lead → pending confirm → lead FSM",
+  "test": "Cq43R2ClientLeadClosureTest::test_bare_name_lead_during_pending_confirmation"
+}

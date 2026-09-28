@@ -8,6 +8,7 @@ use App\Models\AiConversation;
 use App\Services\Ai\AiConversationalAgent;
 use App\Services\Ai\ConversationIntentRouter;
 use App\Services\Ai\FlightSearchConfirmationGate;
+use App\Services\Ai\Hybrid\ClarificationBuilder;
 use App\Services\Ai\Hybrid\HybridTravelPipeline;
 use App\Services\Ai\Hybrid\ServerTravelSignals;
 use App\Services\Ai\OpenDomainResponseService;
@@ -30,6 +31,7 @@ final class SemanticBrain
         private readonly HybridTravelPipeline $hybrid,
         private readonly AiConversationalAgent $conversational,
         private readonly ServerTravelSignals $travelSignals,
+        private readonly ClarificationBuilder $clarifications,
     ) {}
 
     public function isEnabled(): bool
@@ -821,23 +823,33 @@ final class SemanticBrain
      */
     private function clarifyTravelMessage(array $missing, TravelIntent $intent): string
     {
-        // Prefer resolved intent state over stale advisory missing[] entries.
-        if ($intent->departDate === null) {
-            $route = trim(($intent->origin ?? '').' to '.($intent->destination ?? ''));
+        // Server-owned slot priority (Qwen missing[] is advisory only):
+        // 1 origin → 2 destination → 3 depart date → 4 return date → 5 remaining.
+        if ($intent->origin === null || $intent->origin === '') {
+            if (is_string($intent->destination) && $intent->destination !== '') {
+                return $this->clarifications->originForDestination($intent->destination)['message'];
+            }
+
+            return $this->clarifications->route()['message'];
+        }
+
+        if ($intent->destination === null || $intent->destination === '') {
+            return $this->clarifications->destinationForOrigin($intent->origin)['message'];
+        }
+
+        if ($intent->departDate === null || $intent->departDate === '') {
+            $route = trim($intent->origin.' to '.$intent->destination);
             $cabin = $intent->cabin ? ' in '.str_replace('_', ' ', $intent->cabin) : '';
 
-            return 'What departure date should I use'
-                .($route !== ' to ' ? " for {$route}" : '')
-                .$cabin
-                .'?';
+            return 'What departure date should I use for '.$route.$cabin.'?';
         }
-        if ($intent->tripType === 'return' && $intent->returnDate === null) {
-            $route = trim(($intent->origin ?? '').' to '.($intent->destination ?? ''));
 
-            return 'What return date should I use'
-                .($route !== ' to ' ? " for {$route}" : '')
-                .'?';
+        if ($intent->tripType === 'return' && ($intent->returnDate === null || $intent->returnDate === '')) {
+            $route = trim($intent->origin.' to '.$intent->destination);
+
+            return 'What return date should I use for '.$route.'?';
         }
+
         if ($missing !== []) {
             return 'Please share: '.implode(', ', $missing).'.';
         }

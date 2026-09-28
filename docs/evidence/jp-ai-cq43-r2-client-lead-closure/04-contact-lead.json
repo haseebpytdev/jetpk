@@ -1,0 +1,12 @@
+{
+  "LEAD_CONTACT_DURING_CONFIRMATION": "PASS",
+  "TRAVEL_REFINEMENT_OVERRIDES_LEAD_FSM": "PASS",
+  "LEAD_TRAVEL_TEXT_CAPTURED_AS_NAME": 0,
+  "BARE_YES_CONFIRMATION_AUTHORITY": "PASS",
+  "fixtures": {
+    "contact": "ali@example.com Phone 03001234567",
+    "refinements": ["Make it Doha", "3 adults", "business class", "next Monday"],
+    "affirmative": "yes"
+  },
+  "notes": "Bare yes remains confirmation-authoritative while lead_capture_pending=true; consent stage does not bypass pending confirm."
+}

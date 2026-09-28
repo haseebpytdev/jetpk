@@ -13,6 +13,10 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
+import {
+  appendAssistantById,
+  mergePolledAssistantsById,
+} from "@/features/ai-assistant/lib/assistantMessageIdentity";
 import styles from "./AskJetPakistanChat.module.css";
 
 type ChatAction = {
@@ -284,33 +288,13 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
         const incoming = json.messages ?? [];
         if (incoming.length === 0) return;
 
-        setMessages((previous) => {
-          const known = new Set(previous.map((message) => message.id));
-          const next = [...previous];
-
-          for (const message of incoming) {
-            const id = String(message.id);
-            lastPollId.current = Math.max(lastPollId.current, message.id);
-
-            if (known.has(id) || message.role === "user") continue;
-
-            const duplicateBody = next.some(
-              (existing) =>
-                existing.role === "assistant" && existing.body === message.body,
-            );
-            if (duplicateBody) continue;
-
-            next.push({
-              id,
-              role: (message.role as ChatMessage["role"]) || "assistant",
-              body: message.body,
-              recommendations: message.meta?.recommendations,
-              actions: message.meta?.actions,
-            });
-          }
-
-          return next;
-        });
+        setMessages((previous) =>
+          mergePolledAssistantsById(previous, incoming, {
+            advanceLastPollId: (id) => {
+              lastPollId.current = Math.max(lastPollId.current, id);
+            },
+          }),
+        );
       } catch {
         /* polling is intentionally soft-fail */
       }
@@ -368,33 +352,18 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
       lastPollId.current = Math.max(lastPollId.current, json.message_id);
     }
 
-    setMessages((previous) => {
-      if (previous.some((message) => message.id === serverId)) {
-        return previous;
-      }
-
-      const duplicateBody = previous.some(
-        (message) => message.role === "assistant" && message.body === body,
-      );
-      if (duplicateBody) {
-        return previous;
-      }
-
-      return [
-        ...previous,
-        {
-          id: serverId,
-          role: "assistant",
-          body,
-          recommendations: Array.isArray(json.recommendations)
-            ? (json.recommendations as Recommendation[])
-            : undefined,
-          actions: Array.isArray(json.actions)
-            ? (json.actions as ChatAction[])
-            : undefined,
-        },
-      ];
-    });
+    setMessages((previous) =>
+      appendAssistantById(previous, {
+        id: serverId,
+        body,
+        recommendations: Array.isArray(json.recommendations)
+          ? (json.recommendations as Recommendation[])
+          : undefined,
+        actions: Array.isArray(json.actions)
+          ? (json.actions as ChatAction[])
+          : undefined,
+      }),
+    );
   };
 
   const send = async (text: string) => {
