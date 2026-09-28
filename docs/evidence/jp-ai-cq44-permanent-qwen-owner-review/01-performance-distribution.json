@@ -1,0 +1,57 @@
+{
+  "source": "docs/evidence/jp-ai-cq43-final-resoak/out/11-performance.json + sessions/01-primary-long-session.json",
+  "label": "OBSERVED_FINAL_SOAK_PERFORMANCE",
+  "formal_ai_latency_sla": "NONE",
+  "aggregates": {
+    "SEMANTIC_P50_MS": 11185,
+    "SEMANTIC_P95_MS": 22542,
+    "SEMANTIC_MAX_MS": 22542,
+    "OPEN_DOMAIN_P50_MS": 6815,
+    "OPEN_DOMAIN_P95_MS": 6815,
+    "OPEN_DOMAIN_MAX_MS": 6815,
+    "TOTAL_P50_MS": 8006,
+    "TOTAL_P95_MS": 13150,
+    "TOTAL_MAX_MS": 22696,
+    "TURNS_OVER_20S": 1,
+    "TURNS_OVER_30S": 0
+  },
+  "primary_long_session": {
+    "turns": 42,
+    "bands_ms": {
+      "TURNS_LT_5S": 32,
+      "TURNS_5_TO_10S": 4,
+      "TURNS_10_TO_20S": 5,
+      "TURNS_GT_20S": 1
+    },
+    "QWEN_REQUIRED_TURNS": 10,
+    "QWEN_REQUIRED_P50_MS": 11255,
+    "QWEN_REQUIRED_MAX_MS": 22696.6,
+    "DETERMINISTIC_FAST_TURNS": 32,
+    "DETERMINISTIC_P50_MS": 28.2,
+    "DETERMINISTIC_MAX_MS": 127.4
+  },
+  "harness_all_total_samples": {
+    "n": 93,
+    "note": "Includes primary + secondary sessions + burst; burst is limiter probe traffic, not human UX path",
+    "TURNS_LT_5S": 35,
+    "TURNS_5_TO_10S": 39,
+    "TURNS_10_TO_20S": 18,
+    "TURNS_GT_20S": 1
+  },
+  "latency_breakdown": {
+    "QWEN_SEMANTIC_MODEL_LATENCY": "Dominant on SEMANTIC_BRAIN_CALLED turns; SEMANTIC_LATENCY_MS ≈ TOTAL for those turns (median model share ≈ 0.994)",
+    "SEMANTIC_MODEL_SHARE": "~99% of total on Qwen-called primary turns (median)",
+    "SERVER_OVERHEAD_SHARE": "~1% / typically 15–160ms on measured primary Qwen turns",
+    "NETWORK_OVERHEAD_SHARE": "N/A (in-proc soak excludes public HTTP/network)",
+    "FALLBACK_LATENCY_EFFECT": "Present: slowest primary turn was SEMANTIC_BRAIN_FALLBACK=YES (invalid_plan) at 22542ms semantic / 22696ms total",
+    "HYBRID_DETERMINISTIC_TURNS": "Sub-130ms after slots are filled (confirm restates, pax/cabin refinements, handoff/resume)",
+    "OPEN_DOMAIN_QWEN": "P50/P95/MAX = 6815ms (n=2 timed open-domain samples in aggregates)",
+    "RETRIES": "GENERAL_RETRY_COUNT=0",
+    "QUEUE_CONCURRENCY": "N/A (not instrumented in soak)"
+  },
+  "qwen_call_counts": {
+    "QWEN_MODEL_CALLS_TOTAL": 13,
+    "SEMANTIC_FALLBACK_COUNT": 4,
+    "GENERAL_RETRY_COUNT": 0
+  }
+}
