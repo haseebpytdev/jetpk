@@ -1,0 +1,6 @@
+anonymous_per_minute=30
+cache_default="file"
+ok turn=10 attempts_after=10
+ok turn=20 attempts_after=20
+ok turn=30 attempts_after=30
+FIRST_LIMIT_TURN=31 attempts_before=30 retry=60 visitor_len=38

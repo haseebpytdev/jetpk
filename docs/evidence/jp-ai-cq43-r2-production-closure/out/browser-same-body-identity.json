@@ -1,0 +1,38 @@
+{
+  "host": "https://jetpakistan.pk/",
+  "deployed_sha": "24dbf524c06fc894f84a44b14a224a41b49170f7",
+  "conversation_id": "f3d8bd47-f846-443e-a860-71045c2348b6",
+  "scenario": "pending confirmation + two ambiguous non-material turns",
+  "user_turns": [
+    "Lahore to Dubai tomorrow for 2 adults economy",
+    "xyzzy-ambiguous-1",
+    "xyzzy-ambiguous-2"
+  ],
+  "assistant_confirmations": [
+    {
+      "message_id": 6196,
+      "body": "Just to confirm: LHE to DXB, one-way, 2026-09-29, 2 adults. Shall I search?"
+    },
+    {
+      "message_id": 6202,
+      "body": "Just to confirm: LHE to DXB, one-way, 2026-09-29, 2 adults. Shall I search?"
+    },
+    {
+      "message_id": 6227,
+      "body": "Just to confirm: LHE to DXB, one-way, 2026-09-29, 2 adults. Shall I search?"
+    }
+  ],
+  "MESSAGE_ID_1": 6196,
+  "MESSAGE_ID_2": 6202,
+  "MESSAGE_ID_3": 6227,
+  "SAME_BODY_CONFIRMED": true,
+  "VISIBLE_ASSISTANT_ROWS": 3,
+  "SERVER_STORED_ASSISTANT_COUNT": 3,
+  "SAME_BODY_DISTINCT_IDS_BROWSER": "PASS",
+  "SERVER_200_WIDGET_OMIT_COUNT": 0,
+  "CLIENT_PARSE_ERROR_COUNT": 0,
+  "POST_POLL_SAME_ID_DUPLICATES": 0,
+  "POLL_FIRST_RACE_OBSERVED": "NO",
+  "HTTP_200_STORED_BUT_NOT_RENDERED": 0,
+  "CLIENT_MESSAGE_IDENTITY": "PASS"
+}

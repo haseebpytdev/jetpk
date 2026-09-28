@@ -1,0 +1,41 @@
+# CQ43 final re-soak matrix (post R2 deploy `24dbf524`)
+
+| Gate | Result |
+| --- | --- |
+| CQ43_R2_PRODUCTION_CLOSURE | PASS |
+| SAME_BODY_DISTINCT_IDS_BROWSER | PASS |
+| SERVER_200_WIDGET_OMIT_COUNT | 0 |
+| CLIENT_PARSE_ERROR_COUNT | 0 |
+| PROGRESSIVE_SEARCH | PASS |
+| CORRECTION_CHAIN | PASS |
+| NEW_SEARCH_ROUTE_RESET | PASS |
+| DATE_RELATIVE_REFINEMENT | PASS |
+| CONFIRMATION_INVALIDATION | PASS |
+| ONEWAY_TO_RETURN | PASS |
+| RETURN_TO_NEW_ONEWAY | PASS |
+| OPEN_JAW_* | PASS |
+| ROMAN_URDU / HUM_DONO / WAPIS | PASS |
+| GK / CURRENT / BOOKING mid-trip | PASS |
+| HANDOFF_RESUME_STATE | PRESERVED |
+| BARE_NAME_LEAD | PASS |
+| RATE_LIMIT_GRACEFUL (assertRateLimit probe) | PASS (FIRST=31) |
+| Human pacing unexpected RL | 0 |
+| POLLING_RATE_LIMIT_CONTAMINATION | 0 |
+| Safety counters | all 0 |
+| BROWSER_CONTINUITY (≥15 turns) | PASS |
+| CQ43_LONG_CONVERSATION_GATE | PASS |
+| PERMANENT_QWEN_OWNER_DECISION | READY_FOR_REVIEW |
+| PERFORMANCE_OWNER_REVIEW_PENDING | YES |
+| IFRAME_PILOT | HOLD |
+
+## Performance (descriptive)
+
+| Metric | This soak | Prior baseline |
+| --- | --- | --- |
+| SEMANTIC_P95_MS | 22542 | 35336 |
+| SEMANTIC_MAX_MS | 22542 | 35336 |
+| TOTAL_MAX_MS | 22696 | 43240 |
+| TURNS_OVER_20S | 1 | 3 |
+| TURNS_OVER_30S | 0 | 2 |
+
+No performance architecture changes in this loop.
