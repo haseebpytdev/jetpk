@@ -1,0 +1,186 @@
+{
+    "APPLICATION_RUNTIME_SHA": "9901f285e06c85f550191307ef29c9298904a32c",
+    "DEPLOY_MARKER": "9901f285e06c85f550191307ef29c9298904a32c",
+    "RESOLVED_NEXT_MONDAY": "2026-10-05",
+    "gates": {
+        "CURRENT_DETERMINISTIC_FAST_PATH": "PASS",
+        "CURRENT_WEATHER_FAST_PATH": "PASS",
+        "CURRENT_MID_TRIP": "PASS",
+        "TRAVEL_STATE_PRESERVED_AFTER_CURRENT": "PASS",
+        "GOLD_CLASSIFICATION_NON_REGRESSION": "PASS",
+        "FX_CLASSIFICATION_NON_REGRESSION": "PASS",
+        "GENERAL_KNOWLEDGE_QWEN": "PASS",
+        "FRESH_ISB_DXB": "PASS",
+        "FRESH_LHE_DXB": "PASS",
+        "FRESH_KHI_JED": "PASS",
+        "FRESH_DXB_LHE": "PASS",
+        "FRESH_RU_ISB_DXB": "PASS",
+        "EXPLICIT_ROUTE_FAST_PATH": "PASS",
+        "EXPLICIT_ROUTE_QWEN_TAX_REMOVED": "PASS",
+        "CURRENT_QWEN_TAX_REMOVED": "PASS",
+        "EXPLICIT_ROUTE_AFTER_ACTIVE_SEARCH": "PASS",
+        "NEW_SEARCH_ROUTE_RESET": "PASS",
+        "EXPLICIT_ROUTE_AFTER_OPEN_JAW": "PASS",
+        "OPEN_JAW_TO_ONEWAY_RESET": "PASS",
+        "VIA_ROUTE_FAST_PATH": "BLOCKED",
+        "IATA_VIA_ROUTE_FAST_PATH": "BLOCKED",
+        "THROUGH_ROUTE_FAST_PATH": "BLOCKED",
+        "DIRECT_EXPLICIT_ROUTE_FAST_PATH": "PASS",
+        "DIRECT_CONSTRAINT_PRESERVED": "PASS",
+        "AIRLINE_CONSTRAINED_EXPLICIT_ROUTE": "PASS",
+        "AIRLINE_CONSTRAINT_PRESERVED": "PASS",
+        "DESTINATION_LED_QWEN": "PASS",
+        "EXPLICIT_ROUTE_WITHOUT_DATE_QWEN": "PASS",
+        "OPEN_JAW_CURRENT_TURN_QWEN": "PASS",
+        "AMBIGUOUS_ROUTE_FAST_PATH": "BLOCKED",
+        "PRIOR_OPEN_JAW_DATE_QWEN": "PASS",
+        "PRIOR_OPEN_JAW_REFINEMENT_QWEN": "PASS",
+        "EXPLICIT_RETURN_ROUTE_FAST_PATH": "NOT_ENABLED",
+        "CLOSURE29_MIXED_NAME_TRAVEL": "PASS",
+        "PERF_01_NON_REGRESSION": "PASS"
+    },
+    "failures": [],
+    "counters": {
+        "SEARCH_BEFORE_CONFIRMATION": 0,
+        "AUTHORIZED_SEARCH_CALLS": 0,
+        "WRONG_ROUTE_ACTION_READY": 0,
+        "SILENT_EMPTY_TURNS": 0,
+        "HTTP_500": 0,
+        "PII_FIRST": 0,
+        "BOOKING_IDENTITY_BYPASS": 0,
+        "BOOKING_DATA_LEAK": 0,
+        "LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK": 0,
+        "SUPPLIER_MUTATIONS": 0,
+        "BOOKING_MUTATIONS": 0,
+        "PAYMENT_MUTATIONS": 0,
+        "MODEL_CRASHES": 0,
+        "OOM_EVENTS": 0,
+        "QWEN_MODEL_ONLY_HANDOFF": 0,
+        "UNEXPECTED_RATE_LIMITS": 0,
+        "LEAD_TRAVEL_TEXT_CAPTURED_AS_NAME": 0
+    },
+    "evidence": {
+        "bitcoin": {
+            "MODEL_CALLS": 0,
+            "BITCOIN_TOTAL_MS": 110.6,
+            "FINAL_RESPONSE_SOURCE": "DETERMINISTIC_CURRENT_UNVERIFIED",
+            "SERVER_OPEN_DOMAIN_CATEGORY": "CURRENT_UNVERIFIED",
+            "CURRENT_TOPIC": "market",
+            "HALLUCINATED_LIVE_FACT": "NO",
+            "message_preview": "I don't have an approved live market-data source available here, so I can't verify the current price."
+        },
+        "weather": {
+            "MODEL_CALLS": 0,
+            "WEATHER_TOTAL_MS": 46.8,
+            "CURRENT_TOPIC": "weather",
+            "HALLUCINATED_LIVE_FACT": "NO"
+        },
+        "mid_trip": {
+            "bitcoin_calls": 0,
+            "preserved": true,
+            "pending_ok": true
+        },
+        "gold": {
+            "MODEL_CALLS": 1,
+            "FINAL_RESPONSE_SOURCE": "QWEN_OPEN_DOMAIN",
+            "SERVER_OPEN_DOMAIN_CATEGORY": "GENERAL_KNOWLEDGE",
+            "forced_into_deterministic_current": "NO"
+        },
+        "fx": {
+            "MODEL_CALLS": 1,
+            "FINAL_RESPONSE_SOURCE": "SEMANTIC_FALLBACK",
+            "forced_into_deterministic_current": "NO"
+        },
+        "gk": {
+            "MODEL_CALLS": 1,
+            "latency_ms": 2259.3
+        },
+        "fresh_routes": {
+            "ISB_DXB": {
+                "MODEL_CALLS": 0,
+                "TOTAL_MS": 56.4,
+                "origin": "ISB",
+                "destination": "DXB",
+                "depart_date": "2026-10-05",
+                "classes": [
+                    "explicit_route_complete"
+                ]
+            },
+            "LHE_DXB": {
+                "MODEL_CALLS": 0,
+                "TOTAL_MS": 46.7,
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-10-05",
+                "classes": [
+                    "explicit_route_complete"
+                ]
+            },
+            "KHI_JED": {
+                "MODEL_CALLS": 0,
+                "TOTAL_MS": 51.3,
+                "origin": "KHI",
+                "destination": "JED",
+                "depart_date": "2026-09-29",
+                "classes": [
+                    "explicit_route_complete"
+                ]
+            },
+            "DXB_LHE": {
+                "MODEL_CALLS": 0,
+                "TOTAL_MS": 45.5,
+                "origin": "DXB",
+                "destination": "LHE",
+                "depart_date": "2026-09-29",
+                "classes": [
+                    "explicit_route_complete"
+                ]
+            },
+            "RU_ISB_DXB": {
+                "MODEL_CALLS": 0,
+                "TOTAL_MS": 44.8,
+                "origin": "ISB",
+                "destination": "DXB",
+                "depart_date": "2026-09-29",
+                "classes": [
+                    "explicit_route_complete"
+                ]
+            }
+        },
+        "via": {
+            "VIA_ROUTE_FAST_PATH": {
+                "MODEL_CALLS": 1,
+                "classes": [],
+                "origin": "LHE",
+                "destination": "DXB",
+                "message_preview": "Just to confirm: LHE to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"
+            },
+            "IATA_VIA_ROUTE_FAST_PATH": {
+                "MODEL_CALLS": 1,
+                "classes": [],
+                "origin": "LHE",
+                "destination": "DXB",
+                "message_preview": "Just to confirm: LHE to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"
+            },
+            "THROUGH_ROUTE_FAST_PATH": {
+                "MODEL_CALLS": 1,
+                "classes": [],
+                "origin": "LHE",
+                "destination": "DXB",
+                "message_preview": "Just to confirm: LHE to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"
+            }
+        }
+    },
+    "CURRENT_BITCOIN_MODEL_CALLS": 0,
+    "BITCOIN_TOTAL_MS": 110.6,
+    "CURRENT_WEATHER_MODEL_CALLS": 0,
+    "WEATHER_TOTAL_MS": 46.8,
+    "ISB_DXB_TOTAL_MS": 56.4,
+    "FRESH_ISB_DXB_MODEL_CALLS": 0,
+    "FRESH_LHE_DXB_MODEL_CALLS": 0,
+    "FRESH_KHI_JED_MODEL_CALLS": 0,
+    "FRESH_DXB_LHE_MODEL_CALLS": 0,
+    "ROMAN_URDU_EXPLICIT_ROUTE_MODEL_CALLS": 0,
+    "LEAD_TRAVEL_TEXT_CAPTURED_AS_NAME": 0,
+    "CERTIFIED_BEHAVIOR_REGRESSION": 0
+}

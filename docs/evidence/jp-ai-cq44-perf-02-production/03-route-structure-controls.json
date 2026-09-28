@@ -1,0 +1,31 @@
+{
+  "VIA_ROUTE_FAST_PATH": "BLOCKED",
+  "IATA_VIA_ROUTE_FAST_PATH": "BLOCKED",
+  "THROUGH_ROUTE_FAST_PATH": "BLOCKED",
+  "note": "explicit_route_complete absent for via/through; Qwen/semantic retained. Confirmation may still omit via city wording (pre-existing Qwen quality; not PERF-02 fast-path regression).",
+  "cases": {
+    "VIA_ROUTE_FAST_PATH": {
+      "message": "Lahore to Dubai via Doha next Monday",
+      "MODEL_CALLS": 1,
+      "classes": [],
+      "message_preview": "Just to confirm: LHE to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"
+    },
+    "IATA_VIA_ROUTE_FAST_PATH": {
+      "message": "LHE to DXB via DOH next Monday",
+      "MODEL_CALLS": 1,
+      "classes": []
+    },
+    "THROUGH_ROUTE_FAST_PATH": {
+      "message": "Lahore to Dubai through Doha next Monday",
+      "MODEL_CALLS": 1,
+      "classes": []
+    }
+  },
+  "DESTINATION_LED_QWEN": "PASS",
+  "AMBIGUOUS_ROUTE_FAST_PATH": "BLOCKED",
+  "EXPLICIT_ROUTE_WITHOUT_DATE_QWEN": "PASS",
+  "EXPLICIT_RETURN_ROUTE_FAST_PATH": "NOT_ENABLED",
+  "OPEN_JAW_CURRENT_TURN_QWEN": "PASS",
+  "PRIOR_OPEN_JAW_DATE_QWEN": "PASS",
+  "PRIOR_OPEN_JAW_REFINEMENT_QWEN": "PASS"
+}

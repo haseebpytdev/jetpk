@@ -1,0 +1,24 @@
+{
+  "EXPLICIT_ROUTE_FAST_PATH": "PASS",
+  "EXPLICIT_ROUTE_QWEN_TAX_REMOVED": "PASS",
+  "resolved_next_monday": "2026-10-05",
+  "fresh": {
+    "ISB_DXB": {"MODEL_CALLS": 0, "TOTAL_MS": 56.4, "origin": "ISB", "destination": "DXB", "depart_date": "2026-10-05", "classes": ["explicit_route_complete"]},
+    "LHE_DXB": {"MODEL_CALLS": 0, "TOTAL_MS": 46.7, "origin": "LHE", "destination": "DXB", "depart_date": "2026-10-05", "classes": ["explicit_route_complete"]},
+    "KHI_JED": {"MODEL_CALLS": 0, "TOTAL_MS": 51.3, "origin": "KHI", "destination": "JED", "depart_date": "2026-09-29", "classes": ["explicit_route_complete"]},
+    "DXB_LHE": {"MODEL_CALLS": 0, "TOTAL_MS": 45.5, "origin": "DXB", "destination": "LHE", "depart_date": "2026-09-29", "classes": ["explicit_route_complete"]},
+    "RU_ISB_DXB": {"MODEL_CALLS": 0, "TOTAL_MS": 44.8, "origin": "ISB", "destination": "DXB", "depart_date": "2026-09-29", "classes": ["explicit_route_complete"]}
+  },
+  "EXPLICIT_ROUTE_AFTER_ACTIVE_SEARCH": "PASS",
+  "NEW_SEARCH_ROUTE_RESET": "PASS",
+  "DIRECT_EXPLICIT_ROUTE_FAST_PATH": "PASS",
+  "DIRECT_CONSTRAINT_PRESERVED": "PASS",
+  "AIRLINE_CONSTRAINED_EXPLICIT_ROUTE": "PASS",
+  "AIRLINE_CONSTRAINT_PRESERVED": "PASS",
+  "diagnostic_compare": {
+    "primary_explicit_route_p50_ms": 9836,
+    "combined_p50_ms": 9182,
+    "historical_invalid_json_outlier_ms": 36410,
+    "production_ISB_DXB_ms": 56.4
+  }
+}

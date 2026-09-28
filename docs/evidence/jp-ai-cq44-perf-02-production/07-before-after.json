@@ -1,0 +1,21 @@
+{
+  "comparison": [
+    {"Metric": "Qwen calls / 41", "CQ43": 10, "PERF-01": 5, "PERF-02": 3},
+    {"Metric": "Total p50 ms", "CQ43": 31, "PERF-01": 40, "PERF-02": 35},
+    {"Metric": "Total p95 ms", "CQ43": 12199, "PERF-01": 6885, "PERF-02": 5687},
+    {"Metric": "Total max ms", "CQ43": 22697, "PERF-01": 27176, "PERF-02": 7363},
+    {"Metric": ">20s user turns", "CQ43": "baseline", "PERF-01": 1, "PERF-02": 0},
+    {"Metric": ">30s user turns", "CQ43": 0, "PERF-01": 0, "PERF-02": 0}
+  ],
+  "semantic_only": {
+    "PERF-02_SEMANTIC_SAMPLE_N": 1,
+    "PERF-02_SEMANTIC_P50_MS": 5576,
+    "PERF-02_SEMANTIC_P95_MS": 5576,
+    "PERF-02_SEMANTIC_MAX_MS": 5576,
+    "note": "Do not imply Qwen inference speed improved merely because fewer calls remain. Remaining semantic sample is destination-led 'I need Dubai'."
+  },
+  "removed_waits": {
+    "CURRENT_UNVERIFIED": "removed (Bitcoin 110.6ms, MODEL_CALLS=0)",
+    "explicit_route_complete": "removed (ISB→DXB 56.4ms, MODEL_CALLS=0)"
+  }
+}
