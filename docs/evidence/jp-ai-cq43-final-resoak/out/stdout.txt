@@ -1,0 +1,60 @@
+RUNTIME_SHA=24dbf524c06fc894f84a44b14a224a41b49170f7
+DEPLOY_MARKER=24dbf524c06fc894f84a44b14a224a41b49170f7
+=== PRIMARY LONG SESSION ===
+P1 | 11794.2ms | clarify | Where are you travelling from for DXB?
+P2 | 22696.6ms | clarify | What travel date should I use for LHE to DXB?
+P3 | 8812.2ms | clarify | That looks like a multi-city / open-jaw itinerary (LHE-DXB then DXB-LHE). Share both leg dates and u
+P4 | 10182.7ms | clarify | That looks like a multi-city / open-jaw itinerary (LHE-DXB then DXB-LHE). Share both leg dates and u
+P5 | 9948.4ms | clarify | That looks like a multi-city / open-jaw itinerary (LHE-DXB then DXB-LHE). Share both leg dates and u
+P6 | 11255ms | confirm | Just to confirm: LHE to DOH, one-way, 2026-10-02, 2 adults. Shall I search?
+P7 | 33.8ms | confirm | Just to confirm: LHE to DXB, one-way, 2026-10-02, 2 adults. Shall I search?
+P8 | 26.3ms | confirm | Just to confirm: LHE to DXB, one-way, 2026-10-02, 3 adults. Shall I search?
+P9 | 31ms | confirm | Just to confirm: LHE to DXB, one-way, 2026-10-02, business class, 3 adults. Shall I search?
+P10 | 26.6ms | confirm | Just to confirm: LHE to DXB, one-way, 2026-09-29, business class, 3 adults. Shall I search?
+P11 | 25.4ms | confirm | Just to confirm: LHE to DXB, one-way, 2026-09-29, business class, 4 adults. Shall I search?
+P12 | 30.8ms | confirm | Just to confirm: LHE to DXB, one-way, 2026-09-29, business class, 2 adults. Shall I search?
+P13 | 35ms | confirm | Just to confirm: KHI to JED, one-way, 2026-09-29, business class, 2 adults. Shall I search?
+P14 | 30.9ms | confirm | Just to confirm: KHI to JED, one-way, 2026-09-29, business class, 2 adults. Shall I search?
+P15 | 39.7ms | ok | Thanks, direct only. Could you share your email address and contact number, please?
+P16 | 66.2ms | confirm | Just to confirm: KHI to JED, one-way, 2026-09-30, business class, 2 adults. Shall I search?
+P17 | 31.4ms | confirm | Just to confirm: KHI to JED, return, 2026-09-30, return 2026-10-04, business class, 2 adults. Shall 
+P18 | 28.2ms | confirm | Just to confirm: DXB to LHE, one-way, 2026-09-29, business class, 2 adults. Shall I search?
+P19 | 25.3ms | clarify | Updated route to LHE → JED, business class. What travel date should I use?
+P20 | 12843.6ms | confirm | Just to confirm: ISB to DXB, one-way, 2026-10-05, business class, 2 adults. Shall I search?
+P21 | 127.4ms | confirm | Just to confirm: ISB to DXB, one-way, 2026-10-05, business class, 2 adults. Shall I search?
+P22 | 5390.5ms | ok | Gravity is the force that pulls objects toward the center of the Earth.
+P23 | 18.2ms | confirm | Just to confirm: ISB to DXB, one-way, 2026-10-05, business class, 2 adults. Shall I search?
+P24 | 12198.9ms | ok | I don't have an approved live market-data source available here, so I can't verify the current price
+P25 | 36.8ms | confirm | Just to confirm: ISB to DXB, one-way, 2026-10-05, business class, 2 adults. Shall I search?
+P26 | 14.2ms | clarify | Of course — I can help you check a booking. Please send your booking reference and the email or phon
+P27 | 39ms | not_found | I could not find a booking matching those details. Please double-check your reference and contact in
+P28 | 18ms | confirm | Back to your flight search. Just to confirm: ISB to DXB, one-way, 2026-10-05, business class, 2 adul
+P29 | 25.6ms | waiting_for_human | I have connected you with our support queue. A team member will reply in this chat. AI replies are p
+RESUME state=AI_ACTIVE handoff_resume=PRESERVED
+P31 | 25.8ms | confirm | Just to confirm: ISB to DXB, one-way, 2026-10-05, business class, 2 adults. Shall I search?
+P32 | 24.6ms | confirm | Just to confirm: LHE to DXB, one-way, 2026-10-05, business class, 2 adults. Shall I search?
+P33 | 30.6ms | confirm | Just to confirm: LHE to DXB, one-way, 2026-09-29, business class, 2 adults. Shall I search?
+P34 | 21.1ms | confirm | Just to confirm: LHE to DXB, one-way, 2026-09-29, business class, 2 adults. Shall I search?
+P35 | 27.9ms | confirm | Just to confirm: LHE to DXB, return, 2026-09-29, return 2026-10-04, business class, 2 adults. Shall 
+P36 | 26.3ms | confirm | Just to confirm: LHE to DXB, return, 2026-09-29, return 2026-10-04, business class, 2 adults. Shall 
+P37 | 26.1ms | confirm | Just to confirm: LHE to DXB, return, 2026-09-29, return 2026-10-04, business class, 2 adults. Shall 
+P38 | 31.4ms | confirm | Just to confirm: LHE to DXB, return, 2026-09-29, return 2026-10-04, business class, 2 adults. Shall 
+P39 | 42.7ms | confirm | Just to confirm: LHE to DXB, return, 2026-09-29, return 2026-10-04, business class, 2 adults. Shall 
+P40 | 6862.7ms | ok | Photosynthesis is the biological process by which plants, algae, and some bacteria convert light ene
+P41 | 30ms | confirm | Just to confirm: LHE to DXB, return, 2026-09-29, return 2026-10-04, business class, 2 adults. Shall 
+P42 | 16.4ms | confirm | Just to confirm: LHE to DXB, return, 2026-09-29, return 2026-10-04, business class, 2 adults. Shall 
+=== FRESH WAPIS ===
+=== BARE NAME LEAD ===
+P1 | 11679.4ms | confirm | Just to confirm: LHE to DXB, one-way, 2026-09-29, economy class, 2 adults. Shall I search?
+P2 | 33.9ms | ok | Thanks, Ali Khan. Could you share your email address and contact number, please?
+=== HUMAN RATE ===
+=== BURST ===
+=== POST LIMIT RECOVERY ===
+waiting 60s...
+=== POLLING ===
+GATE_FAIL RATE_LIMIT_GRACEFUL=FAIL
+
+CQ43_LONG_CONVERSATION_GATE=FAIL
+PRIMARY_TURNS=41
+FAILURES=0
+OUT=/tmp/cq43-final-resoak-out

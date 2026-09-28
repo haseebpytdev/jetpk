@@ -1,0 +1,49 @@
+{
+    "MERGE_SHA": "24dbf524c06fc894f84a44b14a224a41b49170f7",
+    "RUNTIME_SHA": "24dbf524c06fc894f84a44b14a224a41b49170f7",
+    "FRONTEND_SHA": "24dbf524c06fc894f84a44b14a224a41b49170f7",
+    "DEPLOY_MARKER": "24dbf524c06fc894f84a44b14a224a41b49170f7",
+    "APPLICATION_CODE_PARITY": "PASS",
+    "CQ43_R2_PRODUCTION_CLOSURE_INPROC": "PASS",
+    "gates": {
+        "APPLICATION_CODE_PARITY": "PASS",
+        "DESTINATION_LED_PROMPT_ORDER": "PASS",
+        "DESTINATION_LED_THEN_DATE": "PASS",
+        "ORIGIN_ONLY_PROMPT_ORDER": "PASS",
+        "ROUTE_COMPLETE_DATE_PROMPT": "PASS",
+        "BARE_NAME_LEAD_NON_REGRESSION": "PASS",
+        "PENDING_CONFIRMATION_PRESERVED_AFTER_NAME": "PASS",
+        "LEAD_CONTACT_DURING_CONFIRMATION": "PASS",
+        "CLOSURE29_MIXED_NAME_TRAVEL": "PASS",
+        "EXPLICIT_LEADING_NAME_WITH_TRAVEL": "PASS",
+        "LEAD_TRAVEL_TEXT_CAPTURED_AS_NAME": "PASS",
+        "SAME_BODY_DISTINCT_IDS_API": "PASS",
+        "BARE_YES_CONFIRMATION_AUTHORITY": "PASS",
+        "SHORT_CONTINUITY_SMOKE": "PASS"
+    },
+    "failures": [],
+    "counters": {
+        "SEARCH_BEFORE_CONFIRMATION": 0,
+        "HTTP_500": 0,
+        "PII_FIRST": 0,
+        "BOOKING_IDENTITY_BYPASS": 0,
+        "BOOKING_DATA_LEAK": 0,
+        "LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK": 0,
+        "SUPPLIER_MUTATIONS": 0,
+        "BOOKING_MUTATIONS": 0,
+        "PAYMENT_MUTATIONS": 0,
+        "WRONG_ROUTE_ACTION_READY": 0,
+        "LEAD_TRAVEL_TEXT_CAPTURED_AS_NAME": 0,
+        "QWEN_MODEL_ONLY_HANDOFF": 0,
+        "WAITING_FOR_HUMAN_UNREQUESTED": 0,
+        "MODEL_CRASHES": 0,
+        "AUTHORIZED_SEARCH_CALLS": 1
+    },
+    "same_body_ids": {
+        "MESSAGE_ID_1": 6152,
+        "MESSAGE_ID_2": 6154,
+        "BODY_1": "Just to confirm: LHE to DXB, one-way, 2026-09-29, economy class, 2 adults. Shall I search?",
+        "BODY_2": "Just to confirm: LHE to DXB, one-way, 2026-09-29, economy class, 2 adults. Shall I search?",
+        "SAME_BODY_CONFIRMED": true
+    }
+}

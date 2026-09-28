@@ -1,0 +1,56 @@
+{
+    "session": "07-human-rate",
+    "turns": [
+        {
+            "ts": "2026-09-28T10:53:51+00:00",
+            "rate_limited": false,
+            "latency_ms": 4233.7
+        },
+        {
+            "ts": "2026-09-28T10:54:03+00:00",
+            "rate_limited": false,
+            "latency_ms": 9615.5
+        },
+        {
+            "ts": "2026-09-28T10:54:13+00:00",
+            "rate_limited": false,
+            "latency_ms": 7971.7
+        },
+        {
+            "ts": "2026-09-28T10:54:24+00:00",
+            "rate_limited": false,
+            "latency_ms": 7855.8
+        },
+        {
+            "ts": "2026-09-28T10:54:34+00:00",
+            "rate_limited": false,
+            "latency_ms": 7867.7
+        },
+        {
+            "ts": "2026-09-28T10:54:45+00:00",
+            "rate_limited": false,
+            "latency_ms": 8175.3
+        },
+        {
+            "ts": "2026-09-28T10:54:56+00:00",
+            "rate_limited": false,
+            "latency_ms": 8997.8
+        },
+        {
+            "ts": "2026-09-28T10:55:11+00:00",
+            "rate_limited": false,
+            "latency_ms": 12103.6
+        },
+        {
+            "ts": "2026-09-28T10:55:22+00:00",
+            "rate_limited": false,
+            "latency_ms": 8327.5
+        },
+        {
+            "ts": "2026-09-28T10:55:33+00:00",
+            "rate_limited": false,
+            "latency_ms": 8318.6
+        }
+    ],
+    "unexpected": 0
+}
