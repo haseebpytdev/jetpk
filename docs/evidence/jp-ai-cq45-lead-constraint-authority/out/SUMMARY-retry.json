@@ -1,0 +1,211 @@
+{
+    "MERGE_SHA": "c115cc5712ad0fca0ab9729d6d34907220959a93",
+    "RUNTIME_SHA": "c115cc5712ad0fca0ab9729d6d34907220959a93",
+    "DEPLOY_MARKER": "c115cc5712ad0fca0ab9729d6d34907220959a93",
+    "gates": {
+        "RUNTIME_SHA_MATCH": "PASS",
+        "DEPLOY_MARKER_MATCH": "PASS",
+        "SIGNALS_DIRECT_ONLY_COMPLETE": "PASS",
+        "SIGNALS_STOP_REFINEMENT": "PASS",
+        "DIRECT_ONLY_SEED_MATCH": "PASS",
+        "DIRECT_ONLY_NO_LAB": "PASS",
+        "DIRECT_ONLY_FALSE_LEAD_CAPTURE_0": "PASS",
+        "DIRECT_ONLY_HISTORICAL_REPRO": "PASS",
+        "DIRECT_ONLY_MODEL_CALLS_0": "PASS",
+        "LEGITIMATE_NAME_AHMED": "PASS",
+        "BARE_YES_CONFIRMATION_AUTHORITY": "PASS",
+        "BARE_NO_CONFIRMATION_AUTHORITY": "PASS"
+    },
+    "failures": [],
+    "observations": {
+        "signals_direct_only": {
+            "det": {
+                "complete": true,
+                "reason": "deterministic_authority_complete",
+                "classes": [
+                    "stop_refinement"
+                ],
+                "authority": {
+                    "active": true,
+                    "explicit_route": false,
+                    "origin": null,
+                    "destination": null,
+                    "origin_explicit": false,
+                    "destination_explicit": false,
+                    "travel_start": false,
+                    "travel_refinement": true,
+                    "date_refinement": false,
+                    "pax_refinement": false,
+                    "cabin_refinement": false,
+                    "return_refinement": false,
+                    "stop_refinement": true,
+                    "origin_only": false,
+                    "destination_only": false,
+                    "origin_ambiguous": false,
+                    "dest_ambiguous": false
+                }
+            },
+            "prog": {
+                "stop_refinement": true,
+                "active": true,
+                "travel_refinement": true
+            }
+        },
+        "direct_only": {
+            "ok": true,
+            "status": "confirm",
+            "conversation_id": "c2fc581b-09d4-4561-b20f-49df5461fd83",
+            "seed_match": true,
+            "message": "Just to confirm: KHI to JED, one-way, 2026-10-06, economy class, 2 adults. Shall I search?",
+            "meta": {
+                "AI_FLIGHT_SEARCH_READ_CALLS": 0,
+                "AI_GROUP_SEARCH_READ_CALLS": 0,
+                "LOCAL_LLM_REQUIRED_FOR_CORE": false,
+                "intent": {
+                    "intent": "flight_search",
+                    "origin": "KHI",
+                    "destination": "JED",
+                    "depart_date": "2026-10-06",
+                    "return_date": null,
+                    "adults": 2,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": "economy",
+                    "airline": null,
+                    "max_stops": 0,
+                    "budget": null,
+                    "time_preference": null,
+                    "currency": "PKR",
+                    "mode": "STRUCTURED_FALLBACK",
+                    "trip_type": "one_way",
+                    "legs": null
+                },
+                "clarification_required": false,
+                "clarification_message": null,
+                "clarification_options": [],
+                "provenance": {
+                    "intent": "INHERITED_CONVERSATION_STATE",
+                    "origin": "INHERITED_CONVERSATION_STATE",
+                    "destination": "INHERITED_CONVERSATION_STATE",
+                    "depart_date": "INHERITED_CONVERSATION_STATE",
+                    "max_stops": "EXPLICIT_USER"
+                },
+                "ranking_preference": null,
+                "language": "en",
+                "llm_bypassed": true,
+                "confirmation_invalidated": true,
+                "CONFIRMATION_REQUIRED": true,
+                "confirmation_required": true,
+                "confirmation_type": "flight_search",
+                "CONFIRMATION_BEFORE_SEARCH": true,
+                "CONFIRMATION_SNAPSHOT": {
+                    "origin": "KHI",
+                    "destination": "JED",
+                    "departure_date": "2026-10-06",
+                    "return_date": null,
+                    "trip_type": "one_way",
+                    "adults": 2,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": "economy",
+                    "airline": null,
+                    "max_stops": 0,
+                    "currency": "PKR",
+                    "legs": null
+                }
+            },
+            "shopping_state": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "JED",
+                "depart_date": "2026-10-06",
+                "adults": 2,
+                "cabin": "economy",
+                "trip_type": "one_way",
+                "lead_capture_pending": true,
+                "lead_capture_stage": "name",
+                "lead_name": null,
+                "lead_capture_fields": [
+                    "name",
+                    "email",
+                    "phone",
+                    "contact_consent"
+                ],
+                "pending_flight_search_confirmation": {
+                    "origin": "KHI",
+                    "destination": "JED",
+                    "departure_date": "2026-10-06",
+                    "return_date": null,
+                    "trip_type": "one_way",
+                    "adults": 2,
+                    "children": 0,
+                    "infants": 0,
+                    "cabin": "economy",
+                    "airline": null,
+                    "max_stops": 0,
+                    "currency": "PKR",
+                    "legs": null
+                },
+                "return_date": null,
+                "children": 0,
+                "infants": 0,
+                "max_stops": 0,
+                "currency": "PKR"
+            },
+            "pending": {
+                "origin": "KHI",
+                "destination": "JED",
+                "departure_date": "2026-10-06",
+                "return_date": null,
+                "trip_type": "one_way",
+                "adults": 2,
+                "children": 0,
+                "infants": 0,
+                "cabin": "economy",
+                "airline": null,
+                "max_stops": 0,
+                "currency": "PKR",
+                "legs": null
+            },
+            "lab_adapter": false
+        },
+        "ahmed": {
+            "seed_match": true,
+            "lab": false,
+            "lead": "Ahmed",
+            "stage": "contact"
+        },
+        "bare_yes": {
+            "seed_match": true,
+            "lab": false,
+            "lead": null,
+            "search": 1,
+            "confirm_before": true,
+            "pending": null
+        },
+        "bare_no": {
+            "seed_match": true,
+            "lead": null,
+            "search": 0,
+            "pending": null,
+            "stage": "name"
+        }
+    },
+    "RELATED_CONSTRAINT_FALSE_LEAD_REPRODUCED": "YES",
+    "CQ46_RANKING_TIME_LEAD_AUTHORITY_REQUIRED": "YES",
+    "related_observations": {
+        "cheapest": {
+            "LEAD_NAME_AFTER": "cheapest",
+            "LEAD_STAGE_AFTER": "contact"
+        },
+        "fastest": {
+            "LEAD_NAME_AFTER": "fastest",
+            "LEAD_STAGE_AFTER": "contact"
+        },
+        "morning": {
+            "LEAD_NAME_AFTER": "morning",
+            "LEAD_STAGE_AFTER": "contact"
+        }
+    },
+    "OVERALL": "PASS"
+}

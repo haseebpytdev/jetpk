@@ -1,0 +1,14 @@
+RUNTIME_SHA=c115cc5712ad0fca0ab9729d6d34907220959a93 DEPLOY_MARKER=c115cc5712ad0fca0ab9729d6d34907220959a93 MERGE_SHA=c115cc5712ad0fca0ab9729d6d34907220959a93
+PASS RUNTIME_SHA_MATCH
+PASS DEPLOY_MARKER_MATCH
+PASS SIGNALS_DIRECT_ONLY_COMPLETE ({"complete":true,"reason":"deterministic_authority_complete","classes":["stop_refinement"],"authority":{"active":true,"explicit_route":false,"origin":null,"destination":null,"origin_explicit":false,"destination_explicit":false,"travel_start":false,"travel_refinement":true,"date_refinement":false,"pax_refinement":false,"cabin_refinement":false,"return_refinement":false,"stop_refinement":true,"origin_only":false,"destination_only":false,"origin_ambiguous":false,"dest_ambiguous":false}})
+PASS SIGNALS_STOP_REFINEMENT
+PASS DIRECT_ONLY_SEED_MATCH (cid=c2fc581b-09d4-4561-b20f-49df5461fd83 seed=c2fc581b-09d4-4561-b20f-49df5461fd83)
+PASS DIRECT_ONLY_NO_LAB
+PASS DIRECT_ONLY_FALSE_LEAD_CAPTURE_0
+PASS DIRECT_ONLY_HISTORICAL_REPRO ({"lead_name":null,"stage":"name","max_stops":0,"origin":"KHI","destination":"JED","adults":2,"pending_max_stops":0,"MODEL_CALLS":0,"DETERMINISTIC_AUTHORITY_COMPLETE":"","SEARCH_CALLS":0,"meta_keys":["AI_FLIGHT_SEARCH_READ_CALLS","AI_GROUP_SEARCH_READ_CALLS","LOCAL_LLM_REQUIRED_FOR_CORE","intent","clarification_required","clarification_message","clarification_options","provenance","ranking_preference","language","llm_bypassed","confirmation_invalidated","CONFIRMATION_REQUIRED","confirmation_required","confirmation_type","CONFIRMATION_BEFORE_SEARCH","CONFIRMATION_SNAPSHOT"]})
+PASS DIRECT_ONLY_MODEL_CALLS_0 (MODEL_CALLS=0 det=)
+PASS LEGITIMATE_NAME_AHMED
+PASS BARE_YES_CONFIRMATION_AUTHORITY
+PASS BARE_NO_CONFIRMATION_AUTHORITY
+OVERALL=PASS

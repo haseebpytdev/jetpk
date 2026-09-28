@@ -1,0 +1,74 @@
+{
+    "MERGE_SHA": "c115cc5712ad0fca0ab9729d6d34907220959a93",
+    "RUNTIME_SHA": "c115cc5712ad0fca0ab9729d6d34907220959a93",
+    "DEPLOY_MARKER": "c115cc5712ad0fca0ab9729d6d34907220959a93",
+    "FRONTEND_SHA": "24dbf524c06fc894f84a44b14a224a41b49170f7",
+    "gates": {
+        "RUNTIME_SHA_MATCH": "PASS",
+        "DEPLOY_MARKER_MATCH": "PASS",
+        "SEED_LEAD_STAGE_NAME": "PASS",
+        "SEED_LEAD_NAME_NULL": "PASS",
+        "SEED_PENDING_PRESENT": "PASS",
+        "DIRECT_ONLY_HISTORICAL_REPRO": "FAIL",
+        "DIRECT_ONLY_FALSE_LEAD_CAPTURE_0": "PASS",
+        "DIRECT_ONLY_MODEL_CALLS_0": "FAIL",
+        "STOP_FAMILY_SMOKE": "PASS",
+        "LEGITIMATE_NAME_AHMED": "FAIL",
+        "BARE_YES_CONFIRMATION_AUTHORITY": "FAIL",
+        "BARE_NO_CONFIRMATION_AUTHORITY": "FAIL",
+        "SEARCH_BEFORE_CONFIRMATION_0": "PASS",
+        "HTTP_500_0": "PASS",
+        "WRONG_ROUTE_ACTION_READY_0": "PASS"
+    },
+    "failures": [
+        "DIRECT_ONLY_HISTORICAL_REPRO: {\"lead_name\":null,\"stage\":null,\"max_stops\":0,\"origin\":null,\"destination\":null,\"adults\":1,\"pending_max_stops\":null,\"MODEL_CALLS\":1,\"SEARCH_CALLS\":0}",
+        "DIRECT_ONLY_MODEL_CALLS_0: MODEL_CALLS=1",
+        "LEGITIMATE_NAME_AHMED",
+        "BARE_YES_CONFIRMATION_AUTHORITY",
+        "BARE_NO_CONFIRMATION_AUTHORITY"
+    ],
+    "counters": {
+        "SEARCH_BEFORE_CONFIRMATION": 0,
+        "HTTP_500": 0,
+        "PII_FIRST": 0,
+        "WRONG_ROUTE_ACTION_READY": 0,
+        "BOOKING_IDENTITY_BYPASS": 0,
+        "BOOKING_DATA_LEAK": 0,
+        "QWEN_MODEL_ONLY_HANDOFF": 0,
+        "LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK": 0,
+        "SUPPLIER_MUTATIONS": 0,
+        "BOOKING_MUTATIONS": 0,
+        "PAYMENT_MUTATIONS": 0,
+        "AUTHORIZED_SEARCH_CALLS": 0,
+        "DIRECT_ONLY_FALSE_LEAD_CAPTURE": 0
+    },
+    "DIRECT_ONLY_AFTER": {
+        "lead_name": null,
+        "lead_capture_stage": null,
+        "max_stops": 0,
+        "origin": null,
+        "destination": null,
+        "adults": 1,
+        "pending_max_stops": null,
+        "MODEL_CALLS": 1,
+        "SEARCH_CALLS": 0
+    },
+    "RELATED_CONSTRAINT_FALSE_LEAD_REPRODUCED": "YES",
+    "CQ46_RANKING_TIME_LEAD_AUTHORITY_REQUIRED": "YES",
+    "related_observations": {
+        "cheapest": {
+            "LEAD_NAME_AFTER": "cheapest",
+            "LEAD_STAGE_AFTER": "contact"
+        },
+        "fastest": {
+            "LEAD_NAME_AFTER": "fastest",
+            "LEAD_STAGE_AFTER": "contact"
+        },
+        "morning": {
+            "LEAD_NAME_AFTER": "morning",
+            "LEAD_STAGE_AFTER": "contact"
+        }
+    },
+    "BARE_YES_AUTHORIZED_SEARCH_CALLS": 0,
+    "OVERALL": "FAIL"
+}
