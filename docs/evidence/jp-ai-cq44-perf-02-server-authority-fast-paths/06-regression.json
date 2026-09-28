@@ -1,0 +1,31 @@
+{
+  "PERF_02_1": true,
+  "BACKEND_TESTS_TOTAL": 172,
+  "BACKEND_TESTS_PASS": 172,
+  "BACKEND_TESTS_FAIL": 0,
+  "BACKEND_ASSERTIONS": 1637,
+  "FRONTEND_CONTINUITY": "PASS",
+  "FRONTEND_TYPECHECK": "PASS",
+  "CQ41_REGRESSION_INCLUDED": "YES",
+  "BOOKING_PRESENTER_REGRESSION_INCLUDED": "YES",
+  "CLOSURE29_MIXED_NAME_TRAVEL": "PASS",
+  "LEAD_TRAVEL_TEXT_CAPTURED_AS_NAME": 0,
+  "CERTIFIED_BEHAVIOR_REGRESSION": 0,
+  "suite_files": [
+    "Cq44Perf02ServerAuthorityFastPathsTest",
+    "Cq44PerfDeterministicShortCircuitTest",
+    "ServerTravelSignalsDeterministicAuthorityTest",
+    "Cq43R2ClientLeadClosureTest",
+    "Cq43R1ProgressiveConversationAuthorityTest",
+    "FlightSearchConfirmationAndHandoffClosure29Test",
+    "QwenOpenDomainAuthorityCq42Test",
+    "Cq42R2ProdResidualsTest",
+    "Cq42R3CrossPathTravelAuthorityTest",
+    "QwenLiveUatResidualClosureCq41Test",
+    "QwenSemanticFallbackOrder39Test",
+    "QwenSemanticBrain28Test",
+    "QwenSemanticBrain28FallbackTest",
+    "PublicAiAssistantTest",
+    "AiAssistantBookingChatPresenterTest"
+  ]
+}

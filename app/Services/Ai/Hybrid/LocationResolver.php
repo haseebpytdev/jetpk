@@ -278,6 +278,68 @@ final class LocationResolver
     }
 
     /**
+     * Distinct resolved IATA codes mentioned in the message (left-to-right).
+     * Uses the same CITY_TO_IATA master aliases as extractRoute — no second mapping.
+     *
+     * @return list<string>
+     */
+    public function resolvedLocationMentions(string $normalized, string $original): array
+    {
+        $scan = $this->scanHaystack($normalized, $original);
+        if ($scan === '') {
+            return [];
+        }
+
+        $ordered = self::CITY_TO_IATA;
+        uksort($ordered, static fn ($a, $b) => mb_strlen((string) $b) <=> mb_strlen((string) $a));
+
+        $hits = [];
+        foreach ($ordered as $alias => $code) {
+            if ($alias === '' || mb_strlen((string) $alias) < 3) {
+                continue;
+            }
+            if (preg_match_all(
+                '/(?:^|[\s,])('.preg_quote((string) $alias, '/').')(?:[\s,]|$)/ui',
+                $scan,
+                $mm,
+                PREG_OFFSET_CAPTURE
+            ) < 1) {
+                continue;
+            }
+            foreach ($mm[1] as $match) {
+                $hits[] = ['pos' => (int) $match[1], 'code' => (string) $code];
+            }
+        }
+
+        // Bare known IATA tokens (e.g. DOH) if not already captured via CITY_TO_IATA aliases.
+        foreach (self::KNOWN_IATA as $iata) {
+            $tok = mb_strtolower($iata);
+            if (preg_match_all(
+                '/(?:^|[\s,])('.preg_quote($tok, '/').')(?:[\s,]|$)/ui',
+                $scan,
+                $mm,
+                PREG_OFFSET_CAPTURE
+            ) < 1) {
+                continue;
+            }
+            foreach ($mm[1] as $match) {
+                $hits[] = ['pos' => (int) $match[1], 'code' => $iata];
+            }
+        }
+
+        usort($hits, static fn (array $a, array $b): int => $a['pos'] <=> $b['pos']);
+
+        $found = [];
+        foreach ($hits as $hit) {
+            if (! in_array($hit['code'], $found, true)) {
+                $found[] = $hit['code'];
+            }
+        }
+
+        return $found;
+    }
+
+    /**
      * @return array{0: ?string, 1: ?string, origin_ambiguous: bool, dest_ambiguous: bool, origin_options: list<array{label: string, value: string}>, dest_options: list<array{label: string, value: string}>}
      */
     public function extractRoute(string $normalized, string $original): array

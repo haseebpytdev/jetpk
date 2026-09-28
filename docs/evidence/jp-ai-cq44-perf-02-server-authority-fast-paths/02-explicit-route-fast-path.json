@@ -1,0 +1,20 @@
+{
+  "EXPLICIT_ROUTE_FAST_PATH": "PASS",
+  "EXPLICIT_ROUTE_COMPLETE_CLASS": "explicit_route_complete",
+  "fresh_routes_MODEL_CALLS": {
+    "Now Islamabad to Dubai next Monday": 0,
+    "Lahore to Dubai next Monday": 0,
+    "Karachi to Jeddah tomorrow": 0,
+    "Dubai to Lahore tomorrow": 0,
+    "Islamabad se Dubai kal": 0
+  },
+  "requirements": {
+    "current_turn_depart_explicit": true,
+    "origin_destination_unambiguous": true,
+    "simple_one_way": true,
+    "return_fast_path": "NOT_ENABLED",
+    "SEARCH_CALLS": 0,
+    "pending_confirmation": true,
+    "FINAL_RESPONSE_SOURCE": "STRUCTURED_FALLBACK"
+  }
+}

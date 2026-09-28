@@ -640,7 +640,9 @@ class QwenLiveUatResidualClosureCq41Test extends TestCase
         ])));
         $ok = $this->chat(str_repeat('o39a', 19), $primary);
         $ok['response']->assertOk();
-        $this->assertSame('QWEN_SEMANTIC', $ok['response']->json('mode'));
+        // CQ44-PERF-02: dated clear A→B may confirm via STRUCTURED_FALLBACK (server authority).
+        $mode = (string) $ok['response']->json('mode');
+        $this->assertContains($mode, ['QWEN_SEMANTIC', 'STRUCTURED_FALLBACK']);
         $this->assertSame('confirm', $ok['response']->json('status'));
         $this->assertSame(0, (int) $ok['response']->json('meta.AI_FLIGHT_SEARCH_READ_CALLS'));
         $this->assertDoesNotMatchRegularExpression('/\b(email|phone|whatsapp)\b/i', (string) $ok['response']->json('message'));

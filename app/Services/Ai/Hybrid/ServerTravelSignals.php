@@ -158,13 +158,58 @@ final class ServerTravelSignals
                 || (isset($priorState['intent']) && in_array($priorState['intent'], ['flight_search', 'group_search'], true))
             );
 
-        if (! $hasActiveTravel) {
-            return ['complete' => false, 'reason' => 'no_active_travel', 'classes' => [], 'authority' => $authority];
-        }
-
+        // Structural blockers first (before no_active_travel / prior multi-leg).
         $openJaw = $this->locations->extractOpenJawLegs($norm['normalized'], $norm['original']);
         if (is_array($openJaw) && count($openJaw) >= 2) {
             return ['complete' => false, 'reason' => 'open_jaw_multi_leg', 'classes' => [], 'authority' => $authority];
+        }
+
+        if (! empty($authority['origin_ambiguous']) || ! empty($authority['dest_ambiguous'])) {
+            return ['complete' => false, 'reason' => 'ambiguous_location', 'classes' => [], 'authority' => $authority];
+        }
+
+        // CQ44-PERF-02: complete clear explicit simple A→B with CURRENT-TURN date.
+        // Qualifies even with no_active_travel or prior multi-leg (explicit replacement).
+        // Return-route optimization is NOT enabled in this phase.
+        $currentDates = $this->resolveTripDates($message, null, null);
+        $origin = is_string($authority['origin'] ?? null) ? (string) $authority['origin'] : '';
+        $destination = is_string($authority['destination'] ?? null) ? (string) $authority['destination'] : '';
+        if (
+            ! empty($authority['explicit_route'])
+            && $origin !== ''
+            && $destination !== ''
+            && strtoupper($origin) !== strtoupper($destination)
+            && ! empty($currentDates['depart_explicit'])
+            && is_string($currentDates['depart_date'] ?? null)
+            && $currentDates['depart_date'] !== ''
+            && empty($currentDates['return_explicit'])
+            && ! $this->explicitReturnTripCue($message)
+        ) {
+            // CQ44-PERF-02.1: simple A→B fast path cannot silently drop a third
+            // resolved routing location (via / through / stopover / etc.).
+            $routeMentions = $this->locations->resolvedLocationMentions(
+                $norm['normalized'],
+                $norm['original']
+            );
+            if (count($routeMentions) > 2) {
+                return [
+                    'complete' => false,
+                    'reason' => 'multi_location_requires_semantic',
+                    'classes' => [],
+                    'authority' => $authority,
+                ];
+            }
+
+            return [
+                'complete' => true,
+                'reason' => 'deterministic_authority_complete',
+                'classes' => ['explicit_route_complete'],
+                'authority' => $authority,
+            ];
+        }
+
+        if (! $hasActiveTravel) {
+            return ['complete' => false, 'reason' => 'no_active_travel', 'classes' => [], 'authority' => $authority];
         }
 
         // CQ44-PERF-01.1: prior open-jaw / multi-leg state makes bare refinements
@@ -183,11 +228,7 @@ final class ServerTravelSignals
             ];
         }
 
-        if (! empty($authority['origin_ambiguous']) || ! empty($authority['dest_ambiguous'])) {
-            return ['complete' => false, 'reason' => 'ambiguous_location', 'classes' => [], 'authority' => $authority];
-        }
-
-        // Fresh explicit A→B (or dest-led start) keeps Qwen — not a refinement short-circuit.
+        // Explicit A→B without current-turn date (or with return cue) keeps Qwen.
         if (! empty($authority['explicit_route'])) {
             return ['complete' => false, 'reason' => 'explicit_route_keep_qwen', 'classes' => [], 'authority' => $authority];
         }

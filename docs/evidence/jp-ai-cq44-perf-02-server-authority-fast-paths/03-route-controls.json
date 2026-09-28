@@ -1,0 +1,14 @@
+{
+  "DESTINATION_LED_QWEN": "PASS",
+  "AMBIGUOUS_ROUTE_FAST_PATH": "BLOCKED",
+  "EXPLICIT_ROUTE_WITHOUT_DATE_QWEN": "PASS",
+  "EXPLICIT_RETURN_ROUTE_FAST_PATH": "NOT_ENABLED",
+  "OPEN_JAW_CURRENT_TURN_QWEN": "PASS",
+  "controls_still_call_qwen": [
+    "I need Dubai",
+    "Lahore to Dubai",
+    "Lahore to Jeddah then Medina to Lahore",
+    "London to Dubai next Monday",
+    "New York to Lahore next Monday"
+  ]
+}

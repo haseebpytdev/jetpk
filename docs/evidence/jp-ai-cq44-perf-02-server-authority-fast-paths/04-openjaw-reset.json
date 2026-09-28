@@ -1,0 +1,7 @@
+{
+  "EXPLICIT_ROUTE_AFTER_OPEN_JAW": "PASS",
+  "OPEN_JAW_TO_ONEWAY_RESET": "PASS",
+  "PRIOR_OPEN_JAW_DATE_QWEN": "PASS",
+  "PRIOR_OPEN_JAW_REFINEMENT_QWEN": "PASS",
+  "notes": "Complete dated A→B may bypass even with prior multi-leg; bare refinements still require Qwen via prior_multi_leg_requires_semantic."
+}

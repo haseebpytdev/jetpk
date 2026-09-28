@@ -59,7 +59,8 @@ final class SemanticBrain
             : [];
 
         // CQ42-R2: server-classified plain open-domain bypasses the travel semantic planner
-        // (one Qwen call). Does not bypass booking/handoff/HIGH_RISK/CURRENT/travel.
+        // (one Qwen call). Does not bypass booking/handoff/HIGH_RISK/travel.
+        $priorState = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
         $serverOpenEarly = $this->intentRouter->classifyOpenDomain($message);
         if (
             in_array($serverOpenEarly, ['GENERAL_KNOWLEDGE', 'CASUAL_CONVERSATION', 'OUT_OF_DOMAIN_SAFE'], true)
@@ -93,9 +94,35 @@ final class SemanticBrain
             );
         }
 
-        // CQ44-PERF-01: skip Qwen when shared server authorities fully resolve a
-        // material refinement against active travel (hybrid remains authoritative).
-        $priorState = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        // CQ44-PERF-02: CURRENT_UNVERIFIED with no approved live source — dedicated
+        // deterministic path (not generalAnswer; plan=null there falls back to hybrid).
+        if (
+            $serverOpenEarly === 'CURRENT_UNVERIFIED'
+            && ! $this->messageWantsBookingLookup($message)
+            && ! $this->messageWantsHandoff($message)
+            && ! $this->intentRouter->isTravelAuthorityTurn($message, $priorState)
+        ) {
+            $meta = array_merge($baseMeta, [
+                'SEMANTIC_BRAIN_CALLED' => 'NO',
+                'SEMANTIC_PLANNER_BYPASSED' => 'YES',
+                'SEMANTIC_BRAIN_VALID' => 'N/A',
+                'SEMANTIC_BRAIN_FALLBACK' => 'NO',
+                'MODEL_ID' => (string) config('ota.ai_assistant.model_id', 'local'),
+                'MODEL_CALLS' => 0,
+                'SEMANTIC_LATENCY_MS' => 0,
+                'OPEN_DOMAIN_LATENCY_MS' => 0,
+                'COMPOSER_LATENCY_MS' => 0,
+                'TOTAL_MODEL_LATENCY_MS' => 0,
+                'SERVER_OPEN_DOMAIN_CATEGORY' => 'CURRENT_UNVERIFIED',
+                'TOOL_EXECUTED' => 'NONE',
+                'MODEL_CAN_AUTHORIZE_MUTATION' => 'NO',
+            ]);
+
+            return $this->currentUnverifiedDeterministic($message, $meta, $brand, $capabilities);
+        }
+
+        // CQ44-PERF-01/02: skip Qwen when shared server authorities fully resolve a
+        // material refinement or a complete dated explicit A→B (hybrid remains authoritative).
         $deterministic = $this->travelSignals->deterministicAuthorityComplete($message, $priorState);
         if (($deterministic['complete'] ?? false) === true) {
             return [
@@ -588,6 +615,57 @@ final class SemanticBrain
             'sports' => "I don't have an approved live sports-data source available here, so I can't verify the current result or score. I can still help with flights or JetPakistan travel questions.",
             default => "I don't have an approved live data source for that request, so I can't verify the current information. I can still help with flights or JetPakistan travel questions.",
         };
+    }
+
+    /**
+     * CQ44-PERF-02: CURRENT_UNVERIFIED without an approved live source — deterministic only.
+     * Reuses OpenDomainResponseService::fallbackForCategory; never calls Qwen/composer.
+     *
+     * @param  list<string>  $capabilities
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    private function currentUnverifiedDeterministic(
+        string $message,
+        array $meta,
+        string $brand,
+        array $capabilities,
+    ): array {
+        $topic = $this->intentRouter->classifyCurrentTopic($message);
+        $structured = $this->openDomain->fallbackForCategory($message, 'CURRENT_UNVERIFIED', $capabilities, $brand);
+        $body = is_array($structured) && filled($structured['message'] ?? null)
+            ? (string) $structured['message']
+            : $this->currentUnverifiedLimitationMessage($topic);
+
+        $meta = array_merge($meta, is_array($structured['meta'] ?? null) ? $structured['meta'] : []);
+        $meta['MODEL_CALLS'] = 0;
+        $meta['SEMANTIC_LATENCY_MS'] = 0;
+        $meta['OPEN_DOMAIN_LATENCY_MS'] = 0;
+        $meta['COMPOSER_LATENCY_MS'] = 0;
+        $meta['TOTAL_MODEL_LATENCY_MS'] = 0;
+        $meta['FINAL_RESPONSE_SOURCE'] = 'DETERMINISTIC_CURRENT_UNVERIFIED';
+        $meta['SERVER_OPEN_DOMAIN_CATEGORY'] = 'CURRENT_UNVERIFIED';
+        $meta['open_domain_category'] = 'CURRENT_UNVERIFIED';
+        $meta['CURRENT_TOPIC'] = $topic;
+        $meta['FLIGHT_STATE_CONTAMINATION'] = 0;
+        $meta['HALLUCINATED_LIVE_FACT'] = 'NO';
+        $meta['OPEN_DOMAIN_FALLBACK'] = 'YES';
+        $meta['OPEN_DOMAIN_ATTEMPTED'] = 'NO';
+        $meta['OPEN_DOMAIN_ACCEPTED'] = 'NO';
+        $meta['LLM_SYNTHESIS'] = 'NO';
+        $meta['TOOL_EXECUTED'] = 'NONE';
+        $meta['AI_FLIGHT_SEARCH_READ_CALLS'] = 0;
+        $meta['AI_GROUP_SEARCH_READ_CALLS'] = 0;
+        $meta['MODEL_CAN_AUTHORIZE_MUTATION'] = 'NO';
+        $meta['SEMANTIC_BRAIN_CALLED'] = 'NO';
+        $meta['SEMANTIC_PLANNER_BYPASSED'] = 'YES';
+
+        return [
+            'kind' => 'answer',
+            'status' => 'ok',
+            'message' => $body,
+            'meta' => $meta,
+        ];
     }
 
     /**

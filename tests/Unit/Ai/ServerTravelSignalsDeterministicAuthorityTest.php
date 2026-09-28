@@ -104,12 +104,81 @@ class ServerTravelSignalsDeterministicAuthorityTest extends TestCase
         $this->assertFalse($oj['complete']);
         $this->assertSame('open_jaw_multi_leg', $oj['reason']);
 
+        // CQ44-PERF-02: dated clear A→B completes even with prior active travel.
         $route = $signals->deterministicAuthorityComplete(
             'Now Islamabad to Dubai next Monday',
             $prior
         );
-        $this->assertFalse($route['complete']);
-        $this->assertSame('explicit_route_keep_qwen', $route['reason']);
+        $this->assertTrue($route['complete']);
+        $this->assertContains('explicit_route_complete', $route['classes']);
+    }
+
+    public function test_fresh_dated_explicit_route_complete_without_active_travel(): void
+    {
+        $signals = app(ServerTravelSignals::class);
+        $r = $signals->deterministicAuthorityComplete('Now Islamabad to Dubai next Monday', null);
+        $this->assertTrue($r['complete']);
+        $this->assertContains('explicit_route_complete', $r['classes']);
+    }
+
+    public function test_via_and_through_block_explicit_route_complete(): void
+    {
+        $signals = app(ServerTravelSignals::class);
+        foreach ([
+            'Lahore to Dubai via Doha next Monday',
+            'LHE to DXB via DOH next Monday',
+            'Lahore to Dubai through Doha next Monday',
+            'Lahore to Dubai connecting in Doha next Monday',
+            'Lahore to Dubai with a stopover in Doha next Monday',
+        ] as $msg) {
+            $r = $signals->deterministicAuthorityComplete($msg, null);
+            $this->assertFalse($r['complete'], "Expected incomplete for multi-location: {$msg}");
+            $this->assertSame('multi_location_requires_semantic', $r['reason'], $msg);
+            $this->assertNotContains('explicit_route_complete', $r['classes'] ?? []);
+        }
+    }
+
+    public function test_airline_and_direct_tokens_do_not_block_explicit_route_complete(): void
+    {
+        $signals = app(ServerTravelSignals::class);
+        foreach ([
+            'Lahore to Dubai on Emirates next Monday',
+            'Lahore to Dubai direct next Monday',
+        ] as $msg) {
+            $r = $signals->deterministicAuthorityComplete($msg, null);
+            $this->assertTrue($r['complete'], "Expected complete for: {$msg}");
+            $this->assertContains('explicit_route_complete', $r['classes']);
+        }
+    }
+
+    public function test_explicit_route_without_date_keeps_qwen(): void
+    {
+        $signals = app(ServerTravelSignals::class);
+        $r = $signals->deterministicAuthorityComplete('Lahore to Dubai', [
+            'origin' => 'KHI',
+            'destination' => 'JED',
+            'intent' => 'flight_search',
+        ]);
+        $this->assertFalse($r['complete']);
+        $this->assertSame('explicit_route_keep_qwen', $r['reason']);
+    }
+
+    public function test_complete_explicit_route_overrides_prior_open_jaw(): void
+    {
+        $signals = app(ServerTravelSignals::class);
+        $prior = [
+            'origin' => 'LHE',
+            'destination' => 'JED',
+            'intent' => 'flight_search',
+            'trip_type' => 'open_jaw',
+            'legs' => [
+                ['origin' => 'LHE', 'destination' => 'JED'],
+                ['origin' => 'MED', 'destination' => 'LHE'],
+            ],
+        ];
+        $r = $signals->deterministicAuthorityComplete('Now Islamabad to Dubai next Monday', $prior);
+        $this->assertTrue($r['complete']);
+        $this->assertContains('explicit_route_complete', $r['classes']);
     }
 
     public function test_prior_open_jaw_blocks_bare_refinement_short_circuit(): void
