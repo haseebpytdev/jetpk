@@ -15,7 +15,7 @@ PERFORMANCE_OPERATIONAL_ACCEPTANCE=PASS
 
 `TravelConstraintResolver` already resolved `max_stops`, but `ServerTravelSignals::progressiveTravelAuthority()` did not expose stop refinement to the lead-override / deterministic-authority path.
 
-## Fix
+## Fix (CQ45 — accepted)
 
 Single production file: `app/Services/Ai/Hybrid/ServerTravelSignals.php`
 
@@ -27,11 +27,22 @@ Single production file: `app/Services/Ai/Hybrid/ServerTravelSignals.php`
 
 No lead-name blacklist. No duplicated stop vocabulary. No Qwen/runtime/iframe/PERF-03 changes.
 
+## CQ45.1 — Authority proof hardening
+
+Application code unchanged. Tests strengthened:
+
+1. Open-jaw `"direct only"` proves Qwen ran via `ScriptedInferenceProvider::callCount() === before + 1`, state preserved (`open_jaw`, 2 legs), false lead=0.
+2. Bare `Yes` / `No` endpoint fixtures with lead pending at name stage — confirmation authority wins; Yes → exactly one authorized search read; No → clear pending, search=0.
+3. Endpoint reproduction: `cheapest` / `fastest` / `morning` stored as `lead_name` → `RELATED_CONSTRAINT_FALSE_LEAD_REPRODUCED=YES`, deferred to **CQ46** (confirmation snapshot lacks ranking/time; do not copy stop_refinement pattern blindly).
+
+Evidence: `docs/evidence/jp-ai-cq45-lead-constraint-authority/09-cq45-1-authority-proof.md`
+
 ## Tests
 
-184/184 PASS · 1786 assertions  
+185/185 PASS · 1813 assertions  
 Frontend continuity 11/11 PASS · typecheck PASS
 
 ## Status
 
-READY_FOR_REVIEW=YES · READY_FOR_MERGE=NO · READY_FOR_DEPLOY=NO
+READY_FOR_REVIEW=YES · READY_FOR_MERGE=NO · READY_FOR_DEPLOY=NO  
+No merge. No deployment. No ranking/time implementation.

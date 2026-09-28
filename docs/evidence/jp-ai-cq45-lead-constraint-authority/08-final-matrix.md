@@ -1,8 +1,9 @@
-# CQ45 final matrix
+# CQ45 / CQ45.1 final matrix
 
 | Key | Value |
 | --- | --- |
-| CQ45_STATUS | PASS (implementation + tests; not merged/deployed) |
+| CQ45_STATUS | PASS (implementation accepted) |
+| CQ45_1_STATUS | PASS (test/evidence hardening) |
 | ROOT_CAUSE_DIRECT_ONLY_LEAD_CAPTURE | progressiveTravelAuthority missing stop_refinement from TravelConstraintResolver |
 | STOP_REFINEMENT_AUTHORITY | PASS |
 | DIRECT_ONLY_HISTORICAL_REPRO | PASS |
@@ -15,11 +16,16 @@
 | CONFIRMATION_REFRESH_AFTER_STOP_CHANGE | PASS |
 | LEGITIMATE_NAME_AHMED / ALI_KHAN | PASS |
 | MIXED_NAME_TRAVEL | PASS |
-| PRIOR_OPEN_JAW_DIRECT_QWEN | PASS |
-| RELATED_CONSTRAINT_FALSE_LEAD_REPRODUCED | YES_POTENTIAL (cheapest/fastest/morning — out of scope) |
+| PRIOR_OPEN_JAW_DIRECT_QWEN | PASS (callCount delta = 1) |
+| PRIOR_OPEN_JAW_STATE_PRESERVED | PASS |
+| BARE_YES_CONFIRMATION_AUTHORITY | PASS (AI_FLIGHT_SEARCH_READ_CALLS=1) |
+| BARE_NO_CONFIRMATION_AUTHORITY | PASS (search=0) |
+| RELATED_CONSTRAINT_FALSE_LEAD_REPRODUCED | YES (cheapest/fastest/morning → lead_name) |
+| CQ46_RANKING_TIME_LEAD_AUTHORITY_REQUIRED | YES |
 | PERF02_FAST_PATH_NON_REGRESSION | PASS |
-| BACKEND | 184/184 pass, 1786 assertions |
+| BACKEND | 185/185 pass, 1813 assertions |
 | FRONTEND_CONTINUITY / TYPECHECK | PASS / PASS |
+| APPLICATION_CODE_CHANGED | NO |
 | READY_FOR_REVIEW | YES |
 | READY_FOR_MERGE | NO |
 | READY_FOR_DEPLOY | NO |

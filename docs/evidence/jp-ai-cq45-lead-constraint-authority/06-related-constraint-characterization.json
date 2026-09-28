@@ -1,10 +1,38 @@
 {
-  "RELATED_CONSTRAINT_FALSE_LEAD_REPRODUCED": "YES_POTENTIAL",
-  "RELATED_CONSTRAINT_NOTES": "cheapest / fastest / morning are NOT stop_refinement. looksLikeBareName may still accept some bare ranking/time tokens when they match name shape. CQ45 scope deliberately stop_refinement only; ranking/time authority is a separate candidate.",
+  "RELATED_CONSTRAINT_FALSE_LEAD_REPRODUCED": "YES",
+  "CQ46_RANKING_TIME_LEAD_AUTHORITY_REQUIRED": "YES",
+  "RELATED_CONSTRAINT_NOTES": "Endpoint reproduction confirms cheapest/fastest/morning are stored as lead_name and advance lead stage to contact. TravelConstraintResolver can resolve ranking/time, but ServerTravelSignals does not expose them as travel authority, and looksLikeBareName does not exclude them. Confirmation snapshot lacks ranking_preference/time_preference — do not blindly promote via CQ45 stop_refinement pattern. Deferred to CQ46.",
   "phrases": {
-    "cheapest": {"stop_refinement": false},
-    "fastest": {"stop_refinement": false},
-    "morning": {"stop_refinement": false}
+    "cheapest": {
+      "stop_refinement": false,
+      "LEAD_NAME_AFTER": "cheapest",
+      "LEAD_STAGE_AFTER": "contact",
+      "RANKING_AFTER": null,
+      "TIME_PREFERENCE_AFTER": null,
+      "MODEL_CALLS": 0,
+      "STATUS": "ok",
+      "looksLikeBareName": true
+    },
+    "fastest": {
+      "stop_refinement": false,
+      "LEAD_NAME_AFTER": "fastest",
+      "LEAD_STAGE_AFTER": "contact",
+      "RANKING_AFTER": null,
+      "TIME_PREFERENCE_AFTER": null,
+      "MODEL_CALLS": 0,
+      "STATUS": "ok",
+      "looksLikeBareName": true
+    },
+    "morning": {
+      "stop_refinement": false,
+      "LEAD_NAME_AFTER": "morning",
+      "LEAD_STAGE_AFTER": "contact",
+      "RANKING_AFTER": null,
+      "TIME_PREFERENCE_AFTER": null,
+      "MODEL_CALLS": 0,
+      "STATUS": "ok",
+      "looksLikeBareName": true
+    }
   },
-  "scope": "characterization only — no ranking/time promotion in CQ45"
+  "scope": "endpoint characterization only — no ranking/time implementation in CQ45.1"
 }

@@ -366,44 +366,68 @@ class Cq45LeadConstraintAuthorityTest extends TestCase
         $this->assertNotNull($s[FlightSearchConfirmationGate::STATE_KEY] ?? null);
     }
 
-    public function test_bare_yes_no_confirmation_authority(): void
+    public function test_bare_yes_confirmation_authority_with_lead_pending(): void
     {
-        $this->enableSemanticAi();
-        $gate = app(FlightSearchConfirmationGate::class);
-        $this->assertTrue($gate->isAffirmative('Yes'));
-        $this->assertTrue($gate->isNegative('No'));
-
-        $this->rebindInference(new ScriptedInferenceProvider(array_fill(0, 4, (string) json_encode([
-            'domain' => 'travel', 'intent' => 'flight_search', 'operation' => 'clarify',
-            'travel' => ['trip_type' => 'one_way', 'origin' => 'KHI', 'destination' => 'JED', 'adults' => 2],
-            'missing' => [], 'references' => ['pending_confirmation' => true], 'corrections' => new \stdClass,
-            'response_intent' => 'confirm_search',
-        ], JSON_UNESCAPED_UNICODE))));
+        // Closure29-style authorized read: hybrid path, no semantic planner, controlled fixture.
+        $this->enableSemanticAi([
+            'ota.ai_assistant.semantic_planner_enabled' => false,
+            'ota.ai_assistant.conversational_enabled' => false,
+        ]);
+        $this->rebindInference(new ScriptedInferenceProvider([]));
 
         $vid = str_repeat('cq45yes', 6);
         $conv = $this->seedKhiJedPendingLeadName($vid);
-        // Reject search execution in tests by leaving flight search mocked — just ensure Yes does not become lead_name.
-        // Clear lead pending so Yes hits confirmation gate, not lead FSM.
-        $st = is_array($conv->shopping_state) ? $conv->shopping_state : [];
-        $st['lead_capture_pending'] = false;
-        unset($st['lead_capture_stage']);
-        $conv->shopping_state = $st;
-        $conv->save();
 
-        // Disable actual search execution for Yes by using flight_search_enabled false after confirm path...
-        // Instead assert router/signals: Yes is not stop_refinement and gate owns affirmative.
-        $signals = app(ServerTravelSignals::class);
-        $yesAuth = $signals->progressiveTravelAuthority('Yes', $st);
-        $this->assertFalse($yesAuth['stop_refinement']);
-        $this->assertFalse($yesAuth['active']);
-        $this->assertTrue($gate->isAffirmative('Yes'));
-        $this->assertTrue($gate->isNegative('No'));
+        $before = $this->reloadState($conv->public_id);
+        $this->assertTrue((bool) ($before['lead_capture_pending'] ?? false));
+        $this->assertSame('name', $before['lead_capture_stage'] ?? null);
+        $this->assertNull($before['lead_name'] ?? null);
+        $this->assertNotNull($before[FlightSearchConfirmationGate::STATE_KEY] ?? null);
+
+        $yes = $this->chat($vid, 'Yes', $conv->public_id);
+        $yes['response']->assertOk();
+        $json = $yes['json'];
+
+        $this->assertTrue((bool) data_get($json, 'meta.CONFIRMATION_BEFORE_SEARCH'));
+        $this->assertSame(1, (int) data_get($json, 'meta.AI_FLIGHT_SEARCH_READ_CALLS'));
+        $this->assertSame(0, (int) data_get($json, 'meta.MODEL_CALLS', data_get($json, 'meta.GENERAL_MODEL_CALLS', 0)));
+
+        $after = $this->reloadState($conv->public_id);
+        $this->assertNull($after['lead_name'] ?? null, 'BARE_YES must not store Yes as lead_name');
+        $this->assertNull($after[FlightSearchConfirmationGate::STATE_KEY] ?? null);
+        // Lead FSM must not advance on Yes when confirmation authority wins.
+        $this->assertNotSame('contact', $after['lead_capture_stage'] ?? null);
+    }
+
+    public function test_bare_no_confirmation_authority_with_lead_pending(): void
+    {
+        $this->enableSemanticAi([
+            'ota.ai_assistant.semantic_planner_enabled' => false,
+            'ota.ai_assistant.conversational_enabled' => false,
+        ]);
+        $this->rebindInference(new ScriptedInferenceProvider([]));
+
+        $vid = str_repeat('cq45bno', 6);
+        $conv = $this->seedKhiJedPendingLeadName($vid);
+
+        $no = $this->chat($vid, 'No', $conv->public_id);
+        $no['response']->assertOk();
+        $json = $no['json'];
+
+        $this->assertSame(0, (int) data_get($json, 'meta.AI_FLIGHT_SEARCH_READ_CALLS'));
+        $this->assertSame(0, (int) data_get($json, 'meta.MODEL_CALLS', data_get($json, 'meta.GENERAL_MODEL_CALLS', 0)));
+
+        $after = $this->reloadState($conv->public_id);
+        $this->assertNull($after['lead_name'] ?? null, 'BARE_NO must not store No as lead_name');
+        $this->assertNull($after[FlightSearchConfirmationGate::STATE_KEY] ?? null, 'confirmation cancelled');
+        $this->assertSame('name', $after['lead_capture_stage'] ?? null);
+        $this->assertTrue((bool) ($after['lead_capture_pending'] ?? false));
     }
 
     public function test_prior_open_jaw_direct_keeps_qwen_but_not_false_lead(): void
     {
         $this->enableSemanticAi();
-        $this->rebindInference(new ScriptedInferenceProvider([
+        $provider = new ScriptedInferenceProvider([
             (string) json_encode([
                 'domain' => 'travel',
                 'intent' => 'flight_search',
@@ -424,9 +448,14 @@ class Cq45LeadConstraintAuthorityTest extends TestCase
                 'corrections' => new \stdClass,
                 'response_intent' => 'need_clarification',
             ], JSON_UNESCAPED_UNICODE),
-        ]));
+        ]);
+        $this->rebindInference($provider);
 
         $vid = str_repeat('cq45ojd', 6);
+        $priorLegs = [
+            ['origin' => 'LHE', 'destination' => 'JED', 'departure_date' => '2026-10-06'],
+            ['origin' => 'MED', 'destination' => 'LHE', 'departure_date' => null],
+        ];
         $conv = AiConversation::query()->create([
             'public_id' => (string) Str::uuid(),
             'visitor_token_hash' => hash('sha256', $vid),
@@ -438,10 +467,7 @@ class Cq45LeadConstraintAuthorityTest extends TestCase
                 'destination' => 'JED',
                 'depart_date' => '2026-10-06',
                 'trip_type' => 'open_jaw',
-                'legs' => [
-                    ['origin' => 'LHE', 'destination' => 'JED', 'departure_date' => '2026-10-06'],
-                    ['origin' => 'MED', 'destination' => 'LHE', 'departure_date' => null],
-                ],
+                'legs' => $priorLegs,
                 'lead_capture_pending' => true,
                 'lead_capture_stage' => 'name',
                 'lead_name' => null,
@@ -455,15 +481,40 @@ class Cq45LeadConstraintAuthorityTest extends TestCase
         $this->assertFalse($det['complete']);
         $this->assertSame('prior_multi_leg_requires_semantic', $det['reason']);
 
+        $beforeCalls = $provider->callCount();
         $turn = $this->chat($vid, 'direct only', $conv->public_id);
         $turn['response']->assertOk();
+
+        // Prove Qwen actually ran (not merely that deterministic short-circuit was blocked).
+        $this->assertSame($beforeCalls + 1, $provider->callCount(), 'PRIOR_OPEN_JAW_DIRECT_QWEN call delta');
+
+        $json = $turn['json'];
+        $this->assertSame(0, (int) data_get($json, 'meta.AI_FLIGHT_SEARCH_READ_CALLS'));
+        $this->assertSame(0, (int) data_get($json, 'meta.WRONG_ROUTE_ACTION_READY', 0));
+
         $after = $this->reloadState($conv->public_id);
-        $this->assertNotSame('direct only', $after['lead_name'] ?? null);
-        $this->assertNull($after['lead_name'] ?? null);
+        $this->assertNull($after['lead_name'] ?? null, 'PRIOR_OPEN_JAW_DIRECT_FALSE_LEAD_CAPTURE');
+        $this->assertSame('open_jaw', $after['trip_type'] ?? null, 'PRIOR_OPEN_JAW_STATE_PRESERVED trip_type');
+        $legs = $after['legs'] ?? null;
+        $this->assertIsArray($legs);
+        $this->assertCount(2, $legs, 'legs must not silently collapse');
+        $this->assertSame('LHE', $legs[0]['origin'] ?? null);
+        $this->assertSame('JED', $legs[0]['destination'] ?? null);
+        $this->assertSame('MED', $legs[1]['origin'] ?? null);
+        $this->assertSame('LHE', $legs[1]['destination'] ?? null);
     }
 
-    public function test_related_constraint_characterization_not_stop_refinement(): void
+    public function test_related_constraint_endpoint_repro_cheapest_fastest_morning(): void
     {
+        // Characterization only — do NOT fix ranking/time lead authority in CQ45.1.
+        $this->enableSemanticAi();
+        $this->rebindInference(new ScriptedInferenceProvider(array_fill(0, 12, (string) json_encode([
+            'domain' => 'travel', 'intent' => 'flight_search', 'operation' => 'clarify',
+            'travel' => ['trip_type' => 'one_way', 'origin' => 'KHI', 'destination' => 'JED', 'adults' => 2],
+            'missing' => [], 'references' => ['pending_confirmation' => true], 'corrections' => new \stdClass,
+            'response_intent' => 'confirm_search',
+        ], JSON_UNESCAPED_UNICODE))));
+
         $signals = app(ServerTravelSignals::class);
         $router = app(ConversationIntentRouter::class);
         $prior = [
@@ -473,13 +524,46 @@ class Cq45LeadConstraintAuthorityTest extends TestCase
             'depart_date' => '2026-10-06',
         ];
 
+        $observations = [];
+        $reproduced = false;
         foreach (['cheapest', 'fastest', 'morning'] as $msg) {
             $a = $signals->progressiveTravelAuthority($msg, $prior);
             $this->assertFalse($a['stop_refinement'], $msg);
-            // Characterize vulnerability: bare ranking/time may still lookLikeBareName.
-            $looksName = $router->looksLikeBareName($msg);
-            $this->assertIsBool($looksName);
+            $this->assertIsBool($router->looksLikeBareName($msg));
+
+            $vid = substr(preg_replace('/[^a-z0-9]/', '', 'cq45rel'.md5($msg)).str_repeat('x', 32), 0, 42);
+            $conv = $this->seedKhiJedPendingLeadName($vid);
+            $turn = $this->chat($vid, $msg, $conv->public_id);
+            $turn['response']->assertOk();
+            $state = $this->reloadState($conv->public_id);
+            $leadName = $state['lead_name'] ?? null;
+            $obs = [
+                'message' => $msg,
+                'LEAD_NAME_AFTER' => $leadName,
+                'LEAD_STAGE_AFTER' => $state['lead_capture_stage'] ?? null,
+                'RANKING_AFTER' => $state['ranking_preference'] ?? $state['ranking'] ?? null,
+                'TIME_PREFERENCE_AFTER' => $state['time_preference'] ?? null,
+                'MODEL_CALLS' => (int) data_get($turn['json'], 'meta.MODEL_CALLS', data_get($turn['json'], 'meta.GENERAL_MODEL_CALLS', 0)),
+                'STATUS' => (string) data_get($turn['json'], 'status', ''),
+                'looksLikeBareName' => $router->looksLikeBareName($msg),
+            ];
+            $observations[$msg] = $obs;
+            if (is_string($leadName) && mb_strtolower($leadName) === mb_strtolower($msg)) {
+                $reproduced = true;
+            }
         }
+
+        $path = storage_path('framework/cq45-1-related-constraint-repro.json');
+        file_put_contents($path, json_encode([
+            'RELATED_CONSTRAINT_FALSE_LEAD_REPRODUCED' => $reproduced ? 'YES' : 'NO',
+            'CQ46_RANKING_TIME_LEAD_AUTHORITY_REQUIRED' => $reproduced ? 'YES' : 'NO',
+            'observations' => $observations,
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        // Evidence requires endpoint-observed capture; assert file written and shape stable.
+        $this->assertFileExists($path);
+        $this->assertCount(3, $observations);
+        $this->assertIsBool($reproduced);
     }
 
     public function test_name_direct_with_travel_characterized(): void
