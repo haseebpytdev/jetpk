@@ -1,9 +1,37 @@
 {
-  "source": "out/sessions/05-real-qwen-session.json",
-  "AFTER_PRIMARY_TURNS": 41,
-  "AFTER_QWEN_MODEL_CALLS": 4,
-  "AFTER_QWEN_CALL_RATE": "4/41",
-  "DETERMINISTIC_BYPASS_TURNS": 16,
-  "comparable_to": "CQ43 primary 42-turn human-paced sequence (modeled closely; 41 turns executed)",
-  "note": "Burst/rate traffic excluded. Semantic latency only for SEMANTIC_BRAIN_CALLED=YES samples."
+  "authoritative": "RUN2",
+  "PERCENTILE_METHOD": "nearest-rank: rank=ceil(p/100*N), 1-indexed a[rank-1]",
+  "RUN1": {
+    "NONCOMPARABLE_AFTER_HANDOFF": "YES",
+    "source": "out/sessions/05-real-qwen-session.json",
+    "SESSION_RECORDS": 41,
+    "USER_MESSAGES": 41,
+    "RESUME_ACTIONS": 0,
+    "QWEN_MODEL_CALLS": 4,
+    "USER_MESSAGE_QWEN_RATE": "4/41",
+    "FIRST29_QWEN_CALLS": 4,
+    "FIRST29_TOTAL_P95_MS": 7679
+  },
+  "RUN2": {
+    "source": "out/sessions/05-real-qwen-session-run2.json",
+    "summary": "out/SUMMARY-run2.json",
+    "SESSION_RECORDS": 42,
+    "USER_MESSAGES": 41,
+    "RESUME_ACTIONS": 1,
+    "QWEN_MODEL_CALLS": 5,
+    "USER_MESSAGE_QWEN_RATE": "5/41",
+    "SESSION_RECORD_QWEN_RATE": "5/42",
+    "EXPLICIT_HANDOFF": "PASS",
+    "RESUME_AI": "PASS",
+    "POST_RESUME_STATE": "AI_ACTIVE",
+    "ROMAN_URDU_AFTER_RESUME": "PASS"
+  },
+  "BASELINE_CQ43": {
+    "source": "docs/evidence/jp-ai-cq43-final-resoak/out/sessions/01-primary-long-session.json",
+    "SESSION_RECORDS": 42,
+    "USER_MESSAGES": 41,
+    "RESUME_ACTIONS": 1,
+    "QWEN_MODEL_CALLS": 10,
+    "USER_MESSAGE_QWEN_RATE": "10/41"
+  }
 }
