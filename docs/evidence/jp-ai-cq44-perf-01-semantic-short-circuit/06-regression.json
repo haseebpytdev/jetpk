@@ -1,0 +1,43 @@
+{
+  "BACKEND_TESTS_TOTAL": 144,
+  "BACKEND_TESTS_PASS": 144,
+  "BACKEND_TESTS_FAIL": 0,
+  "BACKEND_ASSERTIONS": 1402,
+  "ARTIFACTS": [
+    "phpunit-out.txt",
+    "frontend-continuity-out.txt",
+    "frontend-typecheck-out.txt"
+  ],
+  "suites": [
+    "Cq43R1ProgressiveConversationAuthorityTest",
+    "Cq43R2ClientLeadClosureTest",
+    "Cq44PerfDeterministicShortCircuitTest",
+    "FlightSearchConfirmationAndHandoffClosure29Test",
+    "Cq42R3CrossPathTravelAuthorityTest",
+    "Cq42R2ProdResidualsTest",
+    "QwenOpenDomainAuthorityCq42Test",
+    "QwenLiveUatResidualClosureCq41Test",
+    "QwenSemanticFallbackOrder39Test",
+    "QwenSemanticBrain28Test",
+    "QwenSemanticBrain28FallbackTest",
+    "PublicAiAssistantTest",
+    "AiAssistantBookingChatPresenterTest",
+    "ServerTravelSignalsDeterministicAuthorityTest"
+  ],
+  "FRONTEND_CONTINUITY": "PASS (11/11)",
+  "FRONTEND_TYPECHECK": "PASS",
+  "CLIENT_MESSAGE_IDENTITY": "PASS",
+  "CERTIFIED_BEHAVIOR_REGRESSION": 0,
+  "safety": {
+    "SEARCH_BEFORE_CONFIRMATION": 0,
+    "PII_FIRST": 0,
+    "WRONG_ROUTE_ACTION_READY": 0,
+    "BOOKING_IDENTITY_BYPASS": 0,
+    "BOOKING_DATA_LEAK": 0,
+    "QWEN_MODEL_ONLY_HANDOFF": 0,
+    "LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK": 0,
+    "SUPPLIER_MUTATIONS": 0,
+    "BOOKING_MUTATIONS": 0,
+    "PAYMENT_MUTATIONS": 0
+  }
+}

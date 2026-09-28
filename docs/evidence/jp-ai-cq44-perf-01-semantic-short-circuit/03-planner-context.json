@@ -1,0 +1,8 @@
+{
+  "note": "Planner prompt size not instrumented in CQ43 soak. PERF-01 did not reduce context; short-circuit avoids the call instead.",
+  "PLANNER_PROMPT_CHARS_P50": "N/A",
+  "PLANNER_PROMPT_CHARS_MAX": "N/A",
+  "CONTEXT_MESSAGES_P50": "N/A",
+  "CONTEXT_MESSAGES_MAX": "N/A",
+  "action": "deferred_to_later_phase_if_needed"
+}

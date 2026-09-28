@@ -1,0 +1,84 @@
+{
+  "source": "docs/evidence/jp-ai-cq43-final-resoak/out/sessions/01-primary-long-session.json",
+  "PRIMARY_SESSION_ARRAY_LENGTH": 42,
+  "QWEN_CALLS_AUDITED": 10,
+  "classifications": {
+    "QWEN_ESSENTIAL": 5,
+    "QWEN_OPTIONAL": 0,
+    "QWEN_UNNECESSARY": 5
+  },
+  "calls": [
+    {
+      "TURN": 1,
+      "USER_MESSAGE": "I need Dubai",
+      "PRIOR_STATE": {"origin": null, "destination": null},
+      "QWEN_REQUIRED_REASON": "destination_led_start",
+      "QWEN_LATENCY_MS": 11633,
+      "FALLBACK": "NO",
+      "CLASS": "QWEN_ESSENTIAL"
+    },
+    {
+      "TURN": 2,
+      "USER_MESSAGE": "from Lahore",
+      "PRIOR_STATE": {"origin": null, "destination": "DXB"},
+      "SERVER_TRAVEL_SIGNAL": "origin_only + prior dest",
+      "QWEN_LATENCY_MS": 22542,
+      "QWEN_RESULT": "open_jaw invalid_plan",
+      "VALIDATOR_RESULT": ["open_jaw_requires_two_legs"],
+      "FALLBACK": "YES",
+      "FINAL_SERVER_ACTION": "clarify date LHE→DXB",
+      "CLASS": "QWEN_UNNECESSARY"
+    },
+    {
+      "TURN": 3,
+      "USER_MESSAGE": "next Friday",
+      "QWEN_LATENCY_MS": 8759,
+      "CLASS": "QWEN_UNNECESSARY"
+    },
+    {
+      "TURN": 4,
+      "USER_MESSAGE": "2 adults",
+      "QWEN_LATENCY_MS": 10143,
+      "CLASS": "QWEN_UNNECESSARY"
+    },
+    {
+      "TURN": 5,
+      "USER_MESSAGE": "economy",
+      "QWEN_LATENCY_MS": 9882,
+      "CLASS": "QWEN_UNNECESSARY"
+    },
+    {
+      "TURN": 6,
+      "USER_MESSAGE": "Make it Doha",
+      "QWEN_LATENCY_MS": 11185,
+      "FALLBACK": "YES",
+      "CLASS": "QWEN_UNNECESSARY"
+    },
+    {
+      "TURN": 20,
+      "USER_MESSAGE": "Now Islamabad to Dubai next Monday",
+      "QWEN_REQUIRED_REASON": "explicit_route_keep_qwen_v1",
+      "QWEN_LATENCY_MS": 12778,
+      "CLASS": "QWEN_ESSENTIAL"
+    },
+    {
+      "TURN": 22,
+      "USER_MESSAGE": "What is gravity?",
+      "SERVER_OPEN_DOMAIN_CATEGORY": "GENERAL_KNOWLEDGE",
+      "CLASS": "QWEN_ESSENTIAL"
+    },
+    {
+      "TURN": 24,
+      "USER_MESSAGE": "What is Bitcoin's price right now?",
+      "SERVER_OPEN_DOMAIN_CATEGORY": "CURRENT",
+      "QWEN_LATENCY_MS": 12158,
+      "CLASS": "QWEN_ESSENTIAL"
+    },
+    {
+      "TURN": 40,
+      "USER_MESSAGE": "What is photosynthesis?",
+      "SERVER_OPEN_DOMAIN_CATEGORY": "GENERAL_KNOWLEDGE",
+      "CLASS": "QWEN_ESSENTIAL"
+    }
+  ]
+}

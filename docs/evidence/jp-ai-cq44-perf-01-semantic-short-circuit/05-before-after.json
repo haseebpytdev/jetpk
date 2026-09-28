@@ -1,0 +1,22 @@
+{
+  "method": "CQ43 primary soak audit vs PERF-01 short-circuit policy + ScriptedInferenceProvider feature proof",
+  "BEFORE_QWEN_CALL_RATE": "10/42 primary SEMANTIC_BRAIN_CALLED travel/open-domain turns",
+  "AFTER_QWEN_CALL_RATE": "5/42 projected planner-essential classes remain; 5 unnecessary travel refinements bypassed (feature test: only destination-led consumes inference)",
+  "feature_test_proof": {
+    "destination_led_calls": 1,
+    "refinement_calls_after": 0,
+    "suite": "Cq44PerfDeterministicShortCircuitTest"
+  },
+  "BEFORE_SEMANTIC_P50_MS": 11185,
+  "BEFORE_SEMANTIC_P95_MS": 22542,
+  "AFTER_SEMANTIC_P50_MS": "N/A_REAL_QWEN_NOT_RERUN",
+  "AFTER_SEMANTIC_P95_MS": "N/A_REAL_QWEN_NOT_RERUN",
+  "BEFORE_TOTAL_P50_MS": 8006,
+  "BEFORE_TOTAL_P95_MS": 13150,
+  "AFTER_TOTAL_P50_MS": "N/A_REAL_QWEN_NOT_RERUN",
+  "AFTER_TOTAL_P95_MS": "N/A_REAL_QWEN_NOT_RERUN",
+  "TURNS_GT_20S_BEFORE": 1,
+  "TURNS_GT_20S_AFTER_PROJECTED": 0,
+  "TURNS_GT_30S_AFTER": 0,
+  "note": "Real-Qwen production re-soak deferred until review/deploy authorization. Deterministic scenarios now MODEL_CALLS=0 locally."
+}

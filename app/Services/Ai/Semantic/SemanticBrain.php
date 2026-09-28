@@ -93,6 +93,34 @@ final class SemanticBrain
             );
         }
 
+        // CQ44-PERF-01: skip Qwen when shared server authorities fully resolve a
+        // material refinement against active travel (hybrid remains authoritative).
+        $priorState = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        $deterministic = $this->travelSignals->deterministicAuthorityComplete($message, $priorState);
+        if (($deterministic['complete'] ?? false) === true) {
+            return [
+                'kind' => 'fallback',
+                'meta' => array_merge($baseMeta, [
+                    'SEMANTIC_BRAIN_CALLED' => 'NO',
+                    'SEMANTIC_PLANNER_BYPASSED' => 'YES',
+                    'DETERMINISTIC_AUTHORITY_COMPLETE' => 'YES',
+                    'DETERMINISTIC_AUTHORITY_CLASSES' => $deterministic['classes'] ?? [],
+                    'SEMANTIC_BRAIN_VALID' => 'N/A',
+                    'SEMANTIC_BRAIN_FALLBACK' => 'YES',
+                    'SEMANTIC_FALLBACK_REASON' => 'deterministic_authority_complete',
+                    'MODEL_ID' => (string) config('ota.ai_assistant.model_id', 'local'),
+                    'MODEL_CALLS' => 0,
+                    'SEMANTIC_LATENCY_MS' => 0,
+                    'COMPOSER_LATENCY_MS' => 0,
+                    'TOTAL_MODEL_LATENCY_MS' => 0,
+                    'FINAL_RESPONSE_SOURCE' => 'STRUCTURED_FALLBACK',
+                    'TOOL_EXECUTED' => 'NONE',
+                    'MODEL_CAN_AUTHORIZE_MUTATION' => 'NO',
+                    'LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK' => 0,
+                ]),
+            ];
+        }
+
         $planResult = $this->planner->plan($conversation, $message, $context);
         $calls = (int) ($planResult['calls'] ?? 0);
         $semanticLatency = (int) ($planResult['latency_ms'] ?? 0);

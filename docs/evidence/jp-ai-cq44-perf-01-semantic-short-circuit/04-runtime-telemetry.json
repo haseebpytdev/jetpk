@@ -1,0 +1,8 @@
+{
+  "MODEL_INFERENCE_TELEMETRY": "N/A",
+  "QUEUE_TELEMETRY": "N/A",
+  "COLD_WARM_TELEMETRY": "N/A",
+  "PROMPT_EVAL": "N/A",
+  "PHP_OVERHEAD": "Measured on CQ43 Qwen turns as total-semantic ≈ 15–160ms; not re-measured here",
+  "note": "PERF-01 eliminates avoidable model calls; runtime tuning deferred"
+}
