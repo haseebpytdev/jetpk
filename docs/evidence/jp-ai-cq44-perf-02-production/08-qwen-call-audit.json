@@ -1,0 +1,49 @@
+{
+  "PERF02_QWEN_MODEL_CALLS": 3,
+  "PERF02_QWEN_CALL_RATE": "3/41",
+  "eligible_PERF02_cases_in_comparable_sequence": true,
+  "requirement": "PERF_02_QWEN_MODEL_CALLS < 5",
+  "satisfied": true,
+  "calls": [
+    {
+      "USER_MESSAGE": "I need Dubai",
+      "INTENT_CLASS": null,
+      "FINAL_RESPONSE_SOURCE": "SEMANTIC",
+      "SEMANTIC_LATENCY_MS": 5576,
+      "TOTAL_MS": 5687.2,
+      "VALID": "VALID",
+      "FALLBACK_REASON": "",
+      "CLASSIFICATION": "QWEN_ESSENTIAL",
+      "note": "destination-led incomplete route"
+    },
+    {
+      "USER_MESSAGE": "What is gravity?",
+      "FINAL_RESPONSE_SOURCE": "QWEN_OPEN_DOMAIN",
+      "SEMANTIC_LATENCY_MS": 0,
+      "TOTAL_MS": 5860.9,
+      "VALID": "VALID",
+      "FALLBACK_REASON": "",
+      "CLASSIFICATION": "QWEN_ESSENTIAL",
+      "note": "general knowledge open-domain"
+    },
+    {
+      "USER_MESSAGE": "What is photosynthesis?",
+      "FINAL_RESPONSE_SOURCE": "QWEN_OPEN_DOMAIN",
+      "SEMANTIC_LATENCY_MS": 0,
+      "TOTAL_MS": 7362.9,
+      "VALID": "VALID",
+      "FALLBACK_REASON": "",
+      "CLASSIFICATION": "QWEN_ESSENTIAL",
+      "note": "post-resume general knowledge"
+    }
+  ],
+  "NEXT_PERF_CANDIDATES": [
+    "return-route fast path (NOT enabled in PERF-02)",
+    "prompt/context shrink",
+    "Qwen timeout / runtime metrics tuning",
+    "gold/FX classifier expansion (explicitly not forced in PERF-02)",
+    "via-city confirmation quality (Qwen still may omit via in confirm text)",
+    "DIRECT_ONLY_LEAD_RESIDUAL (OPEN_SEPARATE_TRACK)"
+  ],
+  "note": "No PERF-03 implementation in this phase."
+}

@@ -1,0 +1,42 @@
+{
+  "host": "https://jetpakistan.pk/",
+  "viewId": "ae8b76",
+  "BROWSER_TURNS": 16,
+  "BROWSER_CONTINUITY": "PASS",
+  "BROWSER_DUPLICATE_TURNS": 0,
+  "BROWSER_SILENT_TURNS": 0,
+  "SERVER_200_WIDGET_OMIT_COUNT": 0,
+  "CLIENT_PARSE_ERROR_COUNT": 0,
+  "coverage": [
+    "CURRENT bitcoin",
+    "fresh dated route LHE→DXB",
+    "route reset Now ISB→DXB",
+    "via Doha (semantic retained)",
+    "direct LHE→DXB",
+    "destination-led / progressive",
+    "Roman Urdu Islamabad se Dubai kal",
+    "GK gravity",
+    "CURRENT weather",
+    "booking detour",
+    "handoff Talk to support",
+    "Resume AI click"
+  ],
+  "turns": [
+    {"turn": 1, "user_message": "What is Bitcoin's price right now?", "assistant_reply": "I don't have an approved live market-data source available here, so I can't verify the current price.", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 2, "user_message": "back to my flight", "assistant_reply": "Just to confirm: ISB to DXB, one-way, 2026-10-05, economy class, 2 adults. Shall I search?", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 3, "user_message": "Lahore to Dubai next Monday", "assistant_reply": "Just to confirm: LHE to DXB, one-way, 2026-10-05, economy class, 2 adults. Shall I search?", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 4, "user_message": "Now Islamabad to Dubai next Monday", "assistant_reply": "Just to confirm: ISB to DXB, one-way, 2026-10-05, economy class, 2 adults. Shall I search?", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 5, "user_message": "Lahore to Dubai via Doha next Monday", "assistant_reply": "Just to confirm: LHE to DXB, one-way, 2026-10-05, economy class, 2 adults. Shall I search?", "silent_turn": false, "duplicate_bubbles": false, "note": "fast path blocked; Qwen confirm omits via wording (pre-existing)"},
+    {"turn": 6, "user_message": "Lahore to Dubai direct next Monday", "assistant_reply": "Just to confirm: LHE to DXB, one-way, 2026-10-05, economy class, 2 adults. Shall I search?", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 7, "user_message": "I need Dubai", "assistant_reply": "Just to confirm: LHE to DXB, one-way, 2026-10-05, economy class, 2 adults. Shall I search?", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 8, "user_message": "from Lahore", "assistant_reply": "Just to confirm: LHE to DXB, one-way, 2026-10-05, economy class, 2 adults. Shall I search?", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 9, "user_message": "next Friday", "assistant_reply": "Just to confirm: LHE to DXB, one-way, 2026-10-02, economy class, 2 adults. Shall I search?", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 10, "user_message": "Islamabad se Dubai kal", "assistant_reply": "Just to confirm: ISB to DXB, one-way, 2026-09-29, economy class, 2 adults. Shall I search?", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 11, "user_message": "What is gravity?", "assistant_reply": "Gravity is the force that pulls objects toward the center of a mass.", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 12, "user_message": "What's the weather in Dubai right now?", "assistant_reply": "I don't have an approved live weather source available here, so I can't verify the current conditions.", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 13, "user_message": "Check my booking", "assistant_reply": "Of course — I can help you check a booking. Please send your booking reference and the email or phone number used when you booked.", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 14, "user_message": "Talk to support", "assistant_reply": "I have connected you with our support queue...", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 15, "user_message": "back to my Dubai search", "assistant_reply": "Your message was sent to our support team. An agent will reply here shortly.", "silent_turn": false, "duplicate_bubbles": false},
+    {"turn": 16, "action": "Resume AI", "note": "Resume AI control clicked; in-proc comparable Resume AI=PASS is authoritative for handoff/resume semantics"}
+  ]
+}

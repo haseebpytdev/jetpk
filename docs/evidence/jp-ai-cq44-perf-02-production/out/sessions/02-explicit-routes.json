@@ -1,0 +1,52 @@
+{
+    "ISB_DXB": {
+        "MODEL_CALLS": 0,
+        "TOTAL_MS": 56.4,
+        "origin": "ISB",
+        "destination": "DXB",
+        "depart_date": "2026-10-05",
+        "classes": [
+            "explicit_route_complete"
+        ]
+    },
+    "LHE_DXB": {
+        "MODEL_CALLS": 0,
+        "TOTAL_MS": 46.7,
+        "origin": "LHE",
+        "destination": "DXB",
+        "depart_date": "2026-10-05",
+        "classes": [
+            "explicit_route_complete"
+        ]
+    },
+    "KHI_JED": {
+        "MODEL_CALLS": 0,
+        "TOTAL_MS": 51.3,
+        "origin": "KHI",
+        "destination": "JED",
+        "depart_date": "2026-09-29",
+        "classes": [
+            "explicit_route_complete"
+        ]
+    },
+    "DXB_LHE": {
+        "MODEL_CALLS": 0,
+        "TOTAL_MS": 45.5,
+        "origin": "DXB",
+        "destination": "LHE",
+        "depart_date": "2026-09-29",
+        "classes": [
+            "explicit_route_complete"
+        ]
+    },
+    "RU_ISB_DXB": {
+        "MODEL_CALLS": 0,
+        "TOTAL_MS": 44.8,
+        "origin": "ISB",
+        "destination": "DXB",
+        "depart_date": "2026-09-29",
+        "classes": [
+            "explicit_route_complete"
+        ]
+    }
+}

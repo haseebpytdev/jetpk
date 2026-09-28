@@ -1,0 +1,44 @@
+{
+  "CURRENT_DETERMINISTIC_FAST_PATH": "PASS",
+  "runtime_sha": "9901f285e06c85f550191307ef29c9298904a32c",
+  "bitcoin": {
+    "message": "What is Bitcoin's price right now?",
+    "status": "ok",
+    "MODEL_CALLS": 0,
+    "SEMANTIC_BRAIN_CALLED": "NO",
+    "SEMANTIC_PLANNER_BYPASSED": "YES",
+    "FINAL_RESPONSE_SOURCE": "DETERMINISTIC_CURRENT_UNVERIFIED",
+    "SERVER_OPEN_DOMAIN_CATEGORY": "CURRENT_UNVERIFIED",
+    "CURRENT_TOPIC": "market",
+    "HALLUCINATED_LIVE_FACT": "NO",
+    "BITCOIN_TOTAL_MS": 110.6,
+    "message_preview": "I don't have an approved live market-data source available here, so I can't verify the current price."
+  },
+  "weather": {
+    "message": "What's the weather in Dubai right now?",
+    "MODEL_CALLS": 0,
+    "CURRENT_TOPIC": "weather",
+    "FINAL_RESPONSE_SOURCE": "DETERMINISTIC_CURRENT_UNVERIFIED",
+    "HALLUCINATED_LIVE_FACT": "NO",
+    "WEATHER_TOTAL_MS": 46.8
+  },
+  "mid_trip": {
+    "CURRENT_MID_TRIP": "PASS",
+    "TRAVEL_STATE_PRESERVED_AFTER_CURRENT": "PASS",
+    "bitcoin_calls": 0
+  },
+  "controls": {
+    "GOLD_CLASSIFICATION_NON_REGRESSION": "PASS",
+    "gold_forced_into_deterministic_current": "NO",
+    "FX_CLASSIFICATION_NON_REGRESSION": "PASS",
+    "fx_forced_into_deterministic_current": "NO",
+    "GENERAL_KNOWLEDGE_QWEN": "PASS"
+  },
+  "CURRENT_QWEN_TAX_REMOVED": "PASS",
+  "diagnostic_compare": {
+    "primary_CURRENT_p50_ms": 4506,
+    "combined_CURRENT_p50_ms": 4177,
+    "historical_primary_outlier_ms": 27176,
+    "production_bitcoin_ms": 110.6
+  }
+}

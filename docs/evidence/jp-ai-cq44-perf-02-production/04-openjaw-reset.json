@@ -1,0 +1,19 @@
+{
+  "EXPLICIT_ROUTE_AFTER_OPEN_JAW": "PASS",
+  "OPEN_JAW_TO_ONEWAY_RESET": "PASS",
+  "seed": {
+    "trip_type": "open_jaw",
+    "origin": "LHE",
+    "destination": "JED",
+    "legs": 2
+  },
+  "after": {
+    "message": "Now Islamabad to Dubai next Monday",
+    "MODEL_CALLS": 0,
+    "origin": "ISB",
+    "destination": "DXB",
+    "trip_type": "one_way",
+    "stale_legs_cleared": true,
+    "stale_return_cleared": true
+  }
+}

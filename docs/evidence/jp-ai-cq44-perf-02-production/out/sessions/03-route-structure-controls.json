@@ -1,0 +1,23 @@
+{
+    "VIA_ROUTE_FAST_PATH": {
+        "MODEL_CALLS": 1,
+        "classes": [],
+        "origin": "LHE",
+        "destination": "DXB",
+        "message_preview": "Just to confirm: LHE to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"
+    },
+    "IATA_VIA_ROUTE_FAST_PATH": {
+        "MODEL_CALLS": 1,
+        "classes": [],
+        "origin": "LHE",
+        "destination": "DXB",
+        "message_preview": "Just to confirm: LHE to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"
+    },
+    "THROUGH_ROUTE_FAST_PATH": {
+        "MODEL_CALLS": 1,
+        "classes": [],
+        "origin": "LHE",
+        "destination": "DXB",
+        "message_preview": "Just to confirm: LHE to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"
+    }
+}
