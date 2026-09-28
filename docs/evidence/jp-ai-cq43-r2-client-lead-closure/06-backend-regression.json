@@ -1,8 +1,8 @@
 {
-  "BACKEND_TESTS_TOTAL": 129,
-  "BACKEND_TESTS_PASS": 129,
+  "BACKEND_TESTS_TOTAL": 121,
+  "BACKEND_TESTS_PASS": 121,
   "BACKEND_TESTS_FAIL": 0,
-  "BACKEND_ASSERTIONS": 1260,
+  "BACKEND_ASSERTIONS": 1192,
   "suites": {
     "Cq43R1ProgressiveConversationAuthorityTest": "PASS",
     "Cq43R2ClientLeadClosureTest": "PASS (8)",
