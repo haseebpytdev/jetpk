@@ -109,7 +109,7 @@ Revert the application PR / redeploy prior SHA `e5640c10` (or post-#41 main with
 
 ## Commit SHA
 
-(filled after commit)
+`6a8afd7ef829e198e3201e4bc5240040abd6a3ed`
 
 ## Final status
 
