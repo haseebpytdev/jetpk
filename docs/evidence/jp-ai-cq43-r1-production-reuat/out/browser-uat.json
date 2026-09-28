@@ -1,0 +1,50 @@
+{
+  "host": "https://jetpakistan.pk/",
+  "conversation_id": "8862be81-eb17-450a-8275-97c6cb92e94e",
+  "turns_executed": 13,
+  "BROWSER_THINKING_STATE": "PASS",
+  "BROWSER_CONTINUITY": "PASS",
+  "BROWSER_NETWORK_ERROR_REPRODUCED": "NO",
+  "BROWSER_NETWORK_ERROR_CLASSIFICATION": null,
+  "busy_input_observed": true,
+  "thinking_indicator_observed": true,
+  "duplicate_responses_observed": false,
+  "http_chat_statuses": [200],
+  "fetch_errors": [],
+  "progressive_ui_summary": {
+    "I need Dubai": "asked date for DXB (no name hijack)",
+    "from Lahore": "LHE to DXB",
+    "next Friday": "confirm LHE→DXB 2026-10-02",
+    "2 adults": "adults=2",
+    "economy": "cabin=economy",
+    "Make it Doha": "LHE→DOH",
+    "actually Dubai again": "UI omit assistant bubble once; next confirm shows DXB",
+    "3 adults": "adults=3 DXB",
+    "business class": "cabin=business",
+    "Check my booking": "asks reference+email/phone",
+    "back to my Dubai search": "LHE→DXB business 3 adults pending confirm restored",
+    "What is gravity?": "GENERAL_KNOWLEDGE gravity explanation",
+    "Talk to support": "WAITING_FOR_HUMAN + Resume AI control"
+  },
+  "prior_stale_conversation_residual": {
+    "conversation_id": "48645916-415e-43fd-9254-aa5566d99de4",
+    "user": "I need Dubai",
+    "assistant_stored_id": 5642,
+    "assistant_stored_body": "Just to confirm: LHE to DXB, one-way, 2026-10-02, 2 adults. Shall I search?",
+    "ui_rendered": false,
+    "chat_http": 200,
+    "classification": "CLIENT_PARSE_ERROR",
+    "note": "Reply stored server-side; widget did not render. Distinct from Network error. Please retry."
+  },
+  "resume_ai_browser": {
+    "result": "RATE_LIMITED",
+    "ui": "Too many requests. Please try again later.",
+    "state_remained": "WAITING_FOR_HUMAN",
+    "inproc_handoff_resume": "PASS"
+  },
+  "residuals": [
+    "Intermittent client non-render of stored assistant reply (CLIENT_PARSE_ERROR)",
+    "Destination-led start asked departure date before origin in UI (in-proc asks origin first)",
+    "Resume AI hit human-paced rate limit after rapid browser turns"
+  ]
+}

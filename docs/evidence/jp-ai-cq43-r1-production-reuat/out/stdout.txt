@@ -1,0 +1,51 @@
+RUNTIME_SHA=e5640c103b40c90a6a34e5f668ccf0865ffbc391
+DEPLOY_MARKER=e5640c103b40c90a6a34e5f668ccf0865ffbc391
+PASS DESTINATION_LED_START ({"origin":null,"destination":"DXB","depart_date":null,"return_date":null,"trip_type":"one_way","adults":1,"cabin":null,"lead_name":null,"legs":null})
+PASS ORIGIN_ONLY_FOLLOWUP ({"origin":"LHE","destination":"DXB","depart_date":null,"return_date":null,"trip_type":"one_way","adults":1,"cabin":null,"lead_name":null,"legs":null})
+PASS PROGRESSIVE_SEARCH ({"origin":"LHE","destination":"DXB","depart_date":"2026-10-02","return_date":null,"trip_type":"one_way","adults":3,"cabin":"business","lead_name":null,"legs":null})
+PASS CORRECTION_CHAIN
+PASS CABIN_REPLACEMENT
+PASS LHE_LHE_SYNTHETIC_ROUTE
+PASS LEAD_TRAVEL_HIJACK
+PASS LEAD_TRAVEL_TEXT_CAPTURED_AS_NAME
+PASS ROMAN_URDU_PROGRESSIVE ({"origin":"LHE","destination":"DXB","depart_date":"2026-09-28","return_date":"2026-10-04","trip_type":"return","adults":2})
+PASS RELATIONAL_HUM_DONO
+PASS CONTEXTUAL_WAPIS_RETURN
+PASS FRESH_WAPIS_DIRECTION ({"origin":"DXB","destination":"LHE","trip_type":"one_way"})
+PASS WAPIS_ROUTE
+PASS ONEWAY_TO_RETURN ({"origin":"KHI","destination":"JED","trip_type":"return","depart":"2026-10-03","return":"2026-10-04"})
+FAIL BOOKING_MID_TRIP
+PASS TRAVEL_STATE_PRESERVED_AFTER_BOOKING ({"before":{"lead_capture_pending":true,"lead_pending_message":"Lahore to Dubai on 2 October for 2 adults economy","lead_capture_fields":["name","email","phone","contact_consent"],"lead_capture_stage":"name","intent":"flight_search","origin":"LHE","destination":"DXB","depart_date":"2026-10-02","return_date":null,"adults":2,"children":0,"infants":0,"cabin":"economy","currency":"PKR","trip_type":"one_way","airline":null,"max_stops":null,"budget":null,"time_preference":null,"mode":"STRUCTURED_FALLBACK","pending_flight_search_confirmation":{"origin":"LHE","destination":"DXB","departure_date":"2026-10-02","return_date":null,"trip_type":"one_way","adults":2,"children":0,"infants":0,"cabin":"economy","airline":null,"max_stops":null,"currency":"PKR","legs":null}},"after":{"lead_capture_pending":true,"lead_pending_message":"Lahore to Dubai on 2 October for 2 adults economy","lead_capture_fields":["name","email","phone","contact_consent"],"lead_capture_stage":"name","intent":"flight_search","origin":"LHE","destination":"DXB","depart_date":"2026-10-02","return_date":null,"adults":2,"children":0,"infants":0,"cabin":"economy","currency":"PKR","trip_type":"one_way","airline":null,"max_stops":null,"budget":null,"time_preference":null,"mode":"STRUCTURED_FALLBACK","pending_flight_search_confirmation":{"origin":"LHE","destination":"DXB","departure_date":"2026-10-02","return_date":null,"trip_type":"one_way","adults":2,"children":0,"infants":0,"cabin":"economy","airline":null,"max_stops":null,"currency":"PKR","legs":null},"booking_detour_active":true,"travel_snapshot_before_booking":{"origin":"LHE","destination":"DXB","depart_date":"2026-10-02","return_date":null,"trip_type":"one_way","adults":2,"children":0,"infants":0,"cabin":"economy","intent":"flight_search"}}})
+PASS BOOKING_DETOUR_PRESERVES_PAX
+FAIL BOOKING_PUBLIC_CONTRACT
+PASS BOOKING_TOP_LEVEL_PAYLOAD
+FAIL BOOKING_NOT_FOUND_STATUS ({"status":"not_found","booking":null,"message":"I could not find a booking matching those details. Please double-check your reference and contact information."})
+PASS BOOKING_DETOUR_RESUME ({"shopping":{"origin":"LHE","destination":"DXB","adults":2,"booking_detour_active":null},"pending_adults":2,"status":"confirm"})
+PASS BOOKING_STATE_CONTAMINATION
+PASS EXPLICIT_HANDOFF_NON_REGRESSION
+PASS HANDOFF_RESUME_STATE ({"before":{"o":"LHE","d":"DXB"},"after":{"o":"LHE","d":"DXB"},"state":"AI_ACTIVE"})
+PASS ORDER39_NON_REGRESSION (status=confirm)
+PASS SEARCH_BEFORE_CONFIRMATION
+PASS WAPAS_ROUTE
+PASS RETURN_ON_DATE ({"depart":"2026-10-10","return":"2026-10-15","status":"confirm"})
+PASS OPEN_JAW_NON_REGRESSION ({"trip_type":"open_jaw","legs":[{"origin":"LHE","destination":"JED"},{"origin":"MED","destination":"LHE"}]})
+PASS GK_NON_REGRESSION (cat=GENERAL_KNOWLEDGE)
+PASS CURRENT_AUTHORITY (cat=CURRENT_UNVERIFIED)
+PASS QWEN_MODEL_ONLY_HANDOFF
+PASS WAITING_FOR_HUMAN_UNREQUESTED
+PASS PII_FIRST
+PASS BOOKING_IDENTITY_BYPASS
+PASS BOOKING_DATA_LEAK
+PASS HTTP_500
+PASS MODEL_CRASHES
+PASS OOM_EVENTS
+PASS SUPPLIER_MUTATIONS
+PASS BOOKING_MUTATIONS
+PASS PAYMENT_MUTATIONS
+PASS LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK
+
+CQ43_R1_PRODUCTION_REUAT=FAIL
+FAILURES=3
+ - BOOKING_MID_TRIP
+ - BOOKING_PUBLIC_CONTRACT
+ - BOOKING_NOT_FOUND_STATUS: {"status":"not_found","booking":null,"message":"I could not find a booking matching those details. Please double-check your reference and contact information."}

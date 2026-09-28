@@ -1,0 +1,13 @@
+{
+  "CLIENT_PARSE_ERROR_COUNT": 12,
+  "SERVER_200_WIDGET_OMIT_COUNT": 12,
+  "classification": "POLL_RACE_OR_CLIENT_RESPONSE_SHAPE",
+  "reproducible": true,
+  "network_error_string": false,
+  "notes": [
+    "Assistant replies present via /messages poll while UI bubble missing or delayed",
+    "Prior focused re-UAT residual confirmed again",
+    "Sticky conversation_id after hard navigate if widget already mounted state"
+  ],
+  "do_not_patch_in_this_phase": true
+}

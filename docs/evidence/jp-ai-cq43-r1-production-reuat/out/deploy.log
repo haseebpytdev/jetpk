@@ -1,0 +1,80 @@
+BACKUP_PATH=/home/pkjetp/backups/jetpk-ai-runtime-20260927T104614Z
+RELEASE_PATH=/home/pkjetp/releases/jetpk-ai-runtime-e5640c103b40c90a6a34e5f668ccf0865ffbc391-20260927T104614Z
+AUTHORIZED_SHA=e5640c103b40c90a6a34e5f668ccf0865ffbc391
+CURRENT_DEPLOYED_SHA=83f24c145407fe16008efcb96cdea1b2ac34bfcf
+CHANGED_PATH_COUNT=12
+DEPLOYED app/Services/Ai/Semantic/SemanticBrain.php
+DEPLOYED app/Services/Ai/Semantic/SemanticPlanValidator.php
+DEPLOYED app/Services/Ai/TravelIntentExtractor.php
+DEPLOYED app/Services/Ai/ConversationIntentRouter.php
+DEPLOYED app/Services/Ai/CustomerQueryLeadService.php
+DEPLOYED app/Services/Ai/Hybrid/HybridTravelPipeline.php
+DEPLOYED app/Services/Ai/Hybrid/DateExpressionResolver.php
+DEPLOYED app/Services/Ai/Hybrid/PassengerExpressionResolver.php
+DEPLOYED app/Services/Ai/Hybrid/ClarificationBuilder.php
+DEPLOYED app/Services/Ai/Hybrid/ServerTravelSignals.php
+DEPLOYED app/Services/Ai/Hybrid/LocationResolver.php
+DEPLOYED app/Services/Ai/AiChatOrchestrator.php
+DEPLOYED_FILE_COUNT=12
+NORMALIZED=storage
+NORMALIZED=storage/framework
+NORMALIZED=storage/framework/cache
+NORMALIZED=storage/framework/cache/data
+NORMALIZED=storage/framework/views
+NORMALIZED=storage/framework/sessions
+NORMALIZED=storage/logs
+NORMALIZED=bootstrap/cache
+RUNTIME_OWNER_EXPECTED=pkjetp:pkjetp
+APP_ROOT=/home/pkjetp/jetpk_app
+MODE=normalize
+TOTAL_FILES=5737
+ROOT_OWNED_RUNTIME_FILES=0
+NON_PKJETP_RUNTIME_FILES=0
+NON_WRITABLE_DIRS=0
+RUNTIME_WRITABLE_AS_PKJETP=PASS
+RUNTIME_OWNERSHIP_GATE=PASS
+RUNTIME_OWNERSHIP_ASSERT_COMPLETE
+Generating optimized autoload files
+
+  [37;44m INFO [39;49m Discovering packages.  
+
+  barryvdh/laravel-dompdf [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  laravel/socialite [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  laravel/tinker [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  nesbot/carbon [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  nunomaduro/termwind [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+
+Generated optimized autoload files containing 7389 classes
+
+   INFO  Nothing to migrate.  
+
+
+   INFO  Clearing cached bootstrap files.  
+
+  config ......................................................... 2.92ms DONE
+  cache ......................................................... 10.60ms DONE
+  compiled ....................................................... 2.01ms DONE
+  events ......................................................... 1.77ms DONE
+  routes ......................................................... 1.75ms DONE
+  views ......................................................... 41.40ms DONE
+
+
+   INFO  Configuration cached successfully.  
+
+
+   INFO  Route cache cleared successfully.  
+
+
+
+   INFO  Blade templates cached successfully.  
+
+RUNTIME_SHA=e5640c103b40c90a6a34e5f668ccf0865ffbc391
+PUBLIC_ASSET_PUBLISH=SKIP
+PUBLIC_ASSET_PUBLISH_REASON=no_embed_assets_in_change_set
+EMBED_DEPLOY_STATUS=SKIP
+DEPLOY_COMPONENT_APPLIED=YES
+DEPLOY_SHA_MARKER_WRITTEN=e5640c103b40c90a6a34e5f668ccf0865ffbc391
+DEPLOY_SHA_MARKER_PATH=/home/pkjetp/jetpk_app/storage/app/deploy-sha.txt
+DEPLOY_SHA_MARKER=PASS
+FINAL_DEPLOY_STATUS=PASS
+PROTECTED_AI_DEPLOY=PASS

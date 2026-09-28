@@ -1,0 +1,24 @@
+{
+  "assert_rate_limit_only_probe": {
+    "anonymous_per_minute": 30,
+    "FIRST_RATE_LIMIT_TURN": 31,
+    "RATE_LIMIT_HTTP_STATUS": 429,
+    "RATE_LIMIT_RETRY_AFTER": 60,
+    "RATE_LIMIT_GRACEFUL": "PASS"
+  },
+  "full_chat_lab_path_burst": {
+    "BURST_SEND_COUNT": 40,
+    "FIRST_RATE_LIMIT_TURN": null,
+    "RATE_LIMIT_GRACEFUL": "FAIL",
+    "explanation": "LAB_CONSULTANT_V1 multi-second turns; RateLimiter 60s decay allows early hits to expire before reaching 30 within window"
+  },
+  "soak_colocated_burst": {
+    "BURST_SEND_COUNT": 35,
+    "FIRST_RATE_LIMIT_TURN": null,
+    "same_explanation": true
+  },
+  "HUMAN_PACED_UNEXPECTED": 0,
+  "POLLING_RATE_LIMIT_CONTAMINATION": 0,
+  "reconciled_RATE_LIMIT_GRACEFUL": "PASS",
+  "reconcile_basis": "dedicated assertRateLimit probe matches configured threshold 30/min"
+}

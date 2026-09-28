@@ -1,0 +1,10 @@
+ota.ai_assistant.conversational_enabled=true
+ota.ai_assistant.semantic_planner_enabled=true
+ota.ai_assistant.semantic_composer_enabled=false
+ai_embed.enabled=false
+ota.ai_assistant.enabled=true
+ota.ai_assistant.mode="public"
+effective.runtime_on=true
+effective.audience_mode="public"
+brain_enabled=true
+RUNTIME_SHA=e5640c103b40c90a6a34e5f668ccf0865ffbc391

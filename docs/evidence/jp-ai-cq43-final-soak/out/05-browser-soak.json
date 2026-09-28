@@ -1,0 +1,14 @@
+{
+  "BROWSER_TURNS": 15,
+  "BROWSER_THINKING_STATE": "PASS",
+  "BROWSER_INPUT_BUSY_STATE": "PASS",
+  "BROWSER_DUPLICATE_TURNS": 0,
+  "BROWSER_SILENT_TURNS": 12,
+  "BROWSER_CONTINUITY": "FAIL",
+  "note": "Fresh navigate often reattached prior sessionStorage cid 8862be81; many turns stored server-side (HTTP 200) while widget omitted or delayed bubbles. Thinking/busy observed on open-domain turns.",
+  "CLIENT_PARSE_ERROR_COUNT": 12,
+  "SERVER_200_WIDGET_OMIT_COUNT": 12,
+  "CLIENT_PARSE_CLASSIFICATION": "POLL_RACE_OR_CLIENT_RESPONSE_SHAPE",
+  "NETWORK_ERROR_PLEASE_RETRY": "NO",
+  "RESUME_AI_CLICKED": true
+}
