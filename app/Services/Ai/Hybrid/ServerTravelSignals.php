@@ -167,6 +167,22 @@ final class ServerTravelSignals
             return ['complete' => false, 'reason' => 'open_jaw_multi_leg', 'classes' => [], 'authority' => $authority];
         }
 
+        // CQ44-PERF-01.1: prior open-jaw / multi-leg state makes bare refinements
+        // ambiguous (which leg?). Keep Qwen — do not short-circuit.
+        $priorLegs = is_array($priorState) ? ($priorState['legs'] ?? null) : null;
+        $priorMultiLeg = is_array($priorState) && (
+            ($priorState['trip_type'] ?? null) === 'open_jaw'
+            || (is_array($priorLegs) && count($priorLegs) >= 2)
+        );
+        if ($priorMultiLeg) {
+            return [
+                'complete' => false,
+                'reason' => 'prior_multi_leg_requires_semantic',
+                'classes' => [],
+                'authority' => $authority,
+            ];
+        }
+
         if (! empty($authority['origin_ambiguous']) || ! empty($authority['dest_ambiguous'])) {
             return ['complete' => false, 'reason' => 'ambiguous_location', 'classes' => [], 'authority' => $authority];
         }

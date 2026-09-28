@@ -90,6 +90,7 @@ class ServerTravelSignalsDeterministicAuthorityTest extends TestCase
             'destination' => 'DXB',
             'depart_date' => '2026-10-02',
             'intent' => 'flight_search',
+            'trip_type' => 'one_way',
         ];
 
         $ret = $signals->deterministicAuthorityComplete('wapis Sunday', $prior);
@@ -109,5 +110,71 @@ class ServerTravelSignalsDeterministicAuthorityTest extends TestCase
         );
         $this->assertFalse($route['complete']);
         $this->assertSame('explicit_route_keep_qwen', $route['reason']);
+    }
+
+    public function test_prior_open_jaw_blocks_bare_refinement_short_circuit(): void
+    {
+        $signals = app(ServerTravelSignals::class);
+        $prior = [
+            'origin' => 'LHE',
+            'destination' => 'JED',
+            'intent' => 'flight_search',
+            'trip_type' => 'open_jaw',
+            'depart_date' => '2026-10-02',
+            'legs' => [
+                ['origin' => 'LHE', 'destination' => 'JED', 'departure_date' => '2026-10-02'],
+                ['origin' => 'MED', 'destination' => 'LHE', 'departure_date' => null],
+            ],
+        ];
+
+        foreach (['next Friday', 'from Lahore', 'Make it Doha', 'wapis Sunday'] as $msg) {
+            $r = $signals->deterministicAuthorityComplete($msg, $prior);
+            $this->assertFalse($r['complete'], "Expected incomplete for prior multi-leg: {$msg}");
+            $this->assertSame(
+                'prior_multi_leg_requires_semantic',
+                $r['reason'],
+                "Expected prior_multi_leg_requires_semantic for: {$msg}"
+            );
+        }
+    }
+
+    public function test_prior_legs_count_alone_blocks_short_circuit(): void
+    {
+        $signals = app(ServerTravelSignals::class);
+        $prior = [
+            'origin' => 'LHE',
+            'destination' => 'JED',
+            'intent' => 'flight_search',
+            // trip_type may be missing/stale; legs>=2 is enough.
+            'trip_type' => 'one_way',
+            'legs' => [
+                ['origin' => 'LHE', 'destination' => 'JED'],
+                ['origin' => 'MED', 'destination' => 'LHE'],
+            ],
+        ];
+
+        $r = $signals->deterministicAuthorityComplete('next Friday', $prior);
+        $this->assertFalse($r['complete']);
+        $this->assertSame('prior_multi_leg_requires_semantic', $r['reason']);
+    }
+
+    public function test_simple_return_trip_type_still_allows_contextual_date(): void
+    {
+        $signals = app(ServerTravelSignals::class);
+        $prior = [
+            'origin' => 'LHE',
+            'destination' => 'DXB',
+            'depart_date' => '2026-10-02',
+            'intent' => 'flight_search',
+            'trip_type' => 'return',
+            'legs' => [
+                ['origin' => 'LHE', 'destination' => 'DXB', 'departure_date' => '2026-10-02'],
+            ],
+        ];
+
+        $ret = $signals->deterministicAuthorityComplete('wapis Sunday', $prior);
+        $this->assertTrue($ret['complete']);
+        $this->assertContains('return_refinement', $ret['classes']);
+        $this->assertNotSame('prior_multi_leg_requires_semantic', $ret['reason']);
     }
 }

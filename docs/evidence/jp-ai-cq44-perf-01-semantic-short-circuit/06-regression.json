@@ -1,12 +1,14 @@
 {
-  "BACKEND_TESTS_TOTAL": 144,
-  "BACKEND_TESTS_PASS": 144,
+  "BACKEND_TESTS_TOTAL": 149,
+  "BACKEND_TESTS_PASS": 149,
   "BACKEND_TESTS_FAIL": 0,
-  "BACKEND_ASSERTIONS": 1402,
+  "BACKEND_ASSERTIONS": 1424,
+  "PERF_01_1": true,
   "ARTIFACTS": [
     "phpunit-out.txt",
     "frontend-continuity-out.txt",
-    "frontend-typecheck-out.txt"
+    "frontend-typecheck-out.txt",
+    "09-perf-01-1-prior-multi-leg.md"
   ],
   "suites": [
     "Cq43R1ProgressiveConversationAuthorityTest",
@@ -27,6 +29,7 @@
   "FRONTEND_CONTINUITY": "PASS (11/11)",
   "FRONTEND_TYPECHECK": "PASS",
   "CLIENT_MESSAGE_IDENTITY": "PASS",
+  "PRIOR_MULTI_LEG_SHORT_CIRCUIT_GUARD": "PASS",
   "CERTIFIED_BEHAVIOR_REGRESSION": 0,
   "safety": {
     "SEARCH_BEFORE_CONFIRMATION": 0,

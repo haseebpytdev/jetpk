@@ -1,10 +1,13 @@
 {
   "method": "CQ43 primary soak audit vs PERF-01 short-circuit policy + ScriptedInferenceProvider feature proof",
   "BEFORE_QWEN_CALL_RATE": "10/42 primary SEMANTIC_BRAIN_CALLED travel/open-domain turns",
-  "AFTER_QWEN_CALL_RATE": "5/42 projected planner-essential classes remain; 5 unnecessary travel refinements bypassed (feature test: only destination-led consumes inference)",
+  "AFTER_QWEN_CALL_RATE": "PROJECTED: simple one-way/return refinements bypass; prior multi-leg/open-jaw refinements keep Qwen (PERF-01.1); original CQ43 10-call audit sample unchanged",
   "feature_test_proof": {
     "destination_led_calls": 1,
     "refinement_calls_after": 0,
+    "prior_open_jaw_date_qwen": "callCount increases",
+    "prior_open_jaw_refinement_qwen": "callCount increases",
+    "simple_return_contextual_date_bypass": "callCount unchanged",
     "suite": "Cq44PerfDeterministicShortCircuitTest"
   },
   "BEFORE_SEMANTIC_P50_MS": 11185,

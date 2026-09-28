@@ -225,4 +225,147 @@ class Cq44PerfDeterministicShortCircuitTest extends TestCase
         $this->assertNotSame('', trim((string) $gk['json']['message']));
         $this->assertGreaterThanOrEqual($beforeGk, $provider->callCount());
     }
+
+    public function test_prior_open_jaw_refinements_still_call_qwen(): void
+    {
+        $this->enableSemanticAi();
+        $provider = new ScriptedInferenceProvider([
+            $this->planJson([
+                'operation' => 'clarify',
+                'travel' => [
+                    'trip_type' => 'open_jaw',
+                    'origin' => 'LHE',
+                    'destination' => 'JED',
+                    'legs' => [
+                        ['origin' => 'LHE', 'destination' => 'JED', 'departure_date' => '2026-10-02'],
+                        ['origin' => 'MED', 'destination' => 'LHE', 'departure_date' => null],
+                    ],
+                ],
+                'missing' => [],
+                'response_intent' => 'confirm_details',
+            ]),
+            $this->planJson([
+                'operation' => 'clarify',
+                'travel' => [
+                    'trip_type' => 'open_jaw',
+                    'origin' => 'LHE',
+                    'destination' => 'JED',
+                    'legs' => [
+                        ['origin' => 'LHE', 'destination' => 'JED', 'departure_date' => '2026-10-09'],
+                        ['origin' => 'MED', 'destination' => 'LHE', 'departure_date' => null],
+                    ],
+                ],
+                'missing' => [],
+                'response_intent' => 'confirm_details',
+            ]),
+            $this->planJson([
+                'operation' => 'clarify',
+                'travel' => [
+                    'trip_type' => 'open_jaw',
+                    'origin' => 'LHE',
+                    'destination' => 'DOH',
+                    'legs' => [
+                        ['origin' => 'LHE', 'destination' => 'DOH', 'departure_date' => '2026-10-09'],
+                        ['origin' => 'MED', 'destination' => 'LHE', 'departure_date' => null],
+                    ],
+                ],
+                'missing' => [],
+                'response_intent' => 'confirm_details',
+            ]),
+        ]);
+        $this->rebindInference($provider);
+
+        $vid = str_repeat('cq44oj', 8);
+        $t1 = $this->chat($vid, 'Lahore to Jeddah then Medina to Lahore', null);
+        $t1['response']->assertOk();
+        $cid = $t1['conversation_id'];
+
+        $conv = AiConversation::query()->where('public_id', $cid)->firstOrFail();
+        $state = is_array($conv->shopping_state) ? $conv->shopping_state : [];
+        $state['trip_type'] = 'open_jaw';
+        $state['origin'] = 'LHE';
+        $state['destination'] = 'JED';
+        $state['intent'] = 'flight_search';
+        $state['depart_date'] = '2026-10-02';
+        $state['legs'] = [
+            ['origin' => 'LHE', 'destination' => 'JED', 'departure_date' => '2026-10-02'],
+            ['origin' => 'MED', 'destination' => 'LHE', 'departure_date' => null],
+        ];
+        $conv->shopping_state = $state;
+        $conv->save();
+
+        $beforeDate = $provider->callCount();
+        $date = $this->chat($vid, 'next Friday', $cid);
+        $date['response']->assertOk();
+        $this->assertGreaterThan(
+            $beforeDate,
+            $provider->callCount(),
+            'PRIOR_OPEN_JAW_DATE_QWEN: prior multi-leg date refinement must call Qwen'
+        );
+
+        $beforeRef = $provider->callCount();
+        $ref = $this->chat($vid, 'Make it Doha', $cid);
+        $ref['response']->assertOk();
+        $this->assertGreaterThan(
+            $beforeRef,
+            $provider->callCount(),
+            'PRIOR_OPEN_JAW_REFINEMENT_QWEN: prior multi-leg dest refinement must call Qwen'
+        );
+    }
+
+    public function test_simple_return_contextual_date_bypasses_qwen(): void
+    {
+        $this->enableSemanticAi();
+        $provider = new ScriptedInferenceProvider([
+            $this->planJson([
+                'travel' => [
+                    'trip_type' => 'return',
+                    'origin' => 'LHE',
+                    'destination' => 'DXB',
+                    'legs' => [
+                        ['origin' => 'LHE', 'destination' => 'DXB', 'departure_date' => '2026-10-02'],
+                    ],
+                    'return_date' => null,
+                    'adults' => 1,
+                ],
+                'missing' => [],
+                'response_intent' => 'confirm_details',
+            ]),
+            $this->planJson(), // must NOT be consumed by contextual return
+        ]);
+        $this->rebindInference($provider);
+
+        $vid = str_repeat('cq44rt', 8);
+        $t1 = $this->chat($vid, 'I need Dubai', null);
+        $t1['response']->assertOk();
+        $cid = $t1['conversation_id'];
+
+        $conv = AiConversation::query()->where('public_id', $cid)->firstOrFail();
+        $state = is_array($conv->shopping_state) ? $conv->shopping_state : [];
+        $state['trip_type'] = 'return';
+        $state['origin'] = 'LHE';
+        $state['destination'] = 'DXB';
+        $state['intent'] = 'flight_search';
+        $state['depart_date'] = '2026-10-02';
+        $state['legs'] = [
+            ['origin' => 'LHE', 'destination' => 'DXB', 'departure_date' => '2026-10-02'],
+        ];
+        $conv->shopping_state = $state;
+        $conv->save();
+
+        $before = $provider->callCount();
+        $ret = $this->chat($vid, 'wapis Sunday', $cid);
+        $ret['response']->assertOk();
+        $this->assertSame(
+            $before,
+            $provider->callCount(),
+            'SIMPLE_RETURN_CONTEXTUAL_DATE_BYPASS: simple return must not call Qwen'
+        );
+        $after = $this->reloadState($cid);
+        $this->assertTrue(
+            ($after['return_date'] ?? null) === '2026-10-04'
+            || ($after['trip_type'] ?? null) === 'return',
+            'Expected return date or trip_type=return after contextual return'
+        );
+    }
 }
