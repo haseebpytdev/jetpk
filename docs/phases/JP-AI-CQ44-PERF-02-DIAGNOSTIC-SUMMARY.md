@@ -20,8 +20,8 @@ Classify remaining Qwen tails on:
 ## Key findings
 
 1. **Explicit A→B server authority is complete before Qwen** for unambiguous city pairs + explicit dates (`ISB→DXB` + `next Monday` → `2026-10-05`). Hybrid builds confirmation without Qwen. Short-circuit is blocked today by `no_active_travel` (fresh session), not missing fields. PERF-01 intentionally kept fresh explicit routes on Qwen.
-2. **Qwen is not required for clear A→B** and can harm: 3/6 primary samples `invalid_json` (all Islamabad variants); a valid probe mislabeled the same route as `open_jaw`. Hybrid always recovered correct confirmation. Qwen wait ≈ 98.8% of failed-request latency; hybrid ≈ 150ms.
-3. **CURRENT safe refusal is fully server-authoritative** for Bitcoin/market: `CURRENT_UNVERIFIED` + topic `market` + `live_provider=false`. SemanticBrain does not early-bypass CURRENT (unlike GK/CASUAL/OOD), so Qwen still runs 3–7s this session (prior RUN2 up to ~27s on invalid_json) for the same deterministic refusal text.
+2. **Qwen is not required for clear A→B** and can harm: 3/6 PRIMARY_ONLY samples `invalid_json` (all Islamabad variants); COMBINED_SAMPLE invalid_json rate 3/11. A valid probe mislabeled the same route as `open_jaw`. Hybrid always recovered correct confirmation. Qwen wait ≈ 98.8% of failed-request latency; hybrid ≈ 150ms. Latency scopes: PRIMARY_EXPLICIT_ROUTE_P50/P95=9836/13313; COMBINED_EXPLICIT_ROUTE_P50/P95=9182/13313.
+3. **CURRENT safe refusal is fully server-authoritative** for Bitcoin/market: `CURRENT_UNVERIFIED` + topic `market` + `live_provider=false`. SemanticBrain does not early-bypass CURRENT (unlike GK/CASUAL/OOD), so Qwen still runs PRIMARY_CURRENT ~4–7s this session (P50/P95=4506/6810; COMBINED_CURRENT P50=4177) — prior RUN2 up to ~27s on invalid_json — for the same deterministic refusal text.
 4. **Do not conflate categories:** gold → `GENERAL_KNOWLEDGE`; USD/PKR → null open-domain; weather → CURRENT/weather.
 5. **Ambiguous / dest-led / open-jaw** correctly remain Qwen-required classes.
 6. Runtime timings available via llama HTTP `usage`/`timings`; queue metrics endpoint disabled; concurrency not stressed (`CONCURRENCY_EFFECT=N/A`).
