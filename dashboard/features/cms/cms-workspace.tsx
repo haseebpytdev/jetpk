@@ -14,6 +14,8 @@ import { CmsFilterBar } from "@/features/cms/components/cms-filter-bar";
 import { CmsRevisionTimeline } from "@/features/cms/components/cms-revision-timeline";
 import { CmsSummaryMetrics } from "@/features/cms/components/cms-summary-metrics";
 import { PageDetailDrawerContent } from "@/features/cms/components/page-detail-drawer";
+import { CmsCreatePageForm } from "@/features/cms/components/cms-create-page-form";
+import { CmsPageLocalEditor } from "@/features/cms/components/cms-page-local-editor";
 import { SectionDetailDrawerContent } from "@/features/cms/components/section-detail-drawer";
 import { BannerDetailDrawerContent } from "@/features/cms/components/banner-detail-drawer";
 import { NoticeDetailDrawerContent } from "@/features/cms/components/notice-detail-drawer";
@@ -84,7 +86,12 @@ export function CmsWorkspace({ result }: Props) {
     drawerTitle = result.selectedPage.title;
     drawerDescription = `${result.selectedPage.id} · ${result.selectedPage.pageType}`;
     closeLabel = "Close page details";
-    drawerContent = <PageDetailDrawerContent page={result.selectedPage} previewMode={previewMode} onPreviewModeChange={onPreviewModeChange} />;
+    drawerContent = (
+      <div className="space-y-4">
+        <CmsPageLocalEditor page={result.selectedPage} />
+        <PageDetailDrawerContent page={result.selectedPage} previewMode={previewMode} onPreviewModeChange={onPreviewModeChange} />
+      </div>
+    );
   } else if (result.selectedSection) {
     drawerTitle = result.selectedSection.sectionType;
     drawerDescription = result.selectedSection.id;
@@ -109,6 +116,8 @@ export function CmsWorkspace({ result }: Props) {
 
   return (
     <div className="space-y-4" data-testid="cms-workspace">
+      {result.module === "pages" ? <CmsCreatePageForm /> : null}
+
       {result.module !== "overview" ? (
         <>
           <CmsFilterBar query={result.query} facets={result.facets} module={result.module} />
@@ -117,7 +126,7 @@ export function CmsWorkspace({ result }: Props) {
       ) : null}
 
       <p className="text-sm text-jp-muted">
-        CMS content is structured, fixture-backed preview data. Brand: <strong>{result.brand.label}</strong> (fixed).
+        CMS pages use live Laravel APIs in live mode. Brand: <strong>{result.brand.label}</strong> (fixed).
       </p>
 
       {result.state === "empty" ? (

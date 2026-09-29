@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreCmsPageRequest;
 use App\Http\Requests\Admin\UpdateCmsPageRequest;
+use App\Http\Resources\Dashboard\DashboardCmsPageResource;
 use App\Models\CmsPage;
 use App\Services\Agencies\AboutUsContentPresenter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -15,11 +18,13 @@ use Illuminate\View\View;
 
 class CmsPageController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected AboutUsContentPresenter $contentPresenter,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         Gate::authorize('viewAny', CmsPage::class);
 
@@ -37,6 +42,21 @@ class CmsPageController extends Controller
         }
 
         $pages = $query->orderByDesc('updated_at')->paginate(20)->withQueryString();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'pages' => collect($pages->items())->map(
+                    static fn (CmsPage $page): array => DashboardCmsPageResource::fromModel($page)
+                )->values()->all(),
+                'meta' => [
+                    'current_page' => $pages->currentPage(),
+                    'last_page' => $pages->lastPage(),
+                    'per_page' => $pages->perPage(),
+                    'total' => $pages->total(),
+                ],
+            ]);
+        }
 
         return view('dashboard.admin.cms-pages.index', [
             'pages' => $pages,
@@ -64,7 +84,7 @@ class CmsPageController extends Controller
         ]);
     }
 
-    public function store(StoreCmsPageRequest $request): RedirectResponse
+    public function store(StoreCmsPageRequest $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', CmsPage::class);
 
@@ -76,13 +96,28 @@ class CmsPageController extends Controller
             ]);
         }
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'CMS page created.',
+                'page' => DashboardCmsPageResource::detail($page->fresh() ?? $page),
+            ]);
+        }
+
         return redirect()->route('admin.cms-pages.index')->with('status', 'cms-page-created');
     }
 
-    public function edit(CmsPage $cmsPage): View
+    public function edit(Request $request, CmsPage $cmsPage): View|JsonResponse
     {
         Gate::authorize('view', $cmsPage);
         $cmsPage->load(['creator', 'updater']);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'page' => DashboardCmsPageResource::detail($cmsPage),
+            ]);
+        }
 
         return view('dashboard.admin.cms-pages.edit', [
             'cmsPage' => $cmsPage,
@@ -94,7 +129,7 @@ class CmsPageController extends Controller
         ]);
     }
 
-    public function update(UpdateCmsPageRequest $request, CmsPage $cmsPage): RedirectResponse
+    public function update(UpdateCmsPageRequest $request, CmsPage $cmsPage): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $cmsPage);
 
@@ -106,10 +141,18 @@ class CmsPageController extends Controller
 
         $cmsPage->update($payload);
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'CMS page updated.',
+                'page' => DashboardCmsPageResource::detail($cmsPage->fresh() ?? $cmsPage),
+            ]);
+        }
+
         return redirect()->route('admin.cms-pages.index')->with('status', 'cms-page-updated');
     }
 
-    public function archive(CmsPage $cmsPage): RedirectResponse
+    public function archive(Request $request, CmsPage $cmsPage): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $cmsPage);
 
@@ -118,14 +161,29 @@ class CmsPageController extends Controller
             'updated_by' => auth()->id(),
         ]);
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'CMS page archived.',
+                'page' => DashboardCmsPageResource::detail($cmsPage->fresh() ?? $cmsPage),
+            ]);
+        }
+
         return back()->with('status', 'cms-page-archived');
     }
 
-    public function destroy(CmsPage $cmsPage): RedirectResponse
+    public function destroy(Request $request, CmsPage $cmsPage): RedirectResponse|JsonResponse
     {
         Gate::authorize('delete', $cmsPage);
 
         $cmsPage->delete();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'CMS page deleted.',
+            ]);
+        }
 
         return redirect()->route('admin.cms-pages.index')->with('status', 'cms-page-deleted');
     }

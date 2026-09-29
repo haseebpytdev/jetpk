@@ -198,6 +198,8 @@ export type CmsSectionInstance = {
 
 export type CmsPage = {
   id: string;
+  /** Laravel numeric id when live API is available */
+  internalId?: string;
   brand: CmsBrand;
   pageType: CmsPageType;
   title: string;
@@ -217,6 +219,10 @@ export type CmsPage = {
   updatedByUserId: string;
   validation: CmsValidationResult;
   previewAvailable: boolean;
+  /** Live HTML/text body when loaded from Laravel */
+  content?: string;
+  excerpt?: string | null;
+  robots?: string;
 };
 
 export type CmsNoticeSeverity =

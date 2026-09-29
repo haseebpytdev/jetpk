@@ -2,32 +2,71 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Services\Communication\AgencyCommunicationSettingsService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class AgencyCommunicationSettingsController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected AgencyCommunicationSettingsService $settingsService,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
-        $agency = Agency::query()->findOrFail($request->user()->current_agency_id);
+        $agency = $this->resolveAgency($request);
         $settings = $this->settingsService->getOrCreateSettings($agency);
         Gate::authorize('view', $settings);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'agency' => [
+                    'id' => $agency->id,
+                    'name' => $agency->name,
+                ],
+                'settings' => [
+                    'email_enabled' => (bool) $settings->email_enabled,
+                    'smtp_enabled' => (bool) $settings->smtp_enabled,
+                    'smtp_host' => (string) ($settings->smtp_host ?? ''),
+                    'smtp_port' => $settings->smtp_port,
+                    'smtp_username' => (string) ($settings->smtp_username ?? ''),
+                    'smtp_encryption' => (string) ($settings->smtp_encryption ?? ''),
+                    'mail_from_name' => (string) ($settings->mail_from_name ?? ''),
+                    'mail_from_email' => (string) ($settings->mail_from_email ?? ''),
+                    'reply_to_email' => (string) ($settings->reply_to_email ?? ''),
+                    'daily_report_enabled' => (bool) $settings->daily_report_enabled,
+                    'daily_report_time' => (string) ($settings->daily_report_time ?? ''),
+                    'weekly_report_enabled' => (bool) $settings->weekly_report_enabled,
+                    'weekly_report_day' => (string) ($settings->weekly_report_day ?? ''),
+                    'weekly_report_time' => (string) ($settings->weekly_report_time ?? ''),
+                    'monthly_report_enabled' => (bool) $settings->monthly_report_enabled,
+                    'monthly_report_day' => $settings->monthly_report_day,
+                    'monthly_report_time' => (string) ($settings->monthly_report_time ?? ''),
+                    'monthly_ledger_enabled' => (bool) $settings->monthly_ledger_enabled,
+                    'whatsapp_enabled' => (bool) $settings->whatsapp_enabled,
+                    'whatsapp_provider' => (string) ($settings->whatsapp_provider ?? ''),
+                    'whatsapp_default_country_code' => (string) ($settings->whatsapp_default_country_code ?? ''),
+                    'has_smtp_password' => filled($settings->smtp_password),
+                    'has_whatsapp_token' => filled($settings->whatsapp_access_token),
+                ],
+            ]);
+        }
 
         return view(client_view('settings.communications.index', 'admin'), compact('agency', 'settings'));
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request): RedirectResponse|JsonResponse
     {
-        $agency = Agency::query()->findOrFail($request->user()->current_agency_id);
+        $agency = $this->resolveAgency($request);
         $settings = $this->settingsService->getOrCreateSettings($agency);
         Gate::authorize('update', $settings);
 
@@ -82,29 +121,64 @@ class AgencyCommunicationSettingsController extends Controller
 
         $this->settingsService->updateSettings($agency, $request->user(), $validated);
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->index($request);
+        }
+
         return back()->with('status', 'communication-settings-updated');
     }
 
-    public function testEmail(Request $request): RedirectResponse
+    public function testEmail(Request $request): RedirectResponse|JsonResponse
     {
-        $agency = Agency::query()->findOrFail($request->user()->current_agency_id);
+        $agency = $this->resolveAgency($request);
         $settings = $this->settingsService->getOrCreateSettings($agency);
         Gate::authorize('update', $settings);
 
         $validated = $request->validate(['recipient_email' => ['required', 'email']]);
         $this->settingsService->testEmailSettings($agency, $request->user(), $validated['recipient_email']);
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Test email sent.',
+            ]);
+        }
+
         return back()->with('status', 'communication-test-email-sent');
     }
 
-    public function testWhatsapp(Request $request): RedirectResponse
+    public function testWhatsapp(Request $request): RedirectResponse|JsonResponse
     {
-        $agency = Agency::query()->findOrFail($request->user()->current_agency_id);
+        $agency = $this->resolveAgency($request);
         $settings = $this->settingsService->getOrCreateSettings($agency);
         Gate::authorize('update', $settings);
 
         $result = $this->settingsService->testWhatsappReadiness($agency, $request->user());
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'WhatsApp readiness checked.',
+                'whatsapp_readiness' => $result,
+            ]);
+        }
+
         return back()->with('status', 'communication-test-whatsapp')->with('whatsapp_readiness', $result);
+    }
+
+    protected function resolveAgency(Request $request): Agency
+    {
+        $user = $request->user();
+        if ($user->isPlatformAdmin() && $request->filled('agency_id')) {
+            return Agency::query()->findOrFail($request->integer('agency_id'));
+        }
+
+        if ($user->current_agency_id) {
+            return Agency::query()->findOrFail($user->current_agency_id);
+        }
+
+        $slug = (string) config('ota.default_agency_slug', 'jetpk-agency');
+
+        return Agency::query()->where('slug', $slug)->firstOrFail();
     }
 }

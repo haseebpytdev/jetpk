@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\ClientPage;
 use App\Models\CmsPage;
@@ -9,6 +10,7 @@ use App\Services\Seo\SeoAuditService;
 use App\Services\Seo\SeoManagementService;
 use App\Services\Seo\SeoVerificationResolver;
 use App\Support\Seo\SeoManagedPageCatalog;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -16,42 +18,71 @@ use Illuminate\View\View;
 
 class SeoManagementController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         private readonly SeoManagementService $seo,
         private readonly SeoAuditService $audit,
         private readonly SeoVerificationResolver $verification,
     ) {}
 
-    public function overview(): View
+    public function overview(Request $request): View|JsonResponse
     {
         Gate::authorize('seo.manage');
+
+        $stats = $this->seo->overviewStats();
+        $pages = $this->seo->listPages();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'stats' => $stats,
+                'pages' => $pages,
+            ]);
+        }
 
         return view('dashboard.admin.seo.overview', [
-            'stats' => $this->seo->overviewStats(),
-            'pages' => $this->seo->listPages(),
+            'stats' => $stats,
+            'pages' => $pages,
         ]);
     }
 
-    public function pagesIndex(): View
+    public function pagesIndex(Request $request): View|JsonResponse
     {
         Gate::authorize('seo.manage');
 
+        $pages = $this->seo->listPages();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'pages' => $pages,
+            ]);
+        }
+
         return view('dashboard.admin.seo.pages-index', [
-            'pages' => $this->seo->listPages(),
+            'pages' => $pages,
         ]);
     }
 
-    public function pagesEdit(string $sourceType, string $sourceId): View
+    public function pagesEdit(Request $request, string $sourceType, string $sourceId): View|JsonResponse
     {
         Gate::authorize('seo.manage');
         $page = $this->seo->getPage($sourceType, $sourceId);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'page' => $page,
+            ]);
+        }
 
         return view('dashboard.admin.seo.pages-edit', [
             'page' => $page,
         ]);
     }
 
-    public function pagesUpdate(Request $request, string $sourceType, string $sourceId): RedirectResponse
+    public function pagesUpdate(Request $request, string $sourceType, string $sourceId): RedirectResponse|JsonResponse
     {
         Gate::authorize('seo.manage');
         $payload = $this->validatedSeoPayload($request);
@@ -63,6 +94,14 @@ class SeoManagementController extends Controller
             Gate::authorize('update', $cmsPage);
             $this->seo->updateCmsSeo($cmsPage, $payload, auth()->id());
 
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson([
+                    'ok' => true,
+                    'message' => 'CMS SEO updated.',
+                    'page' => $this->seo->getPage($sourceType, $sourceId),
+                ]);
+            }
+
             return redirect()
                 ->route('admin.seo.pages.edit', compact('sourceType', 'sourceId'))
                 ->with('status', 'CMS SEO updated.');
@@ -73,12 +112,20 @@ class SeoManagementController extends Controller
             abort(404);
         }
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Draft saved. Publish to update the live site.',
+                'page' => $this->seo->getPage($sourceType, $sourceId),
+            ]);
+        }
+
         return redirect()
             ->route('admin.seo.pages.edit', compact('sourceType', 'sourceId'))
             ->with('status', 'Draft saved. Publish to update the live site.');
     }
 
-    public function pagesPublish(string $sourceType, string $sourceId): RedirectResponse
+    public function pagesPublish(Request $request, string $sourceType, string $sourceId): RedirectResponse|JsonResponse
     {
         Gate::authorize('seo.manage');
 
@@ -91,21 +138,38 @@ class SeoManagementController extends Controller
             abort(404, 'CMS pages publish through CMS status, not draft/publish.');
         }
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'SEO published to the live site.',
+                'page' => $this->seo->getPage($sourceType, $sourceId),
+            ]);
+        }
+
         return redirect()
             ->route('admin.seo.pages.edit', compact('sourceType', 'sourceId'))
             ->with('status', 'SEO published to the live site.');
     }
 
-    public function globalSettings(): View
+    public function globalSettings(Request $request): View|JsonResponse
     {
         Gate::authorize('seo.manage');
 
+        $settings = $this->seo->globalSettings();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'settings' => $settings,
+            ]);
+        }
+
         return view('dashboard.admin.seo.global', [
-            'settings' => $this->seo->globalSettings(),
+            'settings' => $settings,
         ]);
     }
 
-    public function globalUpdate(Request $request): RedirectResponse
+    public function globalUpdate(Request $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('seo.manage');
         $validated = $request->validate([
@@ -122,28 +186,55 @@ class SeoManagementController extends Controller
 
         $this->seo->saveGlobalDraft($validated, auth()->id());
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Global SEO draft saved.',
+                'settings' => $this->seo->globalSettings(),
+            ]);
+        }
+
         return redirect()->route('admin.seo.global')->with('status', 'Global SEO draft saved.');
     }
 
-    public function globalPublish(): RedirectResponse
+    public function globalPublish(Request $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('seo.manage');
         $this->seo->publishGlobal(auth()->id());
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Global SEO published.',
+                'settings' => $this->seo->globalSettings(),
+            ]);
+        }
+
         return redirect()->route('admin.seo.global')->with('status', 'Global SEO published.');
     }
 
-    public function social(): View
+    public function social(Request $request): View|JsonResponse
     {
         Gate::authorize('seo.manage');
 
+        $social = $this->seo->socialSettings();
+        $global = $this->seo->globalSettings();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'social' => $social,
+                'global' => $global,
+            ]);
+        }
+
         return view('dashboard.admin.seo.social', [
-            'social' => $this->seo->socialSettings(),
-            'global' => $this->seo->globalSettings(),
+            'social' => $social,
+            'global' => $global,
         ]);
     }
 
-    public function socialUpdate(Request $request): RedirectResponse
+    public function socialUpdate(Request $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('seo.manage');
         $validated = $request->validate([
@@ -154,40 +245,81 @@ class SeoManagementController extends Controller
 
         $this->seo->saveGlobalDraft($validated, auth()->id());
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Social defaults draft saved.',
+                'social' => $this->seo->socialSettings(),
+                'global' => $this->seo->globalSettings(),
+            ]);
+        }
+
         return redirect()->route('admin.seo.social')->with('status', 'Social defaults draft saved.');
     }
 
-    public function schema(): View
+    public function schema(Request $request): View|JsonResponse
     {
         Gate::authorize('seo.manage');
 
+        $schema = $this->seo->schemaBusinessData();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'schema' => $schema,
+            ]);
+        }
+
         return view('dashboard.admin.seo.schema', [
-            'schema' => $this->seo->schemaBusinessData(),
+            'schema' => $schema,
         ]);
     }
 
-    public function sitemap(): View
+    public function sitemap(Request $request): View|JsonResponse
     {
         Gate::authorize('seo.manage');
 
+        $meta = $this->seo->sitemapMeta();
+        $entries = $this->seo->sitemapEntries();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'meta' => $meta,
+                'entries' => $entries,
+                'protected' => SeoManagedPageCatalog::PROTECTED_ROUTES,
+            ]);
+        }
+
         return view('dashboard.admin.seo.sitemap', [
-            'meta' => $this->seo->sitemapMeta(),
-            'entries' => $this->seo->sitemapEntries(),
+            'meta' => $meta,
+            'entries' => $entries,
             'protected' => SeoManagedPageCatalog::PROTECTED_ROUTES,
         ]);
     }
 
-    public function verification(): View
+    public function verification(Request $request): View|JsonResponse
     {
         Gate::authorize('seo.manage');
 
+        $verification = $this->verification->adminView();
+        $global = $this->seo->globalSettings();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'verification' => $verification,
+                'global' => $global,
+            ]);
+        }
+
         return view('dashboard.admin.seo.verification', [
-            'verification' => $this->verification->adminView(),
-            'global' => $this->seo->globalSettings(),
+            'verification' => $verification,
+            'global' => $global,
         ]);
     }
 
-    public function verificationUpdate(Request $request): RedirectResponse
+    public function verificationUpdate(Request $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('seo.manage');
         $validated = $request->validate([
@@ -200,23 +332,50 @@ class SeoManagementController extends Controller
             'verification_bing' => $validated['verification_bing'] ?? '',
         ], auth()->id());
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Verification draft saved.',
+                'verification' => $this->verification->adminView(),
+                'global' => $this->seo->globalSettings(),
+            ]);
+        }
+
         return redirect()->route('admin.seo.verification')->with('status', 'Verification draft saved.');
     }
 
-    public function verificationPublish(): RedirectResponse
+    public function verificationPublish(Request $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('seo.manage');
         $this->seo->publishGlobal(auth()->id());
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Verification settings published.',
+                'verification' => $this->verification->adminView(),
+                'global' => $this->seo->globalSettings(),
+            ]);
+        }
+
         return redirect()->route('admin.seo.verification')->with('status', 'Verification settings published.');
     }
 
-    public function audit(): View
+    public function audit(Request $request): View|JsonResponse
     {
         Gate::authorize('seo.manage');
 
+        $findings = $this->audit->runAudit();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'findings' => $findings,
+            ]);
+        }
+
         return view('dashboard.admin.seo.audit', [
-            'findings' => $this->audit->runAudit(),
+            'findings' => $findings,
         ]);
     }
 

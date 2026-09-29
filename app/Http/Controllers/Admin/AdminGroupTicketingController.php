@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\GroupHomepageTileTargetType;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\BatchUpsertGroupHomepageTilesRequest;
 use App\Http\Requests\Admin\StoreGroupCategoryRequest;
@@ -15,6 +16,7 @@ use App\Models\GroupInventory;
 use App\Services\GroupTicketing\GroupInventoryFacetService;
 use App\Services\GroupTicketing\GroupInventorySyncService;
 use App\Support\GroupTicketing\GroupHomepageTilePresenter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -27,15 +29,29 @@ use Illuminate\View\View;
  */
 class AdminGroupTicketingController extends Controller
 {
-    public function index(GroupInventoryFacetService $facetService): View
+    use RespondsWithBackOfficeJson;
+
+    public function index(Request $request, GroupInventoryFacetService $facetService): View|JsonResponse
     {
         Gate::authorize('platform.admin');
 
         $lastSync = $facetService->lastInventorySyncAt();
-
-        return view(client_view('group-ticketing.index', 'admin'), [
+        $payload = [
             'activeInventoryCount' => $facetService->totalActiveInventoryCount(),
             'categoryCount' => count($facetService->categoriesForAdmin()),
+            'lastSyncAt' => $lastSync?->toIso8601String(),
+        ];
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                ...$payload,
+            ]);
+        }
+
+        return view(client_view('group-ticketing.index', 'admin'), [
+            'activeInventoryCount' => $payload['activeInventoryCount'],
+            'categoryCount' => $payload['categoryCount'],
             'lastSyncAt' => $lastSync,
         ]);
     }
