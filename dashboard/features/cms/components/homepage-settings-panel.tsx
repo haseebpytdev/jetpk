@@ -230,7 +230,7 @@ export function HomepageSettingsPanel() {
           data-testid="homepage-settings-save"
           onClick={() => void persist(content)}
         >
-          {busy ? "SavingΓÇª" : "Save draft"}
+          {busy ? "Saving..." : "Save draft"}
         </button>
         <button
           type="button"
