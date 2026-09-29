@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\BookingCancellationRequest;
 use App\Models\BookingPayment;
 use App\Models\BookingRefund;
+use App\Models\CustomerQuery;
 use App\Models\SupportTicket;
 use App\Models\User;
 use App\Support\Dashboard\DashboardPermissionResolver;
@@ -37,6 +38,9 @@ class BackOfficeCapabilitiesPresenter
             'payment_proofs' => $this->platformModules->routeEnabled('payment_proofs'),
             'agent_support' => $this->platformModules->routeEnabled('agent_support'),
             'agent_reports' => $this->platformModules->routeEnabled('agent_reports'),
+            'branding_settings' => $this->platformModules->routeEnabled('branding_settings'),
+            'notifications' => $this->platformModules->routeEnabled('notifications'),
+            'markup_settings' => $this->platformModules->routeEnabled('markup_settings'),
         ];
 
         $capabilities = $this->presentCapabilityFlags($user, $isAdmin, $access, $modules);
@@ -111,49 +115,159 @@ class BackOfficeCapabilitiesPresenter
         $has = static fn (string $key): bool => in_array($key, $effectivePermissions, true);
 
         if ($has('dashboard.view')) {
-            $items[] = ['label' => 'Dashboard', 'href' => '/', 'key' => 'dashboard'];
+            $items[] = $this->dashboardNav('Dashboard', 'dashboard', '/');
         }
         if ($has('bookings.view')) {
-            $items[] = ['label' => 'Bookings', 'href' => '/bookings', 'key' => 'bookings'];
+            $items[] = $this->dashboardNav('Bookings', 'bookings', '/bookings');
         }
         if ($has('payments.view')) {
-            $items[] = ['label' => 'Payments', 'href' => '/payments', 'key' => 'payments'];
+            $items[] = $this->dashboardNav('Payments', 'payments', '/payments');
         }
         if ($has('pnrs.view')) {
-            $items[] = ['label' => 'PNRs', 'href' => '/pnrs', 'key' => 'pnrs'];
+            $items[] = $this->dashboardNav('PNRs', 'pnrs', '/pnrs');
         }
         if ($has('tickets.view')) {
-            $items[] = ['label' => 'Tickets', 'href' => '/tickets', 'key' => 'tickets'];
+            $items[] = $this->dashboardNav('Tickets', 'tickets', '/tickets');
         }
         if ($isAdmin && ($modules['agent_deposits'] ?? false)) {
-            $items[] = ['label' => 'Deposits', 'href' => '/deposits', 'key' => 'deposits'];
+            $items[] = $this->dashboardNav('Deposits', 'deposits', '/deposits');
         }
         if ($has('customers.view')) {
-            $items[] = ['label' => 'Customers', 'href' => '/customers', 'key' => 'customers'];
+            $items[] = $this->dashboardNav('Customers', 'customers', '/customers');
         }
         if ($has('agents.view')) {
-            $items[] = ['label' => 'Agents', 'href' => '/agents', 'key' => 'agents'];
+            $items[] = $this->dashboardNav('Agents', 'agents', '/agents');
         }
         if ($has('suppliers.view')) {
-            $items[] = ['label' => 'Suppliers', 'href' => '/suppliers', 'key' => 'suppliers'];
+            // Read-only Next suppliers list remains available; API Settings is the mutation hub.
+            $items[] = $this->dashboardNav('Suppliers', 'suppliers', '/suppliers');
         }
         if ($has('users.view')) {
-            $items[] = ['label' => 'Users', 'href' => '/users', 'key' => 'users'];
+            $items[] = $this->dashboardNav('Users', 'users', '/users');
+        }
+        if ($isAdmin) {
+            $staff = $this->laravelNav('Staff', 'staff', 'admin.staff');
+            if ($staff !== null) {
+                $items[] = $staff;
+            }
+        }
+        if ($isAdmin && Gate::forUser($user)->allows('viewAny', CustomerQuery::class)) {
+            $queries = $this->laravelNav('Customer Queries', 'customer-queries', 'admin.customer-queries.index');
+            if ($queries !== null) {
+                $items[] = $queries;
+            }
         }
         if ($has('reports.view')) {
-            $items[] = ['label' => 'Reports', 'href' => '/reports', 'key' => 'reports'];
+            $items[] = $this->dashboardNav('Reports', 'reports', '/reports');
         }
         if ($has('audit.view')) {
-            $items[] = ['label' => 'Audit', 'href' => '/audit', 'key' => 'audit'];
-        }
-        if ($has('settings.view')) {
-            $items[] = ['label' => 'Settings', 'href' => '/settings', 'key' => 'settings'];
-        }
-        if (($isAdmin || $user->hasStaffPermission(StaffPermission::SupportView)) && ($modules['agent_support'] ?? false)) {
-            $items[] = ['label' => 'Support', 'href' => '/support', 'key' => 'support'];
+            $items[] = $this->dashboardNav('Audit', 'audit', '/audit');
         }
 
-        return $items;
+        // Admin mutation surfaces: Blade hubs (Next dashboard API is intentionally GET-only).
+        if ($isAdmin) {
+            $apiSettings = $this->laravelNav('API Settings', 'api-settings', 'admin.api-settings');
+            if ($apiSettings !== null) {
+                $items[] = $apiSettings;
+            }
+            if ($modules['branding_settings'] ?? false) {
+                $branding = $this->laravelNav('Company Profile', 'company-profile', 'admin.settings.branding.edit');
+                if ($branding !== null) {
+                    $items[] = $branding;
+                }
+                $homepage = $this->laravelNav('Homepage CMS', 'homepage-cms', 'admin.settings.homepage.edit');
+                if ($homepage !== null) {
+                    $items[] = $homepage;
+                }
+            }
+            $cmsPages = $this->laravelNav('CMS Pages', 'cms-pages', 'admin.cms-pages.index');
+            if ($cmsPages !== null) {
+                $items[] = $cmsPages;
+            }
+            $pageSettings = $this->laravelNav('Managed Pages', 'page-settings', 'admin.page-settings.index');
+            if ($pageSettings !== null) {
+                $items[] = $pageSettings;
+            }
+            if (Gate::forUser($user)->allows('seo.manage')) {
+                $seo = $this->laravelNav('SEO', 'seo', 'admin.seo.overview');
+                if ($seo !== null) {
+                    $items[] = $seo;
+                }
+            }
+            if ($modules['notifications'] ?? false) {
+                $comms = $this->laravelNav('Communications', 'communications', 'admin.settings.communications.index');
+                if ($comms !== null) {
+                    $items[] = $comms;
+                }
+            }
+            if ($modules['markup_settings'] ?? false) {
+                $markups = $this->laravelNav('Markups', 'markups', 'admin.markups');
+                if ($markups !== null) {
+                    $items[] = $markups;
+                }
+            }
+            $groups = $this->laravelNav('Group Ticketing', 'group-ticketing', 'admin.group-ticketing.index');
+            if ($groups !== null) {
+                $items[] = $groups;
+            }
+            $otp = $this->laravelNav('Login OTP', 'login-otp', 'admin.settings.login-otp.edit');
+            if ($otp !== null) {
+                $items[] = $otp;
+            }
+            $ai = $this->laravelNav('Ask JetPakistan', 'ai-assistant', 'admin.settings.ai-assistant.show');
+            if ($ai !== null) {
+                $items[] = $ai;
+            }
+            $goLive = $this->laravelNav('Go-live', 'go-live', 'admin.go-live-checklist');
+            if ($goLive !== null) {
+                $items[] = $goLive;
+            }
+            $settingsHub = $this->laravelNav('Settings Hub', 'settings-hub', 'admin.settings.index');
+            if ($settingsHub !== null) {
+                $items[] = $settingsHub;
+            }
+        } elseif ($has('settings.view')) {
+            // Staff keep the read-only Next settings surface (Blade hub is platform-admin only).
+            $items[] = $this->dashboardNav('Settings', 'settings', '/settings');
+        }
+
+        if (($isAdmin || $user->hasStaffPermission(StaffPermission::SupportView)) && ($modules['agent_support'] ?? false)) {
+            $items[] = $this->dashboardNav('Support', 'support', '/support');
+        }
+
+        return array_values(array_filter($items));
+    }
+
+    /**
+     * @return array{label: string, href: string, key: string, target: string}
+     */
+    private function dashboardNav(string $label, string $key, string $href): array
+    {
+        return [
+            'label' => $label,
+            'href' => $href,
+            'key' => $key,
+            'target' => 'dashboard',
+        ];
+    }
+
+    /**
+     * @param  array<string, string|null>  $params
+     * @return array{label: string, href: string, key: string, target: string}|null
+     */
+    private function laravelNav(string $label, string $key, string $routeName, array $params = []): ?array
+    {
+        $href = BackOfficeLaravelRoutePaths::publicPathFromRoute($routeName, $params);
+        if ($href === null) {
+            return null;
+        }
+
+        return [
+            'label' => $label,
+            'href' => $href,
+            'key' => $key,
+            'target' => 'laravel',
+        ];
     }
 
     /**
