@@ -176,3 +176,26 @@ export function financeAdjustmentReversePath(walletTransactionId: string): strin
     `/finance/adjustments/${encodeURIComponent(walletTransactionId)}/reverse?format=json`,
   );
 }
+
+export function apiSettingsIndexPath(): string {
+  return laravelPortalPath("admin", "/api-settings?format=json");
+}
+
+export function apiSettingsStorePath(): string {
+  return laravelPortalPath("admin", "/api-settings?format=json");
+}
+
+export function apiSettingsUpdatePath(connectionId: string): string {
+  return laravelPortalPath("admin", `/api-settings/${encodeURIComponent(connectionId)}?format=json`);
+}
+
+export function apiSettingsTogglePath(connectionId: string): string {
+  return laravelPortalPath(
+    "admin",
+    `/api-settings/${encodeURIComponent(connectionId)}/toggle-status?format=json`,
+  );
+}
+
+export function apiSettingsTestPath(connectionId: string): string {
+  return laravelPortalPath("admin", `/api-settings/${encodeURIComponent(connectionId)}/test?format=json`);
+}

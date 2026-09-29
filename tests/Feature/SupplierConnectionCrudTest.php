@@ -20,7 +20,7 @@ class SupplierConnectionCrudTest extends TestCase
     public function test_agency_admin_can_view_api_settings(): void
     {
         $admin = $this->seededAdmin();
-        $this->actingAs($admin)->get('/admin/api-settings')->assertOk();
+        $this->actingAs($admin)->get('/admin/api-settings')->assertRedirect('/admin/dashboard/api-connections');
     }
 
     public function test_agency_admin_can_create_supplier_connection(): void
@@ -35,7 +35,7 @@ class SupplierConnectionCrudTest extends TestCase
             'base_url' => 'https://example.test/amadeus',
             'credentials' => ['client_id' => 'amadeus_ci', 'client_secret' => 'amadeus_cs'],
             'settings_json' => '{"mode":"sandbox"}',
-        ])->assertRedirect('/admin/api-settings');
+        ])->assertRedirect('/admin/dashboard/api-connections');
 
         $this->assertDatabaseHas('supplier_connections', [
             'name' => 'Amadeus Sandbox',
@@ -57,11 +57,12 @@ class SupplierConnectionCrudTest extends TestCase
             'environment' => SupplierEnvironment::Sandbox->value,
             'status' => SupplierConnectionStatus::Inactive->value,
             'credentials' => [
-                'client_id' => 'sabre-secondary-id',
-                'client_secret' => 'sabre-secondary-secret',
+                'sign_in' => 'sabre-secondary-id',
+                'password' => 'sabre-secondary-secret',
+                'pcc' => '4HLD',
             ],
             'settings_json' => '{}',
-        ])->assertRedirect('/admin/api-settings');
+        ])->assertRedirect('/admin/dashboard/api-connections');
 
         $this->assertSame(2, SupplierConnection::query()
             ->where('agency_id', $admin->current_agency_id)
@@ -103,17 +104,27 @@ class SupplierConnectionCrudTest extends TestCase
     public function test_agency_admin_can_edit_own_supplier_connection(): void
     {
         $admin = $this->seededAdmin();
-        $connection = SupplierConnection::query()->where('agency_id', $admin->current_agency_id)->firstOrFail();
+        $connection = SupplierConnection::factory()->create([
+            'agency_id' => $admin->current_agency_id,
+            'provider' => SupplierProvider::Amadeus,
+            'name' => 'Amadeus Editable',
+            'environment' => SupplierEnvironment::Sandbox,
+            'status' => SupplierConnectionStatus::Inactive,
+            'credentials' => ['client_id' => 'amadeus_ci', 'client_secret' => 'amadeus_cs'],
+        ]);
 
-        $this->actingAs($admin)->patch('/admin/api-settings/'.$connection->id, [
-            'provider' => $connection->provider->value,
+        $this->actingAs($admin)->from('/admin/dashboard/api-connections')->patch('/admin/api-settings/'.$connection->id, [
+            'provider' => SupplierProvider::Amadeus->value,
             'name' => 'Updated Provider Name',
             'environment' => SupplierEnvironment::Sandbox->value,
             'status' => SupplierConnectionStatus::Inactive->value,
             'base_url' => 'https://sandbox.example.test',
             'settings_json' => '{"region":"pk"}',
-            'credentials' => [],
-        ])->assertRedirect('/admin/api-settings');
+            'credentials' => [
+                'client_id' => 'amadeus_ci',
+                'client_secret' => 'amadeus_cs',
+            ],
+        ])->assertSessionHasNoErrors()->assertRedirect('/admin/dashboard/api-connections');
 
         $connection->refresh();
         $this->assertSame('Updated Provider Name', $connection->name);
@@ -131,7 +142,7 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->delete('/admin/api-settings/'.$connection->id)
-            ->assertRedirect('/admin/api-settings');
+            ->assertRedirect('/admin/dashboard/api-connections');
 
         $this->assertDatabaseMissing('supplier_connections', [
             'id' => $connection->id,
@@ -140,11 +151,15 @@ class SupplierConnectionCrudTest extends TestCase
 
     public function test_agency_admin_cannot_edit_another_agency_supplier_connection(): void
     {
-        $admin = $this->seededAdmin();
+        // Platform admins may manage any agency; agency admins are denied the hub entirely.
+        $this->seed(OtaFoundationSeeder::class);
+        $legacy = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $legacy->forceFill(['account_type' => \App\Enums\AccountType::AgencyAdmin])->save();
+        $legacy = $legacy->fresh();
         $otherAgency = Agency::factory()->create();
         $foreign = SupplierConnection::factory()->create(['agency_id' => $otherAgency->id]);
 
-        $this->actingAs($admin)->patch('/admin/api-settings/'.$foreign->id, [
+        $this->actingAs($legacy)->patch('/admin/api-settings/'.$foreign->id, [
             'provider' => SupplierProvider::PiaNdc->value,
             'name' => 'Forbidden',
             'environment' => SupplierEnvironment::Sandbox->value,
@@ -156,11 +171,14 @@ class SupplierConnectionCrudTest extends TestCase
 
     public function test_agency_admin_cannot_delete_another_agency_supplier_connection(): void
     {
-        $admin = $this->seededAdmin();
+        $this->seed(OtaFoundationSeeder::class);
+        $legacy = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $legacy->forceFill(['account_type' => \App\Enums\AccountType::AgencyAdmin])->save();
+        $legacy = $legacy->fresh();
         $otherAgency = Agency::factory()->create();
         $foreign = SupplierConnection::factory()->create(['agency_id' => $otherAgency->id]);
 
-        $this->actingAs($admin)
+        $this->actingAs($legacy)
             ->delete('/admin/api-settings/'.$foreign->id)
             ->assertForbidden();
     }
@@ -191,9 +209,13 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$connection->id.'/edit')
-            ->assertOk()
-            ->assertDontSee('secret-plaintext', false)
-            ->assertSee('••••', false);
+            ->assertRedirect('/admin/dashboard/api-connections?manage='.$connection->id);
+
+        $row = collect($this->actingAs($admin)->getJson('/admin/api-settings?format=json')->json('connections'))
+            ->firstWhere('id', (string) $connection->id);
+        $this->assertNotNull($row);
+        $payload = json_encode($row);
+        $this->assertStringNotContainsString('secret-plaintext', (string) $payload);
     }
 
     public function test_empty_credential_update_preserves_old_credentials(): void
@@ -217,7 +239,7 @@ class SupplierConnectionCrudTest extends TestCase
                 'client_secret' => '',
             ],
             'settings_json' => '{}',
-        ])->assertRedirect('/admin/api-settings');
+        ])->assertRedirect('/admin/dashboard/api-connections');
 
         $connection->refresh();
         $this->assertSame('old-id', $connection->credentials['client_id']);
@@ -235,9 +257,14 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$duffel->id.'/edit')
-            ->assertOk()
-            ->assertSee('Access Token', false)
-            ->assertSee('API Version', false);
+            ->assertRedirect('/admin/dashboard/api-connections?manage='.$duffel->id);
+
+        $providers = $this->actingAs($admin)->getJson('/admin/api-settings?format=json')->json('providers');
+        $catalog = collect($providers)->firstWhere('key', 'duffel');
+        $this->assertNotNull($catalog);
+        $labels = collect($catalog['credentialFields'] ?? [])->pluck('label')->implode(' ');
+        $this->assertStringContainsStringIgnoringCase('access token', $labels);
+        $this->assertStringContainsStringIgnoringCase('api version', $labels);
     }
 
     public function test_duffel_form_hides_generic_non_duffel_credentials(): void
@@ -251,11 +278,15 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$duffel->id.'/edit')
-            ->assertOk()
-            ->assertDontSee('Client ID</label>', false)
-            ->assertDontSee('Client Secret</label>', false)
-            ->assertDontSee('Username</label>', false)
-            ->assertDontSee('Password</label>', false);
+            ->assertRedirect('/admin/dashboard/api-connections?manage='.$duffel->id);
+
+        $providers = $this->actingAs($admin)->getJson('/admin/api-settings?format=json')->json('providers');
+        $catalog = collect($providers)->firstWhere('key', 'duffel');
+        $keys = collect($catalog['credentialFields'] ?? [])->pluck('key')->all();
+        $this->assertNotContains('client_id', $keys);
+        $this->assertNotContains('client_secret', $keys);
+        $this->assertNotContains('username', $keys);
+        $this->assertNotContains('password', $keys);
     }
 
     public function test_duffel_store_requires_access_token(): void
@@ -288,7 +319,7 @@ class SupplierConnectionCrudTest extends TestCase
             'status' => SupplierConnectionStatus::Inactive->value,
             'credentials' => ['access_token' => 'duffel_test_token_only'],
             'settings_json' => '{}',
-        ])->assertRedirect('/admin/api-settings');
+        ])->assertRedirect('/admin/dashboard/api-connections');
 
         $this->assertDatabaseHas('supplier_connections', [
             'name' => 'Duffel Token Only',
@@ -319,7 +350,7 @@ class SupplierConnectionCrudTest extends TestCase
                 'api_version' => 'v2',
             ],
             'settings_json' => '{}',
-        ])->assertRedirect('/admin/api-settings');
+        ])->assertRedirect('/admin/dashboard/api-connections');
 
         $connection->refresh();
         $this->assertSame('duffel_test_old_token', $connection->credentials['access_token']);
@@ -349,7 +380,7 @@ class SupplierConnectionCrudTest extends TestCase
                 'api_version' => 'v2',
             ],
             'settings_json' => '{}',
-        ])->assertRedirect('/admin/api-settings');
+        ])->assertRedirect('/admin/dashboard/api-connections');
 
         $connection->refresh();
         $this->assertSame('duffel_test_new_token', $connection->credentials['access_token']);
@@ -390,10 +421,13 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$connection->id.'/edit')
-            ->assertOk()
-            ->assertDontSee('duffel_test_super_secret_token', false)
-            ->assertSee('Stored token:', false)
-            ->assertSee('duffel_test_', false);
+            ->assertRedirect('/admin/dashboard/api-connections?manage='.$connection->id);
+
+        $row = collect($this->actingAs($admin)->getJson('/admin/api-settings?format=json')->json('connections'))
+            ->firstWhere('id', (string) $connection->id);
+        $payload = json_encode($row);
+        $this->assertStringNotContainsString('duffel_test_super_secret_token', (string) $payload);
+        $this->assertTrue((bool) ($row['credentialsConfigured'] ?? false));
     }
 
     public function test_sabre_non_duffel_provider_fields_still_work(): void
@@ -414,7 +448,7 @@ class SupplierConnectionCrudTest extends TestCase
                 'password' => 'sabre-secret',
             ],
             'settings_json' => '{}',
-        ])->assertRedirect('/admin/api-settings');
+        ])->assertRedirect('/admin/dashboard/api-connections');
 
         $sabre->refresh();
         $this->assertSame('sabre-client', $sabre->credentials['sign_in']);
@@ -450,7 +484,7 @@ class SupplierConnectionCrudTest extends TestCase
                 'password' => '',
             ],
             'settings_json' => '{}',
-        ])->assertRedirect('/admin/api-settings');
+        ])->assertRedirect('/admin/dashboard/api-connections');
 
         $sabre->refresh();
         $this->assertSame('keep-sign-in', $sabre->credentials['sign_in']);
@@ -477,25 +511,63 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$sabre->id.'/edit')
-            ->assertOk()
-            ->assertSee('Sabre Sign in / Client ID (EPR)', false)
-            ->assertSee('Sabre Secret / Password', false)
-            ->assertSee('PCC (pseudo city code)', false)
-            ->assertSee('Sign in / Client ID', false)
-            ->assertDontSee('epr4016', false)
-            ->assertDontSee('secretes99', false)
-            ->assertDontSee('Client Secret</label>', false);
+            ->assertRedirect('/admin/dashboard/api-connections?manage='.$sabre->id);
+
+        $row = collect($this->actingAs($admin)->getJson('/admin/api-settings?format=json')->json('connections'))
+            ->firstWhere('id', (string) $sabre->id);
+        $payload = json_encode($row);
+        $this->assertStringNotContainsString('epr4016', (string) $payload);
+        $this->assertStringNotContainsString('secretes99', (string) $payload);
+        $labels = collect($row['credentialFields'] ?? [])->pluck('label')->implode(' ');
+        $this->assertStringContainsStringIgnoringCase('pcc', $labels);
     }
 
     public function test_api_settings_index_shows_enable_toggle(): void
     {
         $admin = $this->seededAdmin();
+        SupplierConnection::factory()->create([
+            'agency_id' => $admin->current_agency_id,
+            'provider' => SupplierProvider::Travelport,
+            'name' => 'Toggle Visible',
+            'credentials' => ['client_id' => 'x', 'client_secret' => 'y'],
+            'is_active' => true,
+        ]);
 
         $this->actingAs($admin)
             ->get('/admin/api-settings')
+            ->assertRedirect('/admin/dashboard/api-connections');
+
+        $this->actingAs($admin)
+            ->getJson('/admin/api-settings?format=json')
             ->assertOk()
-            ->assertSee('Enabled', false)
-            ->assertSee('toggle-status', false);
+            ->assertJsonPath('ok', true)
+            ->assertJsonStructure([
+                'connections' => [
+                    ['id', 'name', 'enabled', 'credentialsConfigured'],
+                ],
+            ]);
+    }
+
+    public function test_supplier_rows_are_agency_scoped(): void
+    {
+        $admin = $this->seededAdmin();
+        $otherAgency = Agency::factory()->create();
+        SupplierConnection::factory()->create([
+            'agency_id' => $otherAgency->id,
+            'provider' => SupplierProvider::Travelport,
+            'name' => 'Foreign Supplier',
+            'display_name' => 'Foreign Supplier',
+            'credentials' => ['client_id' => 'foreign', 'client_secret' => 'secret'],
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/api-settings')
+            ->assertRedirect('/admin/dashboard/api-connections');
+
+        // Platform admin hub lists all agencies (not agency-scoped).
+        $response = $this->actingAs($admin)->getJson('/admin/api-settings?format=json')->assertOk();
+        $names = collect($response->json('connections'))->pluck('name')->all();
+        $this->assertContains('Foreign Supplier', $names);
     }
 
     public function test_sabre_readiness_with_credentials_sets_ready_for_review_without_external_calls(): void
@@ -537,26 +609,12 @@ class SupplierConnectionCrudTest extends TestCase
         $this->assertSame(SupplierConnectionStatus::Inactive, $connection->status);
     }
 
-    public function test_supplier_rows_are_agency_scoped(): void
-    {
-        $admin = $this->seededAdmin();
-        $otherAgency = Agency::factory()->create();
-        SupplierConnection::factory()->create([
-            'agency_id' => $otherAgency->id,
-            'provider' => SupplierProvider::Travelport,
-            'name' => 'Foreign Supplier',
-        ]);
-
-        $this->actingAs($admin)
-            ->get('/admin/api-settings')
-            ->assertOk()
-            ->assertDontSee('Foreign Supplier', false);
-    }
-
     protected function seededAdmin(): User
     {
         $this->seed(OtaFoundationSeeder::class);
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin->forceFill(['account_type' => \App\Enums\AccountType::PlatformAdmin])->save();
 
-        return User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        return $admin->fresh();
     }
 }

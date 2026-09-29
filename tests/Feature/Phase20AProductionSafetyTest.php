@@ -128,7 +128,7 @@ class Phase20AProductionSafetyTest extends TestCase
         $this->actingAs($admin)->get(route('admin.bookings'))->assertOk()->assertSee('BKG-PHASE20A');
         $this->actingAs($admin)->get(route('admin.reports'))->assertOk()->assertSee('Reports &amp; Analytics', false);
         $this->actingAs($admin)->get(route('admin.markups'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.api-settings'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.api-settings'))->assertRedirect('/admin/dashboard/api-connections');
 
         $this->actingAs($staff)->get(route('staff.bookings.index'))->assertOk();
         $this->actingAs($agent)->get(route('agent.bookings.index'))->assertOk();

@@ -166,10 +166,7 @@ class BackOfficeCapabilitiesPresenter
 
         // Admin mutation surfaces: Blade hubs (Next dashboard API is intentionally GET-only).
         if ($isAdmin) {
-            $apiSettings = $this->laravelNav('API Settings', 'api-settings', 'admin.api-settings');
-            if ($apiSettings !== null) {
-                $items[] = $apiSettings;
-            }
+            $items[] = $this->dashboardNav('API Connections', 'api-connections', '/api-connections');
             if ($modules['branding_settings'] ?? false) {
                 $branding = $this->laravelNav('Company Profile', 'company-profile', 'admin.settings.branding.edit');
                 if ($branding !== null) {

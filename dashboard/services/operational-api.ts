@@ -8,6 +8,11 @@ import {
   agentApplicationApprovePath,
   agentApplicationNeedsMoreInfoPath,
   agentApplicationRejectPath,
+  apiSettingsIndexPath,
+  apiSettingsStorePath,
+  apiSettingsTestPath,
+  apiSettingsTogglePath,
+  apiSettingsUpdatePath,
   bookingAssignStaffPath,
   bookingNotesPath,
   cancellationApprovePath,
@@ -416,6 +421,58 @@ export async function reverseFinanceAdjustment(
 ): Promise<MutationResponse<Record<string, unknown>>> {
   return laravelRequest(financeAdjustmentReversePath(walletTransactionId), {
     method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function listApiConnections(): Promise<
+  MutationResponse<{
+    connections?: Record<string, unknown>[];
+    providers?: Record<string, unknown>[];
+    providerCards?: Record<string, unknown>[];
+  }>
+> {
+  return laravelRequest(apiSettingsIndexPath(), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function createApiConnection(
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ connection?: Record<string, unknown> }>> {
+  return laravelRequest(apiSettingsStorePath(), {
+    method: "POST",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateApiConnection(
+  connectionId: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ connection?: Record<string, unknown> }>> {
+  return laravelRequest(apiSettingsUpdatePath(connectionId), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function toggleApiConnection(
+  connectionId: string,
+): Promise<MutationResponse<{ connection?: Record<string, unknown> }>> {
+  return laravelRequest(apiSettingsTogglePath(connectionId), {
+    method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function testApiConnection(
+  connectionId: string,
+): Promise<MutationResponse<{ test?: Record<string, unknown>; connection?: Record<string, unknown> }>> {
+  return laravelRequest(apiSettingsTestPath(connectionId), {
+    method: "PATCH",
     retryCsrfOnce: false,
   });
 }

@@ -317,6 +317,6 @@ class AuthenticationTest extends TestCase
             'account_type' => AccountType::PlatformAdmin,
         ]);
 
-        $this->actingAs($platformAdmin)->get(route('admin.api-settings'))->assertOk();
+        $this->actingAs($platformAdmin)->get(route('admin.api-settings'))->assertRedirect('/admin/dashboard/api-connections');
     }
 }
