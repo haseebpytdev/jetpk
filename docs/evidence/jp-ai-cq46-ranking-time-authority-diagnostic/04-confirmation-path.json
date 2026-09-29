@@ -1,0 +1,10 @@
+{
+    "CHEAPEST_PENDING_PATH": "lead_FSM_unambiguousPendingLead→name_capture (isTravelAuthorityTurn=false; looksLikeBareName=true; pending confirmation handler not reached for material correction)",
+    "MORNING_PENDING_PATH": "lead_FSM_unambiguousPendingLead→name_capture (same)",
+    "ranking_survives": false,
+    "time_survives": false,
+    "pending_confirmation_after_cheapest": true,
+    "pending_confirmation_after_morning": true,
+    "RANKING_USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+    "TIME_USER_RESPONSE_CLASS": "incorrectly_asks_for_contact"
+}

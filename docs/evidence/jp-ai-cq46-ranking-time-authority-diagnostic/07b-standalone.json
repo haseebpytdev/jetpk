@@ -1,0 +1,23 @@
+{
+    "cheapest": {
+        "STATUS": "ok",
+        "LEAD_NAME_AFTER": "cheapest",
+        "LEAD_STAGE_AFTER": "contact",
+        "message_excerpt": "Thanks, cheapest. Could you share your email address and contact number, please?",
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "fastest": {
+        "STATUS": "ok",
+        "LEAD_NAME_AFTER": "fastest",
+        "LEAD_STAGE_AFTER": "contact",
+        "message_excerpt": "Thanks, fastest. Could you share your email address and contact number, please?",
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "morning": {
+        "STATUS": "ok",
+        "LEAD_NAME_AFTER": "morning",
+        "LEAD_STAGE_AFTER": "contact",
+        "message_excerpt": "Thanks, morning. Could you share your email address and contact number, please?",
+        "LOOKS_LIKE_BARE_NAME": true
+    }
+}

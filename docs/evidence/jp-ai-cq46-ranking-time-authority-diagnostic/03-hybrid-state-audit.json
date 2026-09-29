@@ -1,0 +1,40 @@
+{
+    "cheapest": {
+        "HybridParseResult_rankingPreference": "CHEAPEST",
+        "state_ranking_preference": "CHEAPEST",
+        "TravelIntent_timePreference": null,
+        "TravelIntent_maxStops": null,
+        "TravelIntent_toArray_keys": [
+            "intent",
+            "origin",
+            "destination",
+            "depart_date",
+            "return_date",
+            "adults",
+            "children",
+            "infants",
+            "cabin",
+            "airline",
+            "max_stops",
+            "budget",
+            "time_preference",
+            "currency",
+            "mode",
+            "trip_type",
+            "legs"
+        ]
+    },
+    "morning": {
+        "HybridParseResult_rankingPreference": null,
+        "TravelIntent_timePreference": "morning",
+        "state_time_preference": "morning",
+        "state_ranking_preference": null
+    },
+    "patcher": {
+        "TIME_PREFERENCE_PATCHES_THROUGH_TRAVEL_INTENT": true,
+        "RANKING_PREFERENCE_PATCHES_THROUGH_TRAVEL_INTENT": false,
+        "patched_morning_time": "morning",
+        "patched_cheapest_ranking": null,
+        "note": "ConversationStatePatcher::merge only loops TravelIntent::toArray(); ranking_preference is applied only inside HybridTravelPipeline state merge, not via patchState(TravelIntent)."
+    }
+}

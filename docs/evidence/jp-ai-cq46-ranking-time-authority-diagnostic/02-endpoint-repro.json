@@ -1,0 +1,162 @@
+{
+    "CQ46_FALSE_LEAD_BASELINE": "CONFIRMED",
+    "SEARCH_BEFORE_CONFIRMATION": 0,
+    "rows": {
+        "cheapest": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "cheapest",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, cheapest. Could you share your email address and contact number, please?"
+        },
+        "fastest": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "fastest",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, fastest. Could you share your email address and contact number, please?"
+        },
+        "morning": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "morning",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, morning. Could you share your email address and contact number, please?"
+        },
+        "cheap": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "cheap",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, cheap. Could you share your email address and contact number, please?"
+        },
+        "sasti": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "sasti",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, sasti. Could you share your email address and contact number, please?"
+        },
+        "jaldi": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "jaldi",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, jaldi. Could you share your email address and contact number, please?"
+        },
+        "best value": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "best value",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, best value. Could you share your email address and contact number, please?"
+        },
+        "shortest layover": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "shortest layover",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, shortest layover. Could you share your email address and contact number, please?"
+        },
+        "subah": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "subah",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, subah. Could you share your email address and contact number, please?"
+        },
+        "evening": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "evening",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, evening. Could you share your email address and contact number, please?"
+        },
+        "night": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "night",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, night. Could you share your email address and contact number, please?"
+        },
+        "shaam": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "shaam",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, shaam. Could you share your email address and contact number, please?"
+        },
+        "raat": {
+            "STATUS": "ok",
+            "LEAD_NAME_AFTER": "raat",
+            "LEAD_STAGE_AFTER": "contact",
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null,
+            "MODEL_CALLS": 0,
+            "SEARCH_CALLS": 0,
+            "PENDING_CONFIRMATION_PRESENT": true,
+            "USER_RESPONSE_CLASS": "incorrectly_asks_for_contact",
+            "message_excerpt": "Thanks, raat. Could you share your email address and contact number, please?"
+        }
+    }
+}

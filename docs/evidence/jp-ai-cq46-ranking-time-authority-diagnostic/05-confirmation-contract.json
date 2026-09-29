@@ -1,0 +1,34 @@
+{
+    "snapshot_keys": [
+        "origin",
+        "destination",
+        "departure_date",
+        "return_date",
+        "trip_type",
+        "adults",
+        "children",
+        "infants",
+        "cabin",
+        "airline",
+        "max_stops",
+        "currency",
+        "legs"
+    ],
+    "RANKING_IN_CONFIRMATION_SNAPSHOT": "NO",
+    "TIME_IN_CONFIRMATION_SNAPSHOT": "NO",
+    "MAX_STOPS_IN_CONFIRMATION_SNAPSHOT": "YES",
+    "snapshotsEqual_keys": [
+        "origin",
+        "destination",
+        "departure_date",
+        "return_date",
+        "trip_type",
+        "adults",
+        "children",
+        "infants",
+        "cabin",
+        "airline",
+        "max_stops"
+    ],
+    "confirmationMessage_mentions_preference": false
+}

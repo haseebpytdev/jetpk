@@ -1,0 +1,17 @@
+{
+    "My name is Morning": {
+        "LEAD_NAME_AFTER": "My name is Morning",
+        "LEAD_STAGE_AFTER": "contact",
+        "STATUS": "ok"
+    },
+    "My name is Fast": {
+        "LEAD_NAME_AFTER": "My name is Fast",
+        "LEAD_STAGE_AFTER": "contact",
+        "STATUS": "ok"
+    },
+    "My name is Best": {
+        "LEAD_NAME_AFTER": "My name is Best",
+        "LEAD_STAGE_AFTER": "contact",
+        "STATUS": "ok"
+    }
+}

@@ -1,0 +1,119 @@
+{
+    "cheapest": {
+        "RESOLVER_RANKING": "CHEAPEST",
+        "RESOLVER_TIME_PREFERENCE": null,
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "fastest": {
+        "RESOLVER_RANKING": "FASTEST",
+        "RESOLVER_TIME_PREFERENCE": null,
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "morning": {
+        "RESOLVER_RANKING": null,
+        "RESOLVER_TIME_PREFERENCE": "morning",
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "cheap": {
+        "RESOLVER_RANKING": "CHEAPEST",
+        "RESOLVER_TIME_PREFERENCE": null,
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "sasti": {
+        "RESOLVER_RANKING": "CHEAPEST",
+        "RESOLVER_TIME_PREFERENCE": null,
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "jaldi": {
+        "RESOLVER_RANKING": "FASTEST",
+        "RESOLVER_TIME_PREFERENCE": null,
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "best value": {
+        "RESOLVER_RANKING": "BEST_VALUE",
+        "RESOLVER_TIME_PREFERENCE": null,
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "shortest layover": {
+        "RESOLVER_RANKING": "SHORTEST_LAYOVER",
+        "RESOLVER_TIME_PREFERENCE": null,
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "subah": {
+        "RESOLVER_RANKING": null,
+        "RESOLVER_TIME_PREFERENCE": "morning",
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "evening": {
+        "RESOLVER_RANKING": null,
+        "RESOLVER_TIME_PREFERENCE": "evening",
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "night": {
+        "RESOLVER_RANKING": null,
+        "RESOLVER_TIME_PREFERENCE": "night",
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "shaam": {
+        "RESOLVER_RANKING": null,
+        "RESOLVER_TIME_PREFERENCE": "evening",
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    },
+    "raat": {
+        "RESOLVER_RANKING": null,
+        "RESOLVER_TIME_PREFERENCE": "night",
+        "SERVER_ACTIVE": false,
+        "SERVER_TRAVEL_REFINEMENT": false,
+        "SERVER_STOP_REFINEMENT": false,
+        "IS_TRAVEL_AUTHORITY_TURN": false,
+        "LOOKS_LIKE_BARE_NAME": true
+    }
+}
