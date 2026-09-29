@@ -11,6 +11,8 @@ export type DashboardNavItem = {
   label: string;
   href: string;
   key: string;
+  /** dashboard = Next shell path; laravel = absolute public Blade/Laravel path */
+  target?: "dashboard" | "laravel";
 };
 
 export type DashboardSessionSummary = {

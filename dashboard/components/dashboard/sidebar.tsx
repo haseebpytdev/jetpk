@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { stripDashboardBasePath, detectPortalFromPathname } from "@/lib/portal-path";
 import { dashboardHref } from "@/lib/portal-path";
+import { sanitizePublicHref } from "@/lib/sanitize-public-href";
 import { useDashboardPortal } from "@/lib/portal-context";
 import { useDashboardNavigation, useDashboardSession } from "@/lib/session-context";
 import { useDashboardPath } from "@/lib/use-dashboard-path";
 import { cn } from "@/lib/utils";
 import { navGroups } from "@/lib/nav-config";
-import type { DashboardSessionSummary } from "@/services/session-service";
+import type { DashboardNavItem, DashboardSessionSummary } from "@/services/session-service";
 
 type Props = {
   open: boolean;
@@ -24,6 +25,15 @@ function isActive(pathname: string, href: string): boolean {
   }
   const base = href.split("?")[0];
   return pathname === base || pathname.startsWith(`${base}/`);
+}
+
+function navLinkClass(active: boolean): string {
+  return cn(
+    "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
+    active
+      ? "bg-jp-accent font-medium text-white"
+      : "text-gray-300 hover:bg-white/10 hover:text-white",
+  );
 }
 
 export function DashboardSidebar({ open, onClose, session: sessionProp }: Props) {
@@ -43,6 +53,35 @@ export function DashboardSidebar({ open, onClose, session: sessionProp }: Props)
     email: "—",
     initials: "??",
     roles: isLive ? [] : ["Preview"],
+  };
+
+  const renderSessionItem = (item: DashboardNavItem) => {
+    const isLaravel = item.target === "laravel";
+    const href = isLaravel
+      ? sanitizePublicHref(item.href)
+      : dashboardHref(effectivePortal, item.href);
+    const active = !isLaravel && isActive(relativePathname, item.href);
+    const className = navLinkClass(active);
+
+    return (
+      <li key={item.key}>
+        {isLaravel ? (
+          <a href={href} onClick={onClose} className={className} data-nav-target="laravel">
+            <span className="flex-1">{item.label}</span>
+          </a>
+        ) : (
+          <Link
+            href={href}
+            onClick={onClose}
+            className={className}
+            aria-current={active ? "page" : undefined}
+            data-nav-target="dashboard"
+          >
+            <span className="flex-1">{item.label}</span>
+          </Link>
+        )}
+      </li>
+    );
   };
 
   return (
@@ -88,29 +127,7 @@ export function DashboardSidebar({ open, onClose, session: sessionProp }: Props)
         </div>
         <nav className="flex-1 overflow-y-auto p-3">
           {useSessionNavigation ? (
-            <ul className="space-y-1">
-              {navigation.map((item) => {
-                const active = isActive(relativePathname, item.href);
-                const href = dashboardHref(portal, item.href);
-                return (
-                  <li key={item.key}>
-                    <Link
-                      href={href}
-                      onClick={onClose}
-                      className={cn(
-                        "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
-                        active
-                          ? "bg-jp-accent font-medium text-white"
-                          : "text-gray-300 hover:bg-white/10 hover:text-white",
-                      )}
-                      aria-current={active ? "page" : undefined}
-                    >
-                      <span className="flex-1">{item.label}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <ul className="space-y-1">{navigation.map(renderSessionItem)}</ul>
           ) : isLive ? (
             <p className="px-3 text-sm text-gray-400">Navigation unavailable until session loads.</p>
           ) : (
@@ -128,12 +145,7 @@ export function DashboardSidebar({ open, onClose, session: sessionProp }: Props)
                         <Link
                           href={href}
                           onClick={onClose}
-                          className={cn(
-                            "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
-                            active
-                              ? "bg-jp-accent font-medium text-white"
-                              : "text-gray-300 hover:bg-white/10 hover:text-white",
-                          )}
+                          className={navLinkClass(active)}
                           aria-current={active ? "page" : undefined}
                         >
                           <span className="flex-1">{item.label}</span>
