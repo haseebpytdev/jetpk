@@ -1,0 +1,17 @@
+{
+  "CHEAPEST_FALSE_LEAD_CAPTURE": 0,
+  "FASTEST_FALSE_LEAD_CAPTURE": 0,
+  "family": {
+    "cheapest": "CHEAPEST",
+    "cheap": "CHEAPEST",
+    "sasti": "CHEAPEST",
+    "fastest": "FASTEST",
+    "fast": "FASTEST",
+    "jaldi": "FASTEST",
+    "shortest layover": "SHORTEST_LAYOVER",
+    "best value": "BEST_VALUE"
+  },
+  "MODEL_CALLS": 0,
+  "lead_capture_stage_after": "name",
+  "lead_name_after": null
+}

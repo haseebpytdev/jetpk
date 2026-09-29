@@ -1,0 +1,14 @@
+{
+  "MIXED_STOP_RANKING_PERSIST": "PASS",
+  "MIXED_CABIN_RANKING_PERSIST": "PASS",
+  "MIXED_PAX_TIME_PERSIST": "PASS",
+  "EXPLICIT_ROUTE_RANKING_PERSIST": "PASS",
+  "EXPLICIT_ROUTE_TIME_PERSIST": "PASS",
+  "notes": {
+    "direct_and_cheapest": { "max_stops": 0, "ranking_preference": "CHEAPEST", "MODEL_CALLS": 0 },
+    "business_and_cheapest": { "cabin": "business", "ranking_preference": "CHEAPEST" },
+    "2_adults_and_morning": { "adults": 2, "time_preference": "morning" },
+    "Lahore_to_Dubai_tomorrow_cheapest": { "origin": "LHE", "destination": "DXB", "ranking_preference": "CHEAPEST" },
+    "Islamabad_to_Dubai_tomorrow_morning": { "origin": "ISB", "destination": "DXB", "time_preference": "morning" }
+  }
+}

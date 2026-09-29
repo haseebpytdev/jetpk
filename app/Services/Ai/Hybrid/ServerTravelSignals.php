@@ -58,6 +58,8 @@ final class ServerTravelSignals
      *   cabin_refinement: bool,
      *   return_refinement: bool,
      *   stop_refinement: bool,
+     *   ranking_refinement: bool,
+     *   time_refinement: bool,
      *   origin_only: bool,
      *   destination_only: bool
      * }
@@ -73,6 +75,7 @@ final class ServerTravelSignals
                 (isset($priorState['origin']) && is_string($priorState['origin']) && $priorState['origin'] !== '')
                 || (isset($priorState['destination']) && is_string($priorState['destination']) && $priorState['destination'] !== '')
                 || ! empty($priorState['flight_search_pending_confirmation'])
+                || ! empty($priorState['pending_flight_search_confirmation'])
                 || (isset($priorState['intent']) && in_array($priorState['intent'], ['flight_search', 'group_search'], true))
             );
 
@@ -86,6 +89,12 @@ final class ServerTravelSignals
         $stopRefinement = array_key_exists('max_stops', $constraints)
             && $constraints['max_stops'] !== null;
 
+        // CQ46: ranking / time soft preferences from the same resolver (no vocab duplication).
+        $rankingRefinement = is_string($constraints['ranking'] ?? null)
+            && trim((string) $constraints['ranking']) !== '';
+        $timeRefinement = is_string($constraints['time_preference'] ?? null)
+            && trim((string) $constraints['time_preference']) !== '';
+
         $travelStart = $od['destination_only'] || $od['explicit_route']
             || ($od['origin_only'] && $hasActiveTravel);
         $travelRefinement = $hasActiveTravel && (
@@ -97,6 +106,8 @@ final class ServerTravelSignals
             || $paxRefinement
             || $cabinRefinement
             || $stopRefinement
+            || $rankingRefinement
+            || $timeRefinement
         );
 
         $active = $od['explicit_route']
@@ -108,7 +119,9 @@ final class ServerTravelSignals
             || $returnRefinement
             || $paxRefinement
             || $cabinRefinement
-            || $stopRefinement;
+            || $stopRefinement
+            || $rankingRefinement
+            || $timeRefinement;
 
         // Merge progressive slots with prior when role-partial.
         $origin = $od['origin'];
@@ -127,6 +140,7 @@ final class ServerTravelSignals
             'destination' => $destination,
             'origin_explicit' => $od['origin_explicit'],
             'destination_explicit' => $od['destination_explicit'],
+            // Preference-only must never invent travel_start.
             'travel_start' => $travelStart || $od['destination_only'] || $od['explicit_route'],
             'travel_refinement' => $travelRefinement,
             'date_refinement' => $dateRefinement,
@@ -134,6 +148,8 @@ final class ServerTravelSignals
             'cabin_refinement' => $cabinRefinement,
             'return_refinement' => $returnRefinement,
             'stop_refinement' => $stopRefinement,
+            'ranking_refinement' => $rankingRefinement,
+            'time_refinement' => $timeRefinement,
             'origin_only' => $od['origin_only'],
             'destination_only' => $od['destination_only'],
             'origin_ambiguous' => (bool) ($od['origin_ambiguous'] ?? false),

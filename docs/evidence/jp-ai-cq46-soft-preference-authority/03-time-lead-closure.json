@@ -1,0 +1,15 @@
+{
+  "MORNING_FALSE_LEAD_CAPTURE": 0,
+  "family": {
+    "morning": "morning",
+    "subah": "morning",
+    "evening": "evening",
+    "shaam": "evening",
+    "night": "night",
+    "raat": "night"
+  },
+  "NIGHT_DOWNSTREAM": "UNSUPPORTED_DOWNSTREAM_WEAK",
+  "NIGHT_SOFT_STATE_ALLOWED": true,
+  "MODEL_CALLS": 0,
+  "lead_name_after": null
+}

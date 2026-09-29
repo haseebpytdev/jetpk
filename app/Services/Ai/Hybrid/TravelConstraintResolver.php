@@ -16,7 +16,8 @@ final class TravelConstraintResolver
         $cabin = null;
         $hay = $normalized.' '.$original;
 
-        if (preg_match('/\b(business\s*class|business\s*cabin|make (it|that) business)\b/u', $hay) === 1
+        // Bare "business" matches economy's bare-token authority (CQ46 mixed cabin+ranking).
+        if (preg_match('/\b(business\s*class|business\s*cabin|make (it|that) business|business)\b/u', $hay) === 1
             && preg_match('/\b(economy|premium\s*economy|first\s*class)\b/u', $hay) !== 1) {
             $cabin = 'business';
             $prov['cabin'] = 'EXPLICIT_USER';

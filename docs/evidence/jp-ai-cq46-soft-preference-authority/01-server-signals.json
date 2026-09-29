@@ -1,0 +1,16 @@
+{
+  "ranking_refinement": true,
+  "time_refinement": true,
+  "active_includes_soft_prefs": true,
+  "travel_refinement_requires_prior_active": true,
+  "travel_start_from_pref_only": false,
+  "deterministic_authority_complete_includes_ranking": false,
+  "deterministic_authority_complete_includes_time": false,
+  "vocab_owner": "TravelConstraintResolver::resolve",
+  "probes": {
+    "cheapest": { "ranking_refinement": true, "time_refinement": false, "active": true, "travel_start": false },
+    "fastest": { "ranking_refinement": true, "time_refinement": false },
+    "morning": { "ranking_refinement": false, "time_refinement": true, "active": true },
+    "Ahmed": { "ranking_refinement": false, "time_refinement": false }
+  }
+}

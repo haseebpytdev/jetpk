@@ -1,0 +1,25 @@
+{
+  "PENDING_CHEAPEST": {
+    "lead_name": null,
+    "lead_capture_stage": "name",
+    "ranking_preference": "CHEAPEST",
+    "confirmation_preserved": true,
+    "MODEL_CALLS": 0,
+    "SEARCH_CALLS": 0,
+    "SOFT_PREFERENCE_AUTHORITY": "YES"
+  },
+  "PENDING_MORNING": {
+    "lead_name": null,
+    "time_preference": "morning",
+    "confirmation_preserved": true,
+    "MODEL_CALLS": 0,
+    "SEARCH_CALLS": 0
+  },
+  "SOFT_PREF_THEN_YES_CONFIRMATION": "PASS",
+  "SOFT_PREF_THEN_YES_SEARCH_CALLS": 1,
+  "SOFT_PREF_THEN_NO_CONFIRMATION": "PASS",
+  "SOFT_PREF_THEN_NO_SEARCH_CALLS": 0,
+  "BARE_YES_CONFIRMATION_AUTHORITY": "PASS",
+  "BARE_NO_CONFIRMATION_AUTHORITY": "PASS",
+  "CONFIRMATION_SNAPSHOT_SCHEMA_CHANGED": "NO"
+}
