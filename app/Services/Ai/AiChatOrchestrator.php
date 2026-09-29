@@ -474,6 +474,12 @@ final class AiChatOrchestrator
             return $this->replyOpenDomainFallback($conversation, $cleanMessage, $openCategory, $capabilities, $brand, $baseMeta);
         }
 
+        // CQ46: server-owned soft ranking/time preferences (simple single-leg) before Qwen.
+        $softPref = $this->trySoftTravelPreferenceTurn($conversation, $cleanMessage, $baseMeta);
+        if (is_array($softPref)) {
+            return $softPref;
+        }
+
         // CQ28: Qwen semantic planner primary after hard security/state gates.
         $semanticFallbackMeta = [];
         $skipLegacyLlmAfterSemanticTravelFallback = false;
@@ -1086,6 +1092,158 @@ final class AiChatOrchestrator
         $lower = mb_strtolower(trim($message));
 
         return (bool) preg_match('/^(resume ai|resume assistant|back to ai|return to ai)[\s!.?]*$/u', $lower);
+    }
+
+    /**
+     * CQ46: soft ranking/time preference turns — lead override + shopping_state persist.
+     * Preference-only (not mixed with material route/date/pax/cabin/stop). Simple single-leg
+     * only; prior open-jaw/multi-leg returns null so Qwen owns ambiguity.
+     * Does not alter confirmation snapshot schema or execute search.
+     *
+     * @param  array<string, mixed>  $baseMeta
+     * @return array<string, mixed>|null
+     */
+    private function trySoftTravelPreferenceTurn(AiConversation $conversation, string $cleanMessage, array $baseMeta): ?array
+    {
+        if ($this->extractor->detectBookingLookup($cleanMessage) || $this->extractor->detectHandoff($cleanMessage)) {
+            return null;
+        }
+
+        $openCategory = $this->intentRouter->classifyOpenDomain($cleanMessage);
+        if (in_array($openCategory, [
+            'HIGH_RISK',
+            'CURRENT_UNVERIFIED',
+            'GENERAL_KNOWLEDGE',
+            'OUT_OF_DOMAIN_SAFE',
+            'CASUAL_CONVERSATION',
+        ], true)) {
+            return null;
+        }
+
+        $prior = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+        $signals = app(\App\Services\Ai\Hybrid\ServerTravelSignals::class);
+        $auth = $signals->progressiveTravelAuthority($cleanMessage, $prior);
+        $rankingRefinement = ! empty($auth['ranking_refinement']);
+        $timeRefinement = ! empty($auth['time_refinement']);
+        if (! $rankingRefinement && ! $timeRefinement) {
+            return null;
+        }
+
+        // Mixed material + soft: leave to hybrid/deterministic (ranking still persisted there).
+        if (! empty($auth['stop_refinement'])
+            || ! empty($auth['cabin_refinement'])
+            || ! empty($auth['pax_refinement'])
+            || ! empty($auth['date_refinement'])
+            || ! empty($auth['return_refinement'])
+            || ! empty($auth['explicit_route'])
+            || ! empty($auth['origin_only'])
+            || ! empty($auth['destination_only'])
+            || ! empty($auth['origin_ambiguous'])
+            || ! empty($auth['dest_ambiguous'])
+        ) {
+            return null;
+        }
+
+        $priorLegs = $prior['legs'] ?? null;
+        $priorMultiLeg = ($prior['trip_type'] ?? null) === 'open_jaw'
+            || (is_array($priorLegs) && count($priorLegs) >= 2);
+        if ($priorMultiLeg) {
+            return null;
+        }
+
+        $hybrid = $this->extractor->extractHybrid($cleanMessage, $prior);
+        $ranking = $hybrid->rankingPreference;
+        $timePref = $hybrid->intent->timePreference;
+        if (($ranking === null || $ranking === '') && ($timePref === null || $timePref === '')) {
+            return null;
+        }
+
+        $pendingBefore = $this->flightConfirmation->pendingSnapshot($conversation);
+
+        $state = $prior;
+        $patched = $this->extractor->patchState($prior, $hybrid->intent);
+        // Soft prefs must not silently downgrade active travel / material slots.
+        foreach (['intent', 'origin', 'destination', 'depart_date', 'return_date', 'trip_type', 'adults', 'children', 'infants', 'cabin', 'airline', 'max_stops', 'legs'] as $key) {
+            if (array_key_exists($key, $prior)) {
+                $patched[$key] = $prior[$key];
+            }
+        }
+        if (is_string($timePref) && $timePref !== '') {
+            $patched['time_preference'] = $timePref;
+        }
+        if (is_string($ranking) && $ranking !== '') {
+            $patched['ranking_preference'] = $ranking;
+        }
+        // Preserve lead FSM fields and pending confirmation blob.
+        foreach (['lead_capture_pending', 'lead_capture_stage', 'lead_name', 'lead_capture_fields', FlightSearchConfirmationGate::STATE_KEY] as $key) {
+            if (array_key_exists($key, $prior)) {
+                $patched[$key] = $prior[$key];
+            }
+        }
+        $conversation->shopping_state = $patched;
+        $conversation->save();
+
+        $pendingAfter = $this->flightConfirmation->pendingSnapshot($conversation);
+        if (is_array($pendingBefore) && is_array($pendingAfter)
+            && ! $this->flightConfirmation->snapshotsEqual($pendingBefore, $pendingAfter)) {
+            // Soft path must never mutate confirmation-material fields — restore pending.
+            $restored = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+            $restored[FlightSearchConfirmationGate::STATE_KEY] = $pendingBefore;
+            $conversation->shopping_state = $restored;
+            $conversation->save();
+        }
+
+        $hasRoute = (is_string($patched['origin'] ?? null) && $patched['origin'] !== '')
+            && (is_string($patched['destination'] ?? null) && $patched['destination'] !== '');
+
+        $parts = [];
+        if (is_string($ranking) && $ranking !== '') {
+            $label = strtolower(str_replace('_', ' ', $ranking));
+            $parts[] = 'I’ve noted '.$label.' as your preference';
+        }
+        if (is_string($timePref) && $timePref !== '') {
+            $parts[] = 'I’ve noted '.$timePref.' as your preferred departure time';
+        }
+        $body = 'Got it — '.implode(', and ', $parts).'.';
+        if ($hasRoute) {
+            $body .= ' Your current flight details are unchanged.';
+            if (is_array($pendingBefore)) {
+                $body .= ' Say yes when you are ready for me to search.';
+            }
+        } else {
+            $body .= ' Which route and date should I use?';
+        }
+
+        $meta = array_merge($baseMeta, [
+            'SOFT_PREFERENCE_AUTHORITY' => 'YES',
+            'RANKING_PREFERENCE' => is_string($ranking) && $ranking !== '' ? $ranking : null,
+            'TIME_PREFERENCE' => is_string($timePref) && $timePref !== '' ? $timePref : null,
+            'SEMANTIC_BRAIN_CALLED' => 'NO',
+            'SEMANTIC_PLANNER_BYPASSED' => 'YES',
+            'MODEL_CALLS' => 0,
+            'SEMANTIC_LATENCY_MS' => 0,
+            'TOTAL_MODEL_LATENCY_MS' => 0,
+            'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
+            'AI_GROUP_SEARCH_READ_CALLS' => 0,
+            'MODEL_CAN_AUTHORIZE_MUTATION' => 'NO',
+            'llm_bypassed' => true,
+        ]);
+
+        $assistant = $this->storeMessage($conversation, 'assistant', $body, [
+            'mode' => 'STRUCTURED_FALLBACK',
+        ]);
+
+        return $this->withMessageId($assistant, [
+            'ok' => true,
+            'status' => 'ok',
+            'mode' => 'STRUCTURED_FALLBACK',
+            'conversation_id' => $conversation->public_id,
+            'state' => $conversation->state,
+            'message' => $body,
+            'recommendations' => [],
+            'actions' => $this->resolveResponseActions(),
+            'meta' => $meta,
+        ]);
     }
 
     /**
@@ -1898,11 +2056,23 @@ final class AiChatOrchestrator
             return null;
         }
 
+        // CQ46: soft ranking/time preferences must not restate/invalidate pending confirmation.
+        $softPending = $this->trySoftTravelPreferenceTurn($conversation, $cleanMessage, $baseMeta);
+        if (is_array($softPending)) {
+            return $softPending;
+        }
+
         // Material correction: re-parse against prior shopping state (includes pending fields via patch).
         $prior = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
         $hybrid = $this->extractor->extractHybrid($cleanMessage, $prior);
         $intent = $hybrid->intent;
         $conversation->shopping_state = $this->extractor->patchState($prior, $intent);
+        // Hybrid ranking is not on TravelIntent — preserve when present (mixed material turns).
+        if ($hybrid->rankingPreference) {
+            $patched = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+            $patched['ranking_preference'] = $hybrid->rankingPreference;
+            $conversation->shopping_state = $patched;
+        }
         $conversation->save();
 
         if (

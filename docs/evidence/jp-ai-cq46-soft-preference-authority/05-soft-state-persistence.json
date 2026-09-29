@@ -1,0 +1,13 @@
+{
+  "handler": "AiChatOrchestrator::trySoftTravelPreferenceTurn",
+  "source": "extractHybrid → rankingPreference / intent.timePreference",
+  "persist_keys": ["ranking_preference", "time_preference"],
+  "preserved_material_keys": [
+    "origin", "destination", "depart_date", "return_date", "trip_type",
+    "adults", "children", "infants", "cabin", "airline", "max_stops", "legs"
+  ],
+  "ack_claims_filter_applied": false,
+  "ack_claims_only_show": false,
+  "standalone_cheapest": { "lead_name": null, "ranking_preference": "CHEAPEST", "MODEL_CALLS": 0 },
+  "standalone_morning": { "lead_name": null, "time_preference": "morning", "MODEL_CALLS": 0 }
+}

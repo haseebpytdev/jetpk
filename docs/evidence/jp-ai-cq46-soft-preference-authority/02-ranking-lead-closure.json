@@ -1,0 +1,26 @@
+{
+  "CHEAPEST_FALSE_LEAD_CAPTURE": 0,
+  "FASTEST_FALSE_LEAD_CAPTURE": 0,
+  "CHEAPEST_FAMILY": "PASS",
+  "FASTEST_FAMILY": "PASS",
+  "SHORTEST_LAYOVER_FAMILY": "PASS",
+  "BEST_VALUE_FAMILY": "PASS",
+  "family": {
+    "cheapest": "CHEAPEST",
+    "cheap": "CHEAPEST",
+    "sasti": "CHEAPEST",
+    "سستی": "CHEAPEST",
+    "fastest": "FASTEST",
+    "fast": "FASTEST",
+    "jaldi": "FASTEST",
+    "shortest layover": "SHORTEST_LAYOVER",
+    "long layover nahi": "SHORTEST_LAYOVER",
+    "best value": "BEST_VALUE",
+    "best option": "BEST_VALUE",
+    "best": "BEST_VALUE"
+  },
+  "MODEL_CALLS": 0,
+  "lead_capture_stage_after": "name",
+  "lead_name_after": null,
+  "intent_after": "flight_search"
+}
