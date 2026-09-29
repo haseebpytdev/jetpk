@@ -1,15 +1,23 @@
 {
   "MORNING_FALSE_LEAD_CAPTURE": 0,
+  "MORNING_FAMILY": "PASS",
+  "EVENING_FAMILY": "PASS",
+  "NIGHT_FAMILY": "PASS",
   "family": {
     "morning": "morning",
     "subah": "morning",
+    "صبح": "morning",
     "evening": "evening",
     "shaam": "evening",
+    "شام": "evening",
     "night": "night",
-    "raat": "night"
+    "raat": "night",
+    "رات": "night"
   },
   "NIGHT_DOWNSTREAM": "UNSUPPORTED_DOWNSTREAM_WEAK",
   "NIGHT_SOFT_STATE_ALLOWED": true,
+  "NIGHT_FILTER_CLAIMED": false,
   "MODEL_CALLS": 0,
-  "lead_name_after": null
+  "lead_name_after": null,
+  "intent_after": "flight_search"
 }

@@ -1162,7 +1162,8 @@ final class AiChatOrchestrator
 
         $state = $prior;
         $patched = $this->extractor->patchState($prior, $hybrid->intent);
-        foreach (['origin', 'destination', 'depart_date', 'return_date', 'trip_type', 'adults', 'children', 'infants', 'cabin', 'airline', 'max_stops', 'legs'] as $key) {
+        // Soft prefs must not silently downgrade active travel / material slots.
+        foreach (['intent', 'origin', 'destination', 'depart_date', 'return_date', 'trip_type', 'adults', 'children', 'infants', 'cabin', 'airline', 'max_stops', 'legs'] as $key) {
             if (array_key_exists($key, $prior)) {
                 $patched[$key] = $prior[$key];
             }

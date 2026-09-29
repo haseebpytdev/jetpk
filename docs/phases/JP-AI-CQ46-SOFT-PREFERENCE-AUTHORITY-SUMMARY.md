@@ -52,6 +52,14 @@ BACKEND: 195 passed / 0 failed / 2051 assertions
 FRONTEND_CONTINUITY=PASS  
 FRONTEND_TYPECHECK=PASS
 
+## CQ46.1 scope cleanup
+
+- Removed unrelated bare-`business` cabin expansion from `TravelConstraintResolver` (restore pre-CQ46 tokens only).
+- Mixed cabin test uses `business class and cheapest`.
+- Soft path preserves prior `intent` (active travel not downgraded).
+- Full existing ranking/time resolver families covered at endpoint level (incl. Urdu tokens + `long layover nahi` / `best` / `best option`).
+- Evidence: `11-cq46-1-scope-and-family-closure.md`.
+
 ## Status
 
 READY_FOR_REVIEW=YES  
