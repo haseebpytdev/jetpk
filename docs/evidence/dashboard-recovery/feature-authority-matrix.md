@@ -20,11 +20,12 @@ Batch A `target=laravel` Blade bridges are **NOT recovered**. Classification `BL
 
 | Feature | Portal | Canonical Next route | Current Next | Historical Next | Historical SHA | Laravel API | Mutation? | Current nav | Expected nav | Status | Recovery | QA E2E | Prod |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| API Connections | Admin | `/admin/dashboard/api-connections` | page + workspace (this branch) | phase hub | `47c6bbd3` | Admin `?format=json` | YES | Next (this branch) | Next | NEXT_HISTORICAL_NOT_PORTED→porting | P0 in progress | PENDING | PENDING |
+| API Connections | Admin | `/admin/dashboard/api-connections` | hub + workspace | phase hub | `47c6bbd3` | Admin `?format=json` | YES | Next | Next | NEXT_PRESENT_WORKING | P0 done | PENDING | PENDING |
 | Suppliers read | Admin | `/admin/dashboard/suppliers` | read-only | same | main | api-dashboard GET | no | Next | Next | NEXT_PRESENT_READ_ONLY | keep | PENDING | — |
-| Company Profile | Admin | TBD `/settings/general` live | local preview | org profile form | phase | Branding Admin JSON | YES | Blade Batch A | Next | BACKEND_PRESENT_NO_NEXT_UI | P1 | PENDING | — |
-| Settings | Admin | `/settings/*` | local preview | partial live | phase | Admin JSON | YES | mixed | Next | NEXT_PRESENT_READ_ONLY | P1/P3 | PENDING | — |
-| CMS | Admin | `/cms/*` | local preview | write panels | phase | CmsPage Admin JSON | YES | Blade Batch A | Next | NEXT_PRESENT_READ_ONLY | P2 | PENDING | — |
+| Company Profile | Admin | `/settings/general` | OrganizationProfileForm live | org profile form | `bf5e9cdb` | Branding Admin JSON | YES | Next | Next | NEXT_PRESENT_WORKING | P1 done | PENDING | PENDING |
+| Settings | Admin | `/settings/*` | general live org + local preview | partial live | phase | Admin JSON | partial | mixed | Next | NEXT_PRESENT_READ_ONLY | continue | PENDING | — |
+| Homepage CMS | Admin | `/cms/sections` | HomepageSettingsPanel | homepage panel | `0ebb2278` | page-settings JSON | YES | Next | Next | NEXT_PRESENT_WORKING | homepage done | PENDING | PENDING |
+| CMS Pages | Admin | `/cms/pages` | read shell | write panels | phase | CmsPage Admin JSON | YES | Blade Batch A | Next | NEXT_PRESENT_READ_ONLY | P2 continue | PENDING | — |
 | SEO | Admin | TBD Next SEO | none | none dedicated | Blade SEO | admin-seo | YES | Blade Batch A | Next | BLADE_ONLY_LEGACY | later | PENDING | — |
 | Notifications | Admin | `/settings/notifications` + failures | preview | live + failures | phase | notification-events JSON | YES | Blade Batch A | Next | NEXT_PRESENT_READ_ONLY | P3 | PENDING | — |
 | Customer Queries | Admin | support/queries Next | mocked support | live support | phase | CustomerQuery + support tickets | YES | Blade Batch A | Next | BACKEND_PRESENT_NO_NEXT_UI | P6 | PENDING | — |
@@ -41,4 +42,10 @@ Batch A `target=laravel` Blade bridges are **NOT recovered**. Classification `BL
 
 ## Batch A reclassification
 
-All Batch A `target=laravel` entries for Company Profile, Homepage CMS, CMS Pages, SEO, Customer Queries, OTP, AI, Settings Hub, Staff, Communications, Markups, Group Ticketing, Go-live remain **NOT RECOVERED** until Next modules land. API Settings Batch A bridge is **replaced** by Next `/api-connections` in this correction branch.
+All Batch A `target=laravel` entries for CMS Pages, SEO, Customer Queries, OTP, AI, Settings Hub, Staff, Communications, Markups, Group Ticketing, Go-live remain **NOT RECOVERED** until Next modules land.
+
+**Recovered on this branch (Next nav + JSON):** API Connections, Company Profile, Homepage CMS (`/cms/sections`).
+
+**PR:** https://github.com/haseebpytdev/jetpk/pull/57  
+**HEAD:** `1ded0322` (plus pending matrix doc)  
+**FINAL_STATUS:** `PARTIAL`
