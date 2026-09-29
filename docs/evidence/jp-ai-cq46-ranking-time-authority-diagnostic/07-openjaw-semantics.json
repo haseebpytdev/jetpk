@@ -1,0 +1,29 @@
+{
+    "OPEN_JAW_RANKING_SEMANTICS": "LEG_AMBIGUOUS",
+    "OPEN_JAW_TIME_SEMANTICS": "LEG_AMBIGUOUS",
+    "rationale": "Preference applies globally to itinerary ranking\/time but which leg for morning departure is ambiguous; CQ45 already blocks stop_refinement deterministic complete for prior multi-leg. Ranking\/time not in progressive authority today so false-lead still occurs.",
+    "rows": {
+        "cheapest": {
+            "SERVER_ACTIVE": false,
+            "IS_TRAVEL_AUTHORITY_TURN": false,
+            "deterministic_complete": false,
+            "deterministic_reason": "prior_multi_leg_requires_semantic",
+            "LEAD_NAME_AFTER": "cheapest",
+            "trip_type_after": "open_jaw",
+            "legs_count_after": 2,
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null
+        },
+        "morning": {
+            "SERVER_ACTIVE": false,
+            "IS_TRAVEL_AUTHORITY_TURN": false,
+            "deterministic_complete": false,
+            "deterministic_reason": "prior_multi_leg_requires_semantic",
+            "LEAD_NAME_AFTER": "morning",
+            "trip_type_after": "open_jaw",
+            "legs_count_after": 2,
+            "RANKING_PREFERENCE_AFTER": null,
+            "TIME_PREFERENCE_AFTER": null
+        }
+    }
+}

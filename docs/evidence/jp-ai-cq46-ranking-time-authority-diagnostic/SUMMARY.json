@@ -1,0 +1,9 @@
+{
+    "CQ46_DIAGNOSTIC": "PASS",
+    "CQ46_FALSE_LEAD_BASELINE": "CONFIRMED",
+    "CHEAPEST_FALSE_LEAD": "cheapest",
+    "FASTEST_FALSE_LEAD": "fastest",
+    "MORNING_FALSE_LEAD": "morning",
+    "SEARCH_BEFORE_CONFIRMATION": 0,
+    "out_dir": "C:\\Users\\khadi\\ota-jetpk\\storage\\framework\/cq46-diagnostic"
+}

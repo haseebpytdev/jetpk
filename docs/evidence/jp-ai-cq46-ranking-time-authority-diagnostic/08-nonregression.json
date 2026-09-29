@@ -1,0 +1,15 @@
+{
+    "DIRECT_ONLY_LEAD_NAME": null,
+    "DIRECT_ONLY_MAX_STOPS": 0,
+    "DIRECT_ONLY_MODEL_CALLS": 0,
+    "BITCOIN_CURRENT_COMPLETE": false,
+    "DATED_ISB_DXB_REASON_OR_COMPLETE": {
+        "complete": true,
+        "reason": "deterministic_authority_complete",
+        "classes": [
+            "explicit_route_complete"
+        ]
+    },
+    "VIA_DOHA_COMPLETE": false,
+    "VIA_DOHA_REASON": "multi_location_requires_semantic"
+}

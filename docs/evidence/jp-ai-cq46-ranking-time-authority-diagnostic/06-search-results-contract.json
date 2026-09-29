@@ -1,0 +1,33 @@
+{
+    "FLIGHT_SEARCH_SUPPORTS_RANKING": "NO",
+    "FLIGHT_SEARCH_SUPPORTS_TIME_PREFERENCE": "NO",
+    "FLIGHT_SEARCH_SUPPORTS_MAX_STOPS": "NO_QUERY_PARAM",
+    "note_searchFlights": "Deep-link builds \/flights\/results with trip_type,from,to,depart,return_date,adults,children,infants,cabin — no sort, departure_window, or max_stops query params. DealRankingService::rank runs on a zero-price stub only.",
+    "RESULTS_SUPPORT_CHEAPEST": "YES",
+    "RESULTS_SUPPORT_FASTEST": "YES",
+    "RESULTS_SUPPORT_TIME_WINDOW": "YES",
+    "RESULTS_SUPPORT_MAX_STOPS": "YES_FILTER",
+    "SUPPORTED_QUERY_PARAMS": {
+        "sort": [
+            "recommended",
+            "cheapest",
+            "price_asc",
+            "price_desc",
+            "fastest",
+            "duration",
+            "earliest_departure",
+            "latest_departure",
+            "departure_time"
+        ],
+        "departure_window": [
+            "early_morning",
+            "morning",
+            "afternoon",
+            "evening"
+        ],
+        "filters": "stops\/airline\/price windows via criteria (controller filter path)"
+    },
+    "FLIGHT_REAL_OFFER_RANKING_AVAILABLE": "NO_VIA_AI_DEEP_LINK",
+    "GROUP_REAL_OFFER_RANKING_AVAILABLE": "YES_LABELS_ON_INVENTORY",
+    "DealRankingService": "Labels CHEAPEST\/FASTEST\/DIRECT\/SHORTEST_LAYOVER\/BEST_VALUE on offer arrays; flight AI path uses stub; group search applies to real inventory rows."
+}
