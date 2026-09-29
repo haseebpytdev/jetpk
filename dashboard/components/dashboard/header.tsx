@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DashboardLink } from "@/components/dashboard/dashboard-link";
 import { mockUser } from "@/mocks/overview-fixtures";
 import type { DashboardSessionSummary } from "@/services/session-service";
 
@@ -95,9 +96,15 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
                 <p className="text-xs text-jp-muted">{profile.email}</p>
                 {profile.roles?.[0] ? <p className="mt-1 text-xs text-jp-muted">{profile.roles[0]}</p> : null}
               </div>
-              <button type="button" className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50" role="menuitem">
-                Profile (preview)
-              </button>
+              <DashboardLink
+                href="/profile"
+                className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+                role="menuitem"
+                onClick={() => setProfileOpen(false)}
+                data-testid="header-profile-link"
+              >
+                My Profile
+              </DashboardLink>
               <button
                 type="button"
                 className="block w-full px-4 py-2 text-left text-sm text-gray-400"

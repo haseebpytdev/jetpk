@@ -85,3 +85,51 @@ export type BookingsPageResult = {
     airlines: string[];
   };
 };
+
+export type BookingPassengerSummary = {
+  displayName: string;
+  type: string;
+};
+
+export type BookingFareSummary = {
+  currency: string;
+  baseFare: number;
+  taxes: number;
+  fees: number;
+  markup: number;
+  total: number;
+};
+
+export type BookingDetail = {
+  summary: BookingRecord;
+  itinerary: {
+    route: string;
+    airline: string;
+    travelDate: string | null;
+    returnDate: string | null;
+  };
+  passengers: BookingPassengerSummary[];
+  fareSummary: BookingFareSummary | null;
+  paymentSummary: {
+    status: PaymentStatus | string;
+    amountPaid: number;
+    totalAmount: number;
+    currency: string;
+  } | null;
+  pnrSummary: {
+    pnr: string | null;
+    supplierReference: string | null;
+    channel?: string;
+    supplier: string;
+    supplierStatus?: string;
+  } | null;
+  ticketReadiness: {
+    ticketingStatus: TicketingStatus | string;
+    ticketCount: number;
+  } | null;
+  auditMetadata: {
+    createdAt: string | null;
+    updatedAt: string | null;
+    bookingStatus: BookingStatus | string;
+  } | null;
+};

@@ -1,6 +1,6 @@
-import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 "use client";
 
+import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { Divider } from "@/components/ui/divider";
 import { PreviewDataBanner } from "@/components/ui/page-layout";
 import {
@@ -12,10 +12,30 @@ import { formatCurrency, formatDate, formatDateTime, tripTypeLabel } from "@/lib
 import type { BookingRecord } from "@/types/booking";
 import { BookingOperationalActions } from "@/features/bookings/booking-operational-actions";
 
-export function BookingDetailDrawerContent({ booking }: { booking: BookingRecord }) {
+type Props = {
+  booking: BookingRecord;
+  showOperationalActions?: boolean;
+  showFullDetailLink?: boolean;
+};
+
+export function BookingDetailDrawerContent({
+  booking,
+  showOperationalActions = true,
+  showFullDetailLink = true,
+}: Props) {
   return (
     <div className="space-y-5" data-testid="booking-drawer-content">
       <PreviewDataBanner className="text-xs" />
+
+      {showFullDetailLink ? (
+        <Link
+          href={`/bookings/${encodeURIComponent(booking.id)}`}
+          className="inline-flex min-h-11 items-center rounded-xl border border-jp-border bg-white px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
+          data-testid="booking-open-full-detail"
+        >
+          Open full detail
+        </Link>
+      ) : null}
 
       <section aria-labelledby="booking-id-heading">
         <h3 id="booking-id-heading" className="text-sm font-semibold text-gray-900">
@@ -153,9 +173,12 @@ export function BookingDetailDrawerContent({ booking }: { booking: BookingRecord
         <p className="mt-3 text-sm text-jp-muted">Source: {booking.agentOrSource}</p>
       </section>
 
-      <Divider />
-
-      <BookingOperationalActions bookingId={booking.id} />
+      {showOperationalActions ? (
+        <>
+          <Divider />
+          <BookingOperationalActions bookingId={booking.id} />
+        </>
+      ) : null}
     </div>
   );
 }

@@ -1,11 +1,14 @@
-import type { BookingsPageResult, BookingsQuery, BookingRecord } from "@/types/booking";
+import type { BookingDetail, BookingsPageResult, BookingsQuery, BookingRecord } from "@/types/booking";
 import { buildBookingsPage } from "@/lib/bookings-filter";
 import { getBookingById, mockBookings } from "@/mocks/booking-fixtures";
 import { createReadOnlyEnvelope } from "@/lib/read-only/response-envelope";
 import { createReadOnlyService, ReadOnlyServiceError, type ReadOnlyFetchOptions } from "@/lib/read-only/read-only-service";
 import { fetchDashboardApi } from "@/lib/read-only/laravel/laravel-client";
 import { DASHBOARD_API_ROUTES } from "@/lib/read-only/laravel/api-base";
-import { transformBookingDetail, transformBookingsPage } from "@/lib/read-only/laravel/transformers/bookings";
+import {
+  transformBookingManagementDetail,
+  transformBookingsPage,
+} from "@/lib/read-only/laravel/transformers/bookings";
 import type { LaravelBookingsListPayload } from "@/lib/read-only/laravel/types";
 
 export class BookingsServiceError extends Error {
@@ -84,12 +87,61 @@ export async function getBookingsPage(query: BookingsQuery, options?: ReadOnlyFe
 }
 
 export async function getBookingDetail(id: string, options?: ReadOnlyFetchOptions): Promise<BookingRecord | null> {
+  const detail = await getBookingManagementDetail(id, options);
+  return detail?.summary ?? null;
+}
+
+export async function getBookingManagementDetail(
+  id: string,
+  options?: ReadOnlyFetchOptions,
+): Promise<BookingDetail | null> {
   const { resolveDataSourceMode } = await import("@/lib/read-only/data-source");
   const mode = resolveDataSourceMode();
 
   if (mode === "fixture") {
     await new Promise((r) => setTimeout(r, 40));
-    return getBookingById(id) ?? null;
+    const summary = getBookingById(id);
+    if (!summary) {
+      return null;
+    }
+    return transformBookingManagementDetail({
+      summary,
+      itinerary: {
+        route: `${summary.origin} → ${summary.destination}`,
+        airline: summary.airline,
+        travelDate: summary.departureDate || null,
+        returnDate: summary.returnDate,
+      },
+      passengers: [],
+      fareSummary: {
+        currency: summary.currency,
+        baseFare: summary.totalAmount,
+        taxes: 0,
+        fees: 0,
+        markup: 0,
+        total: summary.totalAmount,
+      },
+      paymentSummary: {
+        status: summary.paymentStatus,
+        amountPaid: summary.amountPaid,
+        totalAmount: summary.totalAmount,
+        currency: summary.currency,
+      },
+      pnrSummary: {
+        pnr: summary.pnr || null,
+        supplierReference: summary.supplierReference,
+        supplier: summary.supplier,
+      },
+      ticketReadiness: {
+        ticketingStatus: summary.ticketingStatus,
+        ticketCount: summary.ticketingStatus === "ticketed" ? 1 : 0,
+      },
+      auditMetadata: {
+        createdAt: summary.bookingDate || null,
+        updatedAt: summary.lastUpdated || null,
+        bookingStatus: summary.bookingStatus,
+      },
+    });
   }
 
   try {
@@ -97,7 +149,7 @@ export async function getBookingDetail(id: string, options?: ReadOnlyFetchOption
       DASHBOARD_API_ROUTES.bookingDetail(id),
       { signal: options?.signal },
     );
-    return transformBookingDetail(envelope.data);
+    return transformBookingManagementDetail(envelope.data);
   } catch (error) {
     if (error instanceof ReadOnlyServiceError && error.envelope.error.code === "not_found") {
       return null;
