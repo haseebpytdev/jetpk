@@ -199,3 +199,7 @@ export function apiSettingsTogglePath(connectionId: string): string {
 export function apiSettingsTestPath(connectionId: string): string {
   return laravelPortalPath("admin", `/api-settings/${encodeURIComponent(connectionId)}/test?format=json`);
 }
+
+export function brandingSettingsPath(): string {
+  return laravelPortalPath("admin", "/settings/branding?format=json");
+}

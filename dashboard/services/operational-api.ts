@@ -13,6 +13,7 @@ import {
   apiSettingsTestPath,
   apiSettingsTogglePath,
   apiSettingsUpdatePath,
+  brandingSettingsPath,
   bookingAssignStaffPath,
   bookingNotesPath,
   cancellationApprovePath,
@@ -473,6 +474,25 @@ export async function testApiConnection(
 ): Promise<MutationResponse<{ test?: Record<string, unknown>; connection?: Record<string, unknown> }>> {
   return laravelRequest(apiSettingsTestPath(connectionId), {
     method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadOrganizationProfile(): Promise<
+  MutationResponse<{ organization?: Record<string, unknown> }>
+> {
+  return laravelRequest(brandingSettingsPath(), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateOrganizationProfile(
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ organization?: Record<string, unknown> }>> {
+  return laravelRequest(brandingSettingsPath(), {
+    method: "PATCH",
+    json: payload,
     retryCsrfOnce: false,
   });
 }

@@ -168,10 +168,8 @@ class BackOfficeCapabilitiesPresenter
         if ($isAdmin) {
             $items[] = $this->dashboardNav('API Connections', 'api-connections', '/api-connections');
             if ($modules['branding_settings'] ?? false) {
-                $branding = $this->laravelNav('Company Profile', 'company-profile', 'admin.settings.branding.edit');
-                if ($branding !== null) {
-                    $items[] = $branding;
-                }
+                $branding = $this->dashboardNav('Company Profile', 'company-profile', '/settings/general');
+                $items[] = $branding;
                 $homepage = $this->laravelNav('Homepage CMS', 'homepage-cms', 'admin.settings.homepage.edit');
                 if ($homepage !== null) {
                     $items[] = $homepage;
