@@ -41,37 +41,43 @@ function profileUrl(): string {
 }
 
 async function fetchSessionLite(portal: string): Promise<SessionLite> {
-  const response = await fetch(`/api/dashboard/session?portal=${encodeURIComponent(portal)}`, {
-    method: "GET",
-    credentials: "same-origin",
-    headers: { Accept: "application/json" },
-    cache: "no-store",
-  });
-  const payload = (await response.json()) as {
-    data?: {
-      displayName?: string;
-      email?: string | null;
-      roles?: string[];
-      accountType?: string;
-      accountStatus?: string;
-    };
+  const unavailable: SessionLite = {
+    displayName: "Session unavailable",
+    email: "—",
+    roles: [],
+    accountType: "unknown",
+    accountStatus: "unknown",
   };
-  if (!response.ok || !payload.data) {
+
+  try {
+    const response = await fetch(`/api/dashboard/session?portal=${encodeURIComponent(portal)}`, {
+      method: "GET",
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    const payload = (await response.json()) as {
+      data?: {
+        displayName?: string;
+        email?: string | null;
+        roles?: string[];
+        accountType?: string;
+        accountStatus?: string;
+      };
+    };
+    if (!response.ok || !payload.data) {
+      return unavailable;
+    }
     return {
-      displayName: "Session unavailable",
-      email: "—",
-      roles: [],
-      accountType: "unknown",
-      accountStatus: "unknown",
+      displayName: payload.data.displayName ?? "Signed in",
+      email: payload.data.email ?? "—",
+      roles: payload.data.roles ?? [],
+      accountType: payload.data.accountType ?? "unknown",
+      accountStatus: payload.data.accountStatus ?? "unknown",
     };
+  } catch {
+    return unavailable;
   }
-  return {
-    displayName: payload.data.displayName ?? "Signed in",
-    email: payload.data.email ?? "—",
-    roles: payload.data.roles ?? [],
-    accountType: payload.data.accountType ?? "unknown",
-    accountStatus: payload.data.accountStatus ?? "unknown",
-  };
 }
 
 function applyPayloadToForm(payload: ProfileJsonPayload, fallbackName: string): ProfileFormState {
