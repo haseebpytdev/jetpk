@@ -203,3 +203,11 @@ export function apiSettingsTestPath(connectionId: string): string {
 export function brandingSettingsPath(): string {
   return laravelPortalPath("admin", "/settings/branding?format=json");
 }
+
+export function pageSettingsEditPath(pageKey: string): string {
+  return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}?format=json`);
+}
+
+export function pageSettingsPublishPath(pageKey: string): string {
+  return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}/publish?format=json`);
+}

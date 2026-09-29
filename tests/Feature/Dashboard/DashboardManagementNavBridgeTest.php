@@ -27,7 +27,7 @@ class DashboardManagementNavBridgeTest extends TestCase
         $expected = [
             'api-connections' => '/api-connections',
             'company-profile' => '/settings/general',
-            'homepage-cms' => '/admin/settings/homepage',
+            'homepage-cms' => '/cms/sections',
             'cms-pages' => '/admin/cms-pages',
             'seo' => '/admin/seo',
             'customer-queries' => '/admin/customer-queries',
@@ -40,7 +40,7 @@ class DashboardManagementNavBridgeTest extends TestCase
 
         foreach ($expected as $key => $href) {
             $this->assertArrayHasKey($key, $byKey, "Missing nav key {$key}");
-            if (in_array($key, ['api-connections', 'company-profile'], true)) {
+            if (in_array($key, ['api-connections', 'company-profile', 'homepage-cms'], true)) {
                 $this->assertSame('dashboard', $byKey[$key]['target'] ?? null, "Nav {$key} must target dashboard Next");
             } else {
                 $this->assertSame('laravel', $byKey[$key]['target'] ?? null, "Nav {$key} must target laravel (temporary Batch A until Next port)");

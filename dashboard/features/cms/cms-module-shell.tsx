@@ -4,12 +4,13 @@ import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboa
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { CmsWorkspace } from "@/features/cms/cms-workspace";
+import { HomepageSettingsPanel } from "@/features/cms/components/homepage-settings-panel";
 import type { CmsModuleKey, CmsModuleResult } from "@/types/cms";
 
 const SUBROUTES: { key: CmsModuleKey; label: string; href: string }[] = [
   { key: "overview", label: "Overview", href: "/cms" },
   { key: "pages", label: "Pages", href: "/cms/pages" },
-  { key: "sections", label: "Sections", href: "/cms/sections" },
+  { key: "sections", label: "Homepage", href: "/cms/sections" },
   { key: "banners", label: "Banners", href: "/cms/banners" },
   { key: "notices", label: "Notices", href: "/cms/notices" },
   { key: "assets", label: "Assets", href: "/cms/assets" },
@@ -31,7 +32,11 @@ export function CmsModuleShell({ module, result }: Props) {
           <Breadcrumb items={[{ label: "Home" }, { label: "Inventory & pricing" }, { label: "CMS" }, { label: current.label }]} />
         }
         title="CMS"
-        description="Theme-aware structured content metadata with read-only Laravel integration for pages."
+        description={
+          module === "sections"
+            ? "Authoritative homepage content. Preview the public home after save/publish."
+            : "Theme-aware structured content with Laravel-backed page and homepage editors."
+        }
       />
       <DataSourceNoticeSlot />
 
@@ -47,6 +52,8 @@ export function CmsModuleShell({ module, result }: Props) {
           </Link>
         ))}
       </nav>
+
+      {module === "sections" ? <HomepageSettingsPanel /> : null}
 
       {result.state === "loading" ? (
         <div aria-busy="true" aria-label="Loading CMS foundation" data-testid="cms-loading-state">

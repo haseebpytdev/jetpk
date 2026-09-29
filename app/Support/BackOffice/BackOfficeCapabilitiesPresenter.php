@@ -170,10 +170,7 @@ class BackOfficeCapabilitiesPresenter
             if ($modules['branding_settings'] ?? false) {
                 $branding = $this->dashboardNav('Company Profile', 'company-profile', '/settings/general');
                 $items[] = $branding;
-                $homepage = $this->laravelNav('Homepage CMS', 'homepage-cms', 'admin.settings.homepage.edit');
-                if ($homepage !== null) {
-                    $items[] = $homepage;
-                }
+                $items[] = $this->dashboardNav('Homepage CMS', 'homepage-cms', '/cms/sections');
             }
             $cmsPages = $this->laravelNav('CMS Pages', 'cms-pages', 'admin.cms-pages.index');
             if ($cmsPages !== null) {
