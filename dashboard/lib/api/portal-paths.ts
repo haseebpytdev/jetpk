@@ -128,6 +128,15 @@ export function agentApplicationNeedsMoreInfoPath(applicationId: string): string
   );
 }
 
+export function supportTicketsIndexPath(query = ""): string {
+  const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
+  return laravelPortalPath("admin", `/support/tickets?format=json${suffix}`);
+}
+
+export function supportTicketShowPath(ticketId: string): string {
+  return laravelPortalPath("admin", `/support/tickets/${encodeURIComponent(ticketId)}?format=json`);
+}
+
 export function supportTicketAssignPath(ticketId: string): string {
   return laravelPortalPath("admin", `/support/tickets/${encodeURIComponent(ticketId)}/assign?format=json`);
 }
@@ -142,6 +151,11 @@ export function supportTicketReplyPath(portal: DashboardPortal, ticketId: string
 
 export function supportTicketStatusPath(portal: DashboardPortal, ticketId: string): string {
   return laravelPortalPath(portal, `/support/tickets/${encodeURIComponent(ticketId)}/status?format=json`);
+}
+
+export function commissionsIndexPath(query = ""): string {
+  const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
+  return laravelPortalPath("admin", `/commissions?format=json${suffix}`);
 }
 
 export function commissionEntryApprovePath(entryId: string): string {

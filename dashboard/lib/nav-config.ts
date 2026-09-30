@@ -115,9 +115,13 @@ export const navGroups: NavGroup[] = [
       },
       {
         label: "Markups & Settings",
-        href: "/planned/markups",
+        href: "/markups",
         laravelRoute: "admin.markups",
-        planned: true,
+      },
+      {
+        label: "Commissions",
+        href: "/commissions",
+        laravelRoute: "admin.commissions.index",
       },
       {
         label: "CMS",

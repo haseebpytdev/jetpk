@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { DashboardLink } from "@/components/dashboard/dashboard-link";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import {
-  approveCommissionEntry,
-  rejectCommissionEntry,
   rejectGroupBookingPayment,
   reverseFinanceAdjustment,
   storeFinanceAdjustment,
@@ -44,24 +43,13 @@ export function FinanceOperationalPanel() {
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {message ? <p className="text-sm text-green-700">{message}</p> : null}
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
-          disabled={busy !== null}
-          data-testid="commission-approve"
-          onClick={() => run("commission-approve", () => approveCommissionEntry("1"))}
+        <DashboardLink
+          href="/commissions"
+          className="inline-flex min-h-11 items-center rounded-xl border border-jp-border px-3 py-2 text-sm"
+          data-testid="commission-queue-link"
         >
-          Approve commission entry
-        </button>
-        <button
-          type="button"
-          className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
-          disabled={busy !== null}
-          data-testid="commission-reject"
-          onClick={() => run("commission-reject", () => rejectCommissionEntry("1", "Review rejected"))}
-        >
-          Reject commission entry
-        </button>
+          Open commissions queue
+        </DashboardLink>
         <button
           type="button"
           className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"

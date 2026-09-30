@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDashboardPortal } from "@/lib/portal-context";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { laravelRequest } from "@/lib/api/laravel-action-client";
+import { supportTicketsIndexPath } from "@/lib/api/portal-paths";
+import { emptyListDescription } from "@/lib/empty-list-copy";
 import {
   assignSupportTicket,
   forwardSupportTicket,
@@ -11,13 +14,55 @@ import {
 } from "@/services/operational-api";
 import type { SupportTicketRecord } from "@/mocks/support-fixtures";
 
-export function SupportOperationalWorkspace({ tickets }: { tickets: SupportTicketRecord[] }) {
+type SupportIndexPayload = {
+  ok?: boolean;
+  tickets?: Array<{
+    id?: string;
+    subject?: string;
+    status?: string;
+    assigned_to?: string | null;
+  }>;
+};
+
+function mapTickets(payload: SupportIndexPayload): SupportTicketRecord[] {
+  return (payload.tickets ?? []).map((ticket) => ({
+    id: String(ticket.id ?? ""),
+    subject: String(ticket.subject ?? "Support ticket"),
+    status: String(ticket.status ?? "open"),
+    assignedTo: ticket.assigned_to ?? null,
+  })).filter((ticket) => ticket.id !== "");
+}
+
+export function SupportOperationalWorkspace() {
   const portal = useDashboardPortal();
   const isLive = useDashboardLiveMode();
-  const [rows, setRows] = useState(tickets);
+  const [rows, setRows] = useState<SupportTicketRecord[]>([]);
+  const [loading, setLoading] = useState(false);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [replyBody, setReplyBody] = useState<Record<string, string>>({});
+
+  const refresh = async () => {
+    setLoading(true);
+    setError(null);
+    const result = await laravelRequest<SupportIndexPayload>(supportTicketsIndexPath(), {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      retryCsrfOnce: false,
+    });
+    setLoading(false);
+    if (!result.ok) {
+      setError(result.message ?? "Could not load support tickets.");
+      setRows([]);
+      return;
+    }
+    setRows(mapTickets(result.data));
+  };
+
+  useEffect(() => {
+    if (!isLive) return;
+    void refresh();
+  }, [isLive]);
 
   if (!isLive) {
     return (
@@ -41,12 +86,28 @@ export function SupportOperationalWorkspace({ tickets }: { tickets: SupportTicke
 
   return (
     <div className="space-y-4" data-testid="support-operational-workspace">
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm"
+          onClick={() => void refresh()}
+          disabled={loading || busyKey !== null}
+        >
+          {loading ? "Loading…" : "Refresh"}
+        </button>
+      </div>
+      {error ? <p className="text-sm text-red-600" role="alert">{error}</p> : null}
+      {!loading && rows.length === 0 && !error ? (
+        <p className="text-sm text-jp-muted">{emptyListDescription(true, "Support tickets")}</p>
+      ) : null}
       <ul className="space-y-3">
         {rows.map((ticket) => (
           <li key={ticket.id} className="rounded-xl border border-jp-border p-4 text-sm">
             <p className="font-medium">{ticket.subject}</p>
-            <p className="text-jp-muted">Ticket {ticket.id} · Status: {ticket.status}</p>
+            <p className="text-jp-muted">
+              Ticket {ticket.id} · Status: {ticket.status}
+              {ticket.assignedTo ? ` · Assigned: ${ticket.assignedTo}` : ""}
+            </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"

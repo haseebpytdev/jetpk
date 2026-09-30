@@ -31,7 +31,7 @@ class SupportTicketController extends Controller
         protected BackOfficeCapabilitiesPresenter $capabilitiesPresenter,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         Gate::authorize('viewAny', SupportTicket::class);
 
@@ -55,10 +55,26 @@ class SupportTicketController extends Controller
             ->paginate(25)
             ->withQueryString();
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'tickets' => $tickets->getCollection()
+                    ->map(fn (SupportTicket $ticket): array => $this->presentTicket($ticket))
+                    ->values()
+                    ->all(),
+                'meta' => [
+                    'current_page' => $tickets->currentPage(),
+                    'last_page' => $tickets->lastPage(),
+                    'per_page' => $tickets->perPage(),
+                    'total' => $tickets->total(),
+                ],
+            ]);
+        }
+
         return view(client_view('support.tickets.index', 'admin'), compact('tickets'));
     }
 
-    public function show(Request $request, SupportTicket $ticket): View
+    public function show(Request $request, SupportTicket $ticket): View|JsonResponse
     {
         Gate::authorize('view', $ticket);
 
@@ -75,6 +91,28 @@ class SupportTicketController extends Controller
             ->with('user:id,name,email')
             ->orderBy('code')
             ->get(['id', 'code', 'user_id', 'agency_id']);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'ticket' => $this->presentTicket($ticket),
+                'assignees' => $assignees->map(fn (User $assignee): array => [
+                    'id' => (string) $assignee->id,
+                    'name' => $assignee->name,
+                    'email' => $assignee->email,
+                ])->values()->all(),
+                'agents' => $agents->map(fn (Agent $agent): array => [
+                    'id' => (string) $agent->id,
+                    'code' => $agent->code,
+                    'name' => $agent->user?->name,
+                ])->values()->all(),
+                'statuses' => array_map(
+                    static fn (SupportTicketStatus $status): string => $status->value,
+                    SupportTicketStatus::cases(),
+                ),
+                'capabilities' => $this->capabilitiesPresenter->presentSupportCapabilities($request->user(), $ticket),
+            ]);
+        }
 
         return view(client_view('support.tickets.show', 'admin'), [
             'ticket' => $ticket,
@@ -196,8 +234,10 @@ class SupportTicketController extends Controller
     {
         return [
             'id' => (string) $ticket->id,
-            'status' => $ticket->status->value,
+            'subject' => (string) ($ticket->subject ?: 'Support ticket'),
+            'status' => is_object($ticket->status) ? $ticket->status->value : (string) $ticket->status,
             'assigned_to_user_id' => $ticket->assigned_to_user_id !== null ? (string) $ticket->assigned_to_user_id : null,
+            'assigned_to' => $ticket->assignedTo?->name,
             'forwarded_to_agent_id' => $ticket->forwarded_to_agent_id !== null ? (string) $ticket->forwarded_to_agent_id : null,
             'last_reply_at' => $ticket->last_reply_at?->toIso8601String(),
         ];
