@@ -111,64 +111,73 @@ export function ProfilePageContent() {
     async function load() {
       setLoading(true);
       setError(null);
-      const nextSession = await fetchSessionLite(portal);
-      if (cancelled) {
-        return;
-      }
-      setSession(nextSession);
-      setAccountType(nextSession.accountType);
-      setAccountStatus(nextSession.accountStatus);
+      try {
+        const nextSession = await fetchSessionLite(portal);
+        if (cancelled) {
+          return;
+        }
+        setSession(nextSession);
+        setAccountType(nextSession.accountType);
+        setAccountStatus(nextSession.accountStatus);
 
-      if (!isLive) {
-        setForm({
-          name: nextSession.displayName,
-          email: nextSession.email === "—" ? "" : nextSession.email,
-          username: "preview.user",
-          phone: "",
-          city: "",
-          country_code: "PK",
-          whatsapp: "",
+        if (!isLive) {
+          setForm({
+            name: nextSession.displayName,
+            email: nextSession.email === "—" ? "" : nextSession.email,
+            username: "preview.user",
+            phone: "",
+            city: "",
+            country_code: "PK",
+            whatsapp: "",
+          });
+          return;
+        }
+
+        const result = await laravelRequest<ProfileJsonPayload>(profileUrl(), {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          retryCsrfOnce: false,
+          timeoutMs: 15000,
         });
-        setLoading(false);
-        return;
-      }
 
-      const result = await laravelRequest<ProfileJsonPayload>(profileUrl(), {
-        method: "GET",
-        headers: { Accept: "application/json" },
-        retryCsrfOnce: false,
-      });
+        if (cancelled) {
+          return;
+        }
 
-      if (cancelled) {
-        return;
-      }
+        if (!result.ok) {
+          setForm({
+            name: nextSession.displayName,
+            email: "",
+            username: "",
+            phone: "",
+            city: "",
+            country_code: "",
+            whatsapp: "",
+          });
+          setError(result.message ?? "Could not load editable profile fields.");
+          return;
+        }
 
-      if (!result.ok) {
-        setForm({
-          name: nextSession.displayName,
-          email: "",
-          username: "",
-          phone: "",
-          city: "",
-          country_code: "",
-          whatsapp: "",
-        });
-        setError(result.message ?? "Could not load editable profile fields.");
-        setLoading(false);
-        return;
+        setForm(applyPayloadToForm(result.data, nextSession.displayName));
+        if (result.data.account) {
+          setAccountType(result.data.account.account_type || nextSession.accountType);
+          setAccountStatus(result.data.account.status || nextSession.accountStatus);
+        }
+        setPhotoUrl(
+          typeof result.data.profile?.profile_photo_url === "string"
+            ? result.data.profile.profile_photo_url
+            : null,
+        );
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Could not load profile.");
+          setForm((prev) => ({ ...prev }));
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-
-      setForm(applyPayloadToForm(result.data, nextSession.displayName));
-      if (result.data.account) {
-        setAccountType(result.data.account.account_type || nextSession.accountType);
-        setAccountStatus(result.data.account.status || nextSession.accountStatus);
-      }
-      setPhotoUrl(
-        typeof result.data.profile?.profile_photo_url === "string"
-          ? result.data.profile.profile_photo_url
-          : null,
-      );
-      setLoading(false);
     }
 
     void load();
