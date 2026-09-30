@@ -23,7 +23,7 @@ final class DashboardCustomerResource
             'email' => DashboardSessionResource::maskEmail($customer->email) ?? '—',
             'phone' => self::maskPhone($phone),
             'city' => (string) ($profile?->city ?? '—'),
-            'country' => (string) ($profile?->country ?? 'Pakistan'),
+            'country' => (string) ($profile?->country_code ?? 'Pakistan'),
             'nationality' => (string) ($profile?->nationality ?? '—'),
             'customerType' => 'Individual',
             'accountStatus' => self::mapAccountStatus((string) ($customer->status->value ?? 'active')),
