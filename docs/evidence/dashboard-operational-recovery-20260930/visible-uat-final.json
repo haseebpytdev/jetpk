@@ -1,0 +1,17 @@
+{
+  "LOCAL_BRANCH_HEAD": "81e1629ae94d1aa863da6739909b5b3e5e6d2cae",
+  "REMOTE_BRANCH_HEAD": "81e1629ae94d1aa863da6739909b5b3e5e6d2cae",
+  "PRODUCTION_DASHBOARD_SOURCE_SHA": "81e1629ae94d1aa863da6739909b5b3e5e6d2cae",
+  "PRODUCTION_DASHBOARD_BUILD_ID": "6e4cVHleZi3KQ0ouqNTmJ",
+  "BROWSER_OBSERVED_BUILD_ID": "6e4cVHleZi3KQ0ouqNTmJ",
+  "DASHBOARD_SOURCE_PARITY": "PASS",
+  "DASHBOARD_BUILD_PARITY": "PASS",
+  "ADMIN_PROFILE_SESSION": "PASS",
+  "ADMIN_PROFILE_SAFE_WRITE_RELOAD": "PASS",
+  "ADMIN_PROFILE_RESTORE": "PASS",
+  "ADMIN_PROFILE_VALUE_RESTORED": "YES",
+  "PRODUCTION_LEGACY_READONLY_BANNERS": 0,
+  "PRODUCTION_PREVIEW_USER_FALLBACKS": 0,
+  "profileUrl": "https://jetpakistan.pk/admin/dashboard/profile",
+  "bodySnippet": "JetPakistan\nADMIN CONSOLE\nFLY SMART, FLY EASY\nJQ\n\nJP-DASH-03 QA Admin\n\nPlatform Admin\n\nDashboard\nBookings\nPayments\nPNRs\nTickets\nDeposits\nCustomers\nAgents\nSuppliers\nUsers\nStaff\nCustomer Queries\nReports\nAudit\nAPI Connections\nCompany Profile\nHomepage CMS\nCMS Pages\nManaged Pages\nSEO\nCommunications\nMarkups\nGroup Ticketing\nLogin OTP\nAsk JetPakistan\nGo-live\nSettings Hub\nSupport\n\nNeed Help?\n\nContact support for operational help with your JetPakistan account.\n\nContact Support\nQuick search\nCtrl+K\n🇵🇰\nPKR"
+}
