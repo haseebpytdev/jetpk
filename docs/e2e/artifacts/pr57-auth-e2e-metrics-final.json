@@ -1,0 +1,20 @@
+{
+  "captured_at": "2026-09-30T04:27:00Z",
+  "note": "Sanitized proxy metrics after full auth certification suite. No cookies, passwords, or PII.",
+  "LARAVEL_WORKER_COUNT": 6,
+  "CRAWL_REQUEST_COUNT": 1742,
+  "PEAK_INFLIGHT_LARAVEL_REQUESTS": 5,
+  "AUTH_GATE_REQUEST_COUNT": 885,
+  "AUTH_GATE_COALESCED_COUNT": 684,
+  "AUTH_GATE_502_COUNT": 0,
+  "LARAVEL_5XX_COUNT": 3,
+  "NEXT_5XX_COUNT": 0,
+  "SQLITE_LOCK_ERRORS": 0,
+  "PLAYWRIGHT_SUMMARY": "45 passed / 1 skipped (25.6m)",
+  "MENU_COUNTS": {
+    "admin": "27/27",
+    "staff": "8/8",
+    "agent": "14/14",
+    "customer": "6/6"
+  }
+}

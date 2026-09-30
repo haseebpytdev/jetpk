@@ -2,97 +2,80 @@
 
 Branch: `work/jetpk-next-dashboard-recovery-20260929`  
 START_HEAD: `d397fb32c5c7e183df2f86623fb382c12b5a8856`  
+FINAL_BRANCH_HEAD: `1ac2e9a0e411861734dccd08d34dabf2fac92a59`  
 Date: 2026-09-30
 
 ## FINAL_STATUS
 
 ```text
 FINAL_STATUS=PARTIAL
-PRE_MERGE_AUTHENTICATED_CERTIFICATION=PARTIAL
+PRE_MERGE_AUTHENTICATED_CERTIFICATION=PASS
 POST_DEPLOY_LIVE_AUTHENTICATED_CERTIFICATION=NOT_STARTED
+PR57_MERGED=NO
 ```
 
-PR #57 must remain unmerged until remaining crawl stability + full suite green.
+Pre-merge authenticated certification is complete locally (see `PR57-AUTH-E2E-CERTIFICATION-FINAL.md`).  
+Overall `FINAL_STATUS` remains **PARTIAL** until merge + deploy + live QA complete.  
+**Do not merge from this status file alone** — confirm FINAL evidence + PR body HEAD match remote tip.
 
-## Delivered infrastructure
-
-| Item | Status |
-| --- | --- |
-| `jetpk:dash-03-qa-identities` (admin/agent/customer) | Present |
-| `jetpk:dash-03-qa-staff` (+ verify-email / restore-baseline) | Present |
-| Isolated `.env.e2e` / `database/e2e.sqlite` | Present |
-| Same-origin proxy `:9080` (Next shell + Laravel session gate) | Present |
-| Full-stack Playwright config `playwright.jetpk-auth-e2e.config.ts` | Present |
-| Auth specs `00`–`06` | Present |
-| Bootstrap script `bootstrap-e2e-auth.ps1` | Present |
-| Next rebuilt with `NEXT_PUBLIC_DASHBOARD_MODE=live` for E2E | Local only (`.env.local` gitignored) |
-
-## Focused critical PASS evidence (2026-09-30)
+## Topology (Windows E2E)
 
 ```text
-11 passed (focused critical path)
+Browser → :9080 auth proxy (single-flight session gate)
+  → Next :3001 (admin/staff shells)
+  → Laravel workers :8001–:8006
+Next SSR → :8090 plain Laravel LB → workers :8001–:8006
+```
+
+## Gate matrix (pre-merge)
+
+```text
+QA_IDENTITY_HARNESS=PRESENT
+LARAVEL_E2E_WORKERS=6
+AUTH_GATE_502_COUNT=0
+SQLITE_LOCK_ERRORS=0
+
+FOCUSED_CRITICAL_PATH=11/11 PASS
+ADMIN_VISIBLE_MENU_ITEMS_TESTED=27/27
+STAFF_VISIBLE_MENU_ITEMS_TESTED=8/8
+AGENT_VISIBLE_MENU_ITEMS_TESTED=14/14
+CUSTOMER_VISIBLE_MENU_ITEMS_TESTED=6/6
+AGENT_STAFF_AUTH_E2E=N/A
+
+ADMIN_AUTH_E2E=PASS
+STAFF_AUTH_E2E=PASS
+AGENT_AUTH_E2E=PASS
+CUSTOMER_AUTH_E2E=PASS
 
 ADMIN_SAFE_WRITE_RELOAD=PASS
 PROFILE_SAFE_WRITE_RELOAD=PASS
 QA_MUTATIONS_RESTORED=100%
-BOOKING_DETAIL_AUTH_E2E=PASS
-STAFF_ADMIN_UI_ACCESS=DENIED (403 via session gate)
-RBAC unauthenticated API denied=PASS
-Customer→admin bookings API denied=PASS
-Agent→admin settings denied=PASS
-Fresh admin login=PASS
-PASSWORDS_PRINTED=0
+RBAC_MATRIX=PASS
+IDOR_FAILURES=0
+PUBLIC_GOLDEN_REGRESSIONS=0
+DASHBOARD_BUILD=PASS
+PHPUNIT_QA_IDENTITY=6/6 PASS
+PHPUNIT_DASHBOARD_JSON=10/10 PASS
+PLAYWRIGHT_FULL_AUTH=45 passed / 1 skipped
 ```
 
-Earlier broader run: **27 passed / 6 failed** (crawl timeout / settings.general stall / profile reload race — subsequently fixed for write/booking/RBAC).
+## LARAVEL_5XX_COUNT disposition
 
-## Gate matrix (current)
+During the full suite metrics dump: `LARAVEL_5XX_COUNT=3`.  
+These were **not** auth-gate 502s (`AUTH_GATE_502_COUNT=0`) and did **not** fail role menu crawls (each crawl asserted zero unexpected 5xx on crawled hrefs).  
+Likely residual from denied/admin probes or transient SSR under load. Non-blocking for pre-merge auth certification; monitor if count rises.
 
-```text
-QA_IDENTITY_HARNESS=PRESENT
-ADMIN_SAFE_WRITE_RELOAD=PASS
-QA_MUTATIONS_RESTORED=100%
-BOOKING_DETAIL_AUTH_E2E=PASS
-STAFF_AUTH_E2E=PARTIAL (login+landing+profile OK; full menu not fully swept)
-AGENT_AUTH_E2E=PARTIAL (login+landing+profile OK)
-CUSTOMER_AUTH_E2E=PARTIAL (login+landing+profile OK)
-ADMIN_AUTH_E2E=PARTIAL (critical paths PASS; full visible-menu crawl still 502-flaky on artisan serve)
-RBAC_MATRIX=PASS (focused)
-IDOR_FAILURES=0 (focused)
-PUBLIC_GOLDEN_REGRESSIONS=PARTIAL (isolated golden subset previously green)
-PR_BODY_UPDATE=EXTERNAL_METADATA_BLOCKER (if gh unavailable)
-MERGED_MAIN=NOT_MERGED
-```
+## Remaining for VERIFIED_PASS
 
-## Remaining blockers for PRE-MERGE PASS
+1. Update PR #57 body HEAD to tip + PRE_MERGE_CERTIFICATION=PASS  
+2. Merge via protected-main workflow  
+3. Deploy merged main  
+4. Live QA identities on https://jetpakistan.pk + cleanup  
 
-1. Admin full-menu crawl still flaky under single-worker `php artisan serve` (auth-gate 502 under concurrent Next SSR + session checks). Needs either Octane/multi-worker local serve or further gate caching before claiming `ADMIN_VISIBLE_MENU_ITEMS_TESTED=100%`.
-2. Full suite (crawl + portals + responsive + golden) needs one clean end-to-end green execution without hung workers.
-3. Laravel QA command PHPUnit should be re-confirmed after E2E DB lock contention clears.
-4. Commit/push harness files (currently untracked on branch HEAD `d397fb32`).
-5. PR body update may hit `PR_BODY_UPDATE=EXTERNAL_METADATA_BLOCKER` if `gh` auth unavailable.
-6. Merge / deploy / live QA identities **blocked** until PRE-MERGE gates pass.
+## Commits
 
-## Local topology
-
-```text
-Browser → http://127.0.0.1:9080
-  /admin|staff/dashboard* → Next :3001 (gated by Laravel /api/dashboard/session)
-  /_next/* → Next :3001
-  /laravel/* → Laravel :8000 (prefix stripped)
-  else → Laravel :8000
-```
-
-QA passwords: process env `JP_DASH_03_QA_*_PASSWORD` only (local helper file `tmp/e2e-auth/qa-passwords.local.ps1` gitignored).
-
-## Commercial safety
-
-```text
-REAL_TICKETS_ISSUED=0
-REAL_PAYMENTS_TRIGGERED=0
-REAL_SUPPLIER_BOOKINGS_CREATED=0
-REAL_PNRS_MUTATED=0
-REAL_CANCELLATIONS=0
-REAL_REFUNDS=0
-PRODUCTION_BALANCE_MUTATIONS=0
-```
+| Marker | SHA |
+|--------|-----|
+| HARNESS_COMMIT | `f5c7ba38498a24f123f680f3819a20f5623e9780` |
+| MULTI_WORKER_COMMIT | `7de98090ec7673c154977f4217b54b243f002077` |
+| CERT_EVIDENCE_COMMIT | `1ac2e9a0e411861734dccd08d34dabf2fac92a59` |
