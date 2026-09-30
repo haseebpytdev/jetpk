@@ -1,8 +1,12 @@
 export type DashboardMode = "preview" | "live";
 
 export function getDashboardMode(): DashboardMode {
-  const mode = process.env.NEXT_PUBLIC_DASHBOARD_MODE;
-  return mode === "live" ? "live" : "preview";
+  const mode = (process.env.NEXT_PUBLIC_DASHBOARD_MODE ?? "").trim().toLowerCase();
+  // "production" is a common mis-set for live ops builds; only explicit preview/mock stays preview.
+  if (mode === "live" || mode === "production") {
+    return "live";
+  }
+  return "preview";
 }
 
 export function useMockData(): boolean {
