@@ -25,22 +25,26 @@ class DashboardManagementNavBridgeTest extends TestCase
         }
 
         $expected = [
-            'api-settings' => '/admin/api-settings',
-            'company-profile' => '/admin/settings/branding',
-            'homepage-cms' => '/admin/settings/homepage',
-            'cms-pages' => '/admin/cms-pages',
-            'seo' => '/admin/seo',
-            'customer-queries' => '/admin/customer-queries',
-            'login-otp' => '/admin/settings/login-otp',
-            'ai-assistant' => '/admin/settings/ai-assistant',
-            'settings-hub' => '/admin/settings',
-            'go-live' => '/admin/go-live-checklist',
-            'staff' => '/admin/staff',
+            'api-connections' => '/api-connections',
+            'company-profile' => '/settings/general',
+            'homepage-cms' => '/cms/sections',
+            'cms-pages' => '/cms/pages',
+            'page-settings' => '/cms/sections',
+            'seo' => '/seo',
+            'customer-queries' => '/customer-queries',
+            'login-otp' => '/settings/security',
+            'ai-assistant' => '/settings/integrations',
+            'settings-hub' => '/settings',
+            'go-live' => '/system/go-live',
+            'staff' => '/staff',
+            'communications' => '/settings/notifications',
+            'markups' => '/markups',
+            'group-ticketing' => '/group-ticketing',
         ];
 
         foreach ($expected as $key => $href) {
             $this->assertArrayHasKey($key, $byKey, "Missing nav key {$key}");
-            $this->assertSame('laravel', $byKey[$key]['target'] ?? null, "Nav {$key} must target laravel");
+            $this->assertSame('dashboard', $byKey[$key]['target'] ?? null, "Nav {$key} must target dashboard Next");
             $this->assertSame($href, $byKey[$key]['href'] ?? null, "Nav {$key} href mismatch");
         }
 
@@ -52,6 +56,9 @@ class DashboardManagementNavBridgeTest extends TestCase
 
         // Admin must not be sent to the read-only Next settings stub as primary Settings.
         $this->assertArrayNotHasKey('settings', $byKey);
+
+        $laravelTargets = collect($navigation)->where('target', 'laravel')->pluck('key')->values()->all();
+        $this->assertSame([], $laravelTargets, 'Canonical dashboard Blade nav targets must be zero');
     }
 
     public function test_staff_navigation_keeps_next_settings_and_omits_admin_laravel_hubs(): void
@@ -77,28 +84,13 @@ class DashboardManagementNavBridgeTest extends TestCase
         }
     }
 
-    public function test_laravel_route_paths_reject_unknown_names_via_null(): void
-    {
-        $this->assertNull(
-            \App\Support\BackOffice\BackOfficeLaravelRoutePaths::pathFor('admin.does-not-exist')
-        );
-        $this->assertSame(
-            '/admin/api-settings',
-            \App\Support\BackOffice\BackOfficeLaravelRoutePaths::pathFor('admin.api-settings')
-        );
-    }
-
     /**
      * @return array{0: User}
      */
     protected function platformAdmin(): array
     {
-        $admin = User::query()->where('email', 'admin@ota.demo')->first();
-        if ($admin === null) {
-            $this->seed(OtaFoundationSeeder::class);
-            $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-        }
-
+        $this->seed(OtaFoundationSeeder::class);
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         if ($admin->account_type !== AccountType::PlatformAdmin) {
             $admin->forceFill(['account_type' => AccountType::PlatformAdmin])->save();
             $admin = $admin->fresh();

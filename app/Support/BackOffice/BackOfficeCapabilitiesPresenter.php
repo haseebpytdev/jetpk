@@ -146,16 +146,10 @@ class BackOfficeCapabilitiesPresenter
             $items[] = $this->dashboardNav('Users', 'users', '/users');
         }
         if ($isAdmin) {
-            $staff = $this->laravelNav('Staff', 'staff', 'admin.staff');
-            if ($staff !== null) {
-                $items[] = $staff;
-            }
+            $items[] = $this->dashboardNav('Staff', 'staff', '/staff');
         }
         if ($isAdmin && Gate::forUser($user)->allows('viewAny', CustomerQuery::class)) {
-            $queries = $this->laravelNav('Customer Queries', 'customer-queries', 'admin.customer-queries.index');
-            if ($queries !== null) {
-                $items[] = $queries;
-            }
+            $items[] = $this->dashboardNav('Customer Queries', 'customer-queries', '/customer-queries');
         }
         if ($has('reports.view')) {
             $items[] = $this->dashboardNav('Reports', 'reports', '/reports');
@@ -166,66 +160,31 @@ class BackOfficeCapabilitiesPresenter
 
         // Admin mutation surfaces: Blade hubs (Next dashboard API is intentionally GET-only).
         if ($isAdmin) {
-            $apiSettings = $this->laravelNav('API Settings', 'api-settings', 'admin.api-settings');
-            if ($apiSettings !== null) {
-                $items[] = $apiSettings;
-            }
+            $items[] = $this->dashboardNav('API Connections', 'api-connections', '/api-connections');
             if ($modules['branding_settings'] ?? false) {
-                $branding = $this->laravelNav('Company Profile', 'company-profile', 'admin.settings.branding.edit');
-                if ($branding !== null) {
-                    $items[] = $branding;
-                }
-                $homepage = $this->laravelNav('Homepage CMS', 'homepage-cms', 'admin.settings.homepage.edit');
-                if ($homepage !== null) {
-                    $items[] = $homepage;
-                }
+                $branding = $this->dashboardNav('Company Profile', 'company-profile', '/settings/general');
+                $items[] = $branding;
+                $items[] = $this->dashboardNav('Homepage CMS', 'homepage-cms', '/cms/sections');
             }
-            $cmsPages = $this->laravelNav('CMS Pages', 'cms-pages', 'admin.cms-pages.index');
-            if ($cmsPages !== null) {
-                $items[] = $cmsPages;
-            }
-            $pageSettings = $this->laravelNav('Managed Pages', 'page-settings', 'admin.page-settings.index');
-            if ($pageSettings !== null) {
-                $items[] = $pageSettings;
-            }
+            $cmsPages = $this->dashboardNav('CMS Pages', 'cms-pages', '/cms/pages');
+            $items[] = $cmsPages;
+            $pageSettings = $this->dashboardNav('Managed Pages', 'page-settings', '/cms/sections');
+            $items[] = $pageSettings;
             if (Gate::forUser($user)->allows('seo.manage')) {
-                $seo = $this->laravelNav('SEO', 'seo', 'admin.seo.overview');
-                if ($seo !== null) {
-                    $items[] = $seo;
-                }
+                $items[] = $this->dashboardNav('SEO', 'seo', '/seo');
             }
             if ($modules['notifications'] ?? false) {
-                $comms = $this->laravelNav('Communications', 'communications', 'admin.settings.communications.index');
-                if ($comms !== null) {
-                    $items[] = $comms;
-                }
+                $items[] = $this->dashboardNav('Communications', 'communications', '/settings/notifications');
             }
             if ($modules['markup_settings'] ?? false) {
-                $markups = $this->laravelNav('Markups', 'markups', 'admin.markups');
-                if ($markups !== null) {
-                    $items[] = $markups;
-                }
+                $items[] = $this->dashboardNav('Markups', 'markups', '/markups');
             }
-            $groups = $this->laravelNav('Group Ticketing', 'group-ticketing', 'admin.group-ticketing.index');
-            if ($groups !== null) {
-                $items[] = $groups;
-            }
-            $otp = $this->laravelNav('Login OTP', 'login-otp', 'admin.settings.login-otp.edit');
-            if ($otp !== null) {
-                $items[] = $otp;
-            }
-            $ai = $this->laravelNav('Ask JetPakistan', 'ai-assistant', 'admin.settings.ai-assistant.show');
-            if ($ai !== null) {
-                $items[] = $ai;
-            }
-            $goLive = $this->laravelNav('Go-live', 'go-live', 'admin.go-live-checklist');
-            if ($goLive !== null) {
-                $items[] = $goLive;
-            }
-            $settingsHub = $this->laravelNav('Settings Hub', 'settings-hub', 'admin.settings.index');
-            if ($settingsHub !== null) {
-                $items[] = $settingsHub;
-            }
+            $items[] = $this->dashboardNav('Group Ticketing', 'group-ticketing', '/group-ticketing');
+            $otp = $this->dashboardNav('Login OTP', 'login-otp', '/settings/security');
+            $items[] = $otp;
+            $items[] = $this->dashboardNav('Ask JetPakistan', 'ai-assistant', '/settings/integrations');
+            $items[] = $this->dashboardNav('Go-live', 'go-live', '/system/go-live');
+            $items[] = $this->dashboardNav('Settings Hub', 'settings-hub', '/settings');
         } elseif ($has('settings.view')) {
             // Staff keep the read-only Next settings surface (Blade hub is platform-admin only).
             $items[] = $this->dashboardNav('Settings', 'settings', '/settings');

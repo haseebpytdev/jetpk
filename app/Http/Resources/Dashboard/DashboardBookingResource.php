@@ -23,14 +23,14 @@ final class DashboardBookingResource
             'supplierReference' => (string) ($row['supplier_reference'] ?? '') ?: null,
             'bookingDate' => self::dateOnly($booking->created_at?->toIso8601String()),
             'departureDate' => (string) ($row['travel_date'] ?? ''),
-            'returnDate' => null,
+            'returnDate' => self::returnDateFromMeta($booking),
             'customerName' => (string) ($row['customer_name'] ?? 'Guest'),
             'customerEmail' => self::maskEmail((string) ($row['contact_email'] ?? '')),
             'customerPhone' => self::maskPhone((string) ($row['contact_phone'] ?? '')),
             'passengerCount' => (int) ($row['passengers_count'] ?? 0),
             'origin' => $origin,
             'destination' => $destination,
-            'tripType' => 'one_way',
+            'tripType' => self::tripTypeFromMeta($booking),
             'airline' => (string) ($row['airline'] ?? ''),
             'supplier' => $supplier,
             'channel' => self::resolveChannel($supplier, $booking),
@@ -168,5 +168,44 @@ final class DashboardBookingResource
         }
 
         return '***'.substr($digits, -4);
+    }
+
+    /**
+     * Return date from booking meta search criteria when present.
+     * RETURN_DATE_SOURCE=meta.search_criteria.return_date|returnDate (null when absent).
+     */
+    protected static function returnDateFromMeta(?Booking $booking): ?string
+    {
+        if (! $booking instanceof Booking) {
+            return null;
+        }
+
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $criteria = is_array($meta['search_criteria'] ?? null) ? $meta['search_criteria'] : [];
+        $raw = $criteria['return_date'] ?? $criteria['returnDate'] ?? null;
+        if (! is_string($raw) || trim($raw) === '') {
+            return null;
+        }
+
+        return self::dateOnly($raw);
+    }
+
+    protected static function tripTypeFromMeta(?Booking $booking): string
+    {
+        if (self::returnDateFromMeta($booking) !== null) {
+            return 'round_trip';
+        }
+
+        if (! $booking instanceof Booking) {
+            return 'one_way';
+        }
+
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $criteria = is_array($meta['search_criteria'] ?? null) ? $meta['search_criteria'] : [];
+        $tripType = strtolower((string) ($criteria['trip_type'] ?? $criteria['tripType'] ?? ''));
+
+        return in_array($tripType, ['round_trip', 'roundtrip', 'return'], true)
+            ? 'round_trip'
+            : 'one_way';
     }
 }

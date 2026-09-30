@@ -69,7 +69,16 @@
                                 <td data-label="Passengers">{{ max(1, (int) $paxCount) }}</td>
                                 <td data-label="Status">@include('themes.frontend.jetpakistan.components.portal.status-badge', ['label' => ucfirst(str_replace('_', ' ', $booking->status?->value ?? ''))])</td>
                                 <td data-label="Payment">@include('themes.frontend.jetpakistan.components.portal.status-badge', ['label' => $paymentOp['label'], 'tone' => 'amber'])</td>
-                                <td data-label="Actions"><a href="{{ client_route('customer.bookings.show', ['booking' => $booking]) }}" class="jp-portal-btn jp-portal-btn--ghost jp-portal-btn--sm">View</a></td>
+                                <td data-label="Actions">
+                                    @php
+                                        // Route binds {booking} to booking_reference; never pass a null key into route().
+                                        $bookingRouteKey = trim((string) ($booking->booking_reference ?? ''));
+                                        if ($bookingRouteKey === '') {
+                                            $bookingRouteKey = (string) $booking->getKey();
+                                        }
+                                    @endphp
+                                    <a href="{{ client_route('customer.bookings.show', ['booking' => $bookingRouteKey]) }}" class="jp-portal-btn jp-portal-btn--ghost jp-portal-btn--sm">View</a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

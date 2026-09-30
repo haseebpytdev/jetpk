@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\MarkupRuleStatus;
 use App\Enums\MarkupRuleType;
 use App\Enums\MarkupValueType;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreMarkupRuleRequest;
 use App\Http\Requests\Admin\UpdateMarkupRuleRequest;
 use App\Models\MarkupRule;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -17,7 +19,9 @@ use Illuminate\View\View;
 
 class MarkupRuleController extends Controller
 {
-    public function index(Request $request): View
+    use RespondsWithBackOfficeJson;
+
+    public function index(Request $request): View|JsonResponse
     {
         Gate::authorize('viewAny', MarkupRule::class);
         $query = $this->scopedQuery($request->user());
@@ -40,6 +44,33 @@ class MarkupRuleController extends Controller
             'agent' => (clone $kpisBase)->where('rule_type', MarkupRuleType::Agent)->count(),
         ];
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'rules' => collect($rules->items())->map(fn (MarkupRule $rule) => $this->serializeRule($rule))->values()->all(),
+                'kpis' => $kpis,
+                'meta' => [
+                    'current_page' => $rules->currentPage(),
+                    'last_page' => $rules->lastPage(),
+                    'per_page' => $rules->perPage(),
+                    'total' => $rules->total(),
+                ],
+                'filters' => $request->only(['type', 'status']),
+                'types' => collect(MarkupRuleType::cases())->map(fn ($type) => [
+                    'value' => $type->value,
+                    'label' => $type->name,
+                ])->values()->all(),
+                'statuses' => collect(MarkupRuleStatus::cases())->map(fn ($status) => [
+                    'value' => $status->value,
+                    'label' => $status->name,
+                ])->values()->all(),
+                'valueTypes' => collect(MarkupValueType::cases())->map(fn ($type) => [
+                    'value' => $type->value,
+                    'label' => $type->name,
+                ])->values()->all(),
+            ]);
+        }
+
         return view(client_view('markups.index', 'admin'), [
             'rules' => $rules,
             'kpis' => $kpis,
@@ -49,9 +80,28 @@ class MarkupRuleController extends Controller
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View|JsonResponse
     {
         Gate::authorize('create', MarkupRule::class);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'rule' => $this->serializeRule(new MarkupRule),
+                'types' => collect(MarkupRuleType::cases())->map(fn ($type) => [
+                    'value' => $type->value,
+                    'label' => $type->name,
+                ])->values()->all(),
+                'valueTypes' => collect(MarkupValueType::cases())->map(fn ($type) => [
+                    'value' => $type->value,
+                    'label' => $type->name,
+                ])->values()->all(),
+                'statuses' => collect(MarkupRuleStatus::cases())->map(fn ($status) => [
+                    'value' => $status->value,
+                    'label' => $status->name,
+                ])->values()->all(),
+            ]);
+        }
 
         return view('dashboard.admin.markups.create', [
             'rule' => new MarkupRule,
@@ -63,19 +113,46 @@ class MarkupRuleController extends Controller
         ]);
     }
 
-    public function store(StoreMarkupRuleRequest $request): RedirectResponse
+    public function store(StoreMarkupRuleRequest $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', MarkupRule::class);
         $agencyId = $this->resolveAgencyId($request);
 
-        MarkupRule::query()->create($this->payload($request) + ['agency_id' => $agencyId]);
+        $rule = MarkupRule::query()->create($this->payload($request) + ['agency_id' => $agencyId]);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Markup rule created.',
+                'rule' => $this->serializeRule($rule),
+            ]);
+        }
 
         return redirect()->route('admin.markups')->with('status', 'markup-rule-created');
     }
 
-    public function edit(MarkupRule $markupRule): View
+    public function edit(Request $request, MarkupRule $markupRule): View|JsonResponse
     {
         Gate::authorize('view', $markupRule);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'rule' => $this->serializeRule($markupRule),
+                'types' => collect(MarkupRuleType::cases())->map(fn ($type) => [
+                    'value' => $type->value,
+                    'label' => $type->name,
+                ])->values()->all(),
+                'valueTypes' => collect(MarkupValueType::cases())->map(fn ($type) => [
+                    'value' => $type->value,
+                    'label' => $type->name,
+                ])->values()->all(),
+                'statuses' => collect(MarkupRuleStatus::cases())->map(fn ($status) => [
+                    'value' => $status->value,
+                    'label' => $status->name,
+                ])->values()->all(),
+            ]);
+        }
 
         return view('dashboard.admin.markups.edit', [
             'rule' => $markupRule,
@@ -87,16 +164,24 @@ class MarkupRuleController extends Controller
         ]);
     }
 
-    public function update(UpdateMarkupRuleRequest $request, MarkupRule $markupRule): RedirectResponse
+    public function update(UpdateMarkupRuleRequest $request, MarkupRule $markupRule): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $markupRule);
 
         $markupRule->update($this->payload($request));
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Markup rule updated.',
+                'rule' => $this->serializeRule($markupRule->fresh() ?? $markupRule),
+            ]);
+        }
+
         return redirect()->route('admin.markups')->with('status', 'markup-rule-updated');
     }
 
-    public function toggleStatus(Request $request, MarkupRule $markupRule): RedirectResponse
+    public function toggleStatus(Request $request, MarkupRule $markupRule): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $markupRule);
 
@@ -109,14 +194,29 @@ class MarkupRuleController extends Controller
             'is_active' => $next === MarkupRuleStatus::Active,
         ])->save();
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Markup rule status updated.',
+                'rule' => $this->serializeRule($markupRule->fresh() ?? $markupRule),
+            ]);
+        }
+
         return back()->with('status', 'markup-rule-status-updated');
     }
 
-    public function destroy(MarkupRule $markupRule): RedirectResponse
+    public function destroy(Request $request, MarkupRule $markupRule): RedirectResponse|JsonResponse
     {
         Gate::authorize('delete', $markupRule);
 
         $markupRule->delete();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Markup rule deleted.',
+            ]);
+        }
 
         return redirect()->route('admin.markups')->with('status', 'markup-rule-deleted');
     }
@@ -183,5 +283,27 @@ class MarkupRuleController extends Controller
             MarkupRuleType::Route->value => ['route' => $request->string('name')->toString()],
             default => null,
         };
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function serializeRule(MarkupRule $rule): array
+    {
+        return [
+            'id' => $rule->id,
+            'name' => $rule->name,
+            'rule_type' => $rule->rule_type instanceof MarkupRuleType ? $rule->rule_type->value : (string) $rule->rule_type,
+            'value' => $rule->value,
+            'value_type' => $rule->value_type instanceof MarkupValueType ? $rule->value_type->value : (string) $rule->value_type,
+            'priority' => $rule->priority,
+            'status' => $rule->status instanceof MarkupRuleStatus ? $rule->status->value : (string) $rule->status,
+            'is_active' => (bool) $rule->is_active,
+            'applies_to' => $rule->applies_to,
+            'starts_at' => optional($rule->starts_at)?->toDateString(),
+            'ends_at' => optional($rule->ends_at)?->toDateString(),
+            'meta_notes' => is_array($rule->meta) ? (string) ($rule->meta['notes'] ?? '') : '',
+            'agency_id' => $rule->agency_id,
+        ];
     }
 }

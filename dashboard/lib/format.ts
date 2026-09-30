@@ -44,6 +44,12 @@ export function formatDateTime(iso: string): string {
   });
 }
 
-export function tripTypeLabel(trip: "one_way" | "return"): string {
-  return trip === "one_way" ? "One way" : "Return";
+export function tripTypeLabel(trip: "one_way" | "return" | "round_trip" | string): string {
+  if (trip === "one_way") {
+    return "One way";
+  }
+  if (trip === "return" || trip === "round_trip" || trip === "roundtrip") {
+    return "Return";
+  }
+  return String(trip || "—");
 }

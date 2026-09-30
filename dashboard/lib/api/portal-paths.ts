@@ -176,3 +176,165 @@ export function financeAdjustmentReversePath(walletTransactionId: string): strin
     `/finance/adjustments/${encodeURIComponent(walletTransactionId)}/reverse?format=json`,
   );
 }
+
+export function apiSettingsIndexPath(): string {
+  return laravelPortalPath("admin", "/api-settings?format=json");
+}
+
+export function apiSettingsStorePath(): string {
+  return laravelPortalPath("admin", "/api-settings?format=json");
+}
+
+export function apiSettingsUpdatePath(connectionId: string): string {
+  return laravelPortalPath("admin", `/api-settings/${encodeURIComponent(connectionId)}?format=json`);
+}
+
+export function apiSettingsTogglePath(connectionId: string): string {
+  return laravelPortalPath(
+    "admin",
+    `/api-settings/${encodeURIComponent(connectionId)}/toggle-status?format=json`,
+  );
+}
+
+export function apiSettingsTestPath(connectionId: string): string {
+  return laravelPortalPath("admin", `/api-settings/${encodeURIComponent(connectionId)}/test?format=json`);
+}
+
+export function brandingSettingsPath(): string {
+  return laravelPortalPath("admin", "/settings/branding?format=json");
+}
+
+export function pageSettingsEditPath(pageKey: string): string {
+  return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}?format=json`);
+}
+
+export function pageSettingsPublishPath(pageKey: string): string {
+  return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}/publish?format=json`);
+}
+
+export function cmsPagesIndexPath(): string {
+  return laravelPortalPath("admin", "/cms-pages?format=json");
+}
+
+export function cmsPageStorePath(): string {
+  return laravelPortalPath("admin", "/cms-pages?format=json");
+}
+
+export function cmsPageEditPath(pageId: string): string {
+  return laravelPortalPath("admin", `/cms-pages/${encodeURIComponent(pageId)}/edit?format=json`);
+}
+
+export function cmsPageUpdatePath(pageId: string): string {
+  return laravelPortalPath("admin", `/cms-pages/${encodeURIComponent(pageId)}?format=json`);
+}
+
+export function cmsPageArchivePath(pageId: string): string {
+  return laravelPortalPath("admin", `/cms-pages/${encodeURIComponent(pageId)}/archive?format=json`);
+}
+
+export function cmsPageDestroyPath(pageId: string): string {
+  return laravelPortalPath("admin", `/cms-pages/${encodeURIComponent(pageId)}?format=json`);
+}
+
+export function seoOverviewPath(): string {
+  return laravelPortalPath("admin", "/seo?format=json");
+}
+
+export function seoGlobalPath(): string {
+  return laravelPortalPath("admin", "/seo/global?format=json");
+}
+
+export function seoGlobalPublishPath(): string {
+  return laravelPortalPath("admin", "/seo/global/publish?format=json");
+}
+
+export function seoSocialPath(): string {
+  return laravelPortalPath("admin", "/seo/social?format=json");
+}
+
+export function seoVerificationPath(): string {
+  return laravelPortalPath("admin", "/seo/verification?format=json");
+}
+
+export function seoVerificationPublishPath(): string {
+  return laravelPortalPath("admin", "/seo/verification/publish?format=json");
+}
+
+export function seoPageEditPath(sourceType: string, sourceId: string): string {
+  return laravelPortalPath(
+    "admin",
+    `/seo/pages/${encodeURIComponent(sourceType)}/${encodeURIComponent(sourceId)}?format=json`,
+  );
+}
+
+export function seoPagePublishPath(sourceType: string, sourceId: string): string {
+  return laravelPortalPath(
+    "admin",
+    `/seo/pages/${encodeURIComponent(sourceType)}/${encodeURIComponent(sourceId)}/publish?format=json`,
+  );
+}
+
+export function seoAuditPath(): string {
+  return laravelPortalPath("admin", "/seo/audit?format=json");
+}
+
+export function loginOtpSettingsPath(): string {
+  return laravelPortalPath("admin", "/settings/login-otp?format=json");
+}
+
+export function aiAssistantSettingsPath(): string {
+  return laravelPortalPath("admin", "/settings/ai-assistant?format=json");
+}
+
+export function customerQueriesIndexPath(query = ""): string {
+  const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
+  return laravelPortalPath("admin", `/customer-queries?format=json${suffix}`);
+}
+
+export function customerQueryShowPath(queryId: string | number): string {
+  return laravelPortalPath("admin", `/customer-queries/${encodeURIComponent(String(queryId))}?format=json`);
+}
+
+export function customerQueryStatusPath(queryId: string | number): string {
+  return laravelPortalPath(
+    "admin",
+    `/customer-queries/${encodeURIComponent(String(queryId))}/status?format=json`,
+  );
+}
+
+export function staffManagementPath(query = ""): string {
+  const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
+  return laravelPortalPath("admin", `/staff?format=json${suffix}`);
+}
+
+export function markupsIndexPath(query = ""): string {
+  const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
+  return laravelPortalPath("admin", `/markups?format=json${suffix}`);
+}
+
+export function markupStorePath(): string {
+  return laravelPortalPath("admin", "/markups?format=json");
+}
+
+export function markupUpdatePath(ruleId: string | number): string {
+  return laravelPortalPath("admin", `/markups/${encodeURIComponent(String(ruleId))}?format=json`);
+}
+
+export function markupTogglePath(ruleId: string | number): string {
+  return laravelPortalPath(
+    "admin",
+    `/markups/${encodeURIComponent(String(ruleId))}/toggle-status?format=json`,
+  );
+}
+
+export function goLiveChecklistPath(): string {
+  return laravelPortalPath("admin", "/go-live-checklist?format=json");
+}
+
+export function groupTicketingAdminPath(): string {
+  return laravelPortalPath("admin", "/group-ticketing?format=json");
+}
+
+export function communicationsSettingsPath(): string {
+  return laravelPortalPath("admin", "/settings/communications?format=json");
+}

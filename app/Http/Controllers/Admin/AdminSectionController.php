@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\AccountType;
 use App\Enums\BookingStatus;
 use App\Enums\UserAccountStatus;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Agent;
 use App\Models\AgentApplication;
@@ -27,6 +28,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminSectionController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected BookingReportService $bookingReportService,
     ) {}
@@ -537,7 +540,7 @@ class AdminSectionController extends Controller
         ];
     }
 
-    public function staff(Request $request): View
+    public function staff(Request $request): View|JsonResponse
     {
         Gate::authorize('viewAny', StaffProfile::class);
 
@@ -610,6 +613,21 @@ class AdminSectionController extends Controller
         $preview = $request->string('preview')->toString();
         $selectedStaff = $staffRows->first(fn (array $row): bool => (string) $row['id'] === $preview || (string) $row['staff_code'] === $preview)
             ?? $staffRows->first();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'staff' => $staffRows->all(),
+                'kpis' => $kpis,
+                'departments' => $departments->all(),
+                'selectedStaff' => $selectedStaff,
+                'filters' => [
+                    'search' => $search,
+                    'department' => $department,
+                    'status' => $status,
+                ],
+            ]);
+        }
 
         return view('dashboard.admin.staff', [
             'staff' => $staffRows,
@@ -964,7 +982,7 @@ class AdminSectionController extends Controller
         return redirect()->route('admin.settings.branding.edit');
     }
 
-    public function goLiveChecklist(): View
+    public function goLiveChecklist(Request $request): View|JsonResponse
     {
         Gate::authorize('platform.admin');
 
@@ -985,6 +1003,14 @@ class AdminSectionController extends Controller
             })
             ->values()
             ->all();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'items' => $items,
+                'classification' => 'CURRENT_NEXT',
+            ]);
+        }
 
         return view('dashboard.admin.go-live-checklist', [
             'items' => $items,

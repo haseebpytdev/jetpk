@@ -26,11 +26,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if ($request->wantsJson() || $request->query('format') === 'json') {
-            if (! $user->isCustomer()) {
-                abort(403);
-            }
-
-            return response()->json($this->customerProfilePresenter->present($user));
+            return response()->json($this->jsonProfilePayload($user));
         }
 
         $userProfile = $user->profile()->firstOrCreate([]);
@@ -105,13 +101,9 @@ class ProfileController extends Controller
         $profile->save();
 
         if ($request->wantsJson() || $request->query('format') === 'json') {
-            if (! $user->isCustomer()) {
-                abort(403);
-            }
-
             return response()->json([
                 'ok' => true,
-                'profile' => $this->customerProfilePresenter->present($user->fresh(['profile'])),
+                'profile' => $this->jsonProfilePayload($user->fresh(['profile'])),
                 'message' => 'Profile updated successfully.',
             ]);
         }
@@ -152,5 +144,26 @@ class ProfileController extends Controller
     protected function dashboardUrlFor(User $user): string
     {
         return LoginDestination::path($user);
+    }
+
+    /**
+     * Dashboard / portal profile JSON. Customer field contract stays in CustomerPortalProfilePresenter;
+     * non-customer roles receive the same editable contact shape plus read-only account metadata.
+     *
+     * @return array<string, mixed>
+     */
+    protected function jsonProfilePayload(User $user): array
+    {
+        $payload = $this->customerProfilePresenter->present($user);
+        $payload['account'] = [
+            'account_type' => $user->account_type?->value ?? (string) $user->account_type,
+            'status' => $user->status?->value ?? (string) $user->status,
+            'is_customer' => $user->isCustomer(),
+            'is_platform_admin' => method_exists($user, 'isPlatformAdmin') && $user->isPlatformAdmin(),
+            'is_staff' => method_exists($user, 'isStaff') && $user->isStaff(),
+            'is_agent_portal' => method_exists($user, 'isAgentPortalUser') && $user->isAgentPortalUser(),
+        ];
+
+        return $payload;
     }
 }

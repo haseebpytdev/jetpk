@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Services\Ai\AiAssistantEligibility;
 use App\Services\Ai\AiAssistantSettingsService;
 use App\Services\Ai\AiChatOrchestrator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -13,21 +15,34 @@ use Illuminate\View\View;
 
 /**
  * Ask JetPakistan admin control plane — safe toggles with env hard ceiling.
+ * Dashboard UI only; does not alter AI orchestration implementation.
  */
 class AiAssistantStatusController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         private readonly AiAssistantEligibility $eligibility,
         private readonly AiAssistantSettingsService $settingsService,
         private readonly AiChatOrchestrator $orchestrator,
     ) {}
 
-    public function show(Request $request): View
+    public function show(Request $request): View|JsonResponse
     {
         Gate::authorize('platform.admin');
 
         $status = $this->eligibility->statusPayload();
         $health = $this->orchestrator->healthPayload();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'status' => $status,
+                'health' => $health,
+                'controlMatrix' => $status['control_matrix'] ?? [],
+                'hardLockedWrites' => $status['hard_locked_writes'] ?? [],
+            ]);
+        }
 
         return view('dashboard.admin.settings.ai-assistant', [
             'status' => $status,
@@ -37,11 +52,11 @@ class AiAssistantStatusController extends Controller
         ]);
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('platform.admin');
 
-        $validated = $request->validate([
+        $request->validate([
             'master_enabled' => ['nullable', 'boolean'],
             'lab_adapter_enabled' => ['nullable', 'boolean'],
             'rag_enabled' => ['nullable', 'boolean'],
@@ -77,7 +92,28 @@ class AiAssistantStatusController extends Controller
         try {
             $this->settingsService->update($request->user(), $payload);
         } catch (\InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson([
+                    'ok' => false,
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
             return back()->withErrors(['audience_mode' => $e->getMessage()]);
+        }
+
+        $status = $this->eligibility->statusPayload();
+        $health = $this->orchestrator->healthPayload();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Ask JetPakistan settings updated.',
+                'status' => $status,
+                'health' => $health,
+                'controlMatrix' => $status['control_matrix'] ?? [],
+                'hardLockedWrites' => $status['hard_locked_writes'] ?? [],
+            ]);
         }
 
         return back()->with('status', 'ai-assistant-settings-updated');

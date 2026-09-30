@@ -30,7 +30,8 @@ final class DashboardBookingDetailResource
                 'route' => (string) ($booking->route ?? ''),
                 'airline' => (string) ($booking->airline ?? ''),
                 'travelDate' => $booking->travel_date?->format('Y-m-d'),
-                'returnDate' => null,
+                // RETURN_DATE_SOURCE=meta.search_criteria.return_date|returnDate via summary
+                'returnDate' => $summary['returnDate'] ?? null,
             ],
             'passengers' => $passengers,
             'fareSummary' => [

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\ClientPageSettingStatus;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\ClientPageAsset;
 use App\Models\ClientPageSetting;
@@ -20,6 +21,7 @@ use App\Services\Homepage\JetpkHomepageRouteFareRefreshService;
 use App\Services\Seo\NextPublicCacheRevalidator;
 use App\Support\Client\ClientPageKeys;
 use App\Services\Client\CurrentClientContext;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -34,6 +36,8 @@ use Throwable;
  */
 class ClientPageSettingsController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         private readonly CurrentClientContext $clientContext,
         private readonly ClientPageContentResolver $contentResolver,
@@ -81,7 +85,7 @@ class ClientPageSettingsController extends Controller
         ]);
     }
 
-    public function edit(string $pageKey): View
+    public function edit(Request $request, string $pageKey): View|JsonResponse
     {
         Gate::authorize('client.page-settings.manage');
         abort_unless(ClientPageKeys::isValid($pageKey), 404);
@@ -91,6 +95,17 @@ class ClientPageSettingsController extends Controller
         $editorMeta = $this->adminContentResolver->editorMeta($profile, $pageKey);
         $previewRoute = ClientPageKeys::previewRoutes()[$pageKey] ?? 'home';
         $previewUrl = client_route($previewRoute);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'pageKey' => $pageKey,
+                'pageLabel' => ClientPageKeys::labels()[$pageKey] ?? $pageKey,
+                'content' => $content,
+                'editorMeta' => $editorMeta,
+                'previewUrl' => $previewUrl,
+            ]);
+        }
 
         return view(client_view('page-settings.edit', 'admin'), [
             'pageKey' => $pageKey,
@@ -110,7 +125,7 @@ class ClientPageSettingsController extends Controller
         ]);
     }
 
-    public function update(Request $request, string $pageKey): RedirectResponse
+    public function update(Request $request, string $pageKey): RedirectResponse|JsonResponse
     {
         Gate::authorize('client.page-settings.manage');
         abort_unless(ClientPageKeys::isValid($pageKey), 404);
@@ -146,6 +161,15 @@ class ClientPageSettingsController extends Controller
             auth()->id(),
         );
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Draft saved.',
+                'pageKey' => $pageKey,
+                'content' => $content,
+            ]);
+        }
+
         return redirect()
             ->to(client_route('admin.page-settings.edit', ['pageKey' => $pageKey]))
             ->with('status', 'Draft saved.');
@@ -168,7 +192,7 @@ class ClientPageSettingsController extends Controller
             ));
     }
 
-    public function publish(string $pageKey): RedirectResponse
+    public function publish(Request $request, string $pageKey): RedirectResponse|JsonResponse
     {
         Gate::authorize('client.page-settings.manage');
         abort_unless(ClientPageKeys::isValid($pageKey), 404);
@@ -177,6 +201,10 @@ class ClientPageSettingsController extends Controller
         $published = $this->contentResolver->publish($profile, $pageKey, auth()->id());
 
         if ($published === null) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson(['ok' => false, 'message' => 'No draft found to publish.'], 422);
+            }
+
             return back()->withErrors(['publish' => 'No draft found to publish.']);
         }
 
@@ -193,6 +221,14 @@ class ClientPageSettingsController extends Controller
             } else {
                 $status .= ' Public cache revalidated.';
             }
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => $status,
+                'pageKey' => $pageKey,
+            ]);
         }
 
         return redirect()

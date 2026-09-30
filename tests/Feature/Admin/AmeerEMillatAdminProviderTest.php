@@ -36,9 +36,13 @@ class AmeerEMillatAdminProviderTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/create?provider=ameer_e_millat')
-            ->assertOk()
-            ->assertSee('AMEER E MILLAT', false)
-            ->assertSee('Bearer token', false);
+            ->assertRedirect('/admin/dashboard/api-connections?provider=ameer_e_millat');
+
+        $providers = $this->actingAs($admin)->getJson('/admin/api-settings?format=json')->json('providers');
+        $ameer = collect($providers)->firstWhere('key', 'ameer_e_millat');
+        $this->assertNotNull($ameer);
+        $labels = collect($ameer['credentialFields'] ?? [])->pluck('label')->implode(' ');
+        $this->assertNotEmpty($labels);
     }
 
     public function test_store_manual_token_connection_normalizes_payload(): void
@@ -56,7 +60,7 @@ class AmeerEMillatAdminProviderTest extends TestCase
                 'token_expires_at' => '2030-01-01T00:00:00+00:00',
             ],
             'settings_json' => '{}',
-        ])->assertRedirect('/admin/api-settings');
+        ])->assertRedirect('/admin/dashboard/api-connections');
 
         $connection = SupplierConnection::query()
             ->where('agency_id', $admin->current_agency_id)
@@ -104,9 +108,12 @@ class AmeerEMillatAdminProviderTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$connection->id.'/edit')
-            ->assertOk()
-            ->assertSee('Authentication mode', false)
-            ->assertDontSee('super-secret-token-value', false);
+            ->assertRedirect('/admin/dashboard/api-connections?manage='.$connection->id);
+
+        $row = collect($this->actingAs($admin)->getJson('/admin/api-settings?format=json')->json('connections'))
+            ->firstWhere('id', (string) $connection->id);
+        $payload = json_encode($row);
+        $this->assertStringNotContainsString('super-secret-token-value', (string) $payload);
 
         Http::fake([
             'ameer.test/api/user' => Http::response(['id' => 1, 'email' => 'ops@example.test'], 200),

@@ -8,12 +8,22 @@ import {
   agentApplicationApprovePath,
   agentApplicationNeedsMoreInfoPath,
   agentApplicationRejectPath,
+  apiSettingsIndexPath,
+  apiSettingsStorePath,
+  apiSettingsTestPath,
+  apiSettingsTogglePath,
+  apiSettingsUpdatePath,
+  brandingSettingsPath,
   bookingAssignStaffPath,
   bookingNotesPath,
   cancellationApprovePath,
   cancellationProcessPath,
   cancellationRejectPath,
   cancellationStorePath,
+  cmsPageArchivePath,
+  cmsPageDestroyPath,
+  cmsPageStorePath,
+  cmsPageUpdatePath,
   commissionEntryApprovePath,
   commissionEntryRejectPath,
   depositApprovePath,
@@ -23,6 +33,9 @@ import {
   groupBookingRejectPaymentPath,
   groupBookingVerifyPaymentPath,
   issueTicketPath,
+  loginOtpSettingsPath,
+  pageSettingsEditPath,
+  pageSettingsPublishPath,
   paymentRejectPath,
   paymentStorePath,
   paymentVerifyPath,
@@ -30,6 +43,15 @@ import {
   refundMarkPaidPath,
   refundRejectPath,
   refundStorePath,
+  seoGlobalPath,
+  seoGlobalPublishPath,
+  seoOverviewPath,
+  seoPageEditPath,
+  seoPagePublishPath,
+  seoSocialPath,
+  seoVerificationPath,
+  seoVerificationPublishPath,
+  aiAssistantSettingsPath,
   supportTicketAssignPath,
   supportTicketForwardPath,
   supportTicketReplyPath,
@@ -416,6 +438,297 @@ export async function reverseFinanceAdjustment(
 ): Promise<MutationResponse<Record<string, unknown>>> {
   return laravelRequest(financeAdjustmentReversePath(walletTransactionId), {
     method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function listApiConnections(): Promise<
+  MutationResponse<{
+    connections?: Record<string, unknown>[];
+    providers?: Record<string, unknown>[];
+    providerCards?: Record<string, unknown>[];
+  }>
+> {
+  return laravelRequest(apiSettingsIndexPath(), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function createApiConnection(
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ connection?: Record<string, unknown> }>> {
+  return laravelRequest(apiSettingsStorePath(), {
+    method: "POST",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateApiConnection(
+  connectionId: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ connection?: Record<string, unknown> }>> {
+  return laravelRequest(apiSettingsUpdatePath(connectionId), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function toggleApiConnection(
+  connectionId: string,
+): Promise<MutationResponse<{ connection?: Record<string, unknown> }>> {
+  return laravelRequest(apiSettingsTogglePath(connectionId), {
+    method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function testApiConnection(
+  connectionId: string,
+): Promise<MutationResponse<{ test?: Record<string, unknown>; connection?: Record<string, unknown> }>> {
+  return laravelRequest(apiSettingsTestPath(connectionId), {
+    method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadOrganizationProfile(): Promise<
+  MutationResponse<{ organization?: Record<string, unknown> }>
+> {
+  return laravelRequest(brandingSettingsPath(), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateOrganizationProfile(
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ organization?: Record<string, unknown> }>> {
+  return laravelRequest(brandingSettingsPath(), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadPageSettings(
+  pageKey: string,
+): Promise<MutationResponse<{ content?: Record<string, unknown>; pageKey?: string; editorMeta?: Record<string, unknown> }>> {
+  return laravelRequest(pageSettingsEditPath(pageKey), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function savePageSettings(
+  pageKey: string,
+  content: Record<string, unknown>,
+): Promise<MutationResponse<{ content?: Record<string, unknown> }>> {
+  return laravelRequest(pageSettingsEditPath(pageKey), {
+    method: "PATCH",
+    json: { content },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function publishPageSettings(
+  pageKey: string,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(pageSettingsPublishPath(pageKey), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function createCmsPage(
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ page?: Record<string, unknown> }>> {
+  return laravelRequest(cmsPageStorePath(), {
+    method: "POST",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateCmsPage(
+  pageId: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ page?: Record<string, unknown> }>> {
+  return laravelRequest(cmsPageUpdatePath(pageId), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function archiveCmsPage(
+  pageId: string,
+): Promise<MutationResponse<{ page?: Record<string, unknown> }>> {
+  return laravelRequest(cmsPageArchivePath(pageId), {
+    method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function destroyCmsPage(
+  pageId: string,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(cmsPageDestroyPath(pageId), {
+    method: "DELETE",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadSeoOverview(): Promise<
+  MutationResponse<{ stats?: Record<string, unknown>; pages?: Array<Record<string, unknown>> }>
+> {
+  return laravelRequest(seoOverviewPath(), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadSeoGlobal(): Promise<
+  MutationResponse<{ settings?: Record<string, unknown> }>
+> {
+  return laravelRequest(seoGlobalPath(), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function saveSeoGlobal(
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ settings?: Record<string, unknown> }>> {
+  return laravelRequest(seoGlobalPath(), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function publishSeoGlobal(): Promise<
+  MutationResponse<{ settings?: Record<string, unknown> }>
+> {
+  return laravelRequest(seoGlobalPublishPath(), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadSeoSocial(): Promise<
+  MutationResponse<{ social?: Record<string, unknown>; global?: Record<string, unknown> }>
+> {
+  return laravelRequest(seoSocialPath(), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function saveSeoSocial(
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ social?: Record<string, unknown>; global?: Record<string, unknown> }>> {
+  return laravelRequest(seoSocialPath(), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadSeoVerification(): Promise<
+  MutationResponse<{ verification?: Record<string, unknown>; global?: Record<string, unknown> }>
+> {
+  return laravelRequest(seoVerificationPath(), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function saveSeoVerification(
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ verification?: Record<string, unknown>; global?: Record<string, unknown> }>> {
+  return laravelRequest(seoVerificationPath(), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function publishSeoVerification(): Promise<
+  MutationResponse<{ verification?: Record<string, unknown>; global?: Record<string, unknown> }>
+> {
+  return laravelRequest(seoVerificationPublishPath(), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadSeoPage(
+  sourceType: string,
+  sourceId: string,
+): Promise<MutationResponse<{ page?: Record<string, unknown> }>> {
+  return laravelRequest(seoPageEditPath(sourceType, sourceId), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function saveSeoPage(
+  sourceType: string,
+  sourceId: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ page?: Record<string, unknown> }>> {
+  return laravelRequest(seoPageEditPath(sourceType, sourceId), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function publishSeoPage(
+  sourceType: string,
+  sourceId: string,
+): Promise<MutationResponse<{ page?: Record<string, unknown> }>> {
+  return laravelRequest(seoPagePublishPath(sourceType, sourceId), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadLoginOtpSettings(): Promise<
+  MutationResponse<{ snapshot?: Record<string, unknown> }>
+> {
+  return laravelRequest(loginOtpSettingsPath(), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateLoginOtpSettings(
+  requireLoginOtp: boolean,
+): Promise<MutationResponse<{ snapshot?: Record<string, unknown> }>> {
+  return laravelRequest(loginOtpSettingsPath(), {
+    method: "PATCH",
+    json: { require_login_otp: requireLoginOtp },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadAiAssistantSettings(): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(aiAssistantSettingsPath(), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateAiAssistantSettings(
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(aiAssistantSettingsPath(), {
+    method: "PATCH",
+    json: payload,
     retryCsrfOnce: false,
   });
 }

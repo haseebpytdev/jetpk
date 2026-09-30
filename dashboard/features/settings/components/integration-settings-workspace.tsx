@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ChannelBadge, CmsStatusBadge } from "@/components/ui/status-badge";
 import { formatDateTime } from "@/lib/format";
 import { validateIntegrationSettings } from "@/lib/access-control/settings-validation";
+import { AiAssistantLiveControl } from "@/features/settings/components/ai-assistant-live-control";
 import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/settings/components/settings-local-preview-form";
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
 import type { IntegrationRecord, IntegrationSettingsValues, SettingsModuleResult } from "@/types/settings-module";
@@ -95,6 +96,8 @@ export function IntegrationSettingsWorkspace({ result }: Props) {
   return (
     <div className="space-y-4" data-testid="integration-settings-workspace">
       <SettingsValidationSummary issues={issues} filter={result.query.validationState} />
+
+      <AiAssistantLiveControl />
 
       {initialIntegration ? (
         <SettingsLocalPreviewForm

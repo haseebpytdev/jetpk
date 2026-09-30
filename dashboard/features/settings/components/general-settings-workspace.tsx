@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { validateGeneralSettings } from "@/lib/access-control/settings-validation";
+import { OrganizationProfileForm } from "@/features/settings/components/organization-profile-form";
 import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/settings/components/settings-local-preview-form";
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
 import type { GeneralSettingsValues, SettingsModuleResult } from "@/types/settings-module";
@@ -71,6 +72,8 @@ export function GeneralSettingsWorkspace({ result }: Props) {
 
   return (
     <div className="space-y-4" data-testid="general-settings-workspace">
+      <OrganizationProfileForm />
+
       <SettingsValidationSummary issues={issues} filter={result.query.validationState} />
 
       <SettingsLocalPreviewForm

@@ -103,7 +103,10 @@ export const navGroups: NavGroup[] = [
       {
         label: "Suppliers",
         href: "/suppliers",
-        laravelRoute: "admin.api-settings",
+      },
+      {
+        label: "API Connections",
+        href: "/api-connections",
       },
       {
         label: "Markups & Settings",
