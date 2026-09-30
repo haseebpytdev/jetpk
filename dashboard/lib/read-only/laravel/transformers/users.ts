@@ -54,8 +54,42 @@ export function transformUsersModule(
   };
 }
 
+function normalizeEffectiveAccess(raw: unknown, roleIds: string[] = []): User["effectiveAccess"] {
+  const ea = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const highRiskPermissions = Array.isArray(ea.highRiskPermissions)
+    ? (ea.highRiskPermissions as string[])
+    : [];
+  const domains = Array.isArray(ea.domains)
+    ? (ea.domains as User["effectiveAccess"]["domains"])
+    : [];
+  const totalPermissions =
+    typeof ea.totalPermissions === "number"
+      ? ea.totalPermissions
+      : Array.isArray(ea.permissionGroups)
+        ? ea.permissionGroups.length
+        : highRiskPermissions.length;
+
+  return {
+    domains,
+    totalPermissions,
+    highRiskPermissions,
+    roleIds: Array.isArray(ea.roleIds) ? (ea.roleIds as string[]) : roleIds,
+  };
+}
+
 export function transformUserDetail(payload: Record<string, unknown>): User {
   const base = payload;
+  const assignedRolesRaw = Array.isArray(base.assignedRoles) ? base.assignedRoles : [];
+  const assignedRoles = assignedRolesRaw.map((entry) => {
+    const row = (entry && typeof entry === "object" ? entry : {}) as Record<string, unknown>;
+    return {
+      roleId: String(row.roleId ?? row.id ?? ""),
+      assignedAt: String(row.assignedAt ?? ""),
+      assignedBy: String(row.assignedBy ?? "system"),
+      source: (row.source as User["assignedRoles"][number]["source"]) ?? "system",
+    };
+  });
+
   return {
     id: String(base.id ?? ""),
     profile: {
@@ -70,16 +104,11 @@ export function transformUserDetail(payload: Record<string, unknown>): User {
       phone: base.phone ? String(base.phone) : null,
       phoneExtension: null,
     },
-    assignedRoles: Array.isArray(base.assignedRoles)
-      ? (base.assignedRoles as User["assignedRoles"])
-      : [],
-    effectiveAccess: (base.effectiveAccess as User["effectiveAccess"]) ?? {
-      roleLabels: [],
-      permissionGroups: [],
-      highRiskPermissions: [],
-      scope: "allRecords",
-      previewOnly: true,
-    },
+    assignedRoles,
+    effectiveAccess: normalizeEffectiveAccess(
+      base.effectiveAccess,
+      assignedRoles.map((r) => r.roleId).filter(Boolean),
+    ),
     security: {
       status: (base.status as UserStatus) ?? "active",
       verificationState: (base.verificationState as User["security"]["verificationState"]) ?? "verified",
