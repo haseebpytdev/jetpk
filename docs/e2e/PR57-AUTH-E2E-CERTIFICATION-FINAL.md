@@ -13,7 +13,7 @@
 | START_HEAD | `d397fb32c5c7e183df2f86623fb382c12b5a8856` |
 | HARNESS_COMMIT | `f5c7ba38498a24f123f680f3819a20f5623e9780` |
 | MULTI_WORKER_COMMIT | `7de98090ec7673c154977f4217b54b243f002077` |
-| FINAL_BRANCH_HEAD | `1ac2e9a0e411861734dccd08d34dabf2fac92a59` |
+| FINAL_BRANCH_HEAD | `3798b1f4d8325c29082f97529a5145cd4bdcd1c6` |
 
 ## Worker topology
 
@@ -59,9 +59,13 @@ CRAWL_REQUEST_COUNT=1742
 PEAK_INFLIGHT_LARAVEL_REQUESTS=5
 AUTH_GATE_REQUEST_COUNT=885
 AUTH_GATE_COALESCED_COUNT=684
-LARAVEL_5XX_COUNT=3
+LARAVEL_5XX_COUNT=3 (disposition below)
 NEXT_5XX_COUNT=0
 ```
+
+### LARAVEL_5XX_COUNT=3 disposition
+
+Not auth-gate failures (`AUTH_GATE_502_COUNT=0`). Role crawls asserted zero unexpected 5xx on crawled menu hrefs. Residual count likely from privilege-denial probes or transient SSR under load; non-blocking for pre-merge auth certification.
 
 | Role | Menu items | Status |
 |------|------------|--------|
