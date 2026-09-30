@@ -55,6 +55,31 @@ php artisan jetpk:dash-03-qa-staff activate
 php artisan jetpk:dash-03-qa-identities all status
 php artisan jetpk:dash-03-qa-staff status
 
+# Apply SQLite concurrency knobs into active .env when missing
+$dot = Get-Content (Join-Path $Root ".env") -Raw
+if ($dot -notmatch 'DB_JOURNAL_MODE=') {
+  Add-Content (Join-Path $Root ".env") "`nDB_JOURNAL_MODE=WAL`nDB_BUSY_TIMEOUT=5000`nDB_SYNCHRONOUS=NORMAL`n"
+}
+php artisan config:clear | Out-Null
+
+# Dashboard Next SSR must call Laravel via the same-origin proxy /laravel mount
+# so server fetches hit the multi-worker pool (not a dead single :8000).
+$dashEnv = Join-Path $Root "dashboard\.env.local"
+$dashEnvBody = @"
+NEXT_PUBLIC_DASHBOARD_MODE=live
+NEXT_PUBLIC_USE_MOCK_DATA=false
+NEXT_PUBLIC_ALLOW_MUTATIONS=true
+NEXT_PUBLIC_LARAVEL_API_BASE=
+NEXT_PUBLIC_APP_URL=http://127.0.0.1:9080
+LARAVEL_URL=http://127.0.0.1:9080/laravel
+DASHBOARD_PREVIEW_ENABLED=false
+DASHBOARD_PREVIEW_ALLOW_LIVE_DATA=true
+DASHBOARD_PREVIEW_ALLOW_MUTATIONS=true
+"@
+Set-Content -Path $dashEnv -Value $dashEnvBody -Encoding UTF8
+Write-Host "DASHBOARD_ENV_LOCAL=written (LARAVEL_URL via proxy /laravel)"
+
 Write-Host "E2E_BOOTSTRAP=READY"
 Write-Host "E2E_PROXY_ORIGIN=http://127.0.0.1:9080"
 Write-Host "PASSWORDS_PRINTED=0"
+Write-Host "NEXT=start Next on :3001 (live mode), then start-laravel-e2e-workers.ps1, then e2e-auth-proxy.mjs with E2E_LARAVEL_ORIGINS"
