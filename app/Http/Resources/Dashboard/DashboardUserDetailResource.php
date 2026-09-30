@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Dashboard;
 
 use App\Models\User;
+use App\Support\Dashboard\DashboardRoleCatalog;
 
 final class DashboardUserDetailResource
 {
@@ -31,7 +32,7 @@ final class DashboardUserDetailResource
                     static fn (string $key): bool => str_contains($key, 'assign') || str_contains($key, 'export'),
                 )),
                 'scope' => (string) ($role['scope'] ?? 'allRecords'),
-                'previewOnly' => true,
+                'previewOnly' => false,
             ],
             'validationIssues' => [],
         ];
