@@ -40,7 +40,7 @@ export function CmsMediaUploadPanel({ onUploaded }: Props) {
     onUploaded?.();
   }
 
-  async function cleanupLastUpload() {
+  async function removeLastUpload() {
     if (!lastUploadedId) return;
     setBusy(true);
     const result = await laravelRequest(agencyMediaDestroyPath(lastUploadedId), {
@@ -50,19 +50,19 @@ export function CmsMediaUploadPanel({ onUploaded }: Props) {
     });
     setBusy(false);
     if (!result.ok) {
-      setError(result.message ?? "Cleanup delete failed.");
+      setError(result.message ?? "Delete failed.");
       return;
     }
     setLastUploadedId(null);
-    setSuccess("QA upload removed.");
+    setSuccess("Media asset removed.");
     onUploaded?.();
   }
 
   return (
     <section className="rounded-xl border border-jp-border bg-white p-4" data-testid="cms-media-upload-panel">
-      <h3 className="text-sm font-semibold text-gray-900">Media library upload</h3>
+      <h3 className="text-sm font-semibold text-gray-900">Upload media</h3>
       <p className="mt-1 text-sm text-jp-muted">
-        Upload controlled QA media through the authoritative Laravel media store. Use cleanup to remove the last QA upload.
+        Upload images to the authoritative Laravel media library. Supported formats follow platform policy.
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <input
@@ -78,11 +78,11 @@ export function CmsMediaUploadPanel({ onUploaded }: Props) {
           }}
         />
         <Button type="button" size="sm" disabled={busy} onClick={() => inputRef.current?.click()} data-testid="cms-media-upload-button">
-          {busy ? "Uploading…" : "Upload QA media"}
+          {busy ? "Uploading…" : "Upload media"}
         </Button>
         {lastUploadedId ? (
-          <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={() => void cleanupLastUpload()} data-testid="cms-media-upload-cleanup">
-            Remove last QA upload
+          <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={() => void removeLastUpload()} data-testid="cms-media-upload-remove">
+            Remove uploaded asset
           </Button>
         ) : null}
       </div>

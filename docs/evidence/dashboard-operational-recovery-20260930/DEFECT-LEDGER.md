@@ -8,17 +8,23 @@ DEPLOYED_SHA=5c1b3fd6dd114f5d0f11f6737e368f5b122a587e
 DASHBOARD_BUILD_ID=RjGeq5dCHFe7KQrB1Glgn
 PRE_B5_BACKUP_PATH=/home/pkjetp/backups/dashboard-b5-20260930T203431Z
 BATCH5_HEAD=5c1b3fd6dd114f5d0f11f6737e368f5b122a587e
-B2B4_EVIDENCE_COMMIT=a59f66fd1e7655df7182a3b95d8aeccffc3a567b
+PRE_FINAL_GAP_HEAD=e480555edcb644471fde4ec0b82e309c83c11d08
 BATCH5_EVIDENCE=storage/framework/dor-b5b6-visible-uat/
-AUTHORITATIVE_STATUS_CORRECTION=20261001T0148
+AUTHORITATIVE_STATUS_CORRECTION=20261001T0200
 BATCH_1=PASS
 BATCH_1_5_GLOBAL_LIVE_MODE=PASS
 BATCH_2=PASS
 BATCH_3=PASS
 BATCH_4=PASS
 BATCH_5=PARTIAL
-BATCH_6=PASS
-ENGINEERING_NOTE=Batch5 deployed 5c1b3fd6; headed UAT PARTIAL on CMS/API depth; Batch6 action UAT PASS with CROSS_PORTAL_RBAC follow-up
+BATCH_6=PARTIAL
+BATCH_6_ACTION_MODULES=PASS
+BATCH_6_SECURITY_GATE=FAIL
+CROSS_PORTAL_RBAC=FAIL
+FULL_REGRESSION=PASS
+UNEXPLAINED_TEST_FAILURES=0
+FINAL_STATUS=PARTIAL
+ENGINEERING_NOTE=Gap-closure candidate: DOR-021 fail-closed portal gate, CMS/API/booking fixes, obsolete Blade tests retired to JetPK theme; headed UAT + deploy pending
 ```
 
 | ID | ROLE | MODULE | ROUTE | EXPECTED | ACTUAL | ROOT_CAUSE | FIX | TEST | VISIBLE_PROOF | COMMIT | DEPLOYED_SHA | STATUS |
@@ -40,9 +46,11 @@ ENGINEERING_NOTE=Batch5 deployed 5c1b3fd6; headed UAT PARTIAL on CMS/API depth; 
 | DOR-015 | Admin | Notification failures | `/notifications/failures` | Operational failure workspace | Delivery-log JSON + Next workspace; masked recipients; no blind retry | Lost Next module | CommunicationDeliveryLogController JSON + NotificationFailuresWorkspace | `DashboardBatch4QueuesJsonContractTest` | headed PASS | `b2cde218` | `b2cde218` | PASS |
 | DOR-016 | Admin | Live Operations | `/operations/inbox` | Inbox/events/badge/assigned work | OperationalInboxController JSON + LiveOperationsWorkspace | Lost Next panel | Assigned bookings/support + KPIs; mark-read store CURRENT_DOMAIN_NA | `DashboardBatch4QueuesJsonContractTest` | headed PASS | `b2cde218` | `b2cde218` | PASS |
 | DOR-017 | Admin | Reports live fidelity | `/reports/sales`, `/operations` | Live KPI rows; no fixture fallback | Dedicated routes + transformer live facets; metrics payload fix | Wrong adapter mapping + undefined metrics var | Batch 5 sales/operations endpoints + resource fix | `DashboardBatch5ReportsJsonContractTest` | headed PASS all 5 modules | `5c1b3fd6` | `5c1b3fd6` | PASS |
-| DOR-018 | Admin | Media library | `/cms/assets` | Upload/list/public URL | AgencyMedia JSON + publicUrl + upload panel | Raw file_path exposure | publicUrl helper + live asset preview | `DashboardBatch5MediaJsonContractTest` | headed PASS; upload panel CURRENT_DOMAIN_NA on prod layout | `5c1b3fd6` | `5c1b3fd6` | PARTIAL |
+| DOR-018 | Admin | Media library | `/cms/assets` | Upload/list/public URL owner-visible | AgencyMedia + CmsMediaUploadPanel implemented; prod visibility/runtime proof pending | Incorrectly classified CURRENT_DOMAIN_NA | publicUrl + live panel + operator copy | `DashboardBatch5MediaJsonContractTest` | headed UAT pending redeploy | PENDING | `5c1b3fd6` | IMPLEMENTED_NEEDS_RUNTIME_PROOF |
 | DOR-019 | Admin | Settings IA | `/settings/*` | Editability clarity; no duplicate modules | SettingsEditabilityNotice + authoritative links | Misleading RO copy | Live notices per submodule | workspace smoke | headed PASS | `5c1b3fd6` | `5c1b3fd6` | PASS |
-| DOR-020 | Admin | API Connections depth | `/api-connections` | Tabs + audit + masked secrets | auditHistoryFor + advancedFields; secrets redacted | Shallow cards only | Batch 5 controller depth | ApiConnectionsHubTest | headed PARTIAL overview copy | `5c1b3fd6` | `5c1b3fd6` | PARTIAL |
-| DOR-021 | Cross-portal | RBAC | customer → admin | Denied | Customer UAT reached admin settings URL without clear deny | Probe logic / session bleed TBD | Investigate customer admin URL guard | headed UAT | CROSS_PORTAL_RBAC=FAIL | — | `5c1b3fd6` | OPEN |
+| DOR-020 | Admin | API Connections depth | `/api-connections` | Tabs + audit + masked secrets | audit `at` canonical + actor/env/changes UI | Next read `createdAt` only | api-connections-workspace audit transformer | ApiConnectionsHubTest | headed UAT pending redeploy | PENDING | `5c1b3fd6` | PARTIAL |
+| DOR-021 | Cross-portal | RBAC | customer/agent/staff → admin | UI+API denied; no child render | Customer reached admin settings shell (pre-fix UAT) | Next layout swallowed session failures | fail-closed layout + getRequiredDashboardPortalSession | portal-session-gate.foundation + BackOfficeSessionContractTest | CROSS_PORTAL_RBAC=FAIL pre-deploy | PENDING | — | OPEN |
+| DOR-022 | Admin | Booking management depth | `/bookings/[id]` | Single workspace + eligible ops | Detail panels complete; ops actions restored on detail page | Detail page omitted operational actions | BookingOperationalActions on detail page | DashboardBookingDetailJsonTest | headed UAT pending | PENDING | — | OPEN |
+| DOR-023 | Admin | CMS fake submodules | `/cms/banners`, `/cms/notices` | No fake operational modules in live | No CmsBanner/CmsNotice models or migrations | Legacy UI fixtures | live CURRENT_DOMAIN_NA shells; hide live nav | schema audit evidence | headed UAT pending | PENDING | — | OPEN |
 
 Additional defects will be appended as recovery batches progress.

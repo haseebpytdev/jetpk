@@ -140,7 +140,11 @@ export function CmsWorkspace({ result }: Props) {
       {result.state === "empty" ? (
         <EmptyState
           title="No CMS records match filters"
-          description="Adjust filters or reset to view preview content. This does not imply the live site has no content."
+          description={
+            isLive
+              ? "No CMS records match the current filters."
+              : "Adjust filters or reset to view preview content. This does not imply the live site has no content."
+          }
         />
       ) : null}
 

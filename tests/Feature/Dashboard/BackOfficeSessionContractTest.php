@@ -47,6 +47,28 @@ class BackOfficeSessionContractTest extends TestCase
             ->assertJsonPath('data.sessionUsable', true);
     }
 
+    public function test_customer_is_denied_admin_portal_session(): void
+    {
+        $customer = User::factory()->create([
+            'account_type' => AccountType::Customer,
+            'status' => UserAccountStatus::Active,
+        ]);
+
+        $this->actingAs($customer)
+            ->getJson(route('api.dashboard.session', ['portal' => 'admin']))
+            ->assertForbidden();
+    }
+
+    public function test_agent_owner_is_denied_admin_portal_session(): void
+    {
+        $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
+
+        $this->actingAs($agent)
+            ->getJson(route('api.dashboard.session', ['portal' => 'admin']))
+            ->assertForbidden()
+            ->assertJsonPath('error.code', 'permission_required');
+    }
+
     public function test_customer_is_denied_dashboard_session(): void
     {
         $customer = User::factory()->create([

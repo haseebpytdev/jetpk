@@ -7,7 +7,10 @@ import { getDashboardSession, type DashboardSessionSummary } from "@/services/se
 const SessionContext = createContext<DashboardSessionSummary | null>(null);
 
 function portalFromPath(pathname: string): DashboardPortal {
-  return pathname.startsWith("/staff/") || pathname.includes("/staff/dashboard") ? "staff" : "admin";
+  if (pathname.startsWith("/staff/") || pathname.includes("/staff/dashboard")) {
+    return "staff";
+  }
+  return "admin";
 }
 
 export function SessionProvider({
@@ -26,7 +29,7 @@ export function SessionProvider({
       !initialSession ||
       initialSession.unavailable ||
       initialSession.sessionUsable === false ||
-      (initialSession.portalType && initialSession.portalType !== portal);
+      initialSession.portalType !== portal;
 
     if (!needsHydrate) {
       return;
@@ -34,7 +37,7 @@ export function SessionProvider({
 
     void getDashboardSession({ portal })
       .then((next) => {
-        if (!cancelled) {
+        if (!cancelled && next.sessionUsable !== false && !next.unavailable && next.portalType === portal) {
           setSession(next);
         }
       })
