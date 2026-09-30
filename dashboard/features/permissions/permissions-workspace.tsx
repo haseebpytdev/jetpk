@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { LiveReadOnlyNotice } from "@/components/ui/data-source-status";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
@@ -60,6 +61,11 @@ export function PermissionsWorkspace({ result }: Props) {
 
   return (
     <div data-testid="permissions-workspace">
+      {isLive ? (
+        <div className="mb-4" data-testid="permissions-read-only-by-design">
+          <LiveReadOnlyNotice />
+        </div>
+      ) : null}
       <PermissionsSummaryMetrics summary={result.summary} />
       <div className="mt-4 space-y-3">
         <PermissionsFilterBar query={result.query} facets={result.facets} />

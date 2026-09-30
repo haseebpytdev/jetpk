@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/page-layout";
 import { Select } from "@/components/ui/select";
 import { PERMISSION_CATALOG, PERMISSION_GROUP_LABELS } from "@/lib/access-control/permission-catalog";
 import { getRolePermissionKeys } from "@/lib/roles/query-filters";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { mockRoles } from "@/mocks/rbac-fixtures";
 import type { PermissionGroup } from "@/types/access-control";
 import type { RoleTableRow } from "@/types/roles";
@@ -58,6 +59,7 @@ export function RolePermissionMatrix({
     [matrixDomain],
   );
 
+  const isLive = useDashboardLiveMode();
   const selectedRolePermissions = useMemo(() => {
     const roleId = matrixRole || displayRoles[0]?.id;
     if (!roleId) return [];
@@ -72,7 +74,9 @@ export function RolePermissionMatrix({
         Permission matrix
       </h2>
       <p className="mt-1 text-xs text-jp-muted">
-        Read-only matrix of fixture role permissions by domain. No mutations are persisted.
+        {isLive
+          ? "Read-only operational catalog by domain. Staff permission changes are saved from Users & Access."
+          : "Read-only matrix of fixture role permissions by domain. Preview mutations are not persisted."}
       </p>
 
       <div className="mt-3 grid gap-4 sm:grid-cols-2">

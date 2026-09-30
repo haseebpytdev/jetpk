@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { LiveReadOnlyNotice } from "@/components/ui/data-source-status";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
@@ -61,6 +62,11 @@ export function RolesWorkspace({ result }: Props) {
 
   return (
     <div data-testid="roles-workspace">
+      {isLive ? (
+        <div className="mb-4" data-testid="roles-read-only-by-design">
+          <LiveReadOnlyNotice />
+        </div>
+      ) : null}
       <RolesSummaryMetrics summary={result.summary} />
       <div className="mt-4 space-y-3">
         <RolesFilterBar query={result.query} facets={result.facets} />

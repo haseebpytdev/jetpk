@@ -11,11 +11,13 @@ import type { User } from "@/types/access-control";
 import { AccessValidationSummary } from "@/features/users/components/access-validation-summary";
 import { EffectiveAccessSummaryPanel } from "@/features/users/components/effective-access-summary";
 import { RoleAssignmentPreview } from "@/features/users/components/role-assignment-preview";
+import { StaffPermissionsEditor } from "@/features/users/components/staff-permissions-editor";
 import { UserLifecycleActions } from "@/features/users/components/user-lifecycle-actions";
 import { UserSecuritySummary } from "@/features/users/components/user-security-summary";
 
 export function UserDetailDrawerContent({ user }: { user: User }) {
   const isLive = useDashboardLiveMode();
+  const showStaffPermissions = isLive && user.profile.userType === "operationsManager";
 
   return (
     <div className="space-y-5" data-testid="user-detail-drawer">
@@ -84,6 +86,13 @@ export function UserDetailDrawerContent({ user }: { user: User }) {
       </section>
 
       <Divider />
+
+      {showStaffPermissions ? (
+        <>
+          <StaffPermissionsEditor userId={user.id} />
+          <Divider />
+        </>
+      ) : null}
 
       <UserSecuritySummary user={user} />
       <EffectiveAccessSummaryPanel summary={user.effectiveAccess} testId="user-effective-access-summary" />

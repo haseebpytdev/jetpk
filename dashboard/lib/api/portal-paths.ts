@@ -302,6 +302,18 @@ export function customerQueryStatusPath(queryId: string | number): string {
   );
 }
 
+export function adminUserShowPath(userId: string | number): string {
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(String(userId))}?format=json`);
+}
+
+export function adminUserEditPath(userId: string | number): string {
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(String(userId))}/edit?format=json`);
+}
+
+export function adminUserUpdatePath(userId: string | number): string {
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(String(userId))}?format=json`);
+}
+
 export function staffManagementPath(query = ""): string {
   const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
   return laravelPortalPath("admin", `/staff?format=json${suffix}`);

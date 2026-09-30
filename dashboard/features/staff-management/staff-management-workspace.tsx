@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { laravelRequest } from "@/lib/api/laravel-action-client";
 import { staffManagementPath } from "@/lib/api/portal-paths";
+import { DashboardLink } from "@/components/dashboard/dashboard-link";
+import { emptyListDescription } from "@/lib/empty-list-copy";
+import { publicUserIdFromLaravelId } from "@/lib/users/public-user-id";
 
 type StaffRow = {
   id: number;
@@ -67,7 +70,20 @@ export function StaffManagementWorkspace() {
 
   return (
     <PageContainer>
-      <PageHeader title="Staff Management" description="Platform staff directory and assignment context." />
+      <PageHeader
+        title="Staff Management"
+        description="Platform staff directory. Create and permission edits use Users & Access."
+        actions={
+          <div className="flex flex-wrap items-center gap-3">
+            <DashboardLink
+              href="/users?userType=operationsManager"
+              className="text-sm font-medium text-jp-accent hover:underline"
+            >
+              Create / manage in Users
+            </DashboardLink>
+          </div>
+        }
+      />
       <div className="grid gap-3 sm:grid-cols-4">
         {["total", "active", "inactive", "assigned_bookings"].map((key) => (
           <Card key={key}>
@@ -83,6 +99,9 @@ export function StaffManagementWorkspace() {
         </Button>
       </div>
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {rows.length === 0 && !error ? (
+        <p className="text-sm text-jp-muted">{emptyListDescription(isLive, "Staff records")}</p>
+      ) : null}
       <Card className="overflow-x-auto">
         <table className="min-w-full text-left text-sm">
           <thead>
@@ -110,9 +129,17 @@ export function StaffManagementWorkspace() {
                 <td className="px-2 py-2">{row.status}</td>
                 <td className="px-2 py-2">{row.assigned_bookings ?? 0}</td>
                 <td className="px-2 py-2 text-right">
-                  <Button type="button" size="sm" variant="secondary" onClick={() => setSelected(row)}>
-                    Detail
-                  </Button>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" size="sm" variant="secondary" onClick={() => setSelected(row)}>
+                      Detail
+                    </Button>
+                    <DashboardLink
+                      href={`/users?selected=${encodeURIComponent(publicUserIdFromLaravelId(row.id))}`}
+                      className="inline-flex items-center rounded-lg border border-jp-border px-3 py-1.5 text-xs font-medium hover:bg-gray-50"
+                    >
+                      Edit permissions
+                    </DashboardLink>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -140,6 +167,14 @@ export function StaffManagementWorkspace() {
               <dd>{selected.department}</dd>
             </div>
           </dl>
+          <div className="mt-4">
+            <DashboardLink
+              href={`/users?selected=${encodeURIComponent(publicUserIdFromLaravelId(selected.id))}`}
+              className="text-sm font-medium text-jp-accent hover:underline"
+            >
+              Open in Users & Access to edit staff permissions
+            </DashboardLink>
+          </div>
         </Card>
       ) : null}
     </PageContainer>

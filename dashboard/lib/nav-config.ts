@@ -65,12 +65,17 @@ export const navGroups: NavGroup[] = [
       {
         label: "Users",
         href: "/users",
-        laravelRoute: "admin.staff",
+        laravelRoute: "admin.users.index",
         children: [
           { label: "Users", href: "/users" },
           { label: "Roles", href: "/users/roles" },
           { label: "Permissions", href: "/users/permissions" },
         ],
+      },
+      {
+        label: "Staff",
+        href: "/staff",
+        laravelRoute: "admin.staff",
       },
       {
         label: "Settings",

@@ -7,6 +7,7 @@ import { buildEffectiveAccessSummary } from "@/lib/access-control/effective-acce
 import { PERMISSION_GROUP_LABELS } from "@/lib/access-control/permission-catalog";
 import { CATEGORY_LABELS, SCOPE_LABELS } from "@/lib/roles/query-filters";
 import { formatDate } from "@/lib/format";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { getUserById } from "@/mocks/user-fixtures";
 import type { AccessValidationIssue, Role } from "@/types/access-control";
 import { AccessValidationSummary } from "@/features/users/components/access-validation-summary";
@@ -32,13 +33,14 @@ export function RoleDetailDrawerContent({
   compareA,
   compareB,
 }: Props) {
+  const isLive = useDashboardLiveMode();
   const effectiveAccess = buildEffectiveAccessSummary([role.id]);
   const sampleUser = getUserById(assignedUsers[0]?.id ?? "JP-USR-0001");
   const explainerPermission = permissionKeys[0] ?? "dashboard.view";
 
   return (
     <div className="space-y-5" data-testid="role-detail-drawer">
-      <PreviewDataBanner className="text-xs" />
+      {isLive ? null : <PreviewDataBanner className="text-xs" />}
 
       <section aria-labelledby="role-identity-heading">
         <h3 id="role-identity-heading" className="text-sm font-semibold text-gray-900">Identity</h3>
@@ -153,21 +155,35 @@ export function RoleDetailDrawerContent({
 
       <Divider />
 
-      <section aria-labelledby="laravel-integration-heading">
-        <h3 id="laravel-integration-heading" className="text-sm font-semibold text-gray-900">Future Laravel integration</h3>
-        <p className="mt-1 text-xs text-jp-muted">
-          Role definitions and permission assignments will be sourced from Laravel authorization APIs.
-          This preview does not connect to live auth. Server-side policies and gates remain authoritative.
-        </p>
-      </section>
-
-      <PermissionAssignmentPreview roleId={role.id} fixtureKeys={permissionKeys} />
+      {isLive ? (
+        <section aria-labelledby="roles-ro-heading">
+          <h3 id="roles-ro-heading" className="text-sm font-semibold text-gray-900">
+            Read-only operational catalog
+          </h3>
+          <p className="mt-1 text-xs text-jp-muted">
+            Role matrix changes are not edited here. Staff permission writes use Users & Access. Laravel
+            policies remain authoritative.
+          </p>
+        </section>
+      ) : (
+        <>
+          <section aria-labelledby="laravel-integration-heading">
+            <h3 id="laravel-integration-heading" className="text-sm font-semibold text-gray-900">
+              Preview mode notice
+            </h3>
+            <p className="mt-1 text-xs text-jp-muted">
+              Fixture role catalog for layout testing. Not connected to live Laravel authorization.
+            </p>
+          </section>
+          <PermissionAssignmentPreview roleId={role.id} fixtureKeys={permissionKeys} />
+        </>
+      )}
 
       <Divider />
 
       <RoleComparisonPanel compareA={compareA} compareB={compareB} />
 
-      {sampleUser ? (
+      {!isLive && sampleUser ? (
         <>
           <Divider />
           <AccessDecisionExplainer user={sampleUser} permissionKey={explainerPermission} />
