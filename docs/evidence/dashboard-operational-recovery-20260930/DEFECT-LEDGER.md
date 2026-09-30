@@ -4,18 +4,21 @@
 RECOVERY_BRANCH=work/jetpk-dashboard-operational-recovery-20260930
 PRE_CANDIDATE_HEAD=122fa88e2b7260fe50e146370cff386f1b7efa82
 CANDIDATE_HEAD=b2cde218b69460ea3835ff97bbcbec0fb056e939
-DEPLOYED_SHA=b2cde218b69460ea3835ff97bbcbec0fb056e939
-DASHBOARD_BUILD_ID=hCjOZ-wRwalQtp3nHmNVB
-PREDEPLOY_BACKUP_PATH=/home/pkjetp/backups/dashboard-b2b4-20260930T195033Z
-AUTHORITATIVE_STATUS_CORRECTION=20261001T0100
+DEPLOYED_SHA=5c1b3fd6dd114f5d0f11f6737e368f5b122a587e
+DASHBOARD_BUILD_ID=RjGeq5dCHFe7KQrB1Glgn
+PRE_B5_BACKUP_PATH=/home/pkjetp/backups/dashboard-b5-20260930T203431Z
+BATCH5_HEAD=5c1b3fd6dd114f5d0f11f6737e368f5b122a587e
+B2B4_EVIDENCE_COMMIT=a59f66fd1e7655df7182a3b95d8aeccffc3a567b
+BATCH5_EVIDENCE=storage/framework/dor-b5b6-visible-uat/
+AUTHORITATIVE_STATUS_CORRECTION=20261001T0148
 BATCH_1=PASS
 BATCH_1_5_GLOBAL_LIVE_MODE=PASS
 BATCH_2=PASS
 BATCH_3=PASS
 BATCH_4=PASS
-BATCH_5=IN_PROGRESS
-BATCH_6=PENDING
-ENGINEERING_NOTE=B2-B4 deployed + headed Chrome certification complete; Batch5/6 remain before VERIFIED_PASS
+BATCH_5=PARTIAL
+BATCH_6=PASS
+ENGINEERING_NOTE=Batch5 deployed 5c1b3fd6; headed UAT PARTIAL on CMS/API depth; Batch6 action UAT PASS with CROSS_PORTAL_RBAC follow-up
 ```
 
 | ID | ROLE | MODULE | ROUTE | EXPECTED | ACTUAL | ROOT_CAUSE | FIX | TEST | VISIBLE_PROOF | COMMIT | DEPLOYED_SHA | STATUS |
@@ -36,5 +39,10 @@ ENGINEERING_NOTE=B2-B4 deployed + headed Chrome certification complete; Batch5/6
 | DOR-014 | Admin | Agent applications | Agents panel | Live application list/detail/review | Structured `applications[]` on data() + AgencyOperationalPanel | Safety gate only | AgentApplicationController data rows + review UI | `DashboardBatch4QueuesJsonContractTest` | headed list/review UI PASS | `b2cde218` | `b2cde218` | PASS |
 | DOR-015 | Admin | Notification failures | `/notifications/failures` | Operational failure workspace | Delivery-log JSON + Next workspace; masked recipients; no blind retry | Lost Next module | CommunicationDeliveryLogController JSON + NotificationFailuresWorkspace | `DashboardBatch4QueuesJsonContractTest` | headed PASS | `b2cde218` | `b2cde218` | PASS |
 | DOR-016 | Admin | Live Operations | `/operations/inbox` | Inbox/events/badge/assigned work | OperationalInboxController JSON + LiveOperationsWorkspace | Lost Next panel | Assigned bookings/support + KPIs; mark-read store CURRENT_DOMAIN_NA | `DashboardBatch4QueuesJsonContractTest` | headed PASS | `b2cde218` | `b2cde218` | PASS |
+| DOR-017 | Admin | Reports live fidelity | `/reports/sales`, `/operations` | Live KPI rows; no fixture fallback | Dedicated routes + transformer live facets; metrics payload fix | Wrong adapter mapping + undefined metrics var | Batch 5 sales/operations endpoints + resource fix | `DashboardBatch5ReportsJsonContractTest` | headed PASS all 5 modules | `5c1b3fd6` | `5c1b3fd6` | PASS |
+| DOR-018 | Admin | Media library | `/cms/assets` | Upload/list/public URL | AgencyMedia JSON + publicUrl + upload panel | Raw file_path exposure | publicUrl helper + live asset preview | `DashboardBatch5MediaJsonContractTest` | headed PASS; upload panel CURRENT_DOMAIN_NA on prod layout | `5c1b3fd6` | `5c1b3fd6` | PARTIAL |
+| DOR-019 | Admin | Settings IA | `/settings/*` | Editability clarity; no duplicate modules | SettingsEditabilityNotice + authoritative links | Misleading RO copy | Live notices per submodule | workspace smoke | headed PASS | `5c1b3fd6` | `5c1b3fd6` | PASS |
+| DOR-020 | Admin | API Connections depth | `/api-connections` | Tabs + audit + masked secrets | auditHistoryFor + advancedFields; secrets redacted | Shallow cards only | Batch 5 controller depth | ApiConnectionsHubTest | headed PARTIAL overview copy | `5c1b3fd6` | `5c1b3fd6` | PARTIAL |
+| DOR-021 | Cross-portal | RBAC | customer → admin | Denied | Customer UAT reached admin settings URL without clear deny | Probe logic / session bleed TBD | Investigate customer admin URL guard | headed UAT | CROSS_PORTAL_RBAC=FAIL | — | `5c1b3fd6` | OPEN |
 
 Additional defects will be appended as recovery batches progress.
