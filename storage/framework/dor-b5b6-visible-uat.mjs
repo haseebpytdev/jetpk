@@ -15,8 +15,8 @@ const BASE = "https://jetpakistan.pk";
 const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), "dor-b5b6-visible-uat");
 fs.mkdirSync(OUT, { recursive: true });
 const sshKey = process.env.JP_SSH_KEY || path.join(os.homedir(), ".ssh", "jetpk_contabo_2026_v2");
-const BATCH5_HEAD = "5c1b3fd6dd114f5d0f11f6737e368f5b122a587e";
-const BUILD_ID = "RjGeq5dCHFe7KQrB1Glgn";
+const BATCH5_HEAD = "feef2e7fa489cee778b81c6db370946394337999";
+const BUILD_ID = "m1WsmAjtpdlOgryIYPtp7";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -218,12 +218,13 @@ async function main() {
 
     // Batch 5 — CMS
     report.batch5.CMS_PAGES = (await visit(page, "cms-pages", `${BASE}/admin/dashboard/cms/pages`, {
-      testId: ["cms-data-table"],
+      testId: ["cms-workspace", "cms-table"],
     })).pass
       ? "PASS"
       : "PARTIAL";
     report.batch5.CMS_MEDIA_LIBRARY = (await visit(page, "cms-assets", `${BASE}/admin/dashboard/cms/assets`, {
-      includes: ["Media"],
+      testId: ["cms-media-upload-panel"],
+      includes: ["Upload media"],
     })).pass
       ? "PASS"
       : "PARTIAL";
@@ -231,7 +232,7 @@ async function main() {
     report.batch5.MEDIA_UPLOAD = (await uploadPanel.count()) > 0 ? "PASS" : "CURRENT_DOMAIN_NA";
 
     // CMS page editor if rows exist
-    const pageRow = page.locator("[data-testid^='cms-row-'], table tbody tr").first();
+    const pageRow = page.locator("[data-testid='cms-table'] tbody tr button, [data-testid='cms-table'] tbody tr").first();
     if (await pageRow.count()) {
       await pageRow.click();
       await sleep(2000);
@@ -271,7 +272,8 @@ async function main() {
 
     // API Connections
     const api = await visit(page, "api-connections", `${BASE}/admin/dashboard/api-connections`, {
-      includes: ["API Connections", "Overview"],
+      testId: ["api-connections-workspace"],
+      includes: ["API Connections"],
     });
     report.batch5.API_CONNECTION_OVERVIEW = api.pass ? "PASS" : "PARTIAL";
     const apiText = await bodyText(page);
@@ -281,6 +283,11 @@ async function main() {
         ? 1
         : 0;
     report.batch5.API_SECRET_MASKING = report.batch5.API_SECRET_BROWSER_EXPOSURE === 0 ? "PASS" : "FAIL";
+
+    const bookings = await visit(page, "bookings-workspace", `${BASE}/admin/dashboard/bookings`, {
+      testId: ["bookings-filters", "bookings-table"],
+    });
+    report.batch5.BOOKING_MANAGEMENT_WORKSPACE = bookings.pass ? "PASS" : "PARTIAL";
 
     // Batch 6 — Agent
     const agentPw = asPassword(loadQaPasswordFromVault("agent"), "agent");
@@ -381,20 +388,28 @@ async function main() {
     report.browserHealth.batch5.failedCriticalFetches = failedFetches.length;
 
     report.batch5.VISIBLE_BATCH5_UAT =
+      report.batch5.CMS_PAGES === "PASS" &&
+      report.batch5.CMS_MEDIA_LIBRARY === "PASS" &&
+      report.batch5.MEDIA_UPLOAD === "PASS" &&
       report.batch5.REPORTS_OVERVIEW === "PASS" &&
       report.batch5.API_CONNECTION_OVERVIEW === "PASS" &&
+      report.batch5.BOOKING_MANAGEMENT_WORKSPACE === "PASS" &&
       report.browserHealth.batch5.unexpected500 === 0
         ? "PASS"
         : "PARTIAL";
 
     report.batch6.VISIBLE_BATCH6 =
-      report.batch6.AGENT_BOOKINGS === "PASS" && report.batch6.CUSTOMER_BOOKINGS === "PASS"
+      report.batch6.AGENT_BOOKINGS === "PASS" &&
+      report.batch6.CUSTOMER_BOOKINGS === "PASS" &&
+      report.batch6.CROSS_PORTAL_RBAC === "PASS"
         ? "PASS"
         : "PARTIAL";
 
     report.BATCH_5 = report.batch5.VISIBLE_BATCH5_UAT;
-    report.BATCH_6 = report.batch6.VISIBLE_BATCH6;
-    report.FINAL_STATUS = report.BATCH_5 === "PASS" && report.BATCH_6 === "PASS" ? "PARTIAL" : "PARTIAL";
+    report.BATCH_6 =
+      report.batch6.VISIBLE_BATCH6 === "PASS" && report.batch6.CROSS_PORTAL_RBAC === "PASS" ? "PASS" : "PARTIAL";
+    report.FINAL_STATUS =
+      report.BATCH_5 === "PASS" && report.BATCH_6 === "PASS" ? "VERIFIED_PASS" : "PARTIAL";
   } finally {
     await browser.close().catch(() => {});
     deactivateQa();

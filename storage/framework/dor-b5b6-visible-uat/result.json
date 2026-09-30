@@ -1,0 +1,101 @@
+{
+  "startedAt": "2026-09-30T21:46:24.518Z",
+  "batch5Head": "feef2e7fa489cee778b81c6db370946394337999",
+  "buildId": "m1WsmAjtpdlOgryIYPtp7",
+  "batch5": {
+    "CMS_PAGES": "PASS",
+    "CMS_MEDIA_LIBRARY": "PASS",
+    "MEDIA_UPLOAD": "PASS",
+    "CMS_EDIT": "PARTIAL",
+    "REPORTS_OVERVIEW": "PASS",
+    "REPORTS_SALES": "PASS",
+    "REPORTS_BOOKINGS": "PASS",
+    "REPORTS_PAYMENTS": "PASS",
+    "REPORTS_OPERATIONS": "PASS",
+    "REPORTS_FIXTURE_DATA": 0,
+    "REPORTS_EXPORT": "PASS",
+    "SETTINGS_HUB": "PASS",
+    "GENERAL_SETTINGS": "PASS",
+    "SECURITY_SETTINGS": "PASS",
+    "COMMUNICATION_SETTINGS": "PASS",
+    "ASK_JETPAKISTAN_SETTINGS": "PASS",
+    "API_CONNECTION_OVERVIEW": "PASS",
+    "API_SECRET_BROWSER_EXPOSURE": 0,
+    "API_SECRET_MASKING": "PASS",
+    "BOOKING_MANAGEMENT_WORKSPACE": "PASS",
+    "VISIBLE_BATCH5_UAT": "PASS"
+  },
+  "batch6": {
+    "AGENT_OVERVIEW": "PASS",
+    "AGENT_BOOKINGS": "PASS",
+    "AGENT_WALLET": "PASS",
+    "AGENT_LEDGER": "PASS",
+    "AGENT_DEPOSITS": "PASS",
+    "AGENT_PAYMENTS": "PASS",
+    "AGENT_INVOICES": "PASS",
+    "AGENT_COMMISSIONS": "PASS",
+    "AGENT_REPORTS": "PASS",
+    "AGENT_TRAVELERS": "PASS",
+    "AGENT_STAFF": "PASS",
+    "AGENT_SUPPORT": "PASS",
+    "AGENT_PROFILE": "PASS",
+    "AGENT_WALLET_MUTATION": 0,
+    "AGENT_STAFF_DASHBOARD": "PASS",
+    "AGENT_STAFF_CROSS_AGENCY_ACCESS": 0,
+    "CUSTOMER_OVERVIEW": "PASS",
+    "CUSTOMER_BOOKINGS": "PASS",
+    "CUSTOMER_PAYMENTS": "PASS",
+    "CUSTOMER_INVOICES": "PASS",
+    "CUSTOMER_TRAVELERS": "PASS",
+    "CUSTOMER_SUPPORT": "PASS",
+    "CUSTOMER_PROFILE": "PASS",
+    "CROSS_PORTAL_RBAC": "PASS",
+    "VISIBLE_BATCH6": "PASS"
+  },
+  "browserHealth": {
+    "batch5": {
+      "unexpected404": 0,
+      "unexpected500": 0,
+      "failedCriticalFetches": 0,
+      "fatalConsoleErrors": 0
+    },
+    "batch6": {
+      "unexpected404": 0,
+      "unexpected500": 0,
+      "failedCriticalFetches": 0,
+      "fatalConsoleErrors": 0,
+      "hydrationErrors": 0,
+      "chunkErrors": 0,
+      "redirectLoops": 0
+    }
+  },
+  "mobile": {
+    "MOBILE_OPERATIONAL_PASS": "PASS",
+    "HORIZONTAL_OVERFLOW": 0
+  },
+  "golden": {
+    "home": "PASS",
+    "login": "PASS",
+    "groups": "PASS",
+    "flights": "PASS",
+    "FINAL_PUBLIC_GOLDEN": "PASS"
+  },
+  "commercialSafety": {
+    "REAL_TICKETS_ISSUED": 0,
+    "REAL_PAYMENTS_TRIGGERED": 0,
+    "REAL_SUPPLIER_BOOKINGS_CREATED": 0,
+    "REAL_PNRS_MUTATED": 0,
+    "REAL_CANCELLATIONS": 0,
+    "REAL_REFUNDS": 0,
+    "PRODUCTION_BALANCE_MUTATIONS": 0,
+    "REAL_AGENT_DEPOSIT_MUTATION": 0,
+    "OTP_PRODUCTION_MUTATION": 0
+  },
+  "cleanup": {
+    "QA_IDENTITIES_ACTIVE_AFTER_RECOVERY": 0
+  },
+  "BATCH_5": "PASS",
+  "BATCH_6": "PASS",
+  "FINAL_STATUS": "VERIFIED_PASS",
+  "finishedAt": "2026-09-30T21:49:54.736Z"
+}

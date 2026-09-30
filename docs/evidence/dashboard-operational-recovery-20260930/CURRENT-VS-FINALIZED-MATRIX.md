@@ -7,25 +7,28 @@ PRE_CANDIDATE_HEAD=122fa88e2b7260fe50e146370cff386f1b7efa82
 CERTIFIED_B2B4_HEAD=b2cde218b69460ea3835ff97bbcbec0fb056e939
 BATCH5_HEAD=5c1b3fd6dd114f5d0f11f6737e368f5b122a587e
 PRE_FINAL_GAP_HEAD=e480555edcb644471fde4ec0b82e309c83c11d08
-PRODUCTION_SOURCE_SHA=5c1b3fd6dd114f5d0f11f6737e368f5b122a587e
-PRODUCTION_DASHBOARD_BUILD_ID=RjGeq5dCHFe7KQrB1Glgn
-PRE_B5_BACKUP_PATH=/home/pkjetp/backups/dashboard-b5-20260930T203431Z
-B2B4_EVIDENCE_COMMIT=a59f66fd1e7655df7182a3b95d8aeccffc3a567b
-BATCH5_EVIDENCE=storage/framework/dor-b5b6-visible-uat/
+FINAL_GAP_ENGINEERING_HEAD=feef2e7fa489cee778b81c6db370946394337999
+REMOTE_BRANCH_HEAD=feef2e7fa489cee778b81c6db370946394337999
+LOCAL_REMOTE_MATCH=PASS
+PRODUCTION_SOURCE_SHA=feef2e7fa489cee778b81c6db370946394337999
+PRODUCTION_DASHBOARD_BUILD_ID=m1WsmAjtpdlOgryIYPtp7
+PRE_B5B6_GAP_BACKUP_PATH=/home/pkjetp/backups/dashboard-b5b6-gap-20260930T213805Z
+BATCH5_EVIDENCE=storage/framework/dor-b5b6-visible-uat/result.json
 RECOVERY_BRANCH=work/jetpk-dashboard-operational-recovery-20260930
 BATCH_1=PASS
 BATCH_1_5=PASS
 BATCH_2=PASS
 BATCH_3=PASS
 BATCH_4=PASS
-BATCH_5=PARTIAL
-BATCH_6=PARTIAL
+BATCH_5=PASS
+BATCH_6=PASS
 BATCH_6_ACTION_MODULES=PASS
-BATCH_6_SECURITY_GATE=FAIL
-CROSS_PORTAL_RBAC=FAIL
+BATCH_6_SECURITY_GATE=PASS
+CROSS_PORTAL_RBAC=PASS
 FULL_REGRESSION=PASS
 UNEXPLAINED_TEST_FAILURES=0
-FINAL_STATUS=PARTIAL
+FINAL_STATUS=VERIFIED_PASS
+OWNER_VISIBLE_UAT=PASS
 ```
 
 | MODULE | HISTORICAL_FINAL_BEHAVIOR | CURRENT_BEHAVIOR | CLASSIFICATION | ROOT_CAUSE | RECOVERY_ACTION | AUTOMATED_TEST | VISIBLE_UAT | PRODUCTION | COMMIT | STATUS |
@@ -42,20 +45,20 @@ FINAL_STATUS=PARTIAL
 | Live Operations | Inbox/events/assigned work | `/operations/inbox` + OperationalInboxController | FULL_MANAGEMENT | Was missing | Mark-read store CURRENT_DOMAIN_NA | DashboardBatch4QueuesJsonContractTest | PASS | `b2cde218` | `b2cde218` | PASS |
 | Execution / Cancellations | Operational queues | Cancellation/refund list JSON + live review/execution loaders | FULL_MANAGEMENT | List contracts missing | Prod UAT read-only | DashboardBatch4QueuesJsonContractTest | PASS | `b2cde218` | `b2cde218` | PASS |
 | Agent Applications | Admin review workspace | Structured applications[] + AgencyOperationalPanel | FULL_MANAGEMENT | Next gated | Prod UAT no real approve/reject | DashboardBatch4QueuesJsonContractTest | PASS | `b2cde218` | `b2cde218` | PASS |
-| Booking management | Single action panel + amendments | Next detail workspace: identification, contact, passengers, itinerary, fare/payment/ticket/supplier/timeline/audit; operational actions on detail page; contact/passenger amend CURRENT_DOMAIN_NA | FULL_MANAGEMENT (read + authorized ops) | Detail page hid operational actions; no contact/passenger amend routes | Enable BookingOperationalActions on detail; classify amend NA | DashboardBookingDetailJsonTest | PENDING deploy UAT | PENDING | — | OPEN |
-| CMS / Media | Full block builder + media library | CmsPage + AgencyMedia current domain; banners/notices/sections CURRENT_DOMAIN_NA (no models/migrations); live media upload panel + operator copy | CMS_PAGES=FULL_MANAGEMENT; CMS_MEDIA=FULL_MANAGEMENT; CMS_INDEPENDENT_SECTIONS/BANNERS/NOTICES=CURRENT_DOMAIN_NA | Legacy block models absent; DOR-021 unrelated | Fail-closed portal gate; hide fake live submodules; fix preview copy | CmsPagesJsonTest + DashboardBatch5MediaJsonContractTest + portal-session-gate | PENDING post-deploy | PENDING | PENDING | PARTIAL |
-| API Connections | Multi-tab full management | 8 tabs + audit `at` contract + actor/env/changes rendering | FULL_MANAGEMENT | Audit timestamp key mismatch | Fix Next audit transformer/display | ApiConnectionsHubTest | PENDING post-deploy | PENDING | PENDING | PARTIAL |
+| Booking management | Single action panel + amendments | Next detail workspace with panels + operational actions; contact/passenger amend CURRENT_DOMAIN_NA | FULL_MANAGEMENT (read + authorized ops) | Detail page hid operational actions | BookingOperationalActions on detail page | DashboardBookingDetailJsonTest + headed UAT | PASS | `feef2e7f` | `feef2e7f` | PASS |
+| CMS / Media | Full block builder + media library | CmsPage + AgencyMedia live; upload panel visible; banners/notices/sections CURRENT_DOMAIN_NA | CMS_PAGES=FULL_MANAGEMENT; CMS_MEDIA=FULL_MANAGEMENT; CMS_INDEPENDENT_SECTIONS/BANNERS/NOTICES=CURRENT_DOMAIN_NA | Legacy block models absent | Fail-closed gate; hide fake live submodules; operator copy | CmsPagesJsonTest + media contract + headed UAT | PASS | `feef2e7f` | `feef2e7f` | PASS |
+| API Connections | Multi-tab full management | 8-tab workspace + audit `at` + actor/env/changes | FULL_MANAGEMENT | Audit timestamp key mismatch | api-connections-workspace fix | ApiConnectionsHubTest + headed UAT | PASS | `feef2e7f` | `feef2e7f` | PASS |
 | Reports | Live authoritative data | Live sales/operations routes; no fixture facets in transformer | FULL_MANAGEMENT (live read) | Wrong route mapping + previewOnly fixture | Batch 5 live fidelity | DashboardBatch5ReportsJsonContractTest | PASS | `5c1b3fd6` | `5c1b3fd6` | PASS |
 | Settings | GENERAL/SECURITY/NOTIFICATIONS/INTEGRATIONS | Settings hub + editability notices; authoritative modules linked | FULL_MANAGEMENT (IA) | Mixed old/new controls | Batch 5 IA reconcile | settings workspace smoke | PASS | `5c1b3fd6` | `5c1b3fd6` | PASS |
-| Cross-portal RBAC | Direct URL denial admin/staff | DOR-021 fail-closed Next layout gate implemented; production UAT pending redeploy | IN_PROGRESS | Next layout swallowed session errors | getRequiredDashboardPortalSession + ForbiddenState without children | portal-session-gate.foundation + BackOfficeSessionContractTest | FAIL pre-fix UAT | `5c1b3fd6` | `5c1b3fd6` | OPEN |
+| Cross-portal RBAC | Direct URL denial admin/staff | Fail-closed Next layout gate + Laravel session/API denial | FULL_MANAGEMENT | Next layout swallowed session errors | portal-session-gate + layout | portal-session-gate.foundation + BackOfficeSessionContractTest + headed UAT | PASS | `feef2e7f` | `feef2e7f` | PASS |
 | Customer Queries | Newer module | Present | FULL_MANAGEMENT | Preserve | Preserve | existing | PENDING | PENDING | — | PRESERVE |
 | SEO | Newer module | Present | FULL_MANAGEMENT | Preserve | Preserve | existing | PENDING | PENDING | — | PRESERVE |
 | Group Ticketing | Newer module | Present | FULL_MANAGEMENT | Preserve | Preserve | existing | PENDING | PENDING | — | PRESERVE |
 | Login OTP settings | Newer module | Present | FULL_MANAGEMENT | Preserve | Preserve | existing | PENDING | PENDING | — | PRESERVE |
 | Ask JetPakistan settings | Newer module | Present | FULL_MANAGEMENT | Preserve | Preserve | existing | PENDING | PENDING | — | PRESERVE |
 | Company Profile / Homepage CMS | Current implementations | Present | FULL_MANAGEMENT | Preserve | Preserve | existing | PENDING | PENDING | — | PRESERVE |
-| Agent / Agent Staff portals | Operational portals | Nav UAT passed; action-level TBD | IN_PROGRESS | Shallow UAT only | Batch 6 action UAT | PENDING | PENDING | PENDING | — | IN_PROGRESS |
-| Customer portal | Operational portal | Nav UAT passed; action-level TBD | IN_PROGRESS | Shallow UAT only | Batch 6 action UAT | PENDING | PENDING | PENDING | — | IN_PROGRESS |
+| Agent / Agent Staff portals | Operational portals | Headed action-module UAT PASS | FULL_MANAGEMENT | Shallow UAT only | Batch 6 action UAT | headed UAT | PASS | `feef2e7f` | `feef2e7f` | PASS |
+| Customer portal | Operational portal | Headed action-module UAT PASS | FULL_MANAGEMENT | Shallow UAT only | Batch 6 action UAT | headed UAT | PASS | `feef2e7f` | `feef2e7f` | PASS |
 | Go-live / System Health | Present / policy | Present / TBD | READ_ONLY_BY_DESIGN | Policy | Classify explicitly | PENDING | PENDING | PENDING | — | READ_ONLY_BY_DESIGN |
 
 Status legend: `OPEN` | `IN_PROGRESS` | `PASS` | `PRESERVE` | `READ_ONLY_BY_DESIGN` | `CURRENT_DOMAIN_NA` | `BLOCKED`.

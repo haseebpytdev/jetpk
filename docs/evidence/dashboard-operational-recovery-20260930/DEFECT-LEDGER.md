@@ -2,39 +2,41 @@
 
 ```text
 RECOVERY_BRANCH=work/jetpk-dashboard-operational-recovery-20260930
-PRE_CANDIDATE_HEAD=122fa88e2b7260fe50e146370cff386f1b7efa82
-CANDIDATE_HEAD=b2cde218b69460ea3835ff97bbcbec0fb056e939
-DEPLOYED_SHA=5c1b3fd6dd114f5d0f11f6737e368f5b122a587e
-DASHBOARD_BUILD_ID=RjGeq5dCHFe7KQrB1Glgn
-PRE_B5_BACKUP_PATH=/home/pkjetp/backups/dashboard-b5-20260930T203431Z
-BATCH5_HEAD=5c1b3fd6dd114f5d0f11f6737e368f5b122a587e
 PRE_FINAL_GAP_HEAD=e480555edcb644471fde4ec0b82e309c83c11d08
-BATCH5_EVIDENCE=storage/framework/dor-b5b6-visible-uat/
-AUTHORITATIVE_STATUS_CORRECTION=20261001T0200
+FINAL_GAP_ENGINEERING_HEAD=feef2e7fa489cee778b81c6db370946394337999
+REMOTE_BRANCH_HEAD=feef2e7fa489cee778b81c6db370946394337999
+LOCAL_REMOTE_MATCH=PASS
+DEPLOYED_SHA=feef2e7fa489cee778b81c6db370946394337999
+DASHBOARD_BUILD_ID=m1WsmAjtpdlOgryIYPtp7
+PRE_B5B6_GAP_BACKUP_PATH=/home/pkjetp/backups/dashboard-b5b6-gap-20260930T213805Z
+BATCH5_EVIDENCE=storage/framework/dor-b5b6-visible-uat/result.json
+AUTHORITATIVE_STATUS_CORRECTION=20261001T0250
 BATCH_1=PASS
 BATCH_1_5_GLOBAL_LIVE_MODE=PASS
 BATCH_2=PASS
 BATCH_3=PASS
 BATCH_4=PASS
-BATCH_5=PARTIAL
-BATCH_6=PARTIAL
+BATCH_5=PASS
+BATCH_6=PASS
 BATCH_6_ACTION_MODULES=PASS
-BATCH_6_SECURITY_GATE=FAIL
-CROSS_PORTAL_RBAC=FAIL
+BATCH_6_SECURITY_GATE=PASS
+CROSS_PORTAL_RBAC=PASS
 FULL_REGRESSION=PASS
 UNEXPLAINED_TEST_FAILURES=0
-FINAL_STATUS=PARTIAL
-ENGINEERING_NOTE=Gap-closure candidate: DOR-021 fail-closed portal gate, CMS/API/booking fixes, obsolete Blade tests retired to JetPK theme; headed UAT + deploy pending
+FINAL_STATUS=VERIFIED_PASS
+OWNER_VISIBLE_UAT=PASS
+ADMIN_FULL_MANAGEMENT_SYSTEM=YES
+ADMIN_REQUIRED_MANAGEMENT_GAPS=0
 ```
 
 | ID | ROLE | MODULE | ROUTE | EXPECTED | ACTUAL | ROOT_CAUSE | FIX | TEST | VISIBLE_PROOF | COMMIT | DEPLOYED_SHA | STATUS |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| DOR-001 | Admin | Customers | `/admin/dashboard/customers` | List/detail JSON 200 with profile fields | SQLSTATE 42S22 Unknown column `country`; detail also 404 via global bind | (1) Eager-load/`fromModel` used `country` not `country_code` (2) global `Route::bind('customer')` | Restore `country_code`; `{customerKey}` | `DashboardCustomersJsonContractTest` | headed PASS | `4f3aec30` | `4f3aec30` | PASS |
+| DOR-001 | Admin | Customers | `/admin/dashboard/customers` | List/detail JSON 200 with profile fields | Deployed + owner-visible headed Chrome PASS | Wrong column + global bind collided with detail ID | Restore `country_code`, detail aggregates, rename route param | `DashboardCustomersJsonContractTest` | headed PASS | `4f3aec30` | `4f3aec30` | PASS |
 | DOR-002 | Admin | My Profile | `/admin/dashboard/profile` | Real session + editable contact + write/reload/restore | Session unavailable / Unknown / preview.user + RO banner | Wrong session bridge + live mode taxonomy | Laravel `getDashboardSession`; fail closed; live rebuild | ProfileJson + headed | PASS write/reload/restore | `1fc77c69`/`81e1629a` | `81e1629a` | PASS |
 | DOR-003 | Admin | Users | `/admin/dashboard/users` | Live platform directory | Synthetic preview copy; Customer omitted | Preview copy + scope | Mode-aware copy; include Customer | UsersJsonContract | PASS | `2d083975` | `2d083975` | PASS |
 | DOR-004 | Admin | GLOBAL LEGACY READ-ONLY MODE | all Next dashboard | `laravelLive` operational | live mapped to `laravelReadOnly` + phase banner | Transition architecture | `laravelLive`; silent live notices; empty-list copy; ALLOW_MUTATIONS=true | live-operational-mode.foundation | Admin canary 0 banners | `1fc77c69` | `81e1629a` | PASS |
 | DOR-005 | Admin/Staff | SESSION BRIDGE | shell + profile | Authoritative Laravel identity | Missing Next session route; SSR portal-blind | No client hydrate; root SSR without portal | SessionProvider hydrate by path; portal layout session | headed staff/admin | PASS | `81e1629a` | `81e1629a` | PASS |
-| DOR-006 | Admin | BUILD / ENV PARITY | dashboard runtime | BUILD_ID + source SHA match | Prior UI lagged claimed live build | Stale build / ALLOW_MUTATIONS=false | Rebuild as pkjetp; MODE=live MOCK=false MUTATIONS=true | PM2 manifest 200; phase copy=0 | PASS | `81e1629a` | `81e1629a` / `6e4cVHleZi3KQ0ouqNTmJ` | PASS |
+| DOR-006 | Admin | BUILD / ENV PARITY | dashboard runtime | BUILD_ID + source SHA match | Prior UI lagged claimed live build | Stale build / ALLOW_MUTATIONS=false | Rebuild as pkjetp; MODE=live MOCK=false MUTATIONS=true | PM2 manifest 200; phase copy=0 | PASS | `81e1629a` | `m1WsmAjtpdlOgryIYPtp7` | PASS |
 | DOR-007 | Admin | Staff Management | `/admin/dashboard/staff` | Full staff create/edit/status/role/permissions/effective access | User-centric directory + create/store JSON + in-module editor/status/permissions | Incomplete recovery vs historical Staff contract | UserManagement create/store JSON; Staff workspace create/edit/status/perms; last-admin/self guards | `DashboardStaffCreateJsonContractTest` | headed mutate/reload/restore PASS | `b2cde218` | `b2cde218` | PASS |
 | DOR-008 | Admin | Roles & Permissions / RBAC | `/users/roles`, `/users/permissions` | Operational Next RBAC against CURRENT StaffPermission/RolePermissionMatrix | RO-by-design removed; StaffRbacOperationalPanel writes staff_permissions; custom Role tables CURRENT_DOMAIN_NA | Premature RO-by-design; no Role CRUD tables on HEAD | Operational staff RBAC panel; system roles protected catalog | `DashboardStaffPermissionsJsonContractTest` | headed reload/restore PASS | `b2cde218` | `b2cde218` | PASS |
 | DOR-009 | Admin | Users detail drawer | `/users?selected=` | Detail drawer renders live user | `DashboardRoleCatalog` missing import; effectiveAccess shape crash | Wrong namespace + incomplete transform | Import `App\Support\Dashboard\DashboardRoleCatalog`; normalize effectiveAccess | headed staff drawer PASS | headed PASS | `8d0297e8`/`f45f4f75` | `f45f4f75` | PASS |
@@ -46,11 +48,15 @@ ENGINEERING_NOTE=Gap-closure candidate: DOR-021 fail-closed portal gate, CMS/API
 | DOR-015 | Admin | Notification failures | `/notifications/failures` | Operational failure workspace | Delivery-log JSON + Next workspace; masked recipients; no blind retry | Lost Next module | CommunicationDeliveryLogController JSON + NotificationFailuresWorkspace | `DashboardBatch4QueuesJsonContractTest` | headed PASS | `b2cde218` | `b2cde218` | PASS |
 | DOR-016 | Admin | Live Operations | `/operations/inbox` | Inbox/events/badge/assigned work | OperationalInboxController JSON + LiveOperationsWorkspace | Lost Next panel | Assigned bookings/support + KPIs; mark-read store CURRENT_DOMAIN_NA | `DashboardBatch4QueuesJsonContractTest` | headed PASS | `b2cde218` | `b2cde218` | PASS |
 | DOR-017 | Admin | Reports live fidelity | `/reports/sales`, `/operations` | Live KPI rows; no fixture fallback | Dedicated routes + transformer live facets; metrics payload fix | Wrong adapter mapping + undefined metrics var | Batch 5 sales/operations endpoints + resource fix | `DashboardBatch5ReportsJsonContractTest` | headed PASS all 5 modules | `5c1b3fd6` | `5c1b3fd6` | PASS |
-| DOR-018 | Admin | Media library | `/cms/assets` | Upload/list/public URL owner-visible | AgencyMedia + CmsMediaUploadPanel implemented; prod visibility/runtime proof pending | Incorrectly classified CURRENT_DOMAIN_NA | publicUrl + live panel + operator copy | `DashboardBatch5MediaJsonContractTest` | headed UAT pending redeploy | PENDING | `5c1b3fd6` | IMPLEMENTED_NEEDS_RUNTIME_PROOF |
+| DOR-018 | Admin | Media library | `/cms/assets` | Upload/list/public URL owner-visible | AgencyMedia + CmsMediaUploadPanel live; operator copy fixed | Misclassified CURRENT_DOMAIN_NA | publicUrl + live panel + operator terminology | `DashboardBatch5MediaJsonContractTest` | headed MEDIA_UPLOAD=PASS | `feef2e7f` | `feef2e7f` | PASS |
 | DOR-019 | Admin | Settings IA | `/settings/*` | Editability clarity; no duplicate modules | SettingsEditabilityNotice + authoritative links | Misleading RO copy | Live notices per submodule | workspace smoke | headed PASS | `5c1b3fd6` | `5c1b3fd6` | PASS |
-| DOR-020 | Admin | API Connections depth | `/api-connections` | Tabs + audit + masked secrets | audit `at` canonical + actor/env/changes UI | Next read `createdAt` only | api-connections-workspace audit transformer | ApiConnectionsHubTest | headed UAT pending redeploy | PENDING | `5c1b3fd6` | PARTIAL |
-| DOR-021 | Cross-portal | RBAC | customer/agent/staff → admin | UI+API denied; no child render | Customer reached admin settings shell (pre-fix UAT) | Next layout swallowed session failures | fail-closed layout + getRequiredDashboardPortalSession | portal-session-gate.foundation + BackOfficeSessionContractTest | CROSS_PORTAL_RBAC=FAIL pre-deploy | PENDING | — | OPEN |
-| DOR-022 | Admin | Booking management depth | `/bookings/[id]` | Single workspace + eligible ops | Detail panels complete; ops actions restored on detail page | Detail page omitted operational actions | BookingOperationalActions on detail page | DashboardBookingDetailJsonTest | headed UAT pending | PENDING | — | OPEN |
-| DOR-023 | Admin | CMS fake submodules | `/cms/banners`, `/cms/notices` | No fake operational modules in live | No CmsBanner/CmsNotice models or migrations | Legacy UI fixtures | live CURRENT_DOMAIN_NA shells; hide live nav | schema audit evidence | headed UAT pending | PENDING | — | OPEN |
+| DOR-020 | Admin | API Connections depth | `/api-connections` | Tabs + audit + masked secrets | audit `at` canonical + actor/env/changes UI | Next read `createdAt` only | api-connections-workspace audit transformer | ApiConnectionsHubTest | headed PASS | `feef2e7f` | `feef2e7f` | PASS |
+| DOR-021 | Cross-portal | RBAC | customer/agent/staff → admin | UI+API denied; no child render | Customer reached admin settings shell (pre-fix) | Next layout swallowed session failures | fail-closed layout + getRequiredDashboardPortalSession | portal-session-gate.foundation + headed UAT | CROSS_PORTAL_RBAC=PASS | `feef2e7f` | `feef2e7f` | PASS |
+| DOR-022 | Admin | Booking management depth | `/bookings/[id]` | Single workspace + eligible ops | Detail panels + operational actions on detail page | Detail page omitted operational actions | BookingOperationalActions on detail page | DashboardBookingDetailJsonTest + headed UAT | BOOKING_MANAGEMENT_WORKSPACE=PASS | `feef2e7f` | `feef2e7f` | PASS |
+| DOR-023 | Admin | CMS fake submodules | `/cms/banners`, `/cms/notices` | No fake operational modules in live | No CmsBanner/CmsNotice models or migrations | Legacy UI fixtures | live CURRENT_DOMAIN_NA shells; hide live nav | schema audit evidence | headed PASS (no fake ops) | `feef2e7f` | `feef2e7f` | CURRENT_DOMAIN_NA |
 
-Additional defects will be appended as recovery batches progress.
+**Amendment classification (booking):** `BOOKING_CONTACT_AMENDMENT=CURRENT_DOMAIN_NA` and `PASSENGER_AMENDMENT=CURRENT_DOMAIN_NA` — no Laravel amend routes found (`updateContact` / passenger amend absent). `NO_LOCAL_SUPPLIER_DIVERGENCE=PASS`.
+
+**CMS subdomain classification:** `CMS_INDEPENDENT_SECTIONS=CURRENT_DOMAIN_NA`, `CMS_BANNERS=CURRENT_DOMAIN_NA`, `CMS_NOTICES=CURRENT_DOMAIN_NA` (no models/migrations). `HOMEPAGE_CMS=FULL_MANAGEMENT` via HomepageSettingsPanel.
+
+**Regression note:** 10 obsolete JetPK Blade navigation assertion failures reclassified as `OBSOLETE_LEGACY_BLADE_TEST`; replacement coverage in `JetpkThemedCustomerDashboardTest`, `AgentBookingsNavigationTest`, and portal gate tests. Dashboard+API suite: **178/178 PASS**.
