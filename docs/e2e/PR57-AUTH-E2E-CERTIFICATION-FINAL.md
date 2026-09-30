@@ -13,7 +13,7 @@
 | START_HEAD | `d397fb32c5c7e183df2f86623fb382c12b5a8856` |
 | HARNESS_COMMIT | `f5c7ba38498a24f123f680f3819a20f5623e9780` |
 | MULTI_WORKER_COMMIT | `7de98090ec7673c154977f4217b54b243f002077` |
-| FINAL_BRANCH_HEAD | _(set at push of this evidence commit)_ |
+| FINAL_BRANCH_HEAD | `017ad5eef0372d8f755d576ed353b125c8dbcef1` |
 
 ## Worker topology
 
