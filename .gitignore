@@ -186,3 +186,8 @@ frontend/tsconfig.tsbuildinfo
 /.playwright-cli/
 /docs/maintenance/local-audits/**
 !/docs/maintenance/local-audits/README.md
+
+# PR #57 isolated auth E2E (never commit secrets or local DB)
+database/e2e.sqlite
+tmp/e2e-auth/
+
