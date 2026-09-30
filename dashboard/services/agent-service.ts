@@ -63,7 +63,7 @@ const agentsService = createReadOnlyService<AgentsQuery, AgentsPageResult>({
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const envelope = await fetchDashboardApi<LaravelAgentsListPayload>(DASHBOARD_API_ROUTES.agents, {
         signal: options?.signal,

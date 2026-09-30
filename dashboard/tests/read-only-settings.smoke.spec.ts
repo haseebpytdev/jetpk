@@ -59,7 +59,7 @@ test("settings no secrets in fixture payload", async () => {
 
 test("settings live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/settings?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("settings subsection source state transitions", async ({ page }) => {

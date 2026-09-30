@@ -98,7 +98,7 @@ test("reports forbidden preview", async ({ page }) => {
 
 test("reports live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/reports?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("reports no overflow at 390px", async ({ page }) => {

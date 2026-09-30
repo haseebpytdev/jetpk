@@ -128,7 +128,7 @@ const reportsService = createReadOnlyService<{ query: ReportsQuery; module: Repo
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch({ query, module }, options) {
       const envelope = await fetchDashboardApi<LaravelReportPayload>(reportRouteForModule(module), {
         signal: options?.signal,

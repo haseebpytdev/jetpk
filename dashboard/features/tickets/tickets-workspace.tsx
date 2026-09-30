@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
 import { TicketDetailDrawerContent } from "@/features/tickets/ticket-detail-drawer";
 import { TicketsFilters } from "@/features/tickets/tickets-filters";
@@ -21,6 +23,7 @@ type Props = {
 
 export function TicketsWorkspace({ query, result, selectedTicket }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
 
@@ -64,7 +67,7 @@ export function TicketsWorkspace({ query, result, selectedTicket }: Props) {
       {empty ? (
         <EmptyState
           title="No tickets or documents match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={emptyListDescription(isLive)}
         />
       ) : (
         <>

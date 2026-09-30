@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
 import { PermissionDetailDrawerContent } from "@/features/permissions/components/permission-detail-drawer";
 import { PermissionMobileCard } from "@/features/permissions/components/permission-mobile-card";
@@ -20,6 +22,7 @@ type Props = {
 
 export function PermissionsWorkspace({ result }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
 
@@ -66,7 +69,7 @@ export function PermissionsWorkspace({ result }: Props) {
       {empty ? (
         <EmptyState
           title="No permissions match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={emptyListDescription(isLive)}
         />
       ) : (
         <>

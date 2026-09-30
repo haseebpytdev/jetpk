@@ -1,6 +1,6 @@
 import { createReadOnlyErrorEnvelope, mapHttpStatusToErrorCode, sanitizeErrorMessage } from "@/lib/read-only/error-envelope";
 import { createReadOnlyEnvelope } from "@/lib/read-only/response-envelope";
-import { resolveDataSourceMode } from "@/lib/read-only/data-source";
+import { isLaravelBackedMode, resolveDataSourceMode } from "@/lib/read-only/data-source";
 import type {
   DataSourceMetadata,
   ReadOnlyErrorEnvelope,
@@ -13,7 +13,7 @@ export type ReadOnlyFetchOptions = {
 };
 
 export type ReadOnlyAdapter<TQuery, TResult> = {
-  readonly mode: "fixture" | "laravelReadOnly";
+  readonly mode: "fixture" | "laravelLive" | "laravelReadOnly";
   fetch(query: TQuery, options?: ReadOnlyFetchOptions): Promise<ReadOnlyResponseEnvelope<TResult>>;
 };
 
@@ -49,13 +49,13 @@ export function createReadOnlyService<TQuery, TResult>(params: {
       );
     }
 
-    if (mode === "laravelReadOnly") {
+    if (isLaravelBackedMode(mode)) {
       if (!laravelAdapter) {
         throw new ReadOnlyServiceError(
           createReadOnlyErrorEnvelope({
             code: "unavailable",
             referenceIdSafe: `${params.module.toUpperCase()}-NO-LIVE-ADAPTER`,
-            message: "Laravel read-only adapter is not configured for this module yet.",
+            message: "Laravel data adapter is not configured for this module yet.",
           }),
         );
       }

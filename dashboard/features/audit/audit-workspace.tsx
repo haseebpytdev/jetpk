@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
 import { AuditActiveFilters } from "@/features/audit/components/audit-active-filters";
 import { AuditDataTable } from "@/features/audit/components/audit-data-table";
@@ -22,6 +24,7 @@ type Props = {
 
 export function AuditWorkspace({ result }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
 
@@ -84,7 +87,7 @@ export function AuditWorkspace({ result }: Props) {
       {empty ? (
         <EmptyState
           title="No audit events match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={emptyListDescription(isLive)}
         />
       ) : (
         <>

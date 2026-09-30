@@ -58,7 +58,7 @@ const customersService = createReadOnlyService<CustomersQuery, CustomersPageResu
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const envelope = await fetchDashboardApi<LaravelCustomersListPayload>(DASHBOARD_API_ROUTES.customers, {
         signal: options?.signal,

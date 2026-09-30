@@ -148,7 +148,7 @@ const sessionService = createReadOnlyService<
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const portal = query.portal ?? "admin";
       const envelope = await fetchDashboardApi<LaravelSessionPayload>(DASHBOARD_API_ROUTES.session, {

@@ -79,5 +79,5 @@ test("bookings no overflow at 390px", async ({ page }) => {
 
 test("bookings live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/bookings?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });

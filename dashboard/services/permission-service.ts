@@ -112,7 +112,7 @@ const permissionsService = createReadOnlyService<PermissionsQuery, PermissionsMo
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const envelope = await fetchDashboardApi<LaravelPermissionsListPayload>(DASHBOARD_API_ROUTES.permissions, {
         signal: options?.signal,

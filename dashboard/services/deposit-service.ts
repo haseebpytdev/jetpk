@@ -38,7 +38,7 @@ const depositsService = createReadOnlyService<Record<string, never>, DepositsPag
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(_query, options) {
       const envelope = await fetchDashboardApi<{ deposits: DepositRecord[] }>(DASHBOARD_API_ROUTES.deposits, {
         signal: options?.signal,

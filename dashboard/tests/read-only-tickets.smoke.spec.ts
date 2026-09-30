@@ -79,7 +79,7 @@ test("tickets forbidden preview", async ({ page }) => {
 
 test("tickets live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/tickets?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("tickets masked external ids in fixtures", async () => {

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
 import { RoleDetailDrawerContent } from "@/features/roles/components/role-detail-drawer";
 import { RoleMobileCard } from "@/features/roles/components/role-mobile-card";
@@ -21,6 +23,7 @@ type Props = {
 
 export function RolesWorkspace({ result }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
 
@@ -67,7 +70,7 @@ export function RolesWorkspace({ result }: Props) {
       {empty ? (
         <EmptyState
           title="No roles match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={emptyListDescription(isLive)}
         />
       ) : (
         <>

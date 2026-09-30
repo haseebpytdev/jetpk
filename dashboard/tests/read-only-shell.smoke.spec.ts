@@ -22,7 +22,7 @@ test("shell renders authenticated fixture profile", async ({ page }) => {
 
 test("live read-only notice via preview gate", async ({ page }) => {
   await page.goto("/admin/dashboard?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("unauthorized state via preview gate", async ({ page }) => {

@@ -1,11 +1,17 @@
 import { createReadOnlyErrorEnvelope, mapHttpStatusToErrorCode, sanitizeErrorMessage } from "@/lib/read-only/error-envelope";
+import { resolveDataSourceMode } from "@/lib/read-only/data-source";
 import { dashboardApiUrl } from "@/lib/read-only/laravel/api-base";
 import type {
   DataSourceMetadata,
+  DataSourceMode,
   ReadOnlyErrorEnvelope,
   ReadOnlyResponseEnvelope,
 } from "@/types/read-only-integration";
 import { READ_ONLY_SCHEMA_VERSION } from "@/types/read-only-integration";
+
+function laravelEnvelopeSource(): Extract<DataSourceMode, "laravelLive" | "laravelReadOnly"> {
+  return resolveDataSourceMode() === "laravelReadOnly" ? "laravelReadOnly" : "laravelLive";
+}
 
 export type LaravelFetchOptions = {
   signal?: AbortSignal;
@@ -25,10 +31,11 @@ function serializeQuery(query?: LaravelFetchOptions["query"]): string {
 
 function normalizeLaravelEnvelope<T>(payload: Record<string, unknown>): ReadOnlyResponseEnvelope<T> {
   const meta = (payload.meta ?? {}) as DataSourceMetadata;
+  const source = laravelEnvelopeSource();
   return {
     data: payload.data as T,
     meta: {
-      source: "laravelReadOnly",
+      source,
       fetchedAt: (meta.fetchedAt as string | null) ?? (payload.generatedAt as string | null) ?? null,
       referenceTime: (meta.referenceTime as string | null) ?? (payload.referenceTime as string | null) ?? null,
       staleAfter: (meta.staleAfter as string | null) ?? null,
@@ -39,7 +46,7 @@ function normalizeLaravelEnvelope<T>(payload: Record<string, unknown>): ReadOnly
     },
     pagination: payload.pagination as ReadOnlyResponseEnvelope<T>["pagination"],
     filters: payload.filters as ReadOnlyResponseEnvelope<T>["filters"],
-    source: "laravelReadOnly",
+    source,
     generatedAt: (payload.generatedAt as string) ?? new Date().toISOString(),
     referenceTime: (payload.referenceTime as string | null) ?? null,
     warnings: Array.isArray(payload.warnings) ? (payload.warnings as ReadOnlyResponseEnvelope<T>["warnings"]) : [],

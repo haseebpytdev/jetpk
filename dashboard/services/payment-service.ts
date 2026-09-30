@@ -64,7 +64,7 @@ const paymentsService = createReadOnlyService<PaymentsQuery, PaymentsPageResult>
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const envelope = await fetchDashboardApi<LaravelPaymentsListPayload>(DASHBOARD_API_ROUTES.payments, {
         signal: options?.signal,

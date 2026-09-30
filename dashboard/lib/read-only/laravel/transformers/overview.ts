@@ -31,7 +31,7 @@ export function transformOverviewPayload(payload: LaravelOverviewPayload): Overv
     recentBookings: payload.recentBookings,
     topRoutes: [],
     systemHealth: payload.hasLiveData
-      ? [{ name: "Laravel read-only", status: "operational" as const }]
+      ? [{ name: "Live Laravel data", status: "operational" as const }]
       : [{ name: "No live bookings", status: "degraded" as const }],
   };
 }

@@ -73,7 +73,7 @@ test("roles matrix responsive at 1024px", async ({ page }) => {
 
 test("roles live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/users/roles?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("protected role metadata in fixture", async () => {

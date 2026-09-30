@@ -65,7 +65,7 @@ const bookingsService = createReadOnlyService<BookingsQuery, BookingsPageResult>
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const envelope = await fetchDashboardApi<LaravelBookingsListPayload>(DASHBOARD_API_ROUTES.bookings, {
         signal: options?.signal,

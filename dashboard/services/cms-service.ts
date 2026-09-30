@@ -119,16 +119,16 @@ const cmsService = createReadOnlyService<{ query: CmsQuery; module: CmsModuleKey
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch({ query, module }, options) {
       if (!LIVE_SUPPORTED_MODULES.includes(module)) {
         throw new ReadOnlyServiceError({
           error: {
             code: "unavailable",
             referenceIdSafe: "CMS-LIVE-MODULE-UNAVAILABLE",
-            message: `Laravel read-only CMS does not expose the ${module} submodule yet.`,
+            message: `Live CMS does not expose the ${module} submodule yet.`,
           },
-          meta: { source: "laravelReadOnly", schemaVersion: "dash-read-only-v1" },
+          meta: { source: "laravelLive", schemaVersion: "dash-read-only-v1" },
         });
       }
 

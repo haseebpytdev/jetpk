@@ -118,7 +118,7 @@ const rolesService = createReadOnlyService<RolesQuery, RolesModuleResult>({
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const [rolesEnvelope] = await Promise.all([
         fetchDashboardApi<LaravelRolesListPayload>(DASHBOARD_API_ROUTES.roles, {

@@ -142,7 +142,7 @@ test("source mode switching suppliers", async ({ page }) => {
   await page.goto("/admin/dashboard/suppliers?dataSourcePreview=fixture", { waitUntil: "load" });
   await expect(page.getByTestId("fixture-data-notice")).toBeVisible();
   await page.goto("/admin/dashboard/suppliers?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("supplier credential exclusion in fixture service", async ({ page }) => {

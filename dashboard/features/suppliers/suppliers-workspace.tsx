@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
 import { SupplierDetailDrawerContent } from "@/features/suppliers/supplier-detail-drawer";
 import { SuppliersFilters } from "@/features/suppliers/suppliers-filters";
@@ -21,6 +23,7 @@ type Props = {
 
 export function SuppliersWorkspace({ query, result, selectedSupplier }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
 
@@ -64,7 +67,7 @@ export function SuppliersWorkspace({ query, result, selectedSupplier }: Props) {
       {empty ? (
         <EmptyState
           title="No suppliers match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={emptyListDescription(isLive)}
         />
       ) : (
         <>

@@ -72,7 +72,7 @@ test("payments no overflow at 390px", async ({ page }) => {
 
 test("payments live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/payments?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("payments drawer with selected transaction", async ({ page }) => {

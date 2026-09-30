@@ -83,7 +83,7 @@ test("users no sensitive fields in fixture", async () => {
 
 test("users live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/users?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("users no overflow at 390px", async ({ page }) => {

@@ -60,7 +60,7 @@ test("high-risk permission metadata in fixture", async () => {
 
 test("permissions live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/users/permissions?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("permissions no overflow at 390px", async ({ page }) => {

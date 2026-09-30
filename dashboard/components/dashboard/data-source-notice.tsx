@@ -7,7 +7,11 @@ import { FixtureDataNotice, LiveReadOnlyNotice, StaleDataNotice } from "@/compon
 import type { DataSourceMetadata } from "@/types/read-only-integration";
 import { isStaleMetadata } from "@/lib/read-only/data-source";
 
-/** Renders module-level source notice unless the shell preview gate is active. */
+/**
+ * Module-level source notice.
+ * Live operational modules (laravelLive) intentionally render no phase banner —
+ * mutability is governed by RBAC/lifecycle, not a global "Laravel=read-only" label.
+ */
 export function DataSourceNotice({ meta }: { meta?: DataSourceMetadata | null }) {
   const searchParams = useSearchParams();
   if (searchParams.get("dataSourcePreview")) {
@@ -27,6 +31,11 @@ export function DataSourceNotice({ meta }: { meta?: DataSourceMetadata | null })
         {meta && isStaleMetadata(meta) ? <StaleDataNotice staleAfter={meta.staleAfter} className="mt-3" /> : null}
       </>
     );
+  }
+
+  // laravelLive / unavailable: no obsolete transition-phase banner
+  if (mode === "laravelLive" && meta && isStaleMetadata(meta)) {
+    return <StaleDataNotice staleAfter={meta.staleAfter} />;
   }
 
   return null;

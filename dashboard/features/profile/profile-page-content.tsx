@@ -5,6 +5,8 @@ import { laravelRequest } from "@/lib/api/laravel-action-client";
 import { getLaravelApiBase } from "@/lib/read-only/laravel/api-base";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { useDashboardPortal } from "@/lib/portal-context";
+import { useDashboardSession } from "@/lib/session-context";
+import { getDashboardSession } from "@/services/session-service";
 import { Button } from "@/components/ui/button";
 import type { ProfileJsonPayload, ProfileUpdateResponse } from "@/types/profile";
 
@@ -16,14 +18,6 @@ type ProfileFormState = {
   city: string;
   country_code: string;
   whatsapp: string;
-};
-
-type SessionLite = {
-  displayName: string;
-  email: string;
-  roles: string[];
-  accountType: string;
-  accountStatus: string;
 };
 
 const emptyForm: ProfileFormState = {
@@ -38,46 +32,6 @@ const emptyForm: ProfileFormState = {
 
 function profileUrl(): string {
   return `${getLaravelApiBase()}/profile?format=json`;
-}
-
-async function fetchSessionLite(portal: string): Promise<SessionLite> {
-  const unavailable: SessionLite = {
-    displayName: "Session unavailable",
-    email: "—",
-    roles: [],
-    accountType: "unknown",
-    accountStatus: "unknown",
-  };
-
-  try {
-    const response = await fetch(`/api/dashboard/session?portal=${encodeURIComponent(portal)}`, {
-      method: "GET",
-      credentials: "same-origin",
-      headers: { Accept: "application/json" },
-      cache: "no-store",
-    });
-    const payload = (await response.json()) as {
-      data?: {
-        displayName?: string;
-        email?: string | null;
-        roles?: string[];
-        accountType?: string;
-        accountStatus?: string;
-      };
-    };
-    if (!response.ok || !payload.data) {
-      return unavailable;
-    }
-    return {
-      displayName: payload.data.displayName ?? "Signed in",
-      email: payload.data.email ?? "—",
-      roles: payload.data.roles ?? [],
-      accountType: payload.data.accountType ?? "unknown",
-      accountStatus: payload.data.accountStatus ?? "unknown",
-    };
-  } catch {
-    return unavailable;
-  }
 }
 
 function applyPayloadToForm(payload: ProfileJsonPayload, fallbackName: string): ProfileFormState {
@@ -95,9 +49,12 @@ function applyPayloadToForm(payload: ProfileJsonPayload, fallbackName: string): 
 export function ProfilePageContent() {
   const portal = useDashboardPortal();
   const isLive = useDashboardLiveMode();
-  const [session, setSession] = useState<SessionLite | null>(null);
-  const [accountType, setAccountType] = useState<string>("");
-  const [accountStatus, setAccountStatus] = useState<string>("");
+  const shellSession = useDashboardSession();
+  const [displayName, setDisplayName] = useState(shellSession?.displayName ?? "");
+  const [roles, setRoles] = useState<string[]>(shellSession?.roles ?? []);
+  const [accountType, setAccountType] = useState(shellSession?.accountType ?? "");
+  const [accountStatus, setAccountStatus] = useState(shellSession?.accountStatus ?? "");
+  const [sessionUsable, setSessionUsable] = useState(Boolean(shellSession && !shellSession.unavailable));
   const [form, setForm] = useState<ProfileFormState>(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -112,19 +69,33 @@ export function ProfilePageContent() {
       setLoading(true);
       setError(null);
       try {
-        const nextSession = await fetchSessionLite(portal);
+        let next = shellSession;
+        if (!next || next.unavailable) {
+          next = await getDashboardSession({ portal });
+        }
         if (cancelled) {
           return;
         }
-        setSession(nextSession);
-        setAccountType(nextSession.accountType);
-        setAccountStatus(nextSession.accountStatus);
+
+        const usable = Boolean(next && !next.unavailable && next.sessionUsable !== false);
+        setSessionUsable(usable);
+        setDisplayName(next?.displayName ?? "");
+        setRoles(next?.roles ?? []);
+        setAccountType(next?.accountType ?? "");
+        setAccountStatus(next?.accountStatus ?? "");
+
+        if (!usable && isLive) {
+          setError("Could not load your authenticated session. Sign in again and retry.");
+          setForm(emptyForm);
+          return;
+        }
 
         if (!isLive) {
+          // Fixture/preview builds only — never used as a silent production fallback.
           setForm({
-            name: nextSession.displayName,
-            email: nextSession.email === "—" ? "" : nextSession.email,
-            username: "preview.user",
+            name: next?.displayName ?? "",
+            email: next?.email && next.email !== "—" ? next.email : "",
+            username: "",
             phone: "",
             city: "",
             country_code: "PK",
@@ -145,23 +116,15 @@ export function ProfilePageContent() {
         }
 
         if (!result.ok) {
-          setForm({
-            name: nextSession.displayName,
-            email: "",
-            username: "",
-            phone: "",
-            city: "",
-            country_code: "",
-            whatsapp: "",
-          });
+          setForm(emptyForm);
           setError(result.message ?? "Could not load editable profile fields.");
           return;
         }
 
-        setForm(applyPayloadToForm(result.data, nextSession.displayName));
+        setForm(applyPayloadToForm(result.data, next?.displayName ?? ""));
         if (result.data.account) {
-          setAccountType(result.data.account.account_type || nextSession.accountType);
-          setAccountStatus(result.data.account.status || nextSession.accountStatus);
+          setAccountType(result.data.account.account_type || next?.accountType || "");
+          setAccountStatus(result.data.account.status || next?.accountStatus || "");
         }
         setPhotoUrl(
           typeof result.data.profile?.profile_photo_url === "string"
@@ -171,7 +134,7 @@ export function ProfilePageContent() {
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Could not load profile.");
-          setForm((prev) => ({ ...prev }));
+          setForm(emptyForm);
         }
       } finally {
         if (!cancelled) {
@@ -184,10 +147,10 @@ export function ProfilePageContent() {
     return () => {
       cancelled = true;
     };
-  }, [isLive, portal]);
+  }, [isLive, portal, shellSession]);
 
   async function onSave() {
-    if (!isLive || saving) {
+    if (!isLive || saving || !sessionUsable) {
       return;
     }
     setSaving(true);
@@ -231,6 +194,16 @@ export function ProfilePageContent() {
     }
   }
 
+  const normalizeAccountLabel = (value: string) => {
+    const trimmed = (value || "").trim();
+    if (!trimmed || trimmed.toLowerCase() === "unknown") {
+      return "—";
+    }
+    return trimmed.replaceAll("_", " ");
+  };
+  const accountTypeLabel = normalizeAccountLabel(accountType);
+  const accountStatusLabel = normalizeAccountLabel(accountStatus);
+
   return (
     <div className="mx-auto max-w-2xl space-y-6" data-testid="my-profile-page">
       <section className="rounded-2xl border border-jp-border bg-white p-5 shadow-sm">
@@ -238,19 +211,25 @@ export function ProfilePageContent() {
         <dl className="mt-3 grid gap-2 text-sm">
           <div className="flex justify-between gap-4">
             <dt className="text-jp-muted">Signed in as</dt>
-            <dd className="font-medium">{session?.displayName ?? "—"}</dd>
+            <dd className="font-medium" data-testid="profile-session-name">
+              {displayName || "—"}
+            </dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-jp-muted">Role</dt>
-            <dd>{session?.roles?.[0] ?? "—"}</dd>
+            <dd data-testid="profile-session-role">{roles[0] ?? "—"}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-jp-muted">Account type</dt>
-            <dd className="capitalize">{(accountType || session?.accountType || "—").replaceAll("_", " ")}</dd>
+            <dd className="capitalize" data-testid="profile-session-account-type">
+              {accountTypeLabel}
+            </dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-jp-muted">Status</dt>
-            <dd className="capitalize">{accountStatus || session?.accountStatus || "—"}</dd>
+            <dd className="capitalize" data-testid="profile-session-status">
+              {accountStatusLabel}
+            </dd>
           </div>
         </dl>
         <p className="mt-3 text-xs text-jp-muted">
@@ -271,7 +250,7 @@ export function ProfilePageContent() {
             {success}
           </p>
         ) : null}
-        {!loading ? (
+        {!loading && (sessionUsable || !isLive) ? (
           <div className="mt-4 grid gap-3">
             {photoUrl ? (
               <div className="flex items-center gap-4">
@@ -287,7 +266,7 @@ export function ProfilePageContent() {
                 className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
                 value={form.name}
                 onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                disabled={!isLive}
+                disabled={!isLive || !sessionUsable}
                 data-testid="profile-name"
               />
             </label>
@@ -298,7 +277,7 @@ export function ProfilePageContent() {
                 className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
                 value={form.email}
                 onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-                disabled={!isLive}
+                disabled={!isLive || !sessionUsable}
                 data-testid="profile-email"
               />
             </label>
@@ -308,7 +287,7 @@ export function ProfilePageContent() {
                 className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
                 value={form.username}
                 onChange={(e) => setForm((prev) => ({ ...prev, username: e.target.value }))}
-                disabled={!isLive}
+                disabled={!isLive || !sessionUsable}
                 data-testid="profile-username"
               />
             </label>
@@ -318,7 +297,7 @@ export function ProfilePageContent() {
                 className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
                 value={form.phone}
                 onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
-                disabled={!isLive}
+                disabled={!isLive || !sessionUsable}
                 data-testid="profile-phone"
               />
             </label>
@@ -328,7 +307,7 @@ export function ProfilePageContent() {
                 className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
                 value={form.whatsapp}
                 onChange={(e) => setForm((prev) => ({ ...prev, whatsapp: e.target.value }))}
-                disabled={!isLive}
+                disabled={!isLive || !sessionUsable}
                 data-testid="profile-whatsapp"
               />
             </label>
@@ -339,7 +318,7 @@ export function ProfilePageContent() {
                   className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
                   value={form.city}
                   onChange={(e) => setForm((prev) => ({ ...prev, city: e.target.value }))}
-                  disabled={!isLive}
+                  disabled={!isLive || !sessionUsable}
                   data-testid="profile-city"
                 />
               </label>
@@ -349,13 +328,18 @@ export function ProfilePageContent() {
                   className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
                   value={form.country_code}
                   onChange={(e) => setForm((prev) => ({ ...prev, country_code: e.target.value }))}
-                  disabled={!isLive}
+                  disabled={!isLive || !sessionUsable}
                   data-testid="profile-country"
                 />
               </label>
             </div>
             <div className="pt-2">
-              <Button type="button" disabled={!isLive || saving} onClick={onSave} data-testid="profile-save">
+              <Button
+                type="button"
+                disabled={!isLive || !sessionUsable || saving}
+                onClick={onSave}
+                data-testid="profile-save"
+              >
                 {saving ? "Saving…" : "Save profile"}
               </Button>
               {!isLive ? (

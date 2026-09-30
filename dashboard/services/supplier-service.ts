@@ -64,7 +64,7 @@ const suppliersService = createReadOnlyService<SuppliersQuery, SuppliersPageResu
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const envelope = await fetchDashboardApi<LaravelSuppliersListPayload>(DASHBOARD_API_ROUTES.suppliers, {
         signal: options?.signal,

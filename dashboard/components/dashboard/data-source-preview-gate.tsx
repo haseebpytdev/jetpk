@@ -9,6 +9,7 @@ import {
 const VALID_VARIANTS = new Set<DataSourcePreviewVariant>([
   "fixture",
   "live",
+  "readOnly",
   "stale",
   "unauthorized",
   "forbidden",
