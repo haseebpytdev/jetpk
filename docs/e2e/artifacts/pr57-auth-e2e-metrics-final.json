@@ -1,20 +1,34 @@
 {
-  "captured_at": "2026-09-30T04:27:00Z",
-  "note": "Sanitized proxy metrics after full auth certification suite. No cookies, passwords, or PII.",
+  "captured_at": "2026-09-30T06:40:00Z",
+  "note": "Sanitized proxy metrics after final pre-merge auth certification suite. No cookies, passwords, or PII.",
   "LARAVEL_WORKER_COUNT": 6,
-  "CRAWL_REQUEST_COUNT": 1742,
-  "PEAK_INFLIGHT_LARAVEL_REQUESTS": 5,
-  "AUTH_GATE_REQUEST_COUNT": 885,
-  "AUTH_GATE_COALESCED_COUNT": 684,
+  "CRAWL_REQUEST_COUNT": 1834,
+  "PEAK_INFLIGHT_LARAVEL_REQUESTS": 6,
+  "AUTH_GATE_REQUEST_COUNT": 948,
+  "AUTH_GATE_COALESCED_COUNT": 746,
   "AUTH_GATE_502_COUNT": 0,
-  "LARAVEL_5XX_COUNT": 3,
+  "LARAVEL_5XX_COUNT": 0,
   "NEXT_5XX_COUNT": 0,
   "SQLITE_LOCK_ERRORS": 0,
-  "PLAYWRIGHT_SUMMARY": "45 passed / 1 skipped (25.6m)",
+  "LARAVEL_5XX_EVENTS": [],
+  "LB_LARAVEL_5XX_COUNT": 0,
+  "PLAYWRIGHT_SUMMARY": "47 passed / 0 skipped (20.7m)",
   "MENU_COUNTS": {
     "admin": "27/27",
     "staff": "8/8",
     "agent": "14/14",
     "customer": "6/6"
+  },
+  "COMPANY_PROFILE_SAFE_WRITE_RELOAD": "PASS",
+  "PRIOR_LARAVEL_5XX_DISPOSITION": {
+    "REQUEST_1_PATH": "GET /api/dashboard/session?portal=admin",
+    "REQUEST_1_CAUSE": "auth-gate intermediate retry timeout (later attempt succeeded)",
+    "REQUEST_1_DISPOSITION": "FIXED_COUNTER_AND_RERUN_ZERO",
+    "REQUEST_2_PATH": "GET /api/dashboard/session?portal=admin",
+    "REQUEST_2_CAUSE": "auth-gate intermediate retry timeout (later attempt succeeded)",
+    "REQUEST_2_DISPOSITION": "FIXED_COUNTER_AND_RERUN_ZERO",
+    "REQUEST_3_PATH": "GET /api/dashboard/session?portal=admin",
+    "REQUEST_3_CAUSE": "auth-gate intermediate retry timeout (later attempt succeeded)",
+    "REQUEST_3_DISPOSITION": "FIXED_COUNTER_AND_RERUN_ZERO"
   }
 }

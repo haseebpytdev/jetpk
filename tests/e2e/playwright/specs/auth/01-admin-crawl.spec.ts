@@ -112,11 +112,21 @@ test("admin visible navigation crawl is 100% Next shell", async ({ page }) => {
     AUTH_GATE_502_COUNT?: number;
     SQLITE_LOCK_ERRORS?: number;
     LARAVEL_WORKER_COUNT?: number;
+    LARAVEL_5XX_COUNT?: number;
+    NEXT_5XX_COUNT?: number;
+    LARAVEL_5XX_EVENTS?: unknown[];
   };
   console.log(`LARAVEL_E2E_WORKERS=${body.LARAVEL_WORKER_COUNT ?? "?"}`);
   console.log(`AUTH_GATE_502_COUNT=${body.AUTH_GATE_502_COUNT ?? "?"}`);
+  console.log(`LARAVEL_5XX_COUNT=${body.LARAVEL_5XX_COUNT ?? "?"}`);
+  console.log(`NEXT_5XX_COUNT=${body.NEXT_5XX_COUNT ?? "?"}`);
   console.log(`SQLITE_LOCK_ERRORS=${body.SQLITE_LOCK_ERRORS ?? "?"}`);
+  if ((body.LARAVEL_5XX_COUNT ?? 0) > 0) {
+    console.log(`LARAVEL_5XX_EVENTS=${JSON.stringify(body.LARAVEL_5XX_EVENTS ?? [])}`);
+  }
   expect(body.AUTH_GATE_502_COUNT ?? 1).toBe(0);
+  expect(body.LARAVEL_5XX_COUNT ?? 1).toBe(0);
+  expect(body.NEXT_5XX_COUNT ?? 1).toBe(0);
   expect(body.SQLITE_LOCK_ERRORS ?? 1).toBe(0);
 
   console.log(`ADMIN_VISIBLE_MENU_ITEMS_TESTED=${results.length}/${unique.length}`);

@@ -9,7 +9,8 @@ test.use({ storageState: path.join(process.cwd(), "tmp", "e2e-auth", "admin.json
 
 const readPages = [
   { name: "API Connections", path: "/admin/dashboard/api-connections", heading: /API Connections|Connections/i },
-  { name: "Company Profile", path: "/admin/dashboard/company-profile", heading: /Company Profile|Company/i },
+  // Company Profile lives under settings/general (canonical Next route).
+  { name: "Company Profile", path: "/admin/dashboard/settings/general", heading: /Company|Organization|General|Settings/i },
   { name: "Homepage CMS", path: "/admin/dashboard/cms", heading: /CMS|Homepage|Content/i },
   { name: "CMS Pages", path: "/admin/dashboard/cms/pages", heading: /Pages|CMS|Content/i },
   { name: "SEO", path: "/admin/dashboard/seo", heading: /SEO|Search/i },
@@ -23,22 +24,73 @@ for (const pageDef of readPages) {
   test(`admin writer surface loads: ${pageDef.name}`, async ({ page }) => {
     const response = await page.goto(pageDef.path, { waitUntil: "domcontentloaded", timeout: 60_000 });
     const status = response?.status() ?? 0;
-    // Some modules may 404 if not recovered yet — record but only fail on 5xx / Blade fallthrough.
-    if (status === 404) {
-      console.log(`ADMIN_WRITER_SURFACE=${pageDef.name}:NOT_PRESENT_404`);
-      test.skip(true, `${pageDef.name} route not present in this recovery build`);
-    }
     expect(status, `${pageDef.name} status`).toBeLessThan(500);
+    expect(status, `${pageDef.name} must exist`).not.toBe(404);
     const html = await page.content();
     const bladeFallthrough =
       html.includes("ota-dashboard-breadcrumbs") &&
       !html.includes("/_next/") &&
       !html.includes("__NEXT_DATA__");
     expect(bladeFallthrough, `${pageDef.name} Blade transition`).toBeFalsy();
-    await expect(page.locator("h1, h2").first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator("h1, h2, h3").first()).toBeVisible({ timeout: 30_000 });
+    if (pageDef.name === "Company Profile") {
+      await expect(page.getByTestId("organization-profile-form")).toBeVisible({ timeout: 45_000 });
+      console.log("COMPANY_PROFILE_NEXT=PASS");
+    }
     console.log(`ADMIN_WRITER_SURFACE=${pageDef.name}:PASS`);
   });
 }
+
+test("company profile safe write → reload → restore", async ({ page }) => {
+  test.setTimeout(180_000);
+  await page.goto("/admin/dashboard/settings/general", { waitUntil: "domcontentloaded" });
+  await expect(page.getByTestId("organization-profile-form")).toBeVisible({ timeout: 45_000 });
+
+  const city = page.getByTestId("organization-profile-form").getByLabel("City");
+  await expect(city).toBeEnabled({ timeout: 30_000 });
+  const original = await city.inputValue();
+  const marker = `E2E-CITY-${Date.now().toString().slice(-6)}`;
+
+  await city.fill(marker);
+  const [saveResponse] = await Promise.all([
+    page.waitForResponse(
+      (res) =>
+        /organization|company|branding|settings\/general/i.test(res.url()) &&
+        res.request().method() !== "GET",
+      { timeout: 45_000 },
+    ),
+    page.getByRole("button", { name: /Save organization profile/i }).click(),
+  ]);
+  expect(saveResponse.ok(), `company profile save status=${saveResponse.status()}`).toBeTruthy();
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.getByTestId("organization-profile-form")).toBeVisible({ timeout: 45_000 });
+  await expect(page.getByTestId("organization-profile-form").getByLabel("City")).toHaveValue(marker, {
+    timeout: 30_000,
+  });
+
+  await page.getByTestId("organization-profile-form").getByLabel("City").fill(original);
+  const [restoreResponse] = await Promise.all([
+    page.waitForResponse(
+      (res) =>
+        /organization|company|branding|settings\/general/i.test(res.url()) &&
+        res.request().method() !== "GET",
+      { timeout: 45_000 },
+    ),
+    page.getByRole("button", { name: /Save organization profile/i }).click(),
+  ]);
+  expect(restoreResponse.ok(), `company profile restore status=${restoreResponse.status()}`).toBeTruthy();
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.getByTestId("organization-profile-form")).toBeVisible({ timeout: 45_000 });
+  await expect(page.getByTestId("organization-profile-form").getByLabel("City")).toHaveValue(original, {
+    timeout: 30_000,
+  });
+
+  console.log("COMPANY_PROFILE_SAFE_WRITE_RELOAD=PASS");
+  console.log("COMPANY_PROFILE_MUTATION_RESTORED=YES");
+  console.log("COMPANY_PROFILE_NEXT=PASS");
+});
 
 test("admin profile remains the certified reversible write path", async ({ page }) => {
   await page.goto("/admin/dashboard/profile", { waitUntil: "domcontentloaded" });

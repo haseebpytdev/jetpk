@@ -1,67 +1,68 @@
-﻿Running 46 tests using 1 worker
+﻿Running 47 tests using 1 worker
 LARAVEL_E2E_WORKERS=6
 [1A[2KAUTH_GATE_502_COUNT=0
+[1A[2KLARAVEL_5XX_COUNT=0
+[1A[2KNEXT_5XX_COUNT=0
 [1A[2KSQLITE_LOCK_ERRORS=0
 [1A[2KADMIN_VISIBLE_MENU_ITEMS_TESTED=27/27
 [1A[2KADMIN_AUTH_E2E=PASS
-[1A[2KADMIN_BLADE_TRANSITIONS=0
-[1A[2KADMIN_MENU_502=0
-[1A[2KADMIN_MENU_404=0
-[1A[2KADMIN_MENU_500=0
 ADMIN_SAFE_WRITE_RELOAD=PASS
 [1A[2KPROFILE_SAFE_WRITE_RELOAD=PASS
 BOOKING_DETAIL_AUTH_E2E=PASS
-[1A[2K[19/46] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ / responds without server error or QA leakage
+[1A[2K[19/47] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ / responds without server error or QA leakage
 [1A[2K[desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ / responds without server error or QA leakage
 PUBLIC_ROUTE=/:PASS status=200
-[1A[2K[20/46] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /login responds without server error or QA leakage
+[1A[2K[20/47] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /login responds without server error or QA leakage
 [1A[2K[desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /login responds without server error or QA leakage
 PUBLIC_ROUTE=/login:PASS status=200
-[1A[2K[21/46] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /register responds without server error or QA leakage
+[1A[2K[21/47] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /register responds without server error or QA leakage
 [1A[2K[desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /register responds without server error or QA leakage
 PUBLIC_ROUTE=/register:PASS status=200
-[1A[2K[22/46] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /forgot-password responds without server error or QA leakage
+[1A[2K[22/47] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /forgot-password responds without server error or QA leakage
 [1A[2K[desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /forgot-password responds without server error or QA leakage
 PUBLIC_ROUTE=/forgot-password:PASS status=200
-[1A[2K[23/46] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /booking-lookup responds without server error or QA leakage
+[1A[2K[23/47] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /booking-lookup responds without server error or QA leakage
 [1A[2K[desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /booking-lookup responds without server error or QA leakage
 PUBLIC_ROUTE=/booking-lookup:PASS status=200
-[1A[2K[24/46] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /groups responds without server error or QA leakage
+[1A[2K[24/47] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /groups responds without server error or QA leakage
 [1A[2K[desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /groups responds without server error or QA leakage
 PUBLIC_ROUTE=/groups:PASS status=200
-[1A[2K[25/46] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /flights responds without server error or QA leakage
+[1A[2K[25/47] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /flights responds without server error or QA leakage
 [1A[2K[desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /flights responds without server error or QA leakage
 PUBLIC_ROUTE=/flights:PASS status=200
-[1A[2K[26/46] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /ask responds without server error or QA leakage
+[1A[2K[26/47] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /ask responds without server error or QA leakage
 [1A[2K[desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:18:5 ΓÇ║ public golden (isolated origin) ΓÇ║ /ask responds without server error or QA leakage
 PUBLIC_ROUTE=/ask:NOT_PRESENT_404
-[1A[2K[27/46] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:34:3 ΓÇ║ public golden (isolated origin) ΓÇ║ homepage approved areas are present without QA markers
+[1A[2K[27/47] [desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:34:3 ΓÇ║ public golden (isolated origin) ΓÇ║ homepage approved areas are present without QA markers
 [1A[2K[desktop-chrome] ΓÇ║ tests\e2e\playwright\specs\auth\06-public-golden.spec.ts:34:3 ΓÇ║ public golden (isolated origin) ΓÇ║ homepage approved areas are present without QA markers
 PUBLIC_GOLDEN_HOMEPAGE=PASS
 [1A[2KCMS_FINAL_PUBLIC_DIFF=0
 [1A[2KPUBLIC_GOLDEN_REGRESSIONS=0
 LARAVEL_E2E_WORKERS=6
 [1A[2KAUTH_GATE_502_COUNT=0
+[1A[2KLARAVEL_5XX_COUNT=0
+[1A[2KNEXT_5XX_COUNT=0
 [1A[2KSQLITE_LOCK_ERRORS=0
 [1A[2KSTAFF_VISIBLE_MENU_ITEMS_TESTED=8/8
 [1A[2KSTAFF_AUTH_E2E=PASS
-[1A[2KSTAFF_PRIVILEGE_ESCALATION=0
 LARAVEL_E2E_WORKERS=6
 [1A[2KAUTH_GATE_502_COUNT=0
+[1A[2KLARAVEL_5XX_COUNT=0
+[1A[2KNEXT_5XX_COUNT=0
 [1A[2KSQLITE_LOCK_ERRORS=0
 [1A[2KAGENT_VISIBLE_MENU_ITEMS_TESTED=14/14
 [1A[2KAGENT_AUTH_E2E=PASS
 [1A[2KAGENCY_ISOLATION=PASS
-[1A[2KAGENT_WALLET_MUTATION=0
 LARAVEL_E2E_WORKERS=6
 [1A[2KAUTH_GATE_502_COUNT=0
+[1A[2KLARAVEL_5XX_COUNT=0
+[1A[2KNEXT_5XX_COUNT=0
 [1A[2KSQLITE_LOCK_ERRORS=0
 [1A[2KCUSTOMER_VISIBLE_MENU_ITEMS_TESTED=6/6
 [1A[2KCUSTOMER_AUTH_E2E=PASS
-[1A[2KCUSTOMER_CROSS_ACCOUNT_ACCESS=0
-AGENT_STAFF_AUTH_E2E=N/A
 ADMIN_WRITER_SURFACE=API Connections:PASS
-ADMIN_WRITER_SURFACE=Company Profile:NOT_PRESENT_404
+COMPANY_PROFILE_NEXT=PASS
+[1A[2KADMIN_WRITER_SURFACE=Company Profile:PASS
 ADMIN_WRITER_SURFACE=Homepage CMS:PASS
 ADMIN_WRITER_SURFACE=CMS Pages:PASS
 ADMIN_WRITER_SURFACE=SEO:PASS
@@ -69,5 +70,7 @@ ADMIN_WRITER_SURFACE=Login OTP:PASS
 ADMIN_WRITER_SURFACE=Communications:PASS
 ADMIN_WRITER_SURFACE=Admin Profile:PASS
 ADMIN_WRITER_SURFACE=Markups:PASS
-[1A[2K  1 skipped
-  45 passed (25.6m)
+COMPANY_PROFILE_SAFE_WRITE_RELOAD=PASS
+[1A[2KCOMPANY_PROFILE_MUTATION_RESTORED=YES
+[1A[2KCOMPANY_PROFILE_NEXT=PASS
+[1A[2K  47 passed (20.7m)

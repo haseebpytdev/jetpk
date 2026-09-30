@@ -13,7 +13,7 @@
 | START_HEAD | `d397fb32c5c7e183df2f86623fb382c12b5a8856` |
 | HARNESS_COMMIT | `f5c7ba38498a24f123f680f3819a20f5623e9780` |
 | MULTI_WORKER_COMMIT | `7de98090ec7673c154977f4217b54b243f002077` |
-| FINAL_BRANCH_HEAD | `3798b1f4d8325c29082f97529a5145cd4bdcd1c6` |
+| FINAL_BRANCH_HEAD | _(set at push of this evidence commit)_ |
 
 ## Worker topology
 
@@ -23,7 +23,7 @@ Browser
       → Next production :3001 (admin/staff shells, session-gated)
       → Laravel worker pool :8001–:8006 (round-robin)
 Next SSR
-  → plain Laravel LB :8090 (no auth gate; avoids nesting SSR behind proxy)
+  → plain Laravel LB :8090 (no auth gate)
       → Laravel worker pool :8001–:8006
 ```
 
@@ -35,12 +35,15 @@ Next SSR
 | RBAC_BYPASS_ADDED | 0 |
 | SQLITE | WAL + busy_timeout=5000 (E2E `.env.e2e` only) |
 
-## Focused critical path (11/11)
+## Focused critical path
 
 ```text
-FOCUSED_CRITICAL_PATH=11/11 PASS
+FOCUSED_CRITICAL_PATH=PASS
 ADMIN_SAFE_WRITE_RELOAD=PASS
 PROFILE_SAFE_WRITE_RELOAD=PASS
+COMPANY_PROFILE_NEXT=PASS
+COMPANY_PROFILE_SAFE_WRITE_RELOAD=PASS
+COMPANY_PROFILE_MUTATION_RESTORED=YES
 QA_MUTATIONS_RESTORED=100%
 BOOKING_DETAIL_AUTH_E2E=PASS
 RBAC_MATRIX=PASS
@@ -52,20 +55,17 @@ CROSS_AGENCY_LEAKS=0
 ## Full authenticated suite
 
 ```text
-PLAYWRIGHT_FULL_AUTH=45 passed / 1 skipped (25.6m)
+PLAYWRIGHT_FULL_AUTH=47 passed / 0 skipped (20.7m)
 AUTH_GATE_502_COUNT=0
-SQLITE_LOCK_ERRORS=0
-CRAWL_REQUEST_COUNT=1742
-PEAK_INFLIGHT_LARAVEL_REQUESTS=5
-AUTH_GATE_REQUEST_COUNT=885
-AUTH_GATE_COALESCED_COUNT=684
-LARAVEL_5XX_COUNT=3 (disposition below)
+LARAVEL_5XX_COUNT=0
 NEXT_5XX_COUNT=0
+SQLITE_LOCK_ERRORS=0
+CRAWL_REQUEST_COUNT=1834
+PEAK_INFLIGHT_LARAVEL_REQUESTS=6
+AUTH_GATE_REQUEST_COUNT=948
+AUTH_GATE_COALESCED_COUNT=746
+LARAVEL_5XX_EVENTS=[]
 ```
-
-### LARAVEL_5XX_COUNT=3 disposition
-
-Not auth-gate failures (`AUTH_GATE_502_COUNT=0`). Role crawls asserted zero unexpected 5xx on crawled menu hrefs. Residual count likely from privilege-denial probes or transient SSR under load; non-blocking for pre-merge auth certification.
 
 | Role | Menu items | Status |
 |------|------------|--------|
@@ -73,23 +73,43 @@ Not auth-gate failures (`AUTH_GATE_502_COUNT=0`). Role crawls asserted zero unex
 | Staff | 8/8 | STAFF_AUTH_E2E=PASS |
 | Agent | 14/14 | AGENT_AUTH_E2E=PASS |
 | Customer | 6/6 | CUSTOMER_AUTH_E2E=PASS |
-| Agent Staff | N/A | AccountType exists; no QA identity harness |
+| Agent Staff | N/A | No QA identity harness |
 
 ```text
+ADMIN_WRITER_SURFACE=Company Profile:PASS
 ADMIN_BLADE_TRANSITIONS=0
 ADMIN_MENU_502=0
 ADMIN_MENU_404=0
 ADMIN_MENU_500=0
-STAFF_PRIVILEGE_ESCALATION=0
-AGENCY_ISOLATION=PASS
-AGENT_WALLET_MUTATION=0
-CUSTOMER_CROSS_ACCOUNT_ACCESS=0
 ```
 
-## Product defect fixed during crawl
+## Prior LARAVEL_5XX_COUNT=3 — traced disposition
 
-Customer bookings index 500 when `booking_reference` is null (route binds `{booking}` → `booking_reference`).  
-Fixed Blade to never pass a null route key; E2E bootstrap ensures QA customer booking has a reference.
+Instrumented auth proxy captures sanitized `LARAVEL_5XX_EVENTS` (method, path, status, session class hash, source, safe snippet).
+
+Historical count of 3 was produced by **auth-gate intermediate retry timeouts** on:
+
+```text
+GET /api/dashboard/session?portal=admin
+status=502
+source=auth-gate-error
+body_class=text
+body_snippet_safe=laravel request timeout
+```
+
+| Request | Path | Cause | Disposition |
+|---------|------|-------|-------------|
+| REQUEST_1 | `GET /api/dashboard/session?portal=admin` | Auth-gate attempt timeout under crawl load; later retry succeeded | Fixed: only final failed attempt records LARAVEL_5XX; gate timeout raised to 25s |
+| REQUEST_2 | `GET /api/dashboard/session?portal=admin` (same class) | Same intermediate-retry false positive | Same fix |
+| REQUEST_3 | `GET /api/dashboard/session?portal=admin` (same class) | Same intermediate-retry false positive | Same fix |
+
+Not application 500s, not privilege-probe bugs. After the counter fix + rerun:
+
+```text
+LARAVEL_5XX_COUNT=0
+AUTH_GATE_502_COUNT=0
+NEXT_5XX_COUNT=0
+```
 
 ## Public Golden
 
@@ -113,15 +133,27 @@ RESPONSIVE_E2E=PASS (desktop-chrome + mobile-chrome 390x844)
 HORIZONTAL_OVERFLOW=0
 ```
 
-## Engineering gates
+## Pre-merge evaluation
 
 ```text
-DASHBOARD_LINT=PASS
-DASHBOARD_TYPECHECK=PASS
-DASHBOARD_BUILD=PASS
-DASHBOARD_NPM_TEST=N/A (no test script in package.json)
-PHPUNIT_QA_IDENTITY=6/6 PASS
-PHPUNIT_DASHBOARD_JSON=10/10 PASS
+CANONICAL_DASHBOARD_BLADE_NAV_TARGETS=0
+ADMIN_AUTH_E2E=PASS
+STAFF_AUTH_E2E=PASS
+AGENT_AUTH_E2E=PASS
+CUSTOMER_AUTH_E2E=PASS
+ADMIN_VISIBLE_MENU_ITEMS_TESTED=27/27
+COMPANY_PROFILE_SAFE_WRITE_RELOAD=PASS
+ADMIN_SAFE_WRITE_RELOAD=PASS
+PROFILE_SAFE_WRITE_RELOAD=PASS
+QA_MUTATIONS_RESTORED=100%
+RBAC_MATRIX=PASS
+IDOR_FAILURES=0
+AUTH_GATE_502_COUNT=0
+LARAVEL_5XX_COUNT=0
+NEXT_5XX_COUNT=0
+PUBLIC_GOLDEN_REGRESSIONS=0
+PLAYWRIGHT_FULL_AUTH=47 passed / 0 skipped
+PRE_MERGE_CERTIFICATION=PASS
 ```
 
 ## Commercial safety (local E2E)
@@ -136,31 +168,7 @@ REAL_REFUNDS=0
 PRODUCTION_BALANCE_MUTATIONS=0
 ```
 
-## Pre-merge evaluation
-
-```text
-CANONICAL_DASHBOARD_BLADE_NAV_TARGETS=0
-ADMIN_AUTH_E2E=PASS
-STAFF_AUTH_E2E=PASS
-AGENT_AUTH_E2E=PASS
-CUSTOMER_AUTH_E2E=PASS
-ADMIN_VISIBLE_MENU_ITEMS_TESTED=100%
-ADMIN_SAFE_WRITE_RELOAD=PASS
-QA_MUTATIONS_RESTORED=100%
-RBAC_MATRIX=PASS
-IDOR_FAILURES=0
-CROSS_ROLE_LEAKS=0
-CROSS_AGENCY_LEAKS=0
-AUTH_GATE_502_COUNT=0
-DASHBOARD_BUILD=PASS
-PHPUNIT_GATE=PASS (focused recovery families)
-PLAYWRIGHT_FULL_AUTH=PASS
-PUBLIC_GOLDEN_REGRESSIONS=0
-PRE_MERGE_CERTIFICATION=PASS
-```
-
 ## Not done in this evidence file
 
 - Merge of PR #57
 - Production deploy / live QA
-- Those remain post pre-merge approval steps
