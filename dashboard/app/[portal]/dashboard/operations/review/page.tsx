@@ -20,7 +20,7 @@ export default function OperationsReviewPage() {
         description={
           mode === "fixture"
             ? "Fixture review queue for layout testing."
-            : "Live review queue. Fixture IDs are disabled; approve/reject only against Laravel-backed requests once the live list is wired."
+            : "Live Laravel-backed cancellation and refund review queues. Fixture mutation IDs are disabled."
         }
       />
       <OperationalReviewWorkspace cancellations={cancellations} refunds={refunds} />

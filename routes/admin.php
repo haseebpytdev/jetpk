@@ -29,6 +29,7 @@ use App\Http\Controllers\Admin\BookingRefundController;
 use App\Http\Controllers\Admin\CmsPageController;
 use App\Http\Controllers\Admin\CommunicationDeliveryLogController;
 use App\Http\Controllers\Admin\CustomerManagementController;
+use App\Http\Controllers\Admin\OperationalInboxController;
 use App\Http\Controllers\BackOffice\BackOfficeDashboardController;
 use App\Http\Controllers\Admin\FinanceAdjustmentController;
 use App\Http\Controllers\Admin\FinanceDashboardController;
@@ -70,6 +71,9 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/bookings', [BookingManagementController::class, 'index'])->name('bookings');
     Route::get('/bookings/data', [BookingManagementController::class, 'data'])->name('bookings.data');
     Route::get('/bookings/suggestions', [BookingManagementController::class, 'suggestions'])->name('bookings.suggestions');
+    // Static booking subpaths must register before /bookings/{booking}.
+    Route::get('/bookings/cancellations', [BookingCancellationController::class, 'index'])->name('bookings.cancellations.index');
+    Route::get('/bookings/refunds', [BookingRefundController::class, 'index'])->name('bookings.refunds.index');
     Route::get('/bookings/{booking}/preview', [BookingManagementController::class, 'preview'])->name('bookings.preview');
     Route::get('/bookings/{booking}', [BookingManagementController::class, 'show'])->name('bookings.show');
     Route::patch('/bookings/{booking}/status', [BookingManagementController::class, 'updateStatus'])->name('bookings.status');
@@ -96,6 +100,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::post('/bookings/{booking}/payments', [BookingPaymentController::class, 'store'])->name('bookings.payments.store');
     Route::patch('/bookings/payments/{bookingPayment}/verify', [BookingPaymentController::class, 'verify'])->name('bookings.payments.verify');
     Route::patch('/bookings/payments/{bookingPayment}/reject', [BookingPaymentController::class, 'reject'])->name('bookings.payments.reject');
+    Route::get('/operations/inbox', [OperationalInboxController::class, 'index'])->name('operations.inbox');
     Route::post('/bookings/{booking}/cancellations', [BookingCancellationController::class, 'store'])->name('bookings.cancellations.store');
     Route::patch('/bookings/cancellations/{cancellationRequest}/approve', [BookingCancellationController::class, 'approve'])->name('bookings.cancellations.approve');
     Route::patch('/bookings/cancellations/{cancellationRequest}/reject', [BookingCancellationController::class, 'reject'])->name('bookings.cancellations.reject');

@@ -18,6 +18,10 @@ const SUBROUTES: { section: SettingsSection | "overview"; label: string; href: s
   { section: "security", label: "Security", href: "/settings/security" },
   { section: "notifications", label: "Notifications", href: "/settings/notifications" },
   { section: "integrations", label: "Integrations", href: "/settings/integrations" },
+  // Newer controls live inside Security / Notifications / Integrations until dedicated pages land.
+  { section: "security", label: "Login OTP", href: "/settings/security#login-otp" },
+  { section: "integrations", label: "Ask JetPakistan", href: "/settings/integrations#ask-jetpakistan" },
+  { section: "notifications", label: "Communications", href: "/settings/notifications#communications" },
 ];
 
 type Props = {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\BookingCancellationStatus;
 use App\Enums\BookingCancellationType;
 use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
@@ -26,6 +27,57 @@ class BookingCancellationController extends Controller
         protected BookingCancellationService $service,
         protected BackOfficeCapabilitiesPresenter $capabilitiesPresenter,
     ) {}
+
+    public function index(Request $request): JsonResponse
+    {
+        Gate::authorize('viewAny', BookingCancellationRequest::class);
+
+        $queue = $request->string('queue')->toString() ?: 'review';
+        $pageSize = max(1, min(50, (int) $request->integer('pageSize', 20)));
+
+        $query = BookingCancellationRequest::query()
+            ->with(['booking:id,booking_reference,pnr,agency_id,status'])
+            ->orderByDesc('id');
+
+        if (! $request->user()?->isPlatformAdmin() && $request->user()?->current_agency_id) {
+            $query->where('agency_id', $request->user()->current_agency_id);
+        }
+
+        if ($queue === 'execution') {
+            $query->where('status', BookingCancellationStatus::Approved);
+        } else {
+            $query->whereIn('status', [
+                BookingCancellationStatus::Requested,
+                BookingCancellationStatus::Approved,
+            ]);
+        }
+
+        $page = $query->paginate($pageSize);
+
+        return $this->backOfficeJson([
+            'ok' => true,
+            'queue' => $queue,
+            'cancellations' => $page->getCollection()->map(function (BookingCancellationRequest $row) use ($request): array {
+                $presented = BackOfficeCancellationPresenter::present($row);
+                $booking = $row->booking;
+
+                return array_merge($presented, [
+                    'booking_reference' => $booking?->booking_reference,
+                    'pnr' => $booking?->pnr,
+                    'capabilities' => $this->capabilitiesPresenter->presentCancellationCapabilities(
+                        $request->user(),
+                        $row,
+                    ),
+                ]);
+            })->values()->all(),
+            'meta' => [
+                'page' => $page->currentPage(),
+                'pageCount' => $page->lastPage(),
+                'pageSize' => $page->perPage(),
+                'total' => $page->total(),
+            ],
+        ]);
+    }
 
     public function store(Request $request, Booking $booking): RedirectResponse|JsonResponse
     {

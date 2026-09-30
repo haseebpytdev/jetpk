@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
-import { LiveReadOnlyNotice } from "@/components/ui/data-source-status";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
@@ -14,6 +13,7 @@ import { PermissionsActiveFilters } from "@/features/permissions/components/perm
 import { PermissionsDataTable } from "@/features/permissions/components/permissions-data-table";
 import { PermissionsFilterBar } from "@/features/permissions/components/permissions-filter-bar";
 import { PermissionsSummaryMetrics } from "@/features/permissions/components/permissions-summary-metrics";
+import { StaffRbacOperationalPanel } from "@/features/roles/components/staff-rbac-operational-panel";
 import { permissionsQueryToSearchParams } from "@/lib/permissions-query";
 import type { PermissionSortField, PermissionsModuleResult } from "@/types/permissions";
 
@@ -62,9 +62,10 @@ export function PermissionsWorkspace({ result }: Props) {
   return (
     <div data-testid="permissions-workspace">
       {isLive ? (
-        <div className="mb-4" data-testid="permissions-read-only-by-design">
-          <LiveReadOnlyNotice />
-        </div>
+        <p className="mb-4 text-sm text-jp-muted" data-testid="permissions-operational-note">
+          Permission catalog is informational for system roles. Durable writes use Operational staff
+          RBAC (StaffPermission on staff users).
+        </p>
       ) : null}
       <PermissionsSummaryMetrics summary={result.summary} />
       <div className="mt-4 space-y-3">
@@ -116,6 +117,8 @@ export function PermissionsWorkspace({ result }: Props) {
           />
         ) : null}
       </Drawer>
+
+      <StaffRbacOperationalPanel />
     </div>
   );
 }

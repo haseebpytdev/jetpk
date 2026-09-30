@@ -4,6 +4,8 @@ namespace App\Services\Dashboard\Api;
 
 use App\Http\Resources\Dashboard\DashboardCmsPageResource;
 use App\Http\Resources\Dashboard\DashboardCmsSectionResource;
+use App\Models\Agency;
+use App\Models\AgencyMedia;
 use App\Models\CmsPage;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -77,6 +79,122 @@ class DashboardCmsReadService
         Gate::authorize('view', $page);
 
         return [DashboardCmsSectionResource::fromPage($page)];
+    }
+
+    /**
+     * Live media library rows from AgencyMedia (CURRENT domain).
+     *
+     * @return array{items: list<array<string, mixed>>, pagination: array<string, int>, filters: array<string, mixed>}
+     */
+    public function paginateAssets(User $user, Request $request): array
+    {
+        Gate::authorize('viewAny', CmsPage::class);
+
+        $agency = null;
+        if ($user->current_agency_id) {
+            $agency = Agency::query()->find($user->current_agency_id);
+        }
+        if ($agency === null && $user->isPlatformAdmin()) {
+            $agency = Agency::query()->orderBy('id')->first();
+        }
+
+        $page = max(1, (int) $request->query('page', 1));
+        $pageSize = max(5, min(50, (int) $request->query('pageSize', 25)));
+
+        if ($agency === null) {
+            return [
+                'items' => [],
+                'pagination' => [
+                    'page' => $page,
+                    'pageSize' => $pageSize,
+                    'total' => 0,
+                    'pageCount' => 1,
+                ],
+                'filters' => [
+                    'q' => (string) $request->query('q', ''),
+                    'collection' => (string) $request->query('collection', ''),
+                ],
+            ];
+        }
+
+        Gate::authorize('viewAny', [AgencyMedia::class, $agency]);
+
+        $query = AgencyMedia::query()
+            ->with('uploader')
+            ->where('agency_id', $agency->id);
+
+        $search = trim((string) $request->query('q', $request->query('search', '')));
+        if ($search !== '') {
+            $like = '%'.$search.'%';
+            $query->where(function (Builder $builder) use ($like): void {
+                $builder->where('file_name', 'like', $like)
+                    ->orWhere('alt_text', 'like', $like)
+                    ->orWhere('collection', 'like', $like);
+            });
+        }
+
+        $collection = trim((string) $request->query('collection', ''));
+        if ($collection !== '') {
+            $query->where('collection', $collection);
+        }
+
+        $paginator = $query->latest('id')->paginate($pageSize, ['*'], 'page', $page);
+        $items = $paginator->getCollection()->map(static function (AgencyMedia $media): array {
+            $mime = (string) ($media->mime_type ?? 'image/jpeg');
+            $fileType = match (true) {
+                str_contains($mime, 'png') => 'image/png',
+                str_contains($mime, 'webp') => 'image/webp',
+                default => 'image/jpeg',
+            };
+            $alt = trim((string) ($media->alt_text ?? ''));
+            $variant = [
+                'width' => 0,
+                'height' => 0,
+                'aspectRatio' => '—',
+                'placeholderLabel' => (string) $media->file_name,
+            ];
+
+            return [
+                'id' => (string) $media->id,
+                'internalName' => (string) $media->file_name,
+                'category' => (string) ($media->collection ?: 'general'),
+                'desktop' => $variant,
+                'mobile' => $variant,
+                'dayVariant' => null,
+                'nightVariant' => null,
+                'fileType' => $fileType,
+                'altText' => $alt,
+                'focalPointX' => 50,
+                'focalPointY' => 50,
+                'safeArea' => 'n/a',
+                'approvalStatus' => 'approved',
+                'usageCount' => 0,
+                'createdDate' => $media->created_at?->toDateString() ?? '',
+                'updatedDate' => $media->updated_at?->toDateString() ?? '',
+                'authorId' => $media->uploader?->name ?? '—',
+                'url' => (string) ($media->file_path ?? ''),
+                'validation' => [
+                    'valid' => $alt !== '',
+                    'issues' => $alt === ''
+                        ? [['code' => 'missing_alt', 'severity' => 'warning', 'message' => 'Alt text missing']]
+                        : [],
+                ],
+            ];
+        })->values()->all();
+
+        return [
+            'items' => $items,
+            'pagination' => [
+                'page' => $paginator->currentPage(),
+                'pageSize' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'pageCount' => max(1, $paginator->lastPage()),
+            ],
+            'filters' => [
+                'q' => $search,
+                'collection' => $collection,
+            ],
+        ];
     }
 
     protected function resolvePage(string $id): ?CmsPage

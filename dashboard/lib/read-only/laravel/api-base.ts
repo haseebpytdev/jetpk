@@ -59,6 +59,7 @@ export const DASHBOARD_API_ROUTES = {
   reportsSuppliers: "/reports/suppliers",
   reportsAgents: "/reports/agents",
   cmsPages: "/cms/pages",
+  cmsAssets: "/cms/assets",
   cmsPageDetail: (id: string) => `/cms/pages/${encodeURIComponent(id)}`,
   cmsPageSections: (id: string) => `/cms/pages/${encodeURIComponent(id)}/sections`,
   users: "/users",

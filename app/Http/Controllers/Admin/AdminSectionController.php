@@ -14,6 +14,7 @@ use App\Models\Booking;
 use App\Models\StaffProfile;
 use App\Models\SupplierConnection;
 use App\Models\SupplierDiagnosticLog;
+use App\Models\User;
 use App\Services\Reports\BookingReportService;
 use App\Support\Access\RolePermissionMatrix;
 use Illuminate\Database\Eloquent\Builder;
@@ -544,10 +545,12 @@ class AdminSectionController extends Controller
     {
         Gate::authorize('viewAny', StaffProfile::class);
 
-        $staffQuery = StaffProfile::query()
-            ->with(['agency', 'user'])
+        // Platform staff authority is User (account_type=staff) + optional StaffProfile + meta RBAC.
+        $staffQuery = User::query()
+            ->where('account_type', AccountType::Staff)
+            ->with(['staffProfile'])
             ->when(! $request->user()->isPlatformAdmin(), function (Builder $query) use ($request): void {
-                $query->where('agency_id', $request->user()->current_agency_id);
+                $query->where('current_agency_id', $request->user()->current_agency_id);
             });
 
         $search = $request->string('search')->toString();
@@ -556,44 +559,54 @@ class AdminSectionController extends Controller
 
         if ($search !== '') {
             $staffQuery->where(function (Builder $query) use ($search): void {
-                $query->where('job_title', 'like', '%'.$search.'%')
-                    ->orWhere('department', 'like', '%'.$search.'%')
-                    ->orWhereHas('user', function (Builder $q) use ($search): void {
-                        $q->where('name', 'like', '%'.$search.'%')
-                            ->orWhere('email', 'like', '%'.$search.'%');
+                $query->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%')
+                    ->orWhereHas('staffProfile', function (Builder $q) use ($search): void {
+                        $q->where('job_title', 'like', '%'.$search.'%')
+                            ->orWhere('department', 'like', '%'.$search.'%');
                     });
             });
         }
         if ($department !== '') {
-            $staffQuery->where('department', $department);
+            $staffQuery->where(function (Builder $query) use ($department): void {
+                $query->whereHas('staffProfile', fn (Builder $q): Builder => $q->where('department', $department))
+                    ->orWhere('meta->department', $department);
+            });
         }
         if ($status !== '') {
-            $staffQuery->whereHas('user', fn (Builder $query): Builder => $query->where('status', $status));
+            $staffQuery->where('status', $status);
         }
 
-        /** @var Collection<int, StaffProfile> $staffProfiles */
-        $staffProfiles = $staffQuery->orderByDesc('id')->get();
-        $staffRows = $staffProfiles->map(function (StaffProfile $profile): array {
-            $assignedBookings = Booking::query()->where('assigned_staff_id', $profile->user_id)->count();
+        /** @var Collection<int, User> $staffUsers */
+        $staffUsers = $staffQuery->orderByDesc('id')->get();
+        $staffRows = $staffUsers->map(function (User $user): array {
+            $profile = $user->staffProfile;
+            $assignedBookings = Booking::query()->where('assigned_staff_id', $user->id)->count();
             $recentBookings = Booking::query()
-                ->where('assigned_staff_id', $profile->user_id)
+                ->where('assigned_staff_id', $user->id)
                 ->latest('id')
                 ->limit(5)
                 ->get(['id', 'booking_reference', 'route', 'status']);
 
-            $status = $profile->user?->status?->value ?? UserAccountStatus::Inactive->value;
+            $meta = is_array($user->meta) ? $user->meta : [];
+            $jobTitle = (string) ($profile?->job_title ?? $meta['role_title'] ?? 'Staff');
+            $dept = (string) ($profile?->department ?? $meta['department'] ?? 'Operations');
 
             return [
-                'id' => $profile->id,
-                'user_id' => $profile->user_id,
-                'staff_code' => 'STF-'.$profile->id,
-                'name' => $profile->user?->name ?? '—',
-                'email' => $profile->user?->email ?? '—',
-                'job_title' => (string) ($profile->job_title ?? '—'),
-                'department' => (string) ($profile->department ?? 'General'),
+                'id' => $user->id,
+                'user_id' => $user->id,
+                'profile_id' => $profile?->id,
+                'staff_code' => $profile !== null ? 'STF-'.$profile->id : 'STF-U-'.$user->id,
+                'name' => $user->name ?? '—',
+                'email' => $user->email ?? '—',
+                'phone' => $meta['phone'] ?? null,
+                'job_title' => $jobTitle,
+                'department' => $dept,
+                'account_type' => $user->account_type?->value,
                 'assigned_bookings' => $assignedBookings,
-                'status' => $status,
-                'last_login_at' => $profile->user?->last_login_at?->format('Y-m-d H:i') ?? 'Never',
+                'status' => $user->status?->value ?? UserAccountStatus::Inactive->value,
+                'last_login_at' => $user->last_login_at?->format('Y-m-d H:i') ?? 'Never',
+                'staff_permissions' => is_array($meta['staff_permissions'] ?? null) ? array_values($meta['staff_permissions']) : [],
                 'recent_bookings' => $recentBookings->map(fn (Booking $booking): array => [
                     'reference' => (string) ($booking->booking_reference ?? ('#'.$booking->id)),
                     'route' => (string) ($booking->route ?? '—'),
@@ -611,7 +624,9 @@ class AdminSectionController extends Controller
 
         $departments = $staffRows->pluck('department')->unique()->sort()->values();
         $preview = $request->string('preview')->toString();
-        $selectedStaff = $staffRows->first(fn (array $row): bool => (string) $row['id'] === $preview || (string) $row['staff_code'] === $preview)
+        $selectedStaff = $staffRows->first(fn (array $row): bool => (string) $row['id'] === $preview
+            || (string) $row['user_id'] === $preview
+            || (string) $row['staff_code'] === $preview)
             ?? $staffRows->first();
 
         if ($this->wantsBackOfficeJson($request)) {

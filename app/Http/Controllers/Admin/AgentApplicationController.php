@@ -47,14 +47,65 @@ class AgentApplicationController extends Controller
             ? '<div class="card-footer">'.$applications->links()->render().'</div>'
             : '';
 
+        $rows = $applications->getCollection()->map(function (AgentApplication $application) use ($payload): array {
+            $emailKey = strtolower((string) $application->email);
+            $duplicateKeys = $payload['duplicateEmailKeys'] ?? [];
+            $convertedKeys = $payload['convertedEmailKeys'] ?? [];
+
+            return [
+                'id' => (string) $application->id,
+                'first_name' => (string) $application->first_name,
+                'last_name' => (string) $application->last_name,
+                'name' => trim($application->first_name.' '.$application->last_name),
+                'email' => (string) $application->email,
+                'mobile' => (string) ($application->mobile ?? ''),
+                'company_name' => (string) ($application->company_name ?? ''),
+                'city' => (string) ($application->city ?? ''),
+                'country' => (string) ($application->country ?? ''),
+                'status' => (string) $application->status,
+                'business_type' => (string) ($application->business_type ?? ''),
+                'iata_number' => (string) ($application->iata_number ?? ''),
+                'years_in_business' => $application->years_in_business,
+                'expected_booking_volume' => (string) ($application->expected_booking_volume ?? ''),
+                'notes' => (string) ($application->notes ?? ''),
+                'internal_note' => (string) ($application->internal_note ?? ''),
+                'reviewed_at' => $application->reviewed_at?->toIso8601String(),
+                'reviewer' => $application->reviewer?->name,
+                'created_at' => $application->created_at?->toIso8601String(),
+                'is_duplicate' => in_array($emailKey, $duplicateKeys, true),
+                'is_converted' => in_array($emailKey, $convertedKeys, true),
+                'document_readiness' => [
+                    'has_cnic' => filled($application->cnic),
+                    'has_ntn' => filled($application->ntn),
+                    'has_iata' => filled($application->iata_number),
+                    'has_address' => filled($application->office_address),
+                ],
+                'capabilities' => [
+                    'can_approve' => $application->status === 'pending' || $application->status === 'needs_more_info',
+                    'can_reject' => $application->status === 'pending' || $application->status === 'needs_more_info',
+                    'can_needs_more_info' => $application->status === 'pending',
+                ],
+            ];
+        })->values()->all();
+
         return response()->json([
+            'ok' => true,
             'table_html' => $tableHtml,
             'pagination_html' => $paginationHtml,
+            'applications' => $rows,
+            'kpis' => $payload['kpis'] ?? [],
+            'filters' => $payload['filters'] ?? [],
             'listed_count' => $applications->count(),
             'total_count' => $applications->total(),
             'has_filters_applied' => (bool) $payload['hasFilters'],
             'current_page' => $applications->currentPage(),
             'last_page' => $applications->lastPage(),
+            'meta' => [
+                'page' => $applications->currentPage(),
+                'pageCount' => $applications->lastPage(),
+                'pageSize' => $applications->perPage(),
+                'total' => $applications->total(),
+            ],
         ]);
     }
 

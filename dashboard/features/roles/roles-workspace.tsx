@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
-import { LiveReadOnlyNotice } from "@/components/ui/data-source-status";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
@@ -15,6 +14,7 @@ import { RolesActiveFilters } from "@/features/roles/components/roles-active-fil
 import { RolesDataTable } from "@/features/roles/components/roles-data-table";
 import { RolesFilterBar } from "@/features/roles/components/roles-filter-bar";
 import { RolesSummaryMetrics } from "@/features/roles/components/roles-summary-metrics";
+import { StaffRbacOperationalPanel } from "@/features/roles/components/staff-rbac-operational-panel";
 import { rolesQueryToSearchParams } from "@/lib/roles-query";
 import type { RoleSortField, RolesModuleResult } from "@/types/roles";
 
@@ -63,9 +63,10 @@ export function RolesWorkspace({ result }: Props) {
   return (
     <div data-testid="roles-workspace">
       {isLive ? (
-        <div className="mb-4" data-testid="roles-read-only-by-design">
-          <LiveReadOnlyNotice />
-        </div>
+        <p className="mb-4 text-sm text-jp-muted" data-testid="roles-system-catalog-note">
+          Account-type system roles are protected catalog entries. Use Operational staff RBAC below
+          for durable StaffPermission writes on the current domain.
+        </p>
       ) : null}
       <RolesSummaryMetrics summary={result.summary} />
       <div className="mt-4 space-y-3">
@@ -127,6 +128,8 @@ export function RolesWorkspace({ result }: Props) {
           />
         ) : null}
       </Drawer>
+
+      <StaffRbacOperationalPanel />
     </div>
   );
 }

@@ -33,14 +33,24 @@ export const navGroups: NavGroup[] = [
         laravelRoute: "admin.bookings",
       },
       {
+        label: "Live operations",
+        href: "/operations/inbox",
+        laravelRoute: "admin.operations.inbox",
+      },
+      {
         label: "Cancellations",
         href: "/operations/review",
-        laravelRoute: "admin.bookings",
+        laravelRoute: "admin.bookings.cancellations.index",
       },
       {
         label: "Execution",
         href: "/operations/execution",
         laravelRoute: "admin.bookings",
+      },
+      {
+        label: "Notification failures",
+        href: "/notifications/failures",
+        laravelRoute: "admin.settings.communications.delivery-log.index",
       },
     ],
   },

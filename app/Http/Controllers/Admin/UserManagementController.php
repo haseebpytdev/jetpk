@@ -102,9 +102,33 @@ class UserManagementController extends Controller
         ]);
     }
 
-    public function create(Request $request): View
+    public function create(Request $request): View|JsonResponse
     {
         Gate::authorize('create', User::class);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson(array_merge(
+                [
+                    'ok' => true,
+                    'isEdit' => false,
+                    'user' => [
+                        'id' => null,
+                        'name' => '',
+                        'email' => '',
+                        'account_type' => AccountType::Staff->value,
+                        'status' => UserAccountStatus::Active->value,
+                        'phone' => null,
+                        'city' => null,
+                    ],
+                    'accountTypeOptions' => $this->accountTypeOptions($request->user()),
+                ],
+                $this->permissionFormData($request->user()),
+                $this->permissionViewData(new User([
+                    'account_type' => AccountType::Staff,
+                    'meta' => [],
+                ])),
+            ));
+        }
 
         return view('dashboard.admin.users.create', array_merge(
             [
@@ -116,7 +140,7 @@ class UserManagementController extends Controller
         ));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', User::class);
         $actor = $request->user();
@@ -130,6 +154,10 @@ class UserManagementController extends Controller
                 'agency_name' => $validated['agency_name'] ?? null,
                 'permission_group' => $validated['permission_group'] ?? null,
             ];
+            if (($validated['account_type'] ?? null) === AccountType::Staff->value) {
+                $meta['role_title'] = $validated['role_title'] ?? null;
+                $meta['department'] = $validated['department'] ?? null;
+            }
             $meta = $this->mergeAgentStaffMeta($meta, $validated);
             $meta = $this->mergeStaffMeta($meta, $validated);
 
@@ -166,6 +194,19 @@ class UserManagementController extends Controller
         }
 
         $this->notifyUserLifecycleEmail($user, $agency, $actor, 'created');
+
+        if ($this->wantsBackOfficeJson($request)) {
+            $user->refresh()->load(['staffProfile', 'agentProfile', 'socialAccounts', 'currentAgency']);
+
+            return $this->backOfficeJson(array_merge(
+                $this->userManagementJsonPayload($request, $user, true),
+                [
+                    'ok' => true,
+                    'message' => 'User created.',
+                    'isEdit' => true,
+                ],
+            ));
+        }
 
         return redirect()->route('admin.users.show', $user)->with('status', 'user-created');
     }
@@ -219,6 +260,10 @@ class UserManagementController extends Controller
                 'agency_name' => $validated['agency_name'] ?? null,
                 'permission_group' => $validated['permission_group'] ?? null,
             ]);
+            if (($validated['account_type'] ?? null) === AccountType::Staff->value) {
+                $meta['role_title'] = $validated['role_title'] ?? ($meta['role_title'] ?? null);
+                $meta['department'] = $validated['department'] ?? ($meta['department'] ?? null);
+            }
             $meta = $this->mergeAgentStaffMeta($meta, $validated, $previousAccountType);
             $meta = $this->mergeStaffMeta($meta, $validated, $previousAccountType);
             $user->forceFill([
@@ -259,9 +304,33 @@ class UserManagementController extends Controller
     public function suspend(Request $request, User $user): RedirectResponse|JsonResponse
     {
         Gate::authorize('suspend', $user);
+        $actor = $request->user();
+
+        if ($actor !== null && (int) $actor->id === (int) $user->id) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson([
+                    'ok' => false,
+                    'message' => 'You cannot suspend your own account.',
+                ], 422);
+            }
+
+            return back()->withErrors(['status' => 'You cannot suspend your own account.']);
+        }
+
+        if ($user->account_type === AccountType::PlatformAdmin && $this->isLastActivePlatformAdmin($user)) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson([
+                    'ok' => false,
+                    'message' => 'Cannot suspend the last active platform admin.',
+                ], 422);
+            }
+
+            return back()->withErrors(['status' => 'Cannot suspend the last active platform admin.']);
+        }
+
         $user->forceFill(['status' => UserAccountStatus::Suspended])->save();
-        $this->writeAudit($request->user(), 'user.suspended', ['user_id' => $user->id]);
-        $this->notifyUserLifecycleEmail($user, $user->currentAgency, $request->user(), 'suspended');
+        $this->writeAudit($actor, 'user.suspended', ['user_id' => $user->id]);
+        $this->notifyUserLifecycleEmail($user, $user->currentAgency, $actor, 'suspended');
 
         if ($this->wantsBackOfficeJson($request)) {
             return $this->backOfficeJson([
@@ -986,5 +1055,22 @@ class UserManagementController extends Controller
         }
 
         return AccountTypeLabels::label($user->account_type);
+    }
+
+    protected function isLastActivePlatformAdmin(User $target): bool
+    {
+        if ($target->account_type !== AccountType::PlatformAdmin) {
+            return false;
+        }
+
+        if ($target->status !== UserAccountStatus::Active) {
+            return false;
+        }
+
+        return ! User::query()
+            ->where('account_type', AccountType::PlatformAdmin)
+            ->where('status', UserAccountStatus::Active)
+            ->where('id', '!=', $target->id)
+            ->exists();
     }
 }

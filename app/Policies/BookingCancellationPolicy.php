@@ -10,6 +10,19 @@ use App\Support\Staff\StaffPermission;
 
 class BookingCancellationPolicy
 {
+    public function viewAny(User $user): bool
+    {
+        if ($user->isPlatformAdmin()) {
+            return true;
+        }
+
+        return $user->isStaff() && (
+            $user->hasStaffPermission(StaffPermission::CancellationsApprove)
+            || $user->hasStaffPermission(StaffPermission::CancellationsProcess)
+            || $user->hasStaffPermission(StaffPermission::CancellationsCreate)
+        );
+    }
+
     public function request(User $user, Booking $booking): bool
     {
         if ($user->isPlatformAdmin()) {

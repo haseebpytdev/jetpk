@@ -117,6 +117,8 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
     Route::middleware('dashboard.permission:cms.view')->group(function (): void {
         Route::get('/cms/pages', [DashboardCmsController::class, 'index'])
             ->name('cms.pages.index');
+        Route::get('/cms/assets', [DashboardCmsController::class, 'assets'])
+            ->name('cms.assets.index');
         Route::get('/cms/pages/{page}', [DashboardCmsController::class, 'show'])
             ->where('page', '[^/]+')
             ->name('cms.pages.show');

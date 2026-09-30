@@ -9,6 +9,20 @@ use App\Support\Staff\StaffPermission;
 
 class BookingRefundPolicy
 {
+    public function viewAny(User $user): bool
+    {
+        if ($user->isPlatformAdmin()) {
+            return true;
+        }
+
+        return $user->isStaff() && (
+            $user->hasStaffPermission(StaffPermission::RefundsApprove)
+            || $user->hasStaffPermission(StaffPermission::RefundsMarkPaid)
+            || $user->hasStaffPermission(StaffPermission::RefundsCreate)
+            || $user->hasStaffPermission(StaffPermission::RefundsReject)
+        );
+    }
+
     public function create(User $user, Booking $booking): bool
     {
         if ($user->isPlatformAdmin()) {
