@@ -71,20 +71,28 @@ test("admin visible navigation crawl is 100% Next shell", async ({ page }) => {
     let bladeTransition = false;
     let finalUrl = href;
     for (let attempt = 0; attempt < 3; attempt += 1) {
-      const response = await page.goto(href, { waitUntil: "domcontentloaded", timeout: 45_000 });
-      status = response?.status() ?? 0;
-      finalUrl = page.url();
-      if (status >= 500 && attempt < 2) {
-        await page.waitForTimeout(200 * (attempt + 1));
-        continue;
+      try {
+        const response = await page.goto(href, { waitUntil: "domcontentloaded", timeout: 30_000 });
+        status = response?.status() ?? 0;
+        finalUrl = page.url();
+        if (status >= 500 && attempt < 2) {
+          await page.waitForTimeout(300 * (attempt + 1));
+          continue;
+        }
+        heading = ((await page.locator("h1").first().textContent().catch(() => "")) ?? "").trim();
+        const html = await page.content();
+        bladeTransition =
+          html.includes("ota-dashboard-breadcrumbs") &&
+          !html.includes("__NEXT_DATA__") &&
+          !html.includes("/_next/");
+        break;
+      } catch {
+        status = 502;
+        if (attempt < 2) {
+          await page.waitForTimeout(400 * (attempt + 1));
+          continue;
+        }
       }
-      heading = ((await page.locator("h1").first().textContent().catch(() => "")) ?? "").trim();
-      const html = await page.content();
-      bladeTransition =
-        html.includes("ota-dashboard-breadcrumbs") &&
-        !html.includes("__NEXT_DATA__") &&
-        !html.includes("/_next/");
-      break;
     }
     results.push({ url: finalUrl, status, heading, bladeTransition });
   }

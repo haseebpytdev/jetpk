@@ -55,6 +55,34 @@ php artisan jetpk:dash-03-qa-staff activate
 php artisan jetpk:dash-03-qa-identities all status
 php artisan jetpk:dash-03-qa-staff status
 
+# Ensure QA customer has a booking with a non-null booking_reference
+# (customer.bookings.show binds {booking} → booking_reference).
+php -r @"
+require 'vendor/autoload.php';
+`$app = require 'bootstrap/app.php';
+`$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+`$user = App\Models\User::query()->where('email', 'jp-dash-03-qa-customer@jetpakistan.pk')->first();
+if (`$user) {
+    `$booking = App\Models\Booking::query()->firstOrCreate(
+        ['customer_id' => `$user->id],
+        [
+            'status' => 'pending',
+            'payment_status' => 'unpaid',
+            'currency' => 'PKR',
+            'booking_reference' => 'E2E-CUST-' . `$user->id,
+            'route' => 'LHE-DXB',
+            'source_channel' => 'web',
+        ]
+    );
+    if (blank(`$booking->booking_reference)) {
+        `$booking->booking_reference = 'E2E-CUST-' . `$booking->id;
+        `$booking->save();
+    }
+    echo 'E2E_CUSTOMER_BOOKING_ID=' . `$booking->id . PHP_EOL;
+    echo 'E2E_CUSTOMER_BOOKING_REF=' . `$booking->booking_reference . PHP_EOL;
+}
+"@
+
 # Apply SQLite concurrency knobs into active .env when missing
 $dot = Get-Content (Join-Path $Root ".env") -Raw
 if ($dot -notmatch 'DB_JOURNAL_MODE=') {
@@ -71,15 +99,17 @@ NEXT_PUBLIC_USE_MOCK_DATA=false
 NEXT_PUBLIC_ALLOW_MUTATIONS=true
 NEXT_PUBLIC_LARAVEL_API_BASE=
 NEXT_PUBLIC_APP_URL=http://127.0.0.1:9080
-LARAVEL_URL=http://127.0.0.1:9080/laravel
+# Next SSR hits the plain Laravel LB (:8090), NOT the auth proxy, to avoid
+# nesting SSR fetches behind auth-gate under crawl concurrency.
+LARAVEL_URL=http://127.0.0.1:8090
 DASHBOARD_PREVIEW_ENABLED=false
 DASHBOARD_PREVIEW_ALLOW_LIVE_DATA=true
 DASHBOARD_PREVIEW_ALLOW_MUTATIONS=true
 "@
 Set-Content -Path $dashEnv -Value $dashEnvBody -Encoding UTF8
-Write-Host "DASHBOARD_ENV_LOCAL=written (LARAVEL_URL via proxy /laravel)"
+Write-Host "DASHBOARD_ENV_LOCAL=written (LARAVEL_URL=http://127.0.0.1:8090 LB)"
 
 Write-Host "E2E_BOOTSTRAP=READY"
 Write-Host "E2E_PROXY_ORIGIN=http://127.0.0.1:9080"
 Write-Host "PASSWORDS_PRINTED=0"
-Write-Host "NEXT=start Next on :3001 (live mode), then start-laravel-e2e-workers.ps1, then e2e-auth-proxy.mjs with E2E_LARAVEL_ORIGINS"
+Write-Host "NEXT=workers.ps1 → e2e-laravel-lb.mjs :8090 → next :3001 → e2e-auth-proxy.mjs :9080"

@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..\..\..\..")
 Set-Location $Root
 
-$workersRaw = if ([string]::IsNullOrWhiteSpace($env:LARAVEL_E2E_WORKERS)) { "4" } else { $env:LARAVEL_E2E_WORKERS }
+$workersRaw = if ([string]::IsNullOrWhiteSpace($env:LARAVEL_E2E_WORKERS)) { "6" } else { $env:LARAVEL_E2E_WORKERS }
 $basePortRaw = if ([string]::IsNullOrWhiteSpace($env:LARAVEL_E2E_BASE_PORT)) { "8001" } else { $env:LARAVEL_E2E_BASE_PORT }
 $workers = [Math]::Max(2, [int]$workersRaw)
 $basePort = [int]$basePortRaw
