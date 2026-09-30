@@ -31,7 +31,7 @@ export async function OverviewPageContent() {
         <PageHeader
           breadcrumb={<Breadcrumb items={[{ label: "Home" }, { label: "Dashboard" }]} />}
           title="Dashboard"
-          description="Operational overview with read-only data from the configured source."
+          description="Operational overview from the live JetPakistan backend."
           actions={<OverviewToolbarActions />}
         />
         <DataSourceNoticeSlot />

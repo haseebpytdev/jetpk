@@ -29,7 +29,7 @@ export function RecentNotificationsPanel({ recentNotifications }: Pick<OverviewD
   return (
     <Card className="h-full">
       <CardTitle>Recent notifications</CardTitle>
-      <CardDescription className="mt-1">Mock feed — not live comms</CardDescription>
+      <CardDescription className="mt-1">Recent operational notifications</CardDescription>
       <ul className="mt-4 space-y-3">
         {recentNotifications.map((n) => (
           <li key={n.id} className="flex gap-3 rounded-xl border border-jp-border p-3">
@@ -56,7 +56,7 @@ export function RecentBookingsTable({ recentBookings }: Pick<OverviewData, "rece
     <Card className="min-w-0 overflow-hidden p-0">
       <div className="border-b border-jp-border p-4 sm:p-5">
         <CardTitle>Recent bookings</CardTitle>
-        <CardDescription className="mt-1">Synthetic preview data</CardDescription>
+        <CardDescription className="mt-1">Latest bookings from the operational directory</CardDescription>
       </div>
       <div className="min-w-0 overflow-x-auto">
         <table className="min-w-[640px] w-full text-left text-sm">
@@ -100,7 +100,9 @@ export function RecentBookingsTable({ recentBookings }: Pick<OverviewData, "rece
         </table>
       </div>
       <div className="flex flex-col gap-2 border-t border-jp-border p-4 text-xs text-jp-muted sm:flex-row sm:items-center sm:justify-between">
-        <span>Showing 1 to {recentBookings.length} of {recentBookings.length} (mock)</span>
+        <span>
+          Showing 1 to {recentBookings.length} of {recentBookings.length}
+        </span>
       </div>
     </Card>
   );

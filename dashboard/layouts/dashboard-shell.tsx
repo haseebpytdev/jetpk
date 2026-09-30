@@ -4,15 +4,18 @@ import { Suspense, useState, type ReactNode } from "react";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DataSourcePreviewGate } from "@/components/dashboard/data-source-preview-gate";
+import { useDashboardSession } from "@/lib/session-context";
 import type { DashboardSessionSummary } from "@/services/session-service";
 
 export function DashboardShell({
   children,
-  session,
+  session: sessionProp,
 }: {
   children: ReactNode;
   session?: DashboardSessionSummary | null;
 }) {
+  const contextSession = useDashboardSession();
+  const session = contextSession ?? sessionProp ?? null;
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
