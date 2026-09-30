@@ -5,6 +5,7 @@ import { PreviewDataBanner } from "@/components/ui/page-layout";
 import { AccessValidationBadge, MfaStatusBadge, UserStatusBadge } from "@/components/ui/status-badge";
 import { getRoleName } from "@/lib/access-control/effective-access";
 import { formatDate } from "@/lib/format";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { USER_TYPE_LABELS } from "@/types/access-control";
 import type { User } from "@/types/access-control";
 import { AccessValidationSummary } from "@/features/users/components/access-validation-summary";
@@ -14,9 +15,11 @@ import { UserLifecycleActions } from "@/features/users/components/user-lifecycle
 import { UserSecuritySummary } from "@/features/users/components/user-security-summary";
 
 export function UserDetailDrawerContent({ user }: { user: User }) {
+  const isLive = useDashboardLiveMode();
+
   return (
     <div className="space-y-5" data-testid="user-detail-drawer">
-      <PreviewDataBanner className="text-xs" />
+      {isLive ? null : <PreviewDataBanner className="text-xs" />}
 
       <section aria-labelledby="user-identity-heading">
         <h3 id="user-identity-heading" className="text-sm font-semibold text-gray-900">Identity</h3>
@@ -66,7 +69,9 @@ export function UserDetailDrawerContent({ user }: { user: User }) {
       <Divider />
 
       <section aria-labelledby="user-roles-heading">
-        <h3 id="user-roles-heading" className="text-sm font-semibold text-gray-900">Assigned roles (fixture)</h3>
+        <h3 id="user-roles-heading" className="text-sm font-semibold text-gray-900">
+          {isLive ? "Assigned roles" : "Assigned roles (fixture)"}
+        </h3>
         <ul className="mt-2 space-y-1 text-sm">
           {user.assignedRoles.length > 0 ? (
             user.assignedRoles.map((r) => (
@@ -138,15 +143,16 @@ export function UserDetailDrawerContent({ user }: { user: User }) {
 
       <Divider />
 
-      <section aria-labelledby="laravel-integration-heading">
-        <h3 id="laravel-integration-heading" className="text-sm font-semibold text-gray-900">Future Laravel integration</h3>
-        <p className="mt-1 text-xs text-jp-muted">
-          User records, roles, and permissions will be sourced from Laravel authentication and authorization APIs.
-          This preview does not connect to live auth. Server-side policies and gates remain authoritative.
-        </p>
-      </section>
+      {isLive ? null : (
+        <section aria-labelledby="laravel-integration-heading">
+          <h3 id="laravel-integration-heading" className="text-sm font-semibold text-gray-900">Preview mode notice</h3>
+          <p className="mt-1 text-xs text-jp-muted">
+            Preview mode may show fixture directory data. Live mode uses Laravel-authoritative users.
+          </p>
+        </section>
+      )}
 
-      <RoleAssignmentPreview user={user} />
+      {isLive ? null : <RoleAssignmentPreview user={user} />}
     </div>
   );
 }

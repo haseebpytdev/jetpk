@@ -67,6 +67,7 @@ class DashboardUsersReadService
         return User::query()->whereIn('account_type', [
             AccountType::PlatformAdmin,
             AccountType::Staff,
+            AccountType::Customer,
             AccountType::Agent,
             AccountType::AgentStaff,
         ]);
@@ -106,13 +107,17 @@ class DashboardUsersReadService
         $accountType = (string) $request->query('accountType', $request->query('userType', 'all'));
         if ($accountType !== '' && $accountType !== 'all') {
             $mapped = match ($accountType) {
-                'superAdministrator' => AccountType::PlatformAdmin,
-                'operationsManager', 'administrator' => AccountType::Staff,
-                'bookingAgent' => AccountType::Agent,
-                default => $accountType,
+                'superAdministrator', 'platform_admin', 'platformAdmin', 'admin' => AccountType::PlatformAdmin,
+                'operationsManager', 'administrator', 'staff' => AccountType::Staff,
+                'customer', 'customerSupport' => AccountType::Customer,
+                'bookingAgent', 'agent' => AccountType::Agent,
+                'agentStaff', 'agent_staff' => AccountType::AgentStaff,
+                default => null,
             };
             if ($mapped instanceof AccountType) {
                 $query->where('account_type', $mapped);
+            } elseif (AccountType::tryFrom($accountType) instanceof AccountType) {
+                $query->where('account_type', AccountType::from($accountType));
             }
         }
 

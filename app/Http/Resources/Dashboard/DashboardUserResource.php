@@ -41,7 +41,7 @@ final class DashboardUserResource
                 'roleLabel' => $role['name'],
                 'scope' => $role['scope'],
                 'highRiskAccess' => false,
-                'previewOnly' => true,
+                'previewOnly' => false,
             ],
             'highRiskAccessSummary' => [
                 'hasHighRiskAccess' => $user->isPlatformAdmin(),
@@ -68,9 +68,11 @@ final class DashboardUserResource
     private static function primaryRole(User $user): array
     {
         return match (true) {
-            $user->isPlatformAdmin() => ['id' => 'JP-ROL-0001', 'name' => 'Super Administrator', 'scope' => 'allRecords'],
-            $user->isStaff() => ['id' => 'JP-ROL-0002', 'name' => 'Operations Manager', 'scope' => 'allRecords'],
-            $user->isAgentPortalUser() => ['id' => 'JP-ROL-AGENT', 'name' => 'Agent Portal', 'scope' => 'ownRecords'],
+            $user->isPlatformAdmin() => ['id' => 'JP-ROL-0001', 'name' => 'Platform Admin', 'scope' => 'allRecords'],
+            $user->isStaff() => ['id' => 'JP-ROL-0002', 'name' => 'Staff', 'scope' => 'allRecords'],
+            $user->isCustomer() => ['id' => 'JP-ROL-CUSTOMER', 'name' => 'Customer', 'scope' => 'ownRecords'],
+            $user->isAgent() => ['id' => 'JP-ROL-AGENT', 'name' => 'Agent', 'scope' => 'ownRecords'],
+            $user->isAgentStaff() => ['id' => 'JP-ROL-AGENT-STAFF', 'name' => 'Agent Staff', 'scope' => 'ownRecords'],
             default => ['id' => 'JP-ROL-0002', 'name' => 'Dashboard User', 'scope' => 'ownRecords'],
         };
     }
@@ -97,10 +99,13 @@ final class DashboardUserResource
 
     private static function userType(User $user): string
     {
+        // Keys stay aligned with dashboard UserType; labels carry platform directory semantics.
         return match ($user->account_type) {
             AccountType::PlatformAdmin => 'superAdministrator',
             AccountType::Staff => 'operationsManager',
-            AccountType::Agent, AccountType::AgentStaff => 'bookingAgent',
+            AccountType::Customer => 'customer',
+            AccountType::Agent => 'bookingAgent',
+            AccountType::AgentStaff => 'agentStaff',
             default => 'administrator',
         };
     }
@@ -108,8 +113,9 @@ final class DashboardUserResource
     private static function userTypeLabel(User $user): string
     {
         return match ($user->account_type) {
-            AccountType::PlatformAdmin => 'Super Administrator',
+            AccountType::PlatformAdmin => 'Platform Admin',
             AccountType::Staff => 'Staff',
+            AccountType::Customer => 'Customer',
             AccountType::Agent => 'Agent',
             AccountType::AgentStaff => 'Agent Staff',
             default => 'User',
@@ -133,7 +139,8 @@ final class DashboardUserResource
         return match ($user->account_type) {
             AccountType::PlatformAdmin => 'Executive',
             AccountType::Staff => 'Operations',
-            AccountType::Agent, AccountType::AgentStaff => 'Commercial',
+            AccountType::Customer => 'Customer',
+            AccountType::Agent, AccountType::AgentStaff => 'Agency',
             default => 'Operations',
         };
     }
@@ -143,6 +150,7 @@ final class DashboardUserResource
         return match ($user->account_type) {
             AccountType::PlatformAdmin => 'Platform Administrator',
             AccountType::Staff => 'Staff Member',
+            AccountType::Customer => 'Customer',
             AccountType::Agent => 'Agent Owner',
             AccountType::AgentStaff => 'Agent Staff',
             default => 'User',
