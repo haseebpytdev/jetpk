@@ -20,7 +20,7 @@ final class DashboardReportResource
             'currency' => $currency,
             'referenceTime' => Carbon::now()->toIso8601String(),
             'hasLiveData' => (bool) ($reportPayload['hasLiveData'] ?? false),
-            'metrics' => self::metricsForSection($section, $summary, $financial, $currency),
+            'metrics' => self::metricsForSection($section, $summary, $financial, $currency, $reportPayload),
             'tableRows' => self::tableRowsForSection($section, $reportPayload),
             'warnings' => self::warnings($currency),
             'supplierPerformance' => $reportPayload['supplierPerformance'] ?? [],
@@ -34,10 +34,16 @@ final class DashboardReportResource
     /**
      * @param  array<string, mixed>  $summary
      * @param  array<string, mixed>  $financial
+     * @param  array<string, mixed>  $reportPayload
      * @return list<array<string, mixed>>
      */
-    protected static function metricsForSection(string $section, array $summary, array $financial, string $currency): array
-    {
+    protected static function metricsForSection(
+        string $section,
+        array $summary,
+        array $financial,
+        string $currency,
+        array $reportPayload,
+    ): array {
         $base = [
             [
                 'key' => 'booking_count',
@@ -69,13 +75,34 @@ final class DashboardReportResource
         }
 
         if ($section === 'operations') {
+            $ops = is_array($reportPayload['operationalKpis'] ?? null) ? $reportPayload['operationalKpis'] : [];
             $base[] = [
                 'key' => 'ticketing_pending',
                 'label' => 'Ticketing pending',
-                'value' => (int) ($summary['ticketing_pending'] ?? 0),
-                'formattedValue' => number_format((int) ($summary['ticketing_pending'] ?? 0)),
+                'value' => (int) ($ops['ticketing_pending'] ?? $summary['ticketing_pending'] ?? 0),
+                'formattedValue' => number_format((int) ($ops['ticketing_pending'] ?? $summary['ticketing_pending'] ?? 0)),
                 'currency' => null,
                 'trend' => 'warning',
+            ];
+            $base[] = [
+                'key' => 'supplier_pnr_pending',
+                'label' => 'Supplier PNR pending',
+                'value' => (int) ($ops['supplier_pnr_pending'] ?? $summary['supplier_pnr_pending'] ?? 0),
+                'formattedValue' => number_format((int) ($ops['supplier_pnr_pending'] ?? $summary['supplier_pnr_pending'] ?? 0)),
+                'currency' => null,
+                'trend' => 'warning',
+            ];
+        }
+
+        if ($section === 'sales') {
+            $financial = is_array($reportPayload['financialKpis'] ?? null) ? $reportPayload['financialKpis'] : $financial;
+            $base[] = [
+                'key' => 'net_revenue',
+                'label' => 'Net revenue',
+                'value' => (int) round((float) ($financial['net_revenue'] ?? 0)),
+                'formattedValue' => number_format((int) round((float) ($financial['net_revenue'] ?? 0))).' '.$currency,
+                'currency' => $currency,
+                'trend' => 'neutral',
             ];
         }
 
@@ -103,6 +130,18 @@ final class DashboardReportResource
             ])->values()->all(),
             'bookings' => collect($reportPayload['bookingPipelineRows'] ?? [])->take(50)->values()->all(),
             'payments' => collect($reportPayload['paymentRows'] ?? [])->take(50)->values()->all(),
+            'sales' => collect($reportPayload['monthlySales'] ?? [])->map(static fn ($row): array => [
+                'id' => (string) ($row['month'] ?? 'month'),
+                'label' => (string) ($row['month'] ?? 'Month'),
+                'bookings' => (int) ($row['bookings'] ?? 0),
+                'sales' => (float) ($row['gross_sales'] ?? 0),
+            ])->values()->all(),
+            'operations' => collect(is_array($reportPayload['operationalKpis'] ?? null) ? $reportPayload['operationalKpis'] : [])->map(static fn ($value, $key): array => [
+                'id' => (string) $key,
+                'label' => ucwords(str_replace('_', ' ', (string) $key)),
+                'bookings' => is_numeric($value) ? (int) $value : 0,
+                'sales' => 0.0,
+            ])->values()->all(),
             default => collect($reportPayload['topRoutes'] ?? [])->map(static fn ($row): array => [
                 'id' => (string) ($row['route'] ?? 'route'),
                 'label' => (string) ($row['route'] ?? 'Route'),

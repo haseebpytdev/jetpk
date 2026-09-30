@@ -172,7 +172,7 @@ class DashboardCmsReadService
                 'createdDate' => $media->created_at?->toDateString() ?? '',
                 'updatedDate' => $media->updated_at?->toDateString() ?? '',
                 'authorId' => $media->uploader?->name ?? '—',
-                'url' => (string) ($media->file_path ?? ''),
+                'url' => $media->publicUrl() ?? '',
                 'validation' => [
                     'valid' => $alt !== '',
                     'issues' => $alt === ''

@@ -35,9 +35,9 @@ function reportRouteForModule(module: ReportsModuleKey): string {
     case "payments":
       return DASHBOARD_API_ROUTES.reportsPayments;
     case "operations":
-      return DASHBOARD_API_ROUTES.reportsSuppliers;
+      return DASHBOARD_API_ROUTES.reportsOperations;
     case "sales":
-      return DASHBOARD_API_ROUTES.reportsAgents;
+      return DASHBOARD_API_ROUTES.reportsSales;
     default:
       return DASHBOARD_API_ROUTES.reportsSummary;
   }

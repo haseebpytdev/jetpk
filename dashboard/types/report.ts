@@ -131,7 +131,7 @@ export type ReportExportManifest = {
   currency: ReportSupportedCurrency | "all";
   columns: ReportExportColumn[];
   rowCount: number;
-  previewOnly: true;
+  previewOnly: boolean;
 };
 
 export type ReportValidationResult = {

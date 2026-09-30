@@ -29,7 +29,8 @@ class DashboardReportsReadService
 
         $payload = $this->bookingReports->build($user, $request);
         $mappedSection = match ($section) {
-            'summary', 'overview', 'sales' => 'summary',
+            'summary', 'overview' => 'summary',
+            'sales' => 'sales',
             'bookings' => 'bookings',
             'payments' => 'payments',
             'suppliers' => 'suppliers',

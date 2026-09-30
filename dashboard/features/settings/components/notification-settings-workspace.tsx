@@ -4,8 +4,10 @@ import { useMemo, useState } from "react";
 import { CmsStatusBadge } from "@/components/ui/status-badge";
 import { validateNotificationSettings } from "@/lib/access-control/settings-validation";
 import { CommunicationsLiveControl } from "@/features/settings/components/communications-live-control";
+import { SettingsEditabilityNotice } from "@/features/settings/components/settings-editability-notice";
 import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/settings/components/settings-local-preview-form";
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { NotificationCategoryConfig, NotificationSettingsValues, SettingsModuleResult } from "@/types/settings-module";
 
 function buildCategoryFields(categories: NotificationCategoryConfig[]): SettingsPreviewField[] {
@@ -82,6 +84,7 @@ type Props = {
 };
 
 export function NotificationSettingsWorkspace({ result }: Props) {
+  const isLive = useDashboardLiveMode();
   const baseline = result.notifications;
   const [previewValues, setPreviewValues] = useState<NotificationSettingsValues | null>(null);
   const active = previewValues ?? baseline;
@@ -97,7 +100,13 @@ export function NotificationSettingsWorkspace({ result }: Props) {
 
       <CommunicationsLiveControl />
 
-      {initialCategory ? (
+      {isLive ? (
+        <SettingsEditabilityNotice
+          title="Category preview controls"
+          status="NOT_APPLICABLE"
+          detail="Per-category notification preview toggles are fixture-only in this workspace. Operational communication transport settings live in Communications above. Notification failure operations are managed separately under Operations."
+        />
+      ) : initialCategory ? (
         <SettingsLocalPreviewForm
           fields={fields}
           baselineValues={formBaseline}

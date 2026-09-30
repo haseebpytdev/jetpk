@@ -8,6 +8,7 @@ use App\Enums\SupplierProvider;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreSupplierConnectionRequest;
 use App\Http\Requests\Admin\UpdateSupplierConnectionRequest;
+use App\Models\AuditLog;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\SupplierConnectionService;
 use App\Support\Suppliers\AirBlueSupplierConnectionNormalizer;
@@ -222,8 +223,8 @@ class SupplierConnectionController extends Controller
             'credentialFields' => $this->credentialFieldsFor($provider),
             'timeouts' => is_array($connection->settings) ? ($connection->settings['timeouts'] ?? null) : null,
             'advanced' => [
-                'fields' => [],
-                'values' => [],
+                'fields' => $this->advancedFieldsFor($connection),
+                'values' => $this->advancedValuesFor($connection),
                 'timeouts' => is_array($connection->settings) ? ($connection->settings['timeouts'] ?? null) : null,
                 'timeoutsUserConfigurable' => false,
                 'baseUrlOverridable' => in_array($provider, [
@@ -233,7 +234,7 @@ class SupplierConnectionController extends Controller
                 'readOnly' => [],
             ],
             'audit' => [
-                'history' => [],
+                'history' => $this->auditHistoryFor($connection),
                 'lastTestedAt' => $connection->last_tested_at?->toIso8601String(),
                 'lastTestStatus' => $connection->last_test_status,
                 'lastFailure' => $this->sanitizeFailure((string) ($connection->last_error ?? '')),
@@ -318,6 +319,95 @@ class SupplierConnectionController extends Controller
         $sanitized = preg_replace('/\b(pcc|lniata|password|token|secret|api[_-]?key)\b/i', '[redacted]', $error);
 
         return mb_substr((string) $sanitized, 0, 200);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    protected function auditHistoryFor(SupplierConnection $connection): array
+    {
+        return AuditLog::query()
+            ->with('user:id,name')
+            ->where('auditable_type', SupplierConnection::class)
+            ->where('auditable_id', $connection->id)
+            ->latest('id')
+            ->limit(50)
+            ->get()
+            ->map(fn (AuditLog $log): array => [
+                'id' => (string) $log->id,
+                'action' => (string) $log->action,
+                'actor' => (string) ($log->user?->name ?? 'System'),
+                'at' => $log->created_at?->toIso8601String(),
+                'environment' => $connection->environment?->value ?? '',
+                'changes' => $this->sanitizeAuditProperties(is_array($log->properties) ? $log->properties : []),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  array<string, mixed>  $properties
+     * @return array<string, mixed>
+     */
+    protected function sanitizeAuditProperties(array $properties): array
+    {
+        $secretPattern = '/password|secret|token|api[_-]?key|client_secret|credentials/i';
+        $sanitize = static function ($value) use (&$sanitize, $secretPattern) {
+            if (is_array($value)) {
+                $clean = [];
+                foreach ($value as $key => $item) {
+                    if (preg_match($secretPattern, (string) $key)) {
+                        $clean[$key] = '[redacted]';
+                        continue;
+                    }
+                    $clean[$key] = $sanitize($item);
+                }
+
+                return $clean;
+            }
+
+            return $value;
+        };
+
+        return $sanitize($properties);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    protected function advancedFieldsFor(SupplierConnection $connection): array
+    {
+        $settings = is_array($connection->settings) ? $connection->settings : [];
+        $fields = [];
+        foreach ($settings as $key => $value) {
+            if (is_array($value) || preg_match('/password|secret|token|api[_-]?key|credentials/i', (string) $key)) {
+                continue;
+            }
+            $fields[] = [
+                'key' => (string) $key,
+                'label' => ucwords(str_replace('_', ' ', (string) $key)),
+                'type' => is_bool($value) ? 'boolean' : (is_numeric($value) ? 'number' : 'text'),
+            ];
+        }
+
+        return $fields;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function advancedValuesFor(SupplierConnection $connection): array
+    {
+        $settings = is_array($connection->settings) ? $connection->settings : [];
+        $values = [];
+        foreach ($settings as $key => $value) {
+            if (is_array($value) || preg_match('/password|secret|token|api[_-]?key|credentials/i', (string) $key)) {
+                continue;
+            }
+            $values[(string) $key] = $value;
+        }
+
+        return $values;
     }
 
     protected function scopedQuery($user): Builder

@@ -76,7 +76,7 @@ export function SettingsModuleShell({ section, result }: Props) {
           <Breadcrumb items={[{ label: "Home" }, { label: "Insights & system" }, { label: "Settings" }, { label: current.label }]} />
         }
         title="Settings"
-        description="System settings metadata — no credentials, read-only Laravel integration."
+        description="Settings hub linking authoritative organization profile, security, communications, and API connection modules."
       />
       <DataSourceNoticeSlot />
 

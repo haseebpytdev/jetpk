@@ -203,6 +203,19 @@ export function brandingSettingsPath(): string {
   return laravelPortalPath("admin", "/settings/branding?format=json");
 }
 
+export function agencyMediaIndexPath(query = ""): string {
+  const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
+  return laravelPortalPath("admin", `/settings/media?format=json${suffix}`);
+}
+
+export function agencyMediaStorePath(): string {
+  return laravelPortalPath("admin", "/settings/media?format=json");
+}
+
+export function agencyMediaDestroyPath(mediaId: string): string {
+  return laravelPortalPath("admin", `/settings/media/${encodeURIComponent(mediaId)}?format=json`);
+}
+
 export function pageSettingsEditPath(pageKey: string): string {
   return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}?format=json`);
 }

@@ -76,6 +76,7 @@ function mapLiveAsset(row: Record<string, unknown>): CmsAsset {
     createdDate: String(row.createdDate ?? ""),
     updatedDate: String(row.updatedDate ?? ""),
     authorId: String(row.authorId ?? "—"),
+    url: row.url == null ? undefined : String(row.url),
     validation,
   };
 }

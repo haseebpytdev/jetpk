@@ -116,6 +116,7 @@ export type CmsAsset = {
   createdDate: string;
   updatedDate: string;
   authorId: string;
+  url?: string;
   validation: CmsValidationResult;
 };
 

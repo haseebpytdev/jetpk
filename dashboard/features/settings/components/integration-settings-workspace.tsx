@@ -5,8 +5,11 @@ import { ChannelBadge, CmsStatusBadge } from "@/components/ui/status-badge";
 import { formatDateTime } from "@/lib/format";
 import { validateIntegrationSettings } from "@/lib/access-control/settings-validation";
 import { AiAssistantLiveControl } from "@/features/settings/components/ai-assistant-live-control";
+import { SettingsEditabilityNotice } from "@/features/settings/components/settings-editability-notice";
 import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/settings/components/settings-local-preview-form";
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
+import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { IntegrationRecord, IntegrationSettingsValues, SettingsModuleResult } from "@/types/settings-module";
 
 const INTEGRATION_FIELDS: SettingsPreviewField[] = [
@@ -70,6 +73,7 @@ type Props = {
 };
 
 export function IntegrationSettingsWorkspace({ result }: Props) {
+  const isLive = useDashboardLiveMode();
   const baseline = result.integrations;
   const [previewValues, setPreviewValues] = useState<IntegrationSettingsValues | null>(null);
   const active = previewValues ?? baseline;
@@ -99,7 +103,13 @@ export function IntegrationSettingsWorkspace({ result }: Props) {
 
       <AiAssistantLiveControl />
 
-      {initialIntegration ? (
+      <SettingsEditabilityNotice title="API Connections" status="EXTERNAL_MANAGEMENT">
+        <Link href="/api-connections" className="text-sm font-medium text-jp-accent hover:underline">
+          Open API Connections hub
+        </Link>
+      </SettingsEditabilityNotice>
+
+      {!isLive && initialIntegration ? (
         <SettingsLocalPreviewForm
           fields={fields}
           baselineValues={formBaseline}

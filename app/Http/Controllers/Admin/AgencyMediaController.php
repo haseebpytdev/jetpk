@@ -21,7 +21,7 @@ class AgencyMediaController extends Controller
         protected AgencyBrandingService $brandingService,
     ) {}
 
-    public function index(Request $request): View|JsonResponse
+    protected function resolveAgency(Request $request): Agency
     {
         $user = $request->user();
         $agency = null;
@@ -32,6 +32,29 @@ class AgencyMediaController extends Controller
             $agency = Agency::query()->orderBy('id')->first();
         }
         abort_if($agency === null, 404);
+
+        return $agency;
+    }
+
+    protected function presentMedia(AgencyMedia $media): array
+    {
+        return [
+            'id' => (string) $media->id,
+            'file_name' => (string) $media->file_name,
+            'alt_text' => (string) ($media->alt_text ?? ''),
+            'collection' => (string) ($media->collection ?? 'general'),
+            'mime_type' => (string) ($media->mime_type ?? ''),
+            'size_bytes' => (int) ($media->size_bytes ?? 0),
+            'url' => $media->publicUrl() ?? '',
+            'uploader' => $media->uploader?->name,
+            'created_at' => $media->created_at?->toIso8601String(),
+        ];
+    }
+
+    public function index(Request $request): View|JsonResponse
+    {
+        $user = $request->user();
+        $agency = $this->resolveAgency($request);
         Gate::authorize('viewAny', [AgencyMedia::class, $agency]);
 
         $query = AgencyMedia::query()
@@ -76,17 +99,7 @@ class AgencyMediaController extends Controller
             return $this->backOfficeJson([
                 'ok' => true,
                 'agency_id' => (string) $agency->id,
-                'assets' => $mediaItems->getCollection()->map(static fn (AgencyMedia $media): array => [
-                    'id' => (string) $media->id,
-                    'file_name' => (string) $media->file_name,
-                    'alt_text' => (string) ($media->alt_text ?? ''),
-                    'collection' => (string) ($media->collection ?? 'general'),
-                    'mime_type' => (string) ($media->mime_type ?? ''),
-                    'size_bytes' => (int) ($media->size_bytes ?? 0),
-                    'url' => (string) ($media->file_path ?? ''),
-                    'uploader' => $media->uploader?->name,
-                    'created_at' => $media->created_at?->toIso8601String(),
-                ])->values()->all(),
+                'assets' => $mediaItems->getCollection()->map(fn (AgencyMedia $media): array => $this->presentMedia($media))->values()->all(),
                 'collections' => \App\Support\Client\ClientPageMediaConsumption::collections(),
                 'meta' => [
                     'page' => $mediaItems->currentPage(),
@@ -117,9 +130,9 @@ class AgencyMediaController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
-        $agency = Agency::query()->findOrFail($request->user()->current_agency_id);
+        $agency = $this->resolveAgency($request);
         Gate::authorize('create', [AgencyMedia::class, $agency]);
         $validated = $request->validate([
             'file' => ['required', 'file', 'max:5120'],
@@ -127,7 +140,7 @@ class AgencyMediaController extends Controller
             'alt_text' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $this->brandingService->uploadMedia(
+        $media = $this->brandingService->uploadMedia(
             $agency,
             $request->user(),
             $request->file('file'),
@@ -135,13 +148,29 @@ class AgencyMediaController extends Controller
             $validated['alt_text'] ?? null,
         );
 
+        if ($this->wantsBackOfficeJson($request)) {
+            $media->loadMissing('uploader');
+
+            return $this->backOfficeJson([
+                'ok' => true,
+                'asset' => $this->presentMedia($media),
+            ]);
+        }
+
         return back()->with('status', 'media-uploaded');
     }
 
-    public function destroy(Request $request, AgencyMedia $agencyMedia): RedirectResponse
+    public function destroy(Request $request, AgencyMedia $agencyMedia): RedirectResponse|JsonResponse
     {
         Gate::authorize('delete', $agencyMedia);
         $this->brandingService->deleteMedia($agencyMedia, $request->user());
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'deleted_id' => (string) $agencyMedia->id,
+            ]);
+        }
 
         return back()->with('status', 'media-deleted');
     }

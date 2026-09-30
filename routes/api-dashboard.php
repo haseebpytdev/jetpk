@@ -112,6 +112,10 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
             ->name('reports.suppliers');
         Route::get('/reports/agents', [DashboardReportsController::class, 'agents'])
             ->name('reports.agents');
+        Route::get('/reports/sales', [DashboardReportsController::class, 'sales'])
+            ->name('reports.sales');
+        Route::get('/reports/operations', [DashboardReportsController::class, 'operations'])
+            ->name('reports.operations');
     });
 
     Route::middleware('dashboard.permission:cms.view')->group(function (): void {

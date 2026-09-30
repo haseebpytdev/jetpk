@@ -55,6 +55,31 @@ class ApiConnectionsHubTest extends TestCase
         $this->assertIsString($payload);
     }
 
+    public function test_json_connection_payload_includes_audit_and_advanced_shapes(): void
+    {
+        [$admin] = $this->platformAdmin();
+
+        $response = $this->actingAs($admin)
+            ->getJson('/admin/api-settings?format=json')
+            ->assertOk();
+
+        $connections = $response->json('connections') ?? [];
+        if ($connections === []) {
+            $this->markTestSkipped('No supplier connections seeded for audit/advanced contract.');
+        }
+
+        $first = $connections[0];
+        $this->assertArrayHasKey('maskedCredentials', $first);
+        $this->assertArrayHasKey('advanced', $first);
+        $this->assertArrayHasKey('audit', $first);
+        $this->assertIsArray($first['advanced']['fields'] ?? null);
+        $this->assertIsArray($first['audit']['history'] ?? null);
+
+        $encoded = strtolower((string) json_encode($first));
+        $this->assertStringNotContainsString('"password":"', $encoded);
+        $this->assertStringNotContainsString('"client_secret":"', $encoded);
+    }
+
     public function test_admin_navigation_exposes_single_next_api_connections_entry(): void
     {
         [$admin] = $this->platformAdmin();
