@@ -94,18 +94,22 @@ class DashboardController extends Controller
             SupplierProvider::Duffel->value => 'Duffel',
             SupplierProvider::Sabre->value => 'Sabre',
             SupplierProvider::PiaNdc->value => 'PIA NDC',
-            SupplierProvider::AirlineDirect->value => 'Airline Direct',
-            SupplierProvider::Amadeus->value => 'Amadeus',
-            SupplierProvider::Travelport->value => 'Travelport',
+            SupplierProvider::Airblue->value => 'AirBlue',
+            SupplierProvider::Iati->value => 'IATI',
+            SupplierProvider::OneApi->value => 'One API',
+            SupplierProvider::AlHaider->value => 'Al-Haider',
+            SupplierProvider::AmeerEMillat->value => 'Ameer-e-Millat',
         ];
 
         $orderedProviders = [
-            SupplierProvider::Duffel->value,
             SupplierProvider::Sabre->value,
             SupplierProvider::PiaNdc->value,
-            SupplierProvider::AirlineDirect->value,
-            SupplierProvider::Amadeus->value,
-            SupplierProvider::Travelport->value,
+            SupplierProvider::Airblue->value,
+            SupplierProvider::Iati->value,
+            SupplierProvider::Duffel->value,
+            SupplierProvider::OneApi->value,
+            SupplierProvider::AlHaider->value,
+            SupplierProvider::AmeerEMillat->value,
         ];
 
         return collect($orderedProviders)->map(function (string $providerKey) use ($connections, $providerLabels): array {

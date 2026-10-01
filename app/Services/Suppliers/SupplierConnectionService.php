@@ -99,25 +99,26 @@ class SupplierConnectionService
             $lastError = null;
             $lastTestStatus = null;
 
-            if (! $hasCreds || ! $this->hasRequiredCredentialKeys($connection->provider, $credentials)) {
+            if (! $hasCreds || ! $this->hasRequiredCredentialKeys($connection->providerEnum(), $credentials)) {
                 $lastTestStatus = 'missing_credentials';
-                $lastError = 'Required credentials are missing for readiness check.';
+                $lastError = 'Required credentials are missing for configuration validation.';
                 $connection->status = SupplierConnectionStatus::Error;
                 $connection->is_active = false;
-            } elseif ($connection->provider === SupplierProvider::AmeerEMillat) {
+            } elseif ($connection->providerEnum() === SupplierProvider::AmeerEMillat) {
                 $probe = $this->ameerEMillatClient->probeUserProfileForConnection($connection);
 
                 if (($probe['profile_ok'] ?? false) === true) {
-                    $lastTestStatus = 'connection_ok';
+                    $lastTestStatus = 'connectivity_ok';
                     $lastError = null;
                 } else {
-                    $lastTestStatus = 'connection_failed';
+                    $lastTestStatus = 'connectivity_failed';
                     $lastError = 'Ameer-e-Millat connection test failed ('.($probe['reason_code'] ?? 'unknown').').';
                     $connection->status = SupplierConnectionStatus::Error;
                     $connection->is_active = false;
                 }
             } else {
-                $lastTestStatus = 'ready_for_review';
+                // Configuration validation only — not proof of supplier connectivity/health.
+                $lastTestStatus = 'configuration_valid';
             }
 
             $connection->last_tested_at = now();
@@ -147,6 +148,15 @@ class SupplierConnectionService
                 'status' => $connection->status->value,
                 'last_test_status' => $connection->last_test_status,
                 'last_error' => $connection->last_error,
+                'check_type' => $connection->providerEnum() === SupplierProvider::AmeerEMillat
+                    ? 'connectivity_probe'
+                    : 'configuration_validation',
+                'message' => $lastError
+                    ?? ($connection->last_test_status === 'configuration_valid'
+                        ? 'Configuration is complete and ready for review.'
+                        : ($connection->last_test_status === 'connectivity_ok'
+                            ? 'Connectivity probe succeeded.'
+                            : 'Check completed.')),
             ];
         });
     }
@@ -172,7 +182,7 @@ class SupplierConnectionService
      */
     public function credentialKeysPresent(SupplierConnection $connection): bool
     {
-        if ($connection->provider === null) {
+        if ($connection->providerEnum() === null) {
             return false;
         }
 
@@ -186,7 +196,7 @@ class SupplierConnectionService
             return false;
         }
 
-        return $this->hasRequiredCredentialKeys($connection->provider, $credentials);
+        return $this->hasRequiredCredentialKeys($connection->providerEnum(), $credentials);
     }
 
     /**
@@ -204,18 +214,16 @@ class SupplierConnectionService
             SupplierProvider::Sabre => (in_array('client_id', $keys, true) && in_array('client_secret', $keys, true))
                 || (in_array('sign_in', $keys, true) && in_array('password', $keys, true)),
             SupplierProvider::Duffel => in_array('access_token', $keys, true),
-            SupplierProvider::Iati => in_array('auth_code', $keys, true)
-                && in_array('organization_id', $keys, true),
+            SupplierProvider::Iati => in_array('auth_code', $keys, true),
             SupplierProvider::PiaNdc => in_array('username', $keys, true)
                 && in_array('password', $keys, true)
                 && in_array('agency_id', $keys, true)
                 && in_array('agency_name', $keys, true)
                 && in_array('owner_code', $keys, true),
-            SupplierProvider::Airblue => (
-                (in_array('username', $keys, true) && in_array('password', $keys, true) && in_array('agency_id', $keys, true))
-                || (in_array('client_id', $keys, true) && in_array('client_key', $keys, true) && in_array('agent_id', $keys, true))
-            ),
-            SupplierProvider::AirlineDirect => in_array('api_key', $keys, true) || in_array('token', $keys, true) || (in_array('username', $keys, true) && in_array('password', $keys, true)),
+            SupplierProvider::Airblue => in_array('client_id', $keys, true)
+                && in_array('client_key', $keys, true)
+                && in_array('agent_id', $keys, true)
+                && in_array('agent_password', $keys, true),
             SupplierProvider::OneApi => in_array('username', $keys, true)
                 && in_array('password', $keys, true)
                 && in_array('agent_code', $keys, true)
@@ -227,7 +235,7 @@ class SupplierConnectionService
                 AmeerEMillatSupplierConnectionNormalizer::class,
                 requiresEmail: true,
             ),
-            default => true,
+            default => false,
         };
     }
 

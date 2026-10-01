@@ -166,14 +166,6 @@ return [
                 ],
             ],
         ],
-        'airline_direct' => [
-            'fields' => [
-                'api_key' => ['label' => 'API Key', 'type' => 'password', 'required' => false],
-                'token' => ['label' => 'Token', 'type' => 'password', 'required' => false],
-                'username' => ['label' => 'Username', 'type' => 'text', 'required' => false],
-                'password' => ['label' => 'Password', 'type' => 'password', 'required' => false],
-            ],
-        ],
         'one_api' => [
             'fields' => [
                 'username' => [
@@ -382,18 +374,6 @@ return [
                     ],
                     'default' => '0',
                 ],
-            ],
-        ],
-        'amadeus' => [
-            'fields' => [
-                'client_id' => ['label' => 'Client ID', 'type' => 'text', 'required' => true],
-                'client_secret' => ['label' => 'Client Secret', 'type' => 'password', 'required' => true],
-            ],
-        ],
-        'travelport' => [
-            'fields' => [
-                'client_id' => ['label' => 'Client ID', 'type' => 'text', 'required' => true],
-                'client_secret' => ['label' => 'Client Secret', 'type' => 'password', 'required' => true],
             ],
         ],
     ],

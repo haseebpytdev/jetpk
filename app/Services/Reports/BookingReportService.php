@@ -542,9 +542,11 @@ class BookingReportService
             SupplierProvider::Duffel->value => 'Duffel',
             SupplierProvider::Sabre->value => 'Sabre',
             SupplierProvider::PiaNdc->value => 'PIA NDC',
-            SupplierProvider::AirlineDirect->value => 'Airline Direct',
-            SupplierProvider::Amadeus->value => 'Amadeus',
-            SupplierProvider::Travelport->value => 'Travelport',
+            SupplierProvider::Airblue->value => 'AirBlue',
+            SupplierProvider::Iati->value => 'IATI',
+            SupplierProvider::OneApi->value => 'One API',
+            SupplierProvider::AlHaider->value => 'Al-Haider',
+            SupplierProvider::AmeerEMillat->value => 'Ameer-e-Millat',
         ];
 
         $connectionsQuery = SupplierConnection::query();

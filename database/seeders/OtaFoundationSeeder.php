@@ -285,8 +285,8 @@ class OtaFoundationSeeder extends Seeder
                 'settings' => [],
             ],
             [
-                'provider' => SupplierProvider::AirlineDirect,
-                'name' => 'Airline Direct API',
+                'provider' => SupplierProvider::Airblue,
+                'name' => 'AirBlue Zapways TEST v2',
                 'environment' => SupplierEnvironment::Sandbox,
                 'status' => SupplierConnectionStatus::Inactive,
                 'is_active' => false,

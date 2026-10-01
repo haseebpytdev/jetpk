@@ -1,26 +1,29 @@
 # JetPakistan — Canonical Release Manifest
 
-**Closure date:** 2026-09-21  
-**Annotated application tag (immutable):** `jetpakistan-recovered-final-20260921` → `78dadc7b330ca24a6183241458dd8d1f6aa0d454`
+**Current production application source (verified 2026-09-30):** `feef2e7fa489cee778b81c6db370946394337999`  
+**Dashboard build ID (verified):** `m1WsmAjtpdlOgryIYPtp7`  
+**Prior certified public/application release (2026-09-21):** `78dadc7b330ca24a6183241458dd8d1f6aa0d454`  
+**Annotated application tag (immutable prior):** `jetpakistan-recovered-final-20260921` → `78dadc7b330ca24a6183241458dd8d1f6aa0d454`
 
-## Identity (two SHAs)
+## Identity (component-aware)
 
 | Field | Value | Role |
 |---|---|---|
-| **application_release_sha** | `78dadc7b330ca24a6183241458dd8d1f6aa0d454` | Immutable binary authority; tag target |
-| **closure_metadata_commit_sha** | _(filled in release-lock after metadata commit)_ | Docs/lock/CI correction tip; **not** binary source |
-| PUBLIC_BUILD_ID | `wmNT0P2lJftqG2n9tM6gp` | Built from `application_release_sha` |
-| DASHBOARD_BUILD_ID | `3TyyvdcNScpOGj0oCkQuT` | Built from `application_release_sha` |
-| RUNTIME_MARKER | `jp-final-78dadc7b-20260921T085837Z` | Host marker after fresh dual rebuild |
-| ROLLBACK_SHA | `cbd7686feadd35773fd0b597117538b8b99b59fa` | Prior certified runtime |
+| **application_release_sha** | `feef2e7fa489cee778b81c6db370946394337999` | Current verified Laravel/application production source |
+| **closure_metadata_commit_sha** | _(see release-lock)_ | Docs/lock tip; **not** binary source unless rebuilt |
+| PUBLIC_BUILD_ID | `wmNT0P2lJftqG2n9tM6gp` | Last verified public Next build (from prior certified release `78dadc7b`) |
+| DASHBOARD_BUILD_ID | `m1WsmAjtpdlOgryIYPtp7` | Built/deployed with Dashboard operational recovery |
+| RUNTIME_MARKER | `dor-b5b6-gap-20260930T213805Z` | Host marker for gap deploy |
+| ROLLBACK_SHA | `5c1b3fd6dd114f5d0f11f6737e368f5b122a587e` | Pre-gap Dashboard deploy source |
 
-Machine truth: `docs/closure/jetpakistan-release-lock.json` (schema v2).
+Machine truth: `docs/closure/jetpakistan-release-lock.json` (schema v3 — component-specific provenance allowed).
 
 ### Provenance rules
 
-- Host `PRODUCTION_RUNTIME_SHA` / `PUBLIC_BUILD_SOURCE_SHA` / `DASHBOARD_BUILD_SOURCE_SHA` **must** equal `application_release_sha`.
-- `REMOTE_MAIN` may equal `closure_metadata_commit_sha` after a metadata-only FF.
-- Do not label the metadata commit as the source of binaries unless those binaries were rebuilt from that tree.
+- Host `PRODUCTION_RUNTIME_SHA` **must** equal `application_release_sha`.
+- `DASHBOARD_BUILD_SOURCE_SHA` / `PUBLIC_BUILD_SOURCE_SHA` may differ when `component_parity.require_all_source_shas_equal` is false.
+- Do not claim public Next rebuild from `feef2e7f` without build evidence.
+- Do not stamp feature branches (including AirBlue Zapways-05) as deployed.
 - Existing annotated tag is **not** moved for metadata corrections.
 
 ## Architecture

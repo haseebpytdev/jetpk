@@ -23,12 +23,12 @@ class SupplierConnectionFactory extends Factory
     {
         return [
             'agency_id' => Agency::factory(),
-            'provider' => SupplierProvider::Amadeus,
-            'name' => 'Amadeus',
+            'provider' => SupplierProvider::Duffel,
+            'name' => 'Duffel',
             'environment' => SupplierEnvironment::Sandbox,
             'status' => SupplierConnectionStatus::Inactive,
             'base_url' => null,
-            'display_name' => 'Amadeus',
+            'display_name' => 'Duffel',
             'credentials' => null,
             'is_active' => false,
             'last_tested_at' => null,

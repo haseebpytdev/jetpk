@@ -16,11 +16,11 @@ class SupplierSourcePresenterTest extends TestCase
     }
 
     #[Test]
-    public function test_labels_pia_ndc_duffel_and_airline_direct(): void
+    public function test_labels_pia_ndc_duffel_and_airblue(): void
     {
         $this->assertSame('PIA NDC', SupplierSourcePresenter::label('pia_ndc'));
         $this->assertSame('Duffel', SupplierSourcePresenter::label('duffel'));
-        $this->assertSame('Airline Direct', SupplierSourcePresenter::label('airline_direct'));
+        $this->assertSame('AirBlue', SupplierSourcePresenter::label('airblue'));
     }
 
     #[Test]

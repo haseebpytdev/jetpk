@@ -27,7 +27,7 @@ jobs:
           fi
           echo "RETIRED_PATH_GUARD=PASS"
 
-      - name: Release lock provenance semantics (v2)
+      - name: Release lock provenance semantics (v3 component-aware)
         run: |
           test -f docs/closure/jetpakistan-release-lock.json
           test -f docs/JETPAKISTAN_RELEASE_GUARD_POLICY.md
@@ -38,6 +38,11 @@ jobs:
           php -r '
             $lock = json_decode(file_get_contents("docs/closure/jetpakistan-release-lock.json"), true);
             if (!is_array($lock)) { fwrite(STDERR, "LOCK_JSON_INVALID\n"); exit(1); }
+            $schema = (string) ($lock["schema"] ?? "");
+            if (!preg_match("#jetpakistan-release-lock/v[23]#", $schema)) {
+              fwrite(STDERR, "LOCK_SCHEMA_INVALID\n");
+              exit(1);
+            }
             $app = $lock["application_release_sha"] ?? null;
             if (!$app || !preg_match("/^[0-9a-f]{40}$/", $app)) {
               fwrite(STDERR, "APPLICATION_RELEASE_SHA_INVALID\n");
@@ -55,13 +60,40 @@ jobs:
             foreach ($required as $k) {
               if (empty($lock[$k])) { fwrite(STDERR, "LOCK_MISSING_$k\n"); exit(1); }
             }
-            foreach (["production_runtime_sha","public_build_source_sha","dashboard_build_source_sha"] as $k) {
-              if (($lock[$k] ?? null) !== $app) {
-                fwrite(STDERR, "BUILD_PROVENANCE_MISMATCH field=$k got={$lock[$k]} want=$app\n");
+            foreach (["production_runtime_sha","public_build_source_sha","dashboard_build_source_sha","rollback_sha"] as $k) {
+              if (!preg_match("/^[0-9a-f]{40}$/", (string) $lock[$k])) {
+                fwrite(STDERR, "LOCK_SHA_INVALID_$k\n");
                 exit(1);
               }
             }
-            // Metadata tip may follow application release; never require HEAD==app or HEAD~1 hacks.
+            $requireAllEqual = (bool) ($lock["component_parity"]["require_all_source_shas_equal"] ?? ($schema === "jetpakistan-release-lock/v2"));
+            if ($requireAllEqual) {
+              foreach (["production_runtime_sha","public_build_source_sha","dashboard_build_source_sha"] as $k) {
+                if (($lock[$k] ?? null) !== $app) {
+                  fwrite(STDERR, "BUILD_PROVENANCE_MISMATCH field=$k got={$lock[$k]} want=$app\n");
+                  exit(1);
+                }
+              }
+            } else {
+              if (($lock["production_runtime_sha"] ?? null) !== $app) {
+                fwrite(STDERR, "RUNTIME_SHA_MUST_MATCH_APPLICATION_RELEASE\n");
+                exit(1);
+              }
+              if (($lock["component_parity"]["dashboard_source_matches_application_release"] ?? false) === true
+                  && ($lock["dashboard_build_source_sha"] ?? null) !== $app) {
+                fwrite(STDERR, "DASHBOARD_SOURCE_SHA_MISMATCH\n");
+                exit(1);
+              }
+              if (($lock["component_parity"]["public_source_matches_application_release"] ?? false) === true
+                  && ($lock["public_build_source_sha"] ?? null) !== $app) {
+                fwrite(STDERR, "PUBLIC_SOURCE_SHA_MISMATCH\n");
+                exit(1);
+              }
+            }
+            if (in_array($app, (array) ($lock["feature_branches_not_deployed"] ?? []), true)) {
+              fwrite(STDERR, "FEATURE_BRANCH_MARKED_AS_APPLICATION_RELEASE\n");
+              exit(1);
+            }
             $meta = $lock["closure_metadata_commit_sha"] ?? null;
             if ($meta !== null && $meta !== "" && !preg_match("/^[0-9a-f]{40}$/", $meta)) {
               fwrite(STDERR, "CLOSURE_METADATA_SHA_INVALID\n");

@@ -212,7 +212,7 @@ final class JetpkPhase9hDAuditService
             $issues[] = 'Missing themed create view';
             $fail++;
         }
-        $requiredProviders = ['sabre', 'pia_ndc', 'airblue', 'iati', 'duffel', 'airline_direct', 'airsial', 'al_haider'];
+        $requiredProviders = ['sabre', 'pia_ndc', 'airblue', 'iati', 'duffel', 'one_api', 'al_haider', 'ameer_e_millat'];
         $controllerSource = (string) @file_get_contents(app_path('Http/Controllers/Admin/SupplierConnectionController.php'));
         foreach ($requiredProviders as $provider) {
             if (! str_contains($controllerSource, "'{$provider}'")) {

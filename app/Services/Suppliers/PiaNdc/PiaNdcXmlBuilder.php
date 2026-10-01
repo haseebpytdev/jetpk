@@ -691,7 +691,7 @@ class PiaNdcXmlBuilder
         $emailAddress = $doc->createElement('EmailAddress');
         $emailAddress->appendChild($doc->createElement(
             'EmailAddressText',
-            (string) ($config['agency_contact_email'] ?? 'ADMIN@JETPAKISTAN.COM'),
+            (string) ($config['agency_contact_email'] ?? ''),
         ));
         $contactInfo->appendChild($emailAddress);
         $agency->appendChild($contactInfo);

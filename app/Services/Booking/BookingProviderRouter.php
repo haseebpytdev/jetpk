@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Log;
  * - {@see SupplierProvider::Duffel}: {@see DuffelBookingService} (wraps existing Duffel path in {@see SupplierBookingService}).
  * - {@see SupplierProvider::Sabre}: {@see SabreBookingService} (skeleton; live HTTP only when
  *   {@see SabreBookingService::mayPerformLiveSabreBookingCall()} is true).
- * - {@see SupplierProvider::PiaNdc}, {@see SupplierProvider::AirlineDirect}: {@see SupplierBookingService}.
+ * - {@see SupplierProvider::PiaNdc}: {@see SupplierBookingService}.
  * - Other / missing: safe rejection for checkout and supplier-booking actions.
  */
 class BookingProviderRouter
@@ -268,7 +268,6 @@ class BookingProviderRouter
                 SupplierProvider::Iati,
                 SupplierProvider::PiaNdc,
                 SupplierProvider::Airblue,
-                SupplierProvider::AirlineDirect,
             ], true);
     }
 

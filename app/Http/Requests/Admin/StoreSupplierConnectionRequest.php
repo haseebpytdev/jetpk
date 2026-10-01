@@ -6,6 +6,7 @@ use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierEnvironment;
 use App\Enums\SupplierProvider;
 use App\Support\Suppliers\GroupSupplierCredentialValidator;
+use App\Support\Suppliers\SupplierIntegrationCatalog;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,7 +23,7 @@ class StoreSupplierConnectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'provider' => ['required', Rule::enum(SupplierProvider::class)],
+            'provider' => ['required', 'string', Rule::in(SupplierIntegrationCatalog::createableKeys())],
             'name' => [
                 'required', 'string', 'max:255',
                 Rule::unique('supplier_connections', 'name')->where(function ($query): void {
@@ -91,20 +92,10 @@ class StoreSupplierConnectionRequest extends FormRequest
                 return;
             }
 
-            if ($provider === SupplierProvider::AirlineDirect->value) {
-                $hasApiKey = in_array('api_key', $keys, true);
-                $hasToken = in_array('token', $keys, true);
-                $hasUserPass = in_array('username', $keys, true) && in_array('password', $keys, true);
-                if (! $hasApiKey && ! $hasToken && ! $hasUserPass) {
-                    $validator->errors()->add('credentials', 'Airline direct usually needs api_key, token, or username/password.');
-                }
-            }
-
             if ($provider === SupplierProvider::Iati->value) {
-                foreach (['auth_code', 'organization_id'] as $field) {
-                    if (! in_array($field, $keys, true)) {
-                        $validator->errors()->add('credentials.'.$field, 'This field is required for IATI.');
-                    }
+                // auth_code required; organization_id optional (matches resolver/config contract).
+                if (! in_array('auth_code', $keys, true)) {
+                    $validator->errors()->add('credentials.auth_code', 'This field is required for IATI.');
                 }
             }
 

@@ -427,8 +427,9 @@ class TicketingReadinessPresenter
             SupplierProvider::Sabre->value,
             SupplierProvider::Duffel->value,
             SupplierProvider::Iati->value,
-            'pia_ndc',
-            'airline_direct',
+            SupplierProvider::PiaNdc->value,
+            SupplierProvider::Airblue->value,
+            SupplierProvider::OneApi->value,
         ], true);
     }
 

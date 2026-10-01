@@ -3,16 +3,25 @@
 namespace Tests\Unit\Enums;
 
 use App\Enums\SupplierProvider;
+use App\Support\Suppliers\RetiredSupplierProviders;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class SupplierProviderTest extends TestCase
 {
     #[Test]
-    public function it_accepts_non_flight_infrastructure_provider_values(): void
+    public function active_set_excludes_platform_and_retired_providers(): void
     {
-        $this->assertSame(SupplierProvider::Smtp, SupplierProvider::from('smtp'));
-        $this->assertSame(SupplierProvider::GoogleOauth, SupplierProvider::from('google_oauth'));
-        $this->assertSame(SupplierProvider::AlHaider, SupplierProvider::from('al_haider'));
+        $values = SupplierProvider::activeValues();
+        $this->assertContains('sabre', $values);
+        $this->assertContains('airblue', $values);
+        $this->assertNotContains('smtp', $values);
+        $this->assertNotContains('google_oauth', $values);
+        $this->assertNotContains('amadeus', $values);
+        $this->assertNotContains('travelport', $values);
+        $this->assertNotContains('airline_direct', $values);
+        $this->assertNull(SupplierProvider::tryFrom('smtp'));
+        $this->assertTrue(RetiredSupplierProviders::isRetired('smtp'));
+        $this->assertTrue(RetiredSupplierProviders::isRetired('google_oauth'));
     }
 }

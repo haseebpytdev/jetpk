@@ -92,13 +92,8 @@ class UpdateSupplierConnectionRequest extends StoreSupplierConnectionRequest
                 }
 
                 $incomingAuthCode = trim((string) ($credentials['auth_code'] ?? ''));
-                $incomingOrgId = trim((string) ($credentials['organization_id'] ?? ''));
-
                 if ($incomingAuthCode === '' && trim((string) ($existingCredentials['auth_code'] ?? '')) === '') {
                     $validator->errors()->add('credentials.auth_code', 'IATI auth code is required.');
-                }
-                if ($incomingOrgId === '' && trim((string) ($existingCredentials['organization_id'] ?? '')) === '') {
-                    $validator->errors()->add('credentials.organization_id', 'IATI organization ID is required.');
                 }
 
                 return;
@@ -142,18 +137,6 @@ class UpdateSupplierConnectionRequest extends StoreSupplierConnectionRequest
             $existingCredentials = is_array($this->route('supplierConnection')?->credentials)
                 ? $this->route('supplierConnection')->credentials
                 : [];
-
-            if ($provider === SupplierProvider::AirlineDirect->value) {
-                $hasApiKey = SupplierCredentialFormPresenter::effectiveValue('api_key', $credentials, $existingCredentials) !== '';
-                $hasToken = SupplierCredentialFormPresenter::effectiveValue('token', $credentials, $existingCredentials) !== '';
-                $hasUserPass = SupplierCredentialFormPresenter::effectiveValue('username', $credentials, $existingCredentials) !== ''
-                    && SupplierCredentialFormPresenter::effectiveValue('password', $credentials, $existingCredentials) !== '';
-                if (! $hasApiKey && ! $hasToken && ! $hasUserPass) {
-                    $validator->errors()->add('credentials', 'Airline direct usually needs api_key, token, or username/password.');
-                }
-
-                return;
-            }
 
             if (in_array($provider, [SupplierProvider::AlHaider->value, SupplierProvider::AmeerEMillat->value], true)) {
                 GroupSupplierCredentialValidator::validate(

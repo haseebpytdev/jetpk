@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Casts\SupplierProviderCast;
 use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierEnvironment;
 use App\Enums\SupplierProvider;
+use App\Support\Suppliers\RetiredSupplierProviders;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
 use Database\Factories\SupplierConnectionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -52,7 +54,7 @@ class SupplierConnection extends Model
     protected function casts(): array
     {
         return [
-            'provider' => SupplierProvider::class,
+            'provider' => SupplierProviderCast::class,
             'environment' => SupplierEnvironment::class,
             'status' => SupplierConnectionStatus::class,
             'credentials' => 'encrypted:array',
@@ -63,13 +65,24 @@ class SupplierConnection extends Model
         ];
     }
 
-    protected function castAttribute($key, $value)
+    public function providerKey(): string
     {
-        if ($key === 'provider' && $value === 'pia') {
-            $value = SupplierProvider::PiaNdc->value;
+        $provider = $this->provider;
+        if ($provider instanceof SupplierProvider) {
+            return $provider->value;
         }
 
-        return parent::castAttribute($key, $value);
+        return is_string($provider) ? $provider : '';
+    }
+
+    public function providerEnum(): ?SupplierProvider
+    {
+        return $this->provider instanceof SupplierProvider ? $this->provider : null;
+    }
+
+    public function isRetiredProvider(): bool
+    {
+        return RetiredSupplierProviders::isRetired($this->providerKey());
     }
 
     /** @return BelongsTo<Agency, $this> */
@@ -167,7 +180,11 @@ class SupplierConnection extends Model
             return false;
         }
 
-        if ($this->provider === SupplierProvider::Sabre) {
+        if ($this->isRetiredProvider()) {
+            return false;
+        }
+
+        if ($this->providerEnum() === SupplierProvider::Sabre) {
             return SabreSupplierChannelConfig::anyChannelEnabled($this);
         }
 
@@ -176,6 +193,10 @@ class SupplierConnection extends Model
 
     public function supplierHealthHealthy(): bool
     {
+        if ($this->isRetiredProvider()) {
+            return false;
+        }
+
         if (self::hasHealthyDatabaseColumn()) {
             $columnHealthy = $this->getAttributes()['healthy'] ?? null;
             if ($columnHealthy !== null) {
@@ -195,7 +216,14 @@ class SupplierConnection extends Model
             return true;
         }
 
-        return in_array($this->last_test_status, ['air_shopping_success', 'ready_for_review', 'success'], true);
+        // Configuration-only statuses must NOT imply supplier health.
+        return in_array($this->last_test_status, [
+            'air_shopping_success',
+            'success',
+            'connectivity_ok',
+            'auth_ok',
+            'connection_ok',
+        ], true);
     }
 
     public static function hasHealthyDatabaseColumn(): bool

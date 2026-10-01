@@ -33,7 +33,7 @@ class AirBlueZapwaysConnectionStoreTest extends TestCase
 
         $this->actingAs($admin)->post('/admin/api-settings', [
             'provider' => SupplierProvider::Airblue->value,
-            'name' => 'AirBlue Zapways TEST v2',
+            'name' => 'AirBlue Zapways Store Defaults',
             'environment' => SupplierEnvironment::Sandbox->value,
             'status' => SupplierConnectionStatus::Inactive->value,
             'credentials' => [
@@ -46,7 +46,7 @@ class AirBlueZapwaysConnectionStoreTest extends TestCase
         ])->assertRedirect('/admin/dashboard/api-connections');
 
         $connection = SupplierConnection::query()
-            ->where('name', 'AirBlue Zapways TEST v2')
+            ->where('name', 'AirBlue Zapways Store Defaults')
             ->where('provider', SupplierProvider::Airblue)
             ->firstOrFail();
 

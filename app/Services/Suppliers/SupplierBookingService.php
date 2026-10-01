@@ -20,7 +20,6 @@ use App\Services\Booking\BookingOperationalPrecheckService;
 use App\Services\Booking\BookingService;
 use App\Services\Communication\BookingCommunicationService;
 use App\Services\Suppliers\BookingAdapters\AirBlueSupplierBookingAdapter;
-use App\Services\Suppliers\BookingAdapters\AirlineDirectSupplierBookingAdapter;
 use App\Services\Suppliers\BookingAdapters\DuffelSupplierBookingAdapter;
 use App\Services\Suppliers\BookingAdapters\IatiSupplierBookingAdapter;
 use App\Services\Suppliers\BookingAdapters\OneApiSupplierBookingAdapter;
@@ -55,7 +54,6 @@ class SupplierBookingService
         protected SabreSupplierBookingAdapter $sabreAdapter,
         protected PiaNdcSupplierBookingAdapter $piaNdcAdapter,
         protected AirBlueSupplierBookingAdapter $airBlueAdapter,
-        protected AirlineDirectSupplierBookingAdapter $airlineDirectAdapter,
         protected DuffelSupplierBookingAdapter $duffelAdapter,
         protected IatiSupplierBookingAdapter $iatiAdapter,
         protected OneApiSupplierBookingAdapter $oneApiAdapter,
@@ -572,7 +570,6 @@ class SupplierBookingService
             SupplierProvider::Sabre => $this->sabreAdapter,
             SupplierProvider::PiaNdc => $this->piaNdcAdapter,
             SupplierProvider::Airblue => $this->airBlueAdapter,
-            SupplierProvider::AirlineDirect => $this->airlineDirectAdapter,
             SupplierProvider::Duffel => $this->duffelAdapter,
             SupplierProvider::Iati => $this->iatiAdapter,
             SupplierProvider::OneApi => $this->oneApiAdapter,

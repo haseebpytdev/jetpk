@@ -41,10 +41,22 @@ export function resolveConnectionOperationalStatus(row: ApiConnectionRow): Conne
     return "auth_required";
   }
   const test = (row.lastTestStatus ?? "").toLowerCase();
-  if (test.includes("fail") || test.includes("error") || test.includes("invalid")) {
+  if (
+    test === "connectivity_ok" ||
+    test === "auth_ok" ||
+    test === "connection_ok" ||
+    test === "air_shopping_success" ||
+    test === "success"
+  ) {
+    return "connected";
+  }
+  if (test === "configuration_valid" || test === "ready_for_review") {
+    return "untested";
+  }
+  if (test.includes("fail") || test.includes("error") || test.includes("invalid") || test.includes("missing")) {
     return "test_failed";
   }
-  if (test.includes("pass") || test.includes("success") || test.includes("ok") || test.includes("connected")) {
+  if (test.includes("pass") || test.includes("connected")) {
     return "connected";
   }
   const status = (row.status ?? "").toLowerCase();

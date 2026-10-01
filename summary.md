@@ -11,7 +11,7 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-07-16 (JETPK portal customer/agent/agent-staff parity closure)
+**Last updated:** 2026-10-01 (API Connections catalog architecture cleanup)
 
 ---
 
@@ -19,6 +19,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
+| 2026-10-01 | API-CONNECTIONS-06 catalog truth | **`SupplierIntegrationCatalog`** is authoritative (no enum `installed=true`). Retired Travelport/Amadeus/Airline Direct via **`RetiredSupplierProviders`** + **`SupplierProviderCast`**. SMTP/Google OAuth → **`PlatformIntegrationStatusPresenter`** (env, read-only). Honest `configuration_valid` vs connectivity probes; health excludes config-only statuses. AgencyAdmin denied `/api/dashboard`. Customer landing → `customer.dashboard`. Release lock v3 component provenance (`feef2e7f` / `m1WsmAjtpdlOgryIYPtp7`). |
 | 2026-09-20 | HERO-CMS + GROUP-SEARCH recovery | **PublicHero:** content-driven height (no fixed 47–52rem); one `<h1>` with two block lines; fixture copy only when `source=fixture` (never for cms/empty blanks). **Group:** `forPublicSearch()` adds `airlines` + `tiles` via **`GroupHomepageTilePresenter::presentForPublicDiscovery()`**; form is Airline\|Sector\|Date only; category stays URL/card filter. Tests: **`HomepageCmsBlankHeroApiTest`**, **`GroupSearchFacetsContractTest`**, Playwright **`group-search-facets.spec.ts`**. |
 | 2026-09-17 | CLOSURE-05 Group DB token + mobile Login | **Al-Haider:** restore **`AlHaiderConnectionAuthResolver`** + **`AlHaiderSupplierConnectionNormalizer`**; **`AlHaiderClient`** prefers active DB `managed_token`/`manual_token` `existing_token` before env login/limit-block. **Public:** mobile compact **`AccountMenu`** guest CTA **Login** (was Account) to match FAB. Tests: **`AlHaiderClientManualTokenConnectionTest`**, **`AlHaiderClientAuthTest`**. |
 | 2026-07-26 | SABRE-GDS-SEARCH-CACHE-18C | **Stale search cache safety:** `FlightSearchResultStore` validates payload schema, rejects version mismatch/malformed rows, attaches `offer_freshness` on read, blocks `findOffer` / return-split selection when stale. Tests: **`FlightSearchResultStoreStaleOfferTest`**. |

@@ -175,7 +175,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'web',
                 'auth',
                 'agency.context',
-                'account.type:platform_admin,agency_admin,staff,agent,agent_staff',
+                'account.type:platform_admin,staff,agent,agent_staff',
             ])
                 ->prefix('api/dashboard')
                 ->name('api.dashboard.')

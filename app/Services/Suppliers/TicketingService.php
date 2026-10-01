@@ -22,7 +22,6 @@ use App\Services\Finance\Ledger\LedgerEventRecorder;
 use App\Services\Suppliers\Sabre\Ticketing\SabreGdsTicketingReadiness;
 use App\Services\Suppliers\Sabre\Ticketing\SabreGdsTicketingService;
 use App\Services\Suppliers\TicketingAdapters\AirBlueSupplierTicketingAdapter;
-use App\Services\Suppliers\TicketingAdapters\AirlineDirectSupplierTicketingAdapter;
 use App\Services\Suppliers\TicketingAdapters\DuffelSupplierTicketingAdapter;
 use App\Services\Suppliers\TicketingAdapters\IatiSupplierTicketingAdapter;
 use App\Services\Suppliers\TicketingAdapters\OneApiSupplierTicketingAdapter;
@@ -44,7 +43,6 @@ class TicketingService
         protected SabreSupplierTicketingAdapter $sabreAdapter,
         protected PiaNdcSupplierTicketingAdapter $piaNdcAdapter,
         protected AirBlueSupplierTicketingAdapter $airBlueAdapter,
-        protected AirlineDirectSupplierTicketingAdapter $airlineDirectAdapter,
         protected DuffelSupplierTicketingAdapter $duffelAdapter,
         protected IatiSupplierTicketingAdapter $iatiAdapter,
         protected OneApiSupplierTicketingAdapter $oneApiAdapter,
@@ -362,7 +360,6 @@ class TicketingService
             SupplierProvider::Duffel => $this->duffelAdapter,
             SupplierProvider::PiaNdc => $this->piaNdcAdapter,
             SupplierProvider::Airblue => $this->airBlueAdapter,
-            SupplierProvider::AirlineDirect => $this->airlineDirectAdapter,
             SupplierProvider::Iati => $this->iatiAdapter,
             SupplierProvider::OneApi => $this->oneApiAdapter,
             default => throw new \InvalidArgumentException('Ticketing adapter not configured for provider: '.($provider?->value ?? 'unknown')),

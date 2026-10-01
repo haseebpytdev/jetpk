@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\UpdateSupplierConnectionRequest;
 use App\Models\AuditLog;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\SupplierConnectionService;
+use App\Support\Integrations\PlatformIntegrationStatusPresenter;
 use App\Support\Suppliers\AirBlueSupplierConnectionNormalizer;
 use App\Support\Suppliers\AlHaiderSupplierConnectionNormalizer;
 use App\Support\Suppliers\AmeerEMillatSupplierConnectionNormalizer;
@@ -20,6 +21,7 @@ use App\Support\Suppliers\PiaNdcSupplierConnectionNormalizer;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
 use App\Support\Suppliers\SabreSupplierConnectionNormalizer;
 use App\Support\Suppliers\SupplierCredentialFormPresenter;
+use App\Support\Suppliers\SupplierIntegrationCatalog;
 use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -52,6 +54,7 @@ class SupplierConnectionController extends Controller
                 'connections' => $connections->map(fn ($row) => $this->presentConnection($row))->values()->all(),
                 'providers' => $this->providerCatalog(),
                 'providerCards' => $this->providerCards($existingProviders),
+                'platformIntegrations' => PlatformIntegrationStatusPresenter::present(),
             ]);
         }
 
@@ -70,29 +73,25 @@ class SupplierConnectionController extends Controller
 
     /**
      * @param  list<string>  $configuredProviders
-     * @return list<array{key: string, label: string, channel: string, description: string, configured: bool}>
+     * @return list<array<string, mixed>>
      */
     private function providerCards(array $configuredProviders): array
     {
-        $catalog = [
-            ['key' => 'sabre', 'label' => 'Sabre', 'channel' => 'GDS / NDC', 'description' => 'Sabre GDS and NDC channels with CERT/LIVE environments.', 'icon' => 'SB', 'capabilities' => ['GDS', 'NDC', 'PNR'], 'readiness' => 'Recommended'],
-            ['key' => 'pia_ndc', 'label' => 'PIA NDC', 'channel' => 'NDC', 'description' => 'Pakistan International Airlines NDC direct connect.', 'icon' => 'PK', 'capabilities' => ['NDC', 'Direct'], 'readiness' => 'Live ready'],
-            ['key' => 'airblue', 'label' => 'AirBlue / Zapways', 'channel' => 'API', 'description' => 'AirBlue Zapways inventory channel.', 'icon' => 'AB', 'capabilities' => ['API', 'LCC'], 'readiness' => 'Sandbox'],
-            ['key' => 'iati', 'label' => 'IATI', 'channel' => 'API', 'description' => 'IATI consolidated inventory and booking API.', 'icon' => 'IA', 'capabilities' => ['API', 'Search'], 'readiness' => 'Sandbox'],
-            ['key' => 'duffel', 'label' => 'Duffel', 'channel' => 'API', 'description' => 'Duffel NDC aggregator for global content.', 'icon' => 'DF', 'capabilities' => ['NDC', 'Global'], 'readiness' => 'Sandbox'],
-            ['key' => 'airline_direct', 'label' => 'Airline Direct', 'channel' => 'Direct', 'description' => 'Direct airline API or portal integration.', 'icon' => 'AD', 'capabilities' => ['Direct'], 'readiness' => 'Custom'],
-            ['key' => 'airsial', 'label' => 'AirSial', 'channel' => 'Direct', 'description' => 'AirSial direct inventory and booking channel.', 'icon' => 'AS', 'capabilities' => ['Direct', 'LCC'], 'readiness' => 'Live ready'],
-            ['key' => 'al_haider', 'label' => 'Al-Haider', 'channel' => 'Group', 'description' => 'Al-Haider Umrah group ticketing and package inventory.', 'icon' => 'AH', 'capabilities' => ['Group', 'Umrah'], 'readiness' => 'Group'],
-            ['key' => 'ameer_e_millat', 'label' => 'Ameer-e-Millat', 'channel' => 'Group', 'description' => 'Ameer-e-Millat group flight inventory and post-payment booking.', 'icon' => 'AM', 'capabilities' => ['Group', 'Live Inventory', 'Booking'], 'readiness' => 'Group'],
-            ['key' => 'one_api', 'label' => 'One API', 'channel' => 'API', 'description' => 'One API consolidated channel (Air Arabia / FlyJinnah family where configured).', 'icon' => 'OA', 'capabilities' => ['API', 'LCC'], 'readiness' => 'Live ready'],
-            ['key' => 'generic', 'label' => 'Generic', 'channel' => 'Other', 'description' => 'Generic supplier connection for custom integrations.', 'icon' => 'GX', 'capabilities' => ['Custom'], 'readiness' => 'Advanced'],
-        ];
-
         return array_map(static function (array $row) use ($configuredProviders): array {
-            $row['configured'] = in_array($row['key'], $configuredProviders, true);
-
-            return $row;
-        }, $catalog);
+            return [
+                'key' => $row['key'],
+                'label' => $row['label'],
+                'channel' => $row['channel'],
+                'description' => $row['description'],
+                'icon' => $row['icon'] ?? null,
+                'capabilities' => $row['capabilities'] ?? [],
+                'readiness' => $row['readiness'] ?? null,
+                'kind' => $row['kind'] ?? 'supplier',
+                'implementation_state' => $row['implementation_state'] ?? null,
+                'installed' => (bool) ($row['installed'] ?? false),
+                'configured' => in_array($row['key'], $configuredProviders, true),
+            ];
+        }, SupplierIntegrationCatalog::definitions());
     }
 
     public function store(StoreSupplierConnectionRequest $request): RedirectResponse|JsonResponse
@@ -151,7 +150,7 @@ class SupplierConnectionController extends Controller
     {
         Gate::authorize('update', $supplierConnection);
         $result = $this->service->testConnection($supplierConnection, $request->user());
-        $sanitized = $this->sanitizeTestResult(is_array($result) ? $result : ['ok' => true, 'message' => 'Test completed']);
+        $sanitized = $this->sanitizeTestResult(is_array($result) ? $result : ['ok' => true, 'message' => 'Check completed']);
 
         if ($this->wantsBackOfficeJson($request)) {
             return $this->backOfficeJson([
@@ -191,10 +190,11 @@ class SupplierConnectionController extends Controller
      */
     protected function presentConnection(SupplierConnection $connection): array
     {
-        $provider = $connection->provider instanceof SupplierProvider
-            ? $connection->provider->value
-            : (string) $connection->provider;
+        $provider = $connection->providerKey();
         $isSabre = $provider === SupplierProvider::Sabre->value;
+        $definition = SupplierIntegrationCatalog::definitionFor($provider);
+        $checkType = SupplierIntegrationCatalog::checkTypeFor($provider);
+        $baseUrlOverridable = SupplierIntegrationCatalog::baseUrlOverridable($provider);
 
         return [
             'id' => (string) $connection->id,
@@ -204,21 +204,23 @@ class SupplierConnectionController extends Controller
             'status' => $connection->status?->value ?? '',
             'enabled' => (bool) $connection->is_active,
             'channel' => $isSabre ? 'gds' : $provider,
+            'retired' => $connection->isRetiredProvider(),
             'credentialsConfigured' => is_array($connection->credentials) && $connection->credentials !== [],
             'maskedCredentials' => $connection->maskedCredentials(),
             'lastTestedAt' => $connection->last_tested_at?->toIso8601String(),
             'lastTestStatus' => $connection->last_test_status,
             'lastFailure' => $this->sanitizeFailure((string) ($connection->last_error ?? '')),
+            'checkType' => $checkType,
+            'checkLabel' => $checkType === 'connectivity_probe' || $checkType === 'auth_probe'
+                ? 'Test connection'
+                : 'Validate configuration',
             'sabreGdsSupported' => $isSabre ? true : null,
             'sabreGdsEnabled' => $isSabre ? SabreSupplierChannelConfig::gdsEnabled($connection) : null,
             'sabreNdcSupported' => $isSabre ? true : null,
             'sabreNdcEnabled' => $isSabre ? SabreSupplierChannelConfig::ndcEnabled($connection) : false,
-            'registryLabel' => $isSabre ? SabreSupplierChannelConfig::connectionAdminLabel($connection) : null,
+            'registryLabel' => $isSabre ? SabreSupplierChannelConfig::connectionAdminLabel($connection) : ($definition['label'] ?? null),
             'baseUrl' => filled($connection->base_url) ? (string) $connection->base_url : null,
-            'baseUrlOverridable' => in_array($provider, [
-                SupplierProvider::PiaNdc->value,
-                SupplierProvider::AlHaider->value,
-            ], true),
+            'baseUrlOverridable' => $baseUrlOverridable,
             'credentialFields' => $this->credentialFieldsFor($provider),
             'timeouts' => is_array($connection->settings) ? ($connection->settings['timeouts'] ?? null) : null,
             'advanced' => [
@@ -226,10 +228,7 @@ class SupplierConnectionController extends Controller
                 'values' => $this->advancedValuesFor($connection),
                 'timeouts' => is_array($connection->settings) ? ($connection->settings['timeouts'] ?? null) : null,
                 'timeoutsUserConfigurable' => false,
-                'baseUrlOverridable' => in_array($provider, [
-                    SupplierProvider::PiaNdc->value,
-                    SupplierProvider::AlHaider->value,
-                ], true),
+                'baseUrlOverridable' => $baseUrlOverridable,
                 'readOnly' => [],
             ],
             'audit' => [
@@ -248,19 +247,27 @@ class SupplierConnectionController extends Controller
     protected function providerCatalog(): array
     {
         $catalog = [];
-        foreach (SupplierProvider::cases() as $provider) {
-            $fields = $this->credentialFieldsFor($provider->value);
+        foreach (SupplierIntegrationCatalog::definitions() as $definition) {
+            $key = (string) $definition['key'];
+            $fields = $this->credentialFieldsFor($key);
             $catalog[] = [
-                'key' => $provider->value,
-                'label' => $provider->name,
-                'installed' => true,
-                'baseUrlOverridable' => in_array($provider->value, [
-                    SupplierProvider::PiaNdc->value,
-                    SupplierProvider::AlHaider->value,
-                ], true),
+                'key' => $key,
+                'label' => (string) $definition['label'],
+                'installed' => (bool) ($definition['installed'] ?? false),
+                'kind' => (string) ($definition['kind'] ?? 'supplier'),
+                'channel' => (string) ($definition['channel'] ?? ''),
+                'implementation_state' => (string) ($definition['implementation_state'] ?? ''),
+                'configuration_source' => (string) ($definition['configuration_source'] ?? 'supplier_connection'),
+                'supports_create' => (bool) ($definition['supports_create'] ?? false),
+                'supports_update' => (bool) ($definition['supports_update'] ?? false),
+                'supports_delete' => (bool) ($definition['supports_delete'] ?? false),
+                'supports_enable_disable' => (bool) ($definition['supports_enable_disable'] ?? false),
+                'check_type' => (string) ($definition['check_type'] ?? 'configuration_validation'),
+                'baseUrlOverridable' => SupplierIntegrationCatalog::baseUrlOverridable($key),
                 'credentialFields' => $fields,
                 'advancedFields' => [],
-                'state' => 'available',
+                'capabilities' => $definition['capabilities'] ?? [],
+                'state' => (string) ($definition['implementation_state'] ?? 'available'),
             ];
         }
 
@@ -310,7 +317,9 @@ class SupplierConnectionController extends Controller
 
         return [
             'ok' => (bool) ($result['ok'] ?? $result['success'] ?? true),
-            'message' => (string) ($result['message'] ?? $result['status'] ?? 'Test completed'),
+            'message' => (string) ($result['message'] ?? $result['status'] ?? 'Check completed'),
+            'check_type' => (string) ($result['check_type'] ?? 'configuration_validation'),
+            'last_test_status' => isset($result['last_test_status']) ? (string) $result['last_test_status'] : null,
         ];
     }
 
@@ -444,7 +453,7 @@ class SupplierConnectionController extends Controller
         $allowedKeys = array_keys($providerFields);
         $normalizedCredentials = [];
 
-        $providerChanged = $existing !== null && $existing->provider->value !== $provider;
+        $providerChanged = $existing !== null && $existing->providerKey() !== $provider;
         $baseCredentials = $providerChanged ? [] : (($existing?->credentials && is_array($existing->credentials)) ? $existing->credentials : []);
 
         foreach ($allowedKeys as $key) {
