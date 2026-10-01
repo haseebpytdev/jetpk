@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <AirAncillaryItemsResponse xmlns="http://zapways.com/air/ota/3.0">
+      <OTA_AirAncillaryItemsRS xmlns="http://www.opentravel.org/OTA/2003/05" Version="1.04">
+        <AncillaryItemSets>
+          <AncillaryItemSet GroupCode="XBAG" GroupDescription="Excess Baggage" GroupTitle="Baggage" MultipleChoice="false">
+            <AncillaryItems>
+              <AncillaryItem ItemCode="XBAG20" ItemTitle="20KG Extra Baggage" Available="true" ChargeAmount="3000.00" ChargeCurrency="PKR" IsRefundable="false">20 kilogram excess baggage</AncillaryItem>
+            </AncillaryItems>
+          </AncillaryItemSet>
+          <AncillaryItemSet GroupCode="WCHR" GroupDescription="Wheelchair" GroupTitle="Special Assistance" MultipleChoice="true">
+            <AncillaryItems>
+              <AncillaryItem ItemCode="WCHR01" ItemTitle="Wheelchair" Available="true" ChargeAmount="0.00" ChargeCurrency="PKR" IsRefundable="true">Wheelchair assistance</AncillaryItem>
+            </AncillaryItems>
+          </AncillaryItemSet>
+        </AncillaryItemSets>
+      </OTA_AirAncillaryItemsRS>
+    </AirAncillaryItemsResponse>
+  </soap:Body>
+</soap:Envelope>

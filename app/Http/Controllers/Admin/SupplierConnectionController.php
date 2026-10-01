@@ -217,7 +217,6 @@ class SupplierConnectionController extends Controller
             'baseUrl' => filled($connection->base_url) ? (string) $connection->base_url : null,
             'baseUrlOverridable' => in_array($provider, [
                 SupplierProvider::PiaNdc->value,
-                SupplierProvider::Airblue->value,
                 SupplierProvider::AlHaider->value,
             ], true),
             'credentialFields' => $this->credentialFieldsFor($provider),
@@ -229,7 +228,7 @@ class SupplierConnectionController extends Controller
                 'timeoutsUserConfigurable' => false,
                 'baseUrlOverridable' => in_array($provider, [
                     SupplierProvider::PiaNdc->value,
-                    SupplierProvider::Airblue->value,
+                    SupplierProvider::AlHaider->value,
                 ], true),
                 'readOnly' => [],
             ],
@@ -257,7 +256,6 @@ class SupplierConnectionController extends Controller
                 'installed' => true,
                 'baseUrlOverridable' => in_array($provider->value, [
                     SupplierProvider::PiaNdc->value,
-                    SupplierProvider::Airblue->value,
                     SupplierProvider::AlHaider->value,
                 ], true),
                 'credentialFields' => $fields,
@@ -289,6 +287,13 @@ class SupplierConnectionController extends Controller
                 'help' => (string) ($meta['help'] ?? ''),
                 'default' => $meta['default'] ?? null,
                 'group' => (string) ($meta['group'] ?? 'credentials'),
+                'channel' => isset($meta['channel']) ? (string) $meta['channel'] : null,
+                'options' => is_array($meta['options'] ?? null)
+                    ? collect($meta['options'])->map(fn ($label, $value): array => [
+                        'value' => (string) $value,
+                        'label' => (string) $label,
+                    ])->values()->all()
+                    : null,
             ];
         }
 

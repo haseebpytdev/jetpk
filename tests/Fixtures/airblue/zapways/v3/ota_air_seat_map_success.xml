@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <AirSeatMapResponse xmlns="http://zapways.com/air/ota/3.0">
+      <OTA_AirSeatMapRS xmlns="http://www.opentravel.org/OTA/2003/05" Version="1.04">
+        <SeatMapResponses>
+          <SeatMapResponse>
+            <FlightSegmentInfo DepartureDateTime="2026-10-15T08:00:00" FlightNumber="401" ResBookDesigCode="Y" FareType="PUBLISHED" CabinClass="ECONOMY"/>
+            <SeatMapDetails>
+              <CabinClass>
+                <RowInfo RowNumber="12">
+                  <Seat SeatNumber="A" AvailableInd="true" OccupiedInd="false">
+                    <Service Amount="1500.00" CurrencyCode="PKR"/>
+                    <SeatCharacteristics>
+                      <Characteristic Code="WINDOW"/>
+                    </SeatCharacteristics>
+                    <Restrictions>
+                      <Restriction Code="NOT_SUITABLE_FOR_CHILD"/>
+                    </Restrictions>
+                  </Seat>
+                  <Seat SeatNumber="B" AvailableInd="false" OccupiedInd="true">
+                    <Restrictions>
+                      <Restriction Code="PERMANENTLY_BLOCKED"/>
+                    </Restrictions>
+                  </Seat>
+                </RowInfo>
+              </CabinClass>
+            </SeatMapDetails>
+          </SeatMapResponse>
+        </SeatMapResponses>
+      </OTA_AirSeatMapRS>
+    </AirSeatMapResponse>
+  </soap:Body>
+</soap:Envelope>

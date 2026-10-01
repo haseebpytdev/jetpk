@@ -82,23 +82,13 @@ class StoreSupplierConnectionRequest extends FormRequest
             }
 
             if ($provider === SupplierProvider::Airblue->value) {
-                $channel = strtolower(trim((string) ($credentials['api_channel'] ?? 'crane_ndc')));
-                if ($channel === 'zapways_ota') {
-                    foreach (['client_id', 'client_key', 'agent_type', 'agent_id', 'agent_password'] as $field) {
-                        if (! in_array($field, $keys, true)) {
-                            $validator->errors()->add('credentials.'.$field, 'This field is required for AirBlue Zapways OTA.');
-                        }
-                    }
-                } else {
-                    foreach (['username', 'password', 'agency_id', 'agency_name', 'owner_code'] as $field) {
-                        if (! in_array($field, $keys, true)) {
-                            $validator->errors()->add('credentials.'.$field, 'This field is required for AirBlue Crane NDC.');
-                        }
+                foreach (['client_id', 'client_key', 'agent_id', 'agent_password'] as $field) {
+                    if (! in_array($field, $keys, true)) {
+                        $validator->errors()->add('credentials.'.$field, 'This field is required for AirBlue Zapways OTA.');
                     }
                 }
-                if (trim((string) $this->input('base_url', '')) === '') {
-                    $validator->errors()->add('base_url', 'AirBlue base URL is required.');
-                }
+
+                return;
             }
 
             if ($provider === SupplierProvider::AirlineDirect->value) {

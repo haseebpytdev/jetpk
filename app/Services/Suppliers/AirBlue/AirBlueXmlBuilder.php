@@ -5,15 +5,19 @@ namespace App\Services\Suppliers\AirBlue;
 use App\Data\FlightSearchRequestData;
 use App\Models\Booking;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueValidationException;
-use App\Support\Phone\SupplierContactFormatter;
 use DOMDocument;
 use DOMElement;
 
 /**
- * Builds SOAP XML request payloads for AirBlue Crane NDC 20.1 operations.
+ * @deprecated AirBlue Crane NDC is retired. PIA uses {@see \App\Services\Suppliers\PiaNdc\PiaNdcXmlBuilder}.
+ * Retained for historical unit tests only — no active AirBlue runtime path.
  */
 class AirBlueXmlBuilder
 {
+    public function __construct(
+        private readonly ?AirBluePassengerPayloadBuilder $passengerPayloadBuilder = null,
+    ) {}
+
     private const SOAP_NS = 'http://schemas.xmlsoap.org/soap/envelope/';
 
     /**
@@ -247,28 +251,7 @@ class AirBlueXmlBuilder
      */
     public function buildPassengersFromBooking(Booking $booking): array
     {
-        $booking->loadMissing('passengers');
-        $passengers = [];
-        $counter = ['ADT' => 1, 'CHD' => 1, 'INF' => 1];
-        foreach ($booking->passengers as $passenger) {
-            $ptc = strtoupper((string) ($passenger->type ?? 'ADT'));
-            if (! in_array($ptc, ['ADT', 'CHD', 'INF'], true)) {
-                $ptc = 'ADT';
-            }
-            $idx = $counter[$ptc]++;
-            $passengers[] = [
-                'pax_id' => 'PAX-'.$ptc.$idx,
-                'ptc' => $ptc,
-                'title' => (string) ($passenger->title ?? ''),
-                'given_name' => (string) ($passenger->first_name ?? ''),
-                'surname' => (string) ($passenger->last_name ?? ''),
-                'gender' => strtoupper(substr((string) ($passenger->gender ?? 'M'), 0, 1)),
-                'birthdate' => (string) ($passenger->date_of_birth ?? ''),
-                'contact_info_ref_id' => 'Contact-1',
-            ];
-        }
-
-        return $passengers;
+        return $this->passengerBuilder()->buildPassengersFromBooking($booking);
     }
 
     /**
@@ -276,21 +259,12 @@ class AirBlueXmlBuilder
      */
     public function buildContactFromBooking(Booking $booking): array
     {
-        $booking->loadMissing('contact');
-        $contact = $booking->contact;
-        $formatted = SupplierContactFormatter::fromBooking($booking);
-        $xml = SupplierContactFormatter::toXmlContact($formatted);
+        return $this->passengerBuilder()->buildContactFromBooking($booking);
+    }
 
-        return [
-            'contact_info_id' => 'Contact-1',
-            'email' => (string) ($contact->email ?? $booking->contact_email ?? ''),
-            'phone_country' => $xml['phone_country'],
-            'phone_area' => $xml['phone_area'],
-            'phone_number' => $xml['phone_number'],
-            'ctcm_text' => $xml['ctcm_text'],
-            'ctcb_text' => $xml['ctcb_text'],
-            'contact_person_phone' => $xml['contact_person_phone'],
-        ];
+    private function passengerBuilder(): AirBluePassengerPayloadBuilder
+    {
+        return $this->passengerPayloadBuilder ?? new AirBluePassengerPayloadBuilder;
     }
 
     /**
@@ -455,7 +429,11 @@ class AirBlueXmlBuilder
                 $pax->appendChild($doc->createElement('ContactInfoRefID', (string) $passenger['contact_info_ref_id']));
             }
             $individual = $doc->createElement('Individual');
-            $individual->appendChild($doc->createElement('GenderCode', (string) ($passenger['gender'] ?? 'M')));
+            $gender = strtoupper(trim((string) ($passenger['gender'] ?? '')));
+            if (! in_array($gender, ['M', 'F'], true)) {
+                throw new \InvalidArgumentException('Passenger gender is required before creating an AirBlue order.');
+            }
+            $individual->appendChild($doc->createElement('GenderCode', $gender));
             $individual->appendChild($doc->createElement('GivenName', strtoupper((string) ($passenger['given_name'] ?? ''))));
             $individual->appendChild($doc->createElement('IndividualID', 'IND-'.($passenger['pax_id'] ?? '1')));
             $individual->appendChild($doc->createElement('Surname', strtoupper((string) ($passenger['surname'] ?? ''))));

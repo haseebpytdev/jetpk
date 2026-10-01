@@ -2,11 +2,11 @@
 
 namespace App\Services\Suppliers\AirBlue;
 
-use App\Enums\AirBlueApiChannel;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueAuthException;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueProviderException;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueUnavailableException;
+use App\Services\Suppliers\AirBlue\Exceptions\AirBlueValidationException;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueXmlException;
 use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Http\Client\ConnectionException;
@@ -15,13 +15,12 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Central SOAP/XML HTTP client for AirBlue (Crane NDC 20.1 and Zapways OTA v2.06).
+ * Central SOAP/XML HTTP client for AirBlue Zapways OTA (v2.0 and v3.0).
  */
 class AirBlueClient
 {
     public function __construct(
         private readonly AirBlueConfigResolver $configResolver,
-        private readonly AirBlueXmlParser $ndcXmlParser,
         private readonly AirBlueOtaXmlParser $otaXmlParser,
         private readonly AirBlueCorrelationContext $correlationContext,
     ) {}
@@ -36,14 +35,14 @@ class AirBlueClient
         string $requestXml,
         array $diagnosticContext = [],
     ): array {
-        $channel = $this->configResolver->apiChannel($connection);
+        $this->configResolver->resolve($connection);
 
-        return $channel === AirBlueApiChannel::ZapwaysOta
-            ? $this->callOta($connection, $operation, $requestXml, $diagnosticContext)
-            : $this->callNdc($connection, $operation, $requestXml, $diagnosticContext);
+        return $this->callOta($connection, $operation, $requestXml, $diagnosticContext);
     }
 
     /**
+     * @deprecated AirBlue Crane NDC is retired.
+     *
      * @param  array<string, mixed>  $diagnosticContext
      * @return array<string, mixed>
      */
@@ -53,45 +52,10 @@ class AirBlueClient
         string $requestXml,
         array $diagnosticContext = [],
     ): array {
-        $config = $this->configResolver->resolveNdc($connection);
-        $correlationId = (string) ($diagnosticContext['correlation_id'] ?? $this->correlationContext->newCorrelationId());
-        $soapAction = (string) config('suppliers.airblue.ndc_operations.'.$operation.'.soap_action', $operation);
-        $startedAt = microtime(true);
-
-        try {
-            $response = $this->baseHttpClient()
-                ->withHeaders([
-                    'Content-Type' => 'text/xml; charset=utf-8',
-                    'SOAPAction' => $soapAction,
-                    $config['username_header'] => $config['username'],
-                    $config['password_header'] => $config['password'],
-                    'X-Correlation-ID' => $correlationId,
-                ])
-                ->withBody($requestXml, 'text/xml; charset=utf-8')
-                ->post($config['endpoint_url']);
-        } catch (ConnectionException $exception) {
-            $this->logCall($connection, $config, $operation, $correlationId, $startedAt, null, $requestXml, null, 'failed', 'supplier_transport_failed', $diagnosticContext);
-
-            throw new AirBlueUnavailableException(
-                'supplier_transport_failed',
-                503,
-                'Provider temporarily unavailable.',
-                ['correlation_id' => $correlationId],
-                $exception,
-            );
-        }
-
-        return $this->finalizeResponse(
-            $response->status(),
-            (string) $response->body(),
-            $connection,
-            $config,
-            $operation,
-            $correlationId,
-            $startedAt,
-            $requestXml,
-            $diagnosticContext,
-            $this->ndcXmlParser,
+        throw new AirBlueValidationException(
+            'deprecated_channel',
+            422,
+            'AirBlue Crane NDC is no longer supported. Use PIA NDC (pia_ndc) for Hitit Crane NDC 20.1.',
         );
     }
 
@@ -143,7 +107,6 @@ class AirBlueClient
             $startedAt,
             $requestXml,
             $diagnosticContext,
-            $this->otaXmlParser,
         );
     }
 
@@ -162,7 +125,6 @@ class AirBlueClient
         float $startedAt,
         string $requestXml,
         array $diagnosticContext,
-        AirBlueXmlParser|AirBlueOtaXmlParser $parser,
     ): array {
         $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
 
@@ -189,7 +151,7 @@ class AirBlueClient
         }
 
         try {
-            $parsed = $parser->parse($body);
+            $parsed = $this->otaXmlParser->parse($body);
         } catch (AirBlueXmlException $exception) {
             $this->logCall($connection, $config, $operation, $correlationId, $startedAt, $status, $requestXml, $body, 'failed', $exception->normalizedCode, $diagnosticContext);
 
@@ -253,10 +215,13 @@ class AirBlueClient
             return $client;
         }
 
+        $keyPath = trim((string) ($config['tls_key_path'] ?? ''));
+        $sslKey = ($keyPath !== '' && is_file($keyPath)) ? $keyPath : $certPath;
+
         return $client->withOptions([
             'verify' => true,
             'cert' => $certPath,
-            'ssl_key' => $certPath,
+            'ssl_key' => $sslKey,
         ]);
     }
 
@@ -265,14 +230,37 @@ class AirBlueClient
      */
     private function resolveOtaSoapAction(string $operation, array $config): string
     {
-        $ops = (array) config('suppliers.airblue.ota_operations.'.$operation, []);
+        $protocol = \App\Enums\AirBlueZapwaysProtocolVersion::fromCredentials([
+            'protocol_version' => (string) ($config['protocol_version'] ?? '2.0'),
+        ]);
+        $ops = $this->configResolver->protocolOperationsConfig($protocol);
+        $operationConfig = is_array($ops[$operation] ?? null) ? $ops[$operation] : [];
+
         if ($operation === 'read') {
-            return (bool) ($config['is_test'] ?? false)
-                ? (string) ($ops['soap_action_test'] ?? 'https://ota.qa.zapways.com/Read')
-                : (string) ($ops['soap_action_live'] ?? 'https://ota.zapways.com/Read');
+            $soapAction = trim((bool) ($config['is_test'] ?? false)
+                ? (string) ($operationConfig['soap_action_test'] ?? '')
+                : (string) ($operationConfig['soap_action_live'] ?? ''));
+            if ($soapAction === '') {
+                throw new AirBlueValidationException(
+                    'missing_soap_action',
+                    422,
+                    sprintf('SOAPAction for AirBlue operation "%s" on protocol %s is not configured.', $operation, $protocol->value),
+                );
+            }
+
+            return $soapAction;
         }
 
-        return (string) ($ops['soap_action'] ?? $operation);
+        $soapAction = trim((string) ($operationConfig['soap_action'] ?? ''));
+        if ($soapAction === '') {
+            throw new AirBlueValidationException(
+                'missing_soap_action',
+                422,
+                sprintf('SOAPAction for AirBlue operation "%s" on protocol %s is not configured.', $operation, $protocol->value),
+            );
+        }
+
+        return $soapAction;
     }
 
     /**
@@ -299,6 +287,7 @@ class AirBlueClient
             'supplier_connection_id' => $connection->id,
             'provider' => 'airblue',
             'api_channel' => $config['api_channel'] ?? null,
+            'protocol_version' => $config['protocol_version'] ?? null,
             'environment' => $config['environment'] ?? null,
             'operation' => $operation,
             'endpoint' => $config['endpoint_url'] ?? null,
@@ -315,8 +304,14 @@ class AirBlueClient
 
     private function sanitizeXml(string $xml): string
     {
-        $redacted = preg_replace('/(<(?:EmailAddressText|GivenName|Surname|Birthdate|PhoneNumber|DocID|MessagePassword)>)[^<]+(<\/)/i', '$1[REDACTED]$2', $xml);
+        $redacted = preg_replace('/(<(?:[\w]+:)?(?:EmailAddressText|GivenName|Surname|Birthdate|BirthDate|PhoneNumber|DocID|MessagePassword|Email)>)[^<]+(<\/)/i', '$1[REDACTED]$2', $xml);
         $redacted = is_string($redacted) ? preg_replace('/(MessagePassword=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
+        $redacted = is_string($redacted) ? preg_replace('/(ERSP_UserID=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
+        $redacted = is_string($redacted) ? preg_replace('/(BirthDate=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
+        $redacted = is_string($redacted) ? preg_replace('/(DocID=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
+        $redacted = is_string($redacted) ? preg_replace('/(\bID=")(?![0-9]{1,3}")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
+        $redacted = is_string($redacted) ? preg_replace('/(<ota:Email>)[^<]+(<\/ota:Email>)/i', '$1[REDACTED]$2', $redacted) : $xml;
+        $redacted = is_string($redacted) ? preg_replace('/(PhoneNumber=")[^"]+(")/i', '$1[REDACTED]$2', $redacted) : $xml;
 
         return is_string($redacted) ? $redacted : $xml;
     }

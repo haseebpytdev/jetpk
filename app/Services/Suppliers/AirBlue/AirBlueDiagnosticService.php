@@ -32,18 +32,33 @@ class AirBlueDiagnosticService
                 ],
             );
 
-            $result = [
+            return [
                 'healthy' => true,
                 'api_channel' => $config['api_channel'] ?? null,
+                'protocol_version' => $config['protocol_version'] ?? null,
+                'namespace' => $config['namespace'] ?? null,
                 'environment' => $config['environment'],
+                'is_test' => (bool) ($config['is_test'] ?? false),
                 'endpoint_url' => $config['endpoint_url'],
+                'service_target' => $config['service_target'] ?? null,
+                'service_version' => $config['service_version'] ?? null,
+                'tls_cert_path_present' => ($config['tls_cert_path'] ?? '') !== '',
+                'tls_key_path_present' => ($config['tls_key_path'] ?? '') !== '',
+                'credential_fields_present' => [
+                    'client_id' => ($config['client_id'] ?? '') !== '',
+                    'client_key' => ($config['client_key'] ?? '') !== '',
+                    'agent_type' => ($config['agent_type'] ?? '') !== '',
+                    'agent_id' => ($config['agent_id'] ?? '') !== '',
+                    'agent_password' => ($config['agent_password'] ?? '') !== '',
+                ],
+                'credential_field_lengths' => [
+                    'client_id' => strlen((string) ($config['client_id'] ?? '')),
+                    'client_key' => strlen((string) ($config['client_key'] ?? '')),
+                    'agent_type' => strlen((string) ($config['agent_type'] ?? '')),
+                    'agent_id' => strlen((string) ($config['agent_id'] ?? '')),
+                    'agent_password' => strlen((string) ($config['agent_password'] ?? '')),
+                ],
             ];
-            if (($config['api_channel'] ?? '') === 'crane_ndc') {
-                $result['agency_id'] = $config['agency_id'] ?? null;
-                $result['owner_code'] = $config['owner_code'] ?? null;
-            }
-
-            return $result;
         } catch (AirBlueException $exception) {
             $this->diagnosticLogger->log(
                 connection: $connection,

@@ -3,12 +3,13 @@
 namespace App\Services\Suppliers\AirBlue;
 
 use App\Enums\AirBlueApiChannel;
+use App\Enums\AirBlueZapwaysProtocolVersion;
 use App\Enums\SupplierEnvironment;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueValidationException;
 
 /**
- * Resolves AirBlue endpoint, channel, and credentials from SupplierConnection.
+ * Resolves AirBlue endpoint, channel, protocol version, and credentials from SupplierConnection.
  */
 class AirBlueConfigResolver
 {
@@ -24,88 +25,36 @@ class AirBlueConfigResolver
      */
     public function resolve(SupplierConnection $connection): array
     {
-        return $this->apiChannel($connection) === AirBlueApiChannel::ZapwaysOta
-            ? $this->resolveOta($connection)
-            : $this->resolveNdc($connection);
+        if ($this->apiChannel($connection)->isDeprecated()) {
+            throw new AirBlueValidationException(
+                'deprecated_channel',
+                422,
+                'AirBlue Crane NDC is no longer supported. Use PIA NDC (pia_ndc) for Hitit Crane NDC 20.1 or configure AirBlue Zapways OTA credentials.',
+            );
+        }
+
+        return $this->resolveOta($connection);
     }
 
     /**
-     * @return array{
-     *     api_channel: string,
-     *     environment: string,
-     *     is_test: bool,
-     *     endpoint_url: string,
-     *     username: string,
-     *     password: string,
-     *     agency_id: string,
-     *     agency_name: string,
-     *     owner_code: string,
-     *     carrier_code: string,
-     *     currency: string,
-     *     language_code: string,
-     *     username_header: string,
-     *     password_header: string
-     * }
+     * @deprecated AirBlue Crane NDC is retired; detection only via {@see resolve()}.
+     *
+     * @return array<string, mixed>
      */
     public function resolveNdc(SupplierConnection $connection): array
     {
-        $credentials = is_array($connection->credentials) ? $connection->credentials : [];
-        $username = trim((string) ($credentials['username'] ?? ''));
-        $password = trim((string) ($credentials['password'] ?? ''));
-        $agencyId = trim((string) ($credentials['agency_id'] ?? ''));
-        $agencyName = trim((string) ($credentials['agency_name'] ?? ''));
-        $ownerCode = trim((string) ($credentials['owner_code'] ?? ''));
-        $endpoint = trim((string) ($connection->base_url ?? ''));
-
-        if ($username === '' || $password === '') {
-            throw new AirBlueValidationException(
-                'missing_credentials',
-                422,
-                'AirBlue Crane NDC username and password are required.',
-            );
-        }
-
-        if ($agencyId === '' || $agencyName === '' || $ownerCode === '') {
-            throw new AirBlueValidationException(
-                'missing_agency_fields',
-                422,
-                'AirBlue Crane NDC agency ID, agency name, and owner code are required.',
-            );
-        }
-
-        if ($endpoint === '') {
-            $endpoint = (string) config('suppliers.airblue.default_ndc_base_url', '');
-        }
-
-        if ($endpoint === '') {
-            throw new AirBlueValidationException(
-                'missing_endpoint',
-                422,
-                'AirBlue Crane NDC base URL is required. Configure the endpoint in API settings.',
-            );
-        }
-
-        return [
-            'api_channel' => AirBlueApiChannel::CraneNdc->value,
-            'environment' => $connection->environment?->value ?? 'sandbox',
-            'is_test' => $this->isTestEnvironment($connection),
-            'endpoint_url' => rtrim($endpoint, '/'),
-            'username' => $username,
-            'password' => $password,
-            'agency_id' => $agencyId,
-            'agency_name' => $agencyName,
-            'owner_code' => $ownerCode,
-            'carrier_code' => trim((string) ($credentials['carrier_code'] ?? '')) ?: 'PA',
-            'currency' => strtoupper(trim((string) ($credentials['currency'] ?? '')) ?: 'PKR'),
-            'language_code' => strtoupper(trim((string) ($credentials['language_code'] ?? '')) ?: 'EN'),
-            'username_header' => (string) config('suppliers.airblue.username_header', 'username'),
-            'password_header' => (string) config('suppliers.airblue.password_header', 'password'),
-        ];
+        throw new AirBlueValidationException(
+            'deprecated_channel',
+            422,
+            'AirBlue Crane NDC is no longer supported. Use PIA NDC (pia_ndc) for Hitit Crane NDC 20.1.',
+        );
     }
 
     /**
      * @return array{
      *     api_channel: string,
+     *     protocol_version: string,
+     *     namespace: string,
      *     environment: string,
      *     is_test: bool,
      *     endpoint_url: string,
@@ -117,19 +66,31 @@ class AirBlueConfigResolver
      *     service_target: string,
      *     service_version: string,
      *     tls_cert_path: string,
+     *     tls_key_path: string,
      *     carrier_code: string,
      *     currency: string
      * }
      */
     public function resolveOta(SupplierConnection $connection): array
     {
+        if ($this->apiChannel($connection)->isDeprecated()) {
+            throw new AirBlueValidationException(
+                'deprecated_channel',
+                422,
+                'AirBlue Crane NDC is no longer supported. Use PIA NDC (pia_ndc) for Hitit Crane NDC 20.1 or configure AirBlue Zapways OTA credentials.',
+            );
+        }
+
         $credentials = is_array($connection->credentials) ? $connection->credentials : [];
+        $protocol = AirBlueZapwaysProtocolVersion::fromCredentials($credentials);
+        $protocolConfig = $this->protocolConfig($protocol);
         $clientId = trim((string) ($credentials['client_id'] ?? ''));
         $clientKey = trim((string) ($credentials['client_key'] ?? ''));
         $agentType = trim((string) ($credentials['agent_type'] ?? ''));
         $agentId = trim((string) ($credentials['agent_id'] ?? ''));
         $agentPassword = trim((string) ($credentials['agent_password'] ?? ''));
         $endpoint = trim((string) ($connection->base_url ?? ''));
+        $isTest = $this->isTestEnvironment($connection);
 
         if ($clientId === '' || $clientKey === '' || $agentType === '' || $agentId === '' || $agentPassword === '') {
             throw new AirBlueValidationException(
@@ -140,9 +101,9 @@ class AirBlueConfigResolver
         }
 
         if ($endpoint === '') {
-            $endpoint = $this->isTestEnvironment($connection)
-                ? (string) config('suppliers.airblue.default_ota_qa_base_url', '')
-                : (string) config('suppliers.airblue.default_ota_base_url', '');
+            $endpoint = $isTest
+                ? (string) ($protocolConfig['default_qa_base_url'] ?? '')
+                : (string) ($protocolConfig['default_base_url'] ?? '');
         }
 
         if ($endpoint === '') {
@@ -153,34 +114,43 @@ class AirBlueConfigResolver
             );
         }
 
+        if ($protocol->isV3() && ! $isTest && ! (bool) ($protocolConfig['live_enabled'] ?? false)) {
+            throw new AirBlueValidationException(
+                'v3_live_not_enabled',
+                422,
+                'AirBlue Zapways OTA v3.0 LIVE is not enabled for this deployment. Use TEST/sandbox until supplier certification completes.',
+            );
+        }
+
         return [
             'api_channel' => AirBlueApiChannel::ZapwaysOta->value,
+            'protocol_version' => $protocol->value,
+            'namespace' => (string) ($protocolConfig['namespace'] ?? $protocol->namespaceUri()),
             'environment' => $connection->environment?->value ?? 'sandbox',
-            'is_test' => $this->isTestEnvironment($connection),
+            'is_test' => $isTest,
             'endpoint_url' => rtrim($endpoint, '/'),
             'client_id' => $clientId,
             'client_key' => $clientKey,
             'agent_type' => $agentType,
             'agent_id' => $agentId,
             'agent_password' => $agentPassword,
-            'service_target' => trim((string) ($credentials['service_target'] ?? '')) ?: 'Production',
+            'service_target' => $this->resolveServiceTarget($connection, $credentials),
             'service_version' => trim((string) ($credentials['service_version'] ?? '')) ?: '1.04',
-            'tls_cert_path' => trim((string) ($credentials['tls_cert_path'] ?? '')),
+            'tls_cert_path' => $this->resolveTlsPath($credentials, 'tls_cert_path', 'default_tls_cert_path'),
+            'tls_key_path' => $this->resolveTlsPath($credentials, 'tls_key_path', 'default_tls_key_path'),
             'carrier_code' => 'PA',
             'currency' => strtoupper(trim((string) ($credentials['currency'] ?? '')) ?: 'PKR'),
         ];
     }
 
-    public function defaultNdcBaseUrl(): string
+    public function defaultOtaBaseUrl(bool $isTest, ?AirBlueZapwaysProtocolVersion $protocol = null): string
     {
-        return (string) config('suppliers.airblue.default_ndc_base_url', '');
-    }
+        $protocol ??= AirBlueZapwaysProtocolVersion::V2;
+        $protocolConfig = $this->protocolConfig($protocol);
 
-    public function defaultOtaBaseUrl(bool $isTest): string
-    {
         return $isTest
-            ? (string) config('suppliers.airblue.default_ota_qa_base_url', '')
-            : (string) config('suppliers.airblue.default_ota_base_url', '');
+            ? (string) ($protocolConfig['default_qa_base_url'] ?? '')
+            : (string) ($protocolConfig['default_base_url'] ?? '');
     }
 
     public function isTestEnvironment(SupplierConnection $connection): bool
@@ -188,5 +158,61 @@ class AirBlueConfigResolver
         $env = $connection->environment;
 
         return in_array($env, [SupplierEnvironment::Demo, SupplierEnvironment::Sandbox], true);
+    }
+
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
+    public function resolveServiceTarget(SupplierConnection $connection, array $credentials): string
+    {
+        $explicit = trim((string) ($credentials['service_target'] ?? ''));
+        if ($explicit !== '') {
+            return $explicit;
+        }
+
+        return $this->isTestEnvironment($connection) ? 'Test' : 'Production';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function protocolOperationsConfig(AirBlueZapwaysProtocolVersion $protocol): array
+    {
+        $protocolConfig = $this->protocolConfig($protocol);
+
+        return is_array($protocolConfig['ota_operations'] ?? null) ? $protocolConfig['ota_operations'] : [];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function protocolConfig(AirBlueZapwaysProtocolVersion $protocol): array
+    {
+        $versions = (array) config('suppliers.airblue.protocol_versions', []);
+        $config = is_array($versions[$protocol->value] ?? null) ? $versions[$protocol->value] : [];
+
+        if ($config !== []) {
+            return $config;
+        }
+
+        return [
+            'namespace' => $protocol->namespaceUri(),
+            'default_base_url' => (string) config('suppliers.airblue.default_ota_base_url', ''),
+            'default_qa_base_url' => (string) config('suppliers.airblue.default_ota_qa_base_url', ''),
+            'ota_operations' => (array) config('suppliers.airblue.ota_operations', []),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
+    private function resolveTlsPath(array $credentials, string $credentialKey, string $configKey): string
+    {
+        $explicit = trim((string) ($credentials[$credentialKey] ?? ''));
+        if ($explicit !== '') {
+            return $explicit;
+        }
+
+        return trim((string) config('suppliers.airblue.'.$configKey, ''));
     }
 }
