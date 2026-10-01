@@ -3,6 +3,12 @@
 namespace Tests\Feature\Dashboard;
 
 use App\Enums\AccountType;
+use App\Enums\SupplierConnectionStatus;
+use App\Enums\SupplierEnvironment;
+use App\Enums\SupplierProvider;
+use App\Models\Agency;
+use App\Models\AuditLog;
+use App\Models\SupplierConnection;
 use App\Models\User;
 use App\Support\BackOffice\BackOfficeCapabilitiesPresenter;
 use Database\Seeders\OtaFoundationSeeder;
@@ -58,26 +64,57 @@ class ApiConnectionsHubTest extends TestCase
     public function test_json_connection_payload_includes_audit_and_advanced_shapes(): void
     {
         [$admin] = $this->platformAdmin();
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+
+        $connection = SupplierConnection::factory()->create([
+            'agency_id' => $agency->id,
+            'provider' => SupplierProvider::Sabre,
+            'name' => 'QA Audit Contract Connection',
+            'display_name' => 'QA Audit Contract Connection',
+            'environment' => SupplierEnvironment::Sandbox,
+            'status' => SupplierConnectionStatus::Inactive,
+            'is_active' => false,
+            'credentials' => [
+                'client_id' => 'qa-client-id',
+                'client_secret' => 'qa-plaintext-secret',
+            ],
+            'settings' => [
+                'api_channel' => 'gds',
+                'notes' => 'qa-safe-setting',
+            ],
+        ]);
+
+        AuditLog::query()->create([
+            'agency_id' => $agency->id,
+            'user_id' => $admin->id,
+            'action' => 'updated',
+            'auditable_type' => SupplierConnection::class,
+            'auditable_id' => $connection->id,
+            'properties' => [
+                'name' => ['old' => 'Old Name', 'new' => 'QA Audit Contract Connection'],
+                'client_secret' => 'must-not-leak',
+            ],
+        ]);
 
         $response = $this->actingAs($admin)
             ->getJson('/admin/api-settings?format=json')
             ->assertOk();
 
-        $connections = $response->json('connections') ?? [];
-        if ($connections === []) {
-            $this->markTestSkipped('No supplier connections seeded for audit/advanced contract.');
-        }
-
-        $first = $connections[0];
+        $connections = collect($response->json('connections') ?? []);
+        $first = $connections->firstWhere('id', (string) $connection->id) ?? $connections->first();
+        $this->assertNotNull($first);
         $this->assertArrayHasKey('maskedCredentials', $first);
         $this->assertArrayHasKey('advanced', $first);
         $this->assertArrayHasKey('audit', $first);
         $this->assertIsArray($first['advanced']['fields'] ?? null);
+        $this->assertNotEmpty($first['advanced']['fields'] ?? []);
         $this->assertIsArray($first['audit']['history'] ?? null);
+        $this->assertNotEmpty($first['audit']['history'] ?? []);
 
         $encoded = strtolower((string) json_encode($first));
         $this->assertStringNotContainsString('"password":"', $encoded);
-        $this->assertStringNotContainsString('"client_secret":"', $encoded);
+        $this->assertStringNotContainsString('"client_secret":"qa-plaintext-secret"', $encoded);
+        $this->assertStringNotContainsString('must-not-leak', $encoded);
     }
 
     public function test_admin_navigation_exposes_single_next_api_connections_entry(): void

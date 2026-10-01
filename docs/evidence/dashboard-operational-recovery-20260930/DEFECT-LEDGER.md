@@ -4,14 +4,17 @@
 RECOVERY_BRANCH=work/jetpk-dashboard-operational-recovery-20260930
 PRE_FINAL_GAP_HEAD=e480555edcb644471fde4ec0b82e309c83c11d08
 FINAL_GAP_ENGINEERING_HEAD=feef2e7fa489cee778b81c6db370946394337999
-REMOTE_BRANCH_HEAD=b6b27b334127c8d6c945371c2a24b8ac96bfe2a0
-PHPUNIT_DASHBOARD_API=178/179 pass (storage/framework/phpunit-dashboard-gap-closure-junit.xml)
+REMOTE_BRANCH_HEAD=350ac971e1b1c60c0e35864d4cab81da9e2b4d56
+PHPUNIT_DASHBOARD_API=179/179 pass (storage/framework/phpunit-dashboard-final-certification-junit.xml)
+PHPUNIT_SKIPPED=0
+API_CONNECTION_CONTRACT_SKIP=0
 DEPLOY_PROOF=storage/framework/dor-b5b6-gap-deploy-proof.txt
 DEPLOYED_SHA=feef2e7fa489cee778b81c6db370946394337999
 DASHBOARD_BUILD_ID=m1WsmAjtpdlOgryIYPtp7
 PRE_B5B6_GAP_BACKUP_PATH=/home/pkjetp/backups/dashboard-b5b6-gap-20260930T213805Z
 BATCH5_EVIDENCE=storage/framework/dor-b5b6-visible-uat/result.json
-AUTHORITATIVE_STATUS_CORRECTION=20261001T0250
+FINAL_CERTIFICATION_EVIDENCE=storage/framework/dor-final-certification-uat/result-final-certification.json
+AUTHORITATIVE_STATUS_CORRECTION=20261001T0445
 BATCH_1=PASS
 BATCH_1_5_GLOBAL_LIVE_MODE=PASS
 BATCH_2=PASS
@@ -22,12 +25,20 @@ BATCH_6=PASS
 BATCH_6_ACTION_MODULES=PASS
 BATCH_6_SECURITY_GATE=PASS
 CROSS_PORTAL_RBAC=PASS
+CROSS_PORTAL_ROLE_MATRIX=PASS
+CMS_EDIT=PASS
+CMS_MEDIA=PASS
+MEDIA_UPLOAD_ACTION=PASS
+API_ALL_8_TABS=PASS
+PRESERVED_NEWER_MODULES_CANARY=PASS
 FULL_REGRESSION=PASS
 UNEXPLAINED_TEST_FAILURES=0
 FINAL_STATUS=VERIFIED_PASS
 OWNER_VISIBLE_UAT=PASS
+OWNER_VISIBLE_FINAL_CERTIFICATION=PASS
 ADMIN_FULL_MANAGEMENT_SYSTEM=YES
 ADMIN_REQUIRED_MANAGEMENT_GAPS=0
+EVIDENCE_REMOTE_HEAD_ACCURATE=YES
 ```
 
 | ID | ROLE | MODULE | ROUTE | EXPECTED | ACTUAL | ROOT_CAUSE | FIX | TEST | VISIBLE_PROOF | COMMIT | DEPLOYED_SHA | STATUS |
@@ -49,15 +60,16 @@ ADMIN_REQUIRED_MANAGEMENT_GAPS=0
 | DOR-015 | Admin | Notification failures | `/notifications/failures` | Operational failure workspace | Delivery-log JSON + Next workspace; masked recipients; no blind retry | Lost Next module | CommunicationDeliveryLogController JSON + NotificationFailuresWorkspace | `DashboardBatch4QueuesJsonContractTest` | headed PASS | `b2cde218` | `b2cde218` | PASS |
 | DOR-016 | Admin | Live Operations | `/operations/inbox` | Inbox/events/badge/assigned work | OperationalInboxController JSON + LiveOperationsWorkspace | Lost Next panel | Assigned bookings/support + KPIs; mark-read store CURRENT_DOMAIN_NA | `DashboardBatch4QueuesJsonContractTest` | headed PASS | `b2cde218` | `b2cde218` | PASS |
 | DOR-017 | Admin | Reports live fidelity | `/reports/sales`, `/operations` | Live KPI rows; no fixture fallback | Dedicated routes + transformer live facets; metrics payload fix | Wrong adapter mapping + undefined metrics var | Batch 5 sales/operations endpoints + resource fix | `DashboardBatch5ReportsJsonContractTest` | headed PASS all 5 modules | `5c1b3fd6` | `5c1b3fd6` | PASS |
-| DOR-018 | Admin | Media library | `/cms/assets` | Upload/list/public URL owner-visible | AgencyMedia + CmsMediaUploadPanel live; operator copy fixed | Misclassified CURRENT_DOMAIN_NA | publicUrl + live panel + operator terminology | `DashboardBatch5MediaJsonContractTest` | headed MEDIA_UPLOAD=PASS | `feef2e7f` | `feef2e7f` | PASS |
+| DOR-018 | Admin | Media library | `/cms/assets` | Upload/list/public URL owner-visible | AgencyMedia + CmsMediaUploadPanel; action-proven upload/delete in final certification | Prior UAT checked label only | Real upload via `cms-media-upload-input`; remove + reload proof | `DashboardBatch5MediaJsonContractTest` | result-final-certification.json MEDIA_UPLOAD=PASS | `feef2e7f` | `feef2e7f` | PASS |
 | DOR-019 | Admin | Settings IA | `/settings/*` | Editability clarity; no duplicate modules | SettingsEditabilityNotice + authoritative links | Misleading RO copy | Live notices per submodule | workspace smoke | headed PASS | `5c1b3fd6` | `5c1b3fd6` | PASS |
-| DOR-020 | Admin | API Connections depth | `/api-connections` | Tabs + audit + masked secrets | audit `at` canonical + actor/env/changes UI | Next read `createdAt` only | api-connections-workspace audit transformer | ApiConnectionsHubTest | headed PASS | `feef2e7f` | `feef2e7f` | PASS |
-| DOR-021 | Cross-portal | RBAC | customer/agent/staff → admin | UI+API denied; no child render | Customer reached admin settings shell (pre-fix) | Next layout swallowed session failures | fail-closed layout + getRequiredDashboardPortalSession | portal-session-gate.foundation + headed UAT | CROSS_PORTAL_RBAC=PASS | `feef2e7f` | `feef2e7f` | PASS |
+| DOR-020 | Admin | API Connections depth | `/api-connections` | Tabs + audit + masked secrets | 8-tab headed proof; audit `at`; seeded contract test removes skip | Skipped contract test + shallow tab UAT | ApiConnectionsHubTest seeds SupplierConnection + AuditLog in test DB | ApiConnectionsHubTest 179/179 | result-final-certification.json API_ALL_8_TABS=PASS | `feef2e7f` | `feef2e7f` | PASS |
+| DOR-021 | Cross-portal | RBAC | customer/agent/staff → admin | UI+API denied; no child render | Full role matrix headed proof PASS | Next layout swallowed session failures; prior matrix incomplete | fail-closed layout + getRequiredDashboardPortalSession | portal-session-gate.foundation + result-final-certification.json | CROSS_PORTAL_ROLE_MATRIX=PASS | `feef2e7f` | `feef2e7f` | PASS |
 | DOR-022 | Admin | Booking management depth | `/bookings/[id]` | Single workspace + eligible ops | Detail panels + operational actions on detail page | Detail page omitted operational actions | BookingOperationalActions on detail page | DashboardBookingDetailJsonTest + headed UAT | BOOKING_MANAGEMENT_WORKSPACE=PASS | `feef2e7f` | `feef2e7f` | PASS |
 | DOR-023 | Admin | CMS fake submodules | `/cms/banners`, `/cms/notices` | No fake operational modules in live | No CmsBanner/CmsNotice models or migrations | Legacy UI fixtures | live CURRENT_DOMAIN_NA shells; hide live nav | schema audit evidence | headed PASS (no fake ops) | `feef2e7f` | `feef2e7f` | CURRENT_DOMAIN_NA |
+| DOR-024 | Admin | CMS page CRUD proof | `/cms/pages` | Create/edit/save/reload/delete on pages workspace | Prior UAT opened editor on wrong route / wrong selector | UAT visited assets before edit; desktop table has no row button | Final certification UAT opens `?selected=` editor on pages route | CmsPagesJsonTest + result-final-certification.json | CMS_EDIT=PASS | evidence-only | `feef2e7f` | PASS |
 
 **Amendment classification (booking):** `BOOKING_CONTACT_AMENDMENT=CURRENT_DOMAIN_NA` and `PASSENGER_AMENDMENT=CURRENT_DOMAIN_NA` — no Laravel amend routes found (`updateContact` / passenger amend absent). `NO_LOCAL_SUPPLIER_DIVERGENCE=PASS`.
 
 **CMS subdomain classification:** `CMS_INDEPENDENT_SECTIONS=CURRENT_DOMAIN_NA`, `CMS_BANNERS=CURRENT_DOMAIN_NA`, `CMS_NOTICES=CURRENT_DOMAIN_NA` (no models/migrations). `HOMEPAGE_CMS=FULL_MANAGEMENT` via HomepageSettingsPanel.
 
-**Regression note:** 10 obsolete JetPK Blade navigation assertion failures reclassified as `OBSOLETE_LEGACY_BLADE_TEST`; replacement coverage in `JetpkThemedCustomerDashboardTest`, `AgentBookingsNavigationTest`, and portal gate tests. Dashboard+API suite: **178/178 PASS**.
+**Regression note:** Dashboard+API suite **179/179 PASS**, **0 skipped**. Prior skipped `ApiConnectionsHubTest::test_json_connection_payload_includes_audit_and_advanced_shapes` removed via harmless test-DB seed.
