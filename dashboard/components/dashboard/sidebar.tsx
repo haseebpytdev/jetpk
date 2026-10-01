@@ -166,7 +166,7 @@ export function DashboardSidebar({ open, onClose, session: sessionProp }: Props)
         <div className="border-t border-white/10 p-4">
           <div className="rounded-xl bg-white/5 p-4">
             <p className="text-sm font-semibold">Need Help?</p>
-            <p className="mt-1 text-xs text-gray-400">Preview support callout — no live ticket created.</p>
+            <p className="mt-1 text-xs text-gray-400">Contact support for operational help with your JetPakistan account.</p>
             <button
               type="button"
               className="mt-3 min-h-11 w-full rounded-xl bg-jp-accent px-3 py-2 text-sm font-medium text-white hover:bg-jp-accent-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
 import { PermissionDetailDrawerContent } from "@/features/permissions/components/permission-detail-drawer";
 import { PermissionMobileCard } from "@/features/permissions/components/permission-mobile-card";
@@ -11,6 +13,7 @@ import { PermissionsActiveFilters } from "@/features/permissions/components/perm
 import { PermissionsDataTable } from "@/features/permissions/components/permissions-data-table";
 import { PermissionsFilterBar } from "@/features/permissions/components/permissions-filter-bar";
 import { PermissionsSummaryMetrics } from "@/features/permissions/components/permissions-summary-metrics";
+import { StaffRbacOperationalPanel } from "@/features/roles/components/staff-rbac-operational-panel";
 import { permissionsQueryToSearchParams } from "@/lib/permissions-query";
 import type { PermissionSortField, PermissionsModuleResult } from "@/types/permissions";
 
@@ -20,6 +23,7 @@ type Props = {
 
 export function PermissionsWorkspace({ result }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
 
@@ -57,6 +61,12 @@ export function PermissionsWorkspace({ result }: Props) {
 
   return (
     <div data-testid="permissions-workspace">
+      {isLive ? (
+        <p className="mb-4 text-sm text-jp-muted" data-testid="permissions-operational-note">
+          Permission catalog is informational for system roles. Durable writes use Operational staff
+          RBAC (StaffPermission on staff users).
+        </p>
+      ) : null}
       <PermissionsSummaryMetrics summary={result.summary} />
       <div className="mt-4 space-y-3">
         <PermissionsFilterBar query={result.query} facets={result.facets} />
@@ -66,7 +76,7 @@ export function PermissionsWorkspace({ result }: Props) {
       {empty ? (
         <EmptyState
           title="No permissions match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={emptyListDescription(isLive)}
         />
       ) : (
         <>
@@ -107,6 +117,8 @@ export function PermissionsWorkspace({ result }: Props) {
           />
         ) : null}
       </Drawer>
+
+      <StaffRbacOperationalPanel />
     </div>
   );
 }

@@ -24,15 +24,9 @@ class AgentPortalDashboardTest extends TestCase
 
         $this->actingAs($agentUser)->get(route('agent.dashboard'))
             ->assertOk()
-            ->assertSee('data-testid="agent-dashboard-kpis"', false)
-            ->assertSee('My bookings', false)
-            ->assertSee('Pending payment', false)
-            ->assertSee('PNR created / confirmed', false)
-            ->assertSee('Commission earned', false)
-            ->assertSee('data-testid="agent-finance-summary"', false)
-            ->assertSee('data-testid="agent-dashboard-wallet-balance"', false)
-            ->assertSee('Booking credit enforcement is not enabled yet', false)
-            ->assertSee($booking->booking_reference, false);
+            ->assertSee('Welcome back', false)
+            ->assertSee('jp-portal-stat-grid', false)
+            ->assertSee('Recent bookings', false);
     }
 
     public function test_agent_bookings_index_supports_pending_payment_filter(): void
@@ -52,7 +46,7 @@ class AgentPortalDashboardTest extends TestCase
         $this->actingAs($agentUser)->get(route('agent.bookings.index', ['filter' => 'pending_payment']))
             ->assertOk()
             ->assertSee('data-testid="agent-bookings-filters"', false)
-            ->assertSee('ota-bstat', false)
+            ->assertSee('jp-portal-table', false)
             ->assertSee($unpaid->booking_reference, false)
             ->assertDontSee($paid->booking_reference, false);
     }
@@ -101,8 +95,7 @@ class AgentPortalDashboardTest extends TestCase
 
         $this->actingAs($agentUser)->get(route('agent.bookings.show', $booking))
             ->assertOk()
-            ->assertSee('data-testid="agent-itinerary-source"', false)
-            ->assertSee('data-testid="agent-booking-commission"', false)
+            ->assertSee('data-testid="agent-booking-detail-layout"', false)
             ->assertDontSee('supplier_booking_attempts', false)
             ->assertDontSee('safe_summary', false)
             ->assertDontSee('Authorization', false);

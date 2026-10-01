@@ -71,7 +71,15 @@ type WorkspaceConnectionRow = ApiConnectionRow & {
     lastTestStatus?: string | null;
     lastFailure?: string | null;
     updatedAt?: string | null;
-    history?: Array<{ id?: number; action: string; createdAt?: string | null }>;
+    history?: Array<{
+      id?: number | string;
+      action: string;
+      actor?: string | null;
+      at?: string | null;
+      createdAt?: string | null;
+      environment?: string | null;
+      changes?: Record<string, unknown>;
+    }>;
   };
   advanced?: {
     fields?: FieldMeta[];
@@ -85,6 +93,24 @@ type WorkspaceConnectionRow = ApiConnectionRow & {
 
 function currentChannel(credentials: Record<string, string>, row?: WorkspaceConnectionRow): string {
   return credentials.api_channel || row?.advanced?.values?.api_channel || "crane_ndc";
+}
+
+function auditTimestamp(entry: NonNullable<WorkspaceConnectionRow["audit"]>["history"] extends (infer T)[] | undefined ? T : never): string {
+  const raw = entry.createdAt ?? entry.at;
+  if (!raw) return "—";
+  try {
+    return new Date(raw).toLocaleString("en-PK", { dateStyle: "medium", timeStyle: "short" });
+  } catch {
+    return raw;
+  }
+}
+
+function formatAuditChanges(changes?: Record<string, unknown>): string {
+  if (!changes || Object.keys(changes).length === 0) return "No field changes recorded";
+  return Object.entries(changes)
+    .slice(0, 6)
+    .map(([key, value]) => `${key}: ${typeof value === "string" ? value : JSON.stringify(value)}`)
+    .join(" · ");
 }
 
 function isFieldVisible(field: FieldMeta, credentials: Record<string, string>, row?: WorkspaceConnectionRow): boolean {
@@ -409,10 +435,14 @@ export function ApiConnectionsWorkspace() {
                     {(row.audit?.history ?? []).length === 0 ? (
                       <p className="text-sm text-jp-muted">No connection audit events yet.</p>
                     ) : (
-                      <ul className="space-y-1 text-sm">
+                      <ul className="space-y-2 text-sm">
                         {(row.audit?.history ?? []).map((entry) => (
-                          <li key={`${entry.action}-${entry.id ?? entry.createdAt}`}>
-                            {entry.action} · {entry.createdAt ?? "unknown time"}
+                          <li key={`${entry.action}-${entry.id ?? entry.at ?? entry.createdAt}`} className="rounded-lg border border-jp-border px-3 py-2">
+                            <p className="font-medium">{entry.action}</p>
+                            <p className="text-xs text-jp-muted">
+                              {entry.actor ?? "System"} · {auditTimestamp(entry)} · {entry.environment || row.environment || "—"}
+                            </p>
+                            <p className="mt-1 text-xs">{formatAuditChanges(entry.changes)}</p>
                           </li>
                         ))}
                       </ul>

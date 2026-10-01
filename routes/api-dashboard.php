@@ -57,8 +57,10 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
     Route::middleware('dashboard.permission:customers.view')->group(function (): void {
         Route::get('/customers', [DashboardCustomersController::class, 'index'])
             ->name('customers.index');
-        Route::get('/customers/{customer}', [DashboardCustomersController::class, 'show'])
-            ->where('customer', '[^/]+')
+        // Use {customerKey} — not {customer} — so global Route::bind('customer') in admin.php
+        // cannot replace the segment with a User model (breaks CU- ids and string parsers).
+        Route::get('/customers/{customerKey}', [DashboardCustomersController::class, 'show'])
+            ->where('customerKey', '[^/]+')
             ->name('customers.show');
     });
 
@@ -110,11 +112,17 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
             ->name('reports.suppliers');
         Route::get('/reports/agents', [DashboardReportsController::class, 'agents'])
             ->name('reports.agents');
+        Route::get('/reports/sales', [DashboardReportsController::class, 'sales'])
+            ->name('reports.sales');
+        Route::get('/reports/operations', [DashboardReportsController::class, 'operations'])
+            ->name('reports.operations');
     });
 
     Route::middleware('dashboard.permission:cms.view')->group(function (): void {
         Route::get('/cms/pages', [DashboardCmsController::class, 'index'])
             ->name('cms.pages.index');
+        Route::get('/cms/assets', [DashboardCmsController::class, 'assets'])
+            ->name('cms.assets.index');
         Route::get('/cms/pages/{page}', [DashboardCmsController::class, 'show'])
             ->where('page', '[^/]+')
             ->name('cms.pages.show');

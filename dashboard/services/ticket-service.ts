@@ -61,7 +61,7 @@ const ticketsService = createReadOnlyService<TicketsQuery, TicketsPageResult>({
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const envelope = await fetchDashboardApi<LaravelTicketsListPayload>(DASHBOARD_API_ROUTES.tickets, {
         signal: options?.signal,

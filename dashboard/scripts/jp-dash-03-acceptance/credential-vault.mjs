@@ -37,6 +37,15 @@ export const QA_CREDENTIAL_ROLES = {
       "JetPakistan-JP-DASH-03-QA-Customer",
     ],
   },
+  agentStaff: {
+    envKey: "JP_DASH_03_QA_AGENT_STAFF_PASSWORD",
+    vaultTargets: [
+      "LegacyGeneric:target=JetPakistan-JP-DASH-03-QA-Agent-Staff",
+      "JetPakistan-JP-DASH-03-QA-Agent-Staff",
+      "LegacyGeneric:target=JetPakistan-JP-DASH-03-QA-AgentStaff",
+      "JetPakistan-JP-DASH-03-QA-AgentStaff",
+    ],
+  },
 };
 
 /**

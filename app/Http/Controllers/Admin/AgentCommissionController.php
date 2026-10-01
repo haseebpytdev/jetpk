@@ -21,28 +21,61 @@ class AgentCommissionController extends Controller
         protected AgentCommissionService $commissionService,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         Gate::authorize('viewAny', AgentCommissionEntry::class);
 
         $agencyId = $request->user()->current_agency_id;
-        $agents = Agent::query()
-            ->where('agency_id', $agencyId)
-            ->with(['user'])
+        $agentsQuery = Agent::query()->with(['user']);
+        $entriesQuery = AgentCommissionEntry::query()->with(['agent.user']);
+
+        if ($agencyId !== null) {
+            $agentsQuery->where('agency_id', $agencyId);
+            $entriesQuery->where('agency_id', $agencyId);
+        } elseif (! $request->user()->isPlatformAdmin()) {
+            $agentsQuery->whereRaw('1 = 0');
+            $entriesQuery->whereRaw('1 = 0');
+        }
+
+        $agents = $agentsQuery->get();
+        $pendingAmount = (clone $entriesQuery)->where('status', 'pending')->sum('commission_amount');
+        $approvedUnpaid = (clone $entriesQuery)->where('status', 'approved')->sum('commission_amount');
+        $paidThisMonth = (clone $entriesQuery)->where('status', 'paid')
+            ->whereBetween('paid_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->sum('commission_amount');
+        $pendingEntries = (clone $entriesQuery)
+            ->where('status', 'pending')
+            ->orderByDesc('id')
+            ->limit(50)
             ->get();
 
-        $pending = AgentCommissionEntry::query()->where('agency_id', $agencyId)->where('status', 'pending')->sum('commission_amount');
-        $approvedUnpaid = AgentCommissionEntry::query()->where('agency_id', $agencyId)->where('status', 'approved')->sum('commission_amount');
-        $paidThisMonth = AgentCommissionEntry::query()->where('agency_id', $agencyId)->where('status', 'paid')->whereBetween('paid_at', [now()->startOfMonth(), now()->endOfMonth()])->sum('commission_amount');
+        $kpis = [
+            'pending' => (float) $pendingAmount,
+            'approved_unpaid' => (float) $approvedUnpaid,
+            'paid_this_month' => (float) $paidThisMonth,
+            'active_agents' => $agents->count(),
+        ];
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'kpis' => $kpis,
+                'pending_entries' => $pendingEntries
+                    ->map(fn (AgentCommissionEntry $entry): array => $this->presentEntry($entry))
+                    ->values()
+                    ->all(),
+                'agents' => $agents->map(fn (Agent $agent): array => [
+                    'id' => (string) $agent->id,
+                    'code' => $agent->code,
+                    'name' => $agent->user?->name,
+                    'balance' => $this->commissionService->calculateBalance($agent),
+                ])->values()->all(),
+            ]);
+        }
 
         return view('dashboard.admin.commissions.index', [
             'agents' => $agents,
-            'kpis' => [
-                'pending' => (float) $pending,
-                'approved_unpaid' => (float) $approvedUnpaid,
-                'paid_this_month' => (float) $paidThisMonth,
-                'active_agents' => $agents->count(),
-            ],
+            'kpis' => $kpis,
             'balances' => $agents->mapWithKeys(fn (Agent $agent): array => [$agent->id => $this->commissionService->calculateBalance($agent)]),
         ]);
     }
@@ -148,8 +181,11 @@ class AgentCommissionController extends Controller
         return [
             'id' => (string) $entry->id,
             'agent_id' => (string) $entry->agent_id,
-            'status' => $entry->status->value,
+            'agent_name' => $entry->agent?->user?->name ?? $entry->agent?->code,
+            'status' => is_object($entry->status) ? $entry->status->value : (string) $entry->status,
             'commission_amount' => (float) $entry->commission_amount,
+            'description' => (string) ($entry->description ?? ''),
+            'created_at' => $entry->created_at?->toIso8601String(),
         ];
     }
 }

@@ -12,6 +12,7 @@ import { UsersFilterBar } from "@/features/users/components/users-filter-bar";
 import { UserMobileCard } from "@/features/users/components/user-mobile-card";
 import { UsersSummaryMetrics } from "@/features/users/components/users-summary-metrics";
 import { usersQueryToSearchParams } from "@/lib/users-query";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { UserSortField, UsersModuleResult } from "@/types/users";
 
 type Props = {
@@ -20,6 +21,7 @@ type Props = {
 
 export function UsersWorkspace({ result }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
 
@@ -67,7 +69,11 @@ export function UsersWorkspace({ result }: Props) {
       {empty ? (
         <EmptyState
           title="No users match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={
+            isLive
+              ? "Try clearing filters or broadening your search. Results come from the live platform directory."
+              : "Try clearing filters or broadening your search. Preview mode may show fixture directory data."
+          }
         />
       ) : (
         <>

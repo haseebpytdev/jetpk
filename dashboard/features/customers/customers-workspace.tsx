@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
 import { CustomerDetailDrawerContent } from "@/features/customers/customer-detail-drawer";
 import { CustomersFilters } from "@/features/customers/customers-filters";
@@ -21,6 +23,7 @@ type Props = {
 
 export function CustomersWorkspace({ query, result, selectedCustomer }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
 
@@ -64,7 +67,7 @@ export function CustomersWorkspace({ query, result, selectedCustomer }: Props) {
       {empty ? (
         <EmptyState
           title="No customers match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={emptyListDescription(isLive)}
         />
       ) : (
         <>

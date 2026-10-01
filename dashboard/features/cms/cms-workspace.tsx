@@ -20,7 +20,9 @@ import { SectionDetailDrawerContent } from "@/features/cms/components/section-de
 import { BannerDetailDrawerContent } from "@/features/cms/components/banner-detail-drawer";
 import { NoticeDetailDrawerContent } from "@/features/cms/components/notice-detail-drawer";
 import { AssetDetailDrawerContent } from "@/features/cms/components/asset-detail-drawer";
+import { CmsMediaUploadPanel } from "@/features/cms/components/cms-media-upload-panel";
 import { cmsQueryToSearchParams } from "@/lib/cms-query";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { CmsModuleResult, CmsPreviewMode } from "@/types/cms";
 
 const MODULE_PATHS: Record<CmsModuleResult["module"], string> = {
@@ -38,6 +40,7 @@ type Props = {
 
 export function CmsWorkspace({ result }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
   const previewMode = result.query.previewMode;
   const modulePath = MODULE_PATHS[result.module];
@@ -117,6 +120,11 @@ export function CmsWorkspace({ result }: Props) {
   return (
     <div className="space-y-4" data-testid="cms-workspace">
       {result.module === "pages" ? <CmsCreatePageForm /> : null}
+      {result.module === "assets" && isLive ? (
+        <CmsMediaUploadPanel
+          onUploaded={() => router.replace(`/cms${modulePath}${cmsQueryToSearchParams(result.query)}`)}
+        />
+      ) : null}
 
       {result.module !== "overview" ? (
         <>
@@ -132,7 +140,11 @@ export function CmsWorkspace({ result }: Props) {
       {result.state === "empty" ? (
         <EmptyState
           title="No CMS records match filters"
-          description="Adjust filters or reset to view preview content. This does not imply the live site has no content."
+          description={
+            isLive
+              ? "No CMS records match the current filters."
+              : "Adjust filters or reset to view preview content. This does not imply the live site has no content."
+          }
         />
       ) : null}
 

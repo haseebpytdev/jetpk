@@ -37,4 +37,14 @@ class AgencyMedia extends Model
     {
         return $this->belongsTo(User::class, 'uploaded_by');
     }
+
+    public function publicUrl(): ?string
+    {
+        $path = trim((string) ($this->file_path ?? ''));
+        if ($path === '' || str_contains($path, '..')) {
+            return null;
+        }
+
+        return asset('storage/'.ltrim($path, '/'));
+    }
 }

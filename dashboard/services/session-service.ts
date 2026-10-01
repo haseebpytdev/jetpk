@@ -3,6 +3,10 @@ import { createReadOnlyEnvelope } from "@/lib/read-only/response-envelope";
 import { fetchDashboardApi } from "@/lib/read-only/laravel/laravel-client";
 import { DASHBOARD_API_ROUTES } from "@/lib/read-only/laravel/api-base";
 import { getDashboardMode } from "@/lib/preview";
+import {
+  assertPortalSessionAuthorized,
+  DashboardPortalSessionError,
+} from "@/lib/portal-session-gate";
 import { mockUser } from "@/mocks/overview-fixtures";
 import type { LaravelSessionPayload } from "@/lib/read-only/laravel/types";
 import type { DashboardPortal } from "@/lib/portal-path";
@@ -148,7 +152,7 @@ const sessionService = createReadOnlyService<
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const portal = query.portal ?? "admin";
       const envelope = await fetchDashboardApi<LaravelSessionPayload>(DASHBOARD_API_ROUTES.session, {
@@ -175,5 +179,33 @@ export async function getDashboardSession(
   const envelope = await sessionService.fetchReadOnly({ portal: options?.portal }, options);
   return envelope.data;
 }
+
+/**
+ * Strict server route gate — never returns unavailableSession() and never swallows auth failures.
+ */
+export async function getRequiredDashboardPortalSession(
+  portal: DashboardPortal,
+  options?: ReadOnlyFetchOptions,
+): Promise<DashboardSessionSummary> {
+  try {
+    const envelope = await sessionService.fetchReadOnly({ portal }, options);
+    assertPortalSessionAuthorized(envelope.data, portal);
+    return envelope.data;
+  } catch (error) {
+    if (error instanceof DashboardPortalSessionError) {
+      throw error;
+    }
+    if (error instanceof ReadOnlyServiceError) {
+      const code = error.envelope.error.code;
+      if (code === "unauthenticated") {
+        throw new DashboardPortalSessionError("unauthenticated", error.message);
+      }
+      throw new DashboardPortalSessionError("forbidden", error.message);
+    }
+    throw error;
+  }
+}
+
+export { DashboardPortalSessionError };
 
 export { ReadOnlyServiceError as SessionServiceError };

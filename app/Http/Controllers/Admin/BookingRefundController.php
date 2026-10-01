@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\BookingRefundStatus;
 use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
@@ -25,6 +26,57 @@ class BookingRefundController extends Controller
         protected BookingRefundService $service,
         protected BackOfficeCapabilitiesPresenter $capabilitiesPresenter,
     ) {}
+
+    public function index(Request $request): JsonResponse
+    {
+        Gate::authorize('viewAny', BookingRefund::class);
+
+        $queue = $request->string('queue')->toString() ?: 'review';
+        $pageSize = max(1, min(50, (int) $request->integer('pageSize', 20)));
+
+        $query = BookingRefund::query()
+            ->with(['booking:id,booking_reference,pnr,agency_id,status'])
+            ->orderByDesc('id');
+
+        if (! $request->user()?->isPlatformAdmin() && $request->user()?->current_agency_id) {
+            $query->where('agency_id', $request->user()->current_agency_id);
+        }
+
+        if ($queue === 'execution') {
+            $query->where('status', BookingRefundStatus::Approved);
+        } else {
+            $query->whereIn('status', [
+                BookingRefundStatus::Pending,
+                BookingRefundStatus::Approved,
+            ]);
+        }
+
+        $page = $query->paginate($pageSize);
+
+        return $this->backOfficeJson([
+            'ok' => true,
+            'queue' => $queue,
+            'refunds' => $page->getCollection()->map(function (BookingRefund $row) use ($request): array {
+                $presented = BackOfficeRefundPresenter::present($row);
+                $booking = $row->booking;
+
+                return array_merge($presented, [
+                    'booking_reference' => $booking?->booking_reference,
+                    'pnr' => $booking?->pnr,
+                    'capabilities' => $this->capabilitiesPresenter->presentRefundCapabilities(
+                        $request->user(),
+                        $row,
+                    ),
+                ]);
+            })->values()->all(),
+            'meta' => [
+                'page' => $page->currentPage(),
+                'pageCount' => $page->lastPage(),
+                'pageSize' => $page->perPage(),
+                'total' => $page->total(),
+            ],
+        ]);
+    }
 
     public function store(Request $request, Booking $booking): RedirectResponse|JsonResponse
     {

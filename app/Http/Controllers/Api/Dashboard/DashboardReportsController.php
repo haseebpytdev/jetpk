@@ -39,6 +39,16 @@ class DashboardReportsController extends Controller
         return $this->respond($request, 'agents');
     }
 
+    public function sales(Request $request): JsonResponse
+    {
+        return $this->respond($request, 'sales');
+    }
+
+    public function operations(Request $request): JsonResponse
+    {
+        return $this->respond($request, 'operations');
+    }
+
     protected function respond(Request $request, string $section): JsonResponse
     {
         $data = $this->reports->section($request->user(), $request, $section);

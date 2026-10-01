@@ -58,4 +58,22 @@ class DashboardCmsController extends Controller
             recordCount: count($sections),
         );
     }
+
+    public function assets(Request $request): JsonResponse
+    {
+        $result = $this->cms->paginateAssets($request->user(), $request);
+
+        return DashboardReadOnlyEnvelope::success(
+            [
+                'assets' => $result['items'],
+                'summary' => [
+                    'totalDisplayed' => count($result['items']),
+                ],
+            ],
+            pagination: $result['pagination'],
+            filters: $result['filters'],
+            staleAfter: now()->addSeconds(120)->toIso8601String(),
+            recordCount: count($result['items']),
+        );
+    }
 }

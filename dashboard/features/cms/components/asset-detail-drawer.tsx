@@ -8,6 +8,7 @@ import { CmsStatusBadge } from "@/components/ui/status-badge";
 import { mockCmsBanners, mockCmsPages, mockCmsRevisions, mockCmsSections } from "@/mocks/cms-fixtures";
 import { validateAsset } from "@/features/cms/validation/cms-validation";
 import { mergeValidationIssues } from "@/features/cms/validation/link-validation";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { CmsAsset, CmsPreviewMode } from "@/types/cms";
 
 export function AssetDetailDrawerContent({
@@ -19,12 +20,15 @@ export function AssetDetailDrawerContent({
   previewMode: CmsPreviewMode;
   onPreviewModeChange: (mode: CmsPreviewMode) => void;
 }) {
+  const isLive = useDashboardLiveMode();
   const validation = mergeValidationIssues(validateAsset(asset));
-  const usages = [
-    ...mockCmsSections.filter((s) => s.assetIds.includes(asset.id)).map((s) => ({ type: "section", id: s.id })),
-    ...mockCmsBanners.filter((b) => [b.desktopAssetId, b.mobileAssetId, b.dayAssetId, b.nightAssetId].includes(asset.id)).map((b) => ({ type: "banner", id: b.id })),
-    ...mockCmsPages.filter((p) => p.sectionIds.some((sid) => mockCmsSections.find((s) => s.id === sid)?.assetIds.includes(asset.id))).map((p) => ({ type: "page", id: p.id })),
-  ];
+  const usages = isLive
+    ? []
+    : [
+        ...mockCmsSections.filter((s) => s.assetIds.includes(asset.id)).map((s) => ({ type: "section", id: s.id })),
+        ...mockCmsBanners.filter((b) => [b.desktopAssetId, b.mobileAssetId, b.dayAssetId, b.nightAssetId].includes(asset.id)).map((b) => ({ type: "banner", id: b.id })),
+        ...mockCmsPages.filter((p) => p.sectionIds.some((sid) => mockCmsSections.find((s) => s.id === sid)?.assetIds.includes(asset.id))).map((p) => ({ type: "page", id: p.id })),
+      ];
 
   return (
     <div className="space-y-4" data-testid="cms-asset-drawer">
@@ -39,6 +43,16 @@ export function AssetDetailDrawerContent({
           <div><dt className="text-jp-muted">Aspect ratio</dt><dd>{asset.desktop.aspectRatio}</dd></div>
           <div><dt className="text-jp-muted">Approval</dt><dd><CmsStatusBadge status={asset.approvalStatus} /></dd></div>
           <div><dt className="text-jp-muted">Usage count</dt><dd>{asset.usageCount}</dd></div>
+          {asset.url ? (
+            <div className="sm:col-span-2">
+              <dt className="text-jp-muted">Public URL</dt>
+              <dd className="break-all">
+                <a href={asset.url} target="_blank" rel="noreferrer" className="text-jp-primary underline">
+                  {asset.url}
+                </a>
+              </dd>
+            </div>
+          ) : null}
         </dl>
       </section>
 
@@ -69,7 +83,7 @@ export function AssetDetailDrawerContent({
       </section>
 
       <CmsValidationSummary issues={validation.issues} />
-      <CmsRevisionTimeline revisions={mockCmsRevisions} entityId={asset.id} />
+      {!isLive ? <CmsRevisionTimeline revisions={mockCmsRevisions} entityId={asset.id} /> : null}
 
       <section>
         <CmsPreviewModeSelector mode={previewMode} onChange={onPreviewModeChange} />
@@ -84,6 +98,16 @@ export function AssetDetailDrawerContent({
 }
 
 function AssetPlaceholderPreview({ asset, mode }: { asset: CmsAsset; mode: CmsPreviewMode }) {
+  if (asset.url) {
+    return (
+      <img
+        src={asset.url}
+        alt={asset.altText.trim() || asset.internalName}
+        className="max-h-80 w-full rounded-xl border border-gray-200 object-contain"
+      />
+    );
+  }
+
   const isNight = mode.includes("night");
   const isMobile = mode.includes("mobile");
   const variant = isMobile ? asset.mobile : asset.desktop;

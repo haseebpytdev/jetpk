@@ -61,7 +61,7 @@ const pnrsService = createReadOnlyService<PnrsQuery, PnrsPageResult>({
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const envelope = await fetchDashboardApi<LaravelPnrsListPayload>(DASHBOARD_API_ROUTES.pnrs, {
         signal: options?.signal,

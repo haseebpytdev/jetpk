@@ -1,7 +1,5 @@
 import { REPORT_REFERENCE_DATE } from "@/lib/reports/constants";
 import { resolveComparisonPeriod, resolveDatePreset } from "@/lib/reports/date-presets";
-import { buildReportFacets } from "@/lib/reports/query-filters";
-import { getOperationalFixtureGraph } from "@/lib/reports/aggregations";
 import type { LaravelReportPayload } from "@/lib/read-only/laravel/types";
 import type { ReportModuleResult, ReportsModuleKey, ReportsQuery } from "@/types/report";
 
@@ -12,7 +10,13 @@ export function transformReportModule(
 ): ReportModuleResult {
   const dateRange = resolveDatePreset(query.datePreset, query.startDate, query.endDate);
   const comparison = { mode: query.comparison, ...resolveComparisonPeriod(query.comparison, dateRange) };
-  const facets = buildReportFacets(getOperationalFixtureGraph());
+  const facets = {
+    channels: [{ value: "", label: "All channels" }],
+    suppliers: [] as string[],
+    airlines: [] as string[],
+    agents: [] as string[],
+    routes: [] as string[],
+  };
   const metrics = (payload.metrics ?? []).map((metric) => ({
     key: String(metric.key ?? "booking_count") as import("@/types/report").ReportMetricKey,
     label: String(metric.label ?? "Metric"),
@@ -74,7 +78,7 @@ export function transformReportModule(
         { key: "sales", header: "Sales", includeByDefault: true },
       ],
       rowCount: rows.length,
-      previewOnly: true,
+      previewOnly: false,
     },
     limitationNotices: (payload.warnings ?? []).map((w) => w.message),
   };

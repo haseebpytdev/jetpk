@@ -29,9 +29,9 @@ export function UsersModuleShell({ module, result, children }: Props) {
           <Breadcrumb items={[{ label: "Home" }, { label: "Insights & system" }, { label: "Users" }, { label: current.label }]} />
         }
         title="Users"
-        description="Dashboard user directory, roles, and permissions with read-only Laravel integration."
+        description="Live user directory. Staff permissions edit in the user drawer. Roles and permissions catalogs are read-only operational views."
       />
-      <DataSourceNoticeSlot />
+      {module === "directory" ? <DataSourceNoticeSlot /> : null}
 
       <nav aria-label="Users sections" className="flex flex-wrap gap-2">
         {SUBROUTES.map((route) => (

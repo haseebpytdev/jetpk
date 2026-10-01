@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DashboardLink } from "@/components/dashboard/dashboard-link";
+import { laravelRequest } from "@/lib/api/laravel-action-client";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { mockUser } from "@/mocks/overview-fixtures";
 import type { DashboardSessionSummary } from "@/services/session-service";
 
@@ -12,12 +14,29 @@ type Props = {
 };
 
 export function DashboardHeader({ onMenuClick, session }: Props) {
-  const profile = session ?? {
-    displayName: mockUser.name,
-    email: mockUser.email,
-    initials: mockUser.initials,
-    roles: [mockUser.role],
-  };
+  const isLive = useDashboardLiveMode();
+  const unavailable = !session || session.unavailable;
+  // Live builds never fall back to mock identity — that leaked "Preview Admin" into production.
+  const profile = unavailable
+    ? isLive
+      ? {
+          displayName: "Session unavailable",
+          email: "—",
+          initials: "??",
+          roles: [] as string[],
+        }
+      : {
+          displayName: mockUser.name,
+          email: mockUser.email,
+          initials: mockUser.initials,
+          roles: [mockUser.role],
+        }
+    : {
+        displayName: session.displayName,
+        email: session.email,
+        initials: session.initials,
+        roles: session.roles,
+      };
   const [profileOpen, setProfileOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -55,7 +74,7 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
           disabled
           placeholder="Search bookings, PNR, customers, agents…"
           className="w-full rounded-xl border border-jp-border bg-gray-50 px-4 py-2.5 text-sm text-gray-500"
-          title="Preview: search is not connected"
+          title={isLive ? "Global search coming soon" : "Preview: search is not connected"}
         />
         <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border bg-white px-1.5 text-[10px] text-gray-500 sm:inline">
           Ctrl+K
@@ -65,13 +84,29 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
         <button
           type="button"
           className="flex min-h-11 items-center gap-2 rounded-xl border border-jp-border px-3 text-sm text-gray-700"
-          title="Mock currency selector"
-          aria-label="Currency PKR (preview)"
+          title={isLive ? "Currency" : "Mock currency selector"}
+          aria-label={isLive ? "Currency PKR" : "Currency PKR (preview)"}
         >
           <span aria-hidden>🇵🇰</span> PKR
         </button>
-        <IconButton label="Notifications (preview)" badge={7} onClick={() => alert("Preview notifications — mock only.")} />
-        <IconButton label="Messages (preview)" badge={3} onClick={() => alert("Preview messages — mock only.")} />
+        <IconButton
+          label={isLive ? "Notifications" : "Notifications (preview)"}
+          badge={isLive ? undefined : 7}
+          onClick={() => {
+            if (!isLive) {
+              alert("Preview notifications — mock only.");
+            }
+          }}
+        />
+        <IconButton
+          label={isLive ? "Messages" : "Messages (preview)"}
+          badge={isLive ? undefined : 3}
+          onClick={() => {
+            if (!isLive) {
+              alert("Preview messages — mock only.");
+            }
+          }}
+        />
         <IconButton label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"} onClick={toggleFullscreen} />
         <div className="relative" ref={menuRef}>
           <button
@@ -107,12 +142,21 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
               </DashboardLink>
               <button
                 type="button"
-                className="block w-full px-4 py-2 text-left text-sm text-gray-400"
+                className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
                 role="menuitem"
-                disabled
-                title="Logout not connected in preview"
+                onClick={() => {
+                  setProfileOpen(false);
+                  void (async () => {
+                    await laravelRequest("/logout", {
+                      method: "POST",
+                      retryCsrfOnce: true,
+                      timeoutMs: 15000,
+                    });
+                    window.location.assign("/login");
+                  })();
+                }}
               >
-                Log out (disabled)
+                Log out
               </button>
             </div>
           ) : null}

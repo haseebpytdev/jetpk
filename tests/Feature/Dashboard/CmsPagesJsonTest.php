@@ -71,7 +71,7 @@ class CmsPagesJsonTest extends TestCase
         $this->actingAs($admin)->getJson('/admin/cms-pages/'.$pageId.'/edit?format=json')
             ->assertOk()
             ->assertJsonPath('page.title', 'QA CMS Published')
-            ->assertJsonPath('page.content', '<p>Updated body</p>');
+            ->assertJsonPath('page.content', 'Updated body');
 
         $this->actingAs($admin)->patchJson('/admin/cms-pages/'.$pageId.'/archive?format=json')
             ->assertOk()

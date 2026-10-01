@@ -179,6 +179,7 @@ class BackOfficeCapabilitiesPresenter
             if ($modules['markup_settings'] ?? false) {
                 $items[] = $this->dashboardNav('Markups', 'markups', '/markups');
             }
+            $items[] = $this->dashboardNav('Commissions', 'commissions', '/commissions');
             $items[] = $this->dashboardNav('Group Ticketing', 'group-ticketing', '/group-ticketing');
             $otp = $this->dashboardNav('Login OTP', 'login-otp', '/settings/security');
             $items[] = $otp;

@@ -9,10 +9,17 @@ use App\Models\Booking;
 use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\JetpkHomepageFixture;
 use Tests\TestCase;
 
+/**
+ * JetPK-themed customer portal integration (canonical Blade shell).
+ *
+ * @see JetpkThemedCustomerDashboardTest for extended themed coverage
+ */
 class CustomerDashboardIntegrationTest extends TestCase
 {
+    use JetpkHomepageFixture;
     use RefreshDatabase;
 
     public function test_customer_dashboard_renders_kpis_pending_payment_and_empty_state(): void
@@ -21,8 +28,8 @@ class CustomerDashboardIntegrationTest extends TestCase
 
         $this->actingAs($customer)->get(route('customer.dashboard'))
             ->assertOk()
-            ->assertSee('data-testid="customer-dashboard"', false)
-            ->assertSee('data-testid="customer-dashboard-kpis"', false)
+            ->assertSee('data-testid="jp-customer-dashboard"', false)
+            ->assertSee('data-testid="jp-customer-dashboard-kpis"', false)
             ->assertSee('Total bookings', false)
             ->assertSee('Pending payment', false);
     }
@@ -37,9 +44,9 @@ class CustomerDashboardIntegrationTest extends TestCase
 
         $this->actingAs($customer)->get(route('customer.dashboard'))
             ->assertOk()
-            ->assertSee('data-testid="customer-dashboard-upcoming"', false)
+            ->assertSee('data-testid="jp-customer-dashboard-upcoming"', false)
             ->assertSee($booking->display_reference, false)
-            ->assertSee('data-testid="customer-recent-bookings"', false);
+            ->assertSee('data-testid="jp-customer-recent-bookings"', false);
     }
 
     public function test_customer_bookings_index_preserves_filters_and_payment_state(): void
@@ -55,7 +62,6 @@ class CustomerDashboardIntegrationTest extends TestCase
         $this->actingAs($customer)->get(route('customer.bookings.index', ['filter' => 'pending_payment']))
             ->assertOk()
             ->assertSee('data-testid="customer-bookings-filters"', false)
-            ->assertSee('ota-bstat', false)
             ->assertDontSee($paid->booking_reference, false);
     }
 
@@ -74,6 +80,7 @@ class CustomerDashboardIntegrationTest extends TestCase
     private function customerWithBookings(array $overrides = []): array
     {
         $this->seed(OtaFoundationSeeder::class);
+        $this->makeJetpkProfile();
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $customer = User::factory()->create([
             'account_type' => AccountType::Customer,

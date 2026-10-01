@@ -3,8 +3,10 @@
 import { useMemo, useState } from "react";
 import { validateGeneralSettings } from "@/lib/access-control/settings-validation";
 import { OrganizationProfileForm } from "@/features/settings/components/organization-profile-form";
+import { SettingsEditabilityNotice } from "@/features/settings/components/settings-editability-notice";
 import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/settings/components/settings-local-preview-form";
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { GeneralSettingsValues, SettingsModuleResult } from "@/types/settings-module";
 
 const GENERAL_FIELDS: SettingsPreviewField[] = [
@@ -64,6 +66,7 @@ type Props = {
 };
 
 export function GeneralSettingsWorkspace({ result }: Props) {
+  const isLive = useDashboardLiveMode();
   const [previewValues, setPreviewValues] = useState<GeneralSettingsValues | null>(null);
   const baseline = result.general;
   const active = previewValues ?? baseline;
@@ -76,27 +79,37 @@ export function GeneralSettingsWorkspace({ result }: Props) {
 
       <SettingsValidationSummary issues={issues} filter={result.query.validationState} />
 
-      <SettingsLocalPreviewForm
-        fields={GENERAL_FIELDS}
-        baselineValues={baseline as unknown as Record<string, unknown>}
-        onApply={(values) => setPreviewValues(values as unknown as GeneralSettingsValues)}
-        onReset={() => setPreviewValues(null)}
-        dirty={dirty}
-      />
+      {isLive ? (
+        <SettingsEditabilityNotice
+          title="Platform preference fields"
+          status="NOT_APPLICABLE"
+          detail="Timezone, locale, pagination defaults, and similar platform preference fields are not persisted in the current Laravel settings domain. Company Profile remains the authoritative organization identity control."
+        />
+      ) : (
+        <>
+          <SettingsLocalPreviewForm
+            fields={GENERAL_FIELDS}
+            baselineValues={baseline as unknown as Record<string, unknown>}
+            onApply={(values) => setPreviewValues(values as unknown as GeneralSettingsValues)}
+            onReset={() => setPreviewValues(null)}
+            dirty={dirty}
+          />
 
-      <section className="rounded-xl border border-jp-border bg-white p-4" aria-labelledby="general-preview-values-heading">
-        <h3 id="general-preview-values-heading" className="text-sm font-semibold text-gray-900">
-          Active preview values
-        </h3>
-        <dl className="mt-3 grid gap-3 sm:grid-cols-2">
-          {GENERAL_FIELDS.map((field) => (
-            <div key={field.key} className="rounded-lg border border-jp-border px-3 py-2">
-              <dt className="text-xs text-jp-muted">{field.label}</dt>
-              <dd className="mt-1 text-sm font-medium break-all">{String(active[field.key as keyof GeneralSettingsValues] ?? "")}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+          <section className="rounded-xl border border-jp-border bg-white p-4" aria-labelledby="general-preview-values-heading">
+            <h3 id="general-preview-values-heading" className="text-sm font-semibold text-gray-900">
+              Active preview values
+            </h3>
+            <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+              {GENERAL_FIELDS.map((field) => (
+                <div key={field.key} className="rounded-lg border border-jp-border px-3 py-2">
+                  <dt className="text-xs text-jp-muted">{field.label}</dt>
+                  <dd className="mt-1 text-sm font-medium break-all">{String(active[field.key as keyof GeneralSettingsValues] ?? "")}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        </>
+      )}
     </div>
   );
 }

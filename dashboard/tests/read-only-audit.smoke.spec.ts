@@ -82,7 +82,7 @@ test("audit privacy no raw IP in fixture", async () => {
 
 test("audit live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/audit?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("audit mobile cards at 1024px", async ({ page }) => {

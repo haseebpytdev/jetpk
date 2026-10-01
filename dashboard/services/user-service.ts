@@ -112,7 +112,7 @@ const usersService = createReadOnlyService<UsersQuery, UsersModuleResult>({
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const envelope = await fetchDashboardApi<LaravelUsersListPayload>(DASHBOARD_API_ROUTES.users, {
         signal: options?.signal,

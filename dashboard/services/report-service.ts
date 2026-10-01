@@ -35,9 +35,9 @@ function reportRouteForModule(module: ReportsModuleKey): string {
     case "payments":
       return DASHBOARD_API_ROUTES.reportsPayments;
     case "operations":
-      return DASHBOARD_API_ROUTES.reportsSuppliers;
+      return DASHBOARD_API_ROUTES.reportsOperations;
     case "sales":
-      return DASHBOARD_API_ROUTES.reportsAgents;
+      return DASHBOARD_API_ROUTES.reportsSales;
     default:
       return DASHBOARD_API_ROUTES.reportsSummary;
   }
@@ -128,7 +128,7 @@ const reportsService = createReadOnlyService<{ query: ReportsQuery; module: Repo
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch({ query, module }, options) {
       const envelope = await fetchDashboardApi<LaravelReportPayload>(reportRouteForModule(module), {
         signal: options?.signal,

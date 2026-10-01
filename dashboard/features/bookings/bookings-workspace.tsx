@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
 import { BookingDetailDrawerContent } from "@/features/bookings/booking-detail-drawer";
 import { BookingsFilters } from "@/features/bookings/bookings-filters";
@@ -21,6 +23,7 @@ type Props = {
 
 export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
 
@@ -65,7 +68,7 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
       {empty ? (
         <EmptyState
           title="No bookings match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={emptyListDescription(isLive)}
         />
       ) : (
         <>

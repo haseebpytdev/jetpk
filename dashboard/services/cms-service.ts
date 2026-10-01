@@ -1,6 +1,5 @@
-import { CMS_BRAND } from "@/types/cms";
+import { CMS_BRAND, type CmsAsset, type CmsFoundationResult, type CmsModuleKey, type CmsModuleResult, type CmsPage, type CmsQuery } from "@/types/cms";
 import { CMS_FIXTURE_COUNTS } from "@/mocks/cms-fixtures";
-import type { CmsFoundationResult, CmsModuleKey, CmsModuleResult, CmsPage, CmsQuery } from "@/types/cms";
 import { buildCmsModule } from "@/lib/cms/build-cms-module";
 import {
   mockCmsAssets,
@@ -27,7 +26,143 @@ export class CmsServiceError extends Error {
   }
 }
 
-const LIVE_SUPPORTED_MODULES: CmsModuleKey[] = ["overview", "pages"];
+const LIVE_SUPPORTED_MODULES: CmsModuleKey[] = ["overview", "pages", "assets"];
+
+function mapLiveAsset(row: Record<string, unknown>): CmsAsset {
+  const desktop = (row.desktop as CmsAsset["desktop"]) ?? {
+    width: 0,
+    height: 0,
+    aspectRatio: "—",
+    placeholderLabel: String(row.internalName ?? "asset"),
+  };
+  const rawValidation = row.validation as { issues?: CmsAsset["validation"]["issues"] } | undefined;
+  const issues = Array.isArray(rawValidation?.issues) ? rawValidation.issues : [];
+  const validation = { valid: issues.length === 0, issues };
+  const fileTypeRaw = String(row.fileType ?? "image/jpeg");
+  const fileType =
+    fileTypeRaw === "image/png" || fileTypeRaw === "image/webp" || fileTypeRaw === "image/jpeg"
+      ? fileTypeRaw
+      : "image/jpeg";
+  const categoryRaw = String(row.category ?? "general");
+  const allowed = [
+    "hero",
+    "support",
+    "offer",
+    "destination",
+    "airline",
+    "campaign",
+    "notice",
+    "general",
+  ] as const;
+  const category = (allowed as readonly string[]).includes(categoryRaw)
+    ? (categoryRaw as CmsAsset["category"])
+    : "general";
+
+  return {
+    id: String(row.id ?? ""),
+    internalName: String(row.internalName ?? ""),
+    category,
+    desktop,
+    mobile: (row.mobile as CmsAsset["mobile"]) ?? desktop,
+    dayVariant: (row.dayVariant as CmsAsset["dayVariant"]) ?? null,
+    nightVariant: (row.nightVariant as CmsAsset["nightVariant"]) ?? null,
+    fileType,
+    altText: String(row.altText ?? ""),
+    focalPointX: Number(row.focalPointX ?? 50),
+    focalPointY: Number(row.focalPointY ?? 50),
+    safeArea: String(row.safeArea ?? "n/a"),
+    approvalStatus: "approved",
+    usageCount: Number(row.usageCount ?? 0),
+    createdDate: String(row.createdDate ?? ""),
+    updatedDate: String(row.updatedDate ?? ""),
+    authorId: String(row.authorId ?? "—"),
+    url: row.url == null ? undefined : String(row.url),
+    validation,
+  };
+}
+
+function transformLiveAssetsModule(
+  assets: CmsAsset[],
+  query: CmsQuery,
+  pagination: { page: number; pageSize: number; total: number; pageCount: number },
+): CmsModuleResult {
+  const selectedAsset =
+    query.selected != null ? (assets.find((asset) => asset.id === query.selected) ?? null) : null;
+  const rows = assets.map((asset) => ({
+    id: asset.id,
+    internalName: asset.internalName,
+    category: asset.category,
+    fileType: asset.fileType,
+    width: asset.desktop.width,
+    height: asset.desktop.height,
+    aspectRatio: asset.desktop.aspectRatio,
+    desktop: "Yes",
+    mobile: "Yes",
+    day: "No",
+    night: "No",
+    altText: asset.altText.trim() ? "Present" : "Missing",
+    focalPoint: `${asset.focalPointX}, ${asset.focalPointY}`,
+    safeArea: asset.safeArea,
+    approval: asset.approvalStatus,
+    usageCount: asset.usageCount,
+    validation: asset.validation.issues.length ? "Warning" : "Valid",
+    createdDate: asset.createdDate,
+    updatedDate: asset.updatedDate,
+    author: asset.authorId,
+    href: `/cms/assets?selected=${encodeURIComponent(asset.id)}`,
+  }));
+
+  return {
+    state: assets.length === 0 ? "empty" : "ready",
+    module: "assets",
+    query,
+    brand: CMS_BRAND,
+    metrics: [],
+    validationSummary: {
+      valid: assets.filter((a) => a.validation.issues.length === 0).length,
+      warning: assets.filter((a) => a.validation.issues.length > 0).length,
+      blocked: 0,
+    },
+    distributions: { publication: [], contentType: [], validation: [], theme: [], assets: [] },
+    attentionQueue: [],
+    recentRevisions: [],
+    scheduledQueue: [],
+    reviewQueue: [],
+    table: {
+      columns: [
+        { key: "id", label: "Asset ID", sortable: true },
+        { key: "internalName", label: "Internal name", sortable: true },
+        { key: "category", label: "Category" },
+        { key: "fileType", label: "File type" },
+        { key: "altText", label: "Alt text" },
+        { key: "approval", label: "Approval" },
+        { key: "updatedDate", label: "Updated", sortable: true },
+      ],
+      rows,
+      total: pagination.total,
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+      pageCount: pagination.pageCount,
+    },
+    selectedPage: null,
+    selectedSection: null,
+    selectedBanner: null,
+    selectedNotice: null,
+    selectedAsset,
+    facets: {
+      pageTypes: [],
+      sectionTypes: [],
+      statuses: [],
+      themeModes: [],
+      locales: [],
+      bannerFamilies: [],
+      noticeSeverities: [],
+      assetStatuses: ["approved"],
+      placements: [],
+      audiences: [],
+    },
+  };
+}
 
 function mapReadOnlyError(error: unknown): never {
   if (error instanceof ReadOnlyServiceError) {
@@ -119,17 +254,37 @@ const cmsService = createReadOnlyService<{ query: CmsQuery; module: CmsModuleKey
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch({ query, module }, options) {
       if (!LIVE_SUPPORTED_MODULES.includes(module)) {
         throw new ReadOnlyServiceError({
           error: {
             code: "unavailable",
             referenceIdSafe: "CMS-LIVE-MODULE-UNAVAILABLE",
-            message: `Laravel read-only CMS does not expose the ${module} submodule yet.`,
+            message: `Live CMS does not expose the ${module} submodule yet.`,
           },
-          meta: { source: "laravelReadOnly", schemaVersion: "dash-read-only-v1" },
+          meta: { source: "laravelLive", schemaVersion: "dash-read-only-v1" },
         });
+      }
+
+      if (module === "assets") {
+        const envelope = await fetchDashboardApi<{ assets?: Record<string, unknown>[] }>(
+          DASHBOARD_API_ROUTES.cmsAssets,
+          {
+            signal: options?.signal,
+            query: {
+              page: query.page,
+              pageSize: query.pageSize,
+              q: query.search,
+            },
+          },
+        );
+        const pagination = envelope.pagination ?? { page: 1, pageSize: 25, total: 0, pageCount: 1 };
+        const assets = (envelope.data.assets ?? []).map((row) => mapLiveAsset(row));
+        return {
+          ...envelope,
+          data: transformLiveAssetsModule(assets, query, pagination),
+        };
       }
 
       const envelope = await fetchDashboardApi<LaravelCmsPagesListPayload>(DASHBOARD_API_ROUTES.cmsPages, {

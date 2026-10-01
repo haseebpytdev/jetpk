@@ -113,19 +113,13 @@ export function agencyPrefixPath(agencyId: string): string {
   return laravelPortalPath("admin", `/agencies/${encodeURIComponent(agencyId)}/prefix?format=json`);
 }
 
-export function agentApplicationApprovePath(applicationId: string): string {
-  return laravelPortalPath("admin", `/agent-applications/${encodeURIComponent(applicationId)}/approve?format=json`);
+export function supportTicketsIndexPath(query = ""): string {
+  const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
+  return laravelPortalPath("admin", `/support/tickets?format=json${suffix}`);
 }
 
-export function agentApplicationRejectPath(applicationId: string): string {
-  return laravelPortalPath("admin", `/agent-applications/${encodeURIComponent(applicationId)}/reject?format=json`);
-}
-
-export function agentApplicationNeedsMoreInfoPath(applicationId: string): string {
-  return laravelPortalPath(
-    "admin",
-    `/agent-applications/${encodeURIComponent(applicationId)}/needs-more-info?format=json`,
-  );
+export function supportTicketShowPath(ticketId: string): string {
+  return laravelPortalPath("admin", `/support/tickets/${encodeURIComponent(ticketId)}?format=json`);
 }
 
 export function supportTicketAssignPath(ticketId: string): string {
@@ -142,6 +136,11 @@ export function supportTicketReplyPath(portal: DashboardPortal, ticketId: string
 
 export function supportTicketStatusPath(portal: DashboardPortal, ticketId: string): string {
   return laravelPortalPath(portal, `/support/tickets/${encodeURIComponent(ticketId)}/status?format=json`);
+}
+
+export function commissionsIndexPath(query = ""): string {
+  const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
+  return laravelPortalPath("admin", `/commissions?format=json${suffix}`);
 }
 
 export function commissionEntryApprovePath(entryId: string): string {
@@ -202,6 +201,19 @@ export function apiSettingsTestPath(connectionId: string): string {
 
 export function brandingSettingsPath(): string {
   return laravelPortalPath("admin", "/settings/branding?format=json");
+}
+
+export function agencyMediaIndexPath(query = ""): string {
+  const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
+  return laravelPortalPath("admin", `/settings/media?format=json${suffix}`);
+}
+
+export function agencyMediaStorePath(): string {
+  return laravelPortalPath("admin", "/settings/media?format=json");
+}
+
+export function agencyMediaDestroyPath(mediaId: string): string {
+  return laravelPortalPath("admin", `/settings/media/${encodeURIComponent(mediaId)}?format=json`);
 }
 
 export function pageSettingsEditPath(pageKey: string): string {
@@ -302,6 +314,26 @@ export function customerQueryStatusPath(queryId: string | number): string {
   );
 }
 
+export function adminUserShowPath(userId: string | number): string {
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(String(userId))}?format=json`);
+}
+
+export function adminUserCreatePath(): string {
+  return laravelPortalPath("admin", "/users/create?format=json");
+}
+
+export function adminUserStorePath(): string {
+  return laravelPortalPath("admin", "/users?format=json");
+}
+
+export function adminUserEditPath(userId: string | number): string {
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(String(userId))}/edit?format=json`);
+}
+
+export function adminUserUpdatePath(userId: string | number): string {
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(String(userId))}?format=json`);
+}
+
 export function staffManagementPath(query = ""): string {
   const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
   return laravelPortalPath("admin", `/staff?format=json${suffix}`);
@@ -337,4 +369,56 @@ export function groupTicketingAdminPath(): string {
 
 export function communicationsSettingsPath(): string {
   return laravelPortalPath("admin", "/settings/communications?format=json");
+}
+
+export function notificationFailuresPath(query = ""): string {
+  const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
+  return laravelPortalPath(
+    "admin",
+    `/settings/communications/delivery-log?format=json${suffix}`,
+  );
+}
+
+export function operationalInboxPath(): string {
+  return laravelPortalPath("admin", "/operations/inbox?format=json");
+}
+
+export function cancellationsIndexPath(query = ""): string {
+  const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
+  return laravelPortalPath("admin", `/bookings/cancellations?format=json${suffix}`);
+}
+
+export function refundsIndexPath(query = ""): string {
+  const suffix = query ? `&${query.replace(/^\?/, "").replace(/^&/, "")}` : "";
+  return laravelPortalPath("admin", `/bookings/refunds?format=json${suffix}`);
+}
+
+export function agentApplicationsDataPath(query = ""): string {
+  const suffix = query ? `?${query.replace(/^\?/, "")}` : "";
+  return laravelPortalPath("admin", `/agent-applications/data${suffix}`);
+}
+
+export function agentApplicationApprovePath(applicationId: string | number): string {
+  return laravelPortalPath(
+    "admin",
+    `/agent-applications/${encodeURIComponent(String(applicationId))}/approve?format=json`,
+  );
+}
+
+export function agentApplicationRejectPath(applicationId: string | number): string {
+  return laravelPortalPath(
+    "admin",
+    `/agent-applications/${encodeURIComponent(String(applicationId))}/reject?format=json`,
+  );
+}
+
+export function agentApplicationNeedsInfoPath(applicationId: string | number): string {
+  return laravelPortalPath(
+    "admin",
+    `/agent-applications/${encodeURIComponent(String(applicationId))}/needs-more-info?format=json`,
+  );
+}
+
+export function agentApplicationNeedsMoreInfoPath(applicationId: string | number): string {
+  return agentApplicationNeedsInfoPath(applicationId);
 }

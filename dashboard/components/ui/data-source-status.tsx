@@ -49,10 +49,19 @@ export function FixtureDataNotice({ className }: { className?: string }) {
   );
 }
 
+/** Intentional READ_ONLY_BY_DESIGN modules only — never the global live operational shell. */
 export function LiveReadOnlyNotice({ className }: { className?: string }) {
   return (
-    <Notice tone="blue" title="Laravel read-only" testId="live-readonly-notice" className={className}>
-      Data is loaded from Laravel in read-only mode. Mutations are disabled in this phase.
+    <Notice tone="blue" title="Read-only operational view" testId="live-readonly-notice" className={className}>
+      This page provides monitoring or audit information and does not support changes here.
+    </Notice>
+  );
+}
+
+export function LiveOperationalNotice({ className }: { className?: string }) {
+  return (
+    <Notice tone="emerald" title="Live Laravel data" testId="live-operational-notice" className={className}>
+      Data is loaded from the live JetPakistan backend. Supported actions follow RBAC and domain rules.
     </Notice>
   );
 }
@@ -170,6 +179,7 @@ export function DataSourceEmptyState({
 export type DataSourcePreviewVariant =
   | "fixture"
   | "live"
+  | "readOnly"
   | "stale"
   | "unauthorized"
   | "forbidden"
@@ -182,6 +192,8 @@ export function DataSourcePreviewStack({ variant }: { variant: DataSourcePreview
     case "fixture":
       return <FixtureDataNotice />;
     case "live":
+      return <LiveOperationalNotice />;
+    case "readOnly":
       return <LiveReadOnlyNotice />;
     case "stale":
       return <StaleDataNotice staleAfter={PREVIEW_REFERENCE_TIMESTAMP} />;

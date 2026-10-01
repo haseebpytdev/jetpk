@@ -86,7 +86,7 @@ test("suppliers unavailable preview", async ({ page }) => {
 
 test("suppliers live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/suppliers?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("suppliers no overflow at 390px", async ({ page }) => {

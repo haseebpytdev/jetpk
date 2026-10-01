@@ -29,7 +29,7 @@ import { containsSensitiveKeys, stripSensitiveFields, SENSITIVE_FIELD_KEYS } fro
 import { READ_ONLY_ENDPOINT_CONTRACTS, getEndpointContract } from "@/lib/read-only/endpoint-contracts";
 
 test("data source modes are valid", () => {
-  expect(DATA_SOURCE_MODES).toEqual(["fixture", "laravelReadOnly", "unavailable"]);
+  expect(DATA_SOURCE_MODES).toEqual(["fixture", "laravelLive", "laravelReadOnly", "unavailable"]);
   for (const mode of DATA_SOURCE_MODES) {
     expect(isValidDataSourceMode(mode)).toBe(true);
   }
@@ -50,10 +50,35 @@ test("fixture source is explicit in preview mode", () => {
   expect(meta.fixtureRevision).toBeTruthy();
 });
 
-test("laravel metadata marks live read-only source", () => {
-  const meta = buildLaravelMetadata({ recordCount: 5, requestIdSafe: "SAFE-001" });
-  expect(meta.source).toBe("laravelReadOnly");
-  expect(meta.fixtureRevision).toBeNull();
+test("laravel metadata marks live operational source by default", () => {
+  const originalMode = process.env.NEXT_PUBLIC_DASHBOARD_MODE;
+  const originalMock = process.env.NEXT_PUBLIC_USE_MOCK_DATA;
+  process.env.NEXT_PUBLIC_DASHBOARD_MODE = "live";
+  process.env.NEXT_PUBLIC_USE_MOCK_DATA = "false";
+  try {
+    const meta = buildLaravelMetadata({ recordCount: 5, requestIdSafe: "SAFE-001" });
+    expect(meta.source).toBe("laravelLive");
+    expect(meta.fixtureRevision).toBeNull();
+  } finally {
+    process.env.NEXT_PUBLIC_DASHBOARD_MODE = originalMode;
+    process.env.NEXT_PUBLIC_USE_MOCK_DATA = originalMock;
+  }
+});
+
+test("live mode resolves laravelLive and does not use obsolete read-only phase mode", () => {
+  const originalMode = process.env.NEXT_PUBLIC_DASHBOARD_MODE;
+  const originalMock = process.env.NEXT_PUBLIC_USE_MOCK_DATA;
+  const originalUnavailable = process.env.NEXT_PUBLIC_DATA_SOURCE_UNAVAILABLE;
+  process.env.NEXT_PUBLIC_DASHBOARD_MODE = "live";
+  process.env.NEXT_PUBLIC_USE_MOCK_DATA = "false";
+  process.env.NEXT_PUBLIC_DATA_SOURCE_UNAVAILABLE = "false";
+  try {
+    expect(resolveDataSourceMode()).toBe("laravelLive");
+  } finally {
+    process.env.NEXT_PUBLIC_DASHBOARD_MODE = originalMode;
+    process.env.NEXT_PUBLIC_USE_MOCK_DATA = originalMock;
+    process.env.NEXT_PUBLIC_DATA_SOURCE_UNAVAILABLE = originalUnavailable;
+  }
 });
 
 test("read-only service does not silently fall back to fixtures when live adapter missing", async () => {
@@ -66,11 +91,14 @@ test("read-only service does not silently fall back to fixtures when live adapte
   });
 
   const originalEnv = process.env.NEXT_PUBLIC_USE_MOCK_DATA;
+  const originalMode = process.env.NEXT_PUBLIC_DASHBOARD_MODE;
   process.env.NEXT_PUBLIC_USE_MOCK_DATA = "false";
+  process.env.NEXT_PUBLIC_DASHBOARD_MODE = "live";
   try {
     await expect(service.fetchReadOnly({})).rejects.toBeInstanceOf(ReadOnlyServiceError);
   } finally {
     process.env.NEXT_PUBLIC_USE_MOCK_DATA = originalEnv;
+    process.env.NEXT_PUBLIC_DASHBOARD_MODE = originalMode;
   }
 });
 
@@ -155,9 +183,17 @@ test("fixture preview notice renders via query gate", async ({ page }) => {
   await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
 });
 
-test("live read-only notice renders via query gate", async ({ page }) => {
+test("live operational notice renders via query gate", async ({ page }) => {
   await page.goto("/admin/dashboard/users?dataSourcePreview=live", { waitUntil: "load" });
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
+  await expect(page.getByTestId("live-readonly-notice")).toHaveCount(0);
+});
+
+test("intentional read-only notice renders via query gate", async ({ page }) => {
+  await page.goto("/admin/dashboard/users?dataSourcePreview=readOnly", { waitUntil: "load" });
   await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-readonly-notice")).toContainText("Read-only operational view");
+  await expect(page.getByTestId("live-readonly-notice")).not.toContainText("Mutations are disabled");
 });
 
 test("stale notice renders via query gate", async ({ page }) => {

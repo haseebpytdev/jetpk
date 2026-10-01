@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { CmsWorkspace } from "@/features/cms/cms-workspace";
 import { HomepageSettingsPanel } from "@/features/cms/components/homepage-settings-panel";
+import { getDashboardMode } from "@/lib/preview";
 import type { CmsModuleKey, CmsModuleResult } from "@/types/cms";
 
 const SUBROUTES: { key: CmsModuleKey; label: string; href: string }[] = [
@@ -16,13 +17,21 @@ const SUBROUTES: { key: CmsModuleKey; label: string; href: string }[] = [
   { key: "assets", label: "Assets", href: "/cms/assets" },
 ];
 
+function visibleSubroutes(): typeof SUBROUTES {
+  if (getDashboardMode() === "live") {
+    return SUBROUTES.filter((route) => route.key !== "banners" && route.key !== "notices");
+  }
+  return SUBROUTES;
+}
+
 type Props = {
   module: CmsModuleKey;
   result: CmsModuleResult;
 };
 
 export function CmsModuleShell({ module, result }: Props) {
-  const current = SUBROUTES.find((r) => r.key === module) ?? SUBROUTES[0];
+  const routes = visibleSubroutes();
+  const current = routes.find((r) => r.key === module) ?? routes[0];
 
   return (
     <PageContainer>
@@ -41,7 +50,7 @@ export function CmsModuleShell({ module, result }: Props) {
       <DataSourceNoticeSlot />
 
       <nav aria-label="CMS sections" className="flex flex-wrap gap-2">
-        {SUBROUTES.map((route) => (
+        {routes.map((route) => (
           <Link
             key={route.key}
             href={route.href}
@@ -55,14 +64,16 @@ export function CmsModuleShell({ module, result }: Props) {
 
       {module === "sections" ? <HomepageSettingsPanel /> : null}
 
-      {result.state === "loading" ? (
-        <div aria-busy="true" aria-label="Loading CMS foundation" data-testid="cms-loading-state">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="mt-4 h-40 w-full" />
-        </div>
-      ) : (
-        <CmsWorkspace result={result} />
-      )}
+      {module !== "sections" ? (
+        result.state === "loading" ? (
+          <div aria-busy="true" aria-label="Loading CMS foundation" data-testid="cms-loading-state">
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="mt-4 h-40 w-full" />
+          </div>
+        ) : (
+          <CmsWorkspace result={result} />
+        )
+      ) : null}
     </PageContainer>
   );
 }

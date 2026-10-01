@@ -1,0 +1,127 @@
+{
+  "artifact": "result-final-certification.json",
+  "engineeringSha": "feef2e7fa489cee778b81c6db370946394337999",
+  "buildId": "m1WsmAjtpdlOgryIYPtp7",
+  "startedAt": "2026-10-01T04:41:54.203Z",
+  "cms": {
+    "CMS_PAGE_CREATE": "PASS",
+    "CMS_PAGE_EDITOR_VISIBLE": "PASS",
+    "CMS_SAVE_RELOAD": "PASS",
+    "CMS_SECOND_EDIT": "PASS",
+    "CMS_PAGE_EDIT": "PASS",
+    "CMS_EDIT": "PASS",
+    "CMS_DRAFT": "PASS",
+    "CMS_DRAFT_PUBLIC_LEAK": 0,
+    "CMS_PAGE_CLEANUP": "PASS",
+    "actions": [
+      {
+        "step": "create",
+        "http": "ui-submit"
+      },
+      {
+        "step": "edit1-save",
+        "http": "ui-submit"
+      },
+      {
+        "step": "edit2-save",
+        "http": "ui-submit"
+      },
+      {
+        "step": "delete",
+        "http": "ui-submit"
+      }
+    ],
+    "qaSlug": "dor-final-qa-1790829737928",
+    "CMS_MEDIA_UPLOAD_PANEL_VISIBLE": "PASS",
+    "MEDIA_UPLOAD_ACTION": "PASS",
+    "MEDIA_LIST_AFTER_UPLOAD": "PASS",
+    "MEDIA_FILESYSTEM_PATH_EXPOSURE": 0,
+    "MEDIA_DELETE": "PASS",
+    "TEMP_QA_MEDIA_RESIDUE": 0,
+    "MEDIA_PUBLIC_URL": "PASS_OR_CURRENT_UI_NA",
+    "MEDIA_DETAIL": "PASS_OR_CURRENT_UI_NA",
+    "MEDIA_UPLOAD": "PASS",
+    "CMS_CURRENT_DOMAIN_MANAGEMENT": "PASS"
+  },
+  "api": {
+    "API_TAB_OVERVIEW": "PASS",
+    "API_TAB_ENVIRONMENT": "PASS",
+    "API_TAB_ENDPOINTS": "PASS",
+    "API_TAB_CREDENTIALS": "PASS",
+    "API_TAB_CAPABILITIES": "PASS",
+    "API_TAB_ADVANCED": "PASS",
+    "API_TAB_HEALTH": "PASS",
+    "API_TAB_AUDIT": "PASS",
+    "API_ALL_8_TABS": "PASS",
+    "API_AUDIT_TIMESTAMP_CONTRACT": "PASS",
+    "API_AUDIT_EMPTY_STATE": "PASS",
+    "API_SECRET_BROWSER_EXPOSURE": 0,
+    "API_SECRET_NETWORK_EXPOSURE": 0,
+    "API_AUDIT_SECRET_VALUES": 0,
+    "API_SECRET_MASKING": "PASS"
+  },
+  "crossPortal": {
+    "customer_admin_dashboard": "PASS",
+    "customer_admin_settings": "PASS",
+    "customer_admin_api": "PASS",
+    "customer_staff_dashboard": "PASS",
+    "agent_admin_dashboard": "PASS",
+    "agent_admin_api": "PASS",
+    "agent_staff_dashboard": "PASS",
+    "agent_staff_admin_dashboard": "PASS",
+    "agent_staff_admin_settings": "PASS",
+    "agent_staff_staff_dashboard": "PASS",
+    "staff_admin_dashboard": "PASS",
+    "staff_admin_api": "PASS",
+    "staff_staff_dashboard": "PASS",
+    "admin_admin_dashboard": "PASS"
+  },
+  "crossPortalFailures": [],
+  "canary": {
+    "CUSTOMER_QUERIES_CANARY": "PASS",
+    "SEO_CANARY": "PASS",
+    "GROUP_TICKETING_CANARY": "PASS",
+    "LOGIN_OTP_CANARY": "PASS",
+    "ASK_JETPAKISTAN_SETTINGS_CANARY": "PASS",
+    "COMPANY_PROFILE_CANARY": "PASS",
+    "HOMEPAGE_CMS_CANARY": "PASS",
+    "GO_LIVE_CANARY": "PASS",
+    "PRESERVED_NEWER_MODULES_CANARY": "PASS",
+    "SYSTEM_HEALTH": "READ_ONLY_BY_DESIGN",
+    "SYSTEM_HEALTH_CLASSIFICATION": "PASS"
+  },
+  "golden": {
+    "home": "PASS",
+    "login": "PASS",
+    "register": "PASS",
+    "forgot_password": "PASS",
+    "booking_lookup": "PASS",
+    "groups": "PASS",
+    "flights": "PASS",
+    "ask_jetpakistan_fab": "PASS"
+  },
+  "cleanup": {
+    "QA_IDENTITIES_ACTIVE_AFTER_RECOVERY": 0,
+    "QA_ACTIVE_SESSIONS_AFTER_RECOVERY": 0,
+    "TEMP_QA_CONTENT_RESIDUE": 0
+  },
+  "commercialSafety": {
+    "REAL_TICKETS_ISSUED": 0,
+    "REAL_PAYMENTS_TRIGGERED": 0,
+    "REAL_SUPPLIER_BOOKINGS_CREATED": 0,
+    "REAL_PNRS_MUTATED": 0,
+    "REAL_CANCELLATIONS": 0,
+    "REAL_REFUNDS": 0,
+    "PRODUCTION_BALANCE_MUTATIONS": 0,
+    "REAL_SUPPLIER_CONFIGURATION_MUTATIONS": 0
+  },
+  "CROSS_PORTAL_RBAC": "PASS",
+  "CROSS_PORTAL_ROLE_MATRIX": "PASS",
+  "ADMIN_ROUTE_SHELL_LEAKS": 0,
+  "STAFF_ROUTE_SHELL_LEAKS": 0,
+  "PRIVILEGED_CHILD_RENDER_ON_DENY": 0,
+  "PUBLIC_GOLDEN_REGRESSIONS": 0,
+  "OWNER_VISIBLE_FINAL_CERTIFICATION": "PASS",
+  "FINAL_STATUS": "VERIFIED_PASS",
+  "finishedAt": "2026-10-01T04:45:48.887Z"
+}

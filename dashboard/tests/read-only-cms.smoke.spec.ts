@@ -79,7 +79,7 @@ test("CMS no overflow at 390px", async ({ page }) => {
 
 test("CMS live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/cms?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("CMS sanitized content has no script tags in fixture", async () => {

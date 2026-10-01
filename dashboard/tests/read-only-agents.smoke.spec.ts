@@ -69,7 +69,7 @@ test("agents forbidden preview", async ({ page }) => {
 
 test("agents live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/agents?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("agents stale preview", async ({ page }) => {

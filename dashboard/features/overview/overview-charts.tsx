@@ -24,7 +24,7 @@ export function OverviewCharts({
     <div className="grid gap-4 lg:grid-cols-2">
       <Card>
         <CardTitle>Booking overview</CardTitle>
-        <CardDescription className="mt-1">Preview trend — last 7 days (mock)</CardDescription>
+        <CardDescription className="mt-1">Booking trend — last 7 days</CardDescription>
         <div className="mt-4 h-64 w-full min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={bookingTrend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -51,7 +51,7 @@ export function OverviewCharts({
       </Card>
       <Card>
         <CardTitle>Bookings by status</CardTitle>
-        <CardDescription className="mt-1">Mock distribution</CardDescription>
+        <CardDescription className="mt-1">Status distribution</CardDescription>
         <div className="mt-4 h-64 w-full min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>

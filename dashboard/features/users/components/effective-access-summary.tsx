@@ -31,29 +31,33 @@ export function AccessDomainGrid({ domains }: { domains: EffectiveAccessDomainSu
 }
 
 export function EffectiveAccessSummaryPanel({ summary, testId = "effective-access-summary" }: { summary: EffectiveAccessSummary; testId?: string }) {
+  const domains = summary?.domains ?? [];
+  const highRiskPermissions = summary?.highRiskPermissions ?? [];
+  const totalPermissions = summary?.totalPermissions ?? 0;
+
   return (
     <section aria-labelledby="effective-access-heading" data-testid={testId}>
       <h3 id="effective-access-heading" className="text-sm font-semibold text-gray-900">
         Effective access summary
       </h3>
       <p className="mt-1 text-xs text-jp-muted">
-        Derived from assigned roles — {summary.totalPermissions} total permissions across {summary.domains.length} domains.
+        Derived from assigned roles — {totalPermissions} total permissions across {domains.length} domains.
       </p>
-      {summary.highRiskPermissions.length > 0 ? (
+      {highRiskPermissions.length > 0 ? (
         <div className="mt-2 rounded-lg border border-red-200 bg-red-50/50 px-3 py-2 text-xs text-red-900">
           <span className="font-medium">High-risk permissions: </span>
-          <span className="break-all">{summary.highRiskPermissions.join(", ")}</span>
+          <span className="break-all">{highRiskPermissions.join(", ")}</span>
         </div>
       ) : null}
       <div className="mt-3">
-        <AccessDomainGrid domains={summary.domains} />
+        <AccessDomainGrid domains={domains} />
       </div>
       <details className="mt-3">
         <summary className="cursor-pointer text-xs font-medium text-jp-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent">
-          Full permission keys ({summary.totalPermissions})
+          Full permission keys ({totalPermissions})
         </summary>
         <ul className="mt-2 max-h-40 overflow-y-auto text-xs break-all">
-          {summary.highRiskPermissions.map((key) => (
+          {highRiskPermissions.map((key) => (
             <li key={key} className="text-red-800">{key} (high risk)</li>
           ))}
         </ul>

@@ -33,14 +33,24 @@ export const navGroups: NavGroup[] = [
         laravelRoute: "admin.bookings",
       },
       {
+        label: "Live operations",
+        href: "/operations/inbox",
+        laravelRoute: "admin.operations.inbox",
+      },
+      {
         label: "Cancellations",
         href: "/operations/review",
-        laravelRoute: "admin.bookings",
+        laravelRoute: "admin.bookings.cancellations.index",
       },
       {
         label: "Execution",
         href: "/operations/execution",
         laravelRoute: "admin.bookings",
+      },
+      {
+        label: "Notification failures",
+        href: "/notifications/failures",
+        laravelRoute: "admin.settings.communications.delivery-log.index",
       },
     ],
   },
@@ -65,12 +75,17 @@ export const navGroups: NavGroup[] = [
       {
         label: "Users",
         href: "/users",
-        laravelRoute: "admin.staff",
+        laravelRoute: "admin.users.index",
         children: [
           { label: "Users", href: "/users" },
           { label: "Roles", href: "/users/roles" },
           { label: "Permissions", href: "/users/permissions" },
         ],
+      },
+      {
+        label: "Staff",
+        href: "/staff",
+        laravelRoute: "admin.staff",
       },
       {
         label: "Settings",
@@ -110,9 +125,13 @@ export const navGroups: NavGroup[] = [
       },
       {
         label: "Markups & Settings",
-        href: "/planned/markups",
+        href: "/markups",
         laravelRoute: "admin.markups",
-        planned: true,
+      },
+      {
+        label: "Commissions",
+        href: "/commissions",
+        laravelRoute: "admin.commissions.index",
       },
       {
         label: "CMS",

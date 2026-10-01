@@ -136,7 +136,7 @@ const auditService = createReadOnlyService<AuditQuery, AuditModuleResult>({
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const envelope = await fetchDashboardApi<LaravelAuditListPayload>(DASHBOARD_API_ROUTES.audit, {
         signal: options?.signal,

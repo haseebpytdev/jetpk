@@ -83,5 +83,5 @@ test("customers no overflow at 360px", async ({ page }) => {
 
 test("customers live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/customers?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });

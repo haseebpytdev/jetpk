@@ -155,7 +155,7 @@ const settingsService = createReadOnlyService<SettingsQuery, SettingsModuleResul
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(query, options) {
       const [overview, general, security, notifications, integrations] = await Promise.all([
         fetchDashboardApi<Record<string, unknown>>(DASHBOARD_API_ROUTES.settings, { signal: options?.signal }),

@@ -80,7 +80,7 @@ test("pnrs forbidden preview", async ({ page }) => {
 
 test("pnrs live read-only notice", async ({ page }) => {
   await page.goto("/admin/dashboard/pnrs?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("pnrs GDS channel distinction in fixtures", async () => {

@@ -56,7 +56,9 @@ export function ReportsWorkspace({ result }: Props) {
       <ReportActiveFilters query={result.query} />
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-jp-muted">Reports are calculated from deterministic JetPakistan preview records.</p>
+        <p className="text-sm text-jp-muted">
+          Live mode uses authoritative Laravel report JSON. Fixture/preview copy applies only outside live mode.
+        </p>
         <ReportExportMenu result={result} allRows={allRows} />
       </div>
 

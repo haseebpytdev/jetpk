@@ -1,6 +1,6 @@
-/** JETPK-DASH-11 — read-only Laravel integration contracts (architecture only in Prompt 01). */
+/** Dashboard Laravel integration contracts — transport/metadata (not write-capability). */
 
-export const DATA_SOURCE_MODES = ["fixture", "laravelReadOnly", "unavailable"] as const;
+export const DATA_SOURCE_MODES = ["fixture", "laravelLive", "laravelReadOnly", "unavailable"] as const;
 export type DataSourceMode = (typeof DATA_SOURCE_MODES)[number];
 
 export const DATA_SOURCE_STATES = [

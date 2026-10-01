@@ -1,4 +1,5 @@
 import { BookingDetailDrawerContent } from "@/features/bookings/booking-detail-drawer";
+import { BookingOperationalActions } from "@/features/bookings/booking-operational-actions";
 import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
 import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import {
@@ -191,10 +192,7 @@ function BookingDetailPanels({ detail }: { detail: BookingDetail }) {
       ) : null}
 
       <Section title="Operational actions">
-        <p className="text-sm text-jp-muted">
-          Payment, refund, cancellation, and ticketing mutations are intentionally omitted from this
-          recovery detail view. Use authorized operational workflows when needed.
-        </p>
+        <BookingOperationalActions bookingId={detail.summary.id} />
       </Section>
     </div>
   );

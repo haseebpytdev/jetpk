@@ -42,7 +42,7 @@ const overviewService = createReadOnlyService<Record<string, never>, OverviewDat
     },
   },
   laravelAdapter: {
-    mode: "laravelReadOnly",
+    mode: "laravelLive",
     async fetch(_query, options) {
       const envelope = await fetchDashboardApi<LaravelOverviewPayload>(DASHBOARD_API_ROUTES.overview, {
         signal: options?.signal,

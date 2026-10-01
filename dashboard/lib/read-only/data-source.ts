@@ -9,18 +9,36 @@ function isMockDataEnabled(): boolean {
   return getDashboardMode() === "preview" || process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 }
 
+/**
+ * Resolves the active data-source mode.
+ * Live production builds with mock disabled are laravelLive (operational).
+ * laravelReadOnly is reserved for intentional read-only / non-live Laravel-backed contexts.
+ */
 export function resolveDataSourceMode(): DataSourceMode {
-  if (!isMockDataEnabled()) {
-    return "laravelReadOnly";
-  }
   if (process.env.NEXT_PUBLIC_DATA_SOURCE_UNAVAILABLE === "true") {
     return "unavailable";
   }
-  return "fixture";
+  if (isMockDataEnabled()) {
+    return "fixture";
+  }
+  if (getDashboardMode() === "live") {
+    return "laravelLive";
+  }
+  // Preview build with mock off still uses Laravel GET adapters, but is not operational live.
+  return "laravelReadOnly";
+}
+
+export function isLaravelBackedMode(mode: DataSourceMode = resolveDataSourceMode()): boolean {
+  return mode === "laravelLive" || mode === "laravelReadOnly";
 }
 
 export function isValidDataSourceMode(value: string): value is DataSourceMode {
-  return value === "fixture" || value === "laravelReadOnly" || value === "unavailable";
+  return (
+    value === "fixture" ||
+    value === "laravelLive" ||
+    value === "laravelReadOnly" ||
+    value === "unavailable"
+  );
 }
 
 export function isValidDataSourceState(value: string): value is DataSourceState {
@@ -53,8 +71,9 @@ export function buildFixtureMetadata(overrides?: Partial<DataSourceMetadata>): D
 
 export function buildLaravelMetadata(overrides?: Partial<DataSourceMetadata>): DataSourceMetadata {
   const now = new Date().toISOString();
+  const requested = overrides?.source ?? resolveDataSourceMode();
+  const laravelSource = requested === "laravelReadOnly" ? "laravelReadOnly" : "laravelLive";
   return {
-    source: "laravelReadOnly",
     fetchedAt: now,
     referenceTime: now,
     staleAfter: overrides?.staleAfter ?? null,
@@ -63,6 +82,7 @@ export function buildLaravelMetadata(overrides?: Partial<DataSourceMetadata>): D
     fixtureRevision: null,
     schemaVersion: READ_ONLY_SCHEMA_VERSION,
     ...overrides,
+    source: laravelSource,
   };
 }
 
@@ -78,8 +98,10 @@ export function mapModeToLabel(mode: DataSourceMode): string {
   switch (mode) {
     case "fixture":
       return "Fixture preview";
+    case "laravelLive":
+      return "Live Laravel data";
     case "laravelReadOnly":
-      return "Laravel read-only";
+      return "Read-only operational view";
     case "unavailable":
       return "Unavailable";
     default:

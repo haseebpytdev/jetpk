@@ -30,9 +30,9 @@ class DashboardCustomersController extends Controller
         );
     }
 
-    public function show(Request $request, string $customer): JsonResponse
+    public function show(Request $request, string $customerKey): JsonResponse
     {
-        $detail = $this->customers->detail($request->user(), $customer);
+        $detail = $this->customers->detail($request->user(), $customerKey);
         if ($detail === null) {
             return DashboardReadOnlyEnvelope::error('not_found', 'The requested record was not found.', 404, 'CU-NOT-FOUND');
         }

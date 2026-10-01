@@ -16,11 +16,11 @@ class DashboardCustomersReadService
      */
     public function paginate(User $user, Request $request): array
     {
-        Gate::authorize('viewAny', User::class);
+        Gate::forUser($user)->authorize('viewAny', User::class);
 
         $query = $this->scopedQuery($user)
             ->select(['id', 'name', 'email', 'status', 'created_at', 'meta', 'email_verified_at'])
-            ->with(['profile:id,user_id,phone,whatsapp,city,country,nationality'])
+            ->with(['profile:id,user_id,phone,whatsapp,city,country_code,nationality'])
             ->withCount('bookings')
             ->withMax('bookings as last_booking_at', 'created_at');
 
@@ -53,15 +53,26 @@ class DashboardCustomersReadService
      */
     public function detail(User $user, string $id): ?array
     {
-        Gate::authorize('viewAny', User::class);
+        Gate::forUser($user)->authorize('viewAny', User::class);
 
         $customerId = str_starts_with(strtoupper($id), 'CU-') ? (int) substr($id, 3) : (int) $id;
+        if ($customerId < 1) {
+            return null;
+        }
+
+        // Resolve the customer first, then load aggregates. Combining constrained
+        // profile eager-load + withMax in one query has returned null on SQLite
+        // under RefreshDatabase even when the row exists.
         $customer = $this->scopedQuery($user)->whereKey($customerId)->first();
         if ($customer === null) {
             return null;
         }
 
-        Gate::authorize('view', $customer);
+        Gate::forUser($user)->authorize('view', $customer);
+
+        $customer->load(['profile:id,user_id,phone,whatsapp,city,country_code,nationality']);
+        $customer->loadCount('bookings');
+        $customer->loadMax('bookings as last_booking_at', 'created_at');
 
         return DashboardCustomerResource::fromModel($customer);
     }

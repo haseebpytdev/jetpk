@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
 import { PnrDetailDrawerContent } from "@/features/pnrs/pnr-detail-drawer";
 import { PnrsFilters } from "@/features/pnrs/pnrs-filters";
@@ -21,6 +23,7 @@ type Props = {
 
 export function PnrsWorkspace({ query, result, selectedPnr }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
 
@@ -64,7 +67,7 @@ export function PnrsWorkspace({ query, result, selectedPnr }: Props) {
       {empty ? (
         <EmptyState
           title="No PNRs or orders match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={emptyListDescription(isLive)}
         />
       ) : (
         <>

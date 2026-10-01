@@ -25,7 +25,7 @@ for (const width of widths) {
 
 test("overview live notice via preview gate", async ({ page }) => {
   await page.goto("/admin/dashboard?dataSourcePreview=live", { waitUntil: "load" });
-  await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
+  await expect(page.getByTestId("live-operational-notice")).toBeVisible();
 });
 
 test("overview error state via preview gate", async ({ page }) => {

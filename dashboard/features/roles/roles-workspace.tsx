@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
 import { RoleDetailDrawerContent } from "@/features/roles/components/role-detail-drawer";
 import { RoleMobileCard } from "@/features/roles/components/role-mobile-card";
@@ -12,6 +14,7 @@ import { RolesActiveFilters } from "@/features/roles/components/roles-active-fil
 import { RolesDataTable } from "@/features/roles/components/roles-data-table";
 import { RolesFilterBar } from "@/features/roles/components/roles-filter-bar";
 import { RolesSummaryMetrics } from "@/features/roles/components/roles-summary-metrics";
+import { StaffRbacOperationalPanel } from "@/features/roles/components/staff-rbac-operational-panel";
 import { rolesQueryToSearchParams } from "@/lib/roles-query";
 import type { RoleSortField, RolesModuleResult } from "@/types/roles";
 
@@ -21,6 +24,7 @@ type Props = {
 
 export function RolesWorkspace({ result }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
 
@@ -58,6 +62,12 @@ export function RolesWorkspace({ result }: Props) {
 
   return (
     <div data-testid="roles-workspace">
+      {isLive ? (
+        <p className="mb-4 text-sm text-jp-muted" data-testid="roles-system-catalog-note">
+          Account-type system roles are protected catalog entries. Use Operational staff RBAC below
+          for durable StaffPermission writes on the current domain.
+        </p>
+      ) : null}
       <RolesSummaryMetrics summary={result.summary} />
       <div className="mt-4 space-y-3">
         <RolesFilterBar query={result.query} facets={result.facets} />
@@ -67,7 +77,7 @@ export function RolesWorkspace({ result }: Props) {
       {empty ? (
         <EmptyState
           title="No roles match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={emptyListDescription(isLive)}
         />
       ) : (
         <>
@@ -118,6 +128,8 @@ export function RolesWorkspace({ result }: Props) {
           />
         ) : null}
       </Drawer>
+
+      <StaffRbacOperationalPanel />
     </div>
   );
 }
