@@ -17,7 +17,7 @@ final class SupplierSourcePresenter
             'pia_ndc' => 'PIA NDC',
             'airblue' => 'AirBlue',
             'duffel' => 'Duffel',
-            'airline_direct' => 'Airline Direct',
+            'one_api' => 'One API',
             default => 'Supplier',
         };
     }

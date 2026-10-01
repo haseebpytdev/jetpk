@@ -12,7 +12,7 @@ class SupplierOperationalStatus
     {
         $raw = strtolower(trim((string) $supplierStatus));
         $provider = strtolower(trim((string) $provider));
-        $providerSupportsAutomation = in_array($provider, ['duffel', 'sabre', 'pia_ndc', 'airline_direct', 'iati'], true);
+        $providerSupportsAutomation = in_array($provider, ['duffel', 'sabre', 'pia_ndc', 'iati', 'airblue', 'one_api'], true);
 
         $code = match (true) {
             $raw === 'failed' => 'failed',

@@ -10,7 +10,12 @@ import {
   updateApiConnection,
 } from "@/services/operational-api";
 import { ApiConnectionCard } from "@/features/api-connections/components/connection-card";
-import { AddApiConnectionCard, ProviderCatalogCards } from "@/features/api-connections/components/provider-catalog-cards";
+import { AddApiConnectionCard } from "@/features/api-connections/components/provider-catalog-cards";
+import { AddApiConnectionModal } from "@/features/api-connections/components/add-api-connection-modal";
+import {
+  airBlueEndpointPreview,
+  AIRBLUE_MINIMAL_FIELD_KEYS,
+} from "@/features/api-connections/lib/airblue-zapways-contract";
 import type { ApiConnectionRow } from "@/features/api-connections/lib/connection-status";
 
 type FieldMeta = {
@@ -46,6 +51,26 @@ type ProviderCardMeta = {
   readiness?: string;
 };
 
+type PlatformIntegration = {
+  key: string;
+  label: string;
+  configured: boolean;
+  active?: boolean;
+  smtpConfigurationPresent?: boolean;
+  statusLabel?: string;
+  source?: string;
+  readOnly?: boolean;
+  activeMailer?: string | null;
+  host?: string | null;
+  scheme?: string | null;
+  fromAddress?: string | null;
+  usernamePresent?: boolean;
+  passwordPresent?: boolean;
+  clientIdPresent?: boolean;
+  clientSecretPresent?: boolean;
+  redirectUri?: string | null;
+};
+
 type WorkspaceConnectionRow = ApiConnectionRow & {
   id: string;
   name: string;
@@ -58,6 +83,8 @@ type WorkspaceConnectionRow = ApiConnectionRow & {
   lastTestedAt?: string | null;
   lastTestStatus?: string | null;
   lastFailure?: string | null;
+  checkType?: string | null;
+  checkLabel?: string | null;
   sabreGdsSupported?: boolean | null;
   sabreNdcSupported?: boolean | null;
   sabreNdcEnabled?: boolean | null;
@@ -91,9 +118,6 @@ type WorkspaceConnectionRow = ApiConnectionRow & {
   };
 };
 
-function currentChannel(credentials: Record<string, string>, row?: WorkspaceConnectionRow): string {
-  return credentials.api_channel || row?.advanced?.values?.api_channel || "crane_ndc";
-}
 
 function auditTimestamp(entry: NonNullable<WorkspaceConnectionRow["audit"]>["history"] extends (infer T)[] | undefined ? T : never): string {
   const raw = entry.createdAt ?? entry.at;
@@ -124,7 +148,7 @@ function isFieldVisible(field: FieldMeta, credentials: Record<string, string>, r
     return field.channel === authMode;
   }
 
-  const apiChannel = credentials.api_channel || row?.advanced?.values?.api_channel || "crane_ndc";
+  const apiChannel = credentials.api_channel || row?.advanced?.values?.api_channel || "zapways_ota";
   return field.channel === apiChannel;
 }
 
@@ -180,22 +204,16 @@ export function ApiConnectionsWorkspace() {
   const [rows, setRows] = useState<WorkspaceConnectionRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [provider, setProvider] = useState("sabre");
-  const [name, setName] = useState("");
-  const [environment, setEnvironment] = useState("sandbox");
   const [credentials, setCredentials] = useState<Record<string, string>>({});
-  const [createBaseUrl, setCreateBaseUrl] = useState("");
   const [manageId, setManageId] = useState<string | null>(null);
   const [manageName, setManageName] = useState("");
   const [manageEnv, setManageEnv] = useState("sandbox");
   const [providers, setProviders] = useState<ProviderCatalog[]>([]);
   const [providerCards, setProviderCards] = useState<ProviderCardMeta[]>([]);
-  const [showCreate, setShowCreate] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [platformIntegrations, setPlatformIntegrations] = useState<PlatformIntegration[]>([]);
   const [manageTab, setManageTab] = useState<"overview" | "environment" | "endpoints" | "credentials" | "capabilities" | "advanced" | "health" | "audit">("overview");
   const [manageBaseUrl, setManageBaseUrl] = useState("");
-
-  const adapter = providers.find((item) => item.key === provider);
-  const installed = Boolean(adapter?.installed);
 
   const refresh = useCallback(async () => {
     if (!isLive) {
@@ -218,6 +236,12 @@ export function ApiConnectionsWorkspace() {
       ?? []) as ProviderCardMeta[];
     if (Array.isArray(cards) && cards.length > 0) {
       setProviderCards(cards);
+    }
+    const integrations = ((result as { data?: { platformIntegrations?: PlatformIntegration[] } }).data?.platformIntegrations
+      ?? (result as { platformIntegrations?: PlatformIntegration[] }).platformIntegrations
+      ?? []) as PlatformIntegration[];
+    if (Array.isArray(integrations)) {
+      setPlatformIntegrations(integrations);
     }
   }, [isLive]);
 
@@ -299,7 +323,7 @@ export function ApiConnectionsWorkspace() {
               onToggle={() => run(() => toggleApiConnection(String(row.id)))}
             />
           ))}
-          <AddApiConnectionCard onClick={() => setShowCreate(true)} />
+          <AddApiConnectionCard onClick={() => setShowCreateModal(true)} />
         </div>
         {connectionsByProvider.size > 0 ? (
           <div className="rounded-xl border border-jp-border bg-gray-50 p-3 text-xs text-jp-muted">
@@ -311,6 +335,52 @@ export function ApiConnectionsWorkspace() {
           </div>
         ) : null}
       </section>
+
+      <section className="space-y-3" data-testid="platform-integrations-panel">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-gray-900">Platform integrations</h2>
+          <p className="text-xs text-jp-muted">Environment managed · read-only</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {platformIntegrations.map((item) => (
+            <div key={item.key} className="rounded-xl border border-jp-border bg-white p-4" data-testid={`platform-integration-${item.key}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-semibold text-gray-900">{item.label}</p>
+                  <p className="text-xs text-jp-muted">Source: {item.source ?? "environment"}</p>
+                </div>
+                <span className={`rounded-full border px-2 py-0.5 text-[11px] ${item.configured ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-900"}`}>
+                  {item.statusLabel ?? (item.configured ? "Configured" : "Not configured")}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-jp-muted">Editing environment values from the Dashboard is not available yet.</p>
+              {item.key === "smtp" ? (
+                <dl className="mt-2 grid gap-1 text-xs text-jp-muted">
+                  {item.activeMailer ? <div>Active mailer: {item.activeMailer}</div> : null}
+                  <div>SMTP settings present: {item.smtpConfigurationPresent ? "Yes" : "No"}</div>
+                  <div>SMTP active: {item.active ? "Yes" : "No"}</div>
+                  {item.host ? <div>Host: {item.host}</div> : null}
+                  {item.scheme ? <div>Scheme: {item.scheme}</div> : null}
+                  {item.fromAddress ? <div>From: {item.fromAddress}</div> : null}
+                  <div>Username: {item.usernamePresent ? "Present" : "Missing"}</div>
+                  <div>Password: {item.passwordPresent ? "Present" : "Missing"}</div>
+                </dl>
+              ) : null}
+              {item.key === "google_oauth" ? (
+                <dl className="mt-2 grid gap-1 text-xs text-jp-muted">
+                  <div>Client ID: {item.clientIdPresent ? "Present" : "Missing"}</div>
+                  <div>Client secret: {item.clientSecretPresent ? "Present" : "Missing"}</div>
+                  {item.redirectUri ? <div>Redirect: {item.redirectUri}</div> : null}
+                </dl>
+              ) : null}
+            </div>
+          ))}
+          {platformIntegrations.length === 0 ? (
+            <p className="text-sm text-jp-muted">Platform integration status loads in live authenticated mode.</p>
+          ) : null}
+        </div>
+      </section>
+
       {manageId ? (
         <section className="space-y-3 rounded-xl border border-jp-border bg-white p-4" data-testid="api-connection-manage">
           <h2 className="text-sm font-semibold">Manage connection</h2>
@@ -382,7 +452,23 @@ export function ApiConnectionsWorkspace() {
                           </p>
                         ))
                       : null}
-                    {fields.filter((field) => isFieldVisible(field, credentials, row)).map((field) => (
+                    {row.provider === "airblue" ? (
+                      <div className="rounded-lg border border-jp-border bg-gray-50 p-3 text-xs" data-testid="airblue-endpoint-preview">
+                        <p className="font-medium text-gray-900">Environment: {manageEnv === "live" ? "Live" : "Test"}</p>
+                        <p className="mt-2 text-jp-muted">Endpoint</p>
+                        <p className="font-mono text-[11px] text-gray-900">{airBlueEndpointPreview(manageEnv)}</p>
+                        <p className="mt-2 text-jp-muted">Protocol</p>
+                        <p>Zapways OTA v2</p>
+                        <p className="mt-2 text-jp-muted">mTLS</p>
+                        <p>JetPakistan certificate configured</p>
+                      </div>
+                    ) : null}
+                    {fields
+                      .filter((field) => isFieldVisible(field, credentials, row))
+                      .filter((field) => (row.provider === "airblue"
+                        ? AIRBLUE_MINIMAL_FIELD_KEYS.includes(field.key as (typeof AIRBLUE_MINIMAL_FIELD_KEYS)[number])
+                        : true))
+                      .map((field) => (
                       <ProviderField
                         key={field.key}
                         field={field}
@@ -479,121 +565,35 @@ export function ApiConnectionsWorkspace() {
           })()}
         </section>
       ) : null}
-      <section className={`space-y-3 rounded-xl border border-jp-border bg-white p-4 ${showCreate ? "" : "hidden"}`} data-testid="api-connection-create-panel">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold">Add API Connection</h2>
-          <button type="button" className="text-xs text-jp-muted hover:underline" onClick={() => setShowCreate(false)}>
-            Close
-          </button>
-        </div>
-        <ProviderCatalogCards
-          providers={providers}
-          providerCards={providerCards}
-          selectedKey={provider}
-          onSelect={(key) => {
-            setProvider(key);
-            setCredentials({});
-            setCreateBaseUrl("");
-          }}
-        />
-        <label className="block text-xs">
-          Provider
-          <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={provider} onChange={(e) => {
-            setProvider(e.target.value);
-            setCredentials({});
-            setCreateBaseUrl("");
-          }}>
-            {providers.map((item) => (
-              <option key={item.key} value={item.key}>{item.label}{item.installed ? "" : " (not installed)"}</option>
-            ))}
-          </select>
-        </label>
-        {!installed ? (
-          <p className="text-sm text-amber-700">Provider adapter not installed. Engineering integration required. Credential entry is disabled.</p>
-        ) : (
-          <>
-            <label className="block text-xs">
-              Connection name
-              <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={name} onChange={(e) => setName(e.target.value)} />
-            </label>
-            <label className="block text-xs">
-              Environment
-              <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={environment} onChange={(e) => setEnvironment(e.target.value)}>
-                <option value="demo">demo</option>
-                <option value="sandbox">sandbox</option>
-                <option value="live">live</option>
-              </select>
-            </label>
-            {adapter?.baseUrlOverridable ? (
-              <label className="block text-xs">
-                Base URL
-                <input
-                  className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1"
-                  value={createBaseUrl}
-                  onChange={(e) => setCreateBaseUrl(e.target.value)}
-                  placeholder="https://api.example.com"
-                />
-              </label>
-            ) : (
-              <p className="text-xs text-jp-muted">This adapter uses its built-in endpoint. A Base URL override is not supported.</p>
-            )}
-            <fieldset className="space-y-2 rounded-lg border border-jp-border p-3">
-              <legend className="text-sm font-medium">Credentials</legend>
-              {(adapter?.credentialFields ?? []).filter((field) => isFieldVisible(field, credentials)).map((field) => (
-                <ProviderField
-                  key={field.key}
-                  field={field}
-                  value={credentials[field.key] ?? (field.type === "select" ? field.default ?? "" : "")}
-                  onChange={(value) => setCredentials((current) => ({ ...current, [field.key]: value }))}
-                />
-              ))}
-            </fieldset>
-            {(adapter?.advancedFields ?? []).length > 0 ? (
-              <fieldset className="space-y-2 rounded-lg border border-jp-border p-3" data-testid="api-create-advanced">
-                <legend className="text-sm font-medium">Advanced configuration</legend>
-                {(adapter?.advancedFields ?? []).filter((field) => isFieldVisible(field, credentials)).map((field) => (
-                  <ProviderField
-                    key={field.key}
-                    field={field}
-                    value={credentials[field.key] ?? field.default ?? ""}
-                    onChange={(value) => setCredentials((current) => ({ ...current, [field.key]: value }))}
-                  />
-                ))}
-              </fieldset>
-            ) : null}
-            {isLive ? (
-              <button
-                type="button"
-                className="min-h-11 rounded-xl bg-jp-accent px-3 text-sm text-white disabled:opacity-60"
-                disabled={busy || !name.trim()}
-                onClick={() =>
-                  run(async () => {
-                    const result = await createApiConnection({
-                      provider,
-                      name: name.trim(),
-                      environment,
-                      status: "inactive",
-                      credentials,
-                      ...(adapter?.baseUrlOverridable ? { base_url: createBaseUrl.trim() || null } : {}),
-                    });
-                    if (result.ok) {
-                      setShowCreate(false);
-                      setName("");
-                      setCredentials({});
-                      setCreateBaseUrl("");
-                    }
-                    return result;
-                  })
-                }
-              >
-                Save securely
-              </button>
-            ) : (
-              <p className="text-xs text-jp-muted">Live credential save is available in authenticated dashboard mode only.</p>
-            )}
-          </>
-        )}
-      </section>
+      <AddApiConnectionModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        providers={providers}
+        providerCards={providerCards}
+        isLive={isLive}
+        busy={busy}
+        error={error}
+        onSave={async (payload) => {
+          setBusy(true);
+          setError(null);
+          const result = await createApiConnection({
+            provider: payload.provider,
+            name: payload.name,
+            environment: payload.environment,
+            status: "inactive",
+            credentials: payload.credentials,
+            ...(payload.base_url !== undefined ? { base_url: payload.base_url } : {}),
+          });
+          setBusy(false);
+          if (!result.ok) {
+            setError(result.message ?? "Request failed");
+            return result;
+          }
+          setShowCreateModal(false);
+          await refresh();
+          return result;
+        }}
+      />
     </div>
   );
 }

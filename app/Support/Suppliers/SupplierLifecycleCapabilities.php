@@ -76,7 +76,7 @@ final class SupplierLifecycleCapabilities
                 'refund' => false,
                 'exchange' => false,
             ],
-            'airblue', 'airsial' => [
+            'airblue' => [
                 'search' => true,
                 'fare_options' => true,
                 'revalidation' => true,
@@ -117,7 +117,7 @@ final class SupplierLifecycleCapabilities
             SupplierProvider::PiaNdc->value => SupplierLifecycleContextResolver::CHANNEL_NDC,
             SupplierProvider::Duffel->value => SupplierLifecycleContextResolver::CHANNEL_DIRECT,
             SupplierProvider::OneApi->value => SupplierLifecycleContextResolver::CHANNEL_DIRECT,
-            'airblue', 'airsial' => SupplierLifecycleContextResolver::CHANNEL_DIRECT,
+            'airblue' => SupplierLifecycleContextResolver::CHANNEL_DIRECT,
             default => SupplierLifecycleContextResolver::CHANNEL_OTHER,
         };
     }

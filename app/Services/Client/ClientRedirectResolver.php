@@ -81,10 +81,10 @@ final class ClientRedirectResolver
             AccountType::Agent, AccountType::AgentStaff => Route::has('agent.dashboard')
                 ? $this->pathForRoute('agent.dashboard')
                 : $this->pathForUrl('/agent'),
-            AccountType::Customer => Route::has('customer.bookings.index')
-                ? $this->pathForRoute('customer.bookings.index')
-                : (Route::has('customer.dashboard')
-                    ? $this->pathForRoute('customer.dashboard')
+            AccountType::Customer => Route::has('customer.dashboard')
+                ? $this->pathForRoute('customer.dashboard')
+                : (Route::has('customer.bookings.index')
+                    ? $this->pathForRoute('customer.bookings.index')
                     : $this->pathForUrl('/customer')),
         };
     }

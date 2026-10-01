@@ -161,7 +161,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticatedAs($user);
-        $response->assertRedirect(route('customer.bookings.index', absolute: false));
+        $response->assertRedirect(route('customer.dashboard', absolute: false));
     }
 
     public function test_users_can_authenticate_using_username(): void

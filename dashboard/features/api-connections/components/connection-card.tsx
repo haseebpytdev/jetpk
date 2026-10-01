@@ -9,7 +9,7 @@ import {
 } from "@/features/api-connections/lib/connection-status";
 
 type Props = {
-  row: ApiConnectionRow;
+  row: ApiConnectionRow & { checkLabel?: string | null; checkType?: string | null };
   providerLabel: string;
   providerIcon?: string;
   busy: boolean;
@@ -96,8 +96,8 @@ export function ApiConnectionCard({
           <dt className="sr-only">Last test</dt>
           <dd>
             {row.lastTestStatus
-              ? `Last test: ${row.lastTestStatus}${row.lastTestedAt ? ` · ${row.lastTestedAt}` : ""}`
-              : "Not tested yet"}
+              ? `Last check: ${row.lastTestStatus}${row.lastTestedAt ? ` · ${row.lastTestedAt}` : ""}`
+              : "Not validated yet"}
           </dd>
         </div>
         {row.channel ? (
@@ -124,7 +124,7 @@ export function ApiConnectionCard({
             disabled={busy}
             onClick={onTest}
           >
-            Test
+            {row.checkLabel ?? "Validate configuration"}
           </button>
           <button
             type="button"

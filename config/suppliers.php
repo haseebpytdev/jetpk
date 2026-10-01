@@ -419,6 +419,14 @@ return [
         'branded_fares_selection_enabled' => (bool) env('IATI_BRANDED_FARES_SELECTION_ENABLED', true),
     ],
     'pia_ndc' => [
+        'default_ndc_base_url' => env(
+            'PIA_NDC_BASE_URL',
+            env('AIRBLUE_NDC_ENDPOINT', 'https://app.crane.aero/cranendc/v20.1/CraneNDCService')
+        ),
+        'default_ndc_wsdl' => env(
+            'PIA_NDC_WSDL',
+            env('AIRBLUE_NDC_WSDL', 'https://app.crane.aero/cranendc/v20.1/CraneNDCService?wsdl')
+        ),
         'timeout_seconds' => (int) env('PIA_NDC_TIMEOUT_SECONDS', 60),
         'connect_timeout_seconds' => (int) env('PIA_NDC_CONNECT_TIMEOUT_SECONDS', 10),
         'checkout_offer_price_enabled' => (bool) env('PIA_NDC_CHECKOUT_OFFER_PRICE_ENABLED', true),
@@ -448,32 +456,56 @@ return [
         'connect_timeout_seconds' => (int) env('AIRBLUE_CONNECT_TIMEOUT_SECONDS', 10),
         'username_header' => env('AIRBLUE_USERNAME_HEADER', 'username'),
         'password_header' => env('AIRBLUE_PASSWORD_HEADER', 'password'),
-        'default_ndc_base_url' => 'https://app.crane.aero/cranendc/v20.1/CraneNDCService',
-        'default_ndc_wsdl' => 'https://app.crane.aero/cranendc/v20.1/CraneNDCService?wsdl',
-        'default_ota_base_url' => env('AIRBLUE_OTA_BASE_URL', 'https://ota3.zapways.com/v2.0/OTAAPI.asmx'),
-        'default_ota_qa_base_url' => 'https://ota.qa.zapways.com/v2.0/OTAAPI.asmx',
-        'ndc_operations' => [
-            'air_shopping' => ['soap_action' => 'doAirShopping'],
-            'offer_price' => ['soap_action' => 'doOfferPrice'],
-            'order_create' => ['soap_action' => 'doOrderCreate'],
-            'order_retrieve' => ['soap_action' => 'doOrderRetrieve'],
-            'ticket_preview' => ['soap_action' => 'doTicketPreview'],
-            'order_change' => ['soap_action' => 'doOrderChange'],
-            'cancel_preview' => ['soap_action' => 'doOrderCancelPreview'],
-            'cancel_commit' => ['soap_action' => 'doOrderCancelCommit'],
-            'void_ticket' => ['soap_action' => 'doVoidTicket'],
-            'seat_availability' => ['soap_action' => 'doSeatAvailability'],
-            'baggage_service_list' => ['soap_action' => 'doBaggageServiceList'],
-            'add_ancillary' => ['soap_action' => 'doAddAncillary'],
-            'sell_ancillary' => ['soap_action' => 'doSellAncillary'],
+        'default_protocol_version' => '2.0',
+        'protocol_versions' => [
+            '2.0' => [
+                'namespace' => 'http://zapways.com/air/ota/2.0',
+                'default_base_url' => env('AIRBLUE_OTA_BASE_URL', 'https://ota4.zapways.com/v2.0/OTAAPI.asmx'),
+                'default_qa_base_url' => env('AIRBLUE_OTA_QA_BASE_URL', 'https://otatest4.zapways.com/v2.0/OTAAPI.asmx'),
+                'ota_operations' => [
+                    'air_low_fare_search' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirLowFareSearch'],
+                    'air_book' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirBook'],
+                    'air_demand_ticket' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirDemandTicket'],
+                    'read' => [
+                        'soap_action_live' => 'https://ota4.zapways.com/Read',
+                        'soap_action_test' => 'https://otatest4.zapways.com/Read',
+                    ],
+                    'cancel' => ['soap_action' => 'http://zapways.com/air/ota/2.0/Cancel'],
+                    'air_book_modify' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirBookModify'],
+                ],
+            ],
+            '3.0' => [
+                'namespace' => 'http://zapways.com/air/ota/3.0',
+                'default_base_url' => env('AIRBLUE_OTA_V3_BASE_URL', 'https://ota4.zapways.com/v3.0/OTAAPI.asmx'),
+                'default_qa_base_url' => env('AIRBLUE_OTA_V3_QA_BASE_URL', 'https://otatest4.zapways.com/v3.0/OTAAPI.asmx'),
+                'live_enabled' => (bool) env('AIRBLUE_OTA_V3_LIVE_ENABLED', false),
+                'ota_operations' => [
+                    'air_low_fare_search' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_AIR_LOW_FARE_SEARCH')],
+                    'air_book' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_AIR_BOOK')],
+                    'air_demand_ticket' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_AIR_DEMAND_TICKET')],
+                    'read' => [
+                        'soap_action_test' => env('AIRBLUE_OTA_V3_SOAP_ACTION_READ_TEST', 'https://ota.qa.zapways.com/Read'),
+                        'soap_action_live' => env('AIRBLUE_OTA_V3_SOAP_ACTION_READ_LIVE', 'https://ota.zapways.com/Read'),
+                    ],
+                    'cancel' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_CANCEL')],
+                    'air_book_modify' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_AIR_BOOK_MODIFY')],
+                    'air_seat_map' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_AIR_SEAT_MAP')],
+                    'air_ancillary_items' => ['soap_action' => env('AIRBLUE_OTA_V3_SOAP_ACTION_AIR_ANCILLARY_ITEMS')],
+                ],
+            ],
         ],
+        // Backward-compatible aliases for legacy config readers.
+        'default_ota_base_url' => env('AIRBLUE_OTA_BASE_URL', 'https://ota4.zapways.com/v2.0/OTAAPI.asmx'),
+        'default_ota_qa_base_url' => env('AIRBLUE_OTA_QA_BASE_URL', 'https://otatest4.zapways.com/v2.0/OTAAPI.asmx'),
+        'default_tls_cert_path' => env('AIRBLUE_ZAPWAYS_TLS_CERT_PATH', env('AIRBLUE_TLS_CERT_PATH', '')),
+        'default_tls_key_path' => env('AIRBLUE_ZAPWAYS_TLS_KEY_PATH', env('AIRBLUE_TLS_KEY_PATH', '')),
         'ota_operations' => [
             'air_low_fare_search' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirLowFareSearch'],
             'air_book' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirBook'],
             'air_demand_ticket' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirDemandTicket'],
             'read' => [
-                'soap_action_live' => 'https://ota.zapways.com/Read',
-                'soap_action_test' => 'https://ota.qa.zapways.com/Read',
+                'soap_action_live' => 'https://ota4.zapways.com/Read',
+                'soap_action_test' => 'https://otatest4.zapways.com/Read',
             ],
             'cancel' => ['soap_action' => 'http://zapways.com/air/ota/2.0/Cancel'],
             'air_book_modify' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirBookModify'],
@@ -526,37 +558,28 @@ return [
         'timeout_seconds' => (int) env('ALHAIDER_API_TIMEOUT', 20),
         'connect_timeout_seconds' => 10,
         'cache_ttl_seconds' => (int) env('ALHAIDER_CACHE_TTL_SECONDS', 600),
-        'token_cache_ttl_seconds' => (int) env('ALHAIDER_TOKEN_CACHE_TTL_SECONDS', 82800),
+        // Performance-layer cache only (not authoritative token lifetime).
+        'token_cache_ttl_seconds' => (int) env('ALHAIDER_TOKEN_CACHE_TTL_SECONDS', 3600),
+        'token_performance_cache_max_seconds' => (int) env('ALHAIDER_TOKEN_PERFORMANCE_CACHE_MAX_SECONDS', 3600),
+        // Business/supplier contract when login response omits expiry metadata (~1 year).
+        'token_validity_seconds' => (int) env('ALHAIDER_TOKEN_VALIDITY_SECONDS', 31_536_000),
+        'token_expiry_margin_seconds' => (int) env('ALHAIDER_TOKEN_EXPIRY_MARGIN_SECONDS', 86_400),
+        // Human-gated: must be explicitly enabled before any supplier login/token issuance.
+        'token_generation_enabled' => (bool) env('ALHAIDER_TOKEN_GENERATION_ENABLED', false),
         'login_lock_seconds' => (int) env('ALHAIDER_LOGIN_LOCK_SECONDS', 15),
         'login_lock_wait_seconds' => (int) env('ALHAIDER_LOGIN_LOCK_WAIT_SECONDS', 10),
         'token_limit_block_seconds' => (int) env('ALHAIDER_TOKEN_LIMIT_BLOCK_SECONDS', 300),
+        // Create gate: permission to create NEW supplier reservations only.
         'booking_enabled' => (bool) env('ALHAIDER_BOOKING_ENABLED', false),
-        'reserve_path' => env('ALHAIDER_RESERVE_PATH', '/api/group/reserve'),
-        'cancel_path' => env('ALHAIDER_CANCEL_PATH', '/api/group/cancel'),
-    ],
-
-    'ameer_e_millat' => [
-        'enabled' => (bool) env('AMEER_E_MILLAT_API_ENABLED', false),
-        'default_base_url' => env('AMEER_E_MILLAT_API_BASE_URL', 'https://fsdameeremillattourism.com'),
-        'token' => env('AMEER_E_MILLAT_API_TOKEN'),
-        'email' => env('AMEER_E_MILLAT_API_EMAIL'),
-        'password' => env('AMEER_E_MILLAT_API_PASSWORD'),
-        'login_path' => '/api/login',
-        'profile_path' => '/api/user',
-        'sectors_path' => '/api/available/sectors',
-        'airlines_path' => '/api/available/airlines',
-        'groups_path' => '/api/available/groups',
-        'group_detail_path' => '/api/group/detail/{id}',
-        'seats_path' => '/api/available/seats/{id}',
-        'legacy_seats_path' => '/api/check/available_seats/{id}',
-        'create_booking_path' => '/api/create/booking',
-        'show_booking_path' => '/api/show/booking/{id}',
-        'timeout_seconds' => (int) env('AMEER_E_MILLAT_API_TIMEOUT', 20),
-        'connect_timeout_seconds' => 10,
-        'cache_ttl_seconds' => (int) env('AMEER_E_MILLAT_CACHE_TTL_SECONDS', 600),
-        'token_cache_ttl_seconds' => (int) env('AMEER_E_MILLAT_TOKEN_CACHE_TTL_SECONDS', 82800),
-        'login_lock_seconds' => (int) env('AMEER_E_MILLAT_LOGIN_LOCK_SECONDS', 15),
-        'login_lock_wait_seconds' => (int) env('AMEER_E_MILLAT_LOGIN_LOCK_WAIT_SECONDS', 10),
-        'booking_enabled' => (bool) env('AMEER_E_MILLAT_BOOKING_ENABLED', false),
+        // Cancel gate: permission to release/cancel EXISTING supplier reservations.
+        // Independent of booking_enabled so cleanup is never blocked by create-off.
+        'cancel_enabled' => (bool) env('ALHAIDER_CANCEL_ENABLED', false),
+        // Official Postman docs (alhaidertravel.pk → API Docs):
+        // POST /api/create/booking, PATCH /api/cancel/booking/{id}
+        'reserve_path' => env('ALHAIDER_RESERVE_PATH', '/api/create/booking'),
+        'cancel_path' => env('ALHAIDER_CANCEL_PATH', '/api/cancel/booking/{id}'),
+        'booking_agency_name' => env('ALHAIDER_BOOKING_AGENCY_NAME', 'JetPakistan'),
+        'booking_agent_name' => env('ALHAIDER_BOOKING_AGENT_NAME', 'JetPakistan'),
+        'max_automatic_token_generations_per_365_days' => 1,
     ],
 ];

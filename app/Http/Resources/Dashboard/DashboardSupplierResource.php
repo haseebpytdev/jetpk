@@ -14,7 +14,8 @@ final class DashboardSupplierResource
      */
     public static function fromModel(SupplierConnection $connection): array
     {
-        $provider = $connection->provider;
+        $provider = $connection->providerEnum();
+        $providerKey = $connection->providerKey();
         $bookingCount = (int) ($connection->supplier_bookings_count ?? 0);
         $currency = 'PKR';
 
@@ -44,7 +45,7 @@ final class DashboardSupplierResource
             'linkedBookingIds' => [],
             'linkedTransactionIds' => [],
             'notesSummary' => self::notesSummary($connection),
-            'provider' => $provider->value,
+            'provider' => $providerKey,
             'channel' => self::primaryChannel($connection),
             'environment' => $connection->environment?->value ?? 'sandbox',
             'healthSummary' => self::healthSummary($connection),
@@ -74,33 +75,39 @@ final class DashboardSupplierResource
             return $label;
         }
 
-        if ($connection->provider === SupplierProvider::Sabre) {
+        if ($connection->providerEnum() === SupplierProvider::Sabre) {
             return SabreSupplierChannelConfig::connectionAdminLabel($connection);
         }
 
-        return SupplierSourcePresenter::label($connection->provider->value);
+        return SupplierSourcePresenter::label($connection->providerKey());
     }
 
     protected static function displayCode(SupplierConnection $connection): string
     {
-        return match ($connection->provider) {
+        return match ($connection->providerEnum()) {
             SupplierProvider::Sabre => 'SBR',
             SupplierProvider::Duffel => 'DFL',
             SupplierProvider::PiaNdc => 'PIA',
             SupplierProvider::Airblue => 'ABQ',
             SupplierProvider::Iati => 'IAT',
-            SupplierProvider::Amadeus => 'AMA',
-            SupplierProvider::Travelport => 'TVP',
-            default => strtoupper(substr($connection->provider->value, 0, 3)),
+            SupplierProvider::OneApi => 'OAPI',
+            SupplierProvider::AlHaider => 'ALH',
+            SupplierProvider::AmeerEMillat => 'AEM',
+            default => strtoupper(substr($connection->providerKey(), 0, 3)),
         };
     }
 
-    protected static function category(SupplierProvider $provider): string
+    protected static function category(?SupplierProvider $provider): string
     {
+        if ($provider === null) {
+            return 'Retired';
+        }
+
         return match ($provider) {
-            SupplierProvider::Sabre, SupplierProvider::Amadeus, SupplierProvider::Travelport => 'GDS',
+            SupplierProvider::Sabre => 'GDS',
             SupplierProvider::Duffel, SupplierProvider::PiaNdc => 'NDC',
-            SupplierProvider::Airblue, SupplierProvider::AirlineDirect => 'Airline',
+            SupplierProvider::Airblue => 'Airline',
+            SupplierProvider::AlHaider, SupplierProvider::AmeerEMillat => 'Group',
             default => 'Ancillary Service',
         };
     }
@@ -155,8 +162,8 @@ final class DashboardSupplierResource
 
     protected static function primaryChannel(SupplierConnection $connection): string
     {
-        if ($connection->provider !== SupplierProvider::Sabre) {
-            return strtolower($connection->provider->value);
+        if ($connection->providerEnum() !== SupplierProvider::Sabre) {
+            return strtolower($connection->providerKey());
         }
 
         $config = SabreSupplierChannelConfig::fromConnection($connection);
@@ -182,7 +189,7 @@ final class DashboardSupplierResource
         if ($connection->isEligibleForSupplierSearch()) {
             $caps[] = 'booking';
         }
-        if ($connection->provider === SupplierProvider::Sabre) {
+        if ($connection->providerEnum() === SupplierProvider::Sabre) {
             $config = SabreSupplierChannelConfig::fromConnection($connection);
             if ($config->gdsEnabled) {
                 $caps[] = 'gds_pnr';
@@ -200,9 +207,9 @@ final class DashboardSupplierResource
      */
     protected static function resultSourceState(SupplierConnection $connection): array
     {
-        if ($connection->provider !== SupplierProvider::Sabre) {
+        if ($connection->providerEnum() !== SupplierProvider::Sabre) {
             return [
-                'primary' => $connection->provider->value,
+                'primary' => $connection->providerKey(),
                 'gds' => null,
                 'ndc' => null,
             ];
@@ -222,7 +229,7 @@ final class DashboardSupplierResource
      */
     protected static function channelStates(SupplierConnection $connection): ?array
     {
-        if ($connection->provider !== SupplierProvider::Sabre) {
+        if ($connection->providerEnum() !== SupplierProvider::Sabre) {
             return null;
         }
 

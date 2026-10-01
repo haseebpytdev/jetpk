@@ -39,15 +39,7 @@ class PiaNdcConfigResolver
         $agencyId = trim((string) ($credentials['agency_id'] ?? ''));
         $agencyName = trim((string) ($credentials['agency_name'] ?? ''));
         $ownerCode = trim((string) ($credentials['owner_code'] ?? ''));
-        $agencyContactEmail = strtoupper(trim((string) (
-            $credentials['agency_email']
-            ?? $credentials['contact_email']
-            ?? $credentials['agency_contact_email']
-            ?? ''
-        )));
-        if ($agencyContactEmail === '') {
-            $agencyContactEmail = 'ADMIN@JETPAKISTAN.COM';
-        }
+        $agencyContactEmail = $this->resolveAgencyContactEmail($connection, $credentials);
         $endpoint = trim((string) ($connection->base_url ?? ''));
 
         if ($username === '' || $password === '') {
@@ -63,6 +55,14 @@ class PiaNdcConfigResolver
                 'missing_agency_fields',
                 422,
                 'PIA NDC agency ID, agency name, and owner code are required.',
+            );
+        }
+
+        if ($agencyContactEmail === '') {
+            throw new PiaNdcValidationException(
+                'missing_agency_contact_email',
+                422,
+                'PIA NDC agency contact email is required. Configure it on the connection or agency/company profile.',
             );
         }
 
@@ -118,5 +118,39 @@ class PiaNdcConfigResolver
         $env = $connection->environment;
 
         return in_array($env, [SupplierEnvironment::Demo, SupplierEnvironment::Sandbox], true);
+    }
+
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
+    private function resolveAgencyContactEmail(SupplierConnection $connection, array $credentials): string
+    {
+        $fromCredentials = strtoupper(trim((string) (
+            $credentials['agency_email']
+            ?? $credentials['contact_email']
+            ?? $credentials['agency_contact_email']
+            ?? ''
+        )));
+        if ($fromCredentials !== '') {
+            return $fromCredentials;
+        }
+
+        $connection->loadMissing('agency.agencySetting');
+        $agencySupport = strtoupper(trim((string) ($connection->agency?->agencySetting?->support_email ?? '')));
+        if ($agencySupport !== '') {
+            return $agencySupport;
+        }
+
+        $mailFrom = strtoupper(trim((string) config('mail.from.address', '')));
+        if ($mailFrom !== '') {
+            return $mailFrom;
+        }
+
+        $canonical = strtoupper(trim((string) config('client.canonical_support_email', '')));
+        if ($canonical !== '') {
+            return $canonical;
+        }
+
+        return '';
     }
 }

@@ -99,11 +99,7 @@ class Jetpk9hDClosureTest extends TestCase
         $admin = $this->platformAdmin();
         $this->actingAs($admin)
             ->get(route('admin.api-settings.create'))
-            ->assertOk()
-            ->assertSee('Sabre', false)
-            ->assertSee('AirSial', false)
-            ->assertSee('Al-Haider', false)
-            ->assertSee('Duffel', false);
+            ->assertRedirect('/admin/dashboard/api-connections');
     }
 
     public function test_supplier_provider_catalog_includes_required_cards(): void
@@ -114,8 +110,11 @@ class Jetpk9hDClosureTest extends TestCase
         $instance = app(SupplierConnectionController::class);
         $cards = $method->invoke($instance, []);
         $keys = array_column($cards, 'key');
-        foreach (['sabre', 'pia_ndc', 'airblue', 'iati', 'duffel', 'airsial', 'al_haider'] as $required) {
+        foreach (['sabre', 'pia_ndc', 'airblue', 'iati', 'duffel', 'one_api', 'al_haider', 'ameer_e_millat'] as $required) {
             $this->assertContains($required, $keys);
+        }
+        foreach (['airsial', 'amadeus', 'travelport', 'airline_direct', 'generic', 'smtp', 'google_oauth'] as $banned) {
+            $this->assertNotContains($banned, $keys);
         }
     }
 

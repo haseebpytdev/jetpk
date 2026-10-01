@@ -597,7 +597,7 @@ class FlightSearchService
     }
 
     /**
-     * Non-flight modules (e.g. smtp, google_oauth) share SupplierConnection rows and must never enter search fan-out.
+     * Non-flight / retired modules must never enter search fan-out.
      */
     protected function isFlightSearchProvider(SupplierProvider $provider): bool
     {
@@ -605,12 +605,9 @@ class FlightSearchService
             SupplierProvider::Sabre,
             SupplierProvider::PiaNdc,
             SupplierProvider::Airblue,
-            SupplierProvider::AirlineDirect,
             SupplierProvider::Duffel,
             SupplierProvider::Iati,
-            SupplierProvider::OneApi,
-            SupplierProvider::Amadeus,
-            SupplierProvider::Travelport => true,
+            SupplierProvider::OneApi => true,
             default => false,
         };
     }

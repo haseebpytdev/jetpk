@@ -27,19 +27,23 @@ class SupplierConnectionCrudTest extends TestCase
     {
         $admin = $this->seededAdmin();
 
+        SupplierConnection::query()
+            ->where('agency_id', $admin->current_agency_id)
+            ->where('provider', SupplierProvider::Duffel)
+            ->delete();
+
         $this->actingAs($admin)->post('/admin/api-settings', [
-            'provider' => SupplierProvider::Amadeus->value,
-            'name' => 'Amadeus Sandbox',
+            'provider' => SupplierProvider::Duffel->value,
+            'name' => 'Duffel Create QA',
             'environment' => SupplierEnvironment::Sandbox->value,
             'status' => SupplierConnectionStatus::Inactive->value,
-            'base_url' => 'https://example.test/amadeus',
-            'credentials' => ['client_id' => 'amadeus_ci', 'client_secret' => 'amadeus_cs'],
+            'credentials' => ['access_token' => 'duffel_test_create_token'],
             'settings_json' => '{"mode":"sandbox"}',
         ])->assertRedirect('/admin/dashboard/api-connections');
 
         $this->assertDatabaseHas('supplier_connections', [
-            'name' => 'Amadeus Sandbox',
-            'provider' => SupplierProvider::Amadeus->value,
+            'name' => 'Duffel Create QA',
+            'provider' => SupplierProvider::Duffel->value,
         ]);
     }
 
@@ -106,28 +110,27 @@ class SupplierConnectionCrudTest extends TestCase
         $admin = $this->seededAdmin();
         $connection = SupplierConnection::factory()->create([
             'agency_id' => $admin->current_agency_id,
-            'provider' => SupplierProvider::Amadeus,
-            'name' => 'Amadeus Editable',
+            'provider' => SupplierProvider::Duffel,
+            'name' => 'Duffel Editable',
             'environment' => SupplierEnvironment::Sandbox,
             'status' => SupplierConnectionStatus::Inactive,
-            'credentials' => ['client_id' => 'amadeus_ci', 'client_secret' => 'amadeus_cs'],
+            'credentials' => ['access_token' => 'duffel_edit_token'],
         ]);
 
         $this->actingAs($admin)->from('/admin/dashboard/api-connections')->patch('/admin/api-settings/'.$connection->id, [
-            'provider' => SupplierProvider::Amadeus->value,
-            'name' => 'Updated Provider Name',
+            'provider' => SupplierProvider::Duffel->value,
+            'name' => 'Updated Duffel Name',
             'environment' => SupplierEnvironment::Sandbox->value,
             'status' => SupplierConnectionStatus::Inactive->value,
-            'base_url' => 'https://sandbox.example.test',
+            'base_url' => '',
             'settings_json' => '{"region":"pk"}',
             'credentials' => [
-                'client_id' => 'amadeus_ci',
-                'client_secret' => 'amadeus_cs',
+                'access_token' => 'duffel_edit_token',
             ],
         ])->assertSessionHasNoErrors()->assertRedirect('/admin/dashboard/api-connections');
 
         $connection->refresh();
-        $this->assertSame('Updated Provider Name', $connection->name);
+        $this->assertSame('Updated Duffel Name', $connection->name);
     }
 
     public function test_agency_admin_can_delete_own_supplier_connection(): void
@@ -135,8 +138,8 @@ class SupplierConnectionCrudTest extends TestCase
         $admin = $this->seededAdmin();
         $connection = SupplierConnection::factory()->create([
             'agency_id' => $admin->current_agency_id,
-            'provider' => SupplierProvider::Travelport,
-            'name' => 'Delete Me',
+            'provider' => SupplierProvider::Iati,
+            'name' => 'IATI Delete Me',
             'credentials' => ['client_id' => 'tp_ci', 'client_secret' => 'tp_cs'],
         ]);
 
@@ -223,27 +226,27 @@ class SupplierConnectionCrudTest extends TestCase
         $admin = $this->seededAdmin();
         $connection = SupplierConnection::factory()->create([
             'agency_id' => $admin->current_agency_id,
-            'provider' => SupplierProvider::Amadeus,
-            'name' => 'Amadeus Preserve',
-            'credentials' => ['client_id' => 'old-id', 'client_secret' => 'old-secret'],
+            'provider' => SupplierProvider::Duffel,
+            'name' => 'Duffel Preserve Creds',
+            'credentials' => ['access_token' => 'old-token', 'api_version' => 'v1'],
         ]);
 
         $this->actingAs($admin)->patch('/admin/api-settings/'.$connection->id, [
-            'provider' => $connection->provider->value,
+            'provider' => $connection->providerKey(),
             'name' => $connection->name,
             'environment' => SupplierEnvironment::Sandbox->value,
             'status' => SupplierConnectionStatus::Inactive->value,
             'base_url' => '',
             'credentials' => [
-                'client_id' => '',
-                'client_secret' => '',
+                'access_token' => '',
+                'api_version' => 'v2',
             ],
             'settings_json' => '{}',
         ])->assertRedirect('/admin/dashboard/api-connections');
 
         $connection->refresh();
-        $this->assertSame('old-id', $connection->credentials['client_id']);
-        $this->assertSame('old-secret', $connection->credentials['client_secret']);
+        $this->assertSame('old-token', $connection->credentials['access_token']);
+        $this->assertSame('v2', $connection->credentials['api_version']);
     }
 
     public function test_duffel_form_shows_access_token_and_api_version(): void
@@ -403,7 +406,7 @@ class SupplierConnectionCrudTest extends TestCase
         $this->actingAs($admin)->patch('/admin/api-settings/'.$duffel->id.'/test')->assertRedirect();
 
         $duffel->refresh();
-        $this->assertSame('ready_for_review', $duffel->last_test_status);
+        $this->assertSame('configuration_valid', $duffel->last_test_status);
         $this->assertNull($duffel->last_error);
     }
 
@@ -527,8 +530,8 @@ class SupplierConnectionCrudTest extends TestCase
         $admin = $this->seededAdmin();
         SupplierConnection::factory()->create([
             'agency_id' => $admin->current_agency_id,
-            'provider' => SupplierProvider::Travelport,
-            'name' => 'Toggle Visible',
+            'provider' => SupplierProvider::Iati,
+            'name' => 'IATI Toggle Visible',
             'credentials' => ['client_id' => 'x', 'client_secret' => 'y'],
             'is_active' => true,
         ]);
@@ -554,9 +557,9 @@ class SupplierConnectionCrudTest extends TestCase
         $otherAgency = Agency::factory()->create();
         SupplierConnection::factory()->create([
             'agency_id' => $otherAgency->id,
-            'provider' => SupplierProvider::Travelport,
-            'name' => 'Foreign Supplier',
-            'display_name' => 'Foreign Supplier',
+            'provider' => SupplierProvider::Iati,
+            'name' => 'IATI Foreign Supplier',
+            'display_name' => 'IATI Foreign Supplier',
             'credentials' => ['client_id' => 'foreign', 'client_secret' => 'secret'],
         ]);
 
@@ -567,10 +570,10 @@ class SupplierConnectionCrudTest extends TestCase
         // Platform admin hub lists all agencies (not agency-scoped).
         $response = $this->actingAs($admin)->getJson('/admin/api-settings?format=json')->assertOk();
         $names = collect($response->json('connections'))->pluck('name')->all();
-        $this->assertContains('Foreign Supplier', $names);
+        $this->assertContains('IATI Foreign Supplier', $names);
     }
 
-    public function test_sabre_readiness_with_credentials_sets_ready_for_review_without_external_calls(): void
+    public function test_sabre_configuration_validation_without_external_calls(): void
     {
         $admin = $this->seededAdmin();
         $sabre = SupplierConnection::query()
@@ -584,9 +587,10 @@ class SupplierConnectionCrudTest extends TestCase
         $this->actingAs($admin)->patch('/admin/api-settings/'.$sabre->id.'/test')->assertRedirect();
 
         $sabre->refresh();
-        $this->assertSame('ready_for_review', $sabre->last_test_status);
+        $this->assertSame('configuration_valid', $sabre->last_test_status);
         $this->assertSame(SupplierConnectionStatus::Inactive, $sabre->status);
         $this->assertNull($sabre->last_error);
+        $this->assertFalse($sabre->supplierHealthHealthy());
     }
 
     public function test_inactive_active_toggle_works(): void
@@ -594,8 +598,8 @@ class SupplierConnectionCrudTest extends TestCase
         $admin = $this->seededAdmin();
         $connection = SupplierConnection::factory()->create([
             'agency_id' => $admin->current_agency_id,
-            'provider' => SupplierProvider::Travelport,
-            'name' => 'Toggle Supplier',
+            'provider' => SupplierProvider::Iati,
+            'name' => 'IATI Toggle Supplier',
             'status' => SupplierConnectionStatus::Inactive,
             'is_active' => false,
         ]);

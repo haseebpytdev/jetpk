@@ -88,14 +88,13 @@ final class DashboardPermissionResolver
     public static function canViewDashboard(User $user): bool
     {
         return $user->isPlatformAdmin()
-            || $user->isAgencyAdmin()
             || $user->isStaff()
             || $user->isAgentPortalUser();
     }
 
     public static function canViewPayments(User $user): bool
     {
-        if ($user->isPlatformAdmin() || $user->isAgencyAdmin()) {
+        if ($user->isPlatformAdmin()) {
             return true;
         }
 

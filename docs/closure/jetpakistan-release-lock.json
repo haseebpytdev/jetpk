@@ -1,22 +1,36 @@
 {
-  "schema": "jetpakistan-release-lock/v2",
-  "closure_date": "2026-09-21",
-  "tag": "jetpakistan-recovered-final-20260921",
-  "status": "VERIFIED",
-  "application_release_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
-  "closure_metadata_commit_sha": "8c5d79da42126fdbd49681938583492dbc5422cf",
-  "remote_main_sha_note": "May equal closure_metadata_commit_sha after metadata FF; binaries remain application_release_sha. Updated 2026-09-21 post-recovery hardening to current main/metadata tip before ops cleanup commits.",
-  "production_runtime_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
+  "schema": "jetpakistan-release-lock/v3",
+  "closure_date": "2026-09-30",
+  "tag": "jetpakistan-dashboard-operational-recovery-20260930",
+  "status": "VERIFIED_COMPONENT_PROVENANCE",
+  "notes": "v3 allows component-specific source/build provenance. Equality of all component SHAs is NOT required. Feature branches must never be stamped as deployed here.",
+  "application_release_sha": "feef2e7fa489cee778b81c6db370946394337999",
+  "closure_metadata_commit_sha": "feef2e7fa489cee778b81c6db370946394337999",
+  "remote_main_sha_note": "Verified production Laravel/application source after Dashboard operational recovery gap deploy 2026-09-30. Evidence: docs/evidence/dashboard-operational-recovery-20260930/CURRENT-VS-FINALIZED-MATRIX.md and storage/framework/dor-b5b6-gap-deploy-proof.txt.",
+  "production_runtime_sha": "feef2e7fa489cee778b81c6db370946394337999",
+  "dashboard_build_source_sha": "feef2e7fa489cee778b81c6db370946394337999",
+  "dashboard_build_id": "m1WsmAjtpdlOgryIYPtp7",
   "public_build_source_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
-  "dashboard_build_source_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
   "public_build_id": "wmNT0P2lJftqG2n9tM6gp",
-  "dashboard_build_id": "3TyyvdcNScpOGj0oCkQuT",
-  "runtime_marker": "jp-final-78dadc7b-20260921T085837Z",
-  "rollback_sha": "cbd7686feadd35773fd0b597117538b8b99b59fa",
-  "prior_certified_runtime_sha": "cbd7686feadd35773fd0b597117538b8b99b59fa",
-  "prior_public_build_id": "kf8S-ybDOI8Vw8LzUye0H",
-  "build_provenance": "PASS",
-  "sha_parity_application": "PASS",
+  "public_build_provenance_note": "Last verified public Next build remains from 2026-09-21 certified release. Do NOT claim public rebuild from feef2e7f without evidence.",
+  "runtime_marker": "dor-b5b6-gap-20260930T213805Z",
+  "rollback_sha": "5c1b3fd6dd114f5d0f11f6737e368f5b122a587e",
+  "prior_certified_runtime_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
+  "prior_certified_release": {
+    "application_release_sha": "78dadc7b330ca24a6183241458dd8d1f6aa0d454",
+    "dashboard_build_id": "3TyyvdcNScpOGj0oCkQuT",
+    "public_build_id": "wmNT0P2lJftqG2n9tM6gp",
+    "closure_date": "2026-09-21",
+    "tag": "jetpakistan-recovered-final-20260921"
+  },
+  "component_parity": {
+    "require_all_source_shas_equal": false,
+    "laravel_runtime_matches_application_release": true,
+    "dashboard_source_matches_application_release": true,
+    "public_source_matches_application_release": false
+  },
+  "build_provenance": "PASS_COMPONENT",
+  "sha_parity_application": "PASS_LARAVEL_DASHBOARD",
   "critical_route_owners": {
     "/flights/s/{ref}": "NEXT",
     "/flights/results": "NEXT",
@@ -30,7 +44,8 @@
   "ols_assert_evidence": "docs/evidence/jp-final-perf-cert-cbd7686f/10-ols-assert-final.log",
   "seo_evidence": "docs/closure/SEO-AEO-GEO/11-FINAL-CONSOLIDATION.md",
   "performance_evidence": "docs/evidence/jp-final-perf-cert-cbd7686f/SUMMARY.md",
-  "functional_evidence": "docs/evidence/jp-final-perf-cert-cbd7686f/06-functional-matrix/RESULTS.md",
+  "functional_evidence": "docs/evidence/dashboard-operational-recovery-20260930/CURRENT-VS-FINALIZED-MATRIX.md",
+  "deploy_evidence": "storage/framework/dor-b5b6-gap-deploy-proof.txt",
   "return_metric": "BROWSER_RENDER_MS",
   "return_metric_equivalence": "PASS",
   "performance_gates": {
@@ -38,7 +53,7 @@
     "traveler_p95_ms": 1954,
     "return_post_supplier_p95_ms": 645,
     "duplicate_supplier_calls": 0,
-    "post_stamp_note": "Fresh dual Next rebuild from application_release_sha 78dadc7b on 2026-09-21; metadata commit follows without becoming binary authority"
+    "post_stamp_note": "Dashboard recovery production source feef2e7f / build m1WsmAjtpdlOgryIYPtp7 verified 2026-09-30; public Next build provenance retained from prior certified release pending separate rebuild evidence"
   },
   "retired_paths": [
     "docs/closure/01-homepage/docs/closure/01-homepage"
@@ -50,7 +65,8 @@
     "deploy/openlitespeed",
     "docs/jetpk/DEPLOYMENT-CONTEXT.md",
     "docs/closure/SEO-AEO-GEO",
-    "docs/evidence/jp-final-perf-cert-cbd7686f"
+    "docs/evidence/jp-final-perf-cert-cbd7686f",
+    "docs/evidence/dashboard-operational-recovery-20260930"
   ],
   "zero_reference_retirement": "PASS_FOR_PROVEN_ITEMS",
   "unknown_retirement_items": [
@@ -69,6 +85,9 @@
     "void_executed": false,
     "refund_executed": false
   },
+  "feature_branches_not_deployed": [
+    "work/jp-airblue-zapways-05-api-modal"
+  ],
   "policy": "docs/JETPAKISTAN_RELEASE_GUARD_POLICY.md",
   "manifest": "docs/closure/JETPAKISTAN_CANONICAL_RELEASE.md",
   "retirement_inventory": "docs/closure/JETPAKISTAN_RETIREMENT_INVENTORY.md"

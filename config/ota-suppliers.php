@@ -61,17 +61,6 @@ return [
             ],
             'notes' => 'REST search + SOAP price, bundles, ancillaries, book, read, hold payment. No cancel API in vendor docs.',
         ],
-        'airline_direct' => [
-            'name' => 'Airline Direct API',
-            'type' => 'Generic NDC / proprietary airline API',
-            'status' => 'not_configured',
-            'environment' => 'live',
-            'required_credentials' => [
-                'OAuth client credentials or API token',
-                'Office / agency identifiers per carrier',
-            ],
-            'notes' => 'Each carrier publishes different schemas and payload constraints.',
-        ],
     ],
     'integration_notice' => 'Real API integration begins only after credential security and technical documentation review.',
 ];

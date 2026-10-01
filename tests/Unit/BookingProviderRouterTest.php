@@ -8,7 +8,11 @@ use App\Models\Agency;
 use App\Models\Booking;
 use App\Models\User;
 use App\Services\Booking\BookingProviderRouter;
+use App\Services\Suppliers\AirBlue\AirBlueBookingRouterService;
 use App\Services\Suppliers\Duffel\DuffelBookingService;
+use App\Services\Suppliers\Iati\IatiBookingRouterService;
+use App\Services\Suppliers\OneApi\OneApiBookingRouterService;
+use App\Services\Suppliers\PiaNdc\PiaNdcBookingRouterService;
 use App\Services\Suppliers\Sabre\SabreBookingService;
 use App\Services\Suppliers\SupplierBookingService;
 use App\Support\Platform\PlatformModuleEnforcer;
@@ -32,6 +36,10 @@ class BookingProviderRouterTest extends TestCase
         return new BookingProviderRouter(
             $inner,
             new DuffelBookingService($inner),
+            $this->app->make(IatiBookingRouterService::class),
+            $this->app->make(OneApiBookingRouterService::class),
+            $this->app->make(PiaNdcBookingRouterService::class),
+            $this->app->make(AirBlueBookingRouterService::class),
             $this->app->make(SabreBookingService::class),
             $this->app->make(PlatformModuleEnforcer::class),
         );
@@ -194,6 +202,10 @@ class BookingProviderRouterTest extends TestCase
         $router = new BookingProviderRouter(
             $inner,
             new DuffelBookingService($inner),
+            $this->app->make(IatiBookingRouterService::class),
+            $this->app->make(OneApiBookingRouterService::class),
+            $this->app->make(PiaNdcBookingRouterService::class),
+            $this->app->make(AirBlueBookingRouterService::class),
             $sabre,
             $this->app->make(PlatformModuleEnforcer::class),
         );

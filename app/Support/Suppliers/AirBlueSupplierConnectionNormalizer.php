@@ -3,6 +3,7 @@
 namespace App\Support\Suppliers;
 
 use App\Enums\AirBlueApiChannel;
+use App\Enums\AirBlueZapwaysProtocolVersion;
 use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
 
@@ -16,11 +17,13 @@ final class AirBlueSupplierConnectionNormalizer
         return strtolower(trim($environment)) === 'live' ? 'live' : 'sandbox';
     }
 
-    public static function defaultConnectionName(?string $agencyName): string
+    public static function defaultConnectionName(?string $agencyName, ?string $protocolVersion = null): string
     {
         $name = trim((string) $agencyName);
+        $protocol = trim((string) ($protocolVersion ?? AirBlueZapwaysProtocolVersion::V2->value));
+        $suffix = $protocol === AirBlueZapwaysProtocolVersion::V3->value ? 'v3' : 'v2';
 
-        return $name !== '' ? 'AirBlue / '.$name : 'AirBlue / OTA';
+        return $name !== '' ? 'AirBlue / Zapways '.$suffix.' / '.$name : 'AirBlue / Zapways '.$suffix;
     }
 
     /**
@@ -39,42 +42,60 @@ final class AirBlueSupplierConnectionNormalizer
 
         $credentials = is_array($payload['credentials'] ?? null) ? $payload['credentials'] : [];
         $existingCredentials = ($existing !== null && is_array($existing->credentials)) ? $existing->credentials : [];
-        $channel = AirBlueApiChannel::fromCredentials($credentials);
-        $credentials['api_channel'] = $channel->value;
+        $credentials['api_channel'] = AirBlueApiChannel::ZapwaysOta->value;
 
-        $baseUrl = trim((string) ($payload['base_url'] ?? $existing?->base_url ?? ''));
-        if ($baseUrl === '') {
-            $baseUrl = $channel === AirBlueApiChannel::ZapwaysOta
-                ? ($isTest
-                    ? (string) config('suppliers.airblue.default_ota_qa_base_url', '')
-                    : (string) config('suppliers.airblue.default_ota_base_url', ''))
-                : (string) config('suppliers.airblue.default_ndc_base_url', '');
+        $protocol = AirBlueZapwaysProtocolVersion::fromCredentials(
+            array_merge($existingCredentials, $credentials),
+        );
+        if (trim((string) ($credentials['protocol_version'] ?? '')) === '') {
+            $credentials['protocol_version'] = $protocol->value;
         }
-        $payload['base_url'] = $baseUrl;
 
-        if ($channel === AirBlueApiChannel::CraneNdc) {
-            foreach (['username', 'password', 'agency_id', 'agency_name', 'owner_code'] as $key) {
-                $incoming = trim((string) ($credentials[$key] ?? ''));
-                if ($incoming === '' && isset($existingCredentials[$key])) {
-                    $credentials[$key] = $existingCredentials[$key];
+        if (! array_key_exists('certification_status', $credentials) && ! array_key_exists('search_certified', $credentials)) {
+            $existingCertification = trim((string) ($existingCredentials['certification_status'] ?? ''));
+            $credentials['certification_status'] = $existingCertification !== '' ? $existingCertification : 'pending';
+        }
+
+        $protocolConfig = (array) config('suppliers.airblue.protocol_versions.'.$protocol->value, []);
+        $payload['base_url'] = $isTest
+            ? (string) ($protocolConfig['default_qa_base_url'] ?? config('suppliers.airblue.default_ota_qa_base_url', ''))
+            : (string) ($protocolConfig['default_base_url'] ?? config('suppliers.airblue.default_ota_base_url', ''));
+
+        foreach (['client_id', 'client_key', 'agent_id', 'agent_password'] as $key) {
+            $incoming = trim((string) ($credentials[$key] ?? ''));
+            if ($incoming === '' && isset($existingCredentials[$key])) {
+                $credentials[$key] = $existingCredentials[$key];
+            }
+        }
+
+        if (trim((string) ($credentials['agent_type'] ?? '')) === '') {
+            $credentials['agent_type'] = trim((string) ($existingCredentials['agent_type'] ?? '')) ?: '29';
+        }
+
+        foreach (['tls_cert_path' => 'default_tls_cert_path', 'tls_key_path' => 'default_tls_key_path'] as $credentialKey => $configKey) {
+            if (trim((string) ($credentials[$credentialKey] ?? '')) === '') {
+                $existingPath = trim((string) ($existingCredentials[$credentialKey] ?? ''));
+                if ($existingPath !== '') {
+                    $credentials[$credentialKey] = $existingPath;
+                    continue;
+                }
+                $runtimeDefault = trim((string) config('suppliers.airblue.'.$configKey, ''));
+                if ($runtimeDefault !== '') {
+                    $credentials[$credentialKey] = $runtimeDefault;
                 }
             }
-            foreach (['carrier_code' => 'PA', 'currency' => 'PKR', 'language_code' => 'EN'] as $key => $default) {
-                if (trim((string) ($credentials[$key] ?? '')) === '') {
-                    $credentials[$key] = trim((string) ($existingCredentials[$key] ?? '')) ?: $default;
-                }
+        }
+
+        $defaultTarget = $isTest ? 'Test' : 'Production';
+        foreach (['service_target' => $defaultTarget, 'service_version' => '1.04'] as $key => $default) {
+            if (trim((string) ($credentials[$key] ?? '')) === '') {
+                $credentials[$key] = trim((string) ($existingCredentials[$key] ?? '')) ?: $default;
             }
-        } else {
-            foreach (['client_id', 'client_key', 'agent_type', 'agent_id', 'agent_password'] as $key) {
-                $incoming = trim((string) ($credentials[$key] ?? ''));
-                if ($incoming === '' && isset($existingCredentials[$key])) {
-                    $credentials[$key] = $existingCredentials[$key];
-                }
-            }
-            foreach (['service_target' => 'Production', 'service_version' => '1.04'] as $key => $default) {
-                if (trim((string) ($credentials[$key] ?? '')) === '') {
-                    $credentials[$key] = trim((string) ($existingCredentials[$key] ?? '')) ?: $default;
-                }
+        }
+
+        foreach (['carrier_code' => 'PA', 'currency' => 'PKR'] as $key => $default) {
+            if (trim((string) ($credentials[$key] ?? '')) === '') {
+                $credentials[$key] = trim((string) ($existingCredentials[$key] ?? '')) ?: $default;
             }
         }
 

@@ -19,7 +19,7 @@ class TicketingOperationalStatus
         $paymentStatus = strtolower(trim((string) $paymentStatus));
         $provider = strtolower(trim((string) $provider));
         $cancellationStatus = strtolower(trim((string) $cancellationStatus));
-        $providerSupported = in_array($provider, ['duffel', 'sabre', 'pia_ndc', 'airline_direct', 'iati'], true);
+        $providerSupported = in_array($provider, ['duffel', 'sabre', 'pia_ndc', 'iati', 'airblue', 'one_api'], true);
 
         $code = match (true) {
             in_array($cancellationStatus, ['requested', 'approved', 'processing'], true) && $hasIssuedTickets => 'void_requested',

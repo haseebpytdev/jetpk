@@ -130,7 +130,7 @@ class DashboardSuppliersReadService
 
         $health = (string) $request->query('health', '');
         if ($health === 'healthy') {
-            $query->whereIn('last_test_status', ['air_shopping_success', 'ready_for_review', 'success']);
+            $query->whereIn('last_test_status', ['air_shopping_success', 'success', 'connectivity_ok', 'auth_ok', 'connection_ok']);
         } elseif ($health === 'degraded') {
             $query->whereNotNull('last_error');
         }

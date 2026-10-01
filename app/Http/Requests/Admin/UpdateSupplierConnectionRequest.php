@@ -92,13 +92,8 @@ class UpdateSupplierConnectionRequest extends StoreSupplierConnectionRequest
                 }
 
                 $incomingAuthCode = trim((string) ($credentials['auth_code'] ?? ''));
-                $incomingOrgId = trim((string) ($credentials['organization_id'] ?? ''));
-
                 if ($incomingAuthCode === '' && trim((string) ($existingCredentials['auth_code'] ?? '')) === '') {
                     $validator->errors()->add('credentials.auth_code', 'IATI auth code is required.');
-                }
-                if ($incomingOrgId === '' && trim((string) ($existingCredentials['organization_id'] ?? '')) === '') {
-                    $validator->errors()->add('credentials.organization_id', 'IATI organization ID is required.');
                 }
 
                 return;
@@ -127,30 +122,13 @@ class UpdateSupplierConnectionRequest extends StoreSupplierConnectionRequest
                 $existingCredentials = is_array($this->route('supplierConnection')?->credentials)
                     ? $this->route('supplierConnection')->credentials
                     : [];
-                $channel = strtolower(trim((string) (
-                    SupplierCredentialFormPresenter::effectiveValue('api_channel', $credentials, $existingCredentials) ?: 'crane_ndc'
-                )));
-                if ($channel === 'zapways_ota') {
-                    foreach (['client_id', 'client_key', 'agent_type', 'agent_id'] as $field) {
-                        if (SupplierCredentialFormPresenter::effectiveValue($field, $credentials, $existingCredentials) === '') {
-                            $validator->errors()->add('credentials.'.$field, 'This field is required for AirBlue Zapways OTA.');
-                        }
-                    }
-                    if (SupplierCredentialFormPresenter::effectiveValue('agent_password', $credentials, $existingCredentials) === '') {
-                        $validator->errors()->add('credentials.agent_password', 'AirBlue agent password is required.');
-                    }
-                } else {
-                    foreach (['username', 'agency_id', 'agency_name', 'owner_code'] as $field) {
-                        if (SupplierCredentialFormPresenter::effectiveValue($field, $credentials, $existingCredentials) === '') {
-                            $validator->errors()->add('credentials.'.$field, 'This field is required for AirBlue Crane NDC.');
-                        }
-                    }
-                    if (SupplierCredentialFormPresenter::effectiveValue('password', $credentials, $existingCredentials) === '') {
-                        $validator->errors()->add('credentials.password', 'AirBlue password is required.');
+                foreach (['client_id', 'client_key', 'agent_id'] as $field) {
+                    if (SupplierCredentialFormPresenter::effectiveValue($field, $credentials, $existingCredentials) === '') {
+                        $validator->errors()->add('credentials.'.$field, 'This field is required for AirBlue Zapways OTA.');
                     }
                 }
-                if (trim((string) $this->input('base_url', '')) === '' && trim((string) ($this->route('supplierConnection')?->base_url ?? '')) === '') {
-                    $validator->errors()->add('base_url', 'AirBlue base URL is required.');
+                if (SupplierCredentialFormPresenter::effectiveValue('agent_password', $credentials, $existingCredentials) === '') {
+                    $validator->errors()->add('credentials.agent_password', 'AirBlue agent password is required.');
                 }
 
                 return;
@@ -159,18 +137,6 @@ class UpdateSupplierConnectionRequest extends StoreSupplierConnectionRequest
             $existingCredentials = is_array($this->route('supplierConnection')?->credentials)
                 ? $this->route('supplierConnection')->credentials
                 : [];
-
-            if ($provider === SupplierProvider::AirlineDirect->value) {
-                $hasApiKey = SupplierCredentialFormPresenter::effectiveValue('api_key', $credentials, $existingCredentials) !== '';
-                $hasToken = SupplierCredentialFormPresenter::effectiveValue('token', $credentials, $existingCredentials) !== '';
-                $hasUserPass = SupplierCredentialFormPresenter::effectiveValue('username', $credentials, $existingCredentials) !== ''
-                    && SupplierCredentialFormPresenter::effectiveValue('password', $credentials, $existingCredentials) !== '';
-                if (! $hasApiKey && ! $hasToken && ! $hasUserPass) {
-                    $validator->errors()->add('credentials', 'Airline direct usually needs api_key, token, or username/password.');
-                }
-
-                return;
-            }
 
             if (in_array($provider, [SupplierProvider::AlHaider->value, SupplierProvider::AmeerEMillat->value], true)) {
                 GroupSupplierCredentialValidator::validate(

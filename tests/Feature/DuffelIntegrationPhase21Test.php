@@ -36,6 +36,7 @@ class DuffelIntegrationPhase21Test extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin->forceFill(['account_type' => \App\Enums\AccountType::PlatformAdmin])->save();
         $connection = $this->configureDuffelConnection((int) $admin->current_agency_id, [
             'environment' => SupplierEnvironment::Sandbox,
             'status' => SupplierConnectionStatus::Inactive,
@@ -43,10 +44,10 @@ class DuffelIntegrationPhase21Test extends TestCase
             'credentials' => ['access_token' => 'duffel_test_readiness_token'],
         ]);
 
-        $this->actingAs($admin)->patch('/admin/api-settings/'.$connection->id.'/test')->assertRedirect();
+        $this->actingAs($admin->fresh())->patch('/admin/api-settings/'.$connection->id.'/test')->assertRedirect();
 
         $connection->refresh();
-        $this->assertSame('ready_for_review', $connection->last_test_status);
+        $this->assertSame('configuration_valid', $connection->last_test_status);
     }
 
     public function test_duffel_offer_request_builder_supports_one_way_and_round_trip(): void
