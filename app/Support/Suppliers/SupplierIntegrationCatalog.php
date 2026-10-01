@@ -32,7 +32,7 @@ final class SupplierIntegrationCatalog
                 'supports_delete' => true,
                 'supports_enable_disable' => true,
                 'check_type' => 'configuration_validation',
-                'readiness' => 'Recommended',
+                'readiness' => 'Implemented',
                 'baseUrlOverridable' => false,
             ],
             [
@@ -51,7 +51,7 @@ final class SupplierIntegrationCatalog
                 'supports_delete' => true,
                 'supports_enable_disable' => true,
                 'check_type' => 'configuration_validation',
-                'readiness' => 'Live ready',
+                'readiness' => 'Implemented',
                 'baseUrlOverridable' => true,
             ],
             [
@@ -70,7 +70,7 @@ final class SupplierIntegrationCatalog
                 'supports_delete' => true,
                 'supports_enable_disable' => true,
                 'check_type' => 'configuration_validation',
-                'readiness' => 'Sandbox',
+                'readiness' => 'Certification pending',
                 'baseUrlOverridable' => false,
             ],
             [
@@ -89,7 +89,7 @@ final class SupplierIntegrationCatalog
                 'supports_delete' => true,
                 'supports_enable_disable' => true,
                 'check_type' => 'configuration_validation',
-                'readiness' => 'Sandbox',
+                'readiness' => 'Implemented',
                 'baseUrlOverridable' => false,
             ],
             [
@@ -108,7 +108,7 @@ final class SupplierIntegrationCatalog
                 'supports_delete' => true,
                 'supports_enable_disable' => true,
                 'check_type' => 'configuration_validation',
-                'readiness' => 'Sandbox',
+                'readiness' => 'Implemented',
                 'baseUrlOverridable' => false,
             ],
             [
@@ -127,7 +127,7 @@ final class SupplierIntegrationCatalog
                 'supports_delete' => true,
                 'supports_enable_disable' => true,
                 'check_type' => 'configuration_validation',
-                'readiness' => 'Live ready',
+                'readiness' => 'Implemented',
                 'baseUrlOverridable' => false,
             ],
             [
@@ -146,7 +146,7 @@ final class SupplierIntegrationCatalog
                 'supports_delete' => true,
                 'supports_enable_disable' => true,
                 'check_type' => 'configuration_validation',
-                'readiness' => 'Group',
+                'readiness' => 'Group integration',
                 'baseUrlOverridable' => true,
             ],
             [
@@ -165,7 +165,7 @@ final class SupplierIntegrationCatalog
                 'supports_delete' => true,
                 'supports_enable_disable' => true,
                 'check_type' => 'connectivity_probe',
-                'readiness' => 'Group',
+                'readiness' => 'Group integration',
                 'baseUrlOverridable' => false,
             ],
         ];

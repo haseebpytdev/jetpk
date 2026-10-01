@@ -263,6 +263,7 @@ class SupplierConnectionController extends Controller
                 'supports_delete' => (bool) ($definition['supports_delete'] ?? false),
                 'supports_enable_disable' => (bool) ($definition['supports_enable_disable'] ?? false),
                 'check_type' => (string) ($definition['check_type'] ?? 'configuration_validation'),
+                'readiness' => (string) ($definition['readiness'] ?? ''),
                 'baseUrlOverridable' => SupplierIntegrationCatalog::baseUrlOverridable($key),
                 'credentialFields' => $fields,
                 'advancedFields' => [],

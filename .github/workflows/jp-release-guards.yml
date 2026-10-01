@@ -66,6 +66,30 @@ jobs:
                 exit(1);
               }
             }
+            $shaFields = [
+              "application_release_sha" => $app,
+              "production_runtime_sha" => (string) ($lock["production_runtime_sha"] ?? ""),
+              "dashboard_build_source_sha" => (string) ($lock["dashboard_build_source_sha"] ?? ""),
+              "public_build_source_sha" => (string) ($lock["public_build_source_sha"] ?? ""),
+              "rollback_sha" => (string) ($lock["rollback_sha"] ?? ""),
+            ];
+            foreach ((array) ($lock["feature_branches_not_deployed"] ?? []) as $branchName) {
+              $branchName = trim((string) $branchName);
+              if ($branchName === "") {
+                fwrite(STDERR, "FEATURE_BRANCH_NAME_EMPTY\n");
+                exit(1);
+              }
+              if (preg_match("/^[0-9a-f]{40}$/", $branchName)) {
+                fwrite(STDERR, "FEATURE_BRANCH_LIST_MUST_NOT_CONTAIN_SHA:$branchName\n");
+                exit(1);
+              }
+              foreach ($shaFields as $field => $sha) {
+                if ($sha !== "" && strcasecmp($branchName, $sha) === 0) {
+                  fwrite(STDERR, "FEATURE_BRANCH_LIST_CONTAINS_SHA_FIELD:$field\n");
+                  exit(1);
+                }
+              }
+            }
             $requireAllEqual = (bool) ($lock["component_parity"]["require_all_source_shas_equal"] ?? ($schema === "jetpakistan-release-lock/v2"));
             if ($requireAllEqual) {
               foreach (["production_runtime_sha","public_build_source_sha","dashboard_build_source_sha"] as $k) {
@@ -89,10 +113,6 @@ jobs:
                 fwrite(STDERR, "PUBLIC_SOURCE_SHA_MISMATCH\n");
                 exit(1);
               }
-            }
-            if (in_array($app, (array) ($lock["feature_branches_not_deployed"] ?? []), true)) {
-              fwrite(STDERR, "FEATURE_BRANCH_MARKED_AS_APPLICATION_RELEASE\n");
-              exit(1);
             }
             $meta = $lock["closure_metadata_commit_sha"] ?? null;
             if ($meta !== null && $meta !== "" && !preg_match("/^[0-9a-f]{40}$/", $meta)) {

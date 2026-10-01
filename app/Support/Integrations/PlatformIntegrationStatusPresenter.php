@@ -24,20 +24,27 @@ final class PlatformIntegrationStatusPresenter
      */
     public static function smtp(): array
     {
-        $mailer = (string) config('mail.default', '');
+        $activeMailer = trim((string) config('mail.default', ''));
         $mailers = (array) config('mail.mailers', []);
         $smtp = is_array($mailers['smtp'] ?? null) ? $mailers['smtp'] : [];
         $username = trim((string) ($smtp['username'] ?? ''));
         $password = trim((string) ($smtp['password'] ?? ''));
         $host = trim((string) ($smtp['host'] ?? ''));
+        $scheme = trim((string) ($smtp['scheme'] ?? ''));
         $fromAddress = trim((string) config('mail.from.address', ''));
         $fromName = trim((string) config('mail.from.name', ''));
-        $configured = $mailer !== ''
-            && ($host !== '' || in_array($mailer, ['log', 'array', 'failover', 'roundrobin'], true));
 
-        if ($mailer === 'smtp') {
-            $configured = $host !== '' && ($username !== '' || $password !== '');
-        }
+        $smtpConfigurationPresent = $host !== '' && ($username !== '' || $password !== '');
+
+        $configured = $activeMailer === 'smtp' && $smtpConfigurationPresent;
+        $active = $configured;
+
+        $statusLabel = match (true) {
+            $activeMailer === 'log', $activeMailer === 'array' => 'Log/array mailer active (SMTP not configured)',
+            $activeMailer === 'smtp' && $configured => 'Configured via environment',
+            $activeMailer === 'smtp' => 'SMTP mailer selected but settings incomplete',
+            default => 'Not configured',
+        };
 
         return [
             'key' => 'smtp',
@@ -45,13 +52,15 @@ final class PlatformIntegrationStatusPresenter
             'kind' => 'platform_integration',
             'source' => 'environment',
             'readOnly' => true,
+            'activeMailer' => $activeMailer !== '' ? $activeMailer : null,
+            'smtpConfigurationPresent' => $smtpConfigurationPresent,
             'configured' => $configured,
+            'active' => $active,
             'status' => $configured ? 'configured' : 'not_configured',
-            'statusLabel' => $configured ? 'Configured via environment' : 'Not configured',
-            'activeMailer' => $mailer !== '' ? $mailer : null,
+            'statusLabel' => $statusLabel,
             'host' => $host !== '' ? $host : null,
             'port' => isset($smtp['port']) ? (int) $smtp['port'] : null,
-            'encryption' => isset($smtp['encryption']) ? (string) $smtp['encryption'] : null,
+            'scheme' => $scheme !== '' ? $scheme : null,
             'fromAddress' => $fromAddress !== '' ? $fromAddress : null,
             'fromName' => $fromName !== '' ? $fromName : null,
             'usernamePresent' => $username !== '',

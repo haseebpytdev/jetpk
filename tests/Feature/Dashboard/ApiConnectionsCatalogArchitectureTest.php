@@ -49,6 +49,7 @@ class ApiConnectionsCatalogArchitectureTest extends TestCase
             'mail.default' => 'smtp',
             'mail.mailers.smtp.host' => 'smtp.example.test',
             'mail.mailers.smtp.port' => 587,
+            'mail.mailers.smtp.scheme' => 'tls',
             'mail.mailers.smtp.username' => 'mail-user',
             'mail.mailers.smtp.password' => 'mail-secret-must-not-leak',
             'mail.from.address' => 'ops@example.test',
@@ -62,9 +63,13 @@ class ApiConnectionsCatalogArchitectureTest extends TestCase
         $google = $integrations->firstWhere('key', 'google_oauth');
 
         $this->assertNotNull($smtp);
+        $this->assertSame('smtp', $smtp['activeMailer']);
+        $this->assertTrue((bool) $smtp['smtpConfigurationPresent']);
         $this->assertTrue((bool) $smtp['configured']);
+        $this->assertTrue((bool) $smtp['active']);
         $this->assertTrue((bool) $smtp['passwordPresent']);
         $this->assertSame('environment', $smtp['source']);
+        $this->assertSame('tls', $smtp['scheme']);
         $this->assertTrue((bool) $smtp['readOnly']);
 
         $this->assertNotNull($google);
@@ -74,6 +79,38 @@ class ApiConnectionsCatalogArchitectureTest extends TestCase
         $encoded = json_encode($payload);
         $this->assertStringNotContainsString('mail-secret-must-not-leak', (string) $encoded);
         $this->assertStringNotContainsString('GOOGLE_CLIENT_SECRET', (string) $encoded);
+    }
+
+    public function test_log_mailer_does_not_imply_smtp_configured(): void
+    {
+        $admin = $this->platformAdmin();
+        config([
+            'mail.default' => 'log',
+            'mail.mailers.smtp.host' => 'smtp.example.test',
+            'mail.mailers.smtp.username' => 'mail-user',
+            'mail.mailers.smtp.password' => 'secret',
+        ]);
+
+        $smtp = collect($this->actingAs($admin)->getJson('/admin/api-settings?format=json')->json('platformIntegrations'))
+            ->firstWhere('key', 'smtp');
+
+        $this->assertNotNull($smtp);
+        $this->assertSame('log', $smtp['activeMailer']);
+        $this->assertFalse((bool) $smtp['configured']);
+        $this->assertFalse((bool) $smtp['active']);
+        $this->assertStringContainsString('Log/array', (string) ($smtp['statusLabel'] ?? ''));
+    }
+
+    public function test_catalog_readiness_labels_are_neutral(): void
+    {
+        $admin = $this->platformAdmin();
+        $providers = collect($this->actingAs($admin)->getJson('/admin/api-settings?format=json')->json('providers'));
+
+        $this->assertSame('Implemented', $providers->firstWhere('key', 'sabre')['readiness'] ?? null);
+        $this->assertSame('Implemented', $providers->firstWhere('key', 'pia_ndc')['readiness'] ?? null);
+        $this->assertSame('Certification pending', $providers->firstWhere('key', 'airblue')['readiness'] ?? null);
+        $this->assertSame('Implemented', $providers->firstWhere('key', 'iati')['readiness'] ?? null);
+        $this->assertSame('Group integration', $providers->firstWhere('key', 'al_haider')['readiness'] ?? null);
     }
 
     public function test_agency_admin_is_denied_dashboard_api_session(): void

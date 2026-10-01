@@ -55,11 +55,14 @@ type PlatformIntegration = {
   key: string;
   label: string;
   configured: boolean;
+  active?: boolean;
+  smtpConfigurationPresent?: boolean;
   statusLabel?: string;
   source?: string;
   readOnly?: boolean;
   activeMailer?: string | null;
   host?: string | null;
+  scheme?: string | null;
   fromAddress?: string | null;
   usernamePresent?: boolean;
   passwordPresent?: boolean;
@@ -353,8 +356,11 @@ export function ApiConnectionsWorkspace() {
               <p className="mt-2 text-xs text-jp-muted">Editing environment values from the Dashboard is not available yet.</p>
               {item.key === "smtp" ? (
                 <dl className="mt-2 grid gap-1 text-xs text-jp-muted">
-                  {item.activeMailer ? <div>Mailer: {item.activeMailer}</div> : null}
+                  {item.activeMailer ? <div>Active mailer: {item.activeMailer}</div> : null}
+                  <div>SMTP settings present: {item.smtpConfigurationPresent ? "Yes" : "No"}</div>
+                  <div>SMTP active: {item.active ? "Yes" : "No"}</div>
                   {item.host ? <div>Host: {item.host}</div> : null}
+                  {item.scheme ? <div>Scheme: {item.scheme}</div> : null}
                   {item.fromAddress ? <div>From: {item.fromAddress}</div> : null}
                   <div>Username: {item.usernamePresent ? "Present" : "Missing"}</div>
                   <div>Password: {item.passwordPresent ? "Present" : "Missing"}</div>
