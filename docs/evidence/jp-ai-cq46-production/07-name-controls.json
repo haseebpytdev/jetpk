@@ -1,0 +1,25 @@
+{
+  "LEGITIMATE_NAME_AHMED": "PASS",
+  "LEGITIMATE_NAME_ALI_KHAN": "PASS",
+  "EXPLICIT_NAME_MORNING_BEHAVIOR": {
+    "lead_name": null,
+    "ranking_preference": null,
+    "time_preference": "morning",
+    "MODEL_CALLS": 0,
+    "note": "Observe-only; soft time path owns 'My name is Morning' — not declared CQ46 failure"
+  },
+  "EXPLICIT_NAME_FAST_BEHAVIOR": {
+    "lead_name": null,
+    "ranking_preference": "FASTEST",
+    "time_preference": null,
+    "MODEL_CALLS": 0,
+    "note": "Observe-only"
+  },
+  "EXPLICIT_NAME_BEST_BEHAVIOR": {
+    "lead_name": null,
+    "ranking_preference": "BEST_VALUE",
+    "time_preference": null,
+    "MODEL_CALLS": 0,
+    "note": "Observe-only"
+  }
+}
