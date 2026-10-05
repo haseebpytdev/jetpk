@@ -1,0 +1,56 @@
+RUNTIME_SHA=3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492
+FRONTEND_SHA=24dbf524c06fc894f84a44b14a224a41b49170f7
+DEPLOY_MARKER=3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492
+MERGE_SHA=3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492
+PASS RUNTIME_SHA_MATCH (runtime=3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492)
+PASS DEPLOY_MARKER_MATCH (marker=3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492)
+PASS CONFIG_PARITY ({"CONVERSATIONAL_ENABLED":true,"SEMANTIC_PLANNER_ENABLED":true,"SEMANTIC_COMPOSER_ENABLED":false,"AI_EMBED_ENABLED":false,"brain_enabled":true,"AI_LAB":false})
+PASS CONFIRMATION_SNAPSHOT_SCHEMA_CHANGED_NO
+PASS AI_DEEP_LINK_PREFERENCE_WIRING_NOT_ENABLED
+PASS BUSINESS_CABIN_VOCABULARY_UNCHANGED
+PASS CHEAPEST_SEED_MATCH (cid=4fe276b6-7cc6-457c-8a3d-8210b252c948 seed=4fe276b6-7cc6-457c-8a3d-8210b252c948)
+PASS CHEAPEST_PRODUCTION ({"lead_name":null,"stage":"name","ranking_preference":"CHEAPEST","intent":"flight_search","origin":"KHI","destination":"JED","adults":2,"MODEL_CALLS":0,"SEARCH":0,"SOFT":"YES","seed":true})
+PASS SOFT_PREFERENCE_RESPONSE_HONEST
+PASS PENDING_CHEAPEST_CONFIRMATION_PRESERVED
+PASS FASTEST_PRODUCTION (rank=FASTEST mc=0)
+PASS MORNING_PRODUCTION (time=morning mc=0)
+PASS PENDING_MORNING_CONFIRMATION_PRESERVED
+PASS CHEAPEST_FAMILY_PRODUCTION ({"cheapest":{"ok":true,"rank":"CHEAPEST","lead":null,"mc":0},"cheap":{"ok":true,"rank":"CHEAPEST","lead":null,"mc":0},"sasti":{"ok":true,"rank":"CHEAPEST","lead":null,"mc":0},"\u0633\u0633\u062a\u06cc":{"ok":true,"rank":"CHEAPEST","lead":null,"mc":0},"fastest":{"ok":true,"rank":"FASTEST","lead":null,"mc":0},"fast":{"ok":true,"rank":"FASTEST","lead":null,"mc":0},"jaldi":{"ok":true,"rank":"FASTEST","lead":null,"mc":0},"shortest layover":{"ok":true,"rank":"SHORTEST_LAYOVER","lead":null,"mc":0},"long layover nahi":{"ok":true,"rank":"SHORTEST_LAYOVER","lead":null,"mc":0},"best value":{"ok":true,"rank":"BEST_VALUE","lead":null,"mc":0},"best option":{"ok":true,"rank":"BEST_VALUE","lead":null,"mc":0},"best":{"ok":true,"rank":"BEST_VALUE","lead":null,"mc":0}})
+PASS FASTEST_FAMILY_PRODUCTION
+PASS SHORTEST_LAYOVER_FAMILY_PRODUCTION
+PASS BEST_VALUE_FAMILY_PRODUCTION
+PASS MORNING_FAMILY_PRODUCTION
+PASS EVENING_FAMILY_PRODUCTION
+PASS NIGHT_FAMILY_PRODUCTION
+PASS RANKING_ACTIVE_INTENT_PRESERVED
+PASS TIME_ACTIVE_INTENT_PRESERVED
+PASS SOFT_PREF_THEN_YES_CONFIRMATION (search=1 rank=CHEAPEST)
+PASS SOFT_PREF_THEN_NO_CONFIRMATION (search=0 time=morning)
+PASS STANDALONE_CHEAPEST
+PASS STANDALONE_MORNING
+PASS OPEN_JAW_RANKING_QWEN ({"lead":null,"trip":"open_jaw","legs":2,"mc":1,"soft":null,"brain":"YES","search":0})
+PASS OPEN_JAW_TIME_QWEN (mc=1 soft=null)
+PASS MIXED_STOP_RANKING_PERSIST
+PASS MIXED_CABIN_RANKING_PERSIST (cabin=business)
+PASS MIXED_PAX_TIME_PERSIST
+PASS EXPLICIT_ROUTE_RANKING_PERSIST ({"o":"LHE","d":"DXB","rank":"CHEAPEST","mc":0})
+PASS EXPLICIT_ROUTE_TIME_PERSIST ({"o":"ISB","d":"DXB","time":"morning"})
+PASS LEGITIMATE_NAME_AHMED
+PASS LEGITIMATE_NAME_ALI_KHAN
+OBS EXPLICIT_NAME_MORNING={"lead_name":null,"ranking_preference":null,"time_preference":"morning","MODEL_CALLS":0}
+OBS EXPLICIT_NAME_FAST={"lead_name":null,"ranking_preference":"FASTEST","time_preference":null,"MODEL_CALLS":0}
+OBS EXPLICIT_NAME_BEST={"lead_name":null,"ranking_preference":"BEST_VALUE","time_preference":null,"MODEL_CALLS":0}
+PASS CQ45_STOP_AUTHORITY_NON_REGRESSION ({"direct only":{"ok":true,"max_stops":0,"lead":null,"mc":0},"nonstop":{"ok":true,"max_stops":0,"lead":null,"mc":0},"one stop":{"ok":true,"max_stops":1,"lead":null,"mc":0},"seedhi":{"ok":true,"max_stops":0,"lead":null,"mc":0}})
+PASS CURRENT_FAST_PATH_NON_REGRESSION (mc=0)
+PASS EXPLICIT_ROUTE_FAST_PATH_NON_REGRESSION (mc=0)
+PASS VIA_GUARD_NON_REGRESSION ({"mc":1,"soft":null,"brain":"YES","msg":"Just to confirm: LHE to DXB, one-way, 2026-10-05, 1 adult. Shall I search?"})
+PASS DESTINATION_LED_QWEN (mc=1)
+PASS GENERAL_KNOWLEDGE_QWEN (mc=1 len=81)
+PASS SEARCH_BEFORE_CONFIRMATION_0
+PASS HTTP_500_0
+PASS WRONG_ROUTE_ACTION_READY_0
+PASS LEGACY_LLM_AFTER_SEMANTIC_TRAVEL_FALLBACK_0
+PASS QWEN_MODEL_ONLY_HANDOFF_0
+OVERALL=PASS
+FAILURES=0
+SUMMARY=/tmp/cq46-prod-cert-out/SUMMARY.json
