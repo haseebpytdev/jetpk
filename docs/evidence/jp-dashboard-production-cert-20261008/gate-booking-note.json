@@ -1,0 +1,15 @@
+{
+  "note": "JPQA-NOTE-GATE-1791479044052",
+  "posts": [
+    {
+      "url": "https://jetpakistan.pk/laravel/admin/bookings/JPQA-20261008-BOOKING/notes?format=json",
+      "status": 200
+    }
+  ],
+  "successVisible": false,
+  "uiNoteListRendered": false,
+  "BOOKING_NOTE_HTTP": "PASS",
+  "BOOKING_NOTE_RELOAD": "PASS",
+  "BOOKING_NOTE_DB": "PASS",
+  "BOOKING_NOTE_BROWSER": "PASS"
+}

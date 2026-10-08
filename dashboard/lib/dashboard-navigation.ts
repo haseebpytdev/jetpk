@@ -20,5 +20,8 @@ export function useDashboardRouter() {
     replace(path: string) {
       router.replace(dashboardHref(portal, path));
     },
+    refresh() {
+      router.refresh();
+    },
   };
 }

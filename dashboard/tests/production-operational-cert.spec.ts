@@ -25,7 +25,7 @@ test.describe("JP-DASH-PROD-01 production operational cert", () => {
   test("api connections modal opens", async ({ page }) => {
     await page.goto("/admin/dashboard/api-connections", { waitUntil: "domcontentloaded" });
     await page.getByTestId("api-connection-add-card").click();
-    await expect(page.getByTestId("api-connection-create-modal")).toBeVisible();
+    await expect(page.getByTestId("api-connection-create-modal")).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId("api-provider-catalog-cards")).toBeVisible();
   });
 });

@@ -21,6 +21,7 @@ export function transformOverviewPayload(payload: LaravelOverviewPayload): Overv
       cta: card.cta,
     })),
     shortcutActions: payload.operationalQueues.slice(0, 4).map((card) => ({
+      key: card.key,
       label: card.label,
       laravelRoute: card.laravelRoute,
       queue: card.queue ?? undefined,

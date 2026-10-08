@@ -118,13 +118,10 @@ export const operationalActionCards: ActionCard[] = [
 ];
 
 export const shortcutActions = [
-  { label: "Review Deposits", laravelRoute: "admin.agent-deposits.index" },
-  { label: "Approve Agencies", laravelRoute: "admin.agent-applications.index" },
-  { label: "Payment Review", laravelRoute: "admin.bookings", queue: "payment_review" },
-  { label: "Ticketing Queue", laravelRoute: "admin.bookings", queue: "ticketing" },
-  { label: "Manual Review", laravelRoute: "admin.bookings", queue: "supplier_pnr" },
-  { label: "Reports", laravelRoute: "admin.reports" },
-  { label: "API Settings", laravelRoute: "admin.api-settings" },
+  { key: "pending_deposits", label: "Review Deposits", laravelRoute: "admin.agent-deposits.index" },
+  { key: "payment_review", label: "Payment Review", laravelRoute: "admin.bookings", queue: "payment_review" },
+  { key: "ticketing_pending", label: "Ticketing Queue", laravelRoute: "admin.bookings", queue: "ticketing" },
+  { key: "manual_review", label: "Manual Review", laravelRoute: "admin.bookings", queue: "supplier_pnr" },
 ];
 
 export const bookingTrend = [

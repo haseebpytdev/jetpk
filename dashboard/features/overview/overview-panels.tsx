@@ -1,8 +1,9 @@
 "use client";
 
+import { DashboardLink } from "@/components/dashboard/dashboard-link";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { dashboardHrefForBookingId, dashboardHrefForOperationalQueue } from "@/lib/overview-route-map";
 import type { OverviewData } from "@/types/dashboard";
 
 export function SummaryStatsRow({ summaryStats }: Pick<OverviewData, "summaryStats">) {
@@ -17,7 +18,7 @@ export function SummaryStatsRow({ summaryStats }: Pick<OverviewData, "summarySta
               stat.tone === "down" ? "text-red-600" : stat.tone === "warn" ? "text-amber-600" : "text-emerald-600"
             }`}
           >
-            {stat.delta} vs yesterday
+            {stat.delta?.trim() ? stat.delta : "—"} vs yesterday
           </p>
         </Card>
       ))}
@@ -90,9 +91,13 @@ export function RecentBookingsTable({ recentBookings }: Pick<OverviewData, "rece
                   <Badge label={row.payment} />
                 </td>
                 <td className="px-4 py-3">
-                  <Button variant="ghost" size="sm" type="button" onClick={() => alert("Preview only — view booking")}>
+                  <DashboardLink
+                    href={dashboardHrefForBookingId(row.id)}
+                    data-testid={`overview-booking-view-${row.id}`}
+                    className="inline-flex min-h-11 items-center rounded-xl px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  >
                     View
-                  </Button>
+                  </DashboardLink>
                 </td>
               </tr>
             ))}
@@ -159,18 +164,29 @@ export function QuickActionsBar({
   actions: OverviewData["shortcutActions"];
 }) {
   return (
-    <Card className="flex flex-wrap gap-2">
-      {actions.map((a) => (
-        <Button
-          key={a.label}
-          variant="secondary"
-          size="sm"
-          type="button"
-          onClick={() => alert(`Preview — ${a.laravelRoute}${a.queue ? `?queue=${a.queue}` : ""}`)}
-        >
-          {a.label}
-        </Button>
-      ))}
+    <Card className="flex flex-wrap gap-2" data-testid="overview-quick-actions">
+      {actions.map((a) => {
+        const href = dashboardHrefForOperationalQueue({
+          key: a.key,
+          laravelRoute: a.laravelRoute,
+          queue: a.queue,
+        });
+
+        if (!href) {
+          return null;
+        }
+
+        return (
+          <DashboardLink
+            key={a.key}
+            href={href}
+            data-testid={`overview-quick-action-${a.key}`}
+            className="inline-flex min-h-11 items-center rounded-xl border border-jp-border bg-white px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
+          >
+            {a.label}
+          </DashboardLink>
+        );
+      })}
     </Card>
   );
 }

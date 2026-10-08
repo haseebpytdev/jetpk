@@ -60,6 +60,20 @@ for (const route of HYDRATION_ROUTES) {
   });
 }
 
+test("dashboard hydration clean: admin home 10 consecutive loads", async ({ page }) => {
+  for (let i = 0; i < 10; i += 1) {
+    const monitors = attachHydrationMonitors(page);
+    await page.goto(`/admin/dashboard?dataSourcePreview=fixture&jpui05a=hydration-run-${i}`, {
+      waitUntil: "load",
+      timeout: 60_000,
+    });
+    await expect(page.getByTestId("dashboard-shell")).toBeVisible({ timeout: 30_000 });
+    await page.waitForTimeout(300);
+    expect(monitors.hydrationWarnings, `run ${i}: ${monitors.hydrationWarnings.join("\n")}`).toEqual([]);
+    expect(monitors.pageErrors, `run ${i}: ${monitors.pageErrors.join("\n")}`).toEqual([]);
+  }
+});
+
 test("dashboard hydration clean: overview dark theme", async ({ page }) => {
   const monitors = attachHydrationMonitors(page);
   await page.emulateMedia({ colorScheme: "dark" });
