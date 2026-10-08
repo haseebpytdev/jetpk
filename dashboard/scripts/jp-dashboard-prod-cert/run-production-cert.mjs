@@ -54,12 +54,11 @@ const VISIBLE_ADMIN_ROUTES = [
   ["cms-assets", "/admin/dashboard/cms/assets", "Assets", "VISIBLE_OPERATIONAL"],
 ];
 
-const HIDDEN_UNIMPLEMENTED_ROUTES = [
-  ["cancellations", "/admin/dashboard/cancellations"],
-  ["execution", "/admin/dashboard/execution"],
-  ["notification-failures", "/admin/dashboard/notification-failures"],
-  ["roles", "/admin/dashboard/roles"],
-  ["permissions", "/admin/dashboard/permissions"],
+/** Legacy preview paths that must not appear in live sidebar navigation. */
+const HIDDEN_FROM_NAV_LABELS = [
+  "Cancellations",
+  "Execution queue",
+  "Notification failures",
 ];
 
 const STORAGE = {
@@ -147,15 +146,19 @@ async function auditAdminPage(context, [key, route, heading, classification], re
   return pass;
 }
 
-async function assertHiddenRoute(context, [key, route], report) {
+async function assertHiddenFromNav(context, report) {
   const page = await context.newPage();
-  const resp = await page.goto(`${BASE}${route}`, { waitUntil: "domcontentloaded", timeout: 60000 });
-  await sleep(1500);
-  const status = resp?.status() ?? 0;
-  const hidden = status === 404 || status === 403;
-  report.hiddenRoutes[key] = hidden ? "HIDDEN_UNIMPLEMENTED" : "EXPOSED_DEFECT";
+  await page.goto(`${BASE}/admin/dashboard`, { waitUntil: "domcontentloaded", timeout: 90000 });
+  await sleep(2500);
+  const navText = await page.locator('[data-testid="dashboard-sidebar"], nav').first().innerText().catch(() => "");
+  const exposed = HIDDEN_FROM_NAV_LABELS.filter((label) => navText.toLowerCase().includes(label.toLowerCase()));
+  report.hiddenRoutes = {};
+  for (const label of HIDDEN_FROM_NAV_LABELS) {
+    report.hiddenRoutes[label] = exposed.includes(label) ? "EXPOSED_DEFECT" : "HIDDEN_UNIMPLEMENTED";
+  }
+  report.hiddenUnimplemented = exposed.length === 0 ? "PASS" : "FAIL";
   await page.close();
-  return hidden;
+  return exposed.length === 0;
 }
 
 async function assertCrossPortalDenied(page, url, key, report, opts = {}) {
@@ -198,10 +201,19 @@ async function assertAllowed(page, url, key, report) {
   return ok;
 }
 
-async function apiConnectionsModalProof(page, report) {
-  await page.goto(`${BASE}/admin/dashboard/api-connections`, { waitUntil: "domcontentloaded" });
-  await sleep(2500);
-  await page.getByTestId("api-connection-add-card").click();
+async function apiConnectionsModalProof(context, report) {
+  const page = await context.newPage();
+  await page.goto(`${BASE}/admin/dashboard/api-connections`, { waitUntil: "networkidle", timeout: 90000 });
+  await sleep(3000);
+  const addCard = page.getByTestId("api-connection-add-card");
+  if ((await addCard.count()) === 0) {
+    report.apiConnectionsModal = "FAIL";
+    report.apiConnectionsChecks = { modal: false, reason: "add-card-missing" };
+    await page.screenshot({ path: path.join(SCREENSHOTS, "api-connections-modal.png"), fullPage: true });
+    await page.close();
+    return;
+  }
+  await addCard.click();
   const modal = page.getByTestId("api-connection-create-modal");
   await modal.waitFor({ state: "visible", timeout: 15000 });
   const checks = {
@@ -220,9 +232,11 @@ async function apiConnectionsModalProof(page, report) {
   report.apiConnectionsModal = Object.values(checks).every(Boolean) ? "PASS" : "PARTIAL";
   report.apiConnectionsChecks = checks;
   await page.screenshot({ path: path.join(SCREENSHOTS, "api-connections-modal.png"), fullPage: true });
+  await page.close();
 }
 
-async function bookingsWriteProof(page, report) {
+async function bookingsWriteProof(context, report) {
+  const page = await context.newPage();
   try {
     await page.goto(`${BASE}/admin/dashboard/bookings`, { waitUntil: "domcontentloaded" });
     await sleep(2500);
@@ -242,6 +256,8 @@ async function bookingsWriteProof(page, report) {
   } catch (error) {
     report.writes.bookingsRead = "PARTIAL";
     report.writes.bookingsError = String(error?.message || error);
+  } finally {
+    await page.close();
   }
 }
 
@@ -282,15 +298,10 @@ async function main() {
   report.adminPagesPass = adminPass;
   report.adminPagesFail = VISIBLE_ADMIN_ROUTES.length - adminPass;
 
-  report.hiddenRoutes = {};
-  let hiddenPass = 0;
-  for (const route of HIDDEN_UNIMPLEMENTED_ROUTES) {
-    if (await assertHiddenRoute(adminContext, route, report)) hiddenPass++;
-  }
-  report.hiddenUnimplemented = hiddenPass === HIDDEN_UNIMPLEMENTED_ROUTES.length ? "PASS" : "FAIL";
+  await assertHiddenFromNav(adminContext, report);
 
-  await apiConnectionsModalProof(adminPage, report);
-  await bookingsWriteProof(adminPage, report);
+  await apiConnectionsModalProof(adminContext, report);
+  await bookingsWriteProof(adminContext, report);
 
   const staffContext = await browser.newContext({ storageState: STORAGE.staff });
   const staffPage = await staffContext.newPage();

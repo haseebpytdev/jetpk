@@ -1,0 +1,54 @@
+{
+  "startedAt": "2026-10-08T15:18:05.495Z",
+  "qaRun": "JPQA-WRITE-1791472685495",
+  "writeBridge": [
+    {
+      "MODULE": "BOOKINGS",
+      "UI_CONTROL": "booking-note-submit",
+      "METHOD": "POST",
+      "URL": "https://jetpakistan.pk/laravel/admin/bookings/JPQA-20261008-BOOKING/notes?format=json",
+      "QA_BROWSER_EXECUTED": "YES",
+      "HTTP_RESULT": 404,
+      "DB_PERSISTED": "NO",
+      "RELOAD_VISIBLE": "NO",
+      "EXTERNAL_SIDE_EFFECT": "NO",
+      "RESULT": "PARTIAL"
+    },
+    {
+      "MODULE": "MARKUPS",
+      "UI_CONTROL": "markup-save",
+      "METHOD": "POST",
+      "URL": "https://jetpakistan.pk/laravel/admin/markups?format=json",
+      "QA_BROWSER_EXECUTED": "YES",
+      "HTTP_RESULT": 200,
+      "DB_PERSISTED": "YES",
+      "RELOAD_VISIBLE": "YES",
+      "EXTERNAL_SIDE_EFFECT": "NO",
+      "RESULT": "PASS"
+    },
+    {
+      "MODULE": "API_CONNECTIONS",
+      "UI_CONTROL": "api-create-save",
+      "METHOD": "POST",
+      "URL": "https://jetpakistan.pk/laravel/admin/api-settings?format=json",
+      "QA_BROWSER_EXECUTED": "YES",
+      "HTTP_RESULT": 200,
+      "DB_PERSISTED": "YES",
+      "RELOAD_VISIBLE": "YES",
+      "EXTERNAL_SIDE_EFFECT": "NO",
+      "RESULT": "PASS_CREATE"
+    }
+  ],
+  "mutations": {
+    "QA_PAYMENT_RECORD_MUTATIONS": "NO",
+    "EXTERNAL_PAYMENT_GATEWAY_CALLS": 0,
+    "QA_CUSTOMER_MUTATIONS": "NO",
+    "NON_QA_CUSTOMER_MUTATIONS": 0,
+    "QA_BOOKING_MUTATIONS": "NO",
+    "REAL_SUPPLIER_BOOKING_MUTATIONS": 0
+  },
+  "BOOKINGS_WRITE": "PARTIAL",
+  "MARKUPS_WRITE": "PASS",
+  "API_CONNECTION_LIFECYCLE": "PASS_CREATE",
+  "finishedAt": "2026-10-08T15:18:39.786Z"
+}
