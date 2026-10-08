@@ -80,6 +80,13 @@ class DashboardPaymentsReadService
                         $booking->where('booking_reference', 'like', '%'.$search.'%')
                             ->orWhere('pnr', 'like', '%'.$search.'%');
                     });
+
+                if (preg_match('/^TXN-(\d+)$/i', $search, $txnMatch) === 1) {
+                    $inner->orWhere('id', (int) $txnMatch[1]);
+                }
+                if (preg_match('/^PAY-(\d+)$/i', $search, $payMatch) === 1) {
+                    $inner->orWhere('id', (int) $payMatch[1]);
+                }
             });
         }
 

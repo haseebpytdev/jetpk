@@ -10,6 +10,7 @@ import {
   TransactionTypeBadge,
 } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { TransactionRecord } from "@/types/payment";
 
 function refOrDash(value: string | null): string {
@@ -17,9 +18,11 @@ function refOrDash(value: string | null): string {
 }
 
 export function PaymentDetailDrawerContent({ transaction }: { transaction: TransactionRecord }) {
+  const isLive = useDashboardLiveMode();
+
   return (
     <div className="space-y-5" data-testid="payment-drawer-content">
-      <PreviewDataBanner className="text-xs" />
+      {isLive ? null : <PreviewDataBanner className="text-xs" />}
 
       <section aria-labelledby="payment-id-heading">
         <h3 id="payment-id-heading" className="text-sm font-semibold text-gray-900">

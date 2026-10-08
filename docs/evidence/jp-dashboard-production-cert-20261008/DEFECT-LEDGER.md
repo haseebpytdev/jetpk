@@ -1,14 +1,14 @@
-# JP-DASH-PROD Defect Ledger
+# JP-DASH-PROD Defect Ledger (reopened JP-DASH-PROD-04)
 
-| DEFECT_ID | DESCRIPTION | ROOT_CAUSE | FIX_SHA | DEPLOYED_SHA | PROD_RETEST | STATUS |
-|-----------|-------------|------------|---------|--------------|-------------|--------|
-| HYDR-418 | React hydration #418 (historical) | ThemeProvider resolved theme could diverge from bootstrap `data-theme` before mount | `744c45f9` | pending | 0 hydration errors on baseline production cert (9e26779) | PREVENTIVE_HARDENING_PENDING_DEPLOY |
-| RBAC-CUST-AGENT | Customer agent portal access concern | Harness false positive; Next.js redirects customer to `/customer/dashboard` | harness `15fb0a82` | N/A | PASS redirect, no agent shell | CLOSED |
-| BOOK-NOTE-404 | Booking internal note POST 404 | Laravel route binding numeric id only; dashboard sends `booking_reference` | `744c45f9` | **not deployed** | HTTP 404 on `JPQA-20261008-BOOKING` | OPEN_PRODUCTION_DEFECT |
-| CERT-WRITES | Safe write matrix incomplete | Certification scope remaining after deploy | PROD-03 | N/A | partial (markups + API create only) | OPEN_CERT_WORK |
+| DEFECT_ID | DESCRIPTION | STATUS |
+|-----------|-------------|--------|
+| DASH-04-01 | React hydration #418 on `/admin/dashboard` | IN_PROGRESS — defer Recharts until client mount (`overview-charts-lazy.tsx`); verify 10× on prod cert |
+| DASH-04-02 | Admin home operational queue CTAs preview-only alerts | FIXED (branch) |
+| DASH-04-03 | Recent bookings View preview-only alert | FIXED (branch) |
+| DASH-04-04 | Quick Actions preview-only alerts | FIXED (branch) |
+| DASH-04-05 | Refresh disabled / coming soon in live | FIXED (branch) |
+| DASH-04-06 | Export report visible but disabled in live | FIXED — hidden in live (branch) |
+| DASH-04-07 | Payment detail drawer / TXN-* search | FIXED — API search + list resolve (branch) |
 
-OPEN_CODE_DEFECTS=0
-OPEN_PRODUCTION_DEFECTS=1
-PENDING_PRODUCTION_FIX=booking_reference route binding
-
-Do not claim OPEN_PRODUCTION_DEFECTS=0 until booking-note fix is deployed and verified in production browser with DB persistence proof.
+OPEN_CODE_DEFECTS=0 (pending verification)  
+OPEN_PRODUCTION_DEFECTS=7 until production re-cert after deploy  

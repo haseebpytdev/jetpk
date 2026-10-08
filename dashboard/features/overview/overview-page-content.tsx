@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { OperationalQueueGrid } from "@/features/overview/operational-queue";
 import { OverviewChartsLazy } from "@/features/overview/overview-charts-lazy";
 import {
@@ -18,7 +17,6 @@ import {
   ServiceUnavailableState,
   UnauthorizedState,
 } from "@/components/ui/data-source-status";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
 
 export async function OverviewPageContent() {
@@ -42,16 +40,7 @@ export async function OverviewPageContent() {
 
         <div className="grid gap-4 xl:grid-cols-3">
           <div className="space-y-4 xl:col-span-2">
-            <Suspense
-              fallback={
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <Skeleton className="h-72" />
-                  <Skeleton className="h-72" />
-                </div>
-              }
-            >
-              <OverviewChartsLazy bookingTrend={data.bookingTrend} statusBreakdown={data.statusBreakdown} />
-            </Suspense>
+            <OverviewChartsLazy bookingTrend={data.bookingTrend} statusBreakdown={data.statusBreakdown} />
             <RecentBookingsTable recentBookings={data.recentBookings} />
           </div>
           <div className="space-y-4">

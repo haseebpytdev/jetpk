@@ -61,8 +61,7 @@ export function PaymentsWorkspace({ query, result, selectedTransaction }: Props)
     pushQuery({ selectedTransactionId: null });
   }, [pushQuery]);
 
-  const drawerOpen =
-    !drawerDismissed && Boolean(query.selectedTransactionId && selectedTransaction);
+  const drawerOpen = !drawerDismissed && Boolean(query.selectedTransactionId);
 
   const empty = result.total === 0;
 
@@ -108,7 +107,13 @@ export function PaymentsWorkspace({ query, result, selectedTransaction }: Props)
         }
         closeAriaLabel="Close payment details"
       >
-        {selectedTransaction ? <PaymentDetailDrawerContent transaction={selectedTransaction} /> : null}
+        {selectedTransaction ? (
+          <PaymentDetailDrawerContent transaction={selectedTransaction} />
+        ) : (
+          <p className="text-sm text-jp-muted" data-testid="payment-drawer-missing">
+            Transaction details could not be loaded for {query.selectedTransactionId}.
+          </p>
+        )}
       </Drawer>
     </div>
   );

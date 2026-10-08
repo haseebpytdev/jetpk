@@ -45,7 +45,7 @@ export type SystemHealthItem = {
 export type OverviewData = {
   summaryStats: StatCard[];
   operationalActionCards: ActionCard[];
-  shortcutActions: { label: string; laravelRoute: string; queue?: string }[];
+  shortcutActions: { key: string; label: string; laravelRoute: string; queue?: string }[];
   bookingTrend: { day: string; bookings: number; revenue: number }[];
   statusBreakdown: { name: string; value: number; color: string }[];
   recentNotifications: NotificationItem[];

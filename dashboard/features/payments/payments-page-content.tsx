@@ -23,7 +23,8 @@ export async function PaymentsPageContent({ searchParams }: Props) {
   try {
     const result = await getPaymentsPage(query);
     const selectedTransaction = query.selectedTransactionId
-      ? await getTransactionDetail(query.selectedTransactionId)
+      ? (result.transactions.find((tx) => tx.transactionId === query.selectedTransactionId) ??
+        await getTransactionDetail(query.selectedTransactionId))
       : null;
 
     return (

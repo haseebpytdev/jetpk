@@ -17,8 +17,8 @@ const repoRoot = path.resolve(__dirname, "../../../");
 const BASE = "https://jetpakistan.pk";
 const EVIDENCE = path.join(repoRoot, "docs/evidence/jp-dashboard-production-cert-20261008");
 const SCREENSHOTS = path.join(EVIDENCE, "screenshots");
-const ENGINEERING_SHA = "9e26779e96ae72db20c72a002e9d1d6be5aa36cb";
-const BUILD_ID = "fI-m6nRfVBIq5CBJnlqQC";
+const ENGINEERING_SHA = "d4d671ec77f5c8ad438410b325dda82525225c5d";
+const BUILD_ID = "OrjgSTJevc7oUhQOp8vvu";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** Live production nav only (BackOfficeCapabilitiesPresenter). */
