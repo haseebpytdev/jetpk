@@ -150,7 +150,7 @@ export const recentNotifications: NotificationItem[] = [
 
 export const recentBookings: BookingRow[] = [
   {
-    id: "b1",
+    id: "JP-BK-10001",
     pnr: "DEMO01",
     customer: "Preview Customer",
     phone: "+92 300 0000000",
@@ -161,7 +161,7 @@ export const recentBookings: BookingRow[] = [
     payment: "Paid",
   },
   {
-    id: "b2",
+    id: "JP-BK-10002",
     pnr: "DEMO02",
     customer: "Sample Traveller",
     phone: "+92 321 0000000",
@@ -172,7 +172,7 @@ export const recentBookings: BookingRow[] = [
     payment: "Pending",
   },
   {
-    id: "b3",
+    id: "JP-BK-10003",
     pnr: "DEMO03",
     customer: "Agent Booking",
     phone: "+92 333 0000000",

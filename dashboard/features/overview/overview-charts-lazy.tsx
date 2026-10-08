@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { OverviewData } from "@/types/dashboard";
 
@@ -22,14 +22,22 @@ const Charts = dynamic(
   },
 );
 
+function subscribeHydrated() {
+  return () => {};
+}
+
+function getHydratedSnapshot() {
+  return true;
+}
+
+function getHydratedServerSnapshot() {
+  return false;
+}
+
 export function OverviewChartsLazy(props: Pick<OverviewData, "bookingTrend" | "statusBreakdown">) {
-  const [mounted, setMounted] = useState(false);
+  const hydrated = useSyncExternalStore(subscribeHydrated, getHydratedSnapshot, getHydratedServerSnapshot);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
+  if (!hydrated) {
     return <OverviewChartsSkeleton />;
   }
 

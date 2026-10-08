@@ -36,7 +36,9 @@ function attachHydrationMonitors(page: Page) {
 }
 
 for (const route of HYDRATION_ROUTES) {
-  test(`dashboard hydration clean: ${route}`, async ({ page }) => {
+  test(`dashboard hydration clean: ${route}`, async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
     const monitors = attachHydrationMonitors(page);
     await page.addInitScript(() => {
       const theme = localStorage.getItem("jp-theme-preference");
@@ -53,15 +55,30 @@ for (const route of HYDRATION_ROUTES) {
     if (route.includes("/payments")) {
       await expect(page.getByTestId("payments-filters")).toBeVisible({ timeout: 30_000 });
     }
-    await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => undefined);
-    await page.waitForTimeout(500);
+    if (route === "/admin/dashboard") {
+      await expect(page.getByTestId("overview-toolbar-actions")).toBeVisible({ timeout: 30_000 });
+    }
+    if (route.includes("/bookings")) {
+      await expect(page.getByTestId("bookings-filters")).toBeVisible({ timeout: 30_000 });
+    }
+    if (route.includes("/users")) {
+      await expect(page.getByTestId("users-filters")).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator("table tbody tr").first()).toBeVisible({ timeout: 30_000 });
+    }
+    if (route.includes("/pnrs")) {
+      await expect(page.getByTestId("pnrs-filters")).toBeVisible({ timeout: 30_000 });
+    }
+    await page.waitForTimeout(800);
     expect(monitors.hydrationWarnings, monitors.hydrationWarnings.join("\n")).toEqual([]);
     expect(monitors.pageErrors, monitors.pageErrors.join("\n")).toEqual([]);
+    await context.close();
   });
 }
 
-test("dashboard hydration clean: admin home 10 consecutive loads", async ({ page }) => {
+test("dashboard hydration clean: admin home 10 consecutive loads", async ({ browser }) => {
   for (let i = 0; i < 10; i += 1) {
+    const context = await browser.newContext();
+    const page = await context.newPage();
     const monitors = attachHydrationMonitors(page);
     await page.goto(`/admin/dashboard?dataSourcePreview=fixture&jpui05a=hydration-run-${i}`, {
       waitUntil: "load",
@@ -71,10 +88,54 @@ test("dashboard hydration clean: admin home 10 consecutive loads", async ({ page
     await page.waitForTimeout(300);
     expect(monitors.hydrationWarnings, `run ${i}: ${monitors.hydrationWarnings.join("\n")}`).toEqual([]);
     expect(monitors.pageErrors, `run ${i}: ${monitors.pageErrors.join("\n")}`).toEqual([]);
+    await context.close();
   }
 });
 
-test("dashboard hydration clean: overview dark theme", async ({ page }) => {
+async function expectRouteHydrationClean(
+  browser: import("@playwright/test").Browser,
+  route: string,
+  runIndex: number,
+  ready?: (page: import("@playwright/test").Page) => Promise<void>,
+) {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const monitors = attachHydrationMonitors(page);
+  await page.goto(`${route}?dataSourcePreview=fixture&jpui05a=hydration-${route}-${runIndex}`, {
+    waitUntil: "load",
+    timeout: 60_000,
+  });
+  await expect(page.getByTestId("dashboard-shell")).toBeVisible({ timeout: 30_000 });
+  if (ready) {
+    await ready(page);
+  }
+  await page.waitForTimeout(800);
+  expect(monitors.hydrationWarnings, `${route} run ${runIndex}: ${monitors.hydrationWarnings.join("\n")}`).toEqual([]);
+  expect(monitors.pageErrors, `${route} run ${runIndex}: ${monitors.pageErrors.join("\n")}`).toEqual([]);
+  await context.close();
+}
+
+test("dashboard hydration clean: bookings 10 consecutive loads", async ({ browser }) => {
+  for (let i = 0; i < 10; i += 1) {
+    await expectRouteHydrationClean(browser, "/admin/dashboard/bookings", i, async (page) => {
+      await expect(page.getByTestId("bookings-filters")).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByTestId("bookings-table")).toBeVisible({ timeout: 30_000 });
+    });
+  }
+});
+
+test("dashboard hydration clean: users 10 consecutive loads", async ({ browser }) => {
+  for (let i = 0; i < 10; i += 1) {
+    await expectRouteHydrationClean(browser, "/admin/dashboard/users", i, async (page) => {
+      await expect(page.getByTestId("users-filters")).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator("table tbody tr").first()).toBeVisible({ timeout: 30_000 });
+    });
+  }
+});
+
+test("dashboard hydration clean: overview dark theme", async ({ browser }) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
   const monitors = attachHydrationMonitors(page);
   await page.emulateMedia({ colorScheme: "dark" });
   await page.addInitScript(() => {
@@ -88,4 +149,5 @@ test("dashboard hydration clean: overview dark theme", async ({ page }) => {
   await page.waitForTimeout(500);
   expect(monitors.hydrationWarnings).toEqual([]);
   expect(monitors.pageErrors).toEqual([]);
+  await context.close();
 });

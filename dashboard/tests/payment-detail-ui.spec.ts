@@ -14,8 +14,6 @@ test.describe("JP-DASH-PROD-04 payment detail drawer UI", () => {
       waitUntil: "load",
     });
     await expect(page.getByTestId("payment-drawer-content")).toBeVisible({ timeout: 15_000 });
-    await expect(
-      page.getByTestId("payment-review-actions").or(page.getByTestId("payment-actions-unavailable")),
-    ).toBeVisible();
+    await expect(page.getByTestId("payment-actions-preview")).toBeVisible();
   });
 });
