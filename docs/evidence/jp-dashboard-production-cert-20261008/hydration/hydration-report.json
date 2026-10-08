@@ -1,0 +1,27 @@
+{
+  "/admin/dashboard": {
+    "hydrationErrors": [],
+    "pageErrors": [],
+    "allConsoleErrors": []
+  },
+  "/admin/dashboard/bookings": {
+    "hydrationErrors": [],
+    "pageErrors": [],
+    "allConsoleErrors": []
+  },
+  "/admin/dashboard/api-connections": {
+    "hydrationErrors": [],
+    "pageErrors": [],
+    "allConsoleErrors": []
+  },
+  "/admin/dashboard/settings": {
+    "hydrationErrors": [],
+    "pageErrors": [],
+    "allConsoleErrors": []
+  },
+  "/admin/dashboard/cms/pages": {
+    "hydrationErrors": [],
+    "pageErrors": [],
+    "allConsoleErrors": []
+  }
+}
