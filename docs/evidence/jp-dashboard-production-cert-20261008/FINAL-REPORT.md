@@ -1,12 +1,14 @@
-# JP-DASH-PROD-02 Final Report
+# JP-DASH-PROD-02 / PROD-03 Final Report
 
 CERT_CHECKPOINT_SHA=2ad67566
+ACTUAL_REMOTE_BRANCH_SHA=15fb0a82328464f8f4feec5da6cb9a32c2340ac6
+LATEST_CODE_SHA=744c45f95b81b93cefcdb30bb458a6b807464142
+LATEST_BRANCH_SHA=15fb0a82328464f8f4feec5da6cb9a32c2340ac6
 BRANCH=work/jp-dashboard-prod-cert-20261008
-PR=pending (create at https://github.com/haseebpytdev/jetpk/pull/new/work/jp-dashboard-prod-cert-20261008)
+PR=pending
 MERGED_MAIN_SHA=pending
 PRODUCTION_SHA=9e26779e96ae72db20c72a002e9d1d6be5aa36cb
 DASHBOARD_BUILD_ID=fI-m6nRfVBIq5CBJnlqQC
-LATEST_BRANCH_SHA=744c45f9
 
 QA_ADMIN_AUTH=PASS
 QA_STAFF_AUTH=PASS
@@ -14,36 +16,34 @@ QA_AGENT_AUTH=PASS
 QA_AGENT_STAFF_AUTH=PASS
 QA_CUSTOMER_AUTH=PASS
 
-HYDRATION_418_ROOT_CAUSE=ThemeProvider resolved theme could diverge from theme-bootstrap-script data-theme before client mount (not reproduced on baseline production after harness isolation)
-HYDRATION_418_FIXED=ThemeProvider readBootstrappedResolved guard (branch, pending deploy)
+HYDRATION_418=PREVENTIVE_HARDENING_PENDING_DEPLOY
+HYDRATION_418_ROOT_CAUSE=ThemeProvider resolved theme could diverge from theme-bootstrap-script data-theme before client mount
+HYDRATION_418_BASELINE_PROD=0 errors on SHA 9e26779 (not currently reproducing on production runtime)
 
-CUSTOMER_AGENT_RBAC=PASS (customer /agent/* redirects to /customer/dashboard; no agent shell)
+CUSTOMER_AGENT_RBAC=PASS
 CROSS_PORTAL_RBAC=PASS
 
 VISIBLE_ADMIN_PAGES=29
 VISIBLE_ADMIN_PASS=29
 VISIBLE_ADMIN_FAIL=0
-HIDDEN_UNIMPLEMENTED=PASS (preview routes absent from live sidebar)
-READ_ONLY_BY_DESIGN=reports, audit, suppliers (classified in cert runner)
-EXTERNAL_ACTION_GATED=supplier/payment execution (by design)
+HIDDEN_UNIMPLEMENTED=PASS
+READ_ONLY_BY_DESIGN=reports, audit, suppliers
+EXTERNAL_ACTION_GATED=supplier booking/ticket/cancel/refund execution
 
-WRITE_CAPABLE_SAFE_MODULES=partial certification started
-WRITE_CAPABLE_CERTIFIED=markups, api-connection-create (production); booking-note fix pending deploy
-
-BOOKINGS_WRITE=PARTIAL (404 on reference-bound note pre-deploy)
-PAYMENTS_WRITE=not executed this pass
-CUSTOMERS_WRITE=not executed this pass
-USERS_WRITE=not executed this pass
-STAFF_WRITE=not executed this pass
-AGENTS_WRITE=not executed this pass
-AGENT_STAFF_WRITE=not executed this pass
-MARKUPS_WRITE=PASS
-CMS_WRITE=not executed this pass
-CMS_MEDIA_WRITE=not executed this pass
-SUPPORT_WRITE=not executed this pass
-SETTINGS_WRITE=not executed this pass
-COMMISSIONS_WRITE=not executed this pass
-API_CONNECTION_LIFECYCLE=PASS_CREATE
+BOOKINGS_WRITE=NOT_EXECUTED (booking-note 404 on production runtime pre-deploy)
+PAYMENTS_WRITE=NOT_EXECUTED
+CUSTOMERS_WRITE=NOT_EXECUTED
+USERS_WRITE=NOT_EXECUTED
+STAFF_WRITE=NOT_EXECUTED
+AGENTS_WRITE=NOT_EXECUTED
+AGENT_STAFF_WRITE=NOT_EXECUTED
+MARKUPS_WRITE=PROD_EXECUTED_PASS (baseline SHA; rerun required post-deploy)
+CMS_WRITE=NOT_EXECUTED
+CMS_MEDIA_WRITE=NOT_EXECUTED
+SUPPORT_WRITE=NOT_EXECUTED
+SETTINGS_WRITE=READ_ONLY_FOR_PROD_CERT_SAFETY
+COMMISSIONS_WRITE=NOT_EXECUTED
+API_CONNECTION_LIFECYCLE=PROD_EXECUTED_PASS (create only on baseline SHA; full lifecycle rerun post-deploy)
 
 QA_PAYMENT_RECORD_MUTATIONS=NO
 EXTERNAL_PAYMENT_GATEWAY_CALLS=0
@@ -53,8 +53,8 @@ QA_BOOKING_MUTATIONS=NO
 REAL_SUPPLIER_BOOKING_MUTATIONS=0
 
 API_CONNECTIONS_MODAL=PASS (5/5)
-SMTP_STATUS=read-only verified via settings (no secrets exposed)
-GOOGLE_OAUTH_STATUS=not configured / truthful display (no false Ready)
+SMTP_STATUS=READ_ONLY_BY_DESIGN
+GOOGLE_OAUTH_STATUS=READ_ONLY_BY_DESIGN
 
 ADMIN_BROWSER=PASS
 STAFF_BROWSER=PASS
@@ -74,11 +74,14 @@ REAL_TICKETS_ISSUED=0
 REAL_EXTERNAL_PAYMENTS=0
 REAL_SUPPLIER_CANCELLATIONS=0
 
-PHPUNIT=193/193 PASS (1146 assertions)
-TYPECHECK=PASS
-PRODUCTION_PLAYWRIGHT=run-production-cert.mjs FULL_PASS (read/RBAC/hydration gate on baseline SHA)
+PHPUNIT=193/193 PASS (1146 assertions) — pre-PROD-03 baseline
+TYPECHECK=PASS — pre-PROD-03 baseline
+PRODUCTION_PLAYWRIGHT=run-production-cert.mjs read/RBAC gate PASS on baseline SHA 9e26779
 
-OPEN_SOFTWARE_DEFECTS=0 (booking-note binding fix in branch; deploy required)
+OPEN_CODE_DEFECTS=0
+OPEN_PRODUCTION_DEFECTS=1
+PENDING_PRODUCTION_FIX=booking_reference route binding
+WRITE_MATRIX_UNKNOWN_COUNT=pending PROD-03 closure
+
 EVIDENCE_DIR=docs/evidence/jp-dashboard-production-cert-20261008
-
 FINAL_STATUS=PARTIAL
