@@ -1,0 +1,739 @@
+{
+  "startedAt": "2026-10-08T15:11:56.604Z",
+  "engineeringSha": "9e26779e96ae72db20c72a002e9d1d6be5aa36cb",
+  "productionDeploySha": "9e26779e96ae72db20c72a002e9d1d6be5aa36cb",
+  "buildId": "fI-m6nRfVBIq5CBJnlqQC",
+  "qaAgency": "jetpk-production-qa",
+  "adminPages": {
+    "dashboard": {
+      "url": "https://jetpakistan.pk/admin/dashboard",
+      "status": 200,
+      "heading": "Dashboard",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=ZVqc7QNxQlpebiBj net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=ZVqc7QNxQlpebiBj net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=ZVqc7QNxQlpebiBj net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=ZVqc7QNxQlpebiBj net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/customers?_rsc=ZVqc7QNxQlpebiBj net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "bookings": {
+      "url": "https://jetpakistan.pk/admin/dashboard/bookings",
+      "status": 200,
+      "heading": "Bookings",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=XoanPsGhbPD-VXhd net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=XoanPsGhbPD-VXhd net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=XoanPsGhbPD-VXhd net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=XoanPsGhbPD-VXhd net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/deposits?_rsc=XoanPsGhbPD-VXhd net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "payments": {
+      "url": "https://jetpakistan.pk/admin/dashboard/payments",
+      "status": 200,
+      "heading": "Payments",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=DMPnsv6Jo4D1Evrc net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/deposits?_rsc=DMPnsv6Jo4D1Evrc net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=DMPnsv6Jo4D1Evrc net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=DMPnsv6Jo4D1Evrc net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=DMPnsv6Jo4D1Evrc net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "pnrs": {
+      "url": "https://jetpakistan.pk/admin/dashboard/pnrs",
+      "status": 200,
+      "heading": "PNRs",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=4VKs2frojWiC4ulC net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=4VKs2frojWiC4ulC net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/deposits?_rsc=4VKs2frojWiC4ulC net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=4VKs2frojWiC4ulC net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=4VKs2frojWiC4ulC net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "tickets": {
+      "url": "https://jetpakistan.pk/admin/dashboard/tickets",
+      "status": 200,
+      "heading": "Tickets",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=dW2_U1d2J_BnXfvj net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=dW2_U1d2J_BnXfvj net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=dW2_U1d2J_BnXfvj net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/deposits?_rsc=dW2_U1d2J_BnXfvj net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/customers?_rsc=dW2_U1d2J_BnXfvj net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "operations": {
+      "url": "https://jetpakistan.pk/admin/dashboard/operations/inbox",
+      "status": 200,
+      "heading": "Live Operations",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=td-AvTKvX70eVR9I net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=td-AvTKvX70eVR9I net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=td-AvTKvX70eVR9I net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=td-AvTKvX70eVR9I net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=td-AvTKvX70eVR9I net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "customers": {
+      "url": "https://jetpakistan.pk/admin/dashboard/customers",
+      "status": 200,
+      "heading": "Customers",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=QVlOI5aUI_JeiOTj net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=QVlOI5aUI_JeiOTj net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=QVlOI5aUI_JeiOTj net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=QVlOI5aUI_JeiOTj net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=QVlOI5aUI_JeiOTj net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "agents": {
+      "url": "https://jetpakistan.pk/admin/dashboard/agents",
+      "status": 200,
+      "heading": "Agents",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=WKMn_wa_ElnKpsk7 net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=WKMn_wa_ElnKpsk7 net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/users?_rsc=WKMn_wa_ElnKpsk7 net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/suppliers?_rsc=WKMn_wa_ElnKpsk7 net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/customers?_rsc=WKMn_wa_ElnKpsk7 net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "suppliers": {
+      "url": "https://jetpakistan.pk/admin/dashboard/suppliers",
+      "status": 200,
+      "heading": "Suppliers",
+      "classification": "READ_ONLY_BY_DESIGN",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=cp6Im6bWNlLTdgw5 net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=cp6Im6bWNlLTdgw5 net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=cp6Im6bWNlLTdgw5 net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=cp6Im6bWNlLTdgw5 net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/staff?_rsc=cp6Im6bWNlLTdgw5 net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "users": {
+      "url": "https://jetpakistan.pk/admin/dashboard/users",
+      "status": 200,
+      "heading": "Users",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=clkU0NUcchw_9IqQ net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=clkU0NUcchw_9IqQ net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=clkU0NUcchw_9IqQ net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=clkU0NUcchw_9IqQ net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=clkU0NUcchw_9IqQ net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "staff": {
+      "url": "https://jetpakistan.pk/admin/dashboard/staff",
+      "status": 200,
+      "heading": "Staff",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=ZdkBOWbUVck2uCkc net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=ZdkBOWbUVck2uCkc net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/deposits?_rsc=ZdkBOWbUVck2uCkc net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/customers?_rsc=ZdkBOWbUVck2uCkc net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/agents?_rsc=ZdkBOWbUVck2uCkc net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "customer-queries": {
+      "url": "https://jetpakistan.pk/admin/dashboard/customer-queries",
+      "status": 200,
+      "heading": "Customer Queries",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=jDGuayNGCu2DbP1X net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=jDGuayNGCu2DbP1X net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=jDGuayNGCu2DbP1X net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=jDGuayNGCu2DbP1X net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/deposits?_rsc=jDGuayNGCu2DbP1X net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "reports": {
+      "url": "https://jetpakistan.pk/admin/dashboard/reports",
+      "status": 200,
+      "heading": "Reports",
+      "classification": "READ_ONLY_BY_DESIGN",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=S8a1Pg6C89549RS- net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=S8a1Pg6C89549RS- net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=S8a1Pg6C89549RS- net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=S8a1Pg6C89549RS- net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=S8a1Pg6C89549RS- net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "audit": {
+      "url": "https://jetpakistan.pk/admin/dashboard/audit",
+      "status": 200,
+      "heading": "Audit",
+      "classification": "READ_ONLY_BY_DESIGN",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=rjs_6uoNdmF7jMdr net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=rjs_6uoNdmF7jMdr net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=rjs_6uoNdmF7jMdr net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=rjs_6uoNdmF7jMdr net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=rjs_6uoNdmF7jMdr net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "api-connections": {
+      "url": "https://jetpakistan.pk/admin/dashboard/api-connections",
+      "status": 200,
+      "heading": "API Connections",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=w-E4DXjlHhTbJfEF net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=w-E4DXjlHhTbJfEF net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=w-E4DXjlHhTbJfEF net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=w-E4DXjlHhTbJfEF net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/deposits?_rsc=w-E4DXjlHhTbJfEF net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "company-profile": {
+      "url": "https://jetpakistan.pk/admin/dashboard/settings/general",
+      "status": 200,
+      "heading": "Company Profile",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=TyKELsqQZjaLw89M net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=TyKELsqQZjaLw89M net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=TyKELsqQZjaLw89M net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=TyKELsqQZjaLw89M net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/suppliers?_rsc=TyKELsqQZjaLw89M net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "homepage-cms": {
+      "url": "https://jetpakistan.pk/admin/dashboard/cms/sections",
+      "status": 200,
+      "heading": "Homepage CMS",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard/staff?_rsc=wRHSfGj4dyurMOIr net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/audit?_rsc=wRHSfGj4dyurMOIr net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/customer-queries?_rsc=wRHSfGj4dyurMOIr net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/settings/general?_rsc=wRHSfGj4dyurMOIr net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/cms/pages?_rsc=wRHSfGj4dyurMOIr net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "cms-pages": {
+      "url": "https://jetpakistan.pk/admin/dashboard/cms/pages",
+      "status": 200,
+      "heading": "Pages",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=c6_vJ7pNMnutONmm net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=c6_vJ7pNMnutONmm net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=c6_vJ7pNMnutONmm net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=c6_vJ7pNMnutONmm net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=c6_vJ7pNMnutONmm net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "seo": {
+      "url": "https://jetpakistan.pk/admin/dashboard/seo",
+      "status": 200,
+      "heading": "SEO",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=Yumte4fofffA5GaP net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=Yumte4fofffA5GaP net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=Yumte4fofffA5GaP net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=Yumte4fofffA5GaP net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/staff?_rsc=Yumte4fofffA5GaP net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "communications": {
+      "url": "https://jetpakistan.pk/admin/dashboard/settings/notifications",
+      "status": 200,
+      "heading": "Communications",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=_sUl3Uo3vHV6i4mn net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=_sUl3Uo3vHV6i4mn net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=_sUl3Uo3vHV6i4mn net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=_sUl3Uo3vHV6i4mn net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=_sUl3Uo3vHV6i4mn net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "markups": {
+      "url": "https://jetpakistan.pk/admin/dashboard/markups",
+      "status": 200,
+      "heading": "Markups",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=HrbL2nRzKgVzO-ng net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=HrbL2nRzKgVzO-ng net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=HrbL2nRzKgVzO-ng net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=HrbL2nRzKgVzO-ng net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=HrbL2nRzKgVzO-ng net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "commissions": {
+      "url": "https://jetpakistan.pk/admin/dashboard/commissions",
+      "status": 200,
+      "heading": "Commissions",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=XrQUh6NtjP28DyQw net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=XrQUh6NtjP28DyQw net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=XrQUh6NtjP28DyQw net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=XrQUh6NtjP28DyQw net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/deposits?_rsc=XrQUh6NtjP28DyQw net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "group-ticketing": {
+      "url": "https://jetpakistan.pk/admin/dashboard/group-ticketing",
+      "status": 200,
+      "heading": "Group Ticketing",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 500 ()"
+      ],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=fjGR7olWTOZCrulV net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=fjGR7olWTOZCrulV net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=fjGR7olWTOZCrulV net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=fjGR7olWTOZCrulV net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=fjGR7olWTOZCrulV net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "login-otp": {
+      "url": "https://jetpakistan.pk/admin/dashboard/settings/security",
+      "status": 200,
+      "heading": "Login OTP",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=b7AI6APoTm4rXBCz net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=b7AI6APoTm4rXBCz net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=b7AI6APoTm4rXBCz net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=b7AI6APoTm4rXBCz net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=b7AI6APoTm4rXBCz net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "ask-jetpakistan": {
+      "url": "https://jetpakistan.pk/admin/dashboard/settings/integrations",
+      "status": 200,
+      "heading": "Integrations",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=UEBF_ylVwaiM7iqX net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/deposits?_rsc=UEBF_ylVwaiM7iqX net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/agents?_rsc=UEBF_ylVwaiM7iqX net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=UEBF_ylVwaiM7iqX net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=UEBF_ylVwaiM7iqX net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "go-live": {
+      "url": "https://jetpakistan.pk/admin/dashboard/system/go-live",
+      "status": 200,
+      "heading": "Go-live",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=vUCKahsaaVzumO2o net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=vUCKahsaaVzumO2o net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=vUCKahsaaVzumO2o net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=vUCKahsaaVzumO2o net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=vUCKahsaaVzumO2o net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "settings": {
+      "url": "https://jetpakistan.pk/admin/dashboard/settings",
+      "status": 200,
+      "heading": "Settings",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=Iqd4cgB8_OOUFV5b net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=Iqd4cgB8_OOUFV5b net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=Iqd4cgB8_OOUFV5b net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=Iqd4cgB8_OOUFV5b net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=Iqd4cgB8_OOUFV5b net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "support": {
+      "url": "https://jetpakistan.pk/admin/dashboard/support",
+      "status": 200,
+      "heading": "Support",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=amOzUN27wlzE9V8w net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=amOzUN27wlzE9V8w net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=amOzUN27wlzE9V8w net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=amOzUN27wlzE9V8w net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/deposits?_rsc=amOzUN27wlzE9V8w net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    },
+    "cms-assets": {
+      "url": "https://jetpakistan.pk/admin/dashboard/cms/assets",
+      "status": 200,
+      "heading": "Assets",
+      "classification": "VISIBLE_OPERATIONAL",
+      "hasHeading": true,
+      "accessDenied": false,
+      "mockHints": false,
+      "hydrationErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        "GET https://jetpakistan.pk/admin/dashboard?_rsc=i3StZuQhnBXqtwOG net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/pnrs?_rsc=i3StZuQhnBXqtwOG net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/payments?_rsc=i3StZuQhnBXqtwOG net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/tickets?_rsc=i3StZuQhnBXqtwOG net::ERR_ABORTED",
+        "GET https://jetpakistan.pk/admin/dashboard/bookings?_rsc=i3StZuQhnBXqtwOG net::ERR_ABORTED"
+      ],
+      "unexpectedFailures": [],
+      "pageErrors": [],
+      "result": "PASS"
+    }
+  },
+  "rbac": {
+    "staff_dashboard": "PASS",
+    "staff_admin_denied": "PASS",
+    "agent_dashboard": "PASS",
+    "agent_admin_denied": "PASS",
+    "agent_staff_portal_denied": "PASS",
+    "agent_staff_dashboard": "PASS",
+    "agent_staff_admin_denied": "PASS",
+    "customer_dashboard": "PASS",
+    "customer_admin_denied": "PASS",
+    "customer_staff_denied": "PASS",
+    "customer_agent_denied": "PASS",
+    "customer_agent_bookings_denied": "PASS",
+    "admin_dashboard": "PASS"
+  },
+  "writes": {
+    "bookingsRead": "PASS",
+    "bookingsDetail": "PARTIAL"
+  },
+  "modules": {},
+  "commercialSafety": {
+    "REAL_SUPPLIER_CALLS": "NO",
+    "REAL_TICKETS": "NO",
+    "REAL_PAYMENTS": "NO",
+    "REAL_CUSTOMER_MUTATIONS": "NO"
+  },
+  "visibleAdminPages": 29,
+  "visibleAdminPass": 29,
+  "visibleAdminFail": 0,
+  "adminPagesTotal": 29,
+  "adminPagesPass": 29,
+  "adminPagesFail": 0,
+  "hiddenRoutes": {
+    "Cancellations": "HIDDEN_UNIMPLEMENTED",
+    "Execution queue": "HIDDEN_UNIMPLEMENTED",
+    "Notification failures": "HIDDEN_UNIMPLEMENTED"
+  },
+  "hiddenUnimplemented": "PASS",
+  "apiConnectionsModal": "PASS",
+  "apiConnectionsChecks": {
+    "modal": true,
+    "catalog": true,
+    "airblue": true,
+    "back": true,
+    "close": true
+  },
+  "rbacDetails": {
+    "staff_admin_denied": {
+      "status": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard",
+      "agentShell": false,
+      "agentOverview": false,
+      "accessDenied": true
+    },
+    "agent_admin_denied": {
+      "status": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard",
+      "agentShell": false,
+      "agentOverview": false,
+      "accessDenied": true
+    },
+    "agent_staff_portal_denied": {
+      "status": 200,
+      "finalUrl": "https://jetpakistan.pk/staff/dashboard",
+      "agentShell": false,
+      "agentOverview": false,
+      "accessDenied": true
+    },
+    "agent_staff_admin_denied": {
+      "status": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard",
+      "agentShell": false,
+      "agentOverview": false,
+      "accessDenied": true
+    },
+    "customer_admin_denied": {
+      "status": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard",
+      "agentShell": false,
+      "agentOverview": false,
+      "accessDenied": true
+    },
+    "customer_staff_denied": {
+      "status": 200,
+      "finalUrl": "https://jetpakistan.pk/staff/dashboard",
+      "agentShell": false,
+      "agentOverview": false,
+      "accessDenied": true
+    },
+    "customer_agent_denied": {
+      "status": 200,
+      "finalUrl": "https://jetpakistan.pk/customer/dashboard",
+      "agentShell": false,
+      "agentOverview": false,
+      "accessDenied": false
+    },
+    "customer_agent_bookings_denied": {
+      "status": 200,
+      "finalUrl": "https://jetpakistan.pk/customer/dashboard",
+      "agentShell": false,
+      "agentOverview": false,
+      "accessDenied": false
+    }
+  },
+  "crossPortalRbac": "PASS",
+  "mockDataInProduction": "NO",
+  "previewFallbackInProduction": "NO",
+  "dashboardMode": "live",
+  "useMockData": false,
+  "qaAuth": {
+    "admin": "PASS",
+    "staff": "PASS",
+    "agent": "PASS",
+    "agent_staff": "PASS",
+    "customer": "PASS"
+  },
+  "hydrationErrors": 0,
+  "finalStatus": "FULL_PASS",
+  "finishedAt": "2026-10-08T15:14:54.697Z"
+}

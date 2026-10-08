@@ -41,6 +41,15 @@ function applyResolvedTheme(resolved: ResolvedTheme) {
   document.documentElement.style.colorScheme = resolved;
 }
 
+function readBootstrappedResolved(): ResolvedTheme {
+  if (typeof document === "undefined") {
+    return "light";
+  }
+
+  const theme = document.documentElement.getAttribute("data-theme");
+  return theme === "dark" ? "dark" : "light";
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [preference, setPreferenceState] = useState<ThemePreference>(DEFAULT_THEME_PREFERENCE);
   const [systemDark, setSystemDark] = useState(false);
@@ -56,11 +65,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => media.removeEventListener("change", updateSystem);
   }, []);
 
-  const resolved = resolveTheme(preference, systemDark);
+  const resolved = mounted ? resolveTheme(preference, systemDark) : readBootstrappedResolved();
 
   useEffect(() => {
-    applyResolvedTheme(resolved);
     if (!mounted) return;
+    applyResolvedTheme(resolved);
     try {
       localStorage.setItem(THEME_STORAGE_KEY, preference);
     } catch {

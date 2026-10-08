@@ -303,4 +303,25 @@ class Booking extends Model
     {
         return $this->reference_code;
     }
+
+    /**
+     * Dashboard operational routes pass the public booking reference; legacy routes may pass numeric id.
+     */
+    public function resolveRouteBinding($value, $field = null): ?static
+    {
+        if ($field !== null) {
+            return parent::resolveRouteBinding($value, $field);
+        }
+
+        if (is_numeric($value)) {
+            return $this->newQuery()->whereKey((int) $value)->first();
+        }
+
+        $reference = trim((string) $value);
+        if ($reference === '') {
+            return null;
+        }
+
+        return $this->newQuery()->where('booking_reference', $reference)->first();
+    }
 }
