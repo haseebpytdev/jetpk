@@ -14,7 +14,20 @@ use App\Support\Agencies\AgencyRolePermissionMatrix;
 use App\Support\Qa\JetpkDashboardFinal11QaScope;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Process\Process;
 use Tests\TestCase;
+
+final class JetpkDashboardFinal11QaCommandTestHarness extends JetpkDashboardFinal11QaCommand
+{
+    public string $stdinPassword = '';
+
+    protected function readSyncPasswordStdin(): string
+    {
+        return $this->stdinPassword;
+    }
+}
 
 class JetpkDashboardFinal11QaCommandTest extends TestCase
 {
@@ -22,23 +35,40 @@ class JetpkDashboardFinal11QaCommandTest extends TestCase
 
     private const TEST_PASSWORD = 'Final11QaPass!567';
 
+    private const FINAL11_PASSWORD_ENV_KEYS = [
+        'JP_FINAL_11_QA_CUSTOMER_B_PASSWORD',
+        'JP_FINAL_11_QA_AGENT_B_PASSWORD',
+        'JP_FINAL_11_QA_STAFF_MANAGER_PASSWORD',
+        'JP_FINAL_11_QA_STAFF_ACCOUNTANT_PASSWORD',
+        'JP_FINAL_11_QA_STAFF_SALES_PASSWORD',
+        'JP_FINAL_11_QA_STAFF_SUPPORT_PASSWORD',
+        'JP_FINAL_11_QA_STAFF_TICKETING_PASSWORD',
+        'JP_FINAL_11_QA_STAFF_VIEWER_PASSWORD',
+        'JP_FINAL_11_QA_LEGACY_AGENCY_ADMIN_PASSWORD',
+    ];
+
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seedFinal11PasswordEnv();
+        $this->seedDash03PasswordEnv();
+        $this->unsetAllFinal11PasswordEnv();
         $this->bootstrapQaAgencyContext();
     }
 
-    private function seedFinal11PasswordEnv(): void
+    private function seedDash03PasswordEnv(): void
     {
         putenv('JP_DASH_03_QA_ADMIN_PASSWORD='.self::TEST_PASSWORD);
         putenv('JP_DASH_03_QA_STAFF_PASSWORD='.self::TEST_PASSWORD);
         putenv('JP_DASH_03_QA_AGENT_PASSWORD='.self::TEST_PASSWORD);
         putenv('JP_DASH_03_QA_CUSTOMER_PASSWORD='.self::TEST_PASSWORD);
         putenv('JP_DASH_03_QA_AGENT_STAFF_PASSWORD='.self::TEST_PASSWORD);
+    }
 
-        foreach (JetpkDashboardFinal11QaCommand::ROLE_DEFINITIONS as $definition) {
-            putenv($definition['env_password'].'='.self::TEST_PASSWORD);
+    private function unsetAllFinal11PasswordEnv(): void
+    {
+        foreach (self::FINAL11_PASSWORD_ENV_KEYS as $envKey) {
+            putenv($envKey.'=');
+            unset($_ENV[$envKey], $_SERVER[$envKey]);
         }
     }
 
@@ -227,8 +257,10 @@ class JetpkDashboardFinal11QaCommandTest extends TestCase
             ->assertSuccessful();
     }
 
-    public function test_missing_required_secret_fails_closed(): void
+    public function test_reconcile_passes_with_all_final11_password_env_unset(): void
     {
+        $this->unsetAllFinal11PasswordEnv();
+
         $final11UserIds = User::query()
             ->where('username', 'like', JetpkDashboardFinal11QaScope::USERNAME_PREFIX.'%')
             ->pluck('id');
@@ -236,13 +268,86 @@ class JetpkDashboardFinal11QaCommandTest extends TestCase
         Agent::query()->whereIn('user_id', $final11UserIds)->delete();
         User::query()->whereIn('id', $final11UserIds)->delete();
 
-        putenv('JP_FINAL_11_QA_CUSTOMER_B_PASSWORD=');
-        unset($_ENV['JP_FINAL_11_QA_CUSTOMER_B_PASSWORD'], $_SERVER['JP_FINAL_11_QA_CUSTOMER_B_PASSWORD']);
+        $this->artisan('jetpk:dashboard-final-11-qa', ['action' => 'reconcile', '--execute' => true])
+            ->expectsOutputToContain('FINAL11_QA_RECONCILE=PASS')
+            ->doesntExpectOutputToContain('FINAL11_MISSING_ENV=')
+            ->assertSuccessful();
+
+        $this->assertSame(
+            9,
+            User::query()->where('username', 'like', JetpkDashboardFinal11QaScope::USERNAME_PREFIX.'%')->count(),
+        );
+    }
+
+    public function test_newly_created_user_has_bootstrap_password_and_must_change_flag(): void
+    {
+        $this->unsetAllFinal11PasswordEnv();
 
         $this->artisan('jetpk:dashboard-final-11-qa', ['action' => 'reconcile', '--execute' => true])
-            ->expectsOutputToContain('FINAL11_MISSING_ENV=JP_FINAL_11_QA_CUSTOMER_B_PASSWORD')
-            ->doesntExpectOutputToContain(self::TEST_PASSWORD)
-            ->assertFailed();
+            ->assertSuccessful();
+
+        $user = User::query()->where('username', 'jp-final-11-qa-customer-b')->firstOrFail();
+        $this->assertTrue((bool) $user->must_change_password);
+        $this->assertFalse(Hash::check(self::TEST_PASSWORD, (string) $user->password));
+        $this->assertFalse(Hash::check('password', (string) $user->password));
+    }
+
+    public function test_sync_password_via_stdin_sets_password_and_clears_must_change(): void
+    {
+        $this->unsetAllFinal11PasswordEnv();
+
+        $this->artisan('jetpk:dashboard-final-11-qa', ['action' => 'reconcile', '--execute' => true])
+            ->assertSuccessful();
+
+        $syncPassword = 'Final11StdinSync!890';
+        $output = $this->runFinal11SyncPasswordHarness('customer_b', $syncPassword);
+        $this->assertStringContainsString('FINAL11_PASSWORD_SYNC=PASS', $output);
+        $this->assertStringNotContainsString($syncPassword, $output);
+
+        $user = User::query()->where('username', 'jp-final-11-qa-customer-b')->firstOrFail();
+        $this->assertTrue(Hash::check($syncPassword, (string) $user->password));
+        $this->assertFalse((bool) $user->must_change_password);
+    }
+
+    public function test_repeated_reconcile_does_not_reset_synced_owned_user_password(): void
+    {
+        $this->unsetAllFinal11PasswordEnv();
+
+        $this->artisan('jetpk:dashboard-final-11-qa', ['action' => 'reconcile', '--execute' => true])
+            ->assertSuccessful();
+
+        $syncPassword = 'Final11PreserveSync!901';
+        $this->runFinal11SyncPasswordHarness('customer_b', $syncPassword);
+
+        $user = User::query()->where('username', 'jp-final-11-qa-customer-b')->firstOrFail();
+        $hashBefore = (string) $user->password;
+
+        $this->artisan('jetpk:dashboard-final-11-qa', ['action' => 'reconcile', '--execute' => true])
+            ->expectsOutputToContain('FINAL11_QA_RECONCILE=PASS')
+            ->assertSuccessful();
+
+        $user->refresh();
+        $this->assertSame($hashBefore, (string) $user->password);
+        $this->assertTrue(Hash::check($syncPassword, (string) $user->password));
+        $this->assertFalse((bool) $user->must_change_password);
+    }
+
+    private function runFinal11SyncPasswordHarness(string $roleKey, string $password): string
+    {
+        $command = new JetpkDashboardFinal11QaCommandTestHarness;
+        $command->stdinPassword = $password;
+        $command->setLaravel($this->app);
+        $input = new ArrayInput([
+            'action' => 'sync-password',
+            '--role' => $roleKey,
+            '--execute' => true,
+        ]);
+        $output = new BufferedOutput;
+        $exit = $command->run($input, $output);
+        $buffer = $output->fetch();
+        $this->assertSame(0, $exit, $buffer);
+
+        return $buffer;
     }
 
     public function test_sync_password_requires_execute_and_stdin(): void
@@ -355,8 +460,59 @@ class JetpkDashboardFinal11QaCommandTest extends TestCase
         $source = (string) file_get_contents($path);
 
         $this->assertMatchesRegularExpression(
-            '/if \(!execute\) \{[\s\S]*?FINAL11_SETUP_DRY_RUN=PASS[\s\S]*?process\.exit\(0\);[\s\S]*?\}[\s\S]*verifyRemoteCommandSupport\(\)/',
+            '/if \(!execute\) \{[\s\S]*?FINAL11_SETUP_DRY_RUN=PASS[\s\S]*?process\.exit\(0\);[\s\S]*?\}[\s\S]*verifyProductionRuntimeSha\(\)[\s\S]*verifyRemoteCommandSupport\(\)/',
             $source,
         );
+    }
+
+    public function test_setup_script_execute_requires_expected_runtime_sha(): void
+    {
+        $path = base_path('dashboard/scripts/jp-dash-final-11/setup-production-qa.mjs');
+        $source = (string) file_get_contents($path);
+
+        $this->assertStringContainsString('FINAL11_RUNTIME_SHA_CHECK=EXPECTED_REQUIRED', $source);
+        $this->assertStringContainsString('PASSWORD_TRANSPORT=STDIN_ONLY', $source);
+        $this->assertStringContainsString('SERVER_ENV_PASSWORDS_REQUIRED=NO', $source);
+    }
+
+    public function test_setup_execute_without_expected_runtime_sha_fails_closed(): void
+    {
+        $script = base_path('dashboard/scripts/jp-dash-final-11/setup-production-qa.mjs');
+        $env = array_merge($_ENV, [
+            'JP_FINAL11_EXECUTE' => '1',
+            'JP_EXPECTED_RUNTIME_SHA' => '',
+            'JP_PRODUCTION_SHA' => '',
+        ]);
+        foreach (self::FINAL11_PASSWORD_ENV_KEYS as $envKey) {
+            $env[$envKey] = 'local-only-secret-value-'.substr($envKey, -8);
+        }
+
+        $process = new Process(['node', $script], base_path(), $env);
+        $process->run();
+
+        $this->assertFalse($process->isSuccessful());
+        $combined = $process->getOutput().$process->getErrorOutput();
+        $this->assertStringContainsString('FINAL11_RUNTIME_SHA_CHECK=EXPECTED_REQUIRED', $combined);
+        $this->assertStringNotContainsString('local-only-secret-value-', $combined);
+    }
+
+    public function test_setup_dry_run_does_not_require_runtime_sha(): void
+    {
+        $script = base_path('dashboard/scripts/jp-dash-final-11/setup-production-qa.mjs');
+        $env = array_merge($_ENV, [
+            'JP_FINAL11_EXECUTE' => '0',
+            'JP_EXPECTED_RUNTIME_SHA' => '',
+        ]);
+        foreach (self::FINAL11_PASSWORD_ENV_KEYS as $envKey) {
+            $env[$envKey] = 'dry-run-local-secret-'.substr($envKey, -6);
+        }
+
+        $process = new Process(['node', $script], base_path(), $env);
+        $process->run();
+
+        $this->assertTrue($process->isSuccessful());
+        $combined = $process->getOutput().$process->getErrorOutput();
+        $this->assertStringContainsString('FINAL11_SETUP_DRY_RUN=PASS', $combined);
+        $this->assertStringNotContainsString('dry-run-local-secret-', $combined);
     }
 }

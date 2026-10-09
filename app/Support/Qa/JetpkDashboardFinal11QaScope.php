@@ -5,6 +5,8 @@ namespace App\Support\Qa;
 use App\Enums\AccountType;
 use App\Models\Agency;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * Ownership boundaries for JP-DASH-FINAL-11 QA provisioning (fail closed).
@@ -86,5 +88,13 @@ final class JetpkDashboardFinal11QaScope
     public static function hasPositiveOwnershipMeta(User $user): bool
     {
         return self::isOwnedUser($user);
+    }
+
+    /**
+     * One-time reconcile bootstrap credential: high-entropy hash only (never returns plaintext).
+     */
+    public static function bootstrapPasswordHash(): string
+    {
+        return Hash::make(Str::password(64));
     }
 }

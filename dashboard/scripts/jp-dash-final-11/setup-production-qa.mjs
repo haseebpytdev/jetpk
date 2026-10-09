@@ -75,8 +75,8 @@ function verifyRemoteCommandSupport() {
 function verifyProductionRuntimeSha() {
   const expected = (process.env.JP_EXPECTED_RUNTIME_SHA || process.env.JP_PRODUCTION_SHA || "").trim().toLowerCase();
   if (!expected) {
-    console.log("FINAL11_RUNTIME_SHA_CHECK=SKIPPED");
-    return;
+    console.error("FINAL11_RUNTIME_SHA_CHECK=EXPECTED_REQUIRED");
+    process.exit(1);
   }
   if (!/^[0-9a-f]{40}$/.test(expected)) {
     console.error("FINAL11_RUNTIME_SHA_CHECK=INVALID_EXPECTED");
@@ -158,6 +158,8 @@ console.log("JP_DASH_FINAL_11_QA_SETUP=START");
 console.log(`FINAL11_EXECUTE_MODE=${execute ? "production" : "dry_run"}`);
 console.log("FINAL11_DIRECT_RUNTIME_SCP=NO");
 console.log("FINAL11_PROTECTED_DEPLOYMENT_REQUIRED=YES");
+console.log("PASSWORD_TRANSPORT=STDIN_ONLY");
+console.log("SERVER_ENV_PASSWORDS_REQUIRED=NO");
 
 assertLocalSecrets();
 
@@ -167,8 +169,8 @@ if (!execute) {
   process.exit(0);
 }
 
-verifyRemoteCommandSupport();
 verifyProductionRuntimeSha();
+verifyRemoteCommandSupport();
 runReconcile();
 syncPasswordsViaStdin();
 emitStatus();
