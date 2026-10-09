@@ -42,10 +42,6 @@ export function BookingOperationalActions({ bookingId }: { bookingId: string }) 
   return (
     <div className="space-y-2" data-testid="booking-operational-actions">
       <h3 className="text-sm font-semibold text-gray-900">Internal note</h3>
-      <p className="text-xs text-jp-muted" data-testid="booking-ops-mutations-pending">
-        Cancellation, refund, payment recording, and staff assignment require dedicated operator forms and are not
-        available from this summary panel yet.
-      </p>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {success ? <p className="text-sm text-green-700">{success}</p> : null}
       <textarea

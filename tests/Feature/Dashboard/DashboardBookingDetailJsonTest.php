@@ -80,6 +80,21 @@ class DashboardBookingDetailJsonTest extends TestCase
                     'pnrSummary',
                     'ticketReadiness',
                     'auditMetadata',
+                    'documents',
+                    'assignment' => ['staffId', 'staffName', 'canAssign', 'assignableStaff'],
+                    'paymentsHistory',
+                    'cancellationState',
+                    'refundState',
+                    'communicationLogs',
+                    'activityTimeline',
+                    'operationalCapabilities' => [
+                        'canAssignStaff',
+                        'canAddNote',
+                        'canRecordPayment',
+                        'canRequestCancellation',
+                        'canCreateRefund',
+                        'communicationActions',
+                    ],
                 ],
             ]);
     }

@@ -12,8 +12,11 @@
 # Optional:
 #   REPO_ROOT=...
 #   STAGE_ROOT=...          (default: <repo>/tmp/releases)
-#   RELEASE_SCOPE=frontend  (default; only public frontend runtime)
+#   RELEASE_SCOPE=frontend  (default; public frontend + dashboard + scoped Laravel runtime)
 #   RELEASE_SCOPE=laravel   (app/config/routes/resources/views only)
+#   RELEASE_SCOPE=dashboard (dashboard runtime only)
+#   RELEASE_SCOPE=dashboard-laravel (dashboard + scoped Laravel; no public frontend)
+#   DRY_RUN=1               (emit manifest only; do not extract archive)
 #   LOCAL_ONLY=1            (unused here; reserved for wrappers)
 #
 # Emits machine-readable KEY=value lines and writes:
@@ -24,6 +27,7 @@ AUTHORIZED_SHA="${AUTHORIZED_SHA:?AUTHORIZED_SHA is required}"
 BASE_SHA="${BASE_SHA:-}"
 AUTHORIZED_BRANCH="${AUTHORIZED_BRANCH:-}"
 RELEASE_SCOPE="${RELEASE_SCOPE:-frontend}"
+DRY_RUN="${DRY_RUN:-0}"
 
 REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || true)}"
 if [[ -z "${REPO_ROOT}" || ! -d "${REPO_ROOT}/.git" ]]; then
@@ -79,8 +83,30 @@ is_excluded_runtime_path() {
       return 0
       ;;
     .env|.env.*|*.pem|*.key|*.p12) return 0 ;;
-    dashboard/*) return 0 ;;
     *) return 1 ;;
+  esac
+}
+
+is_dashboard_runtime_path() {
+  local path="$1"
+  [[ "${path}" == dashboard/* ]] || return 1
+  case "${path}" in
+    dashboard/tests/*|dashboard/**/*.spec.ts|dashboard/**/*.spec.tsx|dashboard/**/*.test.ts|dashboard/**/*.test.tsx|dashboard/**/*.test.mjs) return 1 ;;
+    dashboard/**/*.md) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+is_laravel_runtime_path() {
+  local path="$1"
+  case "${path}" in
+    app/*|config/*|routes/*|resources/views/*|database/migrations/*|ai-assistant/knowledge/*)
+      is_excluded_runtime_path "${path}" && return 1
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
   esac
 }
 
@@ -88,20 +114,29 @@ is_allowed_runtime_path() {
   local path="$1"
   case "${RELEASE_SCOPE}" in
     frontend)
-      [[ "${path}" == frontend/* ]] || return 1
-      is_excluded_runtime_path "${path}" && return 1
-      return 0
+      if [[ "${path}" == frontend/* ]]; then
+        is_excluded_runtime_path "${path}" && return 1
+        return 0
+      fi
+      if is_dashboard_runtime_path "${path}"; then
+        return 0
+      fi
+      if is_laravel_runtime_path "${path}"; then
+        return 0
+      fi
+      return 1
       ;;
     laravel)
-      case "${path}" in
-        app/*|config/*|routes/*|resources/views/*|ai-assistant/knowledge/*)
-          is_excluded_runtime_path "${path}" && return 1
-          return 0
-          ;;
-        *)
-          return 1
-          ;;
-      esac
+      is_laravel_runtime_path "${path}"
+      ;;
+    dashboard)
+      is_dashboard_runtime_path "${path}"
+      ;;
+    dashboard-laravel)
+      if is_dashboard_runtime_path "${path}"; then
+        return 0
+      fi
+      is_laravel_runtime_path "${path}"
       ;;
     *)
       echo "UNSUPPORTED_RELEASE_SCOPE=${RELEASE_SCOPE}"
@@ -142,9 +177,39 @@ while IFS=$'\t' read -r status path extra; do
   fi
 done < <(git diff --name-status "${BASE_SHA}".."${AUTHORIZED_SHA}")
 
+# Deploy wrapper expects a frontend/ directory when the diff has runtime files but no frontend/* paths.
+# Never synthesize an anchor when the SHA diff produced zero runtime entries (NO_CHANGE must fail closed).
+if [[ "${RUNTIME_ENTRIES}" -gt 0 && ( "${RELEASE_SCOPE}" == "frontend" || "${RELEASE_SCOPE}" == "dashboard-laravel" ) ]]; then
+  has_frontend_path=0
+  for staged_path in "${UPLOADABLE[@]}"; do
+    if [[ "${staged_path}" == frontend/* ]]; then
+      has_frontend_path=1
+      break
+    fi
+  done
+  if [[ "${has_frontend_path}" -eq 0 ]]; then
+    UPLOADABLE+=("frontend/package.json")
+    RUNTIME_ENTRIES=$((RUNTIME_ENTRIES + 1))
+  fi
+fi
+
+# dashboard-laravel releases use the same deploy path as scoped frontend releases.
+if [[ "${RELEASE_SCOPE}" == "dashboard-laravel" ]]; then
+  RELEASE_SCOPE="frontend"
+fi
+
 if [[ "${RUNTIME_ENTRIES}" -eq 0 ]]; then
   echo "EMPTY_RUNTIME_MANIFEST"
   exit 1
+fi
+
+if [[ "${DRY_RUN}" == "1" ]]; then
+  echo "DRY_RUN=1"
+  echo "MANIFEST_UPLOADABLE_COUNT=${#UPLOADABLE[@]}"
+  echo "MANIFEST_DELETION_COUNT=${#DELETIONS[@]}"
+  printf '%s\n' "${UPLOADABLE[@]}"
+  echo "RELEASE_STAGED_DRY_RUN_COMPLETE"
+  exit 0
 fi
 
 # Stage uploadable files strictly from AUTHORIZED_SHA (never working tree).

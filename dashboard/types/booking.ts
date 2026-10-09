@@ -132,4 +132,92 @@ export type BookingDetail = {
     updatedAt: string | null;
     bookingStatus: BookingStatus | string;
   } | null;
+  documents?: BookingDocumentRow[];
+  assignment?: BookingAssignmentState;
+  paymentsHistory?: BookingPaymentHistoryRow[];
+  cancellationState?: BookingCancellationState;
+  refundState?: BookingRefundState;
+  communicationLogs?: BookingCommunicationLogRow[];
+  activityTimeline?: BookingActivityEvent[];
+  operationalCapabilities?: BookingOperationalCapabilities;
+};
+
+export type BookingDocumentRow = {
+  id: string;
+  type: string;
+  title: string;
+  documentNumber: string | null;
+  status: string;
+  generatedAt: string | null;
+  generatedBy: string | null;
+  downloadPath: string;
+};
+
+export type BookingAssignmentState = {
+  staffId: string | null;
+  staffName: string | null;
+  assignedAt: string | null;
+  canAssign: boolean;
+  assignableStaff: { id: number; name: string }[];
+};
+
+export type BookingPaymentHistoryRow = {
+  id: string;
+  amount: number;
+  currency: string;
+  method: string;
+  status: string;
+  reference: string | null;
+  recordedAt: string | null;
+};
+
+export type BookingCancellationState = {
+  bookingCancellationStatus: string;
+  requests: {
+    id: string;
+    status: string;
+    cancellationType: string;
+    reason: string | null;
+    requestedAt: string | null;
+  }[];
+};
+
+export type BookingRefundState = {
+  bookingRefundStatus: string;
+  refunds: {
+    id: string;
+    amount: number;
+    currency: string;
+    method: string;
+    status: string;
+    reference: string | null;
+    requestedAt: string | null;
+  }[];
+};
+
+export type BookingCommunicationLogRow = {
+  id: string;
+  channel: string;
+  event: string;
+  status: string;
+  recipientEmail: string | null;
+  sentAt: string | null;
+  errorSummary: string | null;
+};
+
+export type BookingActivityEvent = {
+  type: string;
+  title: string;
+  occurredAt: string | null;
+  details: string;
+};
+
+export type BookingOperationalCapabilities = {
+  canAssignStaff: boolean;
+  canAddNote: boolean;
+  canRecordPayment: boolean;
+  canRequestCancellation: boolean;
+  canCreateRefund: boolean;
+  communicationActions: Record<string, { enabled: boolean; reason: string | null }>;
+  communicationSendGated: boolean;
 };

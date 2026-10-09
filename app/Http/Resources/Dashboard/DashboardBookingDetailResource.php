@@ -3,13 +3,15 @@
 namespace App\Http\Resources\Dashboard;
 
 use App\Models\Booking;
+use App\Models\User;
+use App\Support\Dashboard\DashboardBookingOperationalPresenter;
 
 final class DashboardBookingDetailResource
 {
     /**
      * @return array<string, mixed>
      */
-    public static function fromModel(Booking $booking): array
+    public static function fromModel(Booking $booking, ?User $viewer = null): array
     {
         $summary = DashboardBookingResource::fromModel($booking);
         $booking->loadMissing(['passengers', 'fareBreakdown', 'payments', 'latestSupplierBooking', 'tickets']);
@@ -24,7 +26,7 @@ final class DashboardBookingDetailResource
 
         $fare = $booking->fareBreakdown;
 
-        return [
+        $payload = [
             'summary' => $summary,
             'itinerary' => [
                 'route' => (string) ($booking->route ?? ''),
@@ -65,5 +67,14 @@ final class DashboardBookingDetailResource
                 'bookingStatus' => $summary['bookingStatus'],
             ],
         ];
+
+        if ($viewer !== null) {
+            $payload = array_merge(
+                $payload,
+                app(DashboardBookingOperationalPresenter::class)->present($booking, $viewer),
+            );
+        }
+
+        return $payload;
     }
 }
