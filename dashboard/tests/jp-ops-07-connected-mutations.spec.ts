@@ -158,61 +158,30 @@ test.describe("JP-OPS-07 connected cancellation/refund review", () => {
   });
 });
 
-test.describe("JP-OPS-07 connected booking drawer mutations", () => {
-  test("admin booking drawer sends note assign and intake POST/PATCH routes", async ({ page }) => {
+test.describe("JP-OPS-07 connected booking management note mutations", () => {
+  test("admin booking full page sends note POST route", async ({ page }) => {
     const noteHits = await trackMutation(page, "**/admin/bookings/JP-BK-10001/notes**", { ok: true });
-    const assignHits = await trackMutation(page, "**/admin/bookings/JP-BK-10001/assign-staff**", { ok: true });
-    const cancelHits = await trackMutation(page, "**/admin/bookings/JP-BK-10001/cancellations**", { ok: true });
-    const refundHits = await trackMutation(page, "**/admin/bookings/JP-BK-10001/refunds**", { ok: true });
-    const paymentHits = await trackMutation(page, "**/admin/bookings/JP-BK-10001/payments**", { ok: true });
 
     await page.setViewportSize({ width: 1400, height: 900 });
-    await page.goto(`/admin/dashboard/bookings?${fixture}&id=JP-BK-10001`);
+    await page.goto(`/admin/dashboard/bookings/JP-BK-10001?${fixture}`);
+    await expect(page.getByTestId("booking-detail-page")).toBeVisible();
     await expect(page.getByTestId("booking-operational-actions")).toBeVisible();
+    await expect(page.getByTestId("booking-cancellation-store")).toHaveCount(0);
+    await expect(page.getByTestId("booking-refund-store")).toHaveCount(0);
+    await expect(page.getByTestId("booking-payment-store")).toHaveCount(0);
 
     await page.getByTestId("booking-note-input").fill("Connected mutation note");
     await page.getByTestId("booking-note-submit").click();
     await expect.poll(() => noteHits.length).toBe(1);
-
-    await page.getByTestId("booking-assign-staff").click();
-    await expect.poll(() => assignHits.length).toBe(1);
-
-    await page.getByTestId("booking-cancellation-store").click();
-    await expect.poll(() => cancelHits.length).toBe(1);
-
-    await page.getByTestId("booking-refund-store").click();
-    await expect.poll(() => refundHits.length).toBe(1);
-
-    await page.getByTestId("booking-payment-store").click();
-    await expect.poll(() => paymentHits.length).toBe(1);
   });
 
   test("staff booking note sends canonical POST route", async ({ page }) => {
     const hits = await trackMutation(page, "**/staff/bookings/JP-BK-10001/notes**", { ok: true });
     await page.setViewportSize({ width: 1400, height: 900 });
-    await page.goto(`/staff/dashboard/bookings?${fixture}&id=JP-BK-10001`);
+    await page.goto(`/staff/dashboard/bookings/JP-BK-10001?${fixture}`);
     await page.getByTestId("booking-note-input").fill("Staff note");
     await page.getByTestId("booking-note-submit").click();
     await expect.poll(() => hits.length).toBe(1);
-  });
-
-  test("staff booking intake mutations send canonical POST routes", async ({ page }) => {
-    const cancelHits = await trackMutation(page, "**/staff/bookings/JP-BK-10001/cancellations**", { ok: true });
-    const refundHits = await trackMutation(page, "**/staff/bookings/JP-BK-10001/refunds**", { ok: true });
-    const paymentHits = await trackMutation(page, "**/staff/bookings/JP-BK-10001/payments**", { ok: true });
-
-    await page.setViewportSize({ width: 1400, height: 900 });
-    await page.goto(`/staff/dashboard/bookings?${fixture}&id=JP-BK-10001`);
-    await expect(page.getByTestId("booking-operational-actions")).toBeVisible();
-
-    await page.getByTestId("booking-cancellation-store").click();
-    await expect.poll(() => cancelHits.length).toBe(1);
-
-    await page.getByTestId("booking-refund-store").click();
-    await expect.poll(() => refundHits.length).toBe(1);
-
-    await page.getByTestId("booking-payment-store").click();
-    await expect.poll(() => paymentHits.length).toBe(1);
   });
 });
 

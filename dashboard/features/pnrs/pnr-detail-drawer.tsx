@@ -13,18 +13,20 @@ import {
 } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { PnrRecord } from "@/types/pnr";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 
 const GDS_TICKETING_LIMITATION_NOTE =
   "GDS ticketing is not available in this preview environment. Authorized printer designation is pending — ticketing status is informational only and does not imply live issuance capability.";
 
 export function PnrDetailDrawerContent({ pnr }: { pnr: PnrRecord }) {
+  const isLive = useDashboardLiveMode();
   const isGdsPnr = pnr.referenceType === "GDS PNR";
   const isNdcOrder = pnr.referenceType === "NDC Order";
   const referenceLabel = isGdsPnr ? "GDS PNR" : isNdcOrder ? "NDC order" : pnr.referenceType;
 
   return (
     <div className="space-y-5" data-testid="pnr-drawer-content">
-      <PreviewDataBanner className="text-xs" />
+      {isLive ? null : <PreviewDataBanner className="text-xs" />}
 
       <section aria-labelledby="pnr-overview-heading">
         <h3 id="pnr-overview-heading" className="text-sm font-semibold text-gray-900">

@@ -12,7 +12,7 @@ import type { PnrRecord } from "@/types/pnr";
 
 type Props = {
   pnrs: PnrRecord[];
-  onView: (id: string) => void;
+  onView: (pnr: PnrRecord) => void;
 };
 
 export function PnrsMobileCards({ pnrs, onView }: Props) {
@@ -42,7 +42,7 @@ export function PnrsMobileCards({ pnrs, onView }: Props) {
                 {formatCurrency(pnr.bookingValue, pnr.currency)}
               </span>
             </div>
-            <Button variant="secondary" size="sm" className="w-full" onClick={() => onView(pnr.id)}>
+            <Button variant="secondary" size="sm" className="w-full" onClick={() => onView(pnr)}>
               View details
             </Button>
           </Card>

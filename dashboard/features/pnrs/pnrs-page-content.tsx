@@ -4,7 +4,7 @@ import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layo
 import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { parsePnrsQuery } from "@/lib/pnrs-query";
-import { PnrsServiceError, getPnrDetail, getPnrsPage } from "@/services/pnr-service";
+import { PnrsServiceError, getPnrsPage } from "@/services/pnr-service";
 import {
   ForbiddenState,
   SanitizedErrorState,
@@ -53,7 +53,6 @@ export async function PnrsPageContent({ searchParams }: Props) {
 
   try {
     const result = await getPnrsPage(query);
-    const selectedPnr = query.selectedId ? await getPnrDetail(query.selectedId) : null;
 
     return (
       <PageContainer>
@@ -66,7 +65,7 @@ export async function PnrsPageContent({ searchParams }: Props) {
           description="GDS PNRs, NDC orders, and supplier references with filters, sorting, and read-only detail."
         />
         <DataSourceNoticeSlot />
-        <PnrsWorkspace query={query} result={result} selectedPnr={selectedPnr} />
+        <PnrsWorkspace query={query} result={result} />
       </PageContainer>
     );
   } catch (e) {

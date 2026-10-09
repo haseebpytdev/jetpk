@@ -15,7 +15,7 @@ type Props = {
   pnrs: PnrRecord[];
   query: PnrsQuery;
   onSort: (field: PnrSortField) => void;
-  onView: (id: string) => void;
+  onView: (pnr: PnrRecord) => void;
 };
 
 function sortIndicator(active: boolean, direction: PnrsQuery["direction"]) {
@@ -93,7 +93,7 @@ export function PnrsTable({ pnrs, query, onSort, onView }: Props) {
                 {formatCurrency(pnr.bookingValue, pnr.currency)}
               </Td>
               <Td>
-                <Button variant="secondary" size="sm" aria-label={pnr.id} onClick={() => onView(pnr.id)}>
+                <Button variant="secondary" size="sm" aria-label={pnr.id} onClick={() => onView(pnr)}>
                   View
                 </Button>
               </Td>

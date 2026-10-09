@@ -1,35 +1,28 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
-import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
-import { PnrDetailDrawerContent } from "@/features/pnrs/pnr-detail-drawer";
 import { PnrsFilters } from "@/features/pnrs/pnrs-filters";
 import { PnrsMobileCards } from "@/features/pnrs/pnrs-mobile-cards";
 import { PnrsSummary } from "@/features/pnrs/pnrs-summary";
 import { PnrsTable } from "@/features/pnrs/pnrs-table";
 import { pnrsQueryToSearchParams } from "@/lib/pnrs-query";
+import { pnrHasLinkedBooking, pnrStandaloneDetailPath, pnrViewBookingPath } from "@/features/pnrs/pnr-booking-link";
 import type { PnrRecord, PnrSortField, PnrsPageResult, PnrsQuery } from "@/types/pnr";
 
 type Props = {
   query: PnrsQuery;
   result: PnrsPageResult;
-  selectedPnr: PnrRecord | null;
 };
 
-export function PnrsWorkspace({ query, result, selectedPnr }: Props) {
+export function PnrsWorkspace({ query, result }: Props) {
   const router = useDashboardRouter();
   const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
-  const [drawerDismissed, setDrawerDismissed] = useState(false);
-
-  useEffect(() => {
-    setDrawerDismissed(false);
-  }, [query.selectedId]);
 
   const pushQuery = useCallback(
     (overrides: Partial<PnrsQuery>) => {
@@ -47,16 +40,14 @@ export function PnrsWorkspace({ query, result, selectedPnr }: Props) {
     pushQuery({ sort: field, direction, page: 1 });
   };
 
-  const onView = (id: string) => {
-    pushQuery({ selectedId: id });
+  const onView = (pnr: PnrRecord) => {
+    if (pnrHasLinkedBooking(pnr)) {
+      router.push(pnrViewBookingPath(pnr));
+      return;
+    }
+    router.push(pnrStandaloneDetailPath(pnr));
   };
 
-  const onCloseDrawer = useCallback(() => {
-    setDrawerDismissed(true);
-    pushQuery({ selectedId: null });
-  }, [pushQuery]);
-
-  const drawerOpen = !drawerDismissed && Boolean(query.selectedId && selectedPnr);
   const empty = result.total === 0;
 
   return (
@@ -84,20 +75,6 @@ export function PnrsWorkspace({ query, result, selectedPnr }: Props) {
           />
         </>
       )}
-
-      <Drawer
-        open={drawerOpen}
-        onClose={onCloseDrawer}
-        title={selectedPnr ? selectedPnr.externalReference : "PNR / order details"}
-        description={
-          selectedPnr
-            ? `${selectedPnr.id} · ${selectedPnr.referenceType} · ${selectedPnr.channel}`
-            : undefined
-        }
-        closeAriaLabel="Close PNR details"
-      >
-        {selectedPnr ? <PnrDetailDrawerContent pnr={selectedPnr} /> : null}
-      </Drawer>
     </>
   );
 }

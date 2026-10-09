@@ -1,35 +1,27 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
-import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { emptyListDescription } from "@/lib/empty-list-copy";
 import { Pagination } from "@/components/ui/pagination";
-import { BookingDetailDrawerContent } from "@/features/bookings/booking-detail-drawer";
 import { BookingsFilters } from "@/features/bookings/bookings-filters";
 import { BookingsMobileCards } from "@/features/bookings/bookings-mobile-cards";
 import { BookingsSummary } from "@/features/bookings/bookings-summary";
 import { BookingsTable } from "@/features/bookings/bookings-table";
 import { bookingsQueryToSearchParams } from "@/lib/bookings-query";
-import type { BookingRecord, BookingSortField, BookingsQuery, BookingsPageResult } from "@/types/booking";
+import type { BookingSortField, BookingsQuery, BookingsPageResult } from "@/types/booking";
 
 type Props = {
   query: BookingsQuery;
   result: BookingsPageResult;
-  selectedBooking: BookingRecord | null;
 };
 
-export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
+export function BookingsWorkspace({ query, result }: Props) {
   const router = useDashboardRouter();
   const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
-  const [drawerDismissed, setDrawerDismissed] = useState(false);
-
-  useEffect(() => {
-    setDrawerDismissed(false);
-  }, [query.selectedId]);
 
   const pushQuery = useCallback(
     (overrides: Partial<BookingsQuery>) => {
@@ -48,15 +40,8 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
   };
 
   const onView = (id: string) => {
-    pushQuery({ selectedId: id });
+    router.push(`/bookings/${encodeURIComponent(id)}`);
   };
-
-  const onCloseDrawer = useCallback(() => {
-    setDrawerDismissed(true);
-    pushQuery({ selectedId: null });
-  }, [pushQuery]);
-
-  const drawerOpen = !drawerDismissed && Boolean(query.selectedId && selectedBooking);
 
   const empty = result.total === 0;
 
@@ -89,16 +74,6 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
           />
         </>
       )}
-
-      <Drawer
-        open={drawerOpen}
-        onClose={onCloseDrawer}
-        title={selectedBooking ? selectedBooking.id : "Booking details"}
-        description={selectedBooking ? `PNR ${selectedBooking.pnr}` : undefined}
-        closeAriaLabel="Close booking details"
-      >
-        {selectedBooking ? <BookingDetailDrawerContent booking={selectedBooking} /> : null}
-      </Drawer>
     </>
   );
 }
