@@ -1,0 +1,279 @@
+{
+  "startedAt": "2026-10-08T21:51:10.454Z",
+  "base": "https://jetpakistan.pk",
+  "repeated": {
+    "admin_home": [
+      {
+        "run": 0,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 1,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 2,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 3,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 4,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 5,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 6,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 7,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 8,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 9,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      }
+    ],
+    "bookings": [
+      {
+        "run": 0,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 1,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 2,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 3,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 4,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 5,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 6,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 7,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 8,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 9,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      }
+    ],
+    "users": [
+      {
+        "run": 0,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 1,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 2,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 3,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 4,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 5,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 6,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 7,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 8,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      },
+      {
+        "run": 9,
+        "hydrationErrors": 0,
+        "pageErrors": 0,
+        "unexpectedNetworkFailures": 0,
+        "samples": []
+      }
+    ]
+  },
+  "hydrationRoutes": [
+    {
+      "route": "/admin/dashboard",
+      "hydrationErrors": 0,
+      "pageErrors": 0,
+      "unexpectedNetworkFailures": 0
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "hydrationErrors": 0,
+      "pageErrors": 0,
+      "unexpectedNetworkFailures": 0
+    },
+    {
+      "route": "/admin/dashboard/payments",
+      "hydrationErrors": 0,
+      "pageErrors": 0,
+      "unexpectedNetworkFailures": 0
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "hydrationErrors": 0,
+      "pageErrors": 0,
+      "unexpectedNetworkFailures": 0
+    },
+    {
+      "route": "/admin/dashboard/users",
+      "hydrationErrors": 0,
+      "pageErrors": 0,
+      "unexpectedNetworkFailures": 0
+    },
+    {
+      "route": "/admin/dashboard/pnrs",
+      "hydrationErrors": 0,
+      "pageErrors": 0,
+      "unexpectedNetworkFailures": 0
+    },
+    {
+      "route": "/staff/dashboard",
+      "hydrationErrors": 0,
+      "pageErrors": 0,
+      "unexpectedNetworkFailures": 0
+    },
+    {
+      "route": "/staff/dashboard/bookings",
+      "hydrationErrors": 0,
+      "pageErrors": 0,
+      "unexpectedNetworkFailures": 0
+    }
+  ],
+  "summary": {
+    "ADMIN_HOME_HYDRATION_ERRORS": "0/10",
+    "BOOKINGS_HYDRATION_ERRORS": "0/10",
+    "USERS_HYDRATION_ERRORS": "0/10",
+    "HYDRATION_ERRORS": 0,
+    "PASS": true
+  }
+}
