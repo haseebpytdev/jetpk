@@ -8,6 +8,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { requireDashboardBuildId, requireProductionSha } from "./production-cert-env.mjs";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
@@ -17,8 +18,6 @@ const repoRoot = path.resolve(__dirname, "../../../");
 const BASE = "https://jetpakistan.pk";
 const EVIDENCE = path.join(repoRoot, "docs/evidence/jp-dashboard-production-cert-20261008");
 const SCREENSHOTS = path.join(EVIDENCE, "screenshots");
-const ENGINEERING_SHA = "d4d671ec77f5c8ad438410b325dda82525225c5d";
-const BUILD_ID = "OrjgSTJevc7oUhQOp8vvu";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** Live production nav only (BackOfficeCapabilitiesPresenter). */
@@ -262,13 +261,23 @@ async function bookingsWriteProof(context, report) {
 }
 
 async function main() {
+  let engineeringSha;
+  let buildId;
+  try {
+    engineeringSha = requireProductionSha();
+    buildId = requireDashboardBuildId();
+  } catch (error) {
+    console.error(error?.message || error);
+    process.exit(2);
+  }
   ensureDirs();
   const deploySha = (ssh("cat /home/pkjetp/jetpk_app/storage/app/deploy-sha.txt").stdout || "").trim();
   const report = {
     startedAt: new Date().toISOString(),
-    engineeringSha: ENGINEERING_SHA,
+    engineeringSha,
+    productionSha: engineeringSha,
     productionDeploySha: deploySha,
-    buildId: BUILD_ID,
+    buildId,
     qaAgency: "jetpk-production-qa",
     adminPages: {},
     rbac: {},

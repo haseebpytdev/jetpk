@@ -7,6 +7,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { requireProductionSha } from "./production-cert-env.mjs";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
@@ -643,11 +644,18 @@ async function apiConnectionLifecycle(page, report) {
 }
 
 async function main() {
+  let productionSha;
+  try {
+    productionSha = requireProductionSha();
+  } catch (error) {
+    console.error(error?.message || error);
+    process.exit(2);
+  }
   if (!fs.existsSync(STORAGE.admin)) throw new Error("Missing admin storage state. Run build-auth-states.mjs first.");
   fs.mkdirSync(EVIDENCE, { recursive: true });
   const report = {
     startedAt: new Date().toISOString(),
-    productionSha: "d4d671ec77f5c8ad438410b325dda82525225c5d",
+    productionSha,
     qaRun: QA_RUN,
     writeBridge: [],
     mutations: {
