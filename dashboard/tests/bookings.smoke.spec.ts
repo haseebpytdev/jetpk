@@ -128,38 +128,31 @@ test("URL query state is preserved on reload", async ({ page }) => {
   await expect(page.locator("#bookings-search")).toHaveValue("Emirates");
 });
 
-test("booking drawer opens", async ({ page }) => {
+test("booking View opens full management page", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   const table = page.getByTestId("bookings-table");
   await expectTableReady(table);
   const trigger = table.locator("tbody tr").first().getByRole("button");
   await trigger.click();
-  await page.waitForURL(/id=JP-BK-/, { timeout: 15_000 });
-  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page).toHaveURL(/\/admin\/dashboard\/bookings\/JP-BK-/, { timeout: 15_000 });
+  await expect(page.getByTestId("booking-detail-page")).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
-test("booking drawer displays selected booking", async ({ page }) => {
+test("booking management page displays selected booking", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/admin/dashboard/bookings?id=JP-BK-10001", { waitUntil: "load" });
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
-  const content = page.getByTestId("booking-drawer-content");
-  await expect(content).toContainText("JP-BK-10001");
-  await expect(content).toContainText("ABC123");
+  await page.goto("/admin/dashboard/bookings/JP-BK-10001", { waitUntil: "load" });
+  await expect(page.getByTestId("booking-detail-page")).toBeVisible();
+  await expect(page.getByTestId("booking-drawer-content")).toContainText("JP-BK-10001");
+  await expect(page.getByTestId("booking-drawer-content")).toContainText("ABC123");
 });
 
-test("booking drawer closes through close control", async ({ page }) => {
+test("booking management back link returns to list", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/admin/dashboard/bookings?id=JP-BK-10001", { waitUntil: "load" });
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await closeDrawerWithButton(page, "Close booking details", /id=JP-BK-10001/);
-});
-
-test("booking drawer closes using Escape", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/admin/dashboard/bookings?id=JP-BK-10001", { waitUntil: "load" });
-  await closeDrawerWithEscape(page, /id=JP-BK-10001/);
+  await page.goto("/admin/dashboard/bookings/JP-BK-10001", { waitUntil: "load" });
+  await page.getByRole("link", { name: "Back to list" }).click();
+  await expect(page).toHaveURL(/\/admin\/dashboard\/bookings$/);
 });
 
 test("mobile booking cards render without horizontal viewport overflow", async ({ page }) => {

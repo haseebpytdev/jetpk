@@ -2,7 +2,7 @@ import { BookingsWorkspace } from "@/features/bookings/bookings-workspace";
 import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
 import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { parseBookingsQuery } from "@/lib/bookings-query";
-import { BookingsServiceError, getBookingDetail, getBookingsPage } from "@/services/booking-service";
+import { BookingsServiceError, getBookingsPage } from "@/services/booking-service";
 import { BookingsErrorPanel } from "@/features/bookings/bookings-error-panel";
 import {
   ForbiddenState,
@@ -22,7 +22,6 @@ export async function BookingsPageContent({ searchParams }: Props) {
 
   try {
     const result = await getBookingsPage(query);
-    const selectedBooking = query.selectedId ? await getBookingDetail(query.selectedId) : null;
 
     return (
       <PageContainer>
@@ -35,7 +34,7 @@ export async function BookingsPageContent({ searchParams }: Props) {
           description="Operational booking list with filters, sorting, and read-only detail."
         />
         <DataSourceNoticeSlot />
-        <BookingsWorkspace query={query} result={result} selectedBooking={selectedBooking} />
+        <BookingsWorkspace query={query} result={result} />
       </PageContainer>
     );
   } catch (e) {

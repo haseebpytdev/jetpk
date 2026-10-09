@@ -11,6 +11,7 @@ import {
 import { formatCurrency, formatDate, formatDateTime, tripTypeLabel } from "@/lib/format";
 import type { BookingRecord } from "@/types/booking";
 import { BookingOperationalActions } from "@/features/bookings/booking-operational-actions";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 
 type Props = {
   booking: BookingRecord;
@@ -23,9 +24,11 @@ export function BookingDetailDrawerContent({
   showOperationalActions = true,
   showFullDetailLink = true,
 }: Props) {
+  const isLive = useDashboardLiveMode();
+
   return (
     <div className="space-y-5" data-testid="booking-drawer-content">
-      <PreviewDataBanner className="text-xs" />
+      {isLive ? null : <PreviewDataBanner className="text-xs" />}
 
       {showFullDetailLink ? (
         <Link

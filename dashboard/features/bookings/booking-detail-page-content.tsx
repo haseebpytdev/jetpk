@@ -26,12 +26,56 @@ type Props = {
   bookingId: string;
 };
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+const MANAGEMENT_SECTIONS = [
+  { id: "booking-overview", label: "Overview" },
+  { id: "booking-itinerary", label: "Itinerary" },
+  { id: "booking-passengers", label: "Passengers" },
+  { id: "booking-fare", label: "Fare" },
+  { id: "booking-payments", label: "Payments" },
+  { id: "booking-pnr", label: "PNR / supplier" },
+  { id: "booking-ticketing", label: "Ticketing" },
+  { id: "booking-audit", label: "Audit" },
+  { id: "booking-operations", label: "Notes" },
+] as const;
+
+function Section({
+  id,
+  title,
+  children,
+}: {
+  id?: string;
+  title: string;
+  children: ReactNode;
+}) {
   return (
-    <section className="rounded-2xl border border-jp-border bg-white p-4 shadow-sm">
+    <section
+      id={id}
+      className="scroll-mt-24 rounded-2xl border border-jp-border bg-white p-4 shadow-sm"
+      data-testid={id ? `booking-section-${id}` : undefined}
+    >
       <h2 className="text-sm font-semibold text-gray-900">{title}</h2>
       <div className="mt-3">{children}</div>
     </section>
+  );
+}
+
+function BookingSectionNav() {
+  return (
+    <nav
+      className="sticky top-0 z-10 -mx-1 mb-4 flex gap-2 overflow-x-auto rounded-2xl border border-jp-border bg-white/95 p-2 backdrop-blur"
+      aria-label="Booking management sections"
+      data-testid="booking-management-section-nav"
+    >
+      {MANAGEMENT_SECTIONS.map((item) => (
+        <a
+          key={item.id}
+          href={`#${item.id}`}
+          className="shrink-0 rounded-xl px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
   );
 }
 
@@ -41,7 +85,7 @@ function BookingDetailPanels({ detail }: { detail: BookingDetail }) {
 
   return (
     <div className="space-y-4" data-testid="booking-detail-panels">
-      <Section title="Itinerary">
+      <Section id="booking-itinerary" title="Itinerary">
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between gap-3">
             <dt className="text-jp-muted">Route</dt>
@@ -63,7 +107,7 @@ function BookingDetailPanels({ detail }: { detail: BookingDetail }) {
       </Section>
 
       {passengers.length > 0 ? (
-        <Section title="Passengers">
+        <Section id="booking-passengers" title="Passengers">
           <ul className="space-y-2 text-sm">
             {passengers.map((passenger, index) => (
               <li key={`${passenger.displayName}-${index}`} className="flex justify-between gap-3">
@@ -76,7 +120,7 @@ function BookingDetailPanels({ detail }: { detail: BookingDetail }) {
       ) : null}
 
       {fareSummary ? (
-        <Section title="Fare breakdown">
+        <Section id="booking-fare" title="Fare breakdown">
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between gap-3">
               <dt className="text-jp-muted">Base fare</dt>
@@ -103,7 +147,7 @@ function BookingDetailPanels({ detail }: { detail: BookingDetail }) {
       ) : null}
 
       {paymentSummary ? (
-        <Section title="Payment summary">
+        <Section id="booking-payments" title="Payment summary">
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between gap-3">
               <dt className="text-jp-muted">Status</dt>
@@ -131,7 +175,7 @@ function BookingDetailPanels({ detail }: { detail: BookingDetail }) {
       ) : null}
 
       {pnrSummary ? (
-        <Section title="PNR / supplier">
+        <Section id="booking-pnr" title="PNR / supplier">
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between gap-3">
               <dt className="text-jp-muted">PNR</dt>
@@ -158,7 +202,7 @@ function BookingDetailPanels({ detail }: { detail: BookingDetail }) {
       ) : null}
 
       {ticketReadiness ? (
-        <Section title="Ticket readiness">
+        <Section id="booking-ticketing" title="Ticket readiness">
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between gap-3">
               <dt className="text-jp-muted">Ticketing</dt>
@@ -173,7 +217,7 @@ function BookingDetailPanels({ detail }: { detail: BookingDetail }) {
       ) : null}
 
       {auditMetadata ? (
-        <Section title="Audit">
+        <Section id="booking-audit" title="Audit">
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between gap-3">
               <dt className="text-jp-muted">Created</dt>
@@ -191,7 +235,7 @@ function BookingDetailPanels({ detail }: { detail: BookingDetail }) {
         </Section>
       ) : null}
 
-      <Section title="Operational actions">
+      <Section id="booking-operations" title="Operational actions">
         <BookingOperationalActions bookingId={detail.summary.id} />
       </Section>
     </div>
@@ -242,13 +286,19 @@ export async function BookingDetailPageContent({ bookingId }: Props) {
         />
         <DataSourceNoticeSlot />
 
-        <div className="mb-4 flex flex-wrap gap-2">
+        <BookingSectionNav />
+
+        <div
+          id="booking-overview"
+          className="mb-4 flex flex-wrap gap-2 scroll-mt-24"
+          data-testid="booking-section-booking-overview"
+        >
           <BookingStatusBadge status={booking.bookingStatus} />
           <PaymentStatusBadge status={booking.paymentStatus} />
           <TicketingStatusBadge status={booking.ticketingStatus} />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
           <div className="min-w-0 rounded-2xl border border-jp-border bg-white p-5 shadow-sm">
             <BookingDetailDrawerContent
               booking={booking}
@@ -256,9 +306,9 @@ export async function BookingDetailPageContent({ bookingId }: Props) {
               showFullDetailLink={false}
             />
           </div>
-          <aside className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <BookingDetailPanels detail={detail} />
-          </aside>
+          </div>
         </div>
       </PageContainer>
     );
