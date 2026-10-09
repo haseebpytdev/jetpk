@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Support\Agencies\AgencyRolePermissionMatrix;
 use App\Support\Qa\JetpkDashboardFinal11QaScope;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class JetpkDashboardFinal11QaCommandTest extends TestCase
@@ -228,7 +229,15 @@ class JetpkDashboardFinal11QaCommandTest extends TestCase
 
     public function test_missing_required_secret_fails_closed(): void
     {
+        $final11UserIds = User::query()
+            ->where('username', 'like', JetpkDashboardFinal11QaScope::USERNAME_PREFIX.'%')
+            ->pluck('id');
+        AgencyUser::query()->whereIn('user_id', $final11UserIds)->delete();
+        Agent::query()->whereIn('user_id', $final11UserIds)->delete();
+        User::query()->whereIn('id', $final11UserIds)->delete();
+
         putenv('JP_FINAL_11_QA_CUSTOMER_B_PASSWORD=');
+        unset($_ENV['JP_FINAL_11_QA_CUSTOMER_B_PASSWORD'], $_SERVER['JP_FINAL_11_QA_CUSTOMER_B_PASSWORD']);
 
         $this->artisan('jetpk:dashboard-final-11-qa', ['action' => 'reconcile', '--execute' => true])
             ->expectsOutputToContain('FINAL11_MISSING_ENV=JP_FINAL_11_QA_CUSTOMER_B_PASSWORD')
@@ -258,5 +267,96 @@ class JetpkDashboardFinal11QaCommandTest extends TestCase
         $this->artisan('jetpk:dashboard-final-11-qa', ['action' => 'reconcile', '--execute' => true])
             ->expectsOutputToContain('FINAL11_customer_b_RECONCILE=ambiguous_ownership')
             ->assertFailed();
+    }
+
+    public function test_reserved_username_without_qa_metadata_blocks_reconcile_and_leaves_user_unchanged(): void
+    {
+        $agency = Agency::query()->where('slug', JetpkDashboardFinal11QaScope::QA_AGENCY_A_SLUG)->firstOrFail();
+        $collision = User::factory()->create([
+            'username' => 'jp-final-11-qa-customer-b',
+            'email' => 'collision.customer@jetpakistan.pk',
+            'name' => 'Collision Customer',
+            'account_type' => AccountType::Customer,
+            'current_agency_id' => $agency->id,
+            'meta' => [],
+        ]);
+
+        $this->artisan('jetpk:dashboard-final-11-qa', ['action' => 'reconcile', '--execute' => true])
+            ->expectsOutputToContain('FINAL11_customer_b_RECONCILE=ambiguous_ownership')
+            ->assertFailed();
+
+        $collision->refresh();
+        $this->assertSame('Collision Customer', $collision->name);
+        $this->assertSame('collision.customer@jetpakistan.pk', $collision->email);
+        $this->assertFalse(JetpkDashboardFinal11QaScope::hasPositiveOwnershipMeta($collision));
+    }
+
+    public function test_reserved_username_with_final11_qa_metadata_reconcile_passes(): void
+    {
+        $agency = Agency::query()->where('slug', JetpkDashboardFinal11QaScope::QA_AGENCY_A_SLUG)->firstOrFail();
+        User::factory()->create([
+            'username' => 'jp-final-11-qa-customer-b',
+            'email' => 'jp-final-11-qa-customer-b@jetpakistan.pk',
+            'name' => 'JP-FINAL-11 QA Customer B',
+            'account_type' => AccountType::Customer,
+            'current_agency_id' => $agency->id,
+            'status' => UserAccountStatus::Active,
+            'password' => Hash::make(self::TEST_PASSWORD),
+            'meta' => [
+                'jp_final_11_qa' => true,
+                'qa_run_id' => JetpkDashboardFinal11QaScope::QA_RUN_ID,
+                'qa_only' => true,
+            ],
+        ]);
+
+        $this->artisan('jetpk:dashboard-final-11-qa', ['action' => 'reconcile', '--execute' => true])
+            ->expectsOutputToContain('FINAL11_customer_b_RECONCILE=PASS')
+            ->assertSuccessful();
+    }
+
+    public function test_sync_password_on_ambiguous_reserved_user_fails_and_password_unchanged(): void
+    {
+        $agency = Agency::query()->where('slug', JetpkDashboardFinal11QaScope::QA_AGENCY_A_SLUG)->firstOrFail();
+        $user = User::factory()->create([
+            'username' => 'jp-final-11-qa-customer-b',
+            'email' => 'collision.sync@jetpakistan.pk',
+            'account_type' => AccountType::Customer,
+            'current_agency_id' => $agency->id,
+            'meta' => [],
+        ]);
+        $user->forceFill(['password' => Hash::make('OriginalPass!999')])->save();
+
+        $this->artisan('jetpk:dashboard-final-11-qa', [
+            'action' => 'sync-password',
+            '--role' => 'customer_b',
+            '--execute' => true,
+        ])->expectsOutputToContain('FINAL11_PASSWORD_SYNC=USER_MISSING_OR_AMBIGUOUS')
+            ->assertFailed();
+
+        $user->refresh();
+        $this->assertTrue(Hash::check('OriginalPass!999', (string) $user->password));
+    }
+
+    public function test_setup_script_has_no_direct_runtime_scp_or_upload(): void
+    {
+        $path = base_path('dashboard/scripts/jp-dash-final-11/setup-production-qa.mjs');
+        $source = (string) file_get_contents($path);
+
+        $this->assertStringNotContainsString('uploadCommandIfNeeded', $source);
+        $this->assertStringNotContainsString('spawnSync("scp"', $source);
+        $this->assertStringNotContainsString('JP_SCP_HOST', $source);
+        $this->assertStringContainsString('FINAL11_DIRECT_RUNTIME_SCP=NO', $source);
+        $this->assertStringContainsString('FINAL11_PROTECTED_DEPLOYMENT_REQUIRED=YES', $source);
+    }
+
+    public function test_setup_script_dry_run_exits_before_production_ssh_calls(): void
+    {
+        $path = base_path('dashboard/scripts/jp-dash-final-11/setup-production-qa.mjs');
+        $source = (string) file_get_contents($path);
+
+        $this->assertMatchesRegularExpression(
+            '/if \(!execute\) \{[\s\S]*?FINAL11_SETUP_DRY_RUN=PASS[\s\S]*?process\.exit\(0\);[\s\S]*?\}[\s\S]*verifyRemoteCommandSupport\(\)/',
+            $source,
+        );
     }
 }

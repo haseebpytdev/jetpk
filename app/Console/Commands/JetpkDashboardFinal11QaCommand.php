@@ -421,19 +421,11 @@ class JetpkDashboardFinal11QaCommand extends Command
      */
     private function canMutateUser(User $user, array $definition): bool
     {
-        if ($user->username !== $definition['marker']) {
-            return false;
-        }
-
-        if ($user->account_type !== $definition['account_type']) {
-            return false;
-        }
-
-        if (JetpkDashboardFinal11QaScope::isOwnedUser($user)) {
-            return true;
-        }
-
-        return JetpkDashboardFinal11QaScope::isOwnedUsername((string) $user->username);
+        return JetpkDashboardFinal11QaScope::userMatchesDefinition(
+            $user,
+            $definition['account_type'],
+            $definition['marker'],
+        );
     }
 
     private function createUser(string $roleKey, Agency $agency, AgentWalletService $walletService): ?User
@@ -525,17 +517,17 @@ class JetpkDashboardFinal11QaCommand extends Command
             return self::FAILURE;
         }
 
-        $password = trim((string) stream_get_contents(STDIN));
-        if ($password === '') {
-            $this->line('FINAL11_PASSWORD_SYNC=MISSING_PASSWORD_STDIN');
-
-            return self::FAILURE;
-        }
-
         $definition = self::ROLE_DEFINITIONS[$roleKey];
         $user = User::query()->where('username', $definition['marker'])->first();
         if ($user === null || ! $this->canMutateUser($user, $definition)) {
             $this->line('FINAL11_PASSWORD_SYNC=USER_MISSING_OR_AMBIGUOUS');
+
+            return self::FAILURE;
+        }
+
+        $password = trim((string) stream_get_contents(STDIN));
+        if ($password === '') {
+            $this->line('FINAL11_PASSWORD_SYNC=MISSING_PASSWORD_STDIN');
 
             return self::FAILURE;
         }

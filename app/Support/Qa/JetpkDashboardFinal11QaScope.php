@@ -70,16 +70,21 @@ final class JetpkDashboardFinal11QaScope
         return false;
     }
 
-    public static function userMatchesDefinition(User $user, AccountType $expectedType): bool
+    public static function userMatchesDefinition(User $user, AccountType $expectedType, string $expectedMarker): bool
     {
+        if ($user->username !== $expectedMarker) {
+            return false;
+        }
+
         if ($user->account_type !== $expectedType) {
             return false;
         }
 
-        if (! self::isOwnedUsername((string) $user->username)) {
-            return false;
-        }
+        return self::isOwnedUser($user);
+    }
 
-        return self::isOwnedUser($user) || self::isOwnedUsername((string) $user->username);
+    public static function hasPositiveOwnershipMeta(User $user): bool
+    {
+        return self::isOwnedUser($user);
     }
 }

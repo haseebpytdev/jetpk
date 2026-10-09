@@ -1,6 +1,7 @@
 /**
  * JP-DASH-FINAL-11 production QA provisioning driver (workstation).
  * Default: dry-run (no SSH mutations). Set JP_FINAL11_EXECUTE=1 to run reconcile on production.
+ * Never uploads runtime PHP — command must exist after protected deploy of merged SHA.
  * Never logs passwords.
  */
 import { spawnSync } from "node:child_process";
@@ -13,7 +14,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "../../../");
 const sshKey = process.env.JP_SSH_KEY || path.join(os.homedir(), ".ssh", "jetpk_contabo_2026_v2");
 const sshHost = process.env.JP_SSH_HOST || "pkjetp@185.215.166.176";
-const scpHost = process.env.JP_SCP_HOST || "root@185.215.166.176";
 const appRoot = process.env.JP_APP_ROOT || "/home/pkjetp/jetpk_app";
 const phpBin = process.env.JP_PHP_BIN || "/usr/local/lsws/lsphp83/bin/php";
 const execute = process.env.JP_FINAL11_EXECUTE === "1";
@@ -35,13 +35,6 @@ function ssh(cmd, input = null) {
   return spawnSync("ssh", ["-i", sshKey, "-o", "BatchMode=yes", sshHost, cmd], {
     encoding: "utf8",
     input,
-    maxBuffer: 8 * 1024 * 1024,
-  });
-}
-
-function scp(local, remote) {
-  return spawnSync("scp", ["-i", sshKey, "-o", "BatchMode=yes", local, `${scpHost}:${remote}`], {
-    encoding: "utf8",
     maxBuffer: 8 * 1024 * 1024,
   });
 }
@@ -68,27 +61,38 @@ function assertLocalSecrets() {
 
 function verifyRemoteCommandSupport() {
   const remoteCommand = `${appRoot}/app/Console/Commands/JetpkDashboardFinal11QaCommand.php`;
-  const probe = ssh(`test -f ${remoteCommand} && ${phpBin} ${appRoot}/artisan list --raw | grep -F jetpk:dashboard-final-11-qa`);
+  const probe = ssh(
+    `test -f ${remoteCommand} && ${phpBin} ${appRoot}/artisan list --raw | grep -F jetpk:dashboard-final-11-qa`,
+  );
   if (probe.status !== 0 || !String(probe.stdout).includes("jetpk:dashboard-final-11-qa")) {
     console.error("FINAL11_REMOTE_COMMAND=MISSING");
+    console.error("FINAL11_PROTECTED_DEPLOYMENT_REQUIRED=YES");
     process.exit(1);
   }
   console.log("FINAL11_REMOTE_COMMAND=PASS");
 }
 
-function uploadCommandIfNeeded() {
-  const local = path.join(repoRoot, "app/Console/Commands/JetpkDashboardFinal11QaCommand.php");
-  const remote = `${appRoot}/app/Console/Commands/JetpkDashboardFinal11QaCommand.php`;
-  if (!fs.existsSync(local)) {
-    console.error("FINAL11_COMMAND_LOCAL=MISSING");
+function verifyProductionRuntimeSha() {
+  const expected = (process.env.JP_EXPECTED_RUNTIME_SHA || process.env.JP_PRODUCTION_SHA || "").trim().toLowerCase();
+  if (!expected) {
+    console.log("FINAL11_RUNTIME_SHA_CHECK=SKIPPED");
+    return;
+  }
+  if (!/^[0-9a-f]{40}$/.test(expected)) {
+    console.error("FINAL11_RUNTIME_SHA_CHECK=INVALID_EXPECTED");
     process.exit(1);
   }
-  const upload = scp(local, remote);
-  if (upload.status !== 0) {
-    console.error("FINAL11_COMMAND_UPLOAD=FAIL");
+  const probe = ssh(
+    `(test -f ${appRoot}/.jetpk-runtime-sha && cat ${appRoot}/.jetpk-runtime-sha) || (test -f ${appRoot}/storage/app/deploy-sha.txt && cat ${appRoot}/storage/app/deploy-sha.txt) || echo MISSING`,
+  );
+  const runtime = String(probe.stdout || "").trim().toLowerCase();
+  if (runtime !== expected) {
+    console.error("FINAL11_RUNTIME_SHA_MISMATCH=YES");
+    console.error(`FINAL11_EXPECTED_RUNTIME_SHA=${expected}`);
+    console.error(`FINAL11_ACTUAL_RUNTIME_SHA=${runtime === "missing" ? "MISSING" : runtime}`);
     process.exit(1);
   }
-  console.log("FINAL11_COMMAND_UPLOAD=PASS");
+  console.log("FINAL11_RUNTIME_SHA_CHECK=PASS");
 }
 
 function syncPasswordsViaStdin() {
@@ -150,8 +154,10 @@ function buildAuthStatesIfAvailable() {
   console.log("FINAL11_AUTH_STATES=PASS");
 }
 
-console.log(`JP_DASH_FINAL_11_QA_SETUP=START`);
+console.log("JP_DASH_FINAL_11_QA_SETUP=START");
 console.log(`FINAL11_EXECUTE_MODE=${execute ? "production" : "dry_run"}`);
+console.log("FINAL11_DIRECT_RUNTIME_SCP=NO");
+console.log("FINAL11_PROTECTED_DEPLOYMENT_REQUIRED=YES");
 
 assertLocalSecrets();
 
@@ -161,8 +167,8 @@ if (!execute) {
   process.exit(0);
 }
 
-uploadCommandIfNeeded();
 verifyRemoteCommandSupport();
+verifyProductionRuntimeSha();
 runReconcile();
 syncPasswordsViaStdin();
 emitStatus();
