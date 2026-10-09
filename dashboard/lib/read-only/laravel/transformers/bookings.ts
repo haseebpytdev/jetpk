@@ -93,6 +93,8 @@ export function transformBookingManagementDetail(
     returnDate: summary.returnDate,
   };
 
+  const extended = payload as LaravelBookingDetailPayload & BookingDetail;
+
   return {
     summary,
     itinerary: {
@@ -105,5 +107,13 @@ export function transformBookingManagementDetail(
     pnrSummary: payload.pnrSummary ?? null,
     ticketReadiness: payload.ticketReadiness ?? null,
     auditMetadata: payload.auditMetadata ?? null,
+    documents: extended.documents ?? [],
+    assignment: extended.assignment ?? undefined,
+    paymentsHistory: extended.paymentsHistory ?? [],
+    cancellationState: extended.cancellationState ?? undefined,
+    refundState: extended.refundState ?? undefined,
+    communicationLogs: extended.communicationLogs ?? [],
+    activityTimeline: extended.activityTimeline ?? [],
+    operationalCapabilities: extended.operationalCapabilities ?? undefined,
   };
 }

@@ -1,5 +1,5 @@
 import { BookingDetailDrawerContent } from "@/features/bookings/booking-detail-drawer";
-import { BookingOperationalActions } from "@/features/bookings/booking-operational-actions";
+import { BookingManagementOperationalSections } from "@/features/bookings/booking-management-operational-sections";
 import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
 import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import {
@@ -34,7 +34,13 @@ const MANAGEMENT_SECTIONS = [
   { id: "booking-payments", label: "Payments" },
   { id: "booking-pnr", label: "PNR / supplier" },
   { id: "booking-ticketing", label: "Ticketing" },
-  { id: "booking-audit", label: "Audit" },
+  { id: "booking-documents", label: "Documents" },
+  { id: "booking-cancellation", label: "Cancellation" },
+  { id: "booking-refunds", label: "Refunds" },
+  { id: "booking-payments-record", label: "Record pay" },
+  { id: "booking-communication", label: "Communication" },
+  { id: "booking-assignment", label: "Assignment" },
+  { id: "booking-activity", label: "Audit" },
   { id: "booking-operations", label: "Notes" },
 ] as const;
 
@@ -106,8 +112,10 @@ function BookingDetailPanels({ detail }: { detail: BookingDetail }) {
         </dl>
       </Section>
 
-      {passengers.length > 0 ? (
-        <Section id="booking-passengers" title="Passengers">
+      <Section id="booking-passengers" title="Passengers">
+        {passengers.length === 0 ? (
+          <p className="text-sm text-jp-muted">No passenger rows on file for this booking.</p>
+        ) : (
           <ul className="space-y-2 text-sm">
             {passengers.map((passenger, index) => (
               <li key={`${passenger.displayName}-${index}`} className="flex justify-between gap-3">
@@ -116,8 +124,8 @@ function BookingDetailPanels({ detail }: { detail: BookingDetail }) {
               </li>
             ))}
           </ul>
-        </Section>
-      ) : null}
+        )}
+      </Section>
 
       {fareSummary ? (
         <Section id="booking-fare" title="Fare breakdown">
@@ -235,9 +243,6 @@ function BookingDetailPanels({ detail }: { detail: BookingDetail }) {
         </Section>
       ) : null}
 
-      <Section id="booking-operations" title="Operational actions">
-        <BookingOperationalActions bookingId={detail.summary.id} />
-      </Section>
     </div>
   );
 }
@@ -308,6 +313,7 @@ export async function BookingDetailPageContent({ bookingId }: Props) {
           </div>
           <div className="min-w-0 space-y-4">
             <BookingDetailPanels detail={detail} />
+            <BookingManagementOperationalSections detail={detail} />
           </div>
         </div>
       </PageContainer>

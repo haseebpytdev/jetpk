@@ -13,6 +13,20 @@ AUTHORIZED_BRANCH=<branch> \
 bash scripts/jetpk/stage-release-from-sha.sh
 ```
 
+`RELEASE_SCOPE` values:
+
+- `frontend` (default): public Next + dashboard + scoped Laravel runtime from the SHA diff
+- `dashboard-laravel`: dashboard + scoped Laravel only (auto-anchors `frontend/package.json` for deploy)
+- `dashboard`: dashboard runtime only
+- `laravel`: Laravel runtime only
+
+Dry-run manifest (no extract):
+
+```bash
+DRY_RUN=1 AUTHORIZED_SHA=... BASE_SHA=... bash scripts/jetpk/stage-release-from-sha.sh
+bash scripts/jetpk/test-stage-release-manifest.sh
+```
+
 Invariants:
 
 - `STAGED_SOURCE_SHA` always equals the supplied `AUTHORIZED_SHA`

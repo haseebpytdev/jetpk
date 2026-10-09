@@ -33,7 +33,7 @@ LIVE_PREVIEW_BANNER=NO (live mode surfaces)
 ZAPWAYS_SEARCH_CALLS_NEW=0
 SENSITIVE_DATA_EXPOSED=NO
 
-FINAL_STATUS=PARTIAL_PENDING_MERGE_DEPLOY
+FINAL_STATUS=FULL_PASS (production — see PRODUCTION-CLOSURE.md)
 ```
 
-Next: merge PR, protected deploy merged SHA, production `supplier:prune-jpqa-write-connections --execute`, production booking/API UAT.
+Production closure executed 2026-10-09: deploy `733f04d9…`, QA prune (15 rows), UAT PASS. Evidence: `PRODUCTION-CLOSURE.md`.
