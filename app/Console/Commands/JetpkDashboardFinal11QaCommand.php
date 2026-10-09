@@ -34,7 +34,6 @@ class JetpkDashboardFinal11QaCommand extends Command
      *   agency_slug: string,
      *   agency_role: ?AgencyRole,
      *   agent_staff_template: ?AgencyRole,
-     *   env_password: string,
      *   provision_agent: bool,
      *   agent_code: ?string
      * }>
@@ -49,7 +48,6 @@ class JetpkDashboardFinal11QaCommand extends Command
             'agency_slug' => JetpkDashboardFinal11QaScope::QA_AGENCY_A_SLUG,
             'agency_role' => null,
             'agent_staff_template' => null,
-            'env_password' => 'JP_FINAL_11_QA_CUSTOMER_B_PASSWORD',
             'provision_agent' => false,
             'agent_code' => null,
         ],
@@ -62,7 +60,6 @@ class JetpkDashboardFinal11QaCommand extends Command
             'agency_slug' => JetpkDashboardFinal11QaScope::QA_AGENCY_B_SLUG,
             'agency_role' => AgencyRole::Owner,
             'agent_staff_template' => null,
-            'env_password' => 'JP_FINAL_11_QA_AGENT_B_PASSWORD',
             'provision_agent' => true,
             'agent_code' => 'QA-JP-FINAL-11-B',
         ],
@@ -75,7 +72,6 @@ class JetpkDashboardFinal11QaCommand extends Command
             'agency_slug' => JetpkDashboardFinal11QaScope::QA_AGENCY_A_SLUG,
             'agency_role' => AgencyRole::Manager,
             'agent_staff_template' => AgencyRole::Manager,
-            'env_password' => 'JP_FINAL_11_QA_STAFF_MANAGER_PASSWORD',
             'provision_agent' => false,
             'agent_code' => null,
         ],
@@ -88,7 +84,6 @@ class JetpkDashboardFinal11QaCommand extends Command
             'agency_slug' => JetpkDashboardFinal11QaScope::QA_AGENCY_A_SLUG,
             'agency_role' => AgencyRole::Accountant,
             'agent_staff_template' => AgencyRole::Accountant,
-            'env_password' => 'JP_FINAL_11_QA_STAFF_ACCOUNTANT_PASSWORD',
             'provision_agent' => false,
             'agent_code' => null,
         ],
@@ -101,7 +96,6 @@ class JetpkDashboardFinal11QaCommand extends Command
             'agency_slug' => JetpkDashboardFinal11QaScope::QA_AGENCY_A_SLUG,
             'agency_role' => AgencyRole::SalesAgent,
             'agent_staff_template' => AgencyRole::SalesAgent,
-            'env_password' => 'JP_FINAL_11_QA_STAFF_SALES_PASSWORD',
             'provision_agent' => false,
             'agent_code' => null,
         ],
@@ -114,7 +108,6 @@ class JetpkDashboardFinal11QaCommand extends Command
             'agency_slug' => JetpkDashboardFinal11QaScope::QA_AGENCY_A_SLUG,
             'agency_role' => AgencyRole::SupportStaff,
             'agent_staff_template' => AgencyRole::SupportStaff,
-            'env_password' => 'JP_FINAL_11_QA_STAFF_SUPPORT_PASSWORD',
             'provision_agent' => false,
             'agent_code' => null,
         ],
@@ -127,7 +120,6 @@ class JetpkDashboardFinal11QaCommand extends Command
             'agency_slug' => JetpkDashboardFinal11QaScope::QA_AGENCY_A_SLUG,
             'agency_role' => AgencyRole::TicketingStaff,
             'agent_staff_template' => AgencyRole::TicketingStaff,
-            'env_password' => 'JP_FINAL_11_QA_STAFF_TICKETING_PASSWORD',
             'provision_agent' => false,
             'agent_code' => null,
         ],
@@ -140,7 +132,6 @@ class JetpkDashboardFinal11QaCommand extends Command
             'agency_slug' => JetpkDashboardFinal11QaScope::QA_AGENCY_A_SLUG,
             'agency_role' => AgencyRole::Viewer,
             'agent_staff_template' => AgencyRole::Viewer,
-            'env_password' => 'JP_FINAL_11_QA_STAFF_VIEWER_PASSWORD',
             'provision_agent' => false,
             'agent_code' => null,
         ],
@@ -153,7 +144,6 @@ class JetpkDashboardFinal11QaCommand extends Command
             'agency_slug' => JetpkDashboardFinal11QaScope::LEGACY_AGENCY_SLUG,
             'agency_role' => null,
             'agent_staff_template' => null,
-            'env_password' => 'JP_FINAL_11_QA_LEGACY_AGENCY_ADMIN_PASSWORD',
             'provision_agent' => false,
             'agent_code' => null,
         ],
@@ -374,7 +364,6 @@ class JetpkDashboardFinal11QaCommand extends Command
             'current_agency_id' => $agency->id,
             'status' => UserAccountStatus::Active,
             'email_verified_at' => $user->email_verified_at ?? now(),
-            'must_change_password' => false,
             'meta' => $meta,
         ])->save();
 
@@ -431,15 +420,9 @@ class JetpkDashboardFinal11QaCommand extends Command
     private function createUser(string $roleKey, Agency $agency, AgentWalletService $walletService): ?User
     {
         $definition = self::ROLE_DEFINITIONS[$roleKey];
-        $password = $this->resolvePassword($roleKey);
-        if ($password === null) {
-            $this->line('FINAL11_'.$roleKey.'_PASSWORD_REQUIRED=YES');
-            $this->line('FINAL11_MISSING_ENV='.$definition['env_password']);
+        $passwordHash = JetpkDashboardFinal11QaScope::bootstrapPasswordHash();
 
-            return null;
-        }
-
-        return DB::transaction(function () use ($roleKey, $definition, $password, $agency, $walletService): User {
+        return DB::transaction(function () use ($roleKey, $definition, $passwordHash, $agency, $walletService): User {
             $meta = [
                 'jp_final_11_qa' => true,
                 'qa_run_id' => self::QA_RUN_ID,
@@ -465,12 +448,12 @@ class JetpkDashboardFinal11QaCommand extends Command
                 'name' => $definition['name'],
                 'email' => $definition['email'],
                 'username' => $definition['marker'],
-                'password' => Hash::make($password),
+                'password' => $passwordHash,
                 'account_type' => $definition['account_type'],
                 'current_agency_id' => $agency->id,
                 'status' => UserAccountStatus::Active,
                 'email_verified_at' => now(),
-                'must_change_password' => false,
+                'must_change_password' => true,
                 'meta' => $meta,
             ]);
 
@@ -525,7 +508,7 @@ class JetpkDashboardFinal11QaCommand extends Command
             return self::FAILURE;
         }
 
-        $password = trim((string) stream_get_contents(STDIN));
+        $password = $this->readSyncPasswordStdin();
         if ($password === '') {
             $this->line('FINAL11_PASSWORD_SYNC=MISSING_PASSWORD_STDIN');
 
@@ -544,11 +527,8 @@ class JetpkDashboardFinal11QaCommand extends Command
         return self::SUCCESS;
     }
 
-    private function resolvePassword(string $roleKey): ?string
+    protected function readSyncPasswordStdin(): string
     {
-        $envKey = self::ROLE_DEFINITIONS[$roleKey]['env_password'];
-        $password = (string) env($envKey, '');
-
-        return $password !== '' ? $password : null;
+        return trim((string) stream_get_contents(STDIN));
     }
 }
