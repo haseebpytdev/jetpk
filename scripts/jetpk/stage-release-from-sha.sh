@@ -177,17 +177,16 @@ while IFS=$'\t' read -r status path extra; do
   fi
 done < <(git diff --name-status "${BASE_SHA}".."${AUTHORIZED_SHA}")
 
-# Deploy wrapper expects a frontend/ directory even for dashboard/Laravel-only diffs.
-if [[ "${RELEASE_SCOPE}" == "frontend" || "${RELEASE_SCOPE}" == "dashboard-laravel" ]]; then
+# Deploy wrapper expects a frontend/ directory when the diff has runtime files but no frontend/* paths.
+# Never synthesize an anchor when the SHA diff produced zero runtime entries (NO_CHANGE must fail closed).
+if [[ "${RUNTIME_ENTRIES}" -gt 0 && ( "${RELEASE_SCOPE}" == "frontend" || "${RELEASE_SCOPE}" == "dashboard-laravel" ) ]]; then
   has_frontend_path=0
-  if [[ "${#UPLOADABLE[@]}" -gt 0 ]]; then
-    for staged_path in "${UPLOADABLE[@]}"; do
-      if [[ "${staged_path}" == frontend/* ]]; then
-        has_frontend_path=1
-        break
-      fi
-    done
-  fi
+  for staged_path in "${UPLOADABLE[@]}"; do
+    if [[ "${staged_path}" == frontend/* ]]; then
+      has_frontend_path=1
+      break
+    fi
+  done
   if [[ "${has_frontend_path}" -eq 0 ]]; then
     UPLOADABLE+=("frontend/package.json")
     RUNTIME_ENTRIES=$((RUNTIME_ENTRIES + 1))
