@@ -5,6 +5,7 @@ import { createReadOnlyErrorEnvelope } from "@/lib/read-only/error-envelope";
 import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
 import { classifyDepositsModuleError } from "@/features/deposits/deposits-page-content";
 
+const runLiveProbe = process.env.JP_FINAL_11_RUN_LIVE_PROBE === "1";
 const staffStorageState = process.env.JP_FINAL_11_STAFF_STORAGE_STATE;
 const liveBaseUrl = process.env.JP_FINAL_11_LIVE_BASE_URL ?? "https://jetpakistan.pk";
 
@@ -22,7 +23,10 @@ test.describe("DEF-F11-0007 staff deposits forbidden handling", () => {
   });
 
   test("live staff session: deposits API is 403 and direct URL shows access denied without RSC", async ({ browser }) => {
-    test.skip(!staffStorageState || !fs.existsSync(staffStorageState), "requires JP_FINAL_11_STAFF_STORAGE_STATE");
+    test.skip(
+      !runLiveProbe || !staffStorageState || !fs.existsSync(staffStorageState),
+      "set JP_FINAL_11_RUN_LIVE_PROBE=1 and JP_FINAL_11_STAFF_STORAGE_STATE for production closure",
+    );
 
     const context = await browser.newContext({ storageState: staffStorageState });
     const api = await context.request.get(`${liveBaseUrl}/laravel/api/dashboard/deposits`, {
