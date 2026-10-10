@@ -93,6 +93,25 @@ class DashboardReadOnlyApiTest extends TestCase
             ->assertJsonPath('error.code', 'forbidden');
     }
 
+    public function test_platform_admin_can_read_dashboard_deposits_api(): void
+    {
+        $this->actingAs($this->platformAdmin())
+            ->getJson(route('api.dashboard.deposits.index'))
+            ->assertOk()
+            ->assertJsonPath('meta.source', 'laravelReadOnly')
+            ->assertJsonStructure(['data' => ['deposits']]);
+    }
+
+    public function test_platform_staff_gets_forbidden_on_dashboard_deposits_api(): void
+    {
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
+
+        $this->actingAs($staff)
+            ->getJson(route('api.dashboard.deposits.index'))
+            ->assertForbidden()
+            ->assertJsonPath('error.code', 'forbidden');
+    }
+
     public function test_bookings_pagination_and_sensitive_field_exclusions(): void
     {
         $admin = $this->platformAdmin();
