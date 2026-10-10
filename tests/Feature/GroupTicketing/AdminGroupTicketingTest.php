@@ -161,6 +161,50 @@ class AdminGroupTicketingTest extends TestCase
         $this->assertSame('* * * * *', $releaseEvent->expression);
     }
 
+    public function test_admin_group_ticketing_index_json_returns_summary_when_inventory_synced(): void
+    {
+        $admin = $this->platformAdmin();
+        $this->seedInventoryCategories();
+
+        $response = $this->actingAs($admin)
+            ->getJson(route('admin.group-ticketing.index', ['format' => 'json']), [
+                'HTTP_ACCEPT' => 'application/json',
+                'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest',
+            ]);
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonStructure([
+                'ok',
+                'activeInventoryCount',
+                'categoryCount',
+                'lastSyncAt',
+            ]);
+
+        $this->assertIsString($response->json('lastSyncAt'));
+        $this->assertGreaterThan(0, (int) $response->json('activeInventoryCount'));
+        $this->assertGreaterThan(0, (int) $response->json('categoryCount'));
+    }
+
+    public function test_admin_group_ticketing_index_json_with_no_inventory_returns_zero_counts(): void
+    {
+        $admin = $this->platformAdmin();
+
+        $this->actingAs($admin)
+            ->getJson(route('admin.group-ticketing.index', ['format' => 'json']), [
+                'HTTP_ACCEPT' => 'application/json',
+                'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest',
+            ])
+            ->assertOk()
+            ->assertJson([
+                'ok' => true,
+                'activeInventoryCount' => 0,
+                'categoryCount' => 0,
+                'lastSyncAt' => null,
+            ]);
+    }
+
     public function test_admin_sidebar_contains_group_ticketing_navigation_links(): void
     {
         $admin = $this->platformAdmin();

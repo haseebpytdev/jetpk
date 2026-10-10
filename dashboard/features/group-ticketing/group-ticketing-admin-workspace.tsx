@@ -16,12 +16,17 @@ function payloadOf<T extends Record<string, unknown>>(result: { ok: boolean; dat
 
 export function GroupTicketingAdminWorkspace() {
   const isLive = useDashboardLiveMode();
-  const [summary, setSummary] = useState<Record<string, unknown>>({});
+  const [summary, setSummary] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!isLive) return;
+    setLoading(true);
+    setError(null);
+    setSummary(null);
     void laravelRequest(groupTicketingAdminPath(), { method: "GET", retryCsrfOnce: false }).then((result) => {
+      setLoading(false);
       if (!result.ok) {
         setError(result.message ?? "Could not load group ticketing admin.");
         return;
@@ -45,20 +50,23 @@ export function GroupTicketingAdminWorkspace() {
         description="Administrative inventory summary only. Public group booking engine is unchanged."
       />
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Card>
-          <div className="text-xs text-jp-muted">Active inventory</div>
-          <CardTitle className="mt-1 text-2xl">{String(summary.activeInventoryCount ?? 0)}</CardTitle>
-        </Card>
-        <Card>
-          <div className="text-xs text-jp-muted">Categories</div>
-          <CardTitle className="mt-1 text-2xl">{String(summary.categoryCount ?? 0)}</CardTitle>
-        </Card>
-        <Card>
-          <div className="text-xs text-jp-muted">Last sync</div>
-          <CardTitle className="mt-1 text-base">{String(summary.lastSyncAt ?? "Never")}</CardTitle>
-        </Card>
-      </div>
+      {loading ? <p className="text-sm text-jp-muted">Loading group ticketing summary…</p> : null}
+      {summary && !error ? (
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Card>
+            <div className="text-xs text-jp-muted">Active inventory</div>
+            <CardTitle className="mt-1 text-2xl">{String(summary.activeInventoryCount ?? "—")}</CardTitle>
+          </Card>
+          <Card>
+            <div className="text-xs text-jp-muted">Categories</div>
+            <CardTitle className="mt-1 text-2xl">{String(summary.categoryCount ?? "—")}</CardTitle>
+          </Card>
+          <Card>
+            <div className="text-xs text-jp-muted">Last sync</div>
+            <CardTitle className="mt-1 text-base">{String(summary.lastSyncAt ?? "Never")}</CardTitle>
+          </Card>
+        </div>
+      ) : null}
     </PageContainer>
   );
 }

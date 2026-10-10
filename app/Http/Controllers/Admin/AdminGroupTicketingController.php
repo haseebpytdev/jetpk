@@ -20,6 +20,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -39,7 +40,9 @@ class AdminGroupTicketingController extends Controller
         $payload = [
             'activeInventoryCount' => $facetService->totalActiveInventoryCount(),
             'categoryCount' => count($facetService->categoriesForAdmin()),
-            'lastSyncAt' => $lastSync?->toIso8601String(),
+            'lastSyncAt' => $lastSync instanceof \DateTimeInterface
+                ? Carbon::instance($lastSync)->toIso8601String()
+                : null,
         ];
 
         if ($this->wantsBackOfficeJson($request)) {
