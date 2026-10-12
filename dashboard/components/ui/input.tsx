@@ -1,5 +1,7 @@
+"use client";
+
 import { cn } from "@/lib/utils";
-import type { InputHTMLAttributes } from "react";
+import { useEffect, useState, type InputHTMLAttributes } from "react";
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return (
@@ -19,10 +21,19 @@ export function SearchInput({
   value,
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & { onClear?: () => void }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const showClear =
+    mounted && onClear != null && String(value ?? "").length > 0;
+
   return (
     <div className={cn("relative", className)}>
-      <Input type="search" value={value} className="pr-10" {...props} />
-      {value && onClear ? (
+      <Input type="search" value={value} className={showClear ? "pr-10" : undefined} {...props} />
+      {showClear ? (
         <button
           type="button"
           className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"
