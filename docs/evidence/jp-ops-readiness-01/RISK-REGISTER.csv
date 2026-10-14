@@ -1,0 +1,13 @@
+RISK_ID,SEVERITY,DOMAIN,TITLE,TRIGGER,IMPACT,MITIGATION_OR_AUDIT_PATH,STATUS,RELATED_DEFECT
+OPS-RISK-0001,P3,OPERATIONS,SHA drift main vs production runtime,Auditing current main while production runs older SHA,False confidence / missed live defects,Wave1A closed as INTENTIONAL_TOOLING_EVIDENCE_DIVERGENCE (0 runtime files),CLOSED_FALSE_POSITIVE,OPS-DEF-0001
+OPS-RISK-0002,P0,PAYMENT,Payment/webhook idempotency under failure,Duplicate/out-of-order webhook or retry,Double charge/ledger/booking inconsistency,Payment SM + OPS-DEF-0013; no live charge test,OPEN,OPS-DEF-0013
+OPS-RISK-0003,P0,FINANCE,Wallet/ledger double-post or desync,safeRecord swallow / concurrent wallet mutation,Financial inconsistency,FIN-INV + OPS-DEF-0006/0007,OPEN,OPS-DEF-0006
+OPS-RISK-0004,P1,SUPPLIER,Supplier channel misclassification / freeze breach,Wrong adapter or unauthorized live call,Incorrect availability/pricing or policy violation,SUPPLIER-READINESS-MATRIX; PIA frozen,OPEN,OPS-DEF-0016
+OPS-RISK-0005,P1,OPERATIONS,Background job success opacity,UI success while queued work fails later,Silent booking/mail/finance failure,failed_jobs=147 observed,OPEN,OPS-DEF-0015
+OPS-RISK-0006,P1,SECURITY,Cross-tenant IDOR / isolation gap,Direct object reference across agencies/customers,Data leak / unauthorized mutation,Security audit PASS patterns + gaps OPS-DEF-0004/0005/0008,OPEN,OPS-DEF-0004
+OPS-RISK-0007,P1,BOOKING,Partial booking / uncertain supplier state,Timeout after supplier accept or payment before confirm,Orphan/incorrect booking state,BOOKING-STATE-MACHINE + failure-mode matrix,OPEN,OPS-DEF-0018
+OPS-RISK-0008,P2,OPERATIONS,Dual-stack route parity gaps,Blade residual vs Next public/dashboard divergence,Broken deep links / untested surfaces,MASTER-SURFACE-INVENTORY 777 rows,OPEN,
+OPS-RISK-0009,P2,OPERATIONS,Stale server inventory risk,Relying on Sep-2026 PM2 notes,Wrong ops picture,Superseded by 2026-10-14 SSH probe,MITIGATED,
+OPS-RISK-0010,P2,OPERATIONS,Disk pressure blocks backups/deploys,89% disk,Failed backup/deploy / outage,Wave1B reclaimed ~15G to 73%; retain retention policy,MITIGATED,OPS-DEF-0014
+OPS-RISK-0011,P2,OPERATIONS,Notification queue backlog/failures,147 failed_jobs historical,Missed customer/agent emails,Wave1B archived+removed historical SMTP fails,MITIGATED,OPS-DEF-0015
+OPS-RISK-0012,P1,NOTIFICATION,Default queue backlog of booking/mail jobs,178 pending Closures+BookingUniversalNotification,Stale or duplicate customer emails if drained blindly,Wave1C: archive+delete without execute; route new mail to notifications-transactional,MITIGATING,OPS-DEF-0019

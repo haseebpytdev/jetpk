@@ -1,0 +1,12 @@
+FROM,TO,TRIGGER,ACTOR,PRECONDITIONS,DATABASE_WRITE,SUPPLIER_CALL,PAYMENT_EFFECT,LEDGER_EFFECT,NOTIFICATION,AUDIT_LOG,FAILURE_STATE,RETRY_POLICY,IDEMPOTENCY_KEY,RECOVERY_PATH,AUDIT_STATUS
+draft,pending,submitBookingRequest,customer|agent|staff,draft booking exists,bookings.status + status log,none,none,none,status changed,booking.status_changed,invalid transition exception,n/a,status equality short-circuit,re-submit if still draft,SOURCE_MAPPED
+pending,fare_review,changeStatus,staff|admin,allowed transition,status log,none,none,none,status changed,yes,exception,n/a,none,manual admin,SOURCE_MAPPED
+pending,confirmed,changeStatus,staff|admin,allowed,status+confirmed_at,none,none,markup revenue on confirmed,confirmed + status,yes,exception,n/a,none,manual,SOURCE_MAPPED
+pending,cancelled,changeStatus|cancellation flow,staff|admin|agent,allowed,status,possible cancel adapter,none,none,status,yes,exception,n/a,none,manual,SOURCE_MAPPED
+confirmed,payment_pending,changeStatus,staff|admin,allowed,status,none,none,none,status,yes,exception,n/a,none,manual,SOURCE_MAPPED
+payment_pending,paid,BookingPaymentService.recalculate / verify,system|staff,verified payments cover payable,status+payment_status,may queue supplier booking,verified payment rows,payment verified ledger,payment verified mail,yes,exception,client_transaction_id / payment_reference check,retry verify,SOURCE_MAPPED
+paid,ticketing_pending,recalculate when supplier pending_ticketing,system,paid + supplier_booking_status,status,none,none,none,status,yes,exception,n/a,manual ticketing,SOURCE_MAPPED
+ticketing_pending,ticketed,TicketingService.issueTickets,staff|admin|system,eligible + ticketing enabled,status+tickets+ticketing_status,YES ticketing adapter,none,commission on ticket,ticket issued mail,yes,failed ticketing_status,adapter-dependent,attempt rows,manual retry/manual PNR,SOURCE_MAPPED
+ticketing_pending,failed,ticketing failure,system,attempt failed,status,YES,none,none,status,yes,failed,retry to ticketing_pending,attempt id,staff recovery,SOURCE_MAPPED
+ticketed,refunded,refund flow / changeStatus,staff|admin,allowed,status+refund fields,possible void/refund,refund records,refund ledger events,status,yes,exception,refund id,finance ops,SOURCE_MAPPED
+*,*,platform_admin override,platform_admin,admin bypass,status log,depends,depends,depends,status,yes,exception,n/a,none,HIGH RISK — satellite fields may desync,SOURCE_RISK

@@ -1,0 +1,59 @@
+﻿{
+    "workstream":  "JP-OPS-READINESS-01-FULL-DEEP-AUDIT",
+    "mode":  "AUDIT_ONLY",
+    "frozen_at_utc":  "2026-10-14T16:55:00Z",
+    "project":  "JetPakistan",
+    "repository":  "C:\\Users\\khadi\\ota-jetpk",
+    "protected_main_sha":  "daa5a1a2465cc1504d9b448ed94db307be976cf5",
+    "production_runtime_sha":  "12045dda48c98fefc24db5b1c2e071e7498be87a",
+    "live_dashboard_build_id":  "7-iZf4RbaJmGpuDjO1tsh",
+    "local_main_sha":  "daa5a1a2465cc1504d9b448ed94db307be976cf5",
+    "remote_main_sha":  "daa5a1a2465cc1504d9b448ed94db307be976cf5",
+    "worktree_clean":  false,
+    "worktree_notes":  "Untracked FINAL-11 archived evidence and storage/framework deploy probe scripts present; not part of this workstream mutation. No product code changes for Phase 0.",
+    "sha_drift":  {
+                      "protected_main_vs_production_runtime":  true,
+                      "local_main_matches_protected_main":  true,
+                      "risk_id":  "OPS-RISK-0001",
+                      "note":  "Audited local main SHA differs from certified production application runtime SHA. Live behavior may diverge from current main tree for non-dashboard scopes."
+                  },
+    "previous_certification":  {
+                                   "id":  "JP-DASH-FINAL-11",
+                                   "status":  "CLOSED_FULL_PASS",
+                                   "reuse":  "REFERENCE_ONLY",
+                                   "reopen_forbidden":  true,
+                                   "baseline_summary":  {
+                                                            "reachable_authenticated_routes":  289,
+                                                            "responsive_viewport_rows":  867,
+                                                            "untested":  0,
+                                                            "confirmed_application_defects":  0,
+                                                            "live_all_portals_certified":  true
+                                                        }
+                               },
+    "safety":  {
+                   "deploy":  false,
+                   "production_code_change":  false,
+                   "schema_change":  false,
+                   "real_supplier_mutations":  false,
+                   "real_payments":  false,
+                   "pia":  "FROZEN",
+                   "airblue_new_calls":  "FORBIDDEN_WITHOUT_SEPARATE_AUTH"
+               },
+    "defect_id_prefix":  "OPS-DEF-",
+    "risk_id_prefix":  "OPS-RISK-",
+    "evidence_root":  "docs/evidence/jp-ops-readiness-01/",
+    "phase_status":  {
+                         "phase_0_freeze_baseline":  "COMPLETE",
+                         "phase_1_surface_discovery":  "COMPLETE",
+                         "phase_31_audit_exit":  "COMPLETE",
+                         "production_operational_ready":  "NO",
+                         "audit_phase_exit_verifier":  "PASS"
+                     },
+    "public_frontend_build_id_ssh":  "QClrSvr5W0V2GqllIeLKE",
+    "ssh_ops_snapshot":  {
+                             "app_env":  "production",
+                             "app_debug":  false,
+                             "failed_jobs":  147,
+                             "disk_used_pct":  89
+                         }
+}

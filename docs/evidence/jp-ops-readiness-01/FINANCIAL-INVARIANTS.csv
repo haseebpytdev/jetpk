@@ -1,0 +1,11 @@
+INV_ID,INVARIANT,SOURCE,SERVICE_OR_TABLE,ENFORCEMENT,STATUS,GAP_SEVERITY,EVIDENCE,DEFECT_ID
+FIN-INV-001,At most one ledger tx per (source_type source_id transaction_type),Ledger,ledger_transactions,DB unique + findExistingPost,HELD,P3,LedgerEventRecorder + migration,—
+FIN-INV-002,Deposit approval credits wallet once for Submitted deposit,Wallet,AgentWalletService.approveDeposit,lockForUpdate + status gate,HELD,P3,AgentWalletService.php,—
+FIN-INV-003,Approved deposit emits one AgencyDepositApproved ledger post,Wallet→Ledger,LedgerEventRecorder,idempotent recorder,HELD,P3,LedgerLivePostingTest,—
+FIN-INV-004,Wallet credit and ledger post atomic,Wallet→Ledger,AgentWalletService,Ledger AFTER commit; safeRecord swallows,BROKEN,P1,AgentWalletService + safeRecord,OPS-DEF-0006
+FIN-INV-005,Gateway verified payment at most one verified AbhiPay booking_payment,Payments,PaymentTransactionService,App-level exists check; no DB unique,PARTIAL,P2,PaymentTransactionService,OPS-DEF-0013
+FIN-INV-006,AbhiPay settlement row-locks before transition,Payments,applyVerificationResult,lockForUpdate + isPaid short-circuit,HELD,P3,PaymentTransactionService,—
+FIN-INV-007,Operational wallet singular per agency,Wallet,canonicalWalletForAgency,Heuristic; duplicates retained,BROKEN,P1,AgentWalletService,OPS-DEF-0007
+FIN-INV-008,Deposit credit posts to canonical agency wallet,Wallet,approveDeposit,Uses deposit.agent_wallet_id at submit,BROKEN_CONDITIONAL,P1,AgentWalletService,OPS-DEF-0007
+FIN-INV-009,Verified booking payment ledger idempotent,Ledger,recordBookingPaymentVerified,findExistingPost,HELD,P3,LedgerEventRecorder,—
+FIN-INV-010,Manual wallet adjustment ledger fail-closed,Ledger,recordManualWallet*,throws in TX,HELD,P3,LedgerEventRecorder,—

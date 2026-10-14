@@ -1,0 +1,10 @@
+MUTATION,DOUBLE_CLICK,MULTI_TAB,REFRESH_RETRY,WEBHOOK_DUP,LOCKING,UNIQUE_CONSTRAINT,STATE_PRECONDITION,DUPLICATE_SUPPRESSION,P0_IF_FAILS,RESULT,DEFECT_ID
+AbhiPay start,unknown,unknown,reuses pending tx,n/a,partial,client_transaction_id app,amount match,findReusablePending,YES double pay,PARTIAL,OPS-DEF-0013
+AbhiPay callback,n/a,n/a,n/a,paid short-circuit,lockForUpdate,payment_transactions PK,isPaid,yes,YES,PARTIAL_STRONG,OPS-RISK-0002
+Deposit approve,unknown,unknown,status gate,n/a,lockForUpdate wallet+deposit,deposit status,Submitted only,status,YES double credit,PARTIAL,OPS-DEF-0006
+Wallet manual adjust,unknown,unknown,idempotency_key meta,n/a,service TX,meta key,yes,yes,YES,SOURCE_MAPPED,—
+Booking status change,unknown,unknown,equality short-circuit,n/a,TX refresh,none,allowed transitions,from==to return,medium wrong state,SOURCE_MAPPED,—
+Ticket issue,unknown,unknown,attempt rows,n/a,adapter,attempt,eligibility,partial,YES duplicate ticket,UNTESTED,OPS-DEF-0018
+Ledger post,n/a,n/a,retry,n/a,posting service,ledger_tx_source_unique,yes,findExistingPost,YES double post,HELD,—
+Agent booking create,unknown,unknown,unknown,n/a,unknown,unknown,unknown,unknown,YES double booking,UNTESTED,OPS-DEF-0018
+Cancellation request,unknown,unknown,unknown,n/a,unknown,unknown,policy BookingsView,unknown,medium,GAP_VIEWER,OPS-DEF-0004

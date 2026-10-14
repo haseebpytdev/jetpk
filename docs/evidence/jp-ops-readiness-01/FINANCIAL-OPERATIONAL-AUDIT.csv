@@ -1,0 +1,11 @@
+AREA,CHECK,METHOD,RESULT,DEFECT_ID,NOTES
+wallet_balance,canonical summary vs multi-wallet sum,source,FAIL_RISK,OPS-DEF-0007,agencyWalletSummary sums all wallets
+deposit_approve,atomic wallet+ledger,source,FAIL,OPS-DEF-0006,ledger after commit
+commission_on_ticket,generateCommissionForTicket path,source,MAPPED,—,TicketingService calls commission service
+markup_on_confirm,recordMarkupRevenueForBooking,source,MAPPED,—,on confirmed status
+cross_agency_posting,policies on ledger/wallet,source,PASS_LIKELY,—,agency scoping present; live IDOR not retested
+double_post_ledger,unique index,source+tests,PASS,—,LedgerLivePostingTest
+refund_ledger,recordBookingRefund*,source,MAPPED,—,runtime UNTESTED
+invoice_voucher_totals,parity vs booking,runtime,UNTESTED,OPS-DEF-0018,deferred live finance UAT
+agent_owner_ledger_visibility,RBAC,source,MAPPED,—,agent.ledger.view
+accountant_template,permissions usable,runtime,UNTESTED,OPS-DEF-0018,capability proof pending

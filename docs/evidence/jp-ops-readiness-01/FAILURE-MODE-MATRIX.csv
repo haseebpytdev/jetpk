@@ -1,0 +1,8 @@
+DOMAIN,SCENARIO,EXPECTED_BEHAVIOR,ACTUAL_BEHAVIOR,RECOVERABLE,USER_MESSAGE,STAFF_VISIBILITY,AUDIT_TRAIL,DATA_CONSISTENT,DEFECT_ID
+PAYMENT,duplicate webhook,single settle,code: lock+short-circuit,YES,unknown live,logs,yes path,PARTIAL,OPS-DEF-0013
+FINANCE,ledger post fails after wallet credit,fail closed,safeRecord swallows,PARTIAL,none,log error,wallet yes ledger maybe no,NO,OPS-DEF-0006
+SUPPLIER,timeout after accept,uncertain state surfaced,UNTESTED,unknown,unknown,attempt rows,partial,UNKNOWN,OPS-RISK-0007
+QUEUE,job fails after UI success,staff sees failure,failed_jobs=147,YES if triage,often none,failed_jobs table,partial,UNKNOWN,OPS-DEF-0015
+AUTH,session expiry mid-checkout,safe redirect,UNTESTED,YES,unknown,n/a,n/a,UNKNOWN,OPS-DEF-0018
+BOOKING,duplicate POST,no double book,UNTESTED,unknown,unknown,unknown,unknown,UNKNOWN,OPS-DEF-0018
+DISK,deploy/backup,enough free space,89% used,NO until cleanup,n/a,ops,n/a,N/A,OPS-DEF-0014

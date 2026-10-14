@@ -1,0 +1,12 @@
+ITEM,STATUS,EVIDENCE,DEFECT_OR_GAP
+Provider AbhiPay code path exists,READY,PaymentGateway CODE_ABHIPAY + AbhiPayGateway,—
+Other card gateways,NOT_APPLICABLE,only AbhiPay in code,—
+Callback route registered,READY,/payments/abhipay/callback,—
+Callback CSRF exempt by design,READY,bootstrap/app.php,—
+Server-side verify mandatory,READY,PaymentTransactionService,—
+Idempotency under replay,PARTIAL,paid short-circuit + lock; no DB unique payment ref,OPS-DEF-0013
+Production credentials activated,MANUAL_ACTIVATION_REQUIRED,admin-stored gateway,OPS-DEF-0017
+Callback URL registered at AbhiPay,EXTERNAL_DEPENDENCY,provider dashboard,OPS-DEF-0017
+PIA NDC online pay without PNR,BLOCKED_BY_CODE,piaNdcOnlinePaymentBlockedReason,—
+Live charge UAT this workstream,BLOCKED,governance forbids real charges,OPS-DEF-0017
+Payment→booking→ledger→notification trace,SOURCE_MAPPED,services mapped; live UNTESTED,OPS-DEF-0018

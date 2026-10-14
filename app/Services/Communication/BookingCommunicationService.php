@@ -716,7 +716,9 @@ class BookingCommunicationService
                 return;
             }
 
-            Mail::to($recipient['email'])->queue($mailable);
+            Mail::to($recipient['email'])->queue(
+                $mailable->onQueue((string) config('mail.notification_queue', 'notifications-transactional'))
+            );
             $log->forceFill([
                 'status' => 'queued',
                 'subject' => $renderedTemplate['subject'] ?: $subject,
@@ -1298,7 +1300,9 @@ class BookingCommunicationService
                 return true;
             }
 
-            Mail::to($recipient['email'])->queue($mailable);
+            Mail::to($recipient['email'])->queue(
+                $mailable->onQueue((string) config('mail.notification_queue', 'notifications-transactional'))
+            );
             $log->forceFill([
                 'status' => 'queued',
                 'subject' => $subject,

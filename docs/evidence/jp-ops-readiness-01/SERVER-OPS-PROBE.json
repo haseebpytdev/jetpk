@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "workstream": "JP-OPS-READINESS-01-FULL-DEEP-AUDIT",
+  "phase": "17",
+  "mode": "READ_ONLY",
+  "probed_at_utc": "2026-10-14T17:20:00Z",
+  "canonical_host": "https://jetpakistan.pk",
+  "canonical_ip": "185.215.166.176",
+  "sha": {
+    "local_main": "daa5a1a2465cc1504d9b448ed94db307be976cf5",
+    "remote_jetpk_main": "daa5a1a2465cc1504d9b448ed94db307be976cf5",
+    "production_runtime_ssh_observed": "12045dda48c98fefc24db5b1c2e071e7498be87a",
+    "production_authorized_ssh_observed": "12045dda48c98fefc24db5b1c2e071e7498be87a",
+    "drift_main_vs_runtime": true,
+    "drift_defect_id": "OPS-DEF-0001"
+  },
+  "build": {
+    "dashboard_build_id_ssh_observed": "7-iZf4RbaJmGpuDjO1tsh",
+    "public_frontend_build_id_ssh_observed": "QClrSvr5W0V2GqllIeLKE",
+    "matches_frozen_dashboard_build": true
+  },
+  "http_probes": [
+    {"url": "https://jetpakistan.pk/", "status": 200, "result": "PASS"},
+    {"url": "https://jetpakistan.pk/up", "status": 200, "result": "PASS"}
+  ],
+  "runtime_config": {
+    "APP_ENV": "production",
+    "APP_DEBUG": false,
+    "QUEUE": "database",
+    "MAIL": "smtp",
+    "FAILED_JOBS": 147
+  },
+  "background": {
+    "cron_schedule_run": "every_minute",
+    "cron_notification_queue_worker": "every_minute stop-when-empty queues=notifications-*",
+    "pm2_daemon": "running pid=405709",
+    "next_servers_observed": ["127.0.0.1:3010", "127.0.0.1:3001"],
+    "laravel_listener": "127.0.0.1:8088"
+  },
+  "disk": {
+    "mount": "/home/pkjetp",
+    "used_pct": 89,
+    "avail": "12G",
+    "size": "96G",
+    "defect_id": "OPS-DEF-0014"
+  },
+  "blockers": ["OPS-DEF-0001", "OPS-DEF-0014", "OPS-DEF-0015"]
+}

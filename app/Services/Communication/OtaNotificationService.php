@@ -3,6 +3,7 @@
 namespace App\Services\Communication;
 
 use App\Enums\AccountType;
+use App\Jobs\Notifications\DeliverQueuedOperationalMail;
 use App\Mail\BookingUniversalNotification;
 use App\Mail\OtaOperationalNotificationMail;
 use App\Models\Agency;
@@ -288,25 +289,17 @@ class OtaNotificationService
         ?array $universalPayload = null,
     ): string {
         if ($this->shouldQueueMail()) {
-            dispatch(function () use ($to, $cc, $bcc, $subject, $htmlBody, $plainBody, $attachments, $communicationLogId, $universalPayload): void {
-                try {
-                    $this->sendMailNow($to, $cc, $bcc, $subject, $htmlBody, $plainBody, $attachments, $universalPayload);
-                    if ($communicationLogId !== null) {
-                        CommunicationLog::query()->whereKey($communicationLogId)->update([
-                            'status' => 'sent',
-                            'sent_at' => now(),
-                            'error_message' => null,
-                        ]);
-                    }
-                } catch (Throwable $e) {
-                    if ($communicationLogId !== null) {
-                        CommunicationLog::query()->whereKey($communicationLogId)->update([
-                            'status' => 'failed',
-                            'error_message' => Str::limit($e->getMessage(), 2000),
-                        ]);
-                    }
-                }
-            });
+            DeliverQueuedOperationalMail::dispatch(
+                $to,
+                $cc,
+                $bcc,
+                $subject,
+                $htmlBody,
+                $plainBody,
+                $attachments,
+                $communicationLogId,
+                $universalPayload,
+            );
 
             return 'queued';
         }

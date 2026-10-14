@@ -1,0 +1,16 @@
+SURFACE_ID,COMMAND_OR_JOB,SCHEDULE,EXTERNAL_EFFECT,SUCCESS_OPAQUE_RISK,STAFF_VISIBILITY,RESULT,DEFECT_ID
+SCHED-001,ota:cleanup-expired-access,hourly,none,medium,logs,INVENTORIED,—
+SCHED-002,ota:send-daily-report,daily 08:00,email,high,ops email,INVENTORIED,—
+SCHED-003,ota:send-agency-booking-activity-summary,daily 07:10,email,high,agency email,INVENTORIED,—
+SCHED-004,ota:send-weekly-report,weekly,email,high,ops email,INVENTORIED,—
+SCHED-005,ota:send-monthly-report,monthly,email,high,ops email,INVENTORIED,—
+SCHED-006,ota:send-monthly-ledgers,monthly,email,high,finance email,INVENTORIED,—
+SCHED-007,homepage:refresh-featured-fares,daily,supplier,high,CMS,INVENTORIED,OPS-RISK-0004
+SCHED-008,jetpk:homepage-route-fares-refresh,daily,supplier,high,CMS,INVENTORIED,OPS-RISK-0004
+SCHED-009,ota:process-abandoned-flight-searches,15m,none,medium,logs,INVENTORIED,—
+SCHED-010,ota:send-abandoned-flight-searches,15m,email,high,customer email spam risk,INVENTORIED,OPS-RISK-0011
+SCHED-011,group-ticketing:sync-inventory,daily,supplier,high,admin groups,INVENTORIED,—
+SCHED-012,group-ticketing:release-expired,every minute,none,high race,admin groups,INVENTORIED,OPS-RISK-0007
+SCHED-013,jetpk:branding-background-cleanup,daily,file,low,logs,INVENTORIED,—
+JOB-001,RemoveBrandLogoBackground,queue,file,medium,admin branding,INVENTORIED,—
+QUEUE-CRON,queue:work notifications-*,every minute,email,high,failed_jobs=147,FAIL_BACKLOG,OPS-DEF-0015

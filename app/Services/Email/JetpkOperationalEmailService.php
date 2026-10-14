@@ -151,7 +151,9 @@ class JetpkOperationalEmailService
         $mailable = new JetpkOperationalEventMail($html, $subject, $plainBody, $attachments);
 
         if ($this->shouldQueueMail()) {
-            Mail::to($to)->queue($mailable);
+            Mail::to($to)->queue(
+                $mailable->onQueue((string) config('mail.notification_queue', 'notifications-transactional'))
+            );
 
             return 'queued';
         }

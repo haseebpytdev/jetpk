@@ -1,0 +1,11 @@
+STEP,SCENARIO,SAFE_METHOD,RESULT,BLOCKER,DEFECT_ID
+visitor_home,public home,HTTP 200,PARTIAL_SMOKE,—,—
+search,one-way/return,source+inventory,INVENTORIED_NOT_EXECUTED,supplier live defaults off,OPS-DEF-0016
+results_paired_segmented,fare families,source,INVENTORIED_NOT_EXECUTED,no safe live search cert this pass,OPS-DEF-0018
+fare_review_baggage_rules,pricing display,source,INVENTORIED_NOT_EXECUTED,—,OPS-DEF-0018
+traveler_details_validation,adult/child/infant,source,INVENTORIED_NOT_EXECUTED,—,OPS-DEF-0018
+checkout_payment_select,manual/AbhiPay,source,INVENTORIED_NOT_EXECUTED,no real charge,OPS-DEF-0017
+booking_confirm,non-external,BLOCKED_BY_GOVERNANCE,NOT_EXECUTED,real supplier forbidden,OPS-DEF-0018
+account_booking_list_detail,customer portal,inventory,INVENTORIED_NOT_EXECUTED,—,OPS-DEF-0018
+documents,invoice/voucher,inventory,INVENTORIED_NOT_EXECUTED,—,OPS-DEF-0018
+duplicate_submit_refresh_back,concurrency,matrix,SOURCE_PARTIAL,needs controlled QA,OPS-RISK-0007

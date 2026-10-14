@@ -1,0 +1,16 @@
+JOURNEY_ID,ACTOR,START,STEPS,END_STATE,DEPENDENCIES,SAFE_TEST_METHOD,RESULT,BLOCKER,DEFECT_ID
+OJ-B2C-001,customer,home,search→results→fare→pax→pay→confirm,ticketed|paid,supplier+payment,fixture only,NOT_EXECUTED,supplier/payment activation + no real book,OPS-DEF-0018
+OJ-B2B-OWN-001,agent_owner,login,dash→search→book→wallet,booking+ledger,supplier+wallet,QA reversible,NOT_EXECUTED,activation,OPS-DEF-0018
+OJ-B2B-MGR-001,manager,login,staff ops,managed booking,RBAC,QA,NOT_EXECUTED,—,OPS-DEF-0018
+OJ-B2B-ACC-001,accountant,login,ledger/reports,usable finance view,ledger,QA,NOT_EXECUTED,wallet/ledger gaps,OPS-DEF-0006
+OJ-B2B-SALES-001,sales_agent,login,create booking,booking created,permissions,QA,NOT_EXECUTED,supplier,OPS-DEF-0016
+OJ-B2B-SUP-001,support_staff,login,support ticket,ticket updated,support module,QA,NOT_EXECUTED,—,OPS-DEF-0018
+OJ-B2B-TKT-001,ticketing_staff,login,issue ticket,ticketed,ticketing module,QA no live,NOT_EXECUTED,live flags off,OPS-DEF-0016
+OJ-B2B-VIEW-001,viewer,login,read-only,no mutations,RBAC,source,FAIL,can request cancel,OPS-DEF-0004
+OJ-ADMIN-001,platform_admin,go-live+suppliers,activate modules,production on,admin,checklist,NOT_READY,disk/failed_jobs/SHA/activation,OPS-DEF-0014
+OJ-STAFF-001,staff,ops inbox,service booking,resolved,permissions,QA,NOT_EXECUTED,—,OPS-DEF-0018
+OJ-PAY-001,system,AbhiPay callback,verify→settle,paid,AbhiPay,source,PARTIAL,no live charge,OPS-DEF-0017
+OJ-FIN-001,admin,approve deposit,wallet+ledger,posted,wallet,source,PARTIAL,non-atomic ledger,OPS-DEF-0006
+OJ-PNR-001,staff,issue/void,ticketing adapters,ticketed,supplier,source,NOT_ACTIVATED,flags,OPS-DEF-0016
+OJ-NOTIF-001,system,queue mail,deliver,delivered,smtp+queue,SSH failed_jobs,FAIL,147 failed jobs,OPS-DEF-0015
+OJ-CMS-001,admin,CMS/SEO,publish,public updated,CMS,QA reversible,NOT_EXECUTED,—,OPS-DEF-0018

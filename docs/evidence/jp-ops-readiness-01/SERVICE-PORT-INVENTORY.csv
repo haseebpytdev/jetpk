@@ -1,0 +1,9 @@
+PORT,PROCESS,OWNER,PURPOSE,EXPECTED,PUBLIC_OR_INTERNAL,REQUIRED_FOR_JETPAKISTAN,FLAG
+80,OLS/web,root,HTTP edge,YES,PUBLIC,YES,—
+443,OLS/web,root,HTTPS edge,YES,PUBLIC,YES,—
+8088,Laravel private listener,system/pkjetp topology,Laravel app backend,YES,INTERNAL (127.0.0.1),YES,—
+3001,next-server pid 629135,pkjetp,Public frontend Next,YES,INTERNAL (127.0.0.1),YES,—
+3010,next-server pid 390941,pkjetp,Dashboard Next,YES,INTERNAL (127.0.0.1),YES,—
+3000,listener (process name not attributed in ss),unknown,Unknown Next/legacy?,UNKNOWN,INTERNAL,VERIFY,UNEXPECTED_OR_LEGACY
+3306,MySQL,mysql,Database,YES,INTERNAL,YES,—
+7080,OLS admin,root,LiteSpeed admin,YES,PUBLIC/RESTRICT,OPS,EXPECTED_PANEL
