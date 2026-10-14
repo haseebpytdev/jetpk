@@ -1,0 +1,53 @@
+=== USR ===
+5.9G	/usr
+2.7G	/usr/lib
+2.1G	/usr/local
+497M	/usr/share
+311M	/usr/src
+292M	/usr/bin
+93M	/usr/libexec
+67M	/usr/sbin
+35M	/usr/include
+4.0K	/usr/lib64
+4.0K	/usr/games
+=== USR LIB ===
+2.7G	/usr/lib
+651M	/usr/lib/firmware
+587M	/usr/lib/x86_64-linux-gnu
+470M	/usr/lib/modules
+234M	/usr/lib/python3
+182M	/usr/lib/debug
+180M	/usr/lib/llvm-18
+105M	/usr/lib/snapd
+54M	/usr/lib/python3.12
+25M	/usr/lib/gcc
+22M	/usr/lib/udev
+21M	/usr/lib/grub
+19M	/usr/lib/linux-tools-6.8.0-146
+19M	/usr/lib/linux-tools-6.8.0-136
+11M	/usr/lib/php
+=== USR LOCAL ===
+2.1G	/usr/local
+1.2G	/usr/local/CyberCP
+615M	/usr/local/lsws
+246M	/usr/local/CyberPanel
+96M	/usr/local/lscp
+820K	/usr/local/lsmcd
+60K	/usr/local/share
+12K	/usr/local/lib
+8.0K	/usr/local/sbin
+8.0K	/usr/local/lscpd
+4.0K	/usr/local/src
+4.0K	/usr/local/include
+4.0K	/usr/local/games
+4.0K	/usr/local/etc
+4.0K	/usr/local/bin
+=== OPT ===
+16G	/opt/jetpakistan-ai-lab
+16G	/opt
+204M	/opt/node-v22.23.1-linux-x64
+=== ROOT HOME ===
+12K	/root
+ROOT_HOME_DENIED
+=== LITESPEED ===
+615M	/usr/local/lsws

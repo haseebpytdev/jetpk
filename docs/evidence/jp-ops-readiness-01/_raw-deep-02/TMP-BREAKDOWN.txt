@@ -1,0 +1,44 @@
+TMP_SIZE_BYTES=3677092443
+=== TMP TOP30 ===
+3.6G	/tmp
+969M	/tmp/jp-frontend-build-1790242108
+243M	/tmp/jp-c07-dash-1789724546
+241M	/tmp/jp-dashboard-next-backup-1789758710
+241M	/tmp/jp-dashboard-next-backup-1789754406
+240M	/tmp/jp-dashboard-next-backup-1789744508
+240M	/tmp/jp-dashboard-next-backup-1789724546
+6.7M	/tmp/jp-stage-20260916T222107Z
+6.5M	/tmp/jp-stage-20260916T221035Z
+6.3M	/tmp/jp-stage-20260916T214141Z
+4.0M	/tmp/pr57-dashboard-full-bc37a9067720
+3.6M	/tmp/jp-dash-exact-1789710210
+2.8M	/tmp/jp-email-html-unique
+2.6M	/tmp/node-compile-cache
+1012K	/tmp/jp-ai-lab-03r4-final
+696K	/tmp/jp-ai-lab-03r3-final
+412K	/tmp/cq43-final-soak-out
+396K	/tmp/jp-php-20260916T233706Z
+392K	/tmp/cq43-final-resoak-out
+388K	/tmp/jp-php-20260916T232133Z
+376K	/tmp/cq44-perf01-prod-out-run1
+368K	/tmp/jp-ai-01e
+364K	/tmp/cq44-perf01-prod-out
+344K	/tmp/node-jiti
+316K	/tmp/jp-ai-01d
+292K	/tmp/r7c-fare-extract
+272K	/tmp/jp-php-20260916T225321Z
+236K	/tmp/jp-php-20260916T222956Z
+236K	/tmp/jp-php-20260916T222535Z
+224K	/tmp/cq43-soak-out
+=== TMP >50M ===
+1433825108	root	2026-09-09+12:19:33.7702643760	/tmp/ollama-linux-amd64.tar.zst
+=== LSOF TMP sample ===
+COMMAND      PID   USER   FD   TYPE             DEVICE SIZE/OFF       NODE NAME
+bash       46903 pkjetp    1w   REG                8,1     1149     264778 /tmp/jp-disk-deep-02/TMP-BREAKDOWN.txt
+bash       46903 pkjetp  255r   REG                8,1    19169       7044 /tmp/_disk-deep-accounting-02.sh
+head      141652 pkjetp    1w   REG                8,1     1149     264778 /tmp/jp-disk-deep-02/TMP-BREAKDOWN.txt
+llama-ser 487125 pkjetp    1w   REG                8,1   616722       8622 /tmp/cq28-llama-server-3921.log
+llama-ser 487125 pkjetp    2w   REG                8,1   616722       8622 /tmp/cq28-llama-server-3921.log
+lsphp     915513 pkjetp    4u  unix 0x0000000000000000      0t0 1424498280 /tmp/lshttpd/jetpk-lsphp.sock type=STREAM (LISTEN)
+lsphp     915682 pkjetp    4u  unix 0x0000000000000000      0t0 1424498280 /tmp/lshttpd/jetpk-lsphp.sock type=STREAM (LISTEN)
+LSOF_TMP_LIMITED

@@ -1,0 +1,29 @@
+PATH,SIZE_BYTES,SIZE_HUMAN,CLASS,RUNTIME_REQUIRED,REGENERABLE,PERSISTENT_DATA,FUTURE_CLEANUP_CANDIDATE,NOTES
+/home/pkjetp/jetpk_app,3120627989,3.2G,APP_TOTAL,YES,NO,MIXED,NO,full app tree
+/home/pkjetp/jetpk_app/app,16313590,22M,SOURCE,YES,NO,NO,NO,first-party
+/home/pkjetp/jetpk_app/bootstrap,43462,64K,SOURCE,YES,NO,NO,NO,first-party
+/home/pkjetp/jetpk_app/config,227784,352K,SOURCE,YES,NO,NO,NO,first-party
+/home/pkjetp/jetpk_app/database,675685,1.1M,SOURCE,YES,NO,NO,NO,first-party
+/home/pkjetp/jetpk_app/public,99500133,98M,PUBLIC_ASSETS,YES,PARTIAL,MIXED,REVIEW,public web assets; includes storage dir OPS-DEF-0020
+/home/pkjetp/jetpk_app/resources,3765636,6.3M,SOURCE,YES,NO,NO,NO,first-party
+/home/pkjetp/jetpk_app/routes,103970,132K,SOURCE,YES,NO,NO,NO,first-party
+/home/pkjetp/jetpk_app/storage,149188756,152M,STORAGE,YES,PARTIAL,YES,REVIEW,laravel storage
+/home/pkjetp/jetpk_app/tests,158142,268K,SOURCE,YES,NO,NO,NO,first-party
+/home/pkjetp/jetpk_app/vendor,39971347,61M,COMPOSER_VENDOR,YES,YES,NO,OPTIMIZE_DEPLOYMENT,composer deps
+/home/pkjetp/jetpk_app/node_modules,256258133,266M,NODE_MODULES,UNKNOWN,YES,NO,REVIEW,root nm
+/home/pkjetp/jetpk_app/frontend,992665234,1017M,FRONTEND_TREE,YES,PARTIAL,NO,REVIEW,frontend app+nm+.next
+/home/pkjetp/jetpk_app/dashboard,947701172,980M,DASHBOARD_TREE,YES,PARTIAL,NO,REVIEW,dashboard app+nm+.next
+/home/pkjetp/jetpk_app/ai-assistant,570739035,545M,AI_RUNTIME,YES,NO,MIXED,REVIEW,ai assistant + models
+/home/pkjetp/jetpk_app/scripts,45210,76K,SOURCE,YES,NO,NO,NO,first-party
+/home/pkjetp/jetpk_app/docs,522474,600K,SOURCE,YES,NO,NO,NO,first-party
+/home/pkjetp/jetpk_app/tools,3087,16K,OTHER,UNKNOWN,UNKNOWN,UNKNOWN,REVIEW,
+/home/pkjetp/jetpk_app/bootstrap/cache,23238,36K,OTHER,UNKNOWN,UNKNOWN,UNKNOWN,REVIEW,
+/home/pkjetp/jetpk_app/frontend/node_modules,605132252,641M,NODE_MODULES,BUILD_ONLY,YES,NO,SAFE_CLEANUP_LATER,regenerable via npm ci
+/home/pkjetp/jetpk_app/dashboard/node_modules,578247695,624M,NODE_MODULES,BUILD_ONLY,YES,NO,SAFE_CLEANUP_LATER,regenerable via npm ci
+/home/pkjetp/jetpk_app/frontend/.next,342481682,330M,NEXT_BUILD,RUNTIME_REQUIRED,YES,NO,KEEP,served by Next/PM2
+/home/pkjetp/jetpk_app/dashboard/.next,366676846,352M,NEXT_BUILD,RUNTIME_REQUIRED,YES,NO,KEEP,served by Next/PM2
+/home/pkjetp/jetpk_app/frontend/app,87083,916K,SOURCE,YES,NO,NO,KEEP,first-party source/assets
+/home/pkjetp/jetpk_app/dashboard/app,36555,460K,SOURCE,YES,NO,NO,KEEP,first-party source/assets
+/home/pkjetp/jetpk_app/frontend/public,41874673,41M,SOURCE,YES,NO,NO,KEEP,first-party source/assets
+/home/pkjetp/jetpk_app/dashboard/public,0,4.0K,SOURCE,YES,NO,NO,KEEP,first-party source/assets
+/home/pkjetp/jetpk_app/ai-assistant/models,436743552,417M,AI_MODEL,RUNTIME_REQUIRED,NO,YES,KEEP,gguf model weights

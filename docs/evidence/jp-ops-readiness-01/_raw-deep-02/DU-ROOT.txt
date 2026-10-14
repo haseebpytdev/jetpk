@@ -1,0 +1,19 @@
+=== DU ROOT XDEV ===
+40G	/
+16G	/opt
+12G	/home
+5.9G	/usr
+3.6G	/tmp
+1.3G	/var
+7.9M	/etc
+88K	/app
+64K	/frontend
+16K	/lost+found
+12K	/root
+8.0K	/snap
+4.0K	/srv
+4.0K	/sbin.usr-is-merged
+4.0K	/mnt
+4.0K	/media
+4.0K	/lib.usr-is-merged
+4.0K	/bin.usr-is-merged

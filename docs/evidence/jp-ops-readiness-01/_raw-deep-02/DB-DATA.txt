@@ -1,0 +1,12 @@
+=== DB DATA DIR ===
+DB_DATA_DIR=/var/lib/mysql
+DB_DATA_SIZE_BYTES=193371371
+DB_DATA_SIZE_HUMAN=185M
+185M	/var/lib/mysql
+16K	/var/lib/mysql/cyberpanel
+12K	/var/lib/mysql/sys
+12K	/var/lib/mysql/jetpk_prod
+4.0K	/var/lib/mysql/u654883295_php10
+4.0K	/var/lib/mysql/performance_schema
+4.0K	/var/lib/mysql/mysql
+BINLOG_SIZE_BYTES=0
