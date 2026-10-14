@@ -1,0 +1,39 @@
+=== ROOT OWNED RESIDUALS ===
+PATH=/home/pkjetp/backups/jp-ask-ui-01-20260907T211951Z SIZE=763M OWNER=root:root BYTES=799006853
+PATH=/home/pkjetp/backups/jp-perf-final-02e-20260904T233239Z SIZE=681M OWNER=root:root BYTES=713551712
+PATH=/home/pkjetp/backups/jp-perf-final-02d-20260904T203550Z SIZE=674M OWNER=root:root BYTES=706082305
+PATH=/home/pkjetp/releases/jetpk-20260930T080534Z SIZE=51M OWNER=root:root BYTES=49750137
+=== ROOT OWNED TMP LARGE ===
+1433825108	/tmp/ollama-linux-amd64.tar.zst
+6625724	/tmp/jp-v3-owner-retest-release-844170b8.tar.gz
+424793	/tmp/dashboard-a5e92546.tar.gz
+137460	/tmp/ds.json
+131749	/tmp/jp-67-FlightController.php
+85049	/tmp/jp-ai-lab-03r42-installer.py
+84894	/tmp/jp-probe-body.txt
+81920	/tmp/jp-title-null.tar
+80803	/tmp/admin-ai-rendered.html
+79856	/tmp/jp-home.out
+79700	/tmp/AiChatOrchestrator.php
+79463	/tmp/jp-home-status.txt
+78229	/tmp/jp-c08-home.html
+70695	/tmp/jp-email-delivery-sanitized.json
+68711	/tmp/jp-email-html-unique.tgz
+66948	/tmp/jetpk-jp-client-ui-booking-control-01-20260831T220421Z.tar.gz
+65537	/tmp/jp-c07d-dashboard.blade.php
+61372	/tmp/jp-admin-auth.html
+60329	/tmp/jp_body.html
+59631	/tmp/jetpk-public-home.html
+58736	/tmp/jetpk-release-r7c-17499f44cb38.tar.gz
+58224	/tmp/jp-next-build.log
+57500	/tmp/jp-groups-hub.html
+57082	/tmp/up-q.html
+57034	/tmp/up-bare.html
+57034	/tmp/about-local-3010.html
+57034	/tmp/about-local-3000.html
+52450	/tmp/jp-api07-routes.txt
+51469	/tmp/jp-rebuild-78dadc7b-nohup.out
+51356	/tmp/jp-conv19-route-list.txt
+ROOT_OWNED_TMP_TOPLEVEL_BYTES=2399166360
+ROOT_OWNED_OBSOLETE_BAK_REL_BYTES=2268391007
+ROOT_OWNED_OBSOLETE_TOTAL_BYTES=4667557367

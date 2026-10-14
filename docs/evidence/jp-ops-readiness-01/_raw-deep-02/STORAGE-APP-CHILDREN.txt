@@ -1,0 +1,13 @@
+146M	/home/pkjetp/jetpk_app/storage/app
+58M	/home/pkjetp/jetpk_app/storage/app/public
+37M	/home/pkjetp/jetpk_app/storage/app/audits
+20M	/home/pkjetp/jetpk_app/storage/app/email-qa
+15M	/home/pkjetp/jetpk_app/storage/app/staging
+13M	/home/pkjetp/jetpk_app/storage/app/imports
+2.9M	/home/pkjetp/jetpk_app/storage/app/private
+2.6M	/home/pkjetp/jetpk_app/storage/app/deployment-backups
+228K	/home/pkjetp/jetpk_app/storage/app/diagnostics
+44K	/home/pkjetp/jetpk_app/storage/app/email-previews
+16K	/home/pkjetp/jetpk_app/storage/app/previews
+4.0K	/home/pkjetp/jetpk_app/storage/app/tmp-qa-09b
+4.0K	/home/pkjetp/jetpk_app/storage/app/qa

@@ -1,0 +1,14 @@
+PATH,SIZE_BYTES,SIZE_HUMAN,CLASS,NOTES
+/home/pkjetp/jetpk_app/storage,149188756,152M,STORAGE_ROOT,Laravel storage root
+/home/pkjetp/jetpk_app/storage/app,144568323,146M,MIXED_APP_STORAGE,Dominant storage consumer
+/home/pkjetp/jetpk_app/storage/app/public,58510923,58M,UPLOADS,USER_OR_BUSINESS_DATA; do not cleanup; OPS-DEF-0020 adjacent
+/home/pkjetp/jetpk_app/storage/app/audits,37663144,37M,OPS_EVIDENCE,Audit artifacts
+/home/pkjetp/jetpk_app/storage/app/email-qa,16721100,20M,OPS_EVIDENCE,Email QA captures
+/home/pkjetp/jetpk_app/storage/app/staging,14051020,15M,TEMP,Staging material
+/home/pkjetp/jetpk_app/storage/app/imports,12928658,13M,USER_OR_BUSINESS_DATA,Import payloads
+/home/pkjetp/jetpk_app/storage/logs,4035849,4.0M,LOG,Laravel logs — not disk driver
+/home/pkjetp/jetpk_app/storage/app/private,2709096,2.9M,USER_OR_BUSINESS_DATA,Private app files
+/home/pkjetp/jetpk_app/storage/app/deployment-backups,1797594,2.6M,OPS_EVIDENCE,Scoped deploy backups
+/home/pkjetp/jetpk_app/storage/framework,22338,780K,CACHE,sessions/cache/views
+/home/pkjetp/jetpk_app/storage/backups,493511,664K,OPS_EVIDENCE,Internal storage backups
+/home/pkjetp/jetpk_app/storage/deployment-backups,68735,80K,OPS_EVIDENCE,Legacy deployment backups

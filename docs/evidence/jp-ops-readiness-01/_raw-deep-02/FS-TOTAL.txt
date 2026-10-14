@@ -1,0 +1,13 @@
+TOTAL_FS_BYTES=102888095744
+USED_FS_BYTES=47056502784
+FREE_FS_BYTES=55814815744
+DISK_USED_PERCENT=46
+DISK_FREE_GB=51.98
+INODE_USED_PERCENT=4
+=== DF ===
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        96G   44G   52G  46% /
+Filesystem        1B-blocks        Used   Available Use% Mounted on
+/dev/sda1      102888095744 47056506880 55814811648  46% /
+Filesystem       Inodes  IUsed    IFree IUse% Mounted on
+/dev/sda1      12976128 502546 12473582    4% /

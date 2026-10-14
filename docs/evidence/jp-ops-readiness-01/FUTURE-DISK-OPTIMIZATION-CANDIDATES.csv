@@ -1,0 +1,25 @@
+PATH,SIZE,CLASSIFICATION,RUNTIME_REQUIRED,SAFE_TO_REGENERATE,DELETE_SAFETY,NEEDS_SUDO,NEEDS_DOWNTIME,NEEDS_BACKUP_FIRST,RECOMMENDATION,RISK
+/opt/jetpakistan-ai-lab,16G,AI_LAB_MODELS_RUNTIME,UNKNOWN,NO,HIGH,YES,POSSIBLE,YES,REVIEW,Current llama-server uses jetpk_app Qwen gguf not these blobs; confirm AI-lab decommission before any removal
+/tmp/ollama-linux-amd64.tar.zst,1.4G,TEMP_INSTALLER,NO,YES,MEDIUM,YES,NO,NO,SAFE_CLEANUP_LATER,Root-owned leftover installer archive
+/tmp/jp-frontend-build-*,~1G,STALE_BUILD,NO,YES,MEDIUM,YES,NO,NO,SAFE_CLEANUP_LATER,Root-owned stale Next build tree
+/tmp/jp-dashboard-next-backup-*,~1G,STALE_BUILD,NO,YES,LOW,NO,NO,NO,SAFE_CLEANUP_LATER,Stale dashboard .next backups
+/home/pkjetp/backups/jp-ask-ui-01-20260907T211951Z,763M,REDUNDANT_BACKUP,NO,NO,MEDIUM,YES,NO,YES,SAFE_CLEANUP_LATER,OPS-DEF-0023 root-owned; superseded by current checkpoint
+/home/pkjetp/backups/jp-perf-final-02e-20260904T233239Z,681M,REDUNDANT_BACKUP,NO,NO,MEDIUM,YES,NO,YES,SAFE_CLEANUP_LATER,OPS-DEF-0023
+/home/pkjetp/backups/jp-perf-final-02d-20260904T203550Z,674M,REDUNDANT_BACKUP,NO,NO,MEDIUM,YES,NO,YES,SAFE_CLEANUP_LATER,OPS-DEF-0023
+/home/pkjetp/jetpk_git*,1.4G,GIT_CLONE_MIRROR,NO,YES,MEDIUM,NO,NO,YES,REVIEW,Historical deploy mirrors; UNKNOWN process dependency; not on critical path today
+/home/pkjetp/jetpk_app/frontend/node_modules,641M,NODE_MODULES,BUILD_ONLY,YES,MEDIUM,NO,NO,YES,OPTIMIZE_DEPLOYMENT,PM2 serves .next; nm needed for rebuilds only — do not remove without build-host strategy
+/home/pkjetp/jetpk_app/dashboard/node_modules,624M,NODE_MODULES,BUILD_ONLY,YES,MEDIUM,NO,NO,YES,OPTIMIZE_DEPLOYMENT,Same as frontend nm
+/home/pkjetp/jetpk_app/node_modules,266M,NODE_MODULES,UNKNOWN,YES,MEDIUM,NO,NO,YES,REVIEW,Root nm purpose unclear vs app Next trees
+/home/pkjetp/.cache/ms-playwright,>~400M,CACHE,NO,YES,LOW,NO,NO,NO,SAFE_CLEANUP_LATER,Browser QA cache; regenerable
+/home/pkjetp/.npm,629M,CACHE,NO,YES,LOW,NO,NO,NO,SAFE_CLEANUP_LATER,npm cache; regenerable
+/home/pkjetp/jetpk_app/ai-assistant/models/*.gguf,417M,AI_MODEL,YES,NO,HIGH,NO,YES,YES,KEEP,Actively loaded by llama-server :3921
+/home/pkjetp/jetpk_app/frontend/.next,330M,NEXT_BUILD,YES,YES,HIGH,NO,YES,YES,KEEP,PM2 cwd frontend next-server
+/home/pkjetp/jetpk_app/dashboard/.next,352M,NEXT_BUILD,YES,YES,HIGH,NO,YES,YES,KEEP,PM2 cwd dashboard next-server
+/home/pkjetp/backups/jetpk_app-20261014T215304Z.tar.gz,1.2G,CURRENT_CHECKPOINT,YES,NO,HIGH,NO,NO,YES,KEEP,Verified current rollback
+/home/pkjetp/backups/jetpk_app-20261014T192251Z.tar.gz,1.2G,PREVIOUS_ROLLBACK,YES,NO,HIGH,NO,NO,YES,KEEP,Pre-Wave1C pin
+/home/pkjetp/jetpk_app/storage/app/public,58M,UPLOADS,YES,NO,HIGH,NO,NO,YES,KEEP,User/business uploads; OPS-DEF-0020 adjacent
+/cyberpanel.swap,2.0G,SWAP_FILE,YES,NO,HIGH,YES,YES,YES,KEEP,System swap; do not delete
+/usr/local/CyberCP,1.2G,PANEL,YES,NO,HIGH,YES,YES,YES,KEEP,Hosting panel
+/usr/local/lsws,615M,WEBSERVER,YES,NO,HIGH,YES,YES,YES,KEEP,LiteSpeed
+/var/lib/mysql,185M,DATABASE,YES,NO,HIGH,YES,YES,YES,KEEP,MariaDB datadir
+/var/log/journal,329M,SYSTEM_LOG,NO,PARTIAL,MEDIUM,YES,NO,NO,ROTATE,journalctl vacuum later if needed

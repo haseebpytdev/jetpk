@@ -1,0 +1,15 @@
+PATH,SIZE_BYTES,SIZE_HUMAN,PERCENT_OF_USED_FS,CLASS,NOTES
+/opt,16855534450,16G,35.82,SYSTEM_OPT,Dominated by /opt/jetpakistan-ai-lab (14G models + 2.2G ollama runtime)
+/opt/jetpakistan-ai-lab,16800000000,16G,35.7,AI_LAB,Ollama model blobs + CUDA libs; NOT used by current llama-server (uses jetpk_app model)
+/opt/node-v22.23.1-linux-x64,214000000,204M,0.45,SYSTEM_OPT,Node 22 distribution
+/home,12016622206,12G,25.54,HOME,pkjetp home (app+backups+git+caches)
+/usr,5855800332,5.9G,12.44,SYSTEM_USR,OS + CyberCP/LiteSpeed under /usr/local
+/tmp,3677072670,3.6G,7.81,TEMP,Stale build trees + root-owned ollama tarball 1.4G
+/cyberpanel.swap,2147483648,2.0G,4.56,SWAP_FILE,CyberPanel swap file at FS root
+/var,1681773250,1.3G,3.57,SYSTEM_VAR,mysql 185M + journal 329M + apt/cache
+/boot,221450680,213M,0.47,SYSTEM_BOOT,kernels
+/etc,3142326,7.9M,0.01,SYSTEM_ETC,config
+/root,0,12K,0.00,SYSTEM_ROOT,inaccessible detail for pkjetp (du undercount possible)
+/srv,0,4.0K,0.00,SYSTEM_SRV,
+/mnt,0,4.0K,0.00,SYSTEM_MNT,
+/media,0,4.0K,0.00,SYSTEM_MEDIA,

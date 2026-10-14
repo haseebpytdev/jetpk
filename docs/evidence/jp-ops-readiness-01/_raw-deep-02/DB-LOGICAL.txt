@@ -1,0 +1,17 @@
+Usage: lsphp
+      lsphp -[b|c|n|h|i|q|s|v|?] [<file>] [args...]
+  Run in LSAPI mode, only '-b', '-s' and '-c' are effective
+  Run in Command Line Interpreter mode when parameters are specified
+
+  -b <address:port>|<port> Bind Path for external LSAPI Server mode
+  -c <path>|<file> Look for php.ini file in this directory
+  -n    No php.ini file will be used
+  -h    This help
+  -i    PHP information
+  -l    Syntax check
+  -q    Quiet-mode.  Suppress HTTP Header output.
+  -s    Display colour syntax highlighted source.
+  -v    Version number
+  -?    This help
+
+  args...    Arguments passed to script.

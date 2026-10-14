@@ -1,0 +1,3 @@
+COMMAND    PID   USER   FD   TYPE DEVICE SIZE/OFF NLINK  NODE NAME
+lsphp   915513 pkjetp    3u   REG    0,1        0     0 49167 /memfd:opcache_lock (deleted)
+lsphp   915682 pkjetp    3u   REG    0,1        0     0 49167 /memfd:opcache_lock (deleted)

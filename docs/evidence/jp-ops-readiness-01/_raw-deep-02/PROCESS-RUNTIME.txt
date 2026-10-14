@@ -1,0 +1,15 @@
+=== PM2 ===
+PM2_LIST_FAIL
+
+=== PROCESSES node/php/next ===
+pkjetp    390941  405709  0 Oct12 ?        00:14:03 next-server (v15.5.22)
+pkjetp    405709       1  0 Aug08 ?        00:46:25 PM2 v7.0.3: God Daemon (/home/pkjetp/.pm2)
+pkjetp    629135  405709  0 Oct12 ?        00:05:47 next-server (v15.5.21)
+pkjetp    915513   79104  0 00:29 ?        00:00:00 lsphp
+pkjetp    915682  915513  0 00:29 ?        00:00:00 lsphp
+
+=== CWD of node processes ===
+PID=390941 CMD=next-server (v15.5.22)                                                         
+lrwxrwxrwx 1 pkjetp pkjetp 0 Oct 13 06:50 /proc/390941/cwd -> /home/pkjetp/jetpk_app/frontend
+PID=629135 CMD=next-server (v15.5.21)                                                         
+lrwxrwxrwx 1 pkjetp pkjetp 0 Oct 13 06:50 /proc/629135/cwd -> /home/pkjetp/jetpk_app/dashboard

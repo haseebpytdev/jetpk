@@ -1,0 +1,26 @@
+SRC /home/pkjetp/jetpk_app/app 16313590
+SRC /home/pkjetp/jetpk_app/bootstrap 43462
+SRC /home/pkjetp/jetpk_app/config 227784
+SRC /home/pkjetp/jetpk_app/database 675685
+SRC /home/pkjetp/jetpk_app/resources 3765636
+SRC /home/pkjetp/jetpk_app/routes 103970
+SRC /home/pkjetp/jetpk_app/tests 158142
+SRC /home/pkjetp/jetpk_app/scripts 45210
+SRC /home/pkjetp/jetpk_app/docs 522474
+SRC /home/pkjetp/jetpk_app/composer.json 3175
+SRC /home/pkjetp/jetpk_app/composer.lock 348283
+SRC /home/pkjetp/jetpk_app/package.json 2642
+SRC /home/pkjetp/jetpk_app/artisan 425
+SRC /home/pkjetp/jetpk_app/frontend/app 87083
+SRC /home/pkjetp/jetpk_app/frontend/components 90728
+SRC /home/pkjetp/jetpk_app/frontend/lib 45942
+SRC /home/pkjetp/jetpk_app/frontend/public 41874673
+SRC /home/pkjetp/jetpk_app/frontend/package.json 4195
+SRC /home/pkjetp/jetpk_app/frontend/package-lock.json 228934
+SRC /home/pkjetp/jetpk_app/dashboard/app 36555
+SRC /home/pkjetp/jetpk_app/dashboard/components 73035
+SRC /home/pkjetp/jetpk_app/dashboard/lib 450972
+SRC /home/pkjetp/jetpk_app/dashboard/features 980434
+SRC /home/pkjetp/jetpk_app/dashboard/package.json 1979
+SRC /home/pkjetp/jetpk_app/dashboard/package-lock.json 236386
+SRC_PARTIAL_AI=133995483
