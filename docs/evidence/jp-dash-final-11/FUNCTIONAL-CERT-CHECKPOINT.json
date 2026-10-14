@@ -1,0 +1,20 @@
+{
+  "updatedAt": "2026-10-12T10:25:03.994Z",
+  "baseUrl": "https://jetpakistan.pk",
+  "batchNumber": 35,
+  "batchGroups": 40,
+  "groupsProcessed": 10,
+  "totalGroupsRemaining": 10,
+  "functionalCasesTested": 15049,
+  "functionalCasesTotal": 15155,
+  "batchCasesSelected": 10,
+  "metrics": {
+    "jsErrors": 0,
+    "jsErrorSamples": [],
+    "http500": 0,
+    "unexpectedNetwork": 0,
+    "brokenAssets": 0,
+    "hydrationErrors": 0
+  },
+  "atomicCheckpointSave": true
+}

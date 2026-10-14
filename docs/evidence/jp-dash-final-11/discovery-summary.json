@@ -1,0 +1,110 @@
+{
+  "startedAt": "2026-10-09T21:49:51.408Z",
+  "productionSha": "0949216806b8f117d02c54a22d036a49be3d783a",
+  "buildId": "Zycw6KaLjjyGopIy9o-F4",
+  "provenance": {
+    "supersededInventory": "C:\\Users\\khadi\\ota-jetpk\\docs\\evidence\\jp-dash-final-11\\ROUTE-ACTION-INVENTORY.superseded-unauthenticated-2026-10-09T21-49-51-386Z.csv",
+    "priorUnauthenticatedDiscoveryInvalid": true,
+    "authenticatedFinal11Roles": [
+      "platform_admin",
+      "staff",
+      "agent_owner_a",
+      "agent_owner_b",
+      "agent_staff_manager",
+      "agent_staff_accountant",
+      "agent_staff_sales",
+      "agent_staff_support",
+      "agent_staff_ticketing",
+      "agent_staff_viewer",
+      "customer_a",
+      "customer_b",
+      "legacy_agency_admin"
+    ]
+  },
+  "roles": {
+    "platform_admin": {
+      "routes": 49,
+      "pass": 57,
+      "fail": 0
+    },
+    "staff": {
+      "routes": 44,
+      "pass": 46,
+      "fail": 0
+    },
+    "agent_owner_a": {
+      "routes": 22,
+      "pass": 28,
+      "fail": 0
+    },
+    "agent_owner_b": {
+      "routes": 22,
+      "pass": 28,
+      "fail": 0
+    },
+    "agent_staff_manager": {
+      "routes": 22,
+      "pass": 28,
+      "fail": 0
+    },
+    "agent_staff_accountant": {
+      "routes": 22,
+      "pass": 28,
+      "fail": 0
+    },
+    "agent_staff_sales": {
+      "routes": 22,
+      "pass": 28,
+      "fail": 0
+    },
+    "agent_staff_support": {
+      "routes": 22,
+      "pass": 28,
+      "fail": 0
+    },
+    "agent_staff_ticketing": {
+      "routes": 22,
+      "pass": 28,
+      "fail": 0
+    },
+    "agent_staff_viewer": {
+      "routes": 22,
+      "pass": 28,
+      "fail": 0
+    },
+    "customer_a": {
+      "routes": 10,
+      "pass": 14,
+      "fail": 0
+    },
+    "customer_b": {
+      "routes": 9,
+      "pass": 13,
+      "fail": 0
+    },
+    "legacy_agency_admin": {
+      "routes": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "routeResults": {
+    "PASS": 355,
+    "FAIL": 0
+  },
+  "roleAttributionCorrect": true,
+  "totalRoutesDiscovered": 289,
+  "totalRoutesLiveOpened": 355,
+  "routeAccounting": {
+    "totalUniqueRoleRoutePairs": 289,
+    "totalRouteAuditAttempts": 355,
+    "totalSuccessfulRouteAudits": 355,
+    "totalFailedRouteAudits": 0,
+    "note": "totalRoutesDiscovered counts unique (role, route) pairs from catalog; totalRoutesLiveOpened counts successful LIVE_BROWSER_GET attempts including viewport repetitions where applicable."
+  },
+  "totalControlsEnumerated": 19128,
+  "totalControlsFunctionallyTested": 0,
+  "untestedControls": 19128,
+  "controlsAccountingCorrectedAt": "2026-10-10T06:19:43.896Z",
+  "controlsAccountingNote": "Enumerated controls use VISUAL_ENUMERATION/LIVE_BROWSER_GET; functional probes are not implied by PASS rows."
+}

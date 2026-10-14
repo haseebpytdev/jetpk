@@ -1,0 +1,11 @@
+FUNCTIONAL_CASE_ID,PERSISTENCE_TYPE,BEFORE_STATE,ACTION,PERSISTENCE_SCOPE,RESTORED,SERVER_DB_MUTATION,AUDIT_EXPECTED,OUTCOME
+FC-004260,CLIENT_LOCAL_STATE,localStorage_theme_preference,click_theme_toggle,browser_local,YES,NO,NO,PASS
+FC-005668,CLIENT_LOCAL_STATE,localStorage_theme_preference,click_theme_toggle,browser_local,YES,NO,NO,PASS
+FC-007075,CLIENT_LOCAL_STATE,localStorage_theme_preference,click_theme_toggle,browser_local,YES,NO,NO,PASS
+FC-008421,CLIENT_LOCAL_STATE,localStorage_theme_preference,click_theme_toggle,browser_local,YES,NO,NO,PASS
+FC-009701,CLIENT_LOCAL_STATE,localStorage_theme_preference,click_theme_toggle,browser_local,YES,NO,NO,PASS
+FC-010848,CLIENT_LOCAL_STATE,localStorage_theme_preference,click_theme_toggle,browser_local,YES,NO,NO,PASS
+FC-011929,CLIENT_LOCAL_STATE,localStorage_theme_preference,click_theme_toggle,browser_local,YES,NO,NO,PASS
+FC-013016,CLIENT_LOCAL_STATE,localStorage_theme_preference,click_theme_toggle,browser_local,YES,NO,NO,PASS
+FC-014680,CLIENT_LOCAL_STATE,localStorage_theme_preference,click_theme_toggle,browser_local,YES,NO,NO,PASS
+FC-005420,CLIENT_LOCAL_STATE,localStorage_theme_preference,click_theme_toggle,browser_local,YES,NO,NO,PASS

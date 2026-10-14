@@ -1,0 +1,117 @@
+FUNCTIONAL_CASE_ID,ROLE,ROUTE,CONTROL,ENTITY_TYPE,RECOMMENDED_CLASS,REASON,SAFE_LIFECYCLE_PILOT
+FC-000647,platform_admin,/admin/dashboard/staff,button:Create staff,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-000652,platform_admin,/admin/dashboard/staff,"button:Staff operator — bookings, payments, documents, create cancellations/refunds",OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,retain_pending_review,NO
+FC-000697,platform_admin,/admin/dashboard/staff,input_checkbox:staff-perm-staff.cancellations.create,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,retain_pending_review,NO
+FC-000700,platform_admin,/admin/dashboard/staff,input_checkbox:staff-perm-staff.refunds.create,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,retain_pending_review,NO
+FC-001066,platform_admin,/admin/dashboard/cms/pages,button:Create draft,CMS_DRAFT_QA,QA_CREATE_DELETE_LIFECYCLE,cms_create_surface,YES
+FC-001121,platform_admin,/admin/dashboard/cms/pages,div:Create pageTitleSlugContentCreate draftCMS filtersReset filtersApply filtersSear,CMS_DRAFT_QA,QA_CREATE_DELETE_LIFECYCLE,cms_create_surface,YES
+FC-001122,platform_admin,/admin/dashboard/cms/pages,section:Create pageTitleSlugContentCreate draft,CMS_DRAFT_QA,QA_CREATE_DELETE_LIFECYCLE,cms_create_surface,YES
+FC-001221,platform_admin,/admin/dashboard/markups,button:Create rule,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,retain_pending_review,NO
+FC-003253,staff,/staff/dashboard/staff,button:Create staff,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-003542,staff,/staff/dashboard/markups,button:Create rule,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,retain_pending_review,NO
+FC-004280,agent_owner_a,/agent/dashboard,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-004357,agent_owner_a,/agent/bookings,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-004420,agent_owner_a,/agent/bookings/create,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-004481,agent_owner_a,/agent/wallet,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-004554,agent_owner_a,/agent/wallet/ledger,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-004619,agent_owner_a,/agent/accounting/ledger,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-004683,agent_owner_a,/agent/finance/statement,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-004748,agent_owner_a,/agent/deposits,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-004812,agent_owner_a,/agent/deposits/new,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-004879,agent_owner_a,/agent/payments,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-004941,agent_owner_a,/agent/invoices,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005002,agent_owner_a,/agent/commissions,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005062,agent_owner_a,/agent/reports,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005122,agent_owner_a,/agent/travelers,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005186,agent_owner_a,/agent/travelers/new,navigation_link:New booking,TRAVELER_QA,QA_CREATE_DELETE_LIFECYCLE,traveler_create_surface,YES
+FC-005228,agent_owner_a,/agent/travelers/new,form:TitleMrMrsMsMissDrMxGenderMaleFemaleOtherFirst nameLast nameDate of birthNationa,TRAVELER_QA,QA_CREATE_DELETE_LIFECYCLE,traveler_create_surface,YES
+FC-005254,agent_owner_a,/agent/staff,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005300,agent_owner_a,/agent/staff/new,button:Create staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-005317,agent_owner_a,/agent/staff/new,navigation_link:New booking,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-005353,agent_owner_a,/agent/staff/new,form:NameEmailPhoneTemporary passwordPermissionsView bookingsCreate bookingsView wall,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-005379,agent_owner_a,/agent/agency,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005441,agent_owner_a,/agent/profile,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005505,agent_owner_a,/agent/security,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005567,agent_owner_a,/agent/support,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005628,agent_owner_a,/agent/notifications,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005688,agent_owner_b,/agent/dashboard,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005765,agent_owner_b,/agent/bookings,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005828,agent_owner_b,/agent/bookings/create,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005889,agent_owner_b,/agent/wallet,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-005962,agent_owner_b,/agent/wallet/ledger,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006027,agent_owner_b,/agent/accounting/ledger,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006091,agent_owner_b,/agent/finance/statement,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006156,agent_owner_b,/agent/deposits,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006220,agent_owner_b,/agent/deposits/new,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006287,agent_owner_b,/agent/payments,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006349,agent_owner_b,/agent/invoices,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006410,agent_owner_b,/agent/commissions,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006470,agent_owner_b,/agent/reports,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006530,agent_owner_b,/agent/travelers,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006594,agent_owner_b,/agent/travelers/new,navigation_link:New booking,TRAVELER_QA,QA_CREATE_DELETE_LIFECYCLE,traveler_create_surface,YES
+FC-006636,agent_owner_b,/agent/travelers/new,form:TitleMrMrsMsMissDrMxGenderMaleFemaleOtherFirst nameLast nameDate of birthNationa,TRAVELER_QA,QA_CREATE_DELETE_LIFECYCLE,traveler_create_surface,YES
+FC-006662,agent_owner_b,/agent/staff,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006707,agent_owner_b,/agent/staff/new,button:Create staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-006724,agent_owner_b,/agent/staff/new,navigation_link:New booking,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-006760,agent_owner_b,/agent/staff/new,form:NameEmailPhoneTemporary passwordPermissionsView bookingsCreate bookingsView wall,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-006786,agent_owner_b,/agent/agency,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006848,agent_owner_b,/agent/profile,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006912,agent_owner_b,/agent/security,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-006974,agent_owner_b,/agent/support,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007035,agent_owner_b,/agent/notifications,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007094,agent_staff_manager,/agent/dashboard,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007169,agent_staff_manager,/agent/bookings,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007230,agent_staff_manager,/agent/bookings/create,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007344,agent_staff_manager,/agent/wallet/ledger,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007407,agent_staff_manager,/agent/accounting/ledger,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007469,agent_staff_manager,/agent/finance/statement,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007532,agent_staff_manager,/agent/deposits,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007594,agent_staff_manager,/agent/deposits/new,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007659,agent_staff_manager,/agent/payments,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007719,agent_staff_manager,/agent/invoices,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007778,agent_staff_manager,/agent/commissions,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007836,agent_staff_manager,/agent/reports,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007894,agent_staff_manager,/agent/travelers,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-007956,agent_staff_manager,/agent/travelers/new,navigation_link:New booking,TRAVELER_QA,QA_CREATE_DELETE_LIFECYCLE,traveler_create_surface,YES
+FC-008022,agent_staff_manager,/agent/staff,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-008067,agent_staff_manager,/agent/staff/new,button:Create staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-008083,agent_staff_manager,/agent/staff/new,navigation_link:New booking,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-008118,agent_staff_manager,/agent/staff/new,form:NameEmailPhoneTemporary passwordPermissionsView bookingsCreate bookingsView wall,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-008143,agent_staff_manager,/agent/agency,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-008202,agent_staff_manager,/agent/profile,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-008263,agent_staff_manager,/agent/security,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-008323,agent_staff_manager,/agent/support,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-008382,agent_staff_manager,/agent/notifications,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-009364,agent_staff_accountant,/agent/staff/new,button:Create staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-009412,agent_staff_accountant,/agent/staff/new,form:NameEmailPhoneTemporary passwordPermissionsCreate staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-009720,agent_staff_sales,/agent/dashboard,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-009805,agent_staff_sales,/agent/bookings,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-009836,agent_staff_sales,/agent/bookings/create,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-009886,agent_staff_sales,/agent/wallet,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-009943,agent_staff_sales,/agent/wallet/ledger,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-009997,agent_staff_sales,/agent/accounting/ledger,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010046,agent_staff_sales,/agent/finance/statement,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010096,agent_staff_sales,/agent/deposits,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010148,agent_staff_sales,/agent/deposits/new,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010203,agent_staff_sales,/agent/payments,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010255,agent_staff_sales,/agent/invoices,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010305,agent_staff_sales,/agent/commissions,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010354,agent_staff_sales,/agent/reports,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010403,agent_staff_sales,/agent/travelers,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010456,agent_staff_sales,/agent/travelers/new,navigation_link:New booking,TRAVELER_QA,QA_CREATE_DELETE_LIFECYCLE,traveler_create_surface,YES
+FC-010488,agent_staff_sales,/agent/travelers/new,form:TitleMrMrsMsMissDrMxGenderMaleFemaleOtherFirst nameLast nameDate of birthNationa,TRAVELER_QA,QA_CREATE_DELETE_LIFECYCLE,traveler_create_surface,YES
+FC-010513,agent_staff_sales,/agent/staff,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010547,agent_staff_sales,/agent/staff/new,button:Create staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-010563,agent_staff_sales,/agent/staff/new,navigation_link:New booking,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-010589,agent_staff_sales,/agent/staff/new,form:NameEmailPhoneTemporary passwordPermissionsCreate staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-010614,agent_staff_sales,/agent/agency,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010664,agent_staff_sales,/agent/profile,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010716,agent_staff_sales,/agent/security,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010768,agent_staff_sales,/agent/support,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-010818,agent_staff_sales,/agent/notifications,navigation_link:New booking,OTHER_QA_ENTITY,QA_CREATE_DELETE_LIFECYCLE,create_nav_entry,NO
+FC-011641,agent_staff_support,/agent/staff/new,button:Create staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-011681,agent_staff_support,/agent/staff/new,form:NameEmailPhoneTemporary passwordPermissionsCreate staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-012727,agent_staff_ticketing,/agent/staff/new,button:Create staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-012767,agent_staff_ticketing,/agent/staff/new,form:NameEmailPhoneTemporary passwordPermissionsCreate staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-013814,agent_staff_viewer,/agent/staff/new,button:Create staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES
+FC-013854,agent_staff_viewer,/agent/staff/new,form:NameEmailPhoneTemporary passwordPermissionsCreate staff member,STAFF_QA,QA_CREATE_DELETE_LIFECYCLE,staff_create_surface,YES

@@ -1,0 +1,5 @@
+ROLE_KEY,ROUTE,SOURCE,WHY_NOW_REACHABLE,VALID_CURRENT_ROUTE
+platform_admin,/admin/dashboard/bookings/36,nav_enumeration_live_sweep,Authenticated nav crawl discovered additional booking detail deep links from live bookings list,YES
+platform_admin,/admin/dashboard/bookings/37,nav_enumeration_live_sweep,Authenticated nav crawl discovered additional booking detail deep links from live bookings list,YES
+staff,/staff/dashboard/bookings/39,nav_enumeration_live_sweep,Authenticated nav crawl discovered additional booking detail deep links from live bookings list,YES
+staff,/staff/dashboard/deposits,static_route_catalog,Staff deposits route included in FINAL-11 static reachable set after DEF-F11-0007 tooling closure,YES

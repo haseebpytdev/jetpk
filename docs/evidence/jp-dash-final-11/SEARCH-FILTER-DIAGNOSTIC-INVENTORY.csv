@@ -1,0 +1,206 @@
+FUNCTIONAL_CASE_ID,PATTERN,RESULT,ROLE,ROUTE,CONTROL
+FC-000046,native_input,UNTESTED,platform_admin,/admin/dashboard,input
+FC-000060,button_menu,UNTESTED,platform_admin,/admin/dashboard/bookings,Apply filters
+FC-000121,native_input,UNTESTED,platform_admin,/admin/dashboard/bookings,input
+FC-000131,button_menu,UNTESTED,platform_admin,/admin/dashboard/bookings,FiltersClear allSearchBooking statusAllConfirmedPendingFailedCancelledPayment st
+FC-000141,button_menu,UNTESTED,platform_admin,/admin/dashboard/payments,Apply filters
+FC-000184,native_input,UNTESTED,platform_admin,/admin/dashboard/payments,input
+FC-000195,button_menu,UNTESTED,platform_admin,/admin/dashboard/payments,FiltersClear allSearchPayment statusAllPaidUnpaidPartialPendingFailedReversedRef
+FC-000207,button_menu,UNTESTED,platform_admin,/admin/dashboard/pnrs,Apply filters
+FC-000247,native_input,UNTESTED,platform_admin,/admin/dashboard/pnrs,input
+FC-000261,button_menu,UNTESTED,platform_admin,/admin/dashboard/pnrs,FiltersClear allSearchReference typeAllGDS PNRChannelAllSabre GDSSupplierAllAirl
+FC-000273,button_menu,UNTESTED,platform_admin,/admin/dashboard/tickets,Apply filters
+FC-000304,native_input,UNTESTED,platform_admin,/admin/dashboard/tickets,input
+FC-000315,button_menu,UNTESTED,platform_admin,/admin/dashboard/tickets,FiltersClear allSearchDocument typeAllE-TicketNDC Fulfilment DocumentChannelAllA
+FC-000355,native_input,UNTESTED,platform_admin,/admin/dashboard/operations/inbox,input
+FC-000359,button_menu,UNTESTED,platform_admin,/admin/dashboard/operations/inbox,Event feed / inboxTry clearing filters or broadening your search. Ops events com
+FC-000371,button_menu,UNTESTED,platform_admin,/admin/dashboard/customers,Apply filters
+FC-000411,native_input,UNTESTED,platform_admin,/admin/dashboard/customers,input
+FC-000422,button_menu,UNTESTED,platform_admin,/admin/dashboard/customers,FiltersClear allSearchAccount statusAllActiveInactiveSuspendedReview RequiredVer
+FC-000436,button_menu,UNTESTED,platform_admin,/admin/dashboard/agents,Apply filters
+FC-000492,button_menu,UNTESTED,platform_admin,/admin/dashboard/agents,FiltersClear allSearchAccount statusAllActiveInactiveSuspendedReview RequiredVer
+FC-000504,button_menu,UNTESTED,platform_admin,/admin/dashboard/suppliers,Apply filters
+FC-000544,native_input,UNTESTED,platform_admin,/admin/dashboard/suppliers,input
+FC-000555,button_menu,UNTESTED,platform_admin,/admin/dashboard/suppliers,FiltersClear allSearchCategoryAllGDSNDCRetiredGroupAirlineOperational statusAllA
+FC-000566,button_menu,UNTESTED,platform_admin,/admin/dashboard/users,Reset filters
+FC-000567,button_menu,UNTESTED,platform_admin,/admin/dashboard/users,Apply filters
+FC-000630,native_input,UNTESTED,platform_admin,/admin/dashboard/users,input
+FC-000685,native_input,UNTESTED,platform_admin,/admin/dashboard/staff,input
+FC-000771,button_menu,FAIL,platform_admin,/admin/dashboard/reports,Reset filters
+FC-000772,button_menu,FAIL,platform_admin,/admin/dashboard/reports,Apply filters
+FC-000812,native_input,FAIL,platform_admin,/admin/dashboard/reports,input
+FC-000827,button_menu,FAIL,platform_admin,/admin/dashboard/reports,Report filtersReset filtersApply filtersDate presetLast 7 daysLast 30 daysThis m
+FC-000828,button_menu,FAIL,platform_admin,/admin/dashboard/reports,Active report filters
+FC-000832,button_menu,FAIL,platform_admin,/admin/dashboard/reports,Needs attentionRead-only operational queue derived from preview records.No atten
+FC-000847,button_menu,UNTESTED,platform_admin,/admin/dashboard/audit,Reset filters
+FC-000848,button_menu,UNTESTED,platform_admin,/admin/dashboard/audit,Apply filters
+FC-000882,native_input,UNTESTED,platform_admin,/admin/dashboard/audit,input
+FC-000908,button_menu,UNTESTED,platform_admin,/admin/dashboard/audit,Audit filtersReset filtersApply filtersSearchCategoryAll categoriesEvent typeAll
+FC-000953,native_input,FAIL,platform_admin,/admin/dashboard/api-connections,input
+FC-001005,native_input,UNTESTED,platform_admin,/admin/dashboard/settings/general,input
+FC-001053,native_input,UNTESTED,platform_admin,/admin/dashboard/cms/sections,input
+FC-001067,button_menu,UNTESTED,platform_admin,/admin/dashboard/cms/pages,Reset filters
+FC-001068,button_menu,UNTESTED,platform_admin,/admin/dashboard/cms/pages,Apply filters
+FC-001112,native_input,UNTESTED,platform_admin,/admin/dashboard/cms/pages,input
+FC-001123,button_menu,UNTESTED,platform_admin,/admin/dashboard/cms/pages,CMS filtersReset filtersApply filtersSearchPublication statusAll statusesactived
+FC-001169,native_input,FAIL,platform_admin,/admin/dashboard/seo,input
+FC-001210,native_input,UNTESTED,platform_admin,/admin/dashboard/settings/notifications,input
+FC-001254,native_input,UNTESTED,platform_admin,/admin/dashboard/markups,input
+FC-001305,native_input,UNTESTED,platform_admin,/admin/dashboard/commissions,input
+FC-001348,native_input,UNTESTED,platform_admin,/admin/dashboard/group-ticketing,input
+FC-001389,native_input,UNTESTED,platform_admin,/admin/dashboard/settings/security,input
+FC-001431,native_input,UNTESTED,platform_admin,/admin/dashboard/settings/integrations,input
+FC-001475,native_input,UNTESTED,platform_admin,/admin/dashboard/system/go-live,input
+FC-001516,native_input,FAIL,platform_admin,/admin/dashboard/settings,input
+FC-001561,native_input,UNTESTED,platform_admin,/admin/dashboard/support,input
+FC-001579,button_menu,UNTESTED,platform_admin,/admin/dashboard/cms/assets,Reset filters
+FC-001580,button_menu,UNTESTED,platform_admin,/admin/dashboard/cms/assets,Apply filters
+FC-001633,native_input,UNTESTED,platform_admin,/admin/dashboard/cms/assets,input
+FC-001642,button_menu,UNTESTED,platform_admin,/admin/dashboard/cms/assets,CMS filtersReset filtersApply filtersSearchApproval statusAll approval statesapp
+FC-001683,native_input,UNTESTED,platform_admin,/admin/dashboard/deposits,input
+FC-001729,native_input,UNTESTED,platform_admin,/admin/dashboard/cms,input
+FC-001780,native_input,UNTESTED,platform_admin,/admin/dashboard/cms/notices,input
+FC-001822,native_input,UNTESTED,platform_admin,/admin/dashboard/cms/banners,input
+FC-001834,button_menu,UNTESTED,platform_admin,/admin/dashboard/users/roles,Reset filters
+FC-001835,button_menu,UNTESTED,platform_admin,/admin/dashboard/users/roles,Apply filters
+FC-001887,native_input,UNTESTED,platform_admin,/admin/dashboard/users/roles,input
+FC-001905,button_menu,UNTESTED,platform_admin,/admin/dashboard/users/roles,Role filtersReset filtersApply filtersSearchCategoryAll categoriesSystemOperatio
+FC-001914,button_menu,UNTESTED,platform_admin,/admin/dashboard/users/permissions,Reset filters
+FC-001915,button_menu,UNTESTED,platform_admin,/admin/dashboard/users/permissions,Apply filters
+FC-001977,native_input,UNTESTED,platform_admin,/admin/dashboard/users/permissions,input
+FC-001994,button_menu,FAIL,platform_admin,/admin/dashboard/reports/bookings,Reset filters
+FC-001995,button_menu,FAIL,platform_admin,/admin/dashboard/reports/bookings,Apply filters
+FC-002035,native_input,FAIL,platform_admin,/admin/dashboard/reports/bookings,input
+FC-002050,button_menu,FAIL,platform_admin,/admin/dashboard/reports/bookings,Report filtersReset filtersApply filtersDate presetLast 7 daysLast 30 daysThis m
+FC-002051,button_menu,FAIL,platform_admin,/admin/dashboard/reports/bookings,Active report filters
+FC-002065,button_menu,FAIL,platform_admin,/admin/dashboard/reports/operations,Reset filters
+FC-002066,button_menu,FAIL,platform_admin,/admin/dashboard/reports/operations,Apply filters
+FC-002106,native_input,FAIL,platform_admin,/admin/dashboard/reports/operations,input
+FC-002121,button_menu,FAIL,platform_admin,/admin/dashboard/reports/operations,Report filtersReset filtersApply filtersDate presetLast 7 daysLast 30 daysThis m
+FC-002122,button_menu,FAIL,platform_admin,/admin/dashboard/reports/operations,Active report filters
+FC-002131,button_menu,FAIL,platform_admin,/admin/dashboard/reports/operations,PNR/order lifecycleLifecycle status distribution.PNR/order lifecycle: no data fo
+FC-002133,button_menu,FAIL,platform_admin,/admin/dashboard/reports/operations,Ticket/document statusTicketing states are informational.Ticket/document status:
+FC-002135,button_menu,FAIL,platform_admin,/admin/dashboard/reports/operations,Fulfilment statusFulfilment progress by PNR/order.Fulfilment status: no data for
+FC-002146,button_menu,FAIL,platform_admin,/admin/dashboard/reports/payments,Reset filters
+FC-002147,button_menu,FAIL,platform_admin,/admin/dashboard/reports/payments,Apply filters
+FC-002187,native_input,FAIL,platform_admin,/admin/dashboard/reports/payments,input
+FC-002202,button_menu,FAIL,platform_admin,/admin/dashboard/reports/payments,Report filtersReset filtersApply filtersDate presetLast 7 daysLast 30 daysThis m
+FC-002203,button_menu,FAIL,platform_admin,/admin/dashboard/reports/payments,Active report filters
+FC-002218,button_menu,FAIL,platform_admin,/admin/dashboard/reports/sales,Reset filters
+FC-002219,button_menu,FAIL,platform_admin,/admin/dashboard/reports/sales,Apply filters
+FC-002259,native_input,FAIL,platform_admin,/admin/dashboard/reports/sales,input
+FC-002274,button_menu,FAIL,platform_admin,/admin/dashboard/reports/sales,Report filtersReset filtersApply filtersDate presetLast 7 daysLast 30 daysThis m
+FC-002275,button_menu,FAIL,platform_admin,/admin/dashboard/reports/sales,Active report filters
+FC-002323,native_input,FAIL,platform_admin,/admin/dashboard/operations/review,input
+FC-002367,native_input,UNTESTED,platform_admin,/admin/dashboard/operations/execution,input
+FC-002415,native_input,UNTESTED,platform_admin,/admin/dashboard/notifications/failures,input
+FC-002459,native_input,FAIL,platform_admin,/admin/dashboard/profile,input
+FC-002531,native_input,UNTESTED,platform_admin,/admin/dashboard/bookings/39,input
+FC-002612,native_input,UNTESTED,platform_admin,/admin/dashboard/bookings/38,input
+FC-002693,native_input,UNTESTED,platform_admin,/admin/dashboard/bookings/37,input
+FC-002774,native_input,UNTESTED,platform_admin,/admin/dashboard/bookings/36,input
+FC-002855,native_input,UNTESTED,platform_admin,/admin/dashboard/bookings/35,input
+FC-002936,native_input,UNTESTED,platform_admin,/admin/dashboard/bookings/34,input
+FC-002982,native_input,FAIL,staff,/staff/dashboard,input
+FC-002996,button_menu,UNTESTED,staff,/staff/dashboard/bookings,Apply filters
+FC-003017,native_input,UNTESTED,staff,/staff/dashboard/bookings,input
+FC-003027,button_menu,UNTESTED,staff,/staff/dashboard/bookings,FiltersClear allSearchBooking statusAllConfirmedPendingFailedCancelledPayment st
+FC-003039,button_menu,UNTESTED,staff,/staff/dashboard/payments,Apply filters
+FC-003061,native_input,UNTESTED,staff,/staff/dashboard/payments,input
+FC-003072,button_menu,UNTESTED,staff,/staff/dashboard/payments,FiltersClear allSearchPayment statusAllPaidUnpaidPartialPendingFailedReversedRef
+FC-003084,button_menu,UNTESTED,staff,/staff/dashboard/pnrs,Apply filters
+FC-003094,native_input,UNTESTED,staff,/staff/dashboard/pnrs,input
+FC-003105,button_menu,UNTESTED,staff,/staff/dashboard/pnrs,FiltersClear allSearchReference typeAllChannelAllSupplierAllAirlineAllLifecycle 
+FC-003115,button_menu,UNTESTED,staff,/staff/dashboard/tickets,Apply filters
+FC-003125,native_input,UNTESTED,staff,/staff/dashboard/tickets,input
+FC-003136,button_menu,UNTESTED,staff,/staff/dashboard/tickets,FiltersClear allSearchDocument typeAllE-TicketNDC Fulfilment DocumentChannelAllA
+FC-003155,native_input,UNTESTED,staff,/staff/dashboard/operations/inbox,input
+FC-003159,button_menu,UNTESTED,staff,/staff/dashboard/operations/inbox,Event feed / inboxTry clearing filters or broadening your search. Ops events com
+FC-003180,native_input,UNTESTED,staff,/staff/dashboard/customers,input
+FC-003201,native_input,FAIL,staff,/staff/dashboard/agents,input
+FC-003222,native_input,UNTESTED,staff,/staff/dashboard/suppliers,input
+FC-003242,native_input,UNTESTED,staff,/staff/dashboard/users,input
+FC-003264,native_input,UNTESTED,staff,/staff/dashboard/staff,input
+FC-003278,button_menu,UNTESTED,staff,/staff/dashboard/customer-queries,Filter
+FC-003288,native_input,UNTESTED,staff,/staff/dashboard/customer-queries,input
+FC-003300,button_menu,UNTESTED,staff,/staff/dashboard/reports,Reset filters
+FC-003301,button_menu,UNTESTED,staff,/staff/dashboard/reports,Apply filters
+FC-003320,native_input,UNTESTED,staff,/staff/dashboard/reports,input
+FC-003335,button_menu,UNTESTED,staff,/staff/dashboard/reports,Report filtersReset filtersApply filtersDate presetLast 7 daysLast 30 daysThis m
+FC-003336,button_menu,UNTESTED,staff,/staff/dashboard/reports,Active report filters
+FC-003340,button_menu,UNTESTED,staff,/staff/dashboard/reports,Needs attentionRead-only operational queue derived from preview records.No atten
+FC-003355,button_menu,UNTESTED,staff,/staff/dashboard/audit,Reset filters
+FC-003356,button_menu,UNTESTED,staff,/staff/dashboard/audit,Apply filters
+FC-003369,native_input,UNTESTED,staff,/staff/dashboard/audit,input
+FC-003395,button_menu,UNTESTED,staff,/staff/dashboard/audit,Audit filtersReset filtersApply filtersSearchCategoryAll categoriesEvent typeAll
+FC-003415,native_input,FAIL,staff,/staff/dashboard/api-connections,input
+FC-003438,native_input,UNTESTED,staff,/staff/dashboard/settings/general,input
+FC-003465,native_input,UNTESTED,staff,/staff/dashboard/cms/sections,input
+FC-003487,native_input,UNTESTED,staff,/staff/dashboard/cms/pages,input
+FC-003511,native_input,UNTESTED,staff,/staff/dashboard/seo,input
+FC-003531,native_input,UNTESTED,staff,/staff/dashboard/settings/notifications,input
+FC-003552,native_input,UNTESTED,staff,/staff/dashboard/markups,input
+FC-003582,native_input,UNTESTED,staff,/staff/dashboard/commissions,input
+FC-003604,native_input,UNTESTED,staff,/staff/dashboard/group-ticketing,input
+FC-003624,native_input,UNTESTED,staff,/staff/dashboard/settings/security,input
+FC-003645,native_input,UNTESTED,staff,/staff/dashboard/settings/integrations,input
+FC-003668,native_input,UNTESTED,staff,/staff/dashboard/system/go-live,input
+FC-003688,native_input,UNTESTED,staff,/staff/dashboard/settings,input
+FC-003711,native_input,UNTESTED,staff,/staff/dashboard/support,input
+FC-003738,native_input,UNTESTED,staff,/staff/dashboard/cms/assets,input
+FC-003759,native_input,UNTESTED,staff,/staff/dashboard/deposits,input
+FC-003779,native_input,UNTESTED,staff,/staff/dashboard/cms,input
+FC-003799,native_input,UNTESTED,staff,/staff/dashboard/cms/notices,input
+FC-003820,native_input,UNTESTED,staff,/staff/dashboard/cms/banners,input
+FC-003841,native_input,UNTESTED,staff,/staff/dashboard/users/roles,input
+FC-003861,native_input,UNTESTED,staff,/staff/dashboard/users/permissions,input
+FC-003872,button_menu,UNTESTED,staff,/staff/dashboard/reports/bookings,Reset filters
+FC-003873,button_menu,UNTESTED,staff,/staff/dashboard/reports/bookings,Apply filters
+FC-003892,native_input,UNTESTED,staff,/staff/dashboard/reports/bookings,input
+FC-003907,button_menu,UNTESTED,staff,/staff/dashboard/reports/bookings,Report filtersReset filtersApply filtersDate presetLast 7 daysLast 30 daysThis m
+FC-003908,button_menu,UNTESTED,staff,/staff/dashboard/reports/bookings,Active report filters
+FC-003922,button_menu,UNTESTED,staff,/staff/dashboard/reports/operations,Reset filters
+FC-003923,button_menu,UNTESTED,staff,/staff/dashboard/reports/operations,Apply filters
+FC-003942,native_input,UNTESTED,staff,/staff/dashboard/reports/operations,input
+FC-003957,button_menu,UNTESTED,staff,/staff/dashboard/reports/operations,Report filtersReset filtersApply filtersDate presetLast 7 daysLast 30 daysThis m
+FC-003958,button_menu,UNTESTED,staff,/staff/dashboard/reports/operations,Active report filters
+FC-003967,button_menu,UNTESTED,staff,/staff/dashboard/reports/operations,PNR/order lifecycleLifecycle status distribution.PNR/order lifecycle: no data fo
+FC-003969,button_menu,UNTESTED,staff,/staff/dashboard/reports/operations,Ticket/document statusTicketing states are informational.Ticket/document status:
+FC-003971,button_menu,UNTESTED,staff,/staff/dashboard/reports/operations,Fulfilment statusFulfilment progress by PNR/order.Fulfilment status: no data for
+FC-003985,button_menu,UNTESTED,staff,/staff/dashboard/reports/payments,Reset filters
+FC-003986,button_menu,UNTESTED,staff,/staff/dashboard/reports/payments,Apply filters
+FC-004005,native_input,UNTESTED,staff,/staff/dashboard/reports/payments,input
+FC-004020,button_menu,UNTESTED,staff,/staff/dashboard/reports/payments,Report filtersReset filtersApply filtersDate presetLast 7 daysLast 30 daysThis m
+FC-004021,button_menu,UNTESTED,staff,/staff/dashboard/reports/payments,Active report filters
+FC-004036,button_menu,UNTESTED,staff,/staff/dashboard/reports/sales,Reset filters
+FC-004037,button_menu,UNTESTED,staff,/staff/dashboard/reports/sales,Apply filters
+FC-004056,native_input,UNTESTED,staff,/staff/dashboard/reports/sales,input
+FC-004071,button_menu,UNTESTED,staff,/staff/dashboard/reports/sales,Report filtersReset filtersApply filtersDate presetLast 7 daysLast 30 daysThis m
+FC-004072,button_menu,UNTESTED,staff,/staff/dashboard/reports/sales,Active report filters
+FC-004097,native_input,UNTESTED,staff,/staff/dashboard/operations/review,input
+FC-004102,button_menu,UNTESTED,staff,/staff/dashboard/operations/review,Cancellation reviewTry clearing filters or broadening your search. Cancellation 
+FC-004121,native_input,UNTESTED,staff,/staff/dashboard/operations/execution,input
+FC-004148,native_input,UNTESTED,staff,/staff/dashboard/notifications/failures,input
+FC-004171,native_input,UNTESTED,staff,/staff/dashboard/profile,input
+FC-004221,native_input,FAIL,staff,/staff/dashboard/bookings/39,input
+FC-004392,button_menu,UNTESTED,agent_owner_a,/agent/bookings,No bookings foundTry another filter or search for flights.
+FC-004581,native_input,UNTESTED,agent_owner_a,/agent/wallet/ledger,input
+FC-004592,button_menu,UNTESTED,agent_owner_a,/agent/wallet/ledger,No ledger entriesTry another filter or search term.
+FC-005800,button_menu,UNTESTED,agent_owner_b,/agent/bookings,No bookings foundTry another filter or search for flights.
+FC-005989,native_input,UNTESTED,agent_owner_b,/agent/wallet/ledger,input
+FC-006000,button_menu,UNTESTED,agent_owner_b,/agent/wallet/ledger,No ledger entriesTry another filter or search term.
+FC-007203,button_menu,UNTESTED,agent_staff_manager,/agent/bookings,No bookings foundTry another filter or search for flights.
+FC-007370,native_input,UNTESTED,agent_staff_manager,/agent/wallet/ledger,input
+FC-007381,button_menu,UNTESTED,agent_staff_manager,/agent/wallet/ledger,No ledger entriesTry another filter or search term.
+FC-008542,button_menu,UNTESTED,agent_staff_accountant,/agent/bookings,No bookings foundTry another filter or search for flights.
+FC-008714,native_input,UNTESTED,agent_staff_accountant,/agent/wallet/ledger,input
+FC-008725,button_menu,UNTESTED,agent_staff_accountant,/agent/wallet/ledger,No ledger entriesTry another filter or search term.
+FC-009812,button_menu,UNTESTED,agent_staff_sales,/agent/bookings,No bookings foundTry another filter or search for flights.
+FC-009960,native_input,UNTESTED,agent_staff_sales,/agent/wallet/ledger,input
+FC-010951,button_menu,UNTESTED,agent_staff_support,/agent/bookings,No bookings foundTry another filter or search for flights.
+FC-011094,native_input,UNTESTED,agent_staff_support,/agent/wallet/ledger,input
+FC-012031,button_menu,UNTESTED,agent_staff_ticketing,/agent/bookings,No bookings foundTry another filter or search for flights.
+FC-012174,native_input,UNTESTED,agent_staff_ticketing,/agent/wallet/ledger,input
+FC-013118,button_menu,UNTESTED,agent_staff_viewer,/agent/bookings,No bookings foundTry another filter or search for flights.
+FC-013261,native_input,UNTESTED,agent_staff_viewer,/agent/wallet/ledger,input
+FC-014787,button_menu,UNTESTED,customer_b,/customer/bookings,No bookings foundTry another filter or search for flights.
