@@ -3,7 +3,8 @@
 ```
 WAVE_A_STARTED=YES
 WAVE_A_COMPLETE=PARTIAL
-STOPPED_REASON=No further safe unsupervised probes without QA auth sessions or activation/remediation decisions
+AUTHENTICATED_CONTINUATION=YES
+STOPPED_REASON=Evidence packed; browser Playwright auth still blocked (QA password env missing); write-path journeys intentionally not executed
 PRODUCTION_OPERATIONAL_READY=NO
 ```
 
@@ -12,24 +13,41 @@ PRODUCTION_OPERATIONAL_READY=NO
 | Defect | Status |
 |--------|--------|
 | OPS-DEF-0019 | CLOSED — queue routing + canary on `a138eb57` |
+| OPS-DEF-0014 | CLOSED — disk retention |
+| OPS-DEF-0015 | CLOSED — failed_jobs backlog |
+
+## Authenticated continuation (this loop)
+
+| Item | Result |
+|------|--------|
+| QA accounts | Reused JP-DASH-03 + FINAL-11 markers |
+| Server-side auth | PASS for admin/staff/owner/manager/accountant/support/ticketing/viewer/sales/customer/agent-b |
+| Browser auth | BLOCKED_NO_PASSWORD_ENV |
+| A2 matrix | Capability-level complete |
+| OJ-B2B-MGR/ACC/SUP/STAFF/OWN | PARTIAL (ACC blocked by OPS-DEF-0006) |
+| OJ-B2C-001 | PASS_TO_SAFE_BOUNDARY |
+| OPS-DEF-0004 | OPEN_VERIFIED (policy) |
+| OPS-DEF-0024 | NEW — legacy support QA over-permissioned |
 
 ## Still open (priority)
 
 | Defect | Severity | Wave A evidence |
 |--------|----------|-----------------|
-| OPS-DEF-0006 | P1 | Confirmed: deposit approve commits wallet then `safeRecord` ledger |
-| OPS-DEF-0007 | P1 | Live duplicate agency wallet groups = 0; unique still on `agent_id` only |
-| OPS-DEF-0013 | P2 | `booking_payments` no gateway unique; `payment_transactions.client_transaction_id` unique |
-| OPS-DEF-0016 | P1 | Sabre booking live-call ON; ticketing OFF; other suppliers OFF |
-| OPS-DEF-0017 | P1 | No live AbhiPay charge |
-| OPS-DEF-0018 | P1 | Journeys reclassified; authenticated depth blocked |
-| OPS-DEF-0020 | P2 | `public/storage` directory inventory only |
-| OPS-DEF-0021 | P3 | Residual communication_logs `queued` without jobs |
+| OPS-DEF-0006 | P1 | Confirmed; blocks finance readiness |
+| OPS-DEF-0007 | P1 | Live duplicates=0; architecture open |
+| OPS-DEF-0013 | P2 | booking_payments uniqueness |
+| OPS-DEF-0004 | P2 | Viewer cancel BookingsView-only |
+| OPS-DEF-0016 | P1 | Sabre book live-call ON; ticketing OFF |
+| OPS-DEF-0017 | P1 | AbhiPay activation incomplete |
+| OPS-DEF-0018 | P1 | PARTIAL — server-side journeys done; browser depth pending |
+| OPS-DEF-0020 | P2 | public/storage — do not touch |
+| OPS-DEF-0021 | P3 | 178 queued logs; recommend historical mark later |
+| OPS-DEF-0024 | P2 | Legacy support QA over-permissioned |
 
-## Recommended next (human / gated)
+## Recommended next
 
-1. Restore QA Playwright auth states → finish A2 authenticated negatives + staff/agent journeys  
-2. Remedia OPS-DEF-0006 (atomic wallet+ledger) before finance go-live  
-3. Decide Sabre booking live-call posture vs ticketing OFF  
-4. Separate OPS-DEF-0020 storage reconciliation design  
-5. Duplicate-safe historical notification replay plan (15 critical) — not auto-send
+1. Remediate OPS-DEF-0006 (atomic wallet+ledger)  
+2. OPS-DEF-0007 uniqueness + OPS-DEF-0013 payment uniqueness  
+3. OPS-DEF-0004 viewer cancel permission tighten  
+4. Ops inject QA password env → browser Playwright depth  
+5. Manual activation cert OPS-DEF-0016/0017  

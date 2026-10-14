@@ -1,0 +1,1038 @@
+﻿{
+    "AUTH_METHOD": "loginUsingId_server_side",
+    "BROWSER_AUTH": "BLOCKED_NO_PASSWORD_ENV",
+    "AUTH_RESULTS": {
+        "PLATFORM_ADMIN": {
+            "LOGIN": "PASS_SERVER_SIDE",
+            "AUTH_METHOD": "loginUsingId",
+            "MARKER": "jp-dash-03-qa-admin",
+            "USER_ID": 9,
+            "ACCOUNT_TYPE": "platform_admin",
+            "CURRENT_AGENCY_ID": 4,
+            "IS_PLATFORM_ADMIN": "YES",
+            "IS_STAFF": "NO",
+            "IS_AGENT_PORTAL": "NO",
+            "IS_AGENT_STAFF": "NO",
+            "IS_CUSTOMER": "NO",
+            "AGENT_ID": null,
+            "AGENT_PERMISSIONS": [],
+            "STAFF_PERMISSIONS_COUNT": 0,
+            "HAS_BOOKINGS_VIEW": "N/A",
+            "HAS_WALLET_VIEW": "N/A",
+            "HAS_LEDGER_VIEW": "N/A",
+            "HAS_STAFF_MANAGE": "N/A",
+            "HAS_SUPPORT_MANAGE": "N/A",
+            "HAS_REPORTS_VIEW": "N/A",
+            "HAS_BOOKINGS_CREATE": "N/A"
+        },
+        "STAFF": {
+            "LOGIN": "PASS_SERVER_SIDE",
+            "AUTH_METHOD": "loginUsingId",
+            "MARKER": "jp-dash-03-qa-staff",
+            "USER_ID": 8,
+            "ACCOUNT_TYPE": "staff",
+            "CURRENT_AGENCY_ID": 4,
+            "IS_PLATFORM_ADMIN": "NO",
+            "IS_STAFF": "YES",
+            "IS_AGENT_PORTAL": "NO",
+            "IS_AGENT_STAFF": "NO",
+            "IS_CUSTOMER": "NO",
+            "AGENT_ID": null,
+            "AGENT_PERMISSIONS": [],
+            "STAFF_PERMISSIONS_COUNT": 14,
+            "HAS_BOOKINGS_VIEW": "N/A",
+            "HAS_WALLET_VIEW": "N/A",
+            "HAS_LEDGER_VIEW": "N/A",
+            "HAS_STAFF_MANAGE": "N/A",
+            "HAS_SUPPORT_MANAGE": "N/A",
+            "HAS_REPORTS_VIEW": "N/A",
+            "HAS_BOOKINGS_CREATE": "N/A"
+        },
+        "AGENCY_OWNER": {
+            "LOGIN": "PASS_SERVER_SIDE",
+            "AUTH_METHOD": "loginUsingId",
+            "MARKER": "jp-dash-03-qa-agent",
+            "USER_ID": 10,
+            "ACCOUNT_TYPE": "agent",
+            "CURRENT_AGENCY_ID": 4,
+            "IS_PLATFORM_ADMIN": "NO",
+            "IS_STAFF": "NO",
+            "IS_AGENT_PORTAL": "YES",
+            "IS_AGENT_STAFF": "NO",
+            "IS_CUSTOMER": "NO",
+            "AGENT_ID": 4,
+            "AGENT_PERMISSIONS": [],
+            "STAFF_PERMISSIONS_COUNT": 0,
+            "HAS_BOOKINGS_VIEW": "YES",
+            "HAS_WALLET_VIEW": "YES",
+            "HAS_LEDGER_VIEW": "YES",
+            "HAS_STAFF_MANAGE": "YES",
+            "HAS_SUPPORT_MANAGE": "YES",
+            "HAS_REPORTS_VIEW": "YES",
+            "HAS_BOOKINGS_CREATE": "YES"
+        },
+        "SUPPORT_STAFF_LEGACY": {
+            "LOGIN": "PASS_SERVER_SIDE",
+            "AUTH_METHOD": "loginUsingId",
+            "MARKER": "jp-dash-03-qa-agent-staff",
+            "USER_ID": 12,
+            "ACCOUNT_TYPE": "agent_staff",
+            "CURRENT_AGENCY_ID": 4,
+            "IS_PLATFORM_ADMIN": "NO",
+            "IS_STAFF": "NO",
+            "IS_AGENT_PORTAL": "YES",
+            "IS_AGENT_STAFF": "YES",
+            "IS_CUSTOMER": "NO",
+            "AGENT_ID": 4,
+            "AGENT_PERMISSIONS": [
+                "agent.bookings.view",
+                "agent.bookings.create",
+                "agent.wallet.view",
+                "agent.ledger.view",
+                "agent.ledger.manage",
+                "agent.reports.view",
+                "agent.payments.upload",
+                "agent.travelers.manage",
+                "agent.support.manage",
+                "agent.staff.manage",
+                "agent.agency.view"
+            ],
+            "STAFF_PERMISSIONS_COUNT": 0,
+            "HAS_BOOKINGS_VIEW": "YES",
+            "HAS_WALLET_VIEW": "YES",
+            "HAS_LEDGER_VIEW": "YES",
+            "HAS_STAFF_MANAGE": "YES",
+            "HAS_SUPPORT_MANAGE": "YES",
+            "HAS_REPORTS_VIEW": "YES",
+            "HAS_BOOKINGS_CREATE": "YES"
+        },
+        "CUSTOMER": {
+            "LOGIN": "PASS_SERVER_SIDE",
+            "AUTH_METHOD": "loginUsingId",
+            "MARKER": "jp-dash-03-qa-customer",
+            "USER_ID": 11,
+            "ACCOUNT_TYPE": "customer",
+            "CURRENT_AGENCY_ID": 4,
+            "IS_PLATFORM_ADMIN": "NO",
+            "IS_STAFF": "NO",
+            "IS_AGENT_PORTAL": "NO",
+            "IS_AGENT_STAFF": "NO",
+            "IS_CUSTOMER": "YES",
+            "AGENT_ID": null,
+            "AGENT_PERMISSIONS": [],
+            "STAFF_PERMISSIONS_COUNT": 0,
+            "HAS_BOOKINGS_VIEW": "N/A",
+            "HAS_WALLET_VIEW": "N/A",
+            "HAS_LEDGER_VIEW": "N/A",
+            "HAS_STAFF_MANAGE": "N/A",
+            "HAS_SUPPORT_MANAGE": "N/A",
+            "HAS_REPORTS_VIEW": "N/A",
+            "HAS_BOOKINGS_CREATE": "N/A"
+        },
+        "MANAGER": {
+            "LOGIN": "PASS_SERVER_SIDE",
+            "AUTH_METHOD": "loginUsingId",
+            "MARKER": "jp-final-11-qa-staff-manager",
+            "USER_ID": 27,
+            "ACCOUNT_TYPE": "agent_staff",
+            "CURRENT_AGENCY_ID": 4,
+            "IS_PLATFORM_ADMIN": "NO",
+            "IS_STAFF": "NO",
+            "IS_AGENT_PORTAL": "YES",
+            "IS_AGENT_STAFF": "YES",
+            "IS_CUSTOMER": "NO",
+            "AGENT_ID": 4,
+            "AGENT_PERMISSIONS": [
+                "agent.bookings.view",
+                "agent.bookings.create",
+                "agent.wallet.view",
+                "agent.ledger.view",
+                "agent.reports.view",
+                "agent.payments.upload",
+                "agent.travelers.manage",
+                "agent.support.manage",
+                "agent.staff.manage",
+                "agent.agency.view"
+            ],
+            "STAFF_PERMISSIONS_COUNT": 0,
+            "HAS_BOOKINGS_VIEW": "YES",
+            "HAS_WALLET_VIEW": "YES",
+            "HAS_LEDGER_VIEW": "YES",
+            "HAS_STAFF_MANAGE": "YES",
+            "HAS_SUPPORT_MANAGE": "YES",
+            "HAS_REPORTS_VIEW": "YES",
+            "HAS_BOOKINGS_CREATE": "YES"
+        },
+        "ACCOUNTANT": {
+            "LOGIN": "PASS_SERVER_SIDE",
+            "AUTH_METHOD": "loginUsingId",
+            "MARKER": "jp-final-11-qa-staff-accountant",
+            "USER_ID": 28,
+            "ACCOUNT_TYPE": "agent_staff",
+            "CURRENT_AGENCY_ID": 4,
+            "IS_PLATFORM_ADMIN": "NO",
+            "IS_STAFF": "NO",
+            "IS_AGENT_PORTAL": "YES",
+            "IS_AGENT_STAFF": "YES",
+            "IS_CUSTOMER": "NO",
+            "AGENT_ID": 4,
+            "AGENT_PERMISSIONS": [
+                "agent.bookings.view",
+                "agent.wallet.view",
+                "agent.ledger.view",
+                "agent.reports.view",
+                "agent.payments.upload",
+                "agent.agency.view"
+            ],
+            "STAFF_PERMISSIONS_COUNT": 0,
+            "HAS_BOOKINGS_VIEW": "YES",
+            "HAS_WALLET_VIEW": "YES",
+            "HAS_LEDGER_VIEW": "YES",
+            "HAS_STAFF_MANAGE": "NO",
+            "HAS_SUPPORT_MANAGE": "NO",
+            "HAS_REPORTS_VIEW": "YES",
+            "HAS_BOOKINGS_CREATE": "NO"
+        },
+        "SUPPORT_STAFF": {
+            "LOGIN": "PASS_SERVER_SIDE",
+            "AUTH_METHOD": "loginUsingId",
+            "MARKER": "jp-final-11-qa-staff-support",
+            "USER_ID": 30,
+            "ACCOUNT_TYPE": "agent_staff",
+            "CURRENT_AGENCY_ID": 4,
+            "IS_PLATFORM_ADMIN": "NO",
+            "IS_STAFF": "NO",
+            "IS_AGENT_PORTAL": "YES",
+            "IS_AGENT_STAFF": "YES",
+            "IS_CUSTOMER": "NO",
+            "AGENT_ID": 4,
+            "AGENT_PERMISSIONS": [
+                "agent.bookings.view",
+                "agent.support.manage",
+                "agent.agency.view"
+            ],
+            "STAFF_PERMISSIONS_COUNT": 0,
+            "HAS_BOOKINGS_VIEW": "YES",
+            "HAS_WALLET_VIEW": "NO",
+            "HAS_LEDGER_VIEW": "NO",
+            "HAS_STAFF_MANAGE": "NO",
+            "HAS_SUPPORT_MANAGE": "YES",
+            "HAS_REPORTS_VIEW": "NO",
+            "HAS_BOOKINGS_CREATE": "NO"
+        },
+        "TICKETING_STAFF": {
+            "LOGIN": "PASS_SERVER_SIDE",
+            "AUTH_METHOD": "loginUsingId",
+            "MARKER": "jp-final-11-qa-staff-ticketing",
+            "USER_ID": 31,
+            "ACCOUNT_TYPE": "agent_staff",
+            "CURRENT_AGENCY_ID": 4,
+            "IS_PLATFORM_ADMIN": "NO",
+            "IS_STAFF": "NO",
+            "IS_AGENT_PORTAL": "YES",
+            "IS_AGENT_STAFF": "YES",
+            "IS_CUSTOMER": "NO",
+            "AGENT_ID": 4,
+            "AGENT_PERMISSIONS": [
+                "agent.bookings.view",
+                "agent.agency.view"
+            ],
+            "STAFF_PERMISSIONS_COUNT": 0,
+            "HAS_BOOKINGS_VIEW": "YES",
+            "HAS_WALLET_VIEW": "NO",
+            "HAS_LEDGER_VIEW": "NO",
+            "HAS_STAFF_MANAGE": "NO",
+            "HAS_SUPPORT_MANAGE": "NO",
+            "HAS_REPORTS_VIEW": "NO",
+            "HAS_BOOKINGS_CREATE": "NO"
+        },
+        "VIEWER": {
+            "LOGIN": "PASS_SERVER_SIDE",
+            "AUTH_METHOD": "loginUsingId",
+            "MARKER": "jp-final-11-qa-staff-viewer",
+            "USER_ID": 32,
+            "ACCOUNT_TYPE": "agent_staff",
+            "CURRENT_AGENCY_ID": 4,
+            "IS_PLATFORM_ADMIN": "NO",
+            "IS_STAFF": "NO",
+            "IS_AGENT_PORTAL": "YES",
+            "IS_AGENT_STAFF": "YES",
+            "IS_CUSTOMER": "NO",
+            "AGENT_ID": 4,
+            "AGENT_PERMISSIONS": [
+                "agent.bookings.view",
+                "agent.agency.view"
+            ],
+            "STAFF_PERMISSIONS_COUNT": 0,
+            "HAS_BOOKINGS_VIEW": "YES",
+            "HAS_WALLET_VIEW": "NO",
+            "HAS_LEDGER_VIEW": "NO",
+            "HAS_STAFF_MANAGE": "NO",
+            "HAS_SUPPORT_MANAGE": "NO",
+            "HAS_REPORTS_VIEW": "NO",
+            "HAS_BOOKINGS_CREATE": "NO"
+        },
+        "SALES_AGENT": {
+            "LOGIN": "PASS_SERVER_SIDE",
+            "AUTH_METHOD": "loginUsingId",
+            "MARKER": "jp-final-11-qa-staff-sales",
+            "USER_ID": 29,
+            "ACCOUNT_TYPE": "agent_staff",
+            "CURRENT_AGENCY_ID": 4,
+            "IS_PLATFORM_ADMIN": "NO",
+            "IS_STAFF": "NO",
+            "IS_AGENT_PORTAL": "YES",
+            "IS_AGENT_STAFF": "YES",
+            "IS_CUSTOMER": "NO",
+            "AGENT_ID": 4,
+            "AGENT_PERMISSIONS": [
+                "agent.bookings.view",
+                "agent.bookings.create",
+                "agent.travelers.manage",
+                "agent.agency.view"
+            ],
+            "STAFF_PERMISSIONS_COUNT": 0,
+            "HAS_BOOKINGS_VIEW": "YES",
+            "HAS_WALLET_VIEW": "NO",
+            "HAS_LEDGER_VIEW": "NO",
+            "HAS_STAFF_MANAGE": "NO",
+            "HAS_SUPPORT_MANAGE": "NO",
+            "HAS_REPORTS_VIEW": "NO",
+            "HAS_BOOKINGS_CREATE": "YES"
+        },
+        "AGENT_B_OWNER": {
+            "LOGIN": "PASS_SERVER_SIDE",
+            "AUTH_METHOD": "loginUsingId",
+            "MARKER": "jp-final-11-qa-agent-b",
+            "USER_ID": 26,
+            "ACCOUNT_TYPE": "agent",
+            "CURRENT_AGENCY_ID": 5,
+            "IS_PLATFORM_ADMIN": "NO",
+            "IS_STAFF": "NO",
+            "IS_AGENT_PORTAL": "YES",
+            "IS_AGENT_STAFF": "NO",
+            "IS_CUSTOMER": "NO",
+            "AGENT_ID": 5,
+            "AGENT_PERMISSIONS": [],
+            "STAFF_PERMISSIONS_COUNT": 0,
+            "HAS_BOOKINGS_VIEW": "YES",
+            "HAS_WALLET_VIEW": "YES",
+            "HAS_LEDGER_VIEW": "YES",
+            "HAS_STAFF_MANAGE": "YES",
+            "HAS_SUPPORT_MANAGE": "YES",
+            "HAS_REPORTS_VIEW": "YES",
+            "HAS_BOOKINGS_CREATE": "YES"
+        }
+    },
+    "AUTHORIZATION_MATRIX": [
+        {
+            "ROLE": "AGENCY_OWNER",
+            "CAPABILITY": "bookings_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENCY_OWNER",
+            "CAPABILITY": "wallet_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENCY_OWNER",
+            "CAPABILITY": "ledger_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENCY_OWNER",
+            "CAPABILITY": "staff_manage",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENCY_OWNER",
+            "CAPABILITY": "support_manage",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENCY_OWNER",
+            "CAPABILITY": "reports_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENCY_OWNER",
+            "CAPABILITY": "bookings_create",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENCY_OWNER",
+            "CAPABILITY": "cancellation_request_policy",
+            "ACTUAL": "DENY",
+            "CLASSIFICATION": "DENY_SCOPE_OR_PERM",
+            "NOTES": "agent_id=4; booking_agent=3; booking_agency=4; user_agency=4; hasBookingsView=Y"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF_LEGACY",
+            "CAPABILITY": "bookings_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF_LEGACY",
+            "CAPABILITY": "wallet_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "UNEXPECTED_ALLOW"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF_LEGACY",
+            "CAPABILITY": "ledger_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "UNEXPECTED_ALLOW"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF_LEGACY",
+            "CAPABILITY": "staff_manage",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "UNEXPECTED_ALLOW"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF_LEGACY",
+            "CAPABILITY": "support_manage",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF_LEGACY",
+            "CAPABILITY": "reports_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "UNEXPECTED_ALLOW"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF_LEGACY",
+            "CAPABILITY": "bookings_create",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "UNEXPECTED_ALLOW"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF_LEGACY",
+            "CAPABILITY": "cancellation_request_policy",
+            "ACTUAL": "DENY",
+            "CLASSIFICATION": "NOT_SAFE_TO_EXECUTE",
+            "NOTES": "agent_id=4; booking_agent=3; booking_agency=4; user_agency=4; hasBookingsView=Y"
+        },
+        {
+            "ROLE": "MANAGER",
+            "CAPABILITY": "bookings_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "MANAGER",
+            "CAPABILITY": "wallet_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "MANAGER",
+            "CAPABILITY": "ledger_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "MANAGER",
+            "CAPABILITY": "staff_manage",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "MANAGER",
+            "CAPABILITY": "support_manage",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "MANAGER",
+            "CAPABILITY": "reports_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "MANAGER",
+            "CAPABILITY": "bookings_create",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "MANAGER",
+            "CAPABILITY": "cancellation_request_policy",
+            "ACTUAL": "DENY",
+            "CLASSIFICATION": "DENY_SCOPE_OR_PERM",
+            "NOTES": "agent_id=4; booking_agent=3; booking_agency=4; user_agency=4; hasBookingsView=Y"
+        },
+        {
+            "ROLE": "ACCOUNTANT",
+            "CAPABILITY": "bookings_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "ACCOUNTANT",
+            "CAPABILITY": "wallet_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "ACCOUNTANT",
+            "CAPABILITY": "ledger_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "ACCOUNTANT",
+            "CAPABILITY": "staff_manage",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "ACCOUNTANT",
+            "CAPABILITY": "support_manage",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "ACCOUNTANT",
+            "CAPABILITY": "reports_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "ACCOUNTANT",
+            "CAPABILITY": "bookings_create",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "ACCOUNTANT",
+            "CAPABILITY": "cancellation_request_policy",
+            "ACTUAL": "DENY",
+            "CLASSIFICATION": "NOT_SAFE_TO_EXECUTE",
+            "NOTES": "agent_id=4; booking_agent=3; booking_agency=4; user_agency=4; hasBookingsView=Y"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF",
+            "CAPABILITY": "bookings_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF",
+            "CAPABILITY": "wallet_view",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF",
+            "CAPABILITY": "ledger_view",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF",
+            "CAPABILITY": "staff_manage",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF",
+            "CAPABILITY": "support_manage",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF",
+            "CAPABILITY": "reports_view",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF",
+            "CAPABILITY": "bookings_create",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SUPPORT_STAFF",
+            "CAPABILITY": "cancellation_request_policy",
+            "ACTUAL": "DENY",
+            "CLASSIFICATION": "DENY_SCOPE_OR_PERM",
+            "NOTES": "agent_id=4; booking_agent=3; booking_agency=4; user_agency=4; hasBookingsView=Y"
+        },
+        {
+            "ROLE": "TICKETING_STAFF",
+            "CAPABILITY": "bookings_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "TICKETING_STAFF",
+            "CAPABILITY": "wallet_view",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "TICKETING_STAFF",
+            "CAPABILITY": "ledger_view",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "TICKETING_STAFF",
+            "CAPABILITY": "staff_manage",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "TICKETING_STAFF",
+            "CAPABILITY": "support_manage",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "TICKETING_STAFF",
+            "CAPABILITY": "reports_view",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "TICKETING_STAFF",
+            "CAPABILITY": "bookings_create",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "TICKETING_STAFF",
+            "CAPABILITY": "cancellation_request_policy",
+            "ACTUAL": "DENY",
+            "CLASSIFICATION": "NOT_SAFE_TO_EXECUTE",
+            "NOTES": "agent_id=4; booking_agent=3; booking_agency=4; user_agency=4; hasBookingsView=Y"
+        },
+        {
+            "ROLE": "VIEWER",
+            "CAPABILITY": "bookings_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "VIEWER",
+            "CAPABILITY": "wallet_view",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "VIEWER",
+            "CAPABILITY": "ledger_view",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "VIEWER",
+            "CAPABILITY": "staff_manage",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "VIEWER",
+            "CAPABILITY": "support_manage",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "VIEWER",
+            "CAPABILITY": "reports_view",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "VIEWER",
+            "CAPABILITY": "bookings_create",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "VIEWER",
+            "CAPABILITY": "cancellation_request_policy",
+            "ACTUAL": "DENY",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS",
+            "NOTES": "agent_id=4; booking_agent=3; booking_agency=4; user_agency=4; hasBookingsView=Y"
+        },
+        {
+            "ROLE": "SALES_AGENT",
+            "CAPABILITY": "bookings_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SALES_AGENT",
+            "CAPABILITY": "wallet_view",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SALES_AGENT",
+            "CAPABILITY": "ledger_view",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SALES_AGENT",
+            "CAPABILITY": "staff_manage",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SALES_AGENT",
+            "CAPABILITY": "support_manage",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SALES_AGENT",
+            "CAPABILITY": "reports_view",
+            "ACTUAL": "NO",
+            "CLASSIFICATION": "DENY_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SALES_AGENT",
+            "CAPABILITY": "bookings_create",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "SALES_AGENT",
+            "CAPABILITY": "cancellation_request_policy",
+            "ACTUAL": "DENY",
+            "CLASSIFICATION": "NOT_SAFE_TO_EXECUTE",
+            "NOTES": "agent_id=4; booking_agent=3; booking_agency=4; user_agency=4; hasBookingsView=Y"
+        },
+        {
+            "ROLE": "AGENT_B_OWNER",
+            "CAPABILITY": "bookings_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENT_B_OWNER",
+            "CAPABILITY": "wallet_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENT_B_OWNER",
+            "CAPABILITY": "ledger_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENT_B_OWNER",
+            "CAPABILITY": "staff_manage",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENT_B_OWNER",
+            "CAPABILITY": "support_manage",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENT_B_OWNER",
+            "CAPABILITY": "reports_view",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENT_B_OWNER",
+            "CAPABILITY": "bookings_create",
+            "ACTUAL": "YES",
+            "CLASSIFICATION": "ALLOW_EXPECTED_PASS"
+        },
+        {
+            "ROLE": "AGENT_B_OWNER",
+            "CAPABILITY": "cancellation_request_policy",
+            "ACTUAL": "DENY",
+            "CLASSIFICATION": "NOT_SAFE_TO_EXECUTE",
+            "NOTES": "agent_id=5; booking_agent=3; booking_agency=4; user_agency=5; hasBookingsView=Y"
+        }
+    ],
+    "JOURNEYS": {
+        "OJ-B2B-MGR-001": {
+            "ROLE": "MANAGER",
+            "AUTH_PROVEN": "YES_SERVER_SIDE",
+            "BROWSER_SESSION": "NO \u2014 JP_DASH_03_QA_*_PASSWORD missing from production .env",
+            "ROUTES_NAMED_PRESENT": {
+                "admin.dashboard": "YES",
+                "admin.bookings.index": "NO",
+                "admin.deposits.index": "NO",
+                "staff.dashboard": "YES",
+                "staff.bookings.index": "YES",
+                "agent.dashboard": "YES",
+                "agent.bookings.index": "YES",
+                "agent.wallet.index": "NO",
+                "agent.staff.index": "YES",
+                "agent.support.index": "NO",
+                "agent.deposits.index": "YES",
+                "agent.reports.index": "YES",
+                "agent.agency.edit": "YES",
+                "agent.finance.statement": "NO",
+                "agent.accounting.ledger": "NO",
+                "customer.dashboard": "YES",
+                "customer.bookings.index": "YES",
+                "customer.profile.edit": "NO",
+                "agent.bookings.cancellations.store": "YES"
+            },
+            "SCOPING_PROVEN": "CAPABILITY_MATRIX_OK",
+            "READ_PATH_PROVEN": "CAPABILITY_LEVEL",
+            "WRITE_PATH_PROVEN_OR_NOT_EXECUTED": "NOT_EXECUTED",
+            "EXTERNAL_DEPENDENCY": "NONE",
+            "KNOWN_DEFECT": "",
+            "UNEXPECTED_ALLOW_COUNT": 0,
+            "UNEXPECTED_DENY_COUNT": 0,
+            "FINAL_CLASSIFICATION": "PARTIAL"
+        },
+        "OJ-B2B-ACC-001": {
+            "ROLE": "ACCOUNTANT",
+            "AUTH_PROVEN": "YES_SERVER_SIDE",
+            "BROWSER_SESSION": "NO \u2014 JP_DASH_03_QA_*_PASSWORD missing from production .env",
+            "ROUTES_NAMED_PRESENT": {
+                "admin.dashboard": "YES",
+                "admin.bookings.index": "NO",
+                "admin.deposits.index": "NO",
+                "staff.dashboard": "YES",
+                "staff.bookings.index": "YES",
+                "agent.dashboard": "YES",
+                "agent.bookings.index": "YES",
+                "agent.wallet.index": "NO",
+                "agent.staff.index": "YES",
+                "agent.support.index": "NO",
+                "agent.deposits.index": "YES",
+                "agent.reports.index": "YES",
+                "agent.agency.edit": "YES",
+                "agent.finance.statement": "NO",
+                "agent.accounting.ledger": "NO",
+                "customer.dashboard": "YES",
+                "customer.bookings.index": "YES",
+                "customer.profile.edit": "NO",
+                "agent.bookings.cancellations.store": "YES"
+            },
+            "SCOPING_PROVEN": "CAPABILITY_MATRIX_OK",
+            "READ_PATH_PROVEN": "CAPABILITY_LEVEL",
+            "WRITE_PATH_PROVEN_OR_NOT_EXECUTED": "NOT_EXECUTED",
+            "EXTERNAL_DEPENDENCY": "NONE",
+            "KNOWN_DEFECT": "OPS-DEF-0006",
+            "UNEXPECTED_ALLOW_COUNT": 0,
+            "UNEXPECTED_DENY_COUNT": 0,
+            "FINAL_CLASSIFICATION": "PARTIAL_BLOCKED_KNOWN_DEFECT_OPS_DEF_0006"
+        },
+        "OJ-B2B-SUP-001": {
+            "ROLE": "SUPPORT_STAFF",
+            "AUTH_PROVEN": "YES_SERVER_SIDE",
+            "BROWSER_SESSION": "NO \u2014 JP_DASH_03_QA_*_PASSWORD missing from production .env",
+            "ROUTES_NAMED_PRESENT": {
+                "admin.dashboard": "YES",
+                "admin.bookings.index": "NO",
+                "admin.deposits.index": "NO",
+                "staff.dashboard": "YES",
+                "staff.bookings.index": "YES",
+                "agent.dashboard": "YES",
+                "agent.bookings.index": "YES",
+                "agent.wallet.index": "NO",
+                "agent.staff.index": "YES",
+                "agent.support.index": "NO",
+                "agent.deposits.index": "YES",
+                "agent.reports.index": "YES",
+                "agent.agency.edit": "YES",
+                "agent.finance.statement": "NO",
+                "agent.accounting.ledger": "NO",
+                "customer.dashboard": "YES",
+                "customer.bookings.index": "YES",
+                "customer.profile.edit": "NO",
+                "agent.bookings.cancellations.store": "YES"
+            },
+            "SCOPING_PROVEN": "CAPABILITY_MATRIX_OK",
+            "READ_PATH_PROVEN": "CAPABILITY_LEVEL",
+            "WRITE_PATH_PROVEN_OR_NOT_EXECUTED": "NOT_EXECUTED",
+            "EXTERNAL_DEPENDENCY": "NONE",
+            "KNOWN_DEFECT": "",
+            "UNEXPECTED_ALLOW_COUNT": 0,
+            "UNEXPECTED_DENY_COUNT": 0,
+            "FINAL_CLASSIFICATION": "PARTIAL"
+        },
+        "OJ-STAFF-001": {
+            "ROLE": "STAFF",
+            "AUTH_PROVEN": "YES_SERVER_SIDE",
+            "BROWSER_SESSION": "NO \u2014 JP_DASH_03_QA_*_PASSWORD missing from production .env",
+            "ROUTES_NAMED_PRESENT": {
+                "admin.dashboard": "YES",
+                "admin.bookings.index": "NO",
+                "admin.deposits.index": "NO",
+                "staff.dashboard": "YES",
+                "staff.bookings.index": "YES",
+                "agent.dashboard": "YES",
+                "agent.bookings.index": "YES",
+                "agent.wallet.index": "NO",
+                "agent.staff.index": "YES",
+                "agent.support.index": "NO",
+                "agent.deposits.index": "YES",
+                "agent.reports.index": "YES",
+                "agent.agency.edit": "YES",
+                "agent.finance.statement": "NO",
+                "agent.accounting.ledger": "NO",
+                "customer.dashboard": "YES",
+                "customer.bookings.index": "YES",
+                "customer.profile.edit": "NO",
+                "agent.bookings.cancellations.store": "YES"
+            },
+            "SCOPING_PROVEN": "CAPABILITY_MATRIX_OK",
+            "READ_PATH_PROVEN": "CAPABILITY_LEVEL",
+            "WRITE_PATH_PROVEN_OR_NOT_EXECUTED": "NOT_EXECUTED",
+            "EXTERNAL_DEPENDENCY": "NONE",
+            "KNOWN_DEFECT": "",
+            "UNEXPECTED_ALLOW_COUNT": 0,
+            "UNEXPECTED_DENY_COUNT": 0,
+            "FINAL_CLASSIFICATION": "PARTIAL"
+        },
+        "OJ-B2B-OWN-001": {
+            "ROLE": "AGENCY_OWNER",
+            "AUTH_PROVEN": "YES_SERVER_SIDE",
+            "BROWSER_SESSION": "NO \u2014 JP_DASH_03_QA_*_PASSWORD missing from production .env",
+            "ROUTES_NAMED_PRESENT": {
+                "admin.dashboard": "YES",
+                "admin.bookings.index": "NO",
+                "admin.deposits.index": "NO",
+                "staff.dashboard": "YES",
+                "staff.bookings.index": "YES",
+                "agent.dashboard": "YES",
+                "agent.bookings.index": "YES",
+                "agent.wallet.index": "NO",
+                "agent.staff.index": "YES",
+                "agent.support.index": "NO",
+                "agent.deposits.index": "YES",
+                "agent.reports.index": "YES",
+                "agent.agency.edit": "YES",
+                "agent.finance.statement": "NO",
+                "agent.accounting.ledger": "NO",
+                "customer.dashboard": "YES",
+                "customer.bookings.index": "YES",
+                "customer.profile.edit": "NO",
+                "agent.bookings.cancellations.store": "YES"
+            },
+            "SCOPING_PROVEN": "CAPABILITY_MATRIX_OK",
+            "READ_PATH_PROVEN": "CAPABILITY_LEVEL",
+            "WRITE_PATH_PROVEN_OR_NOT_EXECUTED": "NOT_EXECUTED",
+            "EXTERNAL_DEPENDENCY": "NONE",
+            "KNOWN_DEFECT": "",
+            "UNEXPECTED_ALLOW_COUNT": 0,
+            "UNEXPECTED_DENY_COUNT": 0,
+            "FINAL_CLASSIFICATION": "PARTIAL"
+        },
+        "OJ-B2C-001": {
+            "ROLE": "CUSTOMER",
+            "AUTH_PROVEN": "YES_SERVER_SIDE",
+            "BROWSER_SESSION": "NO \u2014 JP_DASH_03_QA_*_PASSWORD missing from production .env",
+            "ROUTES_NAMED_PRESENT": {
+                "admin.dashboard": "YES",
+                "admin.bookings.index": "NO",
+                "admin.deposits.index": "NO",
+                "staff.dashboard": "YES",
+                "staff.bookings.index": "YES",
+                "agent.dashboard": "YES",
+                "agent.bookings.index": "YES",
+                "agent.wallet.index": "NO",
+                "agent.staff.index": "YES",
+                "agent.support.index": "NO",
+                "agent.deposits.index": "YES",
+                "agent.reports.index": "YES",
+                "agent.agency.edit": "YES",
+                "agent.finance.statement": "NO",
+                "agent.accounting.ledger": "NO",
+                "customer.dashboard": "YES",
+                "customer.bookings.index": "YES",
+                "customer.profile.edit": "NO",
+                "agent.bookings.cancellations.store": "YES"
+            },
+            "SCOPING_PROVEN": "CAPABILITY_MATRIX_OK",
+            "READ_PATH_PROVEN": "CAPABILITY_LEVEL",
+            "WRITE_PATH_PROVEN_OR_NOT_EXECUTED": "NOT_EXECUTED",
+            "EXTERNAL_DEPENDENCY": "STOP_BEFORE_SABRE_DISPATCH",
+            "KNOWN_DEFECT": "",
+            "UNEXPECTED_ALLOW_COUNT": 0,
+            "UNEXPECTED_DENY_COUNT": 0,
+            "FINAL_CLASSIFICATION": "PASS_TO_SAFE_BOUNDARY"
+        }
+    },
+    "ROUTE_PRESENCE": {
+        "admin.dashboard": "YES",
+        "admin.bookings.index": "NO",
+        "admin.deposits.index": "NO",
+        "staff.dashboard": "YES",
+        "staff.bookings.index": "YES",
+        "agent.dashboard": "YES",
+        "agent.bookings.index": "YES",
+        "agent.wallet.index": "NO",
+        "agent.staff.index": "YES",
+        "agent.support.index": "NO",
+        "agent.deposits.index": "YES",
+        "agent.reports.index": "YES",
+        "agent.agency.edit": "YES",
+        "agent.finance.statement": "NO",
+        "agent.accounting.ledger": "NO",
+        "customer.dashboard": "YES",
+        "customer.bookings.index": "YES",
+        "customer.profile.edit": "NO",
+        "agent.bookings.cancellations.store": "YES"
+    },
+    "VIEWER_CANCEL": {
+        "ROLE": "VIEWER",
+        "CAPABILITY": "cancellation_request_policy",
+        "ACTUAL": "DENY",
+        "CLASSIFICATION": "DENY_EXPECTED_PASS",
+        "NOTES": "agent_id=4; booking_agent=3; booking_agency=4; user_agency=4; hasBookingsView=Y"
+    },
+    "SUPPLIER_ENV_FLAGS": {
+        "SABRE_BOOKING_ENABLED": "TRUE",
+        "SABRE_BOOKING_LIVE_CALL_ENABLED": "TRUE",
+        "SABRE_TICKETING_ENABLED": "FALSE",
+        "SABRE_PUBLIC_TICKETING_ENABLED": "FALSE",
+        "SABRE_CHECKOUT_AUTO_TICKETING_ENABLED": "FALSE",
+        "SABRE_VERIFIED_MULTISEG_AUTO_PNR_ENABLED": "FALSE",
+        "AIRBLUE_OTA_V3_LIVE_ENABLED": "MISSING",
+        "ONE_API_LIVE_BOOKING_ENABLED": "MISSING",
+        "ALHAIDER_BOOKING_ENABLED": "FALSE"
+    },
+    "ABHIPAY": {
+        "ABHIPAY_ENABLED": "MISSING",
+        "ABHIPAY_MODE": "MISSING",
+        "ABHIPAY_MERCHANT_ID": "MISSING",
+        "ABHIPAY_API_KEY": "MISSING",
+        "CALLBACK_ROUTE": "ROUTE_FOUND"
+    },
+    "COMM_LOGS_QUEUED_TOTAL": 178,
+    "COMM_LOGS_QUEUED_SAMPLE_IDS": [
+        746,
+        745,
+        744,
+        743,
+        742
+    ],
+    "FAILED_JOBS": 0,
+    "PENDING_JOBS": 0,
+    "QA_BOOKING": {
+        "id": 39,
+        "ref": "JPQA-20261008-BOOKING",
+        "agency_id": 4,
+        "agent_id": 3
+    }
+}
