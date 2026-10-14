@@ -1,0 +1,92 @@
+# WAVE-1C EXIT — Queue Restoration
+
+```
+WAVE=JP-OPS-READINESS-01-WAVE-1C-QUEUE-RESTORATION
+BRANCH=fix/ops-wave1c-queue-restoration
+CODE_SHA=9fb0760af133605a09a9a7e6723ee769d15998bd
+PROTECTED_MAIN_SHA_AT_START=daa5a1a2465cc1504d9b448ed94db307be976cf5
+PRODUCTION_RUNTIME_SHA_AT_START=12045dda48c98fefc24db5b1c2e071e7498be87a
+LIVE_BUILD_ID=7-iZf4RbaJmGpuDjO1tsh
+```
+
+## Architecture verdict
+
+```
+IS_DEFAULT_QUEUE_INTENTIONAL=PARTIAL
+DEFAULT_QUEUE_EXPECTED_JOB_CLASSES=(none for mail; RemoveBrandLogoBackground sync-only today)
+PERSISTENT_DEFAULT_WORKER_REQUIRED=NO
+ROOT_CAUSE=ROUTING_DEFECT — Closure/Mail::queue landed on default; cron consumes notifications-* only
+FIX_IMPLEMENTED=YES (code on branch; not yet on production runtime)
+APPLICATION_CODE_CHANGED=YES
+```
+
+## Classification
+
+```
+PENDING_DEFAULT_JOBS_PRE=178
+CLOSURE_JOBS_CLASSIFIED=169
+BOOKING_UNIVERSAL_JOBS_CLASSIFIED=9
+CLOSURE_UNKNOWN=0
+SAFE_TO_SEND_NOW=0
+MISSED_NOTIFICATIONS_TOTAL=169
+MISSED_CRITICAL_NOTIFICATIONS=15
+ALREADY_DELIVERED_DUPLICATE_RISK=154
+REPLAY_REQUIRED_CURRENT=15
+MANUAL_REVIEW_JOBS=11
+```
+
+## Disposition (production)
+
+```
+OLD_SERIALIZED_CLOSURES_EXECUTED=0
+OBSOLETE_JOBS_REMOVED=178
+ARCHIVE=docs/evidence/jp-ops-readiness-01/DEFAULT-QUEUE-ARCHIVE-20261014T183740Z.json
+PENDING_DEFAULT_JOBS_POST=0
+FAILED_JOBS_POST=0
+DEFAULT_WORKER_STARTED=NO
+```
+
+## Tests (local)
+
+```
+QUEUE_ROUTING_TEST=PASS
+NOTIFICATION_JOB_TEST=PASS
+IDEMPOTENCY_TEST=PASS
+```
+
+## Release / deploy gates
+
+```
+PR_NUMBER=TEMPORARILY_BLOCKED (gh auth missing; branch pushed)
+PR_CREATE_URL=https://github.com/haseebpytdev/jetpk/compare/main...fix/ops-wave1c-queue-restoration?expand=1
+RELEASE_GUARDS=NOT_RUN (no PR)
+MERGED_SHA=
+DEPLOY_REQUIRED=YES
+DEPLOYED_RUNTIME_SHA=(unchanged — feature-head deploy forbidden)
+QUEUE_CANARY=NOT_RUN (blocked on deploy)
+QUEUE_CONSUMPTION_PROVEN=NO
+WORKER_MANAGER=CRON
+WORKER_ACTIVATED=notifications-* only (pre-existing; default not activated)
+EXPECTED_NOTIFICATION_QUEUE=notifications-transactional
+```
+
+## Defect status
+
+```
+OPS_DEF_0019_STATUS=OPEN
+OPS_DEF_0020_STATUS=OPEN
+PUBLIC_STORAGE_CLASSIFICATION=LEGACY_DIRECTORY|BLOCKED_BY_EXISTING_FILES
+PRODUCTION_OPERATIONAL_READY=NO
+```
+
+## Why 0019 remains OPEN
+
+Backlog cleared safely, but routing fix is not on production runtime and canary not proven. New mail may still enqueue Closures on `default` until merged SHA is deployed.
+
+## Next
+
+1. Authenticate `gh` / create+merge PR after release-guards PASS
+2. Deploy canonical merged SHA only
+3. QA canary on `notifications-transactional`
+4. Then close OPS-DEF-0019
+5. Next workstream: `JP-OPS-READINESS-01-DEEP-LIVE-AUDIT-WAVE-A` (unless new P0/P1)
