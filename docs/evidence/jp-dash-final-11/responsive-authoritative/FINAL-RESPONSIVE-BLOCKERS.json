@@ -1,0 +1,41 @@
+{
+  "blockers": [],
+  "metrics": {
+    "horizontalOverflow": 0,
+    "clippedControls": 0,
+    "rawClippedFlags": 35,
+    "trueClippedDefects": 0,
+    "overlap": 0,
+    "sidebarNav": 0,
+    "mobileNavUnreachable": 0,
+    "modalDefects": 0,
+    "rawModalFlags": 0,
+    "trueModalDefects": 0,
+    "drawerDefects": 0,
+    "menuDefects": 0,
+    "tableDefects": 0,
+    "tableActionsHidden": 0,
+    "formDefects": 0,
+    "rawFormLayoutFlags": 111,
+    "trueFormLayoutDefects": 0,
+    "hydration": 0,
+    "uncaughtJs": 0,
+    "page500": 0,
+    "unexpectedNetwork": 0,
+    "fakeSuccess": 0,
+    "fixtureFallback": 0,
+    "bookingRoutes": 84,
+    "bookingPass": 84,
+    "pnrRoutes": 6,
+    "pnrPass": 6,
+    "responsiveByViewport": {
+      "DESKTOP": 289,
+      "TABLET": 289,
+      "MOBILE": 289
+    },
+    "persistentToolingFail": 0,
+    "rowTimeoutRetries": 0
+  },
+  "untestedResponsive": 0,
+  "triageApplied": "YES"
+}

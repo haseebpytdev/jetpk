@@ -1,0 +1,11 @@
+FUNCTIONAL_CASE_ID,ROLE,ROUTE,EXECUTION_CLASS,CONTROL,WHY_UNTESTED,EXPECTED_EXECUTOR,PREVIOUS_RESULT_HISTORY
+FC-004302,agent_owner_a,/agent/dashboard,NAVIGATION,navigation_link:Update profile,navigation_link_reclass_from_reversible_or_lifecycle,functional-cert-execute:NAVIGATION,
+FC-005710,agent_owner_b,/agent/dashboard,NAVIGATION,navigation_link:Update profile,navigation_link_reclass_from_reversible_or_lifecycle,functional-cert-execute:NAVIGATION,
+FC-007115,agent_staff_manager,/agent/dashboard,NAVIGATION,navigation_link:Update profile,navigation_link_reclass_from_reversible_or_lifecycle,functional-cert-execute:NAVIGATION,
+FC-008457,agent_staff_accountant,/agent/dashboard,NAVIGATION,navigation_link:Update profile,navigation_link_reclass_from_reversible_or_lifecycle,functional-cert-execute:NAVIGATION,
+FC-009729,agent_staff_sales,/agent/dashboard,NAVIGATION,navigation_link:Update profile,navigation_link_reclass_from_reversible_or_lifecycle,functional-cert-execute:NAVIGATION,
+FC-010875,agent_staff_support,/agent/dashboard,NAVIGATION,navigation_link:Update profile,navigation_link_reclass_from_reversible_or_lifecycle,functional-cert-execute:NAVIGATION,
+FC-011955,agent_staff_ticketing,/agent/dashboard,NAVIGATION,navigation_link:Update profile,navigation_link_reclass_from_reversible_or_lifecycle,functional-cert-execute:NAVIGATION,
+FC-013042,agent_staff_viewer,/agent/dashboard,NAVIGATION,navigation_link:Update profile,navigation_link_reclass_from_reversible_or_lifecycle,functional-cert-execute:NAVIGATION,
+FC-014135,customer_a,/customer/dashboard,NAVIGATION,navigation_link:Update profile,navigation_link_reclass_from_reversible_or_lifecycle,functional-cert-execute:NAVIGATION,
+FC-014709,customer_b,/customer/dashboard,NAVIGATION,navigation_link:Update profile,navigation_link_reclass_from_reversible_or_lifecycle,functional-cert-execute:NAVIGATION,

@@ -1,0 +1,14 @@
+FUNCTIONAL_CASE_ID,ROLE,ROUTE,CONTROL,TERMINAL_BEFORE,EXECUTION_BUCKET,QA_RESOURCE,NOTE
+FC-000708,platform_admin,/admin/dashboard/staff,input_checkbox:staff-perm-staff.support.reply,,HIGH_RISK_INTERNAL,NO,staff_permission_toggle_requires_dedicated_qa_staff_edit
+FC-002428,platform_admin,/admin/dashboard/profile,button:Save profile,PASS,SAFE_AUTOMATED,YES,next_dashboard_profile_done
+FC-004161,staff,/staff/dashboard/profile,button:Save profile,PASS,SAFE_AUTOMATED,YES,next_dashboard_profile_done
+FC-005424,agent_owner_a,/agent/profile,button:Save profile,PASS,SAFE_AFTER_HARNESS,YES,blade_profile_whatsapp
+FC-006831,agent_owner_b,/agent/profile,button:Save profile,PASS,SAFE_AFTER_HARNESS,YES,blade_profile_whatsapp
+FC-008186,agent_staff_manager,/agent/profile,button:Save profile,PASS,SAFE_AFTER_HARNESS,YES,blade_profile_whatsapp
+FC-009477,agent_staff_accountant,/agent/profile,button:Save profile,FAIL,SAFE_AFTER_HARNESS,YES,blade_profile_whatsapp
+FC-010648,agent_staff_sales,/agent/profile,button:Save profile,PASS,SAFE_AFTER_HARNESS,YES,blade_profile_whatsapp
+FC-011738,agent_staff_support,/agent/profile,button:Save profile,PASS,SAFE_AFTER_HARNESS,YES,blade_profile_whatsapp
+FC-012824,agent_staff_ticketing,/agent/profile,button:Save profile,PASS,SAFE_AFTER_HARNESS,YES,blade_profile_whatsapp
+FC-013911,agent_staff_viewer,/agent/profile,button:Save profile,PASS,SAFE_AFTER_HARNESS,YES,blade_profile_whatsapp
+FC-014389,customer_a,/customer/profile,button:Save profile,FAIL,SAFE_AFTER_HARNESS,YES,blade_profile_whatsapp
+FC-014952,customer_b,/customer/profile,button:Save profile,FAIL,SAFE_AFTER_HARNESS,YES,blade_profile_whatsapp

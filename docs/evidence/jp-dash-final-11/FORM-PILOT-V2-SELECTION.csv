@@ -1,0 +1,9 @@
+FUNCTIONAL_CASE_ID,QA_IDENTITY_KEY,ROUTE,CONTROL_TYPE,SEMANTIC_TYPE,PROBE_TARGET_KIND
+FC-000688,platform_admin,/admin/dashboard/staff,input_email,FIELD_VALIDATION,input_email
+FC-003466,staff,/staff/dashboard/cms/sections,textarea,FIELD_VALIDATION,textarea
+FC-005531,agent_owner_a,/agent/security,input_password,FIELD_VALIDATION,input_password
+FC-014474,customer_a,/customer/security,input_password,FIELD_VALIDATION,input_password
+FC-002461,platform_admin,/admin/dashboard/profile,input_email,FIELD_VALIDATION,input_email
+FC-001118,platform_admin,/admin/dashboard/cms/pages,textarea,FIELD_VALIDATION,textarea
+FC-006938,agent_owner_b,/agent/security,input_password,FIELD_VALIDATION,input_password
+FC-004173,staff,/staff/dashboard/profile,input_email,FIELD_VALIDATION,input_email

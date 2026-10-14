@@ -81,6 +81,23 @@ export function loadQaStaffPasswordFromVault() {
   return loadQaPasswordFromVault("staff");
 }
 
+/**
+ * @param {string[]} vaultTargets
+ * @returns {string|null}
+ */
+export function loadPasswordFromCredTargets(vaultTargets) {
+  if (process.platform !== "win32" || !Array.isArray(vaultTargets)) {
+    return null;
+  }
+  for (const target of vaultTargets) {
+    const password = retrieveWithCredRead(target);
+    if (password) {
+      return password;
+    }
+  }
+  return null;
+}
+
 function retrieveWithCredRead(vaultTarget) {
   const tempFile = path.join(os.tmpdir(), `jp-dash-03-qa-pw-${process.pid}.tmp`);
   const psScript = `

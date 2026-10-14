@@ -1,0 +1,97 @@
+/** Authoritative admin/staff back-office routes (nav + deep pages). Live nav is merged at runtime. */
+
+const ADMIN_NAV_ROUTES = [
+  "/admin/dashboard",
+  "/admin/dashboard/bookings",
+  "/admin/dashboard/payments",
+  "/admin/dashboard/pnrs",
+  "/admin/dashboard/tickets",
+  "/admin/dashboard/operations/inbox",
+  "/admin/dashboard/customers",
+  "/admin/dashboard/agents",
+  "/admin/dashboard/suppliers",
+  "/admin/dashboard/users",
+  "/admin/dashboard/staff",
+  "/admin/dashboard/customer-queries",
+  "/admin/dashboard/reports",
+  "/admin/dashboard/audit",
+  "/admin/dashboard/api-connections",
+  "/admin/dashboard/settings/general",
+  "/admin/dashboard/cms/sections",
+  "/admin/dashboard/cms/pages",
+  "/admin/dashboard/seo",
+  "/admin/dashboard/settings/notifications",
+  "/admin/dashboard/markups",
+  "/admin/dashboard/commissions",
+  "/admin/dashboard/group-ticketing",
+  "/admin/dashboard/settings/security",
+  "/admin/dashboard/settings/integrations",
+  "/admin/dashboard/system/go-live",
+  "/admin/dashboard/settings",
+  "/admin/dashboard/support",
+  "/admin/dashboard/cms/assets",
+];
+
+export const ADMIN_SUPPLEMENTAL = [
+  ...ADMIN_NAV_ROUTES,
+  "/admin/dashboard/deposits",
+  "/admin/dashboard/cms",
+  "/admin/dashboard/cms/notices",
+  "/admin/dashboard/cms/banners",
+  "/admin/dashboard/users/roles",
+  "/admin/dashboard/users/permissions",
+  "/admin/dashboard/reports/bookings",
+  "/admin/dashboard/reports/operations",
+  "/admin/dashboard/reports/payments",
+  "/admin/dashboard/reports/sales",
+  "/admin/dashboard/operations/review",
+  "/admin/dashboard/operations/execution",
+  "/admin/dashboard/notifications/failures",
+  "/admin/dashboard/profile",
+];
+
+export const STAFF_SUPPLEMENTAL = ADMIN_SUPPLEMENTAL.map((p) => p.replace("/admin/", "/staff/"));
+
+export const AGENT_ROUTES = [
+  "/agent/dashboard",
+  "/agent/bookings",
+  "/agent/bookings/create",
+  "/agent/wallet",
+  "/agent/wallet/ledger",
+  "/agent/accounting/ledger",
+  "/agent/finance/statement",
+  "/agent/deposits",
+  "/agent/deposits/new",
+  "/agent/payments",
+  "/agent/invoices",
+  "/agent/commissions",
+  "/agent/reports",
+  "/agent/travelers",
+  "/agent/travelers/new",
+  "/agent/staff",
+  "/agent/staff/new",
+  "/agent/agency",
+  "/agent/profile",
+  "/agent/security",
+  "/agent/support",
+  "/agent/notifications",
+];
+
+export const CUSTOMER_ROUTES = [
+  "/customer/dashboard",
+  "/customer/bookings",
+  "/customer/payments",
+  "/customer/invoices",
+  "/customer/travelers",
+  "/customer/profile",
+  "/customer/security",
+  "/customer/support",
+  "/customer/notifications",
+];
+
+export const NEGATIVE_PROBE_ROUTES = [
+  { key: "legacy_admin_dashboard", url: "/admin/dashboard", roles: ["legacy_agency_admin"] },
+  { key: "staff_admin_dashboard", url: "/admin/dashboard", roles: ["staff"] },
+  { key: "agent_admin_dashboard", url: "/admin/dashboard", roles: ["agent", "agent_staff"] },
+  { key: "customer_admin_dashboard", url: "/admin/dashboard", roles: ["customer"] },
+];

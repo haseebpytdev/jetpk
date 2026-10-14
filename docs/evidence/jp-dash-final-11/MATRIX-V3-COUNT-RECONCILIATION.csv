@@ -1,0 +1,4 @@
+ROW_NUMBER,FUNCTIONAL_CASE_ID,EXECUTION_CLASS,FUNCTIONAL_RESULT,IN_CONTROL_CASE_MAP,SOURCE_CONTROL_COUNT,ROW_ORIGIN,CORRUPTION_SIGNATURE,ACTION
+14391,Call log:,,,NO,0,playwright_error_csv_corruption,invalid_functional_case_id,REMOVE_CORRUPT_ROW
+14392,  - waiting for locator('#whatsapp') to be visible,,,NO,0,playwright_error_csv_corruption,invalid_functional_case_id,REMOVE_CORRUPT_ROW
+14393,",,,,,,",,,NO,0,playwright_error_csv_corruption,invalid_functional_case_id,REMOVE_CORRUPT_ROW

@@ -1,0 +1,9 @@
+FUNCTIONAL_CASE_ID,TRIAGE,EVIDENCE,INVALID_INPUT_APPLIED,VALIDATION_SIGNAL,SIDE_EFFECT
+FC-000688,CERT_TOOLING_DEFECT,probe_target_not_found,NO,,NO
+FC-003466,WRONG_CLASSIFICATION,no_validation_signal:textarea_required:textarea,YES,,NO
+FC-005531,WRONG_CLASSIFICATION,no_validation_signal:password_confirmation:input,YES,,NO
+FC-014474,WRONG_CLASSIFICATION,no_validation_signal:password_confirmation:input,YES,,NO
+FC-002461,PASS,native_invalid_email_format,YES,native_invalid_email_format,NO
+FC-001118,WRONG_CLASSIFICATION,no_validation_signal:textarea_required:textarea,YES,,NO
+FC-006938,WRONG_CLASSIFICATION,no_validation_signal:password_confirmation:input,YES,,NO
+FC-004173,PASS,native_invalid_email_format,YES,native_invalid_email_format,NO
