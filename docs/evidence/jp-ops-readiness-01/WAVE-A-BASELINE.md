@@ -38,13 +38,16 @@ DEFAULT_WORKER_RUNNING=NO
 
 ## Priority order (in progress)
 
-A1 runtime baseline — PASS (reconciled)  
-A2 role inventory counts — PASS (auth matrix deep check deferred)  
-A3 public/portal smoke — PASS (8/8 HTTP 200)  
-A6 cron health — PASS (stale log noise only)  
-A7 queue topology — PASS (pending=0)  
-A8 failed_jobs/comms observability — PARTIAL (OPS-DEF-0021 residual queued logs)  
-A4–A5 / A9–A11 — next ticks
+A1 runtime baseline — PASS  
+A2 role inventory + unauth deep-link negatives — PARTIAL (no QA auth states in workspace)  
+A3 public/portal smoke — PASS  
+A4 reports/read paths — PARTIAL_UNAUTH_ONLY  
+A5 notification observability — PASS_WITH_RESIDUAL_0021  
+A6 cron health — PASS  
+A7 queue topology — PASS  
+A8 failed_jobs/comms — PARTIAL (OPS-DEF-0021)  
+A9 CMS read-only — INVENTORIED_NOT_AUDITED (0020 untouched)  
+A10–A11 / authenticated journey execution — next (needs QA sessions)
 
 ## Safety
 
