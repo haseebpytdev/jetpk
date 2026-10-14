@@ -48,7 +48,9 @@ A7 queue topology — PASS
 A8 failed_jobs/comms — PARTIAL (OPS-DEF-0021)  
 A9 CMS read-only — INVENTORIED_NOT_AUDITED (0020 untouched)  
 A10 supplier/payment mutation-path source audit — PASS_READ_ONLY (Sabre book live-call ON; ticketing OFF)  
-A11 authenticated journey execution — BLOCKED (needs QA sessions)
+A11 authenticated journey execution — BLOCKED_NO_QA_SESSION  
+Finance idempotency source+live read — 0006/0013 confirmed; 0007 live dup=0  
+WAVE_A_LOOP — STOPPED (see WAVE-A-STATUS.md)
 
 ## Safety
 

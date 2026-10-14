@@ -1,16 +1,16 @@
 JOURNEY_ID,ACTOR,START,STEPS,END_STATE,DEPENDENCIES,SAFE_TEST_METHOD,RESULT,BLOCKER,DEFECT_ID
 OJ-B2C-001,customer,home,search→results→fare→pax→pay→confirm,ticketed|paid,supplier+payment,fixture only,BLOCKED_EXTERNAL,supplier/payment activation + no real book,OPS-DEF-0018
-OJ-B2B-OWN-001,agent_owner,login,dash→search→book→wallet,booking+ledger,supplier+wallet,QA reversible,BLOCKED_EXTERNAL,activation,OPS-DEF-0018
-OJ-B2B-MGR-001,manager,login,staff ops,managed booking,RBAC,QA,NOT_EXECUTED,needs QA session,OPS-DEF-0018
-OJ-B2B-ACC-001,accountant,login,ledger/reports,usable finance view,ledger,QA,NOT_EXECUTED,wallet/ledger gaps + needs QA session,OPS-DEF-0006
+OJ-B2B-OWN-001,agent_owner,login,dash→search→book→wallet,booking+ledger,supplier+wallet,QA reversible,BLOCKED_EXTERNAL,activation; Sabre book live-call ON but unused in audit,OPS-DEF-0018
+OJ-B2B-MGR-001,manager,login,staff ops,managed booking,RBAC,QA,BLOCKED_NO_QA_SESSION,no Playwright auth states in workspace,OPS-DEF-0018
+OJ-B2B-ACC-001,accountant,login,ledger/reports,usable finance view,ledger,QA,BLOCKED_NO_QA_SESSION,no QA session + wallet/ledger gaps,OPS-DEF-0006
 OJ-B2B-SALES-001,sales_agent,login,create booking,booking created,permissions,QA,BLOCKED_EXTERNAL,supplier,OPS-DEF-0016
-OJ-B2B-SUP-001,support_staff,login,support ticket,ticket updated,support module,QA,NOT_EXECUTED,needs QA session,OPS-DEF-0018
+OJ-B2B-SUP-001,support_staff,login,support ticket,ticket updated,support module,QA,BLOCKED_NO_QA_SESSION,no Playwright auth states in workspace,OPS-DEF-0018
 OJ-B2B-TKT-001,ticketing_staff,login,issue ticket,ticketed,ticketing module,QA no live,MANUAL_ACTIVATION_REQUIRED,live flags off,OPS-DEF-0016
 OJ-B2B-VIEW-001,viewer,login,read-only,no mutations,RBAC,source,FAIL,can request cancel,OPS-DEF-0004
 OJ-ADMIN-001,platform_admin,go-live+suppliers,activate modules,production on,admin,checklist,MANUAL_ACTIVATION_REQUIRED,supplier/payment modules still off (disk/failed_jobs/SHA cleared),OPS-DEF-0016
-OJ-STAFF-001,staff,ops inbox,service booking,resolved,permissions,QA,NOT_EXECUTED,needs QA session,OPS-DEF-0018
-OJ-PAY-001,system,AbhiPay callback,verify→settle,paid,AbhiPay,source,PARTIAL,no live charge,OPS-DEF-0017
-OJ-FIN-001,admin,approve deposit,wallet+ledger,posted,wallet,source,PARTIAL,non-atomic ledger,OPS-DEF-0006
-OJ-PNR-001,staff,issue/void,ticketing adapters,ticketed,supplier,source,MANUAL_ACTIVATION_REQUIRED,flags,OPS-DEF-0016
+OJ-STAFF-001,staff,ops inbox,service booking,resolved,permissions,QA,BLOCKED_NO_QA_SESSION,no Playwright auth states in workspace,OPS-DEF-0018
+OJ-PAY-001,system,AbhiPay callback,verify→settle,paid,AbhiPay,source,PARTIAL,no live charge; booking_payments lacks gateway unique,OPS-DEF-0017
+OJ-FIN-001,admin,approve deposit,wallet+ledger,posted,wallet,source,PARTIAL,wallet commits before safeRecord ledger,OPS-DEF-0006
+OJ-PNR-001,staff,issue/void,ticketing adapters,ticketed,supplier,source,MANUAL_ACTIVATION_REQUIRED,ticketing flags false; Sabre book live-call true unused,OPS-DEF-0016
 OJ-NOTIF-001,system,queue mail,deliver,delivered,smtp+queue,Wave1C canary + SSH,PARTIAL,canary PASS; residual queued logs OPS-DEF-0021; historical replay deferred,OPS-DEF-0021
-OJ-CMS-001,admin,CMS/SEO,publish,public updated,CMS,QA reversible,INVENTORIED_NOT_AUDITED,no auth CMS session this tick; storage dir untouched,OPS-DEF-0018
+OJ-CMS-001,admin,CMS/SEO,publish,public updated,CMS,QA reversible,INVENTORIED_NOT_AUDITED,no auth CMS session; storage dir untouched,OPS-DEF-0018
