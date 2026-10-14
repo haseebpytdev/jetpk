@@ -1,0 +1,13 @@
+FLOW,ROLE,CHECK,METHOD,RESULT,DEFECT_ID,NOTES
+login,all,route+UI present,source,MAPPED,—,frontend (auth)/login + Laravel auth
+logout,all,route present,source,MAPPED,—,
+password_reset,all,forgot/reset pages,source,MAPPED,—,
+login_otp,all,OTP mail + settings,source,MAPPED,—,EXTERNAL_DEPENDENCY SMS/email
+session_expiry,all,runtime behavior,runtime,UNTESTED,OPS-DEF-0018,
+cross_role_redirect,multi,DashboardRedirect + portal gates,source,MAPPED,—,
+unauthorized_deep_link,multi,middleware account.type,source,MAPPED,—,live negative probes UNTESTED
+disabled_account,multi,UserAccountStatus,source,MAPPED,—,access-denied reason account-disabled
+legacy_agency_admin,agency_admin,RolePermissionMatrix denial,source,MAPPED,—,legacy disabled
+agent_staff_templates,agent_staff,AgencyRolePermissionMatrix,source,MAPPED,OPS-DEF-0004,viewer mutation gap
+concurrent_sessions,all,runtime,runtime,UNTESTED,OPS-DEF-0018,
+session_fixation,all,Laravel session regen,source,ASSUMED_FRAMEWORK,—,not specially audited

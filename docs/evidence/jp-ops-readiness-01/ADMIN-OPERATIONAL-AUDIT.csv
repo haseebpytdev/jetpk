@@ -1,0 +1,13 @@
+AREA,BUSINESS_OPERATION,COMPLETABLE,PERSISTS,DOWNSTREAM_VISIBLE,ROLLBACK,AUDIT_LOG,RESULT,DEFECT_ID
+users_staff,manage users/staff,UNTESTED_LIVE,unknown,unknown,unknown,expected,INVENTORIED,OPS-DEF-0018
+agents_customers,manage agencies/customers,UNTESTED_LIVE,unknown,unknown,unknown,expected,INVENTORIED,OPS-DEF-0018
+bookings_pnrs_tickets,ops servicing,UNTESTED_LIVE,unknown,unknown,unknown,expected,INVENTORIED,OPS-DEF-0018
+payments_deposits,approve/verify,SOURCE_PARTIAL,yes path,yes path,partial,yes path,PARTIAL,OPS-DEF-0006
+commissions_markups,configure,UNTESTED_LIVE,unknown,unknown,unknown,expected,INVENTORIED,OPS-DEF-0018
+reports,view aggregates,UNTESTED_LIVE,n/a,n/a,n/a,n/a,INVENTORIED,OPS-DEF-0018
+suppliers_api_connections,activate channels,MANUAL,yes,yes,manual,expected,ACTIVATION_REQUIRED,OPS-DEF-0016
+cms_seo,content/SEO,UNTESTED_LIVE,unknown,public,draft/restore possible,expected,INVENTORIED,OPS-DEF-0018
+settings_notifications,configure,UNTESTED_LIVE,unknown,unknown,unknown,expected,INVENTORIED,OPS-DEF-0018
+system_go_live,activation checklist UI,items false in config,n/a,n/a,n/a,n/a,NOT_READY,OPS-DEF-0016
+group_ticketing,inventory/release,schedule present,yes,yes,release-expired,expected,INVENTORIED_RISK,OPS-RISK-0007
+operations_inbox,ops queues,UNTESTED_LIVE,unknown,unknown,unknown,expected,INVENTORIED,OPS-DEF-0018

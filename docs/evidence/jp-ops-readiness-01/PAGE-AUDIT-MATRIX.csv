@@ -1,0 +1,8 @@
+PAGE_OR_CONTROL,PORTAL,ROLE,PURPOSE,DATA_OWNERSHIP,CONTROLS_INSPECTED,RESULT,DEFECT_ID,NOTES
+FINAL-11 authenticated routes (289),admin|staff|agent|customer,multi,UI certification CLOSED,REF_ONLY,responsive FULL_PASS,REFERENCE_ONLY_NOT_OPS,—,Do not reopen FINAL-11; not ops proof
+Next dashboard templates (46),admin|staff,platform_admin|staff,ops UI,tenant scoped BFF,inventory only,INVENTORIED_NOT_AUDITED,OPS-DEF-0018,control-level audit pending
+Next frontend agent pages (27),agent,agent|agent_staff,B2B portal,agency,inventory only,INVENTORIED_NOT_AUDITED,OPS-DEF-0018,
+Next frontend customer pages (13),customer,customer,B2C portal,customer,inventory only,INVENTORIED_NOT_AUDITED,OPS-DEF-0018,
+Laravel admin Blade (~268),admin,platform_admin,legacy/admin ops,platform,inventory only,INVENTORIED_NOT_AUDITED,OPS-DEF-0018,dual-stack
+system/go-live,admin|staff,platform_admin,activation UI,platform,source inventory,INVENTORIED_NOT_AUDITED,—,config/ota-go-live items false
+api-connections,admin|staff,platform_admin,supplier config,platform,source inventory,INVENTORIED_NOT_AUDITED,OPS-DEF-0016,

@@ -115,4 +115,16 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Notification pipeline queue
+    |--------------------------------------------------------------------------
+    |
+    | Named operational / booking notification jobs must land on a queue that
+    | production cron/workers already consume (not the implicit "default").
+    |
+    */
+
+    'notification_queue' => env('MAIL_NOTIFICATION_QUEUE', 'notifications-transactional'),
+
 ];

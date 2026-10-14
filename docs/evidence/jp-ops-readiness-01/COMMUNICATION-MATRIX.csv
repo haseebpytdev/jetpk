@@ -1,0 +1,12 @@
+MAILABLE_OR_CHANNEL,TRIGGER,RECIPIENT,TEMPLATE,BRANDING,DYNAMIC_VALUES,RETRY,LOGGING,RESULT,DEFECT_ID
+LoginOtpMail,login OTP,user,app/Mail,JetPakistan expected,OTP,queue,logs,SOURCE_MAPPED,OPS-RISK-0011
+CustomerWelcomeMail,register,customer,app/Mail,expected,profile,queue,logs,SOURCE_MAPPED,—
+BookingStatusChangedMail,status change,customer/agent,app/Mail,expected,status,queue,logs,SOURCE_MAPPED,—
+BookingItineraryReadyMail,itinerary,customer,app/Mail,expected,itinerary,queue,logs,SOURCE_MAPPED,—
+TicketIssuedMail,ticket,customer,app/Mail,expected,ticket,queue,logs,SOURCE_MAPPED,—
+PaymentVerifiedMail,verify,customer,app/Mail,expected,payment,queue,logs,SOURCE_MAPPED,—
+PaymentRejectedMail,reject,customer,app/Mail,expected,payment,queue,logs,SOURCE_MAPPED,—
+AbandonedFlightSearchMail,schedule 15m,prospect,app/Mail,expected,search,queue,logs,SOURCE_MAPPED,OPS-RISK-0011
+Daily/Weekly/Monthly reports,schedule,ops,commands,expected,aggregates,cron,logs,SOURCE_MAPPED,OPS-DEF-0015
+Agency booking activity summary,daily,agencies,command,expected,activity,cron,logs,SOURCE_MAPPED,OPS-DEF-0015
+failed_jobs backlog,n/a,n/a,n/a,n/a,n/a,n/a,failed_jobs=147,FAIL,OPS-DEF-0015

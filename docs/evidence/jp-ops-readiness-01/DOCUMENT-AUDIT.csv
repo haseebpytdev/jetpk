@@ -1,0 +1,6 @@
+DOCUMENT,GENERATION_PATH,AUTH,DYNAMIC_VALUES,RESULT,DEFECT_ID
+booking invoice,BookingDocument* / frontend invoice page,auth|guest token,fare totals,INVENTORIED_NOT_EXECUTED,OPS-DEF-0018
+voucher,documents service,auth|guest,booking,INVENTORIED_NOT_EXECUTED,OPS-DEF-0018
+ticket,ticketing + mail,auth,ticket numbers,INVENTORIED_NOT_EXECUTED,OPS-DEF-0016
+confirmation page,frontend booking/confirmation,session,booking ref,INVENTORIED_NOT_EXECUTED,OPS-DEF-0018
+exports/reports,admin/agent reports,RBAC,aggregates,INVENTORIED_NOT_EXECUTED,OPS-DEF-0018

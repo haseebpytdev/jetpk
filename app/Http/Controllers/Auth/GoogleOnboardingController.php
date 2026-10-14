@@ -85,7 +85,10 @@ class GoogleOnboardingController extends Controller
     private function queueWelcomeEmail(User $user): void
     {
         try {
-            Mail::to($user->email)->queue(GoogleCustomerWelcomeMail::forUser($user));
+            Mail::to($user->email)->queue(
+                GoogleCustomerWelcomeMail::forUser($user)
+                    ->onQueue((string) config('mail.notification_queue', 'notifications-transactional'))
+            );
         } catch (Throwable $e) {
             report($e);
         }

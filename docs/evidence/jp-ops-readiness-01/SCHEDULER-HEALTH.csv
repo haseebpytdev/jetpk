@@ -1,0 +1,14 @@
+COMMAND,FREQUENCY,PURPOSE,MUTATION_RISK,LAST_RUN_EVIDENCE,FAILURE_VISIBILITY
+ota:cleanup-expired-access,hourly,expire access tokens,LOW,schedule:list next-due,logs/failed_jobs
+ota:send-daily-report,daily 08:00,ops email,MEDIUM email,schedule:list,mail/failed_jobs
+ota:send-agency-booking-activity-summary --all-active-agencies,daily 07:10,agency email,MEDIUM email,schedule:list,mail/failed_jobs
+ota:send-weekly-report,weekly Mon 08:00,ops email,MEDIUM email,schedule:list,mail/failed_jobs
+ota:send-monthly-report,monthly 1st 08:00,ops email,MEDIUM email,schedule:list,mail/failed_jobs
+ota:send-monthly-ledgers,monthly 1st 09:00,finance email,MEDIUM email,schedule:list,mail/failed_jobs
+homepage:refresh-featured-fares,daily 05:00,CMS fares,HIGH supplier,schedule:list,logs
+jetpk:homepage-route-fares-refresh,daily 00:30,CMS fares,HIGH supplier,schedule:list,logs
+ota:process-abandoned-flight-searches,every 15m,marketing prep,LOW,schedule:list,logs
+ota:send-abandoned-flight-searches,every 15m,marketing email,MEDIUM email,schedule:list,mail/failed_jobs
+group-ticketing:sync-inventory,daily 02:00,group inventory,HIGH supplier,schedule:list,logs
+group-ticketing:release-expired,every minute,release holds,MEDIUM state,schedule:list next seconds,logs
+jetpk:branding-background-cleanup,daily 03:15,file cleanup,LOW file,schedule:list,logs

@@ -1,0 +1,9 @@
+AREA,CHECK,METHOD,RESULT,DEFECT_ID
+PNR storage,SupplierBooking model,source,MAPPED,—
+internal locator,booking reference,source,MAPPED,—
+ticket issue,TicketingService + adapters,source,MAPPED_NOT_ACTIVATED,OPS-DEF-0016
+void_cancel_refund,services+policies,source,MAPPED_NO_LIVE,OPS-DEF-0018
+permissions,staff.ticketing.issue,source,MAPPED,—
+ownership,agency/agent scoping,source,PASS_LIKELY,—
+Sabre eligibility,SupplierBookingService Sabre false,source,GAP_PATH,OPS-DEF-0016
+dashboard pnrs/tickets pages,Next UI,inventory,INVENTORIED_NOT_EXECUTED,OPS-DEF-0018

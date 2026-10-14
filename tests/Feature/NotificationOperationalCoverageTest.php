@@ -17,11 +17,12 @@ use App\Models\User;
 use App\Services\Booking\BookingService;
 use App\Services\Communication\BookingCommunicationService;
 use App\Services\Communication\NotificationRecipientResolver;
+use App\Services\Communication\OtaNotificationService;
 use App\Services\Suppliers\BookingAdapters\DuffelSupplierBookingAdapter;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Queue\CallQueuedClosure;
+use App\Jobs\Notifications\DeliverQueuedOperationalMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Tests\Support\PlatformAdminTestHelpers;
@@ -209,14 +210,27 @@ class NotificationOperationalCoverageTest extends TestCase
     {
         Mail::fake();
         Queue::fake();
-        config(['queue.default' => 'database', 'mail.default' => 'smtp']);
+        config([
+            'queue.default' => 'database',
+            'mail.default' => 'smtp',
+            'mail.notification_queue' => 'notifications-transactional',
+        ]);
 
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
-        $booking = $this->draftBookingWithContact();
 
-        app(BookingCommunicationService::class)->notifyManualReviewRequired($booking);
+        app(OtaNotificationService::class)->send(
+            $agency,
+            OtaNotificationEvent::BookingManualReviewRequired->value,
+            ['message' => 'Queue routing regression'],
+            null,
+            fallbackSubject: 'Manual review required',
+            fallbackBody: 'A booking requires manual review.',
+        );
 
-        Queue::assertPushed(CallQueuedClosure::class);
+        Queue::assertPushed(DeliverQueuedOperationalMail::class, function (DeliverQueuedOperationalMail $job): bool {
+            return $job->queue === 'notifications-transactional';
+        });
+        Queue::assertNotPushed(\Illuminate\Queue\CallQueuedClosure::class);
     }
 
     public function test_communication_log_error_message_does_not_contain_smtp_password(): void

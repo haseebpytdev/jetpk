@@ -1,0 +1,6 @@
+SURFACE,TYPE,AUTH,VALIDATION,OWNERSHIP,RESULT,DEFECT_ID
+payment_proof_upload,upload,auth+permission,UNTESTED_DETAIL,booking scoped,INVENTORIED,OPS-DEF-0018
+booking_documents_download,download,auth|guest token,token bind,booking,PARTIAL,OPS-DEF-0011
+cms_media_upload,upload,admin,UNTESTED_DETAIL,agency,INVENTORIED,OPS-DEF-0018
+branding_logo_bg_job,queue file,admin,job,agency,INVENTORIED,—
+report_exports,download,RBAC,UNTESTED,portal scoped,INVENTORIED,OPS-DEF-0018

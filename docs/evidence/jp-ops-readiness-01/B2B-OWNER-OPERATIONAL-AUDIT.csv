@@ -1,0 +1,11 @@
+AREA,CHECK,METHOD,RESULT,DEFECT_ID
+login_dashboard,surfaces exist,inventory,INVENTORIED_NOT_EXECUTED,OPS-DEF-0018
+search_booking,allowed journey,source,INVENTORIED_NOT_EXECUTED,OPS-DEF-0016
+wallet_balance,canonical wallet,source,FAIL_RISK,OPS-DEF-0007
+ledger,posting invariants,source,PARTIAL,OPS-DEF-0006
+deposits,approve path,source,PARTIAL,OPS-DEF-0006
+staff_management,owner-only,source,MAPPED,—
+agency_profile,pages,inventory,INVENTORIED_NOT_EXECUTED,OPS-DEF-0018
+commissions_markups,visibility,source,MAPPED,—
+reports_invoices_payments,pages,inventory,INVENTORIED_NOT_EXECUTED,OPS-DEF-0018
+cross_agency_isolation,policy,source,PASS_LIKELY,—

@@ -1,0 +1,13 @@
+PATH,SIZE,OWNER,LAST_MODIFIED,CLASS,WHY_SAFE_OR_UNSAFE,ACTIVE_REFERENCE,CLEANUP_METHOD,ESTIMATED_RECLAIMABLE_SPACE
+/home/pkjetp/backups/jetpk_app-202609*.tar.gz,≈18-22G,pkjetp,2026-09,BACKUPS,SAFE_IF_NEWER_RETAINED — older full-app tarballs superseded by Oct backups; keep newest N,not mounted by runtime,archive_offhost_then_delete_or_retention_policy,18-22G
+/home/pkjetp/backups/jetpk_app-20261008*.tar.gz + 20261009 early,≈6-8G,pkjetp,2026-10-08/09,BACKUPS,CONDITIONAL — keep at least one pre-FINAL-11 and latest 20261012,rollback candidates,retain_latest_2_plus_milestone,4-6G if pruned
+/home/pkjetp/backups/jp-perf-final-02d|02e|jp-ask-ui-01|jetpk-seo-phase2*,≈3.1G,pkjetp,2026-09,BACKUPS,SAFE_IF_ARCHIVED — old phase trees with node_modules/.next,not live,offhost_archive_then_rm,≈3.1G
+/home/pkjetp/backups/p0-frontend-restore*|jetpk-frontend-full-restore*|frontend-node_modules-bak*|frontend-broken*,≈0.7G,pkjetp,2026-09,BACKUPS,SAFE_IF_ARCHIVED — frontend recovery leftovers,not live,offhost_archive_then_rm,≈0.7G
+/home/pkjetp/jetpk_git|/home/pkjetp/jetpk_git_align37|/home/pkjetp/jetpk_git_cq40|/home/pkjetp/jetpk_git_writable,≈1.5G,pkjetp,mixed,OTHER,CONDITIONAL — not active runtime path; confirm no deploy script depends,not jetpk_app,remove_unused_clones_after_confirm,≈1.5G
+/home/pkjetp/.npm + /home/pkjetp/.cache,≈1.3G,pkjetp,mixed,CACHE,CONDITIONAL — regenerable; may slow next npm ops,not runtime serve path,npm_cache_clean_after_confirm,≈1.0-1.3G
+/home/pkjetp/releases/*,62M,pkjetp/root,mixed,OLD_RELEASES,LOW VALUE — already small; do not bulk-delete without mapping active,not primary,retention_prune_optional,<0.1G
+/home/pkjetp/jetpk_app,3.2G,pkjetp,live,CURRENT_RELEASE,UNSAFE — active application,YES live,NONE,0
+/home/pkjetp/jetpk_app/storage/app/public + public/storage,≈150M,pkjetp,live,USER_UPLOADS,UNSAFE without content audit,YES,NONE,0
+/home/pkjetp/backups/jetpk_app-20261012T192408Z.tar.gz,≈1.14G,pkjetp,2026-10-12,BACKUPS,UNSAFE to delete first — newest full backup observed,rollback,RETAIN,0
+/var/lib/mysql,185M,mysql,live,DATABASE,UNSAFE,YES,NONE,0
+/home/pkjetp/jetpk_app/storage/logs,4.3M,pkjetp,rotated,APPLICATION_LOGS,LOW — already rotated; not disk driver,logs,NONE_NOW,<0.01G

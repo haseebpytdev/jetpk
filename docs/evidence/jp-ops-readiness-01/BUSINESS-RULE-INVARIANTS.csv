@@ -1,0 +1,15 @@
+RULE_ID,DOMAIN,RULE,SOURCE,TEST_METHOD,RESULT,DEFECT_ID
+BRI-001,RBAC,agent cannot access another agency booking,BookingPolicy,source,PASS_LIKELY,—
+BRI-002,RBAC,customer cannot access another customer booking,BookingPolicy,source,PASS_LIKELY,—
+BRI-003,RBAC,viewer cannot mutate bookings,AgencyRolePermissionMatrix + cancel route,source,FAIL,OPS-DEF-0004
+BRI-004,FINANCE,financial posting cannot occur twice for same source,ledger unique,source+tests,PASS,—
+BRI-005,FINANCE,wallet credit implies ledger mirror,AgentWalletService,source,FAIL,OPS-DEF-0006
+BRI-006,FINANCE,agency has one operational wallet balance truth,canonicalWalletForAgency,source,FAIL,OPS-DEF-0007
+BRI-007,PAYMENT,paid gateway callback cannot double-settle,PaymentTransactionService,source,PARTIAL,OPS-DEF-0013
+BRI-008,BOOKING,confirmed requires allowed transition (non-admin),BookingService,source,PASS,—
+BRI-009,BOOKING,supplier failure not represented as confirmed success,adapters+status,runtime,UNTESTED,OPS-DEF-0018
+BRI-010,SUPPLIER,PIA frozen for this audit,governance,policy,PASS_GOVERNANCE,—
+BRI-011,TICKETING,ticket cannot issue when module/live flags off,TicketingService+config,source,PASS_SAFE_DEFAULT,OPS-DEF-0016
+BRI-012,SECURITY,guest lookup requires matching identity,GuestBookingAccessService,source,FAIL_OR,OPS-DEF-0005
+BRI-013,ADMIN,admin status override must keep satellite fields consistent,BookingService admin bypass,source,RISK,OPS-RISK-0007
+BRI-014,OPS,failed background work must be visible,failed_jobs,SSH,FAIL_BACKLOG,OPS-DEF-0015

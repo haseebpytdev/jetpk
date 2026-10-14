@@ -1,0 +1,6 @@
+AREA,CHECK,METHOD,RESULT,DEFECT_ID
+FINAL-11 responsive,867 viewport rows,reference CLOSED,PASS_UI_REF,—
+keyboard_focus_labels,deep a11y,runtime,UNTESTED,OPS-DEF-0018
+dangerous_action_confirm,ticketing/cancel/refund,runtime,UNTESTED,OPS-DEF-0018
+viewer_mutation_clarity,viewer can cancel,source,FAIL,OPS-DEF-0004
+mobile_tap_targets,public+portals,runtime,UNTESTED,OPS-DEF-0018

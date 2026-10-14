@@ -1,0 +1,11 @@
+AUDIT_ID,PHASE,DOMAIN,SEVERITY,STATUS,FINDING,SURFACE,FILE_EVIDENCE,CONTROL_OR_GAP,RUNTIME_VERIFIED,DEFECT_ID
+SEC-OPS-001,20,TENANT_ISOLATION,P3,PASS,Agent booking view scoped by agency_id + agent_id,Agent portal,app/Policies/BookingPolicy.php,CONTROL,N,—
+SEC-OPS-002,20,TENANT_ISOLATION,P3,PASS,Staff booking view scoped by agency_id,Staff portal,BookingPolicy.php,CONTROL,N,—
+SEC-OPS-003,20,TENANT_ISOLATION,P3,PASS,BFF bookings filter agent to own agent_id,Dashboard BFF,DashboardBookingsReadService.php,CONTROL,N,—
+SEC-OPS-004,20,AUTHZ,P2,GAP,Viewer can request cancellations via BookingsView,Agent portal,routes/agent.php; BookingCancellationPolicy,GAP,N,OPS-DEF-0004
+SEC-OPS-005,20,GUEST_ACCESS,P2,GAP,Guest lookup OR-match email/phone,Guest lookup,GuestBookingAccessService.php,GAP,N,OPS-DEF-0005
+SEC-OPS-006,20,GUEST_ACCESS,P3,PASS,Guest token SHA-256 hashed + expiry,Guest tokens,GuestBookingAccessService.php,CONTROL,N,—
+SEC-OPS-007,20,PAYMENTS,P3,PASS,AbhiPay callback CSRF-exempt with server verify + lock,AbhiPay,PaymentTransactionService.php; bootstrap/app.php,CONTROL,N,—
+SEC-OPS-008,20,PAYMENTS,P2,GAP,No DB unique on booking_payments gateway reference,AbhiPay settlement,migrations + PaymentTransactionService,GAP,N,OPS-DEF-0013
+SEC-OPS-009,20,IDOR,P2,GAP,Deposits BFF list agency-only (latent),Dashboard deposits,DashboardDepositsReadService.php,GAP,N,OPS-DEF-0008
+SEC-OPS-010,20,AUTHZ,P3,LATENT,BookingPolicy.update staff without permission,Policy,BookingPolicy.php,LATENT,N,OPS-DEF-0009

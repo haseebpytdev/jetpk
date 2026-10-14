@@ -1,0 +1,6 @@
+RISK_ID,AREA,CONCERN,EVIDENCE,SEVERITY,STATUS
+PERF-RISK-001,server,disk 89%,SSH df,P1,OPEN
+PERF-RISK-002,queue,failed_jobs 147 + cron stop-when-empty,SSH,P1,OPEN
+PERF-RISK-003,homepage,featured fare refresh supplier calls,schedule,P2,OPEN
+PERF-RISK-004,reports,unbounded exports possible,source inventory,P2,UNTESTED
+PERF-RISK-005,search,supplier latency not re-measured,no live supplier calls,P2,UNTESTED

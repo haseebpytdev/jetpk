@@ -1,0 +1,7 @@
+TEMPLATE,CAPABILITY_FOCUS,MUTATION_EXPECTED,METHOD,RESULT,DEFECT_ID
+manager,broad ops,many,source matrix,MAPPED_NOT_EXECUTED,OPS-DEF-0018
+accountant,ledger/finance,limited,source,MAPPED_NOT_EXECUTED,OPS-DEF-0018
+sales_agent,book/create,booking create,source,MAPPED_NOT_EXECUTED,OPS-DEF-0018
+support_staff,support,support tickets,source,MAPPED_NOT_EXECUTED,OPS-DEF-0018
+ticketing_staff,ticketing,issue if permitted,source,MAPPED_NOT_EXECUTED,OPS-DEF-0016
+viewer,read-only,NONE expected,source,FAIL_GAP_CANCEL,OPS-DEF-0004

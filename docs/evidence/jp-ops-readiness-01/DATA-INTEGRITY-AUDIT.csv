@@ -1,0 +1,10 @@
+CHECK,METHOD,RESULT,DEFECT_ID,NOTES
+orphan_bookings,live SQL,NOT_RUN,OPS-DEF-0018,read-only query deferred
+orphan_passengers,live SQL,NOT_RUN,OPS-DEF-0018,
+orphan_pnrs,live SQL,NOT_RUN,OPS-DEF-0018,
+orphan_payments,live SQL,NOT_RUN,OPS-DEF-0018,
+orphan_ledger,live SQL,NOT_RUN,OPS-DEF-0018,
+duplicate_wallets,source+tests,RISK,OPS-DEF-0007,CanonicalAgencyWalletTest exists
+invalid_booking_states,source,RISK,OPS-RISK-0007,admin unrestricted transitions
+cross_tenant_fk,source policies,PASS_LIKELY,—,needs live sampling
+failed_jobs_backlog,SSH count,FAIL,OPS-DEF-0015,147 rows
