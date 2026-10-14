@@ -1,0 +1,13 @@
+PATH,SIZE_BYTES,SIZE_HUMAN,CLASS,SAFE_REGENERABLE,BACKUP_OR_RUNTIME,LAST_MODIFIED,KNOWN_OWNER,NOTES
+/tmp,15043810676,15G,TEMP,YES,TEMP,2026-10-14,root:root,PRE cleanup staging builds; POST ~3.6G residual root-owned
+/home/pkjetp/backups,22430730939,22G,OLD_BACKUP,NO,BACKUP,2026-10-14,pkjetp:pkjetp,PRE; POST 5.3G after prune
+/home/pkjetp/jetpk_app,3120950842,3.2G,CURRENT_RUNTIME,NO,RUNTIME,2026-10-09,pkjetp:pkjetp,live app
+/home/pkjetp/jetpk_app/frontend/node_modules,605132252,641M,NODE_MODULES,YES,RUNTIME,2026-10-12,pkjetp:pkjetp,regenerable
+/home/pkjetp/jetpk_app/dashboard/node_modules,578247695,624M,NODE_MODULES,YES,RUNTIME,2026-10-12,pkjetp:pkjetp,regenerable
+/home/pkjetp/jetpk_app/frontend/.next,342481682,330M,CACHE,YES,RUNTIME,2026-10-12,pkjetp:pkjetp,build artifact
+/home/pkjetp/jetpk_app/dashboard/.next,366676846,352M,CACHE,YES,RUNTIME,2026-10-12,pkjetp:pkjetp,build artifact
+/home/pkjetp/.cache,687865856,656M,CACHE,YES,RUNTIME,2026-10-14,pkjetp:pkjetp,user cache
+/home/pkjetp/.npm,659554304,629M,CACHE,YES,RUNTIME,2026-10-14,pkjetp:pkjetp,npm cache
+/home/pkjetp/jetpk_git,512753664,489M,UNKNOWN,NO,USER_DATA,2026-10-14,pkjetp:pkjetp,git clone retained UNKNOWN
+/var/log,767384375,428M,LOG,YES,SYSTEM,2026-10-11,root:syslog,system logs
+/home/pkjetp/releases,56401065,62M,RELEASE_STAGING,YES,BACKUP,2026-10-14,pkjetp:pkjetp,PRE; POST 54M residual root-owned

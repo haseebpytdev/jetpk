@@ -1,0 +1,24 @@
+PATH,RETENTION_CLASS,DELETE_CANDIDATE,REASON,SUPERSEDED_BY,CHECKPOINT_VERIFIED
+/home/pkjetp/backups/jetpk_app-20261014T215304Z.tar.gz,CURRENT_VERIFIED_CHECKPOINT,NO,Current runtime a138eb57,n/a,YES
+/home/pkjetp/backups/jetpk-db-20261014T215304Z.sql.gz,CURRENT_VERIFIED_CHECKPOINT,NO,Paired DB,n/a,YES
+/home/pkjetp/backups/public_html-20261014T215304Z.tar.gz,CURRENT_VERIFIED_CHECKPOINT,NO,Paired public_html,n/a,YES
+/home/pkjetp/backups/jetpk_app-20261014T192251Z.tar.gz,PREVIOUS_VERIFIED_ROLLBACK,NO,Pre-Wave1C pin,n/a,YES
+/home/pkjetp/backups/jetpk-db-20261014T192251Z.sql.gz,PREVIOUS_VERIFIED_ROLLBACK,NO,Pre-Wave1C DB pin,n/a,YES
+/home/pkjetp/backups/jetpakistan-recovered-20260921,REQUIRED_MILESTONE,NO,DR recovery archive,n/a,N/A
+/home/pkjetp/backups/jetpk_app-20260919T133533Z.tar.gz,REDUNDANT,YES,Old full archive,20261014T215304Z,YES
+/home/pkjetp/backups/jetpk_app-20260921T174957Z.tar.gz,REDUNDANT,YES,Duplicate same-day,20261014T215304Z,YES
+/home/pkjetp/backups/jetpk_app-20260921T175205Z.tar.gz,REDUNDANT,YES,Duplicate same-day,20261014T215304Z,YES
+/home/pkjetp/backups/jetpk_app-20260924T091650Z.tar.gz,REDUNDANT,YES,Superseded,20261014T215304Z,YES
+/home/pkjetp/backups/jetpk_app-20260930T170440Z.tar.gz,REDUNDANT,YES,Superseded,20261014T215304Z,YES
+/home/pkjetp/backups/jetpk_app-20261008T161625Z.tar.gz,REDUNDANT,YES,Superseded,20261014T215304Z,YES
+/home/pkjetp/backups/jetpk_app-20261008T212021Z.tar.gz,REDUNDANT,YES,Superseded,20261014T215304Z,YES
+/home/pkjetp/backups/jetpk_app-20261009T074212Z.tar.gz,REDUNDANT,YES,Superseded,20261014T215304Z,YES
+/home/pkjetp/backups/jetpk_app-20261009T085629Z.tar.gz,REDUNDANT,YES,Superseded,20261014T215304Z,YES
+/home/pkjetp/backups/jetpk_app-20261009T211349Z.tar.gz,REDUNDANT,YES,Superseded,20261014T215304Z,YES
+/home/pkjetp/backups/jetpk_app-20261010T063311Z.tar.gz,REDUNDANT,YES,Superseded,20261014T215304Z,YES
+/home/pkjetp/backups/jetpk_app-20261010T123257Z.tar.gz,REDUNDANT,YES,Superseded,20261014T215304Z,YES
+/home/pkjetp/backups/jetpk_app-20261012T192408Z.tar.gz,REDUNDANT,YES,Superseded,20261014T215304Z,YES
+/tmp/jp-frontend-build-*,REDUNDANT,YES,Regenerable build staging,n/a,YES
+/tmp/jetpk-stage-*,REDUNDANT,YES,Regenerable stage trees,n/a,YES
+/home/pkjetp/backups/jp-ask-ui-01-20260907T211951Z,REDUNDANT,YES,Root-owned residual blocked,20261014T215304Z,YES
+/home/pkjetp/jetpk_git*,UNKNOWN_REVIEW_REQUIRED,NO,Purpose not proven disposable,n/a,N/A

@@ -57,36 +57,27 @@ IDEMPOTENCY_TEST=PASS
 ## Release / deploy gates
 
 ```
-PR_NUMBER=TEMPORARILY_BLOCKED (gh auth missing; branch pushed)
-PR_CREATE_URL=https://github.com/haseebpytdev/jetpk/compare/main...fix/ops-wave1c-queue-restoration?expand=1
-RELEASE_GUARDS=NOT_RUN (no PR)
-MERGED_SHA=
+PR_NUMBER=73
+MERGED_SHA=a138eb570b05910046df7fb251beeef839b25395
 DEPLOY_REQUIRED=YES
-DEPLOYED_RUNTIME_SHA=(unchanged — feature-head deploy forbidden)
-QUEUE_CANARY=NOT_RUN (blocked on deploy)
-QUEUE_CONSUMPTION_PROVEN=NO
+DEPLOYED_RUNTIME_SHA=a138eb570b05910046df7fb251beeef839b25395
+QUEUE_CANARY=PASS (job 1175 / log 747 sent)
+QUEUE_CONSUMPTION_PROVEN=YES
 WORKER_MANAGER=CRON
-WORKER_ACTIVATED=notifications-* only (pre-existing; default not activated)
+WORKER_ACTIVATED=notifications-* only (default not activated)
 EXPECTED_NOTIFICATION_QUEUE=notifications-transactional
 ```
 
 ## Defect status
 
 ```
-OPS_DEF_0019_STATUS=OPEN
+OPS_DEF_0019_STATUS=CLOSED
 OPS_DEF_0020_STATUS=OPEN
 PUBLIC_STORAGE_CLASSIFICATION=LEGACY_DIRECTORY|BLOCKED_BY_EXISTING_FILES
 PRODUCTION_OPERATIONAL_READY=NO
 ```
 
-## Why 0019 remains OPEN
-
-Backlog cleared safely, but routing fix is not on production runtime and canary not proven. New mail may still enqueue Closures on `default` until merged SHA is deployed.
-
 ## Next
 
-1. Authenticate `gh` / create+merge PR after release-guards PASS
-2. Deploy canonical merged SHA only
-3. QA canary on `notifications-transactional`
-4. Then close OPS-DEF-0019
-5. Next workstream: `JP-OPS-READINESS-01-DEEP-LIVE-AUDIT-WAVE-A` (unless new P0/P1)
+`JP-OPS-READINESS-01-DEEP-LIVE-AUDIT-WAVE-A` — see WAVE-A-BASELINE.md
+

@@ -1,0 +1,70 @@
+# WAVE-1C PRODUCTION CLOSURE
+
+```
+MERGED_SHA=a138eb570b05910046df7fb251beeef839b25395
+DEPLOYED_RUNTIME_SHA=a138eb570b05910046df7fb251beeef839b25395
+DEPLOY_TIME=2026-10-14T19:28:17Z
+BACKUP_TS=20261014T192251Z
+BACKUP_APP=/home/pkjetp/backups/jetpk_app-20261014T192251Z.tar.gz
+BACKUP_DB=/home/pkjetp/backups/jetpk-db-20261014T192251Z.sql.gz
+RELEASE_DIR=/home/pkjetp/releases/jetpk-20261014T192123Z
+```
+
+## Deploy notes
+
+- Protected `jetpk-deploy.sh` failed on `rsync chgrp` / root-owned `config/` dir.
+- Recovered with scoped copy of the 6 PR #73 application files from the staged SHA archive (same bytes).
+- `config/mail.php` updated via in-place overwrite (directory root-owned).
+- Runtime marker set to canonical SHA; `artisan optimize:clear` succeeded.
+- No frontend/dashboard rebuild. Dashboard BUILD_ID remained `7-iZf4RbaJmGpuDjO1tsh`.
+
+## Queue canary
+
+```
+QUEUE_CANARY_TIME=2026-10-14T19:29:41Z
+CANARY_JOB_CLASS=App\Jobs\Notifications\DeliverQueuedOperationalMail
+CANARY_JOB_ID=1175
+CANARY_QUEUE=notifications-transactional
+CANARY_ON_DEFAULT=NO
+CANARY_QUEUED=YES
+CANARY_CONSUMED=YES
+COMMUNICATION_LOG_ID=747
+COMMUNICATION_LOG_STATUS=sent
+COMMUNICATION_LOG_SENT_AT=2026-10-14T19:30:06Z
+WORKER_EVIDENCE=notification-worker-cron.log RUNNING→DONE (~2s)
+```
+
+## Counts
+
+```
+PENDING_DEFAULT_PRE=0
+PENDING_DEFAULT_POST=0
+FAILED_JOBS_PRE=0
+FAILED_JOBS_POST=0
+DEFAULT_WORKER_RUNNING=NO
+QUEUE_CONSUMPTION_PROVEN=YES
+QUEUE_FAILURE_OBSERVABILITY=PASS
+FRONTEND_REGRESSION=NO
+POST_CANARY_FRONTEND_REGRESSION=NO
+HISTORICAL_REPLAY_EXECUTED=NO
+```
+
+## Gate
+
+```
+OPS_DEF_0019_STATUS=CLOSED
+PRODUCTION_OPERATIONAL_READY=NO
+OPS_DEF_0020_STATUS=OPEN
+```
+
+## Historical replay (deferred)
+
+```
+MISSED_NOTIFICATIONS_TOTAL=169
+MISSED_CRITICAL_NOTIFICATIONS=15
+ALREADY_DELIVERED_DUPLICATE_RISK=154
+REPLAY_REQUIRED_CURRENT=15
+MANUAL_REVIEW_JOBS=11
+```
+
+Archive preserved: `DEFAULT-QUEUE-ARCHIVE-20261014T183740Z.json`

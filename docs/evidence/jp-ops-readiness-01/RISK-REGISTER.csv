@@ -8,6 +8,8 @@ OPS-RISK-0006,P1,SECURITY,Cross-tenant IDOR / isolation gap,Direct object refere
 OPS-RISK-0007,P1,BOOKING,Partial booking / uncertain supplier state,Timeout after supplier accept or payment before confirm,Orphan/incorrect booking state,BOOKING-STATE-MACHINE + failure-mode matrix,OPEN,OPS-DEF-0018
 OPS-RISK-0008,P2,OPERATIONS,Dual-stack route parity gaps,Blade residual vs Next public/dashboard divergence,Broken deep links / untested surfaces,MASTER-SURFACE-INVENTORY 777 rows,OPEN,
 OPS-RISK-0009,P2,OPERATIONS,Stale server inventory risk,Relying on Sep-2026 PM2 notes,Wrong ops picture,Superseded by 2026-10-14 SSH probe,MITIGATED,
-OPS-RISK-0010,P2,OPERATIONS,Disk pressure blocks backups/deploys,89% disk,Failed backup/deploy / outage,Wave1B reclaimed ~15G to 73%; retain retention policy,MITIGATED,OPS-DEF-0014
+OPS-RISK-0010,P2,OPERATIONS,Disk pressure blocks backups/deploys,89% disk,Failed backup/deploy / outage,DISK-RETENTION-01: 46% used; retention dry-run cron + disk-health NORMAL,MITIGATED,OPS-DEF-0014
 OPS-RISK-0011,P2,OPERATIONS,Notification queue backlog/failures,147 failed_jobs historical,Missed customer/agent emails,Wave1B archived+removed historical SMTP fails,MITIGATED,OPS-DEF-0015
-OPS-RISK-0012,P1,NOTIFICATION,Default queue backlog of booking/mail jobs,178 pending Closures+BookingUniversalNotification,Stale or duplicate customer emails if drained blindly,Wave1C: archive+delete without execute; route new mail to notifications-transactional,MITIGATING,OPS-DEF-0019
+OPS-RISK-0012,P1,NOTIFICATION,Default queue backlog of booking/mail jobs,178 pending Closures+BookingUniversalNotification,Stale or duplicate customer emails if drained blindly,Wave1C closed: backlog deleted; routing deployed a138eb57; canary consumed on notifications-transactional,CLOSED,OPS-DEF-0019
+OPS-RISK-0013,P3,OPERATIONS,External disk/failed_jobs alert delivery unwired,HIGH/CRITICAL disk or failed_jobs>0 without human watch,Delayed ops response,Local cron logs ACTIVE; wire mail/Slack for GAP-014,OPEN,OPS-DEF-0022
+OPS-RISK-0014,P3,OPERATIONS,Root-owned residual artifacts,sudo not available to pkjetp,Slow reclaim of ~2-5G,Documented OPEN OPS-DEF-0023,OPEN,OPS-DEF-0023
