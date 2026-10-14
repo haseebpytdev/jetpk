@@ -12,5 +12,5 @@ OJ-STAFF-001,staff,ops inbox,service booking,resolved,permissions,QA,NOT_EXECUTE
 OJ-PAY-001,system,AbhiPay callback,verify→settle,paid,AbhiPay,source,PARTIAL,no live charge,OPS-DEF-0017
 OJ-FIN-001,admin,approve deposit,wallet+ledger,posted,wallet,source,PARTIAL,non-atomic ledger,OPS-DEF-0006
 OJ-PNR-001,staff,issue/void,ticketing adapters,ticketed,supplier,source,NOT_ACTIVATED,flags,OPS-DEF-0016
-OJ-NOTIF-001,system,queue mail,deliver,delivered,smtp+queue,SSH failed_jobs,FAIL,147 failed jobs,OPS-DEF-0015
+OJ-NOTIF-001,system,queue mail,deliver,delivered,smtp+queue,Wave1C canary + SSH,PARTIAL,canary PASS; residual queued logs OPS-DEF-0021; historical replay deferred,OPS-DEF-0021
 OJ-CMS-001,admin,CMS/SEO,publish,public updated,CMS,QA reversible,NOT_EXECUTED,—,OPS-DEF-0018

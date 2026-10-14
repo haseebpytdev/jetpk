@@ -38,9 +38,13 @@ DEFAULT_WORKER_RUNNING=NO
 
 ## Priority order (in progress)
 
-A1 runtime baseline — started  
-A2 auth/role read-only checks — next  
-A3–A11 per mission (non-mutating)
+A1 runtime baseline — PASS (reconciled)  
+A2 role inventory counts — PASS (auth matrix deep check deferred)  
+A3 public/portal smoke — PASS (8/8 HTTP 200)  
+A6 cron health — PASS (stale log noise only)  
+A7 queue topology — PASS (pending=0)  
+A8 failed_jobs/comms observability — PARTIAL (OPS-DEF-0021 residual queued logs)  
+A4–A5 / A9–A11 — next ticks
 
 ## Safety
 
