@@ -47,7 +47,8 @@ A6 cron health — PASS
 A7 queue topology — PASS  
 A8 failed_jobs/comms — PARTIAL (OPS-DEF-0021)  
 A9 CMS read-only — INVENTORIED_NOT_AUDITED (0020 untouched)  
-A10–A11 / authenticated journey execution — next (needs QA sessions)
+A10 supplier/payment mutation-path source audit — PASS_READ_ONLY (Sabre book live-call ON; ticketing OFF)  
+A11 authenticated journey execution — BLOCKED (needs QA sessions)
 
 ## Safety
 
