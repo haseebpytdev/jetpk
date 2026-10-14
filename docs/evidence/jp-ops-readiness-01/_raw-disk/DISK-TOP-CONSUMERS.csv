@@ -1,0 +1,16 @@
+PATH,SIZE_BYTES,SIZE_HUMAN,CLASS,SAFE_REGENERABLE,BACKUP_OR_RUNTIME,LAST_MODIFIED,KNOWN_OWNER,NOTES
+/home/pkjetp,28534520522,28G,CURRENT_RUNTIME,NO,RUNTIME,2026-09-30_19:35:06,pkjetp:pkjetp,home root
+/home/pkjetp/backups,22430730939,22G,OLD_BACKUP,NO,BACKUP,2026-10-14_21:26:56,pkjetp:pkjetp,backup root
+/home/pkjetp/releases,56401065,62M,RELEASE_STAGING,YES,BACKUP,2026-10-14_21:22:06,pkjetp:pkjetp,release staging
+/home/pkjetp/jetpk_app,3120950842,3.2G,CURRENT_RUNTIME,NO,RUNTIME,2026-10-09_10:01:50,pkjetp:pkjetp,laravel app
+/home/pkjetp/jetpk_app/vendor,39971347,61M,VENDOR,YES,RUNTIME,2026-07-10_00:01:17,pkjetp:pkjetp,composer vendor
+/home/pkjetp/jetpk_app/node_modules,256258133,266M,NODE_MODULES,YES,RUNTIME,2026-09-16_10:07:32,pkjetp:pkjetp,root nm
+/home/pkjetp/jetpk_app/frontend/node_modules,605132252,641M,NODE_MODULES,YES,RUNTIME,2026-10-12_21:33:17,pkjetp:pkjetp,frontend nm
+/home/pkjetp/jetpk_app/dashboard/node_modules,578247695,624M,NODE_MODULES,YES,RUNTIME,2026-10-12_21:35:56,pkjetp:pkjetp,dashboard nm
+/home/pkjetp/jetpk_app/frontend/.next,342481682,330M,CACHE,YES,RUNTIME,2026-10-12_21:35:11,pkjetp:pkjetp,next build
+/home/pkjetp/jetpk_app/dashboard/.next,366676846,352M,CACHE,YES,RUNTIME,2026-10-12_21:37:27,pkjetp:pkjetp,dashboard next
+/home/pkjetp/jetpk_app/storage,149511609,152M,LOG,NO,RUNTIME,2026-07-24_12:47:18,pkjetp:pkjetp,storage root
+/home/pkjetp/jetpk_app/storage/logs,4359114,4.3M,LOG,YES,RUNTIME,2026-10-14_00:00:00,pkjetp:pkjetp,laravel logs
+/home/pkjetp/public_html,49696649,48M,CURRENT_RUNTIME,NO,RUNTIME,2026-09-29_00:07:21,pkjetp:pkjetp,webroot
+/var/log,767384375,428M,LOG,YES,SYSTEM,2026-10-11_00:00:22,root:syslog,system logs
+/tmp,15043810676,15G,TEMP,YES,TEMP,2026-10-14_23:48:37,root:root,tmp

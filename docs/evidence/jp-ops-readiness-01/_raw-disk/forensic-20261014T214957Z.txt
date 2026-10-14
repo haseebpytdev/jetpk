@@ -1,0 +1,615 @@
+=== DF ===
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           1.2G  1.2M  1.2G   1% /run
+/dev/sda1        96G   71G   26G  74% /
+tmpfs           5.9G  110M  5.8G   2% /dev/shm
+tmpfs           5.0M     0  5.0M   0% /run/lock
+/dev/sda16      881M  213M  607M  26% /boot
+/dev/sda15      105M  6.2M   99M   6% /boot/efi
+tmpfs           1.2G   12K  1.2G   1% /run/user/5002
+tmpfs           1.2G   12K  1.2G   1% /run/user/0
+
+=== DFI ===
+Filesystem       Inodes  IUsed    IFree IUse% Mounted on
+tmpfs           1530944    829  1530115    1% /run
+/dev/sda1      12976128 753101 12223027    6% /
+tmpfs           1530944     38  1530906    1% /dev/shm
+tmpfs           1530944      4  1530940    1% /run/lock
+/dev/sda16        58496    606    57890    2% /boot
+/dev/sda15            0      0        0     - /boot/efi
+tmpfs            306188     33   306155    1% /run/user/5002
+tmpfs            306188     33   306155    1% /run/user/0
+
+=== DU HOME PKJETP TOP ===
+28G	/home/pkjetp
+22G	/home/pkjetp/backups
+3.2G	/home/pkjetp/jetpk_app
+656M	/home/pkjetp/.cache
+629M	/home/pkjetp/.npm
+489M	/home/pkjetp/jetpk_git
+427M	/home/pkjetp/jetpk_git_cq40
+427M	/home/pkjetp/jetpk_git_align37
+175M	/home/pkjetp/jetpk_git_writable
+62M	/home/pkjetp/releases
+48M	/home/pkjetp/public_html
+27M	/home/pkjetp/ai-lab
+25M	/home/pkjetp/.npm-global
+3.2M	/home/pkjetp/.pm2
+712K	/home/pkjetp/jp-perf-cbd7686f
+204K	/home/pkjetp/iframe-pilot
+116K	/home/pkjetp/tmp
+96K	/home/pkjetp/jetpk-alhaider-token-backup-20260809T083955
+92K	/home/pkjetp/.local
+60K	/home/pkjetp/jp-softnav-cbd7686f
+44K	/home/pkjetp/.config
+40K	/home/pkjetp/jetpk-alhaider-hardening-backup-20260809T121412
+32K	/home/pkjetp/jp-func-cbd7686f
+16K	/home/pkjetp/jetpk-profile-dropdown-backup-20260808T211500Z
+16K	/home/pkjetp/ai-lab-gateway
+12K	/home/pkjetp/public_html.before-cutover-20260729T142407Z
+12K	/home/pkjetp/jetpk-profile-dropdown-backup-20260808T203500Z
+8.0K	/home/pkjetp/.ssh
+8.0K	/home/pkjetp/logs
+8.0K	/home/pkjetp/jetpk_secrets
+8.0K	/home/pkjetp/jetpk-scripts
+4.0K	/home/pkjetp/jetpk_repo
+
+=== DU BACKUPS ===
+22G	/home/pkjetp/backups
+966M	/home/pkjetp/backups/jetpk-seo-phase2-7c2a003-20260915T174232Z
+763M	/home/pkjetp/backups/jp-ask-ui-01-20260907T211951Z
+681M	/home/pkjetp/backups/jp-perf-final-02e-20260904T233239Z
+674M	/home/pkjetp/backups/jp-perf-final-02d-20260904T203550Z
+311M	/home/pkjetp/backups/jetpakistan-recovered-20260921
+292M	/home/pkjetp/backups/p0-frontend-restore-20260916T110238Z
+183M	/home/pkjetp/backups/frontend-node_modules-bak-1789546174
+182M	/home/pkjetp/backups/jetpk-frontend-full-restore-20260916T081421Z
+28M	/home/pkjetp/backups/frontend-broken-1789546288
+884K	/home/pkjetp/backups/api-connections-07-20261001T145943Z
+884K	/home/pkjetp/backups/api-connections-07-20261001T145647Z
+884K	/home/pkjetp/backups/api-connections-07-20261001T145619Z
+592K	/home/pkjetp/backups/jetpk-ai-runtime-20260917T181300Z
+308K	/home/pkjetp/backups/jetpk-ai-runtime-20260927T104614Z
+288K	/home/pkjetp/backups/jetpk-ai-runtime-20260926T205200Z
+264K	/home/pkjetp/backups/jetpk-ai-runtime-20260927T080207Z
+264K	/home/pkjetp/backups/jetpk-ai-runtime-20260923T153557Z
+244K	/home/pkjetp/backups/jetpk-ai-runtime-20260925T193219Z
+204K	/home/pkjetp/backups/jetpk-ai-runtime-20260928T103228Z
+200K	/home/pkjetp/backups/scoped-pre-31c69b73-20260916T214141Z
+196K	/home/pkjetp/backups/jetpk-ai-runtime-20260924T092227Z
+188K	/home/pkjetp/backups/jetpk-ai-runtime-20260928T140615Z
+188K	/home/pkjetp/backups/cq27-live-uat-20260925T195142Z
+180K	/home/pkjetp/backups/jetpk-ai-runtime-20260928T140247Z
+172K	/home/pkjetp/backups/jetpk-ai-runtime-20260926T174402Z
+164K	/home/pkjetp/backups/jetpk-embed-r3-20260923T084511Z
+164K	/home/pkjetp/backups/jetpk-code-f104ac56-20260917T140825Z
+164K	/home/pkjetp/backups/jetpk-ai-runtime-20260926T090144Z
+152K	/home/pkjetp/backups/scoped-jp-airblue-zapways-03r1-20260913T141938Z
+148K	/home/pkjetp/backups/jetpk-ai-runtime-20260929T125701Z
+148K	/home/pkjetp/backups/jetpk-ai-runtime-20260926T174150Z
+128K	/home/pkjetp/backups/jetpk-ai-runtime-20260926T185204Z
+128K	/home/pkjetp/backups/jetpk-ai-runtime-20260923T153213Z
+120K	/home/pkjetp/backups/jetpk-ai-runtime-20260926T073509Z
+112K	/home/pkjetp/backups/jetpk-code-66e9039c-20260917T160618Z
+112K	/home/pkjetp/backups/drift-removed-3eef62a3
+108K	/home/pkjetp/backups/jetpk-ai-runtime-20260928T194153Z
+108K	/home/pkjetp/backups/jetpk-ai-runtime-20260923T084419Z
+100K	/home/pkjetp/backups/jetpk-ai-runtime-20260924T133839Z
+
+=== DU RELEASES ===
+62M	/home/pkjetp/releases
+51M	/home/pkjetp/releases/jetpk-20260930T080534Z
+820K	/home/pkjetp/releases/jetpk-ai-runtime-3e5c24231901e8148015011d8a3bfde0ff95411c-20260923T084419Z
+756K	/home/pkjetp/releases/jetpk-ai-runtime-3e5c24231901e8148015011d8a3bfde0ff95411c-20260923T084240Z
+720K	/home/pkjetp/releases/jetpk-ai-runtime-e393d336f1fac5644610f3679be05b75017ab149-20260917T181300Z
+484K	/home/pkjetp/releases/jetpk-20260923T070452Z
+440K	/home/pkjetp/releases/jetpk-ai-runtime-2f7c3b17c7bcf15532c4ab7ac66a76b5999a2c79-20260923T153557Z
+440K	/home/pkjetp/releases/jetpk-ai-runtime-2f7c3b17c7bcf15532c4ab7ac66a76b5999a2c79-20260923T153213Z
+404K	/home/pkjetp/releases/jetpk-20260908T182533Z
+340K	/home/pkjetp/releases/jetpk-ai-runtime-e5640c103b40c90a6a34e5f668ccf0865ffbc391-20260927T104614Z
+308K	/home/pkjetp/releases/jetpk-ai-runtime-9a2182f5bf5380491ff091d3f572c98898c727bc-20260926T205200Z
+284K	/home/pkjetp/releases/jetpk-ai-runtime-03be054d59ddfe0c412368437162009b09c0b7b7-20260927T080207Z
+268K	/home/pkjetp/releases/jetpk-ai-runtime-386b3aa78ef5aef89aed4341eac9f3eb548ef5f9-20260925T193219Z
+268K	/home/pkjetp/releases/jetpk-ai-runtime-386b3aa78ef5aef89aed4341eac9f3eb548ef5f9-20260925T193034Z
+264K	/home/pkjetp/releases/jetpk-ai-runtime-613d46f5a8c355a77c0d3cabdaac813c9619fc1e-20260924T092227Z
+228K	/home/pkjetp/releases/jetpk-embed-r3-20260923T084511Z
+228K	/home/pkjetp/releases/jetpk-conv-lead-19-20260922T174346Z
+228K	/home/pkjetp/releases/jetpk-20261009T074917Z
+224K	/home/pkjetp/releases/jetpk-20261008T212344Z
+216K	/home/pkjetp/releases/jetpk-ai-runtime-24dbf524c06fc894f84a44b14a224a41b49170f7-20260928T103228Z
+204K	/home/pkjetp/releases/jetpk-ai-runtime-1602ec2969ce15d17dd3bb92750cece48d4c6de2-20260926T073509Z
+204K	/home/pkjetp/releases/jetpk-ai-runtime-1602ec2969ce15d17dd3bb92750cece48d4c6de2-20260926T073433Z
+192K	/home/pkjetp/releases/jetpk-ai-runtime-a0e616747a95d632f270a6edafc3f6e8d9230fca-20260928T140615Z
+192K	/home/pkjetp/releases/jetpk-ai-runtime-a0e616747a95d632f270a6edafc3f6e8d9230fca-20260928T140247Z
+184K	/home/pkjetp/releases/jetpk-20261014T192123Z
+176K	/home/pkjetp/releases/jetpk-ai-runtime-d681651df61a878a385a9d3184d00cbb0dcd938f-20260926T174402Z
+176K	/home/pkjetp/releases/jetpk-ai-runtime-d681651df61a878a385a9d3184d00cbb0dcd938f-20260926T174150Z
+160K	/home/pkjetp/releases/jetpk-ai-runtime-437904f46bdbd471b40d211532ab893b598e0616-20260926T090144Z
+160K	/home/pkjetp/releases/jetpk-ai-runtime-3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492-20260929T125701Z
+160K	/home/pkjetp/releases/jetpk-20261008T162853Z
+160K	/home/pkjetp/releases/jetpk-20261008T162822Z
+160K	/home/pkjetp/releases/jetpk-20261008T162715Z
+156K	/home/pkjetp/releases/jetpk-20261008T163003Z
+152K	/home/pkjetp/releases/jetpk-20260930T155854Z
+148K	/home/pkjetp/releases/jetpk-ai-runtime-01dbe7cf5ba79280420d7b2274db6b2b3fb0f8e3-20260926T185204Z
+124K	/home/pkjetp/releases/jetpk-ai-runtime-c14f7737083deb68adb26ffee2889e2bff557537-20260924T133839Z
+124K	/home/pkjetp/releases/jetpk-ai-runtime-9901f285e06c85f550191307ef29c9298904a32c-20260928T194153Z
+92K	/home/pkjetp/releases/jetpk-20260930T153653Z
+88K	/home/pkjetp/releases/jetpk-activation18-20260922T155557Z
+80K	/home/pkjetp/releases/jetpk-20261012T192955Z
+
+=== DU JETPK_APP ===
+3.2G	/home/pkjetp/jetpk_app
+1017M	/home/pkjetp/jetpk_app/frontend
+980M	/home/pkjetp/jetpk_app/dashboard
+545M	/home/pkjetp/jetpk_app/ai-assistant
+266M	/home/pkjetp/jetpk_app/node_modules
+152M	/home/pkjetp/jetpk_app/storage
+98M	/home/pkjetp/jetpk_app/public
+61M	/home/pkjetp/jetpk_app/vendor
+22M	/home/pkjetp/jetpk_app/app
+6.3M	/home/pkjetp/jetpk_app/resources
+1.1M	/home/pkjetp/jetpk_app/database
+600K	/home/pkjetp/jetpk_app/docs
+352K	/home/pkjetp/jetpk_app/config
+268K	/home/pkjetp/jetpk_app/tests
+136K	/home/pkjetp/jetpk_app/tmp
+132K	/home/pkjetp/jetpk_app/routes
+76K	/home/pkjetp/jetpk_app/scripts
+64K	/home/pkjetp/jetpk_app/bootstrap
+20K	/home/pkjetp/jetpk_app/ai-lab-gateway
+16K	/home/pkjetp/jetpk_app/tools
+4.0K	/home/pkjetp/jetpk_app/dashboardtypes
+4.0K	/home/pkjetp/jetpk_app/dashboardservices
+4.0K	/home/pkjetp/jetpk_app/dashboardlibread-onlylaravel
+4.0K	/home/pkjetp/jetpk_app/dashboardlib
+4.0K	/home/pkjetp/jetpk_app/dashboardfeaturessettingscomponents
+4.0K	/home/pkjetp/jetpk_app/dashboard\features\settings\components
+4.0K	/home/pkjetp/jetpk_app/dashboardfeaturesoverview
+4.0K	/home/pkjetp/jetpk_app/dashboardfeaturesoperations
+4.0K	/home/pkjetp/jetpk_app/dashboard\features\api-connections\lib
+4.0K	/home/pkjetp/jetpk_app/dashboard\features\api-connections\components
+4.0K	/home/pkjetp/jetpk_app/dashboard\features\api-connections
+4.0K	/home/pkjetp/jetpk_app/dashboardapp[portal]dashboardsystemhealth
+4.0K	/home/pkjetp/jetpk_app/dashboardapp[portal]dashboardsystemgo-live
+4.0K	/home/pkjetp/jetpk_app/dashboardapp[portal]dashboardsupport
+4.0K	/home/pkjetp/jetpk_app/dashboardapp[portal]dashboardoperationsreview
+4.0K	/home/pkjetp/jetpk_app/dashboardapp[portal]dashboardoperationsexecution
+4.0K	/home/pkjetp/jetpk_app/dashboardapp[portal]dashboardmarkups
+4.0K	/home/pkjetp/jetpk_app/dashboardapp[portal]dashboardgroup-ticketing
+4.0K	/home/pkjetp/jetpk_app/dashboardapp[portal]dashboardcommissions
+4.0K	/home/pkjetp/jetpk_app/dashboardapp[portal]dashboardagentsapplications
+
+=== DU STORAGE ===
+152M	/home/pkjetp/jetpk_app/storage
+146M	/home/pkjetp/jetpk_app/storage/app
+4.3M	/home/pkjetp/jetpk_app/storage/logs
+772K	/home/pkjetp/jetpk_app/storage/framework
+664K	/home/pkjetp/jetpk_app/storage/backups
+80K	/home/pkjetp/jetpk_app/storage/deployment-backups
+
+=== DU VAR (best effort) ===
+1.3G	/var
+461M	/var/lib
+428M	/var/log
+422M	/var/cache
+4.9M	/var/mail
+3.5M	/var/spool
+3.0M	/var/backups
+48K	/var/tmp
+4.0K	/var/snap
+4.0K	/var/opt
+4.0K	/var/local
+4.0K	/var/crash
+
+=== DU TMP ===
+15G	/tmp
+969M	/tmp/jp-frontend-build-1790591676
+969M	/tmp/jp-frontend-build-1790444776
+969M	/tmp/jp-frontend-build-1790365043
+969M	/tmp/jp-frontend-build-1790364826
+969M	/tmp/jp-frontend-build-1790242108
+552M	/tmp/jp-c08-build-1789758710
+552M	/tmp/jp-c08-build-1789754406
+552M	/tmp/jp-c08-build-1789744508
+546M	/tmp/jetpk-stage-d95
+546M	/tmp/jetpk-stage-c947
+546M	/tmp/jetpk-stage-c70
+546M	/tmp/jetpk-stage-afb
+546M	/tmp/jetpk-stage-703
+546M	/tmp/jetpk-stage-077
+376M	/tmp/jp-c07-build-1789723452
+307M	/tmp/jp-c08-fe-1789751895
+307M	/tmp/jp-c07e-pub-1789731295
+285M	/tmp/jetpk_cq42_mirror
+262M	/tmp/jp-frontend-next-backup-1789758710
+
+=== LARGE FILES >200M under /home/pkjetp ===
+1489403519	1790241743.9235236900	/home/pkjetp/backups/jetpk_app-20260924T091650Z.tar.gz
+1264038042	1790788069.6989428680	/home/pkjetp/backups/jetpk_app-20260930T170440Z.tar.gz
+1227491437	1792006016.4386504780	/home/pkjetp/backups/jetpk_app-20261014T192251Z.tar.gz
+1226504142	1791833301.9628246470	/home/pkjetp/backups/jetpk_app-20261012T192408Z.tar.gz
+1225650808	1791536385.6949352120	/home/pkjetp/backups/jetpk_app-20261009T085629Z.tar.gz
+1225308208	1791635775.3491331470	/home/pkjetp/backups/jetpk_app-20261010T123257Z.tar.gz
+1225300230	1791614192.2370436420	/home/pkjetp/backups/jetpk_app-20261010T063311Z.tar.gz
+1225276912	1791580624.3857575330	/home/pkjetp/backups/jetpk_app-20261009T211349Z.tar.gz
+1225252410	1791476415.5216052770	/home/pkjetp/backups/jetpk_app-20261008T161625Z.tar.gz
+1224898368	1791494620.9287124520	/home/pkjetp/backups/jetpk_app-20261008T212021Z.tar.gz
+1223554816	1791531941.6173611890	/home/pkjetp/backups/jetpk_app-20261009T074212Z.tar.gz
+1070942632	1790013337.5286026140	/home/pkjetp/backups/jetpk_app-20260921T175205Z.tar.gz
+1070942632	1790013272.9561922690	/home/pkjetp/backups/jetpk_app-20260921T174957Z.tar.gz
+1003451469	1789825159.2131043450	/home/pkjetp/backups/jetpk_app-20260919T133533Z.tar.gz
+789653535	1788816155.2736762000	/home/pkjetp/backups/jp-ask-ui-01-20260907T211951Z/jetpk_app.tar.gz
+704944735	1788564899.0953840500	/home/pkjetp/backups/jp-perf-final-02e-20260904T233239Z/jetpk_app.tar.gz
+697551366	1788554289.7254545350	/home/pkjetp/backups/jp-perf-final-02d-20260904T203550Z/jetpk_app.tar.gz
+436743552	1790200835.8659647640	/home/pkjetp/jetpk_app/ai-assistant/models/Qwen3.5-0.8B-M-TS-Q4_K_M.gguf
+319815312	1789985269.7274635890	/home/pkjetp/backups/jetpakistan-recovered-20260921/JetPakistan-Recovered-20260921.bundle
+315958675	1790413300.4926674390	/home/pkjetp/jetpk_git_cq40/.git/objects/pack/pack-3ed7550b2ec09bb570beccfb59c1131f12313b81.pack
+315932985	1790407841.0394144730	/home/pkjetp/jetpk_git_align37/.git/objects/pack/pack-02b33a36a390ba209112662635fc64e5e974425d.pack
+290614600	1789937330.9958310290	/home/pkjetp/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome
+264071405	1791494421.1945133840	/home/pkjetp/jetpk_git/.git/objects/pack/pack-d52f6ca509b5909bd0a91de3fd4dfc738cbf3cc6.pack
+
+=== BACKUPS LS ===
+total 18G
+drwxrwxr-x 101 pkjetp pkjetp   20K Oct 14 21:26 .
+drwxr-xr-x  33 pkjetp pkjetp  4.0K Sep 30 19:35 ..
+-rw-rw-r--   1 pkjetp pkjetp   38K Sep 22 20:30 AiChatOrchestrator.php.20260922T184120Z.bak
+drwxr-xr-x   6 root   root    4.0K Oct  1 16:56 api-connections-07-20261001T145619Z
+drwxr-xr-x   6 root   root    4.0K Oct  1 16:56 api-connections-07-20261001T145647Z
+drwxr-xr-x   6 root   root    4.0K Oct  1 16:59 api-connections-07-20261001T145943Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 25 21:30 cq27-closure34-20260925T192959Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 25 21:30 cq27-closure34-deploy-20260925T193034Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 25 21:33 cq27-closure34-deploy-20260925T193219Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 25 21:39 cq27-closure34-frontend-20260925T193723Z
+drwxr-xr-x   3 root   root    4.0K Sep 25 21:52 cq27-closure34-iframe-tls-20260925T195244Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 25 21:41 cq27-live-uat-20260925T194118Z
+drwxr-xr-x   3 root   root    4.0K Sep 25 21:58 cq27-live-uat-20260925T195142Z
+drwxr-xr-x   2 root   root    4.0K Sep 30 19:09 dashboard-b15-20260930T170912Z
+drwxr-xr-x   2 root   root    4.0K Sep 30 19:10 dashboard-b15-20260930T171011Z
+drwxr-xr-x   2 root   root    4.0K Sep 30 20:07 dashboard-b2-20260930T180723Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 30 21:48 dashboard-b2b4-20260930T194858Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 30 21:49 dashboard-b2b4-20260930T194924Z
+drwxr-xr-x   2 root   root    4.0K Sep 30 21:50 dashboard-b2b4-20260930T195033Z
+drwxr-xr-x   2 root   root    4.0K Sep 30 20:42 dashboard-b3-20260930T184256Z
+drwxr-xr-x   2 root   root    4.0K Sep 30 22:34 dashboard-b5-20260930T203431Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 30 23:37 dashboard-b5b6-gap-20260930T213723Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 30 23:38 dashboard-b5b6-gap-20260930T213805Z
+drwxrwxr-x   5 pkjetp pkjetp  4.0K Sep 29 16:28 dashboard-recovery-batch-a-20260929-192851
+-rw-rw-r--   1 pkjetp pkjetp   465 Sep 16 23:40 deploy-31c69b73-20260916T214045Z.log
+-rw-rw-r--   1 pkjetp pkjetp   15K Sep 16 23:43 deploy-31c69b73-20260916T214141Z.log
+-rw-rw-r--   1 pkjetp pkjetp   394 Sep 16 20:46 deploy-3eef62a3-20260916T184507Z.log
+-rw-rw-r--   1 pkjetp pkjetp   282 Sep 16 20:49 deploy-3eef62a3-20260916T184507Z.retry2.log
+-rw-rw-r--   1 pkjetp pkjetp   394 Sep 16 20:47 deploy-3eef62a3-20260916T184507Z.retry.log
+-rw-rw-r--   1 pkjetp pkjetp   16K Sep 17 00:22 deploy-42d1913c-20260916T222107Z.log
+-rw-rw-r--   1 pkjetp pkjetp   15K Sep 17 00:12 deploy-a7f8e64d-20260916T221035Z.log
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 16 20:55 drift-removed-3eef62a3
+-rw-------   1 pkjetp pkjetp  6.7K Sep 21 20:05 .env.before-readonly-qa-20260921T180500Z
+-rw-rw-r--   1 pkjetp pkjetp   238 Sep 16 18:22 env.production.local.pre-31c69b73-20260916T214141Z.bak
+-rw-rw-r--   1 pkjetp pkjetp   238 Sep 16 18:22 env.production.local.pre-31c69b73.bak
+-rw-rw-r--   1 pkjetp pkjetp   238 Sep 16 18:22 env.production.local.pre-3eef62a3.bak
+-rw-rw-r--   1 pkjetp pkjetp   238 Sep 16 18:22 env.production.local.pre-42d1913c.bak
+-rw-rw-r--   1 pkjetp pkjetp   238 Sep 16 18:22 env.production.local.pre-a7f8e64d.bak
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 16 10:11 frontend-broken-1789546288
+drwxrwxr-x  56 pkjetp pkjetp   12K Sep 16 10:09 frontend-node_modules-bak-1789546174
+drwx------  11 pkjetp pkjetp  4.0K Sep 21 11:56 jetpakistan-recovered-20260921
+drwxrwxr-x   4 pkjetp pkjetp  4.0K Sep 16 09:06 jetpk-ai-runtime-20260916T070631Z
+drwxrwxr-x   4 pkjetp pkjetp  4.0K Sep 16 12:21 jetpk-ai-runtime-20260916T102143Z
+drwxrwxr-x   4 pkjetp pkjetp  4.0K Sep 16 12:23 jetpk-ai-runtime-20260916T102359Z
+drwxrwxr-x   4 pkjetp pkjetp  4.0K Sep 16 13:03 jetpk-ai-runtime-20260916T110312Z
+drwxrwxr-x   4 pkjetp pkjetp  4.0K Sep 16 18:10 jetpk-ai-runtime-20260916T161015Z
+drwxrwxr-x   4 pkjetp pkjetp  4.0K Sep 16 18:14 jetpk-ai-runtime-20260916T161420Z
+drwxrwxr-x   5 pkjetp pkjetp  4.0K Sep 16 18:20 jetpk-ai-runtime-20260916T162040Z
+drwxr-xr-x   8 root   root    4.0K Sep 17 20:13 jetpk-ai-runtime-20260917T181300Z
+drwxrwxr-x   7 pkjetp pkjetp  4.0K Sep 23 10:42 jetpk-ai-runtime-20260923T084240Z
+drwxrwxr-x   7 pkjetp pkjetp  4.0K Sep 23 10:44 jetpk-ai-runtime-20260923T084419Z
+drwxr-xr-x   7 root   root    4.0K Sep 23 17:32 jetpk-ai-runtime-20260923T153213Z
+drwxr-xr-x   9 root   root    4.0K Sep 23 17:35 jetpk-ai-runtime-20260923T153557Z
+drwxr-xr-x   3 root   root    4.0K Sep 24 11:09 jetpk-ai-runtime-20260924T090926Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 24 11:10 jetpk-ai-runtime-20260924T091013Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 24 11:12 jetpk-ai-runtime-20260924T091237Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 24 11:14 jetpk-ai-runtime-20260924T091458Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 24 11:15 jetpk-ai-runtime-20260924T091555Z
+drwxr-xr-x   4 root   root    4.0K Sep 24 11:22 jetpk-ai-runtime-20260924T092227Z
+drwxr-xr-x   3 root   root    4.0K Sep 24 15:38 jetpk-ai-runtime-20260924T133839Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 25 21:28 jetpk-ai-runtime-20260925T192856Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 25 21:30 jetpk-ai-runtime-20260925T193001Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 25 21:30 jetpk-ai-runtime-20260925T193004Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 25 21:30 jetpk-ai-runtime-20260925T193034Z
+drwxrwxr-x   4 pkjetp pkjetp  4.0K Sep 25 21:32 jetpk-ai-runtime-20260925T193219Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 26 09:27 jetpk-ai-runtime-20260926T072736Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 26 09:28 jetpk-ai-runtime-20260926T072811Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 26 09:28 jetpk-ai-runtime-20260926T072812Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 26 09:30 jetpk-ai-runtime-20260926T073045Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 26 09:34 jetpk-ai-runtime-20260926T073433Z
+drwxrwxr-x   4 pkjetp pkjetp  4.0K Sep 26 09:35 jetpk-ai-runtime-20260926T073509Z
+drwxrwxr-x   4 pkjetp pkjetp  4.0K Sep 26 11:01 jetpk-ai-runtime-20260926T090144Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 26 19:39 jetpk-ai-runtime-20260926T173942Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 26 19:41 jetpk-ai-runtime-20260926T174150Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 26 19:44 jetpk-ai-runtime-20260926T174402Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 26 20:50 jetpk-ai-runtime-20260926T185040Z
+drwxrwxr-x   4 pkjetp pkjetp  4.0K Sep 26 20:52 jetpk-ai-runtime-20260926T185204Z
+drwxrwxr-x   4 pkjetp pkjetp  4.0K Sep 26 22:52 jetpk-ai-runtime-20260926T205200Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 27 09:58 jetpk-ai-runtime-20260927T075828Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 27 09:59 jetpk-ai-runtime-20260927T075928Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 27 10:02 jetpk-ai-runtime-20260927T080207Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 27 10:28 jetpk-ai-runtime-20260927T082835Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 27 10:48 jetpk-ai-runtime-20260927T084817Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 27 12:46 jetpk-ai-runtime-20260927T104614Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 28 12:32 jetpk-ai-runtime-20260928T103228Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 28 16:02 jetpk-ai-runtime-20260928T140247Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 28 16:04 jetpk-ai-runtime-20260928T140442Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 28 16:06 jetpk-ai-runtime-20260928T140615Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 28 21:41 jetpk-ai-runtime-20260928T194118Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 28 21:41 jetpk-ai-runtime-20260928T194153Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 28 23:50 jetpk-ai-runtime-20260928T215042Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 29 14:57 jetpk-ai-runtime-20260929T125701Z
+drwxr-xr-x   2 root   root    4.0K Sep 23 17:41 jetpk-ai-runtime-embed02-gap-20260923T154130Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 23 15:29 jetpk-ai-tooling-20260923T132955Z
+-rw-r--r--   1 root   root    957M Sep 19 15:39 jetpk_app-20260919T133533Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp 1022M Sep 21 19:54 jetpk_app-20260921T174957Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp 1022M Sep 21 19:55 jetpk_app-20260921T175205Z.tar.gz
+-rw-r--r--   1 root   root    1.4G Sep 24 11:22 jetpk_app-20260924T091650Z.tar.gz
+-rw-r--r--   1 root   root    1.2G Sep 30 19:07 jetpk_app-20260930T170440Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp  1.2G Oct  8 18:20 jetpk_app-20261008T161625Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp  1.2G Oct  8 23:23 jetpk_app-20261008T212021Z.tar.gz
+-rw-r--r--   1 root   root    1.2G Oct  9 09:45 jetpk_app-20261009T074212Z.tar.gz
+-rw-r--r--   1 root   root    1.2G Oct  9 10:59 jetpk_app-20261009T085629Z.tar.gz
+-rw-r--r--   1 root   root    1.2G Oct  9 23:17 jetpk_app-20261009T211349Z.tar.gz
+-rw-r--r--   1 root   root    1.2G Oct 10 08:36 jetpk_app-20261010T063311Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp  1.2G Oct 10 14:36 jetpk_app-20261010T123257Z.tar.gz
+-rw-r--r--   1 root   root    1.2G Oct 12 21:28 jetpk_app-20261012T192408Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp  1.2G Oct 14 21:26 jetpk_app-20261014T192251Z.tar.gz
+drwxr-xr-x   4 root   root    4.0K Sep 17 18:06 jetpk-code-66e9039c-20260917T160618Z
+drwxr-xr-x   4 root   root    4.0K Sep 17 16:08 jetpk-code-f104ac56-20260917T140825Z
+drwxr-xr-x   3 root   root    4.0K Sep 17 18:49 jetpk-code-ocr2-7296741a74c6d19f077820a461f3135becdf9bca-20260917T164932Z
+drwxr-xr-x   3 root   root    4.0K Sep 17 18:34 jetpk-code-ocr-8a332af4ee3fd32a4d0090961161d687b2eca123-20260917T163450Z
+-rw-r--r--   1 root   root    2.4K Sep 17 11:52 jetpk-dashboard-orphan-20260917T095224Z.tar.gz
+-rw-r--r--   1 root   root    666K Sep 17 11:56 jetpk-dashboard-src-20260917T095610Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp  3.0M Sep  5 12:22 jetpk-db-20260905T102200Z.sql.gz
+-rw-r--r--   1 root   root    3.1M Sep  6 09:32 jetpk-db-20260906T073222Z.sql.gz
+-rw-r--r--   1 root   root    3.4M Sep  6 13:50 jetpk-db-20260906T115027Z.sql.gz
+-rw-r--r--   1 root   root    3.4M Sep  6 14:30 jetpk-db-20260906T123054Z.sql.gz
+-rw-r--r--   1 root   root    3.5M Sep  6 21:15 jetpk-db-20260906T191552Z.sql.gz
+-rw-r--r--   1 root   root    3.5M Sep  7 01:42 jetpk-db-20260906T234220Z.sql.gz
+-rw-r--r--   1 root   root    3.5M Sep  7 05:56 jetpk-db-20260907T035658Z.sql.gz
+-rw-r--r--   1 root   root    3.5M Sep  7 06:37 jetpk-db-20260907T043752Z.sql.gz
+-rw-r--r--   1 root   root    3.5M Sep  7 12:29 jetpk-db-20260907T102942Z.sql.gz
+-rw-r--r--   1 root   root    3.5M Sep  7 13:01 jetpk-db-20260907T110140Z.sql.gz
+-rw-r--r--   1 root   root    3.5M Sep  7 13:56 jetpk-db-20260907T115621Z.sql.gz
+-rw-r--r--   1 root   root    3.5M Sep  7 15:21 jetpk-db-20260907T132118Z.sql.gz
+-rw-r--r--   1 root   root    3.5M Sep  7 16:24 jetpk-db-20260907T142432Z.sql.gz
+-rw-r--r--   1 root   root    3.5M Sep  7 17:41 jetpk-db-20260907T154147Z.sql.gz
+-rw-r--r--   1 root   root    3.5M Sep  7 19:29 jetpk-db-20260907T172913Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  3.5M Sep  8 13:03 jetpk-db-20260908T110330Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  3.5M Sep  8 13:43 jetpk-db-20260908T114345Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  3.5M Sep  8 13:46 jetpk-db-20260908T114616Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  3.5M Sep  8 13:46 jetpk-db-20260908T114642Z.sql.gz
+-rw-r--r--   1 root   root    3.5M Sep  8 20:19 jetpk-db-20260908T181924Z.sql.gz
+-rw-r--r--   1 root   root    3.6M Sep  9 09:50 jetpk-db-20260909T075019Z.sql.gz
+-rw-r--r--   1 root   root    3.6M Sep  9 09:52 jetpk-db-20260909T075219Z.sql.gz
+-rw-r--r--   1 root   root    3.6M Sep  9 09:56 jetpk-db-20260909T075617Z.sql.gz
+-rw-r--r--   1 root   root    3.6M Sep  9 09:57 jetpk-db-20260909T075723Z.sql.gz
+-rw-r--r--   1 root   root    3.6M Sep  9 10:02 jetpk-db-20260909T080240Z.sql.gz
+-rw-r--r--   1 root   root    3.6M Sep  9 10:04 jetpk-db-20260909T080448Z.sql.gz
+-rw-r--r--   1 root   root    3.6M Sep  9 20:52 jetpk-db-20260909T185217Z.sql.gz
+-rw-r--r--   1 root   root    3.8M Sep 10 20:45 jetpk-db-20260910T184539Z.sql.gz
+-rw-r--r--   1 root   root    3.8M Sep 11 00:44 jetpk-db-20260910T224455Z.sql.gz
+-rw-r--r--   1 root   root    3.8M Sep 12 03:18 jetpk-db-20260912T011828Z.sql.gz
+-rw-r--r--   1 root   root    3.8M Sep 12 06:34 jetpk-db-20260912T043419Z.sql.gz
+-rw-r--r--   1 root   root    3.8M Sep 12 10:53 jetpk-db-20260912T085358Z.sql.gz
+-rw-r--r--   1 root   root    3.8M Sep 12 12:54 jetpk-db-20260912T105427Z.sql.gz
+-rw-r--r--   1 root   root    3.8M Sep 12 22:48 jetpk-db-20260912T204816Z.sql.gz
+-rw-r--r--   1 root   root    3.8M Sep 13 01:49 jetpk-db-20260912T234908Z.sql.gz
+-rw-r--r--   1 root   root    3.8M Sep 13 01:53 jetpk-db-20260912T235303Z.sql.gz
+-rw-r--r--   1 root   root    3.8M Sep 13 10:00 jetpk-db-20260913T080012Z.sql.gz
+-rw-r--r--   1 root   root    3.8M Sep 13 11:47 jetpk-db-20260913T094730Z.sql.gz
+-rw-r--r--   1 root   root    3.8M Sep 13 12:06 jetpk-db-20260913T100652Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  3.8M Sep 13 13:33 jetpk-db-20260913T113333Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  3.8M Sep 13 16:19 jetpk-db-20260913T141938Z.sql.gz
+-rw-r--r--   1 root   root    4.0M Sep 14 19:43 jetpk-db-20260914T174350Z.sql.gz
+-rw-r--r--   1 root   root    4.0M Sep 14 23:30 jetpk-db-20260914T213041Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.0M Sep 15 08:46 jetpk-db-20260915T064650Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.0M Sep 16 20:41 jetpk-db-20260916T184121Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.0M Sep 16 21:36 jetpk-db-20260916T193621Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.0M Sep 16 21:46 jetpk-db-20260916T194646Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.0M Sep 16 21:49 jetpk-db-20260916T194913Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.0M Sep 16 21:56 jetpk-db-20260916T195648Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.0M Sep 16 22:00 jetpk-db-20260916T200001Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.0M Sep 16 22:05 jetpk-db-20260916T200527Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.0M Sep 16 22:49 jetpk-db-20260916T204931Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.0M Sep 16 22:54 jetpk-db-20260916T205410Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.1M Sep 16 23:40 jetpk-db-20260916T214045Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.1M Sep 17 00:10 jetpk-db-20260916T221035Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  4.1M Sep 17 00:21 jetpk-db-20260916T222107Z.sql.gz
+-rw-r--r--   1 root   root    4.6M Sep 17 10:16 jetpk-db-20260917T081645Z.sql.gz
+-rw-r--r--   1 root   root    4.6M Sep 17 12:51 jetpk-db-20260917T105102Z.sql.gz
+-rw-r--r--   1 root   root    4.6M Sep 17 13:04 jetpk-db-20260917T110428Z.sql.gz
+-rw-r--r--   1 root   root    4.6M Sep 17 13:40 jetpk-db-20260917T113948Z.sql.gz
+-rw-r--r--   1 root   root    4.6M Sep 17 16:08 jetpk-db-20260917T140825Z.sql.gz
+-rw-r--r--   1 root   root    4.6M Sep 17 18:06 jetpk-db-20260917T160618Z.sql.gz
+-rw-r--r--   1 root   root    4.7M Sep 17 18:34 jetpk-db-20260917T163450Z.sql.gz
+-rw-r--r--   1 root   root    4.7M Sep 18 07:11 jetpk-db-20260918T051142Z.sql.gz
+-rw-r--r--   1 root   root    4.7M Sep 18 09:55 jetpk-db-20260918T075549Z.sql.gz
+-rw-r--r--   1 root   root    4.7M Sep 19 15:35 jetpk-db-20260919T133533Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  5.1M Sep 21 19:50 jetpk-db-20260921T174957Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  5.1M Sep 21 19:52 jetpk-db-20260921T175205Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  5.1M Sep 21 19:54 jetpk-db-20260921T175432Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  5.1M Sep 22 07:53 jetpk-db-20260922T055351Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  5.1M Sep 22 17:48 jetpk-db-20260922T154826Z.sql.gz
+-rw-r--r--   1 root   root    5.1M Sep 22 17:56 jetpk-db-20260922T155557Z.sql.gz
+-rw-r--r--   1 root   root    5.1M Sep 22 19:43 jetpk-db-20260922T174346Z.sql.gz
+-rw-r--r--   1 root   root    5.1M Sep 22 20:31 jetpk-db-20260922T183154Z.sql.gz
+-rw-r--r--   1 root   root    5.1M Sep 22 20:36 jetpk-db-20260922T183651Z.sql.gz
+-rw-r--r--   1 root   root    5.1M Sep 23 09:00 jetpk-db-20260923T070052Z.sql.gz
+-rw-r--r--   1 root   root    5.1M Sep 24 11:16 jetpk-db-20260924T091650Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  5.1M Sep 26 19:36 jetpk-db-20260926T173607Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  5.1M Sep 26 20:47 jetpk-db-20260926T184711Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  5.2M Sep 26 22:48 jetpk-db-20260926T204828Z.sql.gz
+-rw-r--r--   1 root   root    5.2M Sep 30 09:56 jetpk-db-20260930T075557Z.sql.gz
+-rw-r--r--   1 root   root    5.3M Sep 30 17:33 jetpk-db-20260930T153330Z.sql.gz
+-rw-r--r--   1 root   root    5.3M Sep 30 17:54 jetpk-db-20260930T155445Z.sql.gz
+-rw-r--r--   1 root   root    5.3M Sep 30 19:04 jetpk-db-20260930T170440Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  5.3M Oct  8 18:16 jetpk-db-20261008T161625Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  5.3M Oct  8 23:20 jetpk-db-20261008T212021Z.sql.gz
+-rw-r--r--   1 root   root    5.3M Oct  9 09:42 jetpk-db-20261009T074212Z.sql.gz
+-rw-r--r--   1 root   root    5.3M Oct  9 10:56 jetpk-db-20261009T085629Z.sql.gz
+-rw-r--r--   1 root   root    5.3M Oct  9 23:13 jetpk-db-20261009T211349Z.sql.gz
+-rw-r--r--   1 root   root    5.3M Oct 10 08:33 jetpk-db-20261010T063311Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  5.3M Oct 10 14:33 jetpk-db-20261010T123257Z.sql.gz
+-rw-r--r--   1 root   root    5.4M Oct 12 21:24 jetpk-db-20261012T192408Z.sql.gz
+-rw-rw-r--   1 pkjetp pkjetp  5.2M Oct 14 21:22 jetpk-db-20261014T192251Z.sql.gz
+-rw-r--r--   1 root   root    164M Sep  5 12:25 jetpk-email-branding-02-runtime-20260905T102200Z.tar.gz
+drwxrwxr-x   7 pkjetp pkjetp  4.0K Sep 23 10:45 jetpk-embed-r3-20260923T084511Z
+-rw-------   1 pkjetp pkjetp  6.6K Sep 16 08:39 jetpk-env-otp-demo-20260917T095224Z.bak
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 16 10:14 jetpk-frontend-full-restore-20260916T081421Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 15 20:35 jetpk-frontend-pre-sync-20260915T183520Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 15 20:36 jetpk-frontend-pre-sync-20260915T183640Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 16 10:04 jetpk-homepage-ssr-fix-20260916T080423Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 16 10:06 jetpk-homepage-ssr-fix-20260916T080535Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 16 10:07 jetpk-homepage-ssr-fix-20260916T080716Z
+drwxrwxr-x   8 pkjetp pkjetp  4.0K Sep 15 19:42 jetpk-seo-phase2-7c2a003-20260915T174232Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 15 19:52 jp-ai-uat05-20260915
+drwxr-xr-x   3 root   root    4.0K Sep  7 23:23 jp-ask-ui-01-20260907T211951Z
+drwxr-xr-x   3 root   root    4.0K Sep  4 22:38 jp-perf-final-02d-20260904T203550Z
+drwxr-xr-x   3 root   root    4.0K Sep  5 01:35 jp-perf-final-02e-20260904T233239Z
+-rw-rw-r--   1 pkjetp pkjetp   121 Sep 16 20:52 migrate-media-authority-3eef62a3.log
+-rw-rw-r--   1 pkjetp pkjetp   14K Sep 16 22:56 next-build-077061e6-public-only.log
+-rw-rw-r--   1 pkjetp pkjetp   14K Sep 16 23:43 next-build-31c69b73-public-only.log
+-rw-rw-r--   1 pkjetp pkjetp   37K Sep 16 21:07 next-build-3eef62a3-final.log
+-rw-rw-r--   1 pkjetp pkjetp  2.3K Sep 16 20:53 next-build-3eef62a3.log
+-rw-rw-r--   1 pkjetp pkjetp  1.8K Sep 16 21:01 next-build-3eef62a3-parity.log
+-rw-rw-r--   1 pkjetp pkjetp   14K Sep 16 21:09 next-build-3eef62a3-public-only.log
+-rw-rw-r--   1 pkjetp pkjetp  2.0K Sep 16 20:57 next-build-3eef62a3-retry.log
+-rw-rw-r--   1 pkjetp pkjetp   14K Sep 17 00:22 next-build-42d1913c-public-only.log
+-rw-rw-r--   1 pkjetp pkjetp   14K Sep 16 22:02 next-build-70353dd6-public-only.log
+-rw-rw-r--   1 pkjetp pkjetp   14K Sep 17 00:12 next-build-a7f8e64d-public-only.log
+-rw-rw-r--   1 pkjetp pkjetp   14K Sep 16 21:41 next-build-afb36077-public-only.log
+-rw-rw-r--   1 pkjetp pkjetp   14K Sep 16 22:07 next-build-c70e12c0-public-only.log
+-rw-rw-r--   1 pkjetp pkjetp   14K Sep 16 21:54 next-build-c94722ed-public-only.log
+-rw-rw-r--   1 pkjetp pkjetp  1.9K Sep 16 22:51 next-build-d95a8e0b-public-only.log
+-rw-r--r--   1 pkjetp pkjetp  7.5K Sep 24 11:22 OpenDomainResponseService.php.pre-cq41-20260926T174349Z
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 16 13:02 p0-frontend-restore-20260916T110238Z
+-rw-r--r--   1 root   root     27M Sep 19 15:39 public_html-20260919T133533Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp   27M Sep 21 19:54 public_html-20260921T174957Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp   27M Sep 21 19:55 public_html-20260921T175205Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp   27M Sep 21 19:58 public_html-20260921T175432Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp   27M Sep 22 07:58 public_html-20260922T055351Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp   27M Sep 22 17:53 public_html-20260922T154826Z.tar.gz
+-rw-r--r--   1 root   root     27M Sep 22 17:59 public_html-20260922T155557Z.tar.gz
+-rw-r--r--   1 root   root     27M Sep 22 19:47 public_html-20260922T174346Z.tar.gz
+-rw-r--r--   1 root   root     27M Sep 22 20:36 public_html-20260922T183154Z.tar.gz
+-rw-r--r--   1 root   root     27M Sep 22 20:40 public_html-20260922T183651Z.tar.gz
+-rw-r--r--   1 root   root     27M Sep 23 09:05 public_html-20260923T070052Z.tar.gz
+-rw-r--r--   1 root   root     27M Sep 24 11:22 public_html-20260924T091650Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp   27M Sep 26 19:39 public_html-20260926T173607Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp   27M Sep 26 20:50 public_html-20260926T184711Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp   27M Sep 26 22:51 public_html-20260926T204828Z.tar.gz
+-rw-r--r--   1 root   root     27M Sep 30 09:59 public_html-20260930T075557Z.tar.gz
+-rw-r--r--   1 root   root     27M Sep 30 17:36 public_html-20260930T153330Z.tar.gz
+-rw-r--r--   1 root   root     27M Sep 30 17:58 public_html-20260930T155445Z.tar.gz
+-rw-r--r--   1 root   root     27M Sep 30 19:07 public_html-20260930T170440Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp   27M Oct  8 18:20 public_html-20261008T161625Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp   27M Oct  8 23:23 public_html-20261008T212021Z.tar.gz
+-rw-r--r--   1 root   root     27M Oct  9 09:45 public_html-20261009T074212Z.tar.gz
+-rw-r--r--   1 root   root     27M Oct  9 10:59 public_html-20261009T085629Z.tar.gz
+-rw-r--r--   1 root   root     27M Oct  9 23:17 public_html-20261009T211349Z.tar.gz
+-rw-r--r--   1 root   root     27M Oct 10 08:36 public_html-20261010T063311Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp   27M Oct 10 14:36 public_html-20261010T123257Z.tar.gz
+-rw-r--r--   1 root   root     27M Oct 12 21:28 public_html-20261012T192408Z.tar.gz
+-rw-rw-r--   1 pkjetp pkjetp   27M Oct 14 21:27 public_html-20261014T192251Z.tar.gz
+drwxrwxr-x   4 pkjetp pkjetp  4.0K Sep 13 16:24 scoped-jp-airblue-zapways-03r1-20260913T141938Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 16 23:41 scoped-pre-31c69b73-20260916T214141Z
+drwxrwxr-x   2 pkjetp pkjetp  4.0K Sep 16 20:52 stale-ownership-20260916
+drwxrwxr-x   3 pkjetp pkjetp  4.0K Sep 16 20:47 stale-ownership-20260916T184121Z
+
+=== RELEASES LS ===
+total 460K
+drwxrwxr-x 73 pkjetp pkjetp  64K Oct 14 21:22 .
+drwxr-xr-x 33 pkjetp pkjetp 4.0K Sep 30 19:35 ..
+drwxr-xr-x  7 197609 197609 4.0K Sep  8 20:26 jetpk-20260908T182533Z
+drwxr-xr-x  3 root   root   4.0K Sep 18 09:59 jetpk-20260918T075940Z
+drwxr-xr-x  5 pkjetp pkjetp 4.0K Sep 23 09:05 jetpk-20260923T070452Z
+drwxr-xr-x 10 root   root   4.0K Sep 30 10:09 jetpk-20260930T080534Z
+drwxr-xr-x  4 root   root   4.0K Sep 30 17:36 jetpk-20260930T153653Z
+drwxr-xr-x  4 root   root   4.0K Sep 30 17:58 jetpk-20260930T155854Z
+drwxrwxr-x  4 pkjetp pkjetp 4.0K Oct  8 18:27 jetpk-20261008T162715Z
+drwxrwxr-x  4 pkjetp pkjetp 4.0K Oct  8 18:28 jetpk-20261008T162822Z
+drwxrwxr-x  4 pkjetp pkjetp 4.0K Oct  8 18:28 jetpk-20261008T162853Z
+drwxr-xr-x  4 root   root   4.0K Oct  8 18:30 jetpk-20261008T163003Z
+drwxrwxr-x  4 pkjetp pkjetp 4.0K Oct  8 23:23 jetpk-20261008T212344Z
+drwxr-xr-x  2 root   root   4.0K Oct  9 09:47 jetpk-20261009T074747Z
+drwxr-xr-x  5 pkjetp pkjetp 4.0K Oct  9 09:49 jetpk-20261009T074917Z
+drwxr-xr-x  5 pkjetp pkjetp 4.0K Oct 10 08:37 jetpk-20261010T063645Z
+drwxr-xr-x  4 pkjetp pkjetp 4.0K Oct 12 21:30 jetpk-20261012T192955Z
+drwxr-xr-x  4 pkjetp pkjetp 4.0K Oct 14 21:21 jetpk-20261014T192123Z
+drwxr-xr-x  4 pkjetp pkjetp 4.0K Sep 22 17:59 jetpk-activation18-20260922T155557Z
+drwxrwxr-x  2 pkjetp pkjetp 4.0K Sep 26 20:50 jetpk-ai-runtime-01dbe7cf5ba79280420d7b2274db6b2b3fb0f8e3-20260926T185040Z
+drwxrwxr-x  4 pkjetp pkjetp 4.0K Sep 26 20:52 jetpk-ai-runtime-01dbe7cf5ba79280420d7b2274db6b2b3fb0f8e3-20260926T185204Z
+drwxrwxr-x  2 pkjetp pkjetp 4.0K Sep 27 09:58 jetpk-ai-runtime-03be054d59ddfe0c412368437162009b09c0b7b7-20260927T075828Z
+drwxrwxr-x  2 pkjetp pkjetp 4.0K Sep 27 09:59 jetpk-ai-runtime-03be054d59ddfe0c412368437162009b09c0b7b7-20260927T075928Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 27 10:02 jetpk-ai-runtime-03be054d59ddfe0c412368437162009b09c0b7b7-20260927T080207Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 24 11:15 jetpk-ai-runtime-04ceadcc9a2dd3de958399b9727ef7368154eb98-20260924T091555Z
+drwxrwxr-x  4 pkjetp pkjetp 4.0K Sep 26 09:34 jetpk-ai-runtime-1602ec2969ce15d17dd3bb92750cece48d4c6de2-20260926T073433Z
+drwxrwxr-x  4 pkjetp pkjetp 4.0K Sep 26 09:35 jetpk-ai-runtime-1602ec2969ce15d17dd3bb92750cece48d4c6de2-20260926T073509Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 24 11:12 jetpk-ai-runtime-17bee9f6b2346e5d9764618e56a4c1c679ae6d0d-20260924T091237Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 26 09:28 jetpk-ai-runtime-1dd364679534f117048f306b43318af5b537bbbf-20260926T072811Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 27 10:28 jetpk-ai-runtime-1efd8307d381f9195d3e036aee639cdcd7a41578-20260927T082835Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 26 09:28 jetpk-ai-runtime-237a255a41522e8fd2e58e98c74d3ed963997eaa-20260926T072812Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 28 12:32 jetpk-ai-runtime-24dbf524c06fc894f84a44b14a224a41b49170f7-20260928T103228Z
+drwxr-xr-x  9 root   root   4.0K Sep 23 17:32 jetpk-ai-runtime-2f7c3b17c7bcf15532c4ab7ac66a76b5999a2c79-20260923T153213Z
+drwxr-xr-x  9 root   root   4.0K Sep 23 17:35 jetpk-ai-runtime-2f7c3b17c7bcf15532c4ab7ac66a76b5999a2c79-20260923T153557Z
+drwxrwxr-x  4 pkjetp pkjetp 4.0K Sep 25 21:30 jetpk-ai-runtime-386b3aa78ef5aef89aed4341eac9f3eb548ef5f9-20260925T193034Z
+drwxrwxr-x  4 pkjetp pkjetp 4.0K Sep 25 21:32 jetpk-ai-runtime-386b3aa78ef5aef89aed4341eac9f3eb548ef5f9-20260925T193219Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 29 14:57 jetpk-ai-runtime-3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492-20260929T125701Z
+drwxrwxr-x 11 pkjetp pkjetp 4.0K Sep 23 10:42 jetpk-ai-runtime-3e5c24231901e8148015011d8a3bfde0ff95411c-20260923T084240Z
+drwxrwxr-x 11 pkjetp pkjetp 4.0K Sep 23 10:44 jetpk-ai-runtime-3e5c24231901e8148015011d8a3bfde0ff95411c-20260923T084419Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 26 11:01 jetpk-ai-runtime-437904f46bdbd471b40d211532ab893b598e0616-20260926T090144Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 26 11:01 jetpk-ai-runtime-4e6ec1308597816e00097f672b8c547a21e7f5e3-20260926T090144Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 24 11:10 jetpk-ai-runtime-521d6780f98cfe688f3353a090872bb3ba0eb091-20260924T091013Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 26 09:27 jetpk-ai-runtime-52a0cc56e4312f8b18156d045bc6249af195fb9e-20260926T072736Z
+drwxr-xr-x  5 root   root   4.0K Sep 24 11:22 jetpk-ai-runtime-613d46f5a8c355a77c0d3cabdaac813c9619fc1e-20260924T092227Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 25 21:28 jetpk-ai-runtime-6685bd51cc5705dc2546a6df474260dd83bdcd39-20260925T192856Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 26 09:30 jetpk-ai-runtime-6e70ba92b02de1a8b15f7b44c18d28483a5e3e16-20260926T073045Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 24 11:10 jetpk-ai-runtime-6f0dfdf3ed8d65745f8cb0bf0b3dba1487de0249-20260924T091013Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 26 09:30 jetpk-ai-runtime-768fe74e58302d0878872df733de02ff4a9f098d-20260926T073045Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 25 21:30 jetpk-ai-runtime-7e982cd39d43de0216a29712f177c541f136089e-20260925T193001Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 27 10:48 jetpk-ai-runtime-83f24c145407fe16008efcb96cdea1b2ac34bfcf-20260927T084817Z
+drwxrwxr-x  2 pkjetp pkjetp 4.0K Sep 28 21:41 jetpk-ai-runtime-9901f285e06c85f550191307ef29c9298904a32c-20260928T194118Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 28 21:41 jetpk-ai-runtime-9901f285e06c85f550191307ef29c9298904a32c-20260928T194153Z
+drwxrwxr-x  4 pkjetp pkjetp 4.0K Sep 26 22:52 jetpk-ai-runtime-9a2182f5bf5380491ff091d3f572c98898c727bc-20260926T205200Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 24 11:12 jetpk-ai-runtime-9bc2d24633412accdb7d102b59faccef07a72a0d-20260924T091237Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 28 16:02 jetpk-ai-runtime-a0e616747a95d632f270a6edafc3f6e8d9230fca-20260928T140247Z
+drwxrwxr-x  2 pkjetp pkjetp 4.0K Sep 28 16:04 jetpk-ai-runtime-a0e616747a95d632f270a6edafc3f6e8d9230fca-20260928T140442Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 28 16:06 jetpk-ai-runtime-a0e616747a95d632f270a6edafc3f6e8d9230fca-20260928T140615Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 26 11:01 jetpk-ai-runtime-aabebf93970191c7b907e3dbd0a73bbc9b248167-20260926T090144Z
+drwxr-xr-x  3 root   root   4.0K Sep 24 11:09 jetpk-ai-runtime-b8ea057bc490bc873a42e800a0056880af5cb38c-20260924T090926Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 25 21:30 jetpk-ai-runtime-b9875c01f1d26ec418e51036aadd7e1a5de863be-20260925T193004Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 28 23:50 jetpk-ai-runtime-c115cc5712ad0fca0ab9729d6d34907220959a93-20260928T215042Z
+drwxr-xr-x  3 root   root   4.0K Sep 24 15:38 jetpk-ai-runtime-c14f7737083deb68adb26ffee2889e2bff557537-20260924T133839Z
+drwxrwxr-x  2 pkjetp pkjetp 4.0K Sep 26 19:39 jetpk-ai-runtime-d681651df61a878a385a9d3184d00cbb0dcd938f-20260926T173942Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 26 19:41 jetpk-ai-runtime-d681651df61a878a385a9d3184d00cbb0dcd938f-20260926T174150Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 26 19:44 jetpk-ai-runtime-d681651df61a878a385a9d3184d00cbb0dcd938f-20260926T174402Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 26 09:27 jetpk-ai-runtime-e31069b6d93e1d06f94603c3e3d22f3b8893422b-20260926T072736Z
+drwxr-xr-x 11 root   root   4.0K Sep 17 20:13 jetpk-ai-runtime-e393d336f1fac5644610f3679be05b75017ab149-20260917T181300Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 27 12:46 jetpk-ai-runtime-e5640c103b40c90a6a34e5f668ccf0865ffbc391-20260927T104614Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 24 11:14 jetpk-ai-runtime-ee215b9ef6b0f525486b9c023e56275246a2f55e-20260924T091458Z
+drwxrwxr-x  3 pkjetp pkjetp 4.0K Sep 25 21:28 jetpk-ai-runtime-f74f009ab6a7f0062a8346882928019b20fe3c95-20260925T192856Z
+drwxr-xr-x  6 pkjetp pkjetp 4.0K Sep 22 19:47 jetpk-conv-lead-19-20260922T174346Z
+drwxrwxr-x  8 pkjetp pkjetp 4.0K Sep 23 10:45 jetpk-embed-r3-20260923T084511Z
+-rw-r--r--  1 root   root   8.8K Oct 12 21:30 jetpk-release-12045dda48c9-20261012T192955Z.tar.gz
+-rw-r--r--  1 root   root   5.0K Oct 10 08:36 jetpk-release-4ab934cc872a-20261010T063645Z.tar.gz
+-rw-r--r--  1 root   root    58K Sep 23 09:05 jetpk-release-5c17a43375e0-20260923T070452Z.tar.gz
+-rw-rw-r--  1 pkjetp pkjetp  21K Oct 14 21:22 jetpk-release-a138eb570b05-20261014T192123Z.tar.gz
+drwxr-xr-x  4 pkjetp pkjetp 4.0K Sep 22 20:40 jetpk-sim20-locked-write-20260922T183651Z
+
+=== DOCKER ===
+DOCKER_ABSENT
+
+=== CRON ===
+* * * * * /usr/local/lsws/lsphp83/bin/php /home/pkjetp/jetpk_app/artisan schedule:run >> /dev/null 2>&1
+* * * * * /usr/local/lsws/lsphp83/bin/php /home/pkjetp/jetpk_app/artisan queue:work database --stop-when-empty --queue=notifications-critical,notifications-transactional,notifications-ops,notifications-bulk --tries=5 --timeout=90 >> /home/pkjetp/jetpk_app/storage/logs/notification-worker-cron.log 2>&1
+
+=== SYSTEMD TIMERS (backup/reten) ===
+Thu 2026-10-15 00:00:00 CEST     9min Wed 2026-10-14 00:00:00 CEST      23h ago dpkg-db-backup.timer           dpkg-db-backup.service
+Thu 2026-10-15 00:09:00 CEST    18min Wed 2026-10-14 23:39:00 CEST    11min ago phpsessionclean.timer          phpsessionclean.service
+Thu 2026-10-15 14:03:50 CEST      14h Wed 2026-10-14 14:03:50 CEST       9h ago systemd-tmpfiles-clean.timer   systemd-tmpfiles-clean.service

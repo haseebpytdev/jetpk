@@ -1,0 +1,28 @@
+=== SHA MARKERS ===
+FILE=/home/pkjetp/jetpk_app/.jetpk-runtime-sha
+VALUE=a138eb570b05910046df7fb251beeef839b25395
+-rw-r--r-- 1 pkjetp pkjetp 40 Oct 14 21:28 /home/pkjetp/jetpk_app/.jetpk-runtime-sha
+FILE=/home/pkjetp/jetpk_app/storage/app/deploy-sha.txt
+VALUE=ab26661f0107d9bd8f9889dda1d59567d93be683
+
+-rw-rw-r-- 1 pkjetp pkjetp 41 Oct 10 14:44 /home/pkjetp/jetpk_app/storage/app/deploy-sha.txt
+MISSING=/home/pkjetp/jetpk_app/storage/app/AUTHORIZED_DEPLOY_SHA
+MISSING=/home/pkjetp/jetpk_app/DEPLOYED_RUNTIME_SHA
+MISSING=/home/pkjetp/public_html/.jetpk-runtime-sha
+=== ACTIVE LINKS ===
+total 42068
+-rw-r--r--   1 pkjetp pkjetp        0 Jul 19 13:02 ,
+-rw-r--r--   1 pkjetp pkjetp        0 Jul 19 15:48 -
+drwxr-xr-x  64 pkjetp pkjetp    12288 Oct  9 10:01 .
+drwxr-xr-x  33 pkjetp pkjetp     4096 Sep 30 19:35 ..
+/home/pkjetp/jetpk_app
+total 68
+drwxr-xr-x 11 pkjetp pkjetp 4096 Sep 29 00:07 .
+drwxr-xr-x 33 pkjetp pkjetp 4096 Sep 30 19:35 ..
+drwxr-xr-x  4 pkjetp pkjetp 4096 May  3 19:39 assets
+drwxr-xr-x  3 pkjetp pkjetp 4096 Aug 19 06:30 build
+drwxrwxr-x  6 root   root   4096 Aug 18 23:11 client-assets
+drwxrwxr-x  4 root   root   4096 Sep 23 15:33 css
+-rw-rw-r--  1 pkjetp pkjetp  251 Sep 16 21:39 favicon.ico
+drwxrwxr-x  3 pkjetp pkjetp 4096 Sep 17 04:47 fonts
+-rw-r--r--  1 pkjetp pkjetp  837 Jul 10 01:17 .htaccess

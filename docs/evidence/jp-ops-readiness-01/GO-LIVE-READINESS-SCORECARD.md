@@ -24,9 +24,9 @@
 | Security | AMBER | Core isolation sound; P2 gaps open |
 | Data integrity | AMBER | Source risks; live SQL sampling not run |
 | Background jobs | AMBER | notifications-* cron proven; default worker intentionally OFF |
-| Observability | AMBER | failed_jobs backlog cleared; default backlog still opaque to cron worker |
-| Performance | AMBER | Disk improved 89%→73%; no live latency cert |
-| Server operations | AMBER | Disk OK for headroom; SHA false-positive closed; queue gap remains |
+| Observability | AMBER | disk-health + failed_jobs local cron ACTIVE; external alert delivery still open (OPS-DEF-0022) |
+| Performance | AMBER | Disk 46% after DISK-RETENTION-01; no live latency cert |
+| Server operations | AMBER | Current rollback checkpoint proven; retention policy live (dry-run); root residual OPS-DEF-0023 |
 | Admin activation | RED | Modules/suppliers/payments/go-live items |
 
 **PRODUCTION_OPERATIONAL_READY = NO**  
