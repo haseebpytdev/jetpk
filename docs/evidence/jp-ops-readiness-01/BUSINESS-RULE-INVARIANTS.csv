@@ -10,8 +10,11 @@ BRI-006,FINANCE,agency has one operational wallet balance truth,canonicalWalletF
 BRI-007,PAYMENT,paid gateway callback cannot double-settle,PaymentTransactionService + UNIQUE payment_transaction_id,source+tests+prod schema,PASS,OPS-DEF-0013 CLOSED
 BRI-008,BOOKING,confirmed requires allowed transition (non-admin),BookingService,source,PASS,—
 BRI-009,BOOKING,supplier failure not represented as confirmed success,adapters+status,runtime,UNTESTED,OPS-DEF-0018
-BRI-010,SUPPLIER,PIA frozen for this audit,governance,policy,PASS_GOVERNANCE,—
+BRI-010,SUPPLIER,PIA frozen for this audit,governance,policy,PASS_GOVERNANCE,OPS-DEF-0016
 BRI-011,TICKETING,ticket cannot issue when module/live flags off,TicketingService+config,source,PASS_SAFE_DEFAULT,OPS-DEF-0016
+BRI-012,SUPPLIER,Launch scope is Sabre GDS limited; adapters≠activated,OPS-DEF-0016-SUPPLIER-ACTIVATION-READINESS.md,evidence,PASS_SCOPE_DEFINED,OPS-DEF-0016
+BRI-013,SUPPLIER,Sabre NDC not intended for current launch,config sabre.ndc.enabled=false,prod_env,PASS_EXCLUDED,OPS-DEF-0016
+BRI-014,SUPPLIER,Ticketing/void/refund remain disabled without LNIATA+live UAT,prod flags+connection,prod_readonly,PASS_DISABLED,OPS-DEF-0016
 BRI-012,SECURITY,guest lookup requires matching identity,GuestBookingAccessService,source,FAIL_OR,OPS-DEF-0005
 BRI-013,ADMIN,admin status override must keep satellite fields consistent,BookingService admin bypass,source,RISK,OPS-RISK-0007
 BRI-014,OPS,failed background work must be visible,failed_jobs,SSH,FAIL_BACKLOG,OPS-DEF-0015

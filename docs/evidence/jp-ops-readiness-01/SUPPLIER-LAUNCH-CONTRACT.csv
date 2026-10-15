@@ -1,0 +1,23 @@
+PROVIDER,CHANNEL,CAPABILITY,CLASSIFICATION,RUNTIME_EFFECTIVE,AUTOMATION_MODE,KILL_SWITCH,LAUNCH_SCOPE,NOTES
+sabre_gds,GDS,SEARCH,ACTIVE_AND_CERTIFIED,branded_fares_search_enabled=true; gds_global_kill_switch=false,AUTO,gds_global_kill_switch,IN_SCOPE_WAVE1,No fresh search call this audit; historical search path + Wave A
+sabre_gds,GDS,REVALIDATION,ACTIVE_LIMITED_SCOPE,booking_live_call_enabled=true gates live revalidate,AUTO_WHEN_BOOKING_LIVE,booking_live_call_enabled,IN_SCOPE_WAVE1,Live HTTP possible when booking_live_call true; not invoked this audit
+sabre_gds,GDS,PNR_ONE_WAY_DIRECT,ACTIVE_LIMITED_SCOPE,booking_enabled+booking_live_call+certified_route_selector; admin_manual_pnr=true,AUTO_PUBLIC_CERTIFIED_OR_ADMIN_MANUAL,booking_live_call_enabled / booking_enabled,IN_SCOPE_WAVE1,Live PNR capability ON; treat as active mutation risk
+sabre_gds,GDS,PNR_CONNECTING_SAME_CARRIER,ACTIVE_LIMITED_SCOPE,cpnr_connecting_same_carrier_* =true; verified_multiseg_auto_pnr=false,ADMIN_MANUAL_OR_CONTROLLED_PUBLIC,booking_live_call_enabled,IN_SCOPE_WAVE1_LIMITED,Public connecting checkout flag true but auto multiseg off
+sabre_gds,GDS,PNR_CONNECTING_MIXED_CARRIER,BLOCKED_CONFIGURATION,operational readiness blocks mixed carrier,DISABLED,n/a,EXCLUDED,blocked_mixed_carrier in SabreOperationalPnrReadiness
+sabre_gds,GDS,PNR_RETURN,ACTIVE_LIMITED_SCOPE,depends certified route / same-carrier gates,AUTO_OR_ADMIN_MANUAL,booking_live_call_enabled,IN_SCOPE_WAVE1_LIMITED,Return pairing historically certified for search; PNR live not re-UAT'd this loop
+sabre_gds,GDS,PNR_MULTICITY,NOT_INTENDED_FOR_CURRENT_LAUNCH,complex_itinerary_pnr_enabled=false,DISABLED,complex_itinerary_pnr_enabled,EXCLUDED,Keep disabled
+sabre_gds,GDS,TICKETING,CERTIFIED_BUT_DISABLED,ticketing_enabled=false; printer_lniata absent; ticketing_live_call_enabled=true inert without ticketing_enabled,STAFF_MANUAL_EXTERNAL_UNTIL_FLAGS,ticketing_enabled / ticketing_live_call_enabled,EXCLUDED_UNTIL_CERT,Code present; no LNIATA; public/auto ticket false
+sabre_gds,GDS,UNTICKETED_CANCEL,ACTIVE_LIMITED_SCOPE,unticketed_cancel_enabled=true; cancel_enabled=true; cancel_live_call_enabled=true,ADMIN_MANUAL,cancel_live_call_enabled / unticketed_cancel_enabled,IN_SCOPE_STAFF_ONLY,Do not exercise; admin cancel live path armed
+sabre_gds,GDS,VOID,CONFIGURED_BUT_DISABLED,void_enabled=false; void_live_call=false,DISABLED,void_enabled,EXCLUDED,
+sabre_gds,GDS,REFUND,CONFIGURED_BUT_DISABLED,refund_enabled=false; refund_live_call=false,DISABLED,refund_enabled,EXCLUDED,
+sabre_ndc,NDC,SEARCH,NOT_INTENDED_FOR_CURRENT_LAUNCH,ndc.enabled=false (nested search_enabled=true inert without ndc.enabled),DISABLED,ndc.global_kill_switch / ndc.enabled,EXCLUDED,Do not combine with GDS readiness
+sabre_ndc,NDC,ORDER_CREATE,NOT_INTENDED_FOR_CURRENT_LAUNCH,order_create/public false,DISABLED,ndc.order_create_enabled,EXCLUDED,
+sabre_ndc,NDC,CANCEL,NOT_INTENDED_FOR_CURRENT_LAUNCH,ndc.cancel_enabled=false,DISABLED,ndc.cancel_enabled,EXCLUDED,
+pia_ndc,Hitit/Crane 20.1,ALL,FROZEN,connection active+credentials but governance FROZEN; live_enabled false,DISABLED,governance+env,EXCLUDED,Do not invoke; connection presence ≠ launch
+airblue,Zapways,SEARCH_BOOK,CONFIGURED_BUT_DISABLED,AIRBLUE_OTA_V3_LIVE_ENABLED=false; sandbox TEST connection active,DISABLED,AIRBLUE_OTA_V3_LIVE_ENABLED,EXCLUDED,Sandbox Zapways only; not live launch
+one_api,API,ALL,NOT_CONFIGURED,no connection row; live_* false,DISABLED,ONE_API_LIVE_*,EXCLUDED,
+iati,API,ALL,NOT_CONFIGURED,no connection; IATI_LIVE_ENABLED=false; prior auth unresolved,DISABLED,IATI_LIVE_ENABLED,EXCLUDED,BLOCKED_EXTERNAL_OR_CONFIGURATION historically
+duffel,API,ALL,NOT_INTENDED_FOR_CURRENT_LAUNCH,no connection; DUFFEL_LIVE_ENABLED=false,DISABLED,module+env,EXCLUDED,
+al_haider,Group,INVENTORY_BOOK,CONFIGURED_BUT_DISABLED,status inactive; booking/sync/release false; group require-live true,DISABLED,ALHAIDER_* / group require-live,EXCLUDED_OR_MANUAL_GROUP,
+ameer_e_millat,Group,ALL,NOT_CONFIGURED,no dedicated connection in inventory,DISABLED,group gates,EXCLUDED,
+smtp,Mail,N/A,NOT_A_FLIGHT_SUPPLIER,active mail connection,N/A,n/a,N/A,Listed only to avoid misclassification as flight supplier

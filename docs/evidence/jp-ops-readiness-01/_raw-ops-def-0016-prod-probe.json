@@ -1,0 +1,25 @@
+{
+  "PROBED_AT_UTC": "2026-10-15T19:46:41+00:00",
+  "RUNTIME_SHA": "922f15774ece177d8b3cc23207e98379b8a2755b",
+  "BUILD_ID": "QClrSvr5W0V2GqllIeLKE",
+  "PROTECTED_MAIN_SHA": "953f4ede2ec206aa6e01a1bae17dbcef48ea57aa",
+  "HEALTH": {
+    "DISK_USED_PERCENT": "48%",
+    "FAILED_JOBS": 1,
+    "FAILED_JOB_ID": 148,
+    "FAILED_JOB_QUEUE": "notifications-transactional",
+    "PENDING_DEFAULT": 0,
+    "DEFAULT_WORKER_RUNNING": "NO",
+    "HTTP": { "/up": 200, "/": 200, "/login": 200, "/admin": 302, "/agent": 200 }
+  },
+  "NOTE": "READ_ONLY_NO_SUPPLIER_CALLS_NO_SECRETS",
+  "LIVE_SUPPLIER_CALLS": 0,
+  "PNR_MUTATIONS": 0,
+  "TICKET_MUTATIONS": 0,
+  "CANCELLATION_MUTATIONS": 0,
+  "REFUND_VOID_MUTATIONS": 0,
+  "SUPPLIER_CONNECTION_MUTATIONS": 0,
+  "ENV_CHANGES": 0,
+  "DB_MUTATIONS": 0,
+  "COMMIT_TREE_PROOF": "c068cc69 docs-only under docs/evidence/jp-ops-readiness-01/; follow-up evidence nits in next commit"
+}

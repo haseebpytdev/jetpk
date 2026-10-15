@@ -1,0 +1,20 @@
+CAPABILITY,DEPENDENCY_CATEGORY,DETAIL,BLOCKS_LAUNCH_SCOPE,FOLLOWUP
+sabre_gds_search,ENV_FLAG_ONLY,gds_global_kill_switch must stay false; branded fares search already on,NO,Monitor kill switch
+sabre_gds_pnr_direct_public,LIVE_UAT_REQUIRED,booking_live_call already true — controlled QA PNR UAT still required before claiming OJ-B2C complete,YES_FOR_0018,Dedicated PNR UAT plan (not this loop)
+sabre_gds_pnr_connecting,PAYLOAD_NOT_CERTIFIED / LIVE_UAT_REQUIRED,cpnr connecting flags true; verified_multiseg_auto_pnr false; needs itinerary-class UAT,YES_FOR_0018_CONNECTING,Controlled connecting UAT
+sabre_gds_ticketing,CREDENTIAL_MISSING,SABRE_TICKETING_PRINTER_LNIATA absent,YES_IF_AUTO_TICKET_DESIRED,Configure LNIATA then enable flags
+sabre_gds_ticketing,ENV_FLAG_ONLY,SABRE_TICKETING_ENABLED=false (ticketing_live_call_enabled=true is inert alone),YES_IF_AUTO_TICKET_DESIRED,Flip only after LNIATA+cert
+sabre_gds_ticketing,SUPPLIER_CERTIFICATION_REQUIRED,No production ticket issuance cert in this audit,YES_IF_AUTO_TICKET_DESIRED,Staff ticketing UAT
+sabre_gds_ticketing,PCC_ENTITLEMENT,Printer/PCC entitlement assumed unresolved without LNIATA,YES_IF_AUTO_TICKET_DESIRED,Vendor/PCC confirmation
+sabre_gds_void,ENV_FLAG_ONLY,void_enabled / void_live_call false,NO_IF_EXCLUDED,Keep disabled for launch
+sabre_gds_refund,ENV_FLAG_ONLY,refund_enabled / refund_live_call false,NO_IF_EXCLUDED,Keep disabled for launch
+sabre_gds_unticketed_cancel,LIVE_UAT_REQUIRED,cancel live flags already true — operational risk if staff cancel without UAT playbook,PARTIAL,Admin cancel playbook + optional UAT
+sabre_ndc,BUSINESS_DECISION_REQUIRED,NDC not intended for current launch,NO,Remain excluded
+pia_ndc,EXTERNAL_VENDOR_APPROVAL / BUSINESS_DECISION_REQUIRED,Governance FROZEN despite active connection,NO,Remain frozen
+airblue,ENV_FLAG_ONLY,AIRBLUE_OTA_V3_LIVE_ENABLED=false; only sandbox connection,NO,Do not activate without cert
+airblue,SUPPLIER_CERTIFICATION_REQUIRED,No live Zapways production cert,NO,Separate activation wave
+one_api,ADMIN_CONNECTION_SETTING,No supplier_connections row,NO,Create+cert if desired later
+iati,EXTERNAL_VENDOR_APPROVAL,Historical AUTHENTICATION UNRESOLVED; still no live connection/flags,NO,Remain excluded
+duffel,BUSINESS_DECISION_REQUIRED,No connection; not in launch intent,NO,Remain excluded
+al_haider,ADMIN_CONNECTION_SETTING,Connection status inactive; booking/sync/release flags false,NO,Group workflow separate
+abhipay_payment,LIVE_UAT_REQUIRED,OPS-DEF-0017 separate from supplier activation,YES_FOR_0018_PAYMENT,Do not conflate with 0016
