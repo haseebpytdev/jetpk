@@ -21,6 +21,7 @@ use App\Services\Suppliers\PiaNdc\PiaNdcBookingStatusRefreshService;
 use App\Support\Payments\BookingPayableResolver;
 use App\Support\Payments\PaymentGatewayPayloadRedactor;
 use App\Support\References\CompactReferenceGenerator;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -275,18 +276,32 @@ class PaymentTransactionService
         $gatewayDriver = $this->gatewayResolver->resolve(PaymentGateway::CODE_ABHIPAY);
         $result = $gatewayDriver->createPayment($transaction);
 
-        $transaction->forceFill([
-            'request_payload_json' => PaymentGatewayPayloadRedactor::redact($result->safeResponse['request'] ?? null),
-            'response_payload_json' => PaymentGatewayPayloadRedactor::redact($result->safeResponse['response'] ?? null),
-            'gateway_order_id' => $result->gatewayOrderId,
-            'gateway_payment_url' => $result->redirectUrl,
-            'gateway_code' => $result->gatewayCode,
-            'gateway_message' => $result->gatewayMessage,
-            'status' => $result->success
-                ? PaymentTransactionStatus::Created
-                : PaymentTransactionStatus::Failed,
-            'failed_at' => $result->success ? null : now(),
-        ])->save();
+        try {
+            $transaction->forceFill([
+                'request_payload_json' => PaymentGatewayPayloadRedactor::redact($result->safeResponse['request'] ?? null),
+                'response_payload_json' => PaymentGatewayPayloadRedactor::redact($result->safeResponse['response'] ?? null),
+                'gateway_order_id' => $result->gatewayOrderId,
+                'gateway_payment_url' => $result->redirectUrl,
+                'gateway_code' => $result->gatewayCode,
+                'gateway_message' => $result->gatewayMessage,
+                'status' => $result->success
+                    ? PaymentTransactionStatus::Created
+                    : PaymentTransactionStatus::Failed,
+                'failed_at' => $result->success ? null : now(),
+            ])->save();
+        } catch (UniqueConstraintViolationException $e) {
+            Log::error('abhipay_gateway_order_collision', [
+                'payment_transaction_id' => $transaction->id,
+                'gateway' => $transaction->gateway,
+                'environment' => $transaction->environment,
+                'gateway_order_id' => $result->gatewayOrderId,
+            ]);
+
+            throw new InvalidArgumentException(
+                'Payment integrity error: provider order is already claimed by another transaction.',
+                previous: $e
+            );
+        }
 
         if (! $result->success || ! filled($result->redirectUrl)) {
             throw new InvalidArgumentException($result->errorMessage ?? 'Unable to start AbhiPay payment.');
@@ -339,19 +354,33 @@ class PaymentTransactionService
                 return $transaction;
             }
 
-            $transaction->forceFill([
-                'gateway_order_id' => $verify->gatewayOrderId ?? $transaction->gateway_order_id,
-                'gateway_status' => $verify->gatewayStatus,
-                'gateway_code' => $verify->gatewayCode,
-                'gateway_message' => $verify->gatewayMessage,
-                'response_payload_json' => PaymentGatewayPayloadRedactor::redact($verify->safeResponse),
-                'verified_at' => now(),
-                'status' => $verify->status,
-                'paid_at' => $verify->status === PaymentTransactionStatus::Paid ? now() : null,
-                'failed_at' => $verify->status->isTerminal() && $verify->status !== PaymentTransactionStatus::Paid
-                    ? now()
-                    : $transaction->failed_at,
-            ])->save();
+            try {
+                $transaction->forceFill([
+                    'gateway_order_id' => $verify->gatewayOrderId ?? $transaction->gateway_order_id,
+                    'gateway_status' => $verify->gatewayStatus,
+                    'gateway_code' => $verify->gatewayCode,
+                    'gateway_message' => $verify->gatewayMessage,
+                    'response_payload_json' => PaymentGatewayPayloadRedactor::redact($verify->safeResponse),
+                    'verified_at' => now(),
+                    'status' => $verify->status,
+                    'paid_at' => $verify->status === PaymentTransactionStatus::Paid ? now() : null,
+                    'failed_at' => $verify->status->isTerminal() && $verify->status !== PaymentTransactionStatus::Paid
+                        ? now()
+                        : $transaction->failed_at,
+                ])->save();
+            } catch (UniqueConstraintViolationException $e) {
+                Log::error('abhipay_verify_gateway_order_collision', [
+                    'payment_transaction_id' => $transaction->id,
+                    'gateway' => $transaction->gateway,
+                    'environment' => $transaction->environment,
+                    'gateway_order_id' => $verify->gatewayOrderId ?? $transaction->gateway_order_id,
+                ]);
+
+                throw new InvalidArgumentException(
+                    'Payment integrity error: provider order is already claimed by another transaction.',
+                    previous: $e
+                );
+            }
 
             if ($verify->status === PaymentTransactionStatus::Paid && $transaction->booking_id !== null) {
                 $this->settleVerifiedBookingPayment($transaction, $verify);
@@ -368,14 +397,18 @@ class PaymentTransactionService
             return;
         }
 
-        $existingPayment = BookingPayment::query()
+        // Primary invariant: one BookingPayment per PaymentTransaction (DB unique).
+        if (BookingPayment::query()->where('payment_transaction_id', $transaction->id)->exists()) {
+            return;
+        }
+
+        // Defensive compatibility for historical rows linked only by payment_reference.
+        if (BookingPayment::query()
             ->where('booking_id', $booking->id)
             ->where('method', BookingPaymentMethod::AbhiPay)
             ->where('payment_reference', $transaction->client_transaction_id)
             ->where('status', BookingPaymentStatus::Verified)
-            ->exists();
-
-        if ($existingPayment) {
+            ->exists()) {
             return;
         }
 
@@ -384,11 +417,12 @@ class PaymentTransactionService
             ->orderBy('id')
             ->first();
 
-        $this->bookingPaymentService->recordVerifiedGatewayPayment($booking, [
+        $result = $this->bookingPaymentService->recordVerifiedGatewayPayment($booking, [
             'method' => BookingPaymentMethod::AbhiPay,
             'amount' => (float) $transaction->amount,
             'currency' => (string) $transaction->currency,
             'payment_reference' => $transaction->client_transaction_id,
+            'payment_transaction_id' => $transaction->id,
             'meta' => array_filter([
                 'gateway' => PaymentGateway::CODE_ABHIPAY,
                 'gateway_order_id' => $transaction->gateway_order_id,
@@ -401,6 +435,12 @@ class PaymentTransactionService
                 'payable_after_promo' => $booking->payable_after_promo,
             ]),
         ], $systemUser);
+
+        if (! $result['created']) {
+            return;
+        }
+
+        $payment = $result['payment'];
 
         try {
             $this->promoCodeService->redeemForBooking($booking->fresh());
@@ -418,6 +458,7 @@ class PaymentTransactionService
                 'old_values' => [],
                 'new_values' => [
                     'payment_transaction_id' => $transaction->id,
+                    'booking_payment_id' => $payment->id,
                     'client_transaction_id' => $transaction->client_transaction_id,
                     'gateway_order_id' => $transaction->gateway_order_id,
                     'amount' => (float) $transaction->amount,

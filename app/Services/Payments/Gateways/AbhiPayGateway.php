@@ -168,14 +168,29 @@ class AbhiPayGateway implements PaymentGatewayInterface
         $transaction = null;
         if (filled($clientTransactionId)) {
             $transaction = PaymentTransaction::query()
+                ->where('gateway', PaymentGateway::CODE_ABHIPAY)
                 ->where('client_transaction_id', $clientTransactionId)
                 ->first();
         }
 
         if ($transaction === null && filled($orderId)) {
-            $transaction = PaymentTransaction::query()
+            // Provider-order fallback must be gateway-scoped and deterministic.
+            // UNIQUE(gateway, environment, gateway_order_id) allows the same order id
+            // across environments; refuse ambiguous multi-row matches.
+            $candidates = PaymentTransaction::query()
+                ->where('gateway', PaymentGateway::CODE_ABHIPAY)
                 ->where('gateway_order_id', $orderId)
-                ->first();
+                ->get();
+
+            if ($candidates->count() === 1) {
+                $transaction = $candidates->first();
+            } elseif ($candidates->count() > 1) {
+                Log::error('abhipay_callback_ambiguous_gateway_order', [
+                    'gateway_order_id' => $orderId,
+                    'candidate_count' => $candidates->count(),
+                    'candidate_ids' => $candidates->pluck('id')->all(),
+                ]);
+            }
         }
 
         return new PaymentGatewayCallbackResult(
