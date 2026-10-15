@@ -15,15 +15,15 @@
 | Booking | RED | State machine mapped; live E2E unproven |
 | Supplier | RED | Sabre book live-call ON; ticketing OFF; others OFF |
 | Pricing | RED | Cross-surface invariants untested |
-| Finance | AMBER | OPS-DEF-0006+0007 CLOSED on runtime 7fe1cd80; OPS-DEF-0013 FIX_READY_NOT_DEPLOYED |
-| Payments | AMBER | AbhiPay activation still open; OPS-DEF-0013 code ready pending prod schema |
+| Finance | AMBER | OPS-DEF-0006+0007+0013 CLOSED on runtime cc21dc92; residual activation/cert gaps |
+| Payments | AMBER | Idempotency architecture CLOSED; OPS-DEF-0017 AbhiPay activation/cert still OPEN |
 | PNR/ticketing | RED | Live flags off; no issuance UAT |
 | Notifications | AMBER | OPS-DEF-0019 CLOSED; OPS-DEF-0021 residual queued logs |
 | Documents | AMBER | Inventoried; values unproven |
 | CMS/SEO | AMBER | Inventoried; not re-audited |
 | Security | AMBER | OPS-DEF-0004 verified open; OPS-DEF-0024 QA fixture drift |
 | Data integrity | AMBER | Source risks; live SQL sampling not run |
-| Background jobs | AMBER | failed_jobs=0; default=0; default worker OFF |
+| Background jobs | AMBER | failed_jobs=1 (QA SMTP residual); default=0; default worker OFF |
 | Observability | AMBER | disk-health ACTIVE; external alert delivery open (OPS-DEF-0022) |
 | Performance | AMBER | Disk 46%; no live latency cert |
 | Server operations | AMBER | Rollback checkpoint proven; root residual OPS-DEF-0023 |
@@ -31,5 +31,6 @@
 
 **PRODUCTION_OPERATIONAL_READY = NO**  
 **Wave A auth:** critical journeys reclassified off `BLOCKED_NO_QA_SESSION`.  
-**OPS-DEF-0006 + OPS-DEF-0007:** CLOSED on production runtime `7fe1cd80`.  
-**OPS-DEF-0013:** `FIX_READY_NOT_DEPLOYED` (code/tests/PR). Next: **0013 prod schema closure** → **0004**.
+**OPS-DEF-0006 + OPS-DEF-0007 + OPS-DEF-0013:** CLOSED on production runtime `cc21dc92`.  
+**Payments:** idempotency architecture CLOSED; live AbhiPay activation/certification remains **OPS-DEF-0017**.  
+**Next:** **OPS-DEF-0004** (viewer cancellation authorization).
