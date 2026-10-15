@@ -298,6 +298,7 @@ final class OtaFinanceDemoScenario
             'balance' => $walletBalance,
             'currency' => 'PKR',
             'status' => AgentWalletStatus::Active,
+            'canonical_for_agency' => AgentWallet::CANONICAL_MARKER,
         ]);
 
         $staffFinance = $this->createAgentStaff($agent, $staffFinanceEmail, $staffFinanceName, [

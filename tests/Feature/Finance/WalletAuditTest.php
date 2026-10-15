@@ -285,8 +285,15 @@ class WalletAuditTest extends TestCase
                 'balance' => $balance,
                 'currency' => 'PKR',
                 'status' => 'active',
+                'canonical_for_agency' => null,
             ]);
         }
+
+        $this->markHeuristicWalletCanonical($agency);
+        $wallets = array_map(
+            fn (AgentWallet $wallet): AgentWallet => $wallet->fresh() ?? $wallet,
+            $wallets,
+        );
 
         return [$agency, $wallets];
     }

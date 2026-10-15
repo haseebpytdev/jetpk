@@ -325,6 +325,7 @@ class ManualWalletAdjustmentSafetyTest extends TestCase
             'balance' => $balance,
             'currency' => 'PKR',
             'status' => 'active',
+            'canonical_for_agency' => AgentWallet::CANONICAL_MARKER,
         ]);
 
         return [$agency, $wallet];

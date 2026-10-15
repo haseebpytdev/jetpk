@@ -26,6 +26,15 @@ class AgentWalletFactory extends Factory
             'credit_limit' => null,
             'currency' => 'PKR',
             'status' => AgentWalletStatus::Active,
+            // Default NULL so multi-wallet historical fixtures remain valid under the unique index.
+            'canonical_for_agency' => null,
         ];
+    }
+
+    public function canonical(): static
+    {
+        return $this->state(fn (): array => [
+            'canonical_for_agency' => AgentWallet::CANONICAL_MARKER,
+        ]);
     }
 }
