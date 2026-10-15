@@ -23,7 +23,7 @@
 | CMS/SEO | AMBER | Inventoried; not re-audited |
 | Security | AMBER | OPS-DEF-0004 verified open; OPS-DEF-0024 QA fixture drift |
 | Data integrity | AMBER | Source risks; live SQL sampling not run |
-| Background jobs | AMBER | failed_jobs=0; default=0; default worker OFF |
+| Background jobs | AMBER | failed_jobs=1 (QA SMTP residual); default=0; default worker OFF |
 | Observability | AMBER | disk-health ACTIVE; external alert delivery open (OPS-DEF-0022) |
 | Performance | AMBER | Disk 46%; no live latency cert |
 | Server operations | AMBER | Rollback checkpoint proven; root residual OPS-DEF-0023 |
