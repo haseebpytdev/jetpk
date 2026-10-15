@@ -15,7 +15,7 @@
 | Booking | RED | State machine mapped; live E2E unproven |
 | Supplier | RED | Sabre book live-call ON; ticketing OFF; others OFF |
 | Pricing | RED | Cross-surface invariants untested |
-| Finance | RED | OPS-DEF-0006/0007 P1 |
+| Finance | RED | OPS-DEF-0006 FIX_READY_NOT_DEPLOYED; OPS-DEF-0007 P1 still open |
 | Payments | RED | AbhiPay activation + OPS-DEF-0013 |
 | PNR/ticketing | RED | Live flags off; no issuance UAT |
 | Notifications | AMBER | OPS-DEF-0019 CLOSED; OPS-DEF-0021 residual queued logs |
@@ -30,4 +30,5 @@
 | Admin activation | RED | Modules/suppliers/payments/go-live items |
 
 **PRODUCTION_OPERATIONAL_READY = NO**  
-**Wave A auth:** critical journeys reclassified off `BLOCKED_NO_QA_SESSION`. Next remediation: OPS-DEF-0006 → 0007 → 0013 → 0004.
+**Wave A auth:** critical journeys reclassified off `BLOCKED_NO_QA_SESSION`.  
+**OPS-DEF-0006:** code+tests on `fix/ops-def-0006-wallet-ledger-atomicity` (`FIX_READY_NOT_DEPLOYED`). Next: merge/deploy 0006 → OPS-DEF-0007 → 0013 → 0004.

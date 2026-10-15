@@ -478,10 +478,13 @@ class AgentWalletService
                 'reviewed_at' => now(),
             ]);
 
-            return $deposit->fresh(['agent.user', 'wallet']);
-        });
+            $deposit = $deposit->fresh(['agent.user', 'wallet', 'agency']);
 
-        app(LedgerEventRecorder::class)->recordAgencyDepositApproved($deposit, $reviewer);
+            // Strict ledger post inside the same transaction as wallet credit (OPS-DEF-0006).
+            app(LedgerEventRecorder::class)->recordAgencyDepositApprovedOrFail($deposit, $reviewer);
+
+            return $deposit;
+        });
 
         $deposit->loadMissing('agency');
         if ($deposit->agency === null) {
