@@ -131,9 +131,12 @@ class LedgerMultiWalletReconciliationTest extends TestCase
                     'balance' => $balance,
                     'currency' => 'PKR',
                     'status' => AgentWalletStatus::Active,
+                    'canonical_for_agency' => null,
                 ],
             );
         }
+
+        $this->markHeuristicWalletCanonical($agency);
 
         $factory = app(LedgerTransactionFactory::class);
         $posting = app(LedgerPostingService::class);

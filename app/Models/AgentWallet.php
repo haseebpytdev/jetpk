@@ -18,11 +18,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'credit_limit',
     'currency',
     'status',
+    'canonical_for_agency',
 ])]
 class AgentWallet extends Model
 {
     /** @use HasFactory<AgentWalletFactory> */
     use HasFactory;
+
+    /**
+     * Canonical marker: store 1 for the operational wallet, NULL for historical rows.
+     * Never persist 0/false — that would collapse UNIQUE(agency_id, canonical_for_agency).
+     */
+    public const CANONICAL_MARKER = 1;
 
     protected function casts(): array
     {
@@ -30,7 +37,14 @@ class AgentWallet extends Model
             'balance' => 'decimal:2',
             'credit_limit' => 'decimal:2',
             'status' => AgentWalletStatus::class,
+            // Intentionally not boolean: false/0 must not become the non-canonical marker.
+            'canonical_for_agency' => 'integer',
         ];
+    }
+
+    public function isCanonicalForAgency(): bool
+    {
+        return (int) $this->canonical_for_agency === self::CANONICAL_MARKER;
     }
 
     /** @return BelongsTo<Agency, $this> */

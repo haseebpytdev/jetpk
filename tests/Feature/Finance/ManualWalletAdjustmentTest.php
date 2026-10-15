@@ -226,6 +226,7 @@ class ManualWalletAdjustmentTest extends TestCase
             'balance' => 10,
             'currency' => 'PKR',
             'status' => 'active',
+            'canonical_for_agency' => null,
         ]);
         $walletB = AgentWallet::query()->create([
             'agency_id' => $agency->id,
@@ -234,8 +235,10 @@ class ManualWalletAdjustmentTest extends TestCase
             'balance' => 20,
             'currency' => 'PKR',
             'status' => 'active',
+            'canonical_for_agency' => null,
         ]);
 
+        $this->markHeuristicWalletCanonical($agency);
         $canonical = app(AgentWalletService::class)->canonicalWalletForAgency($agency);
         $this->assertSame((int) $walletB->id, (int) $canonical?->id);
 
@@ -328,6 +331,7 @@ class ManualWalletAdjustmentTest extends TestCase
             'balance' => $balance,
             'currency' => 'PKR',
             'status' => 'active',
+            'canonical_for_agency' => AgentWallet::CANONICAL_MARKER,
         ]);
 
         return [$agency, $wallet];

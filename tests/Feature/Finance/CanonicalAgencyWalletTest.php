@@ -91,6 +91,7 @@ class CanonicalAgencyWalletTest extends TestCase
             'balance' => 0,
             'currency' => 'PKR',
             'status' => 'active',
+            'canonical_for_agency' => null,
         ]);
         AgentWallet::query()->create([
             'agency_id' => $agency->id,
@@ -99,11 +100,15 @@ class CanonicalAgencyWalletTest extends TestCase
             'balance' => 0,
             'currency' => 'PKR',
             'status' => 'active',
+            'canonical_for_agency' => null,
         ]);
 
+        // Legacy fallback (no marker): owner wallet wins among zero-balance actives.
         $canonical = app(AgentWalletService::class)->canonicalWalletForAgency($agency);
-
         $this->assertSame((int) $ownerWallet->id, (int) $canonical?->id);
+
+        $this->markHeuristicWalletCanonical($agency);
+        $this->assertTrue((bool) $ownerWallet->fresh()?->isCanonicalForAgency());
     }
 
     public function test_canonical_wallet_falls_back_to_oldest_active_wallet(): void
@@ -314,8 +319,15 @@ class CanonicalAgencyWalletTest extends TestCase
                 'balance' => $balance,
                 'currency' => 'PKR',
                 'status' => 'active',
+                'canonical_for_agency' => null,
             ]);
         }
+
+        $this->markHeuristicWalletCanonical($agency);
+        $wallets = array_map(
+            fn (AgentWallet $wallet): AgentWallet => $wallet->fresh() ?? $wallet,
+            $wallets,
+        );
 
         return [$agency, $wallets];
     }

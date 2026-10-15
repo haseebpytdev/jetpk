@@ -82,6 +82,10 @@ class DuplicateWalletArchiveService
             $reasons[] = 'Wallet is suspended; resolve suspension before archive.';
         }
 
+        if ($wallet->isCanonicalForAgency()) {
+            $reasons[] = 'Explicitly marked canonical wallet cannot be archived.';
+        }
+
         $canonical = $this->walletService->canonicalWalletForAgency((int) $wallet->agency_id);
         $canonicalId = $canonical?->id;
 
@@ -189,7 +193,11 @@ class DuplicateWalletArchiveService
             }
 
             $balanceBefore = (float) $locked->balance;
-            $locked->update(['status' => AgentWalletStatus::Archived]);
+            // Status-only archive; never keep a canonical marker on an archived row.
+            $locked->update([
+                'status' => AgentWalletStatus::Archived,
+                'canonical_for_agency' => null,
+            ]);
             $locked->refresh();
 
             $this->writeAuditLog($locked, $actor, $reason, $statusBefore, $balanceBefore, $request);

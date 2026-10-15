@@ -8,6 +8,7 @@ use App\Enums\AgentWalletStatus;
 use App\Enums\AgentWalletTransactionStatus;
 use App\Enums\AgentWalletTransactionType;
 use App\Enums\OtaNotificationEvent;
+use App\Exceptions\Finance\NonCanonicalWalletDepositException;
 use App\Models\Agency;
 use App\Models\Agent;
 use App\Models\AgentDepositRequest;
@@ -20,15 +21,15 @@ use App\Services\Communication\OtaNotificationService;
 use App\Services\Finance\Ledger\LedgerEventRecorder;
 use App\Support\Platform\PlatformModuleEnforcer;
 use App\Support\References\CompactReferenceGenerator;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 
 /**
  * Agent prepaid wallet: canonical agency wallet resolution, deposit requests, and balance posting on admin approval.
  *
- * Finance model: one operational wallet per agency. Legacy per-agent rows may exist; {@see canonicalWalletForAgency}
- * selects deterministically without merging or deleting history.
+ * Finance model: one operational wallet per agency marked with {@see AgentWallet::CANONICAL_MARKER}.
+ * Historical/non-canonical rows keep {@see AgentWallet::$canonical_for_agency} NULL and are never deleted.
  */
 class AgentWalletService
 {
@@ -52,8 +53,9 @@ class AgentWalletService
     /**
      * Resolve the single operational wallet for an agency without creating a row.
      *
-     * Priority: (1) active non-zero balance; (2) if several non-zero, latest wallet transaction;
-     * (3) agency owner/admin agent wallet; (4) oldest active wallet; (5) oldest wallet overall.
+     * Post-migration: prefer the explicitly marked canonical active wallet.
+     * Legacy fallback (no marker present): historical heuristic for fixtures/pre-migration data.
+     * Never silently pick among two marked canonical rows (DB unique should prevent; fail closed if seen).
      */
     public function canonicalWalletForAgency(Agency|int $agency): ?AgentWallet
     {
@@ -73,64 +75,84 @@ class AgentWalletService
             return null;
         }
 
-        $pool = $active;
-
-        $nonZero = $pool->filter(fn (AgentWallet $wallet): bool => abs((float) $wallet->balance) > 0.001);
-        if ($nonZero->count() === 1) {
-            return $nonZero->first();
+        $marked = $active->filter(fn (AgentWallet $wallet): bool => $wallet->isCanonicalForAgency());
+        if ($marked->count() > 1) {
+            throw new \RuntimeException(
+                'Agency '.$agencyId.' has multiple wallets marked canonical_for_agency=1; reconciliation required.'
+            );
+        }
+        if ($marked->count() === 1) {
+            return $marked->first();
         }
 
-        if ($nonZero->count() > 1) {
-            return $this->walletWithLatestTransactionActivity($nonZero);
-        }
-
-        $primaryAgent = $this->primaryAgentForAgency($agencyId);
-        if ($primaryAgent !== null) {
-            $ownerWallet = $pool->firstWhere('agent_id', $primaryAgent->id);
-            if ($ownerWallet !== null) {
-                return $ownerWallet;
-            }
-        }
-
-        return $active->sortBy('id')->first();
+        return $this->legacyHeuristicCanonicalWallet($active, $agencyId);
     }
 
+    /**
+     * Create or return the agency canonical wallet under agency row lock + unique constraint.
+     */
     public function getOrCreateCanonicalWalletForAgency(Agency|int $agency): AgentWallet
     {
-        $existing = $this->canonicalWalletForAgency($agency);
-        if ($existing !== null) {
-            return $existing;
-        }
+        $agencyId = $agency instanceof Agency ? (int) $agency->id : (int) $agency;
 
-        $agencyModel = $agency instanceof Agency
-            ? $agency
-            : Agency::query()->findOrFail((int) $agency);
+        return DB::transaction(function () use ($agency, $agencyId): AgentWallet {
+            Agency::query()->whereKey($agencyId)->lockForUpdate()->firstOrFail();
 
-        $primaryAgent = $this->primaryAgentForAgency($agencyModel);
-        if ($primaryAgent === null) {
-            throw new InvalidArgumentException('Cannot create canonical wallet: agency has no agent.');
-        }
+            $existing = $this->canonicalWalletForAgency($agencyId);
+            if ($existing !== null) {
+                if (! $existing->isCanonicalForAgency()) {
+                    $existing->update(['canonical_for_agency' => AgentWallet::CANONICAL_MARKER]);
 
-        $primaryAgent->loadMissing('user');
+                    return $existing->fresh() ?? $existing;
+                }
 
-        $existingForAgent = AgentWallet::query()->where('agent_id', $primaryAgent->id)->first();
-        if ($existingForAgent !== null) {
-            if ($existingForAgent->status !== AgentWalletStatus::Active) {
-                $existingForAgent->update(['status' => AgentWalletStatus::Active]);
+                return $existing;
             }
 
-            return $existingForAgent->fresh();
-        }
+            $agencyModel = $agency instanceof Agency
+                ? $agency
+                : Agency::query()->findOrFail($agencyId);
 
-        return AgentWallet::query()->create([
-            'agency_id' => $agencyModel->id,
-            'agent_id' => $primaryAgent->id,
-            'user_id' => $primaryAgent->user_id,
-            'balance' => 0,
-            'credit_limit' => null,
-            'currency' => 'PKR',
-            'status' => AgentWalletStatus::Active,
-        ]);
+            $primaryAgent = $this->primaryAgentForAgency($agencyModel);
+            if ($primaryAgent === null) {
+                throw new \InvalidArgumentException('Cannot create canonical wallet: agency has no agent.');
+            }
+
+            $primaryAgent->loadMissing('user');
+
+            $existingForAgent = AgentWallet::query()->where('agent_id', $primaryAgent->id)->lockForUpdate()->first();
+            if ($existingForAgent !== null) {
+                $updates = [
+                    'canonical_for_agency' => AgentWallet::CANONICAL_MARKER,
+                ];
+                if ($existingForAgent->status !== AgentWalletStatus::Active) {
+                    $updates['status'] = AgentWalletStatus::Active;
+                }
+                $existingForAgent->update($updates);
+
+                return $existingForAgent->fresh() ?? $existingForAgent;
+            }
+
+            try {
+                return AgentWallet::query()->create([
+                    'agency_id' => $agencyModel->id,
+                    'agent_id' => $primaryAgent->id,
+                    'user_id' => $primaryAgent->user_id,
+                    'balance' => 0,
+                    'credit_limit' => null,
+                    'currency' => 'PKR',
+                    'status' => AgentWalletStatus::Active,
+                    'canonical_for_agency' => AgentWallet::CANONICAL_MARKER,
+                ]);
+            } catch (UniqueConstraintViolationException $e) {
+                $refetch = $this->canonicalWalletForAgency($agencyId);
+                if ($refetch !== null) {
+                    return $refetch;
+                }
+
+                throw $e;
+            }
+        });
     }
 
     /**
@@ -202,12 +224,13 @@ class AgentWalletService
         $wallets = AgentWallet::query()
             ->where('agency_id', $agencyId)
             ->orderBy('id')
-            ->get(['id', 'agent_id', 'balance', 'credit_limit', 'currency', 'status']);
+            ->get(['id', 'agent_id', 'balance', 'credit_limit', 'currency', 'status', 'canonical_for_agency']);
 
         $canonical = $this->canonicalWalletForAgency($agencyId);
         $canonicalId = $canonical?->id;
         $lastMovements = $this->lastMovementAtByWalletId($wallets->pluck('id')->all());
 
+        // Historical reporting: sum ALL wallet rows for the agency (canonical + historical).
         $balance = (float) $wallets->sum(fn (AgentWallet $wallet): float => (float) $wallet->balance);
         $pendingDeposits = (float) AgentDepositRequest::query()
             ->where('agency_id', $agencyId)
@@ -239,6 +262,7 @@ class AgentWalletService
                     'balance' => (float) $wallet->balance,
                     'credit_limit' => $wallet->credit_limit !== null ? (float) $wallet->credit_limit : null,
                     'status' => $wallet->status instanceof AgentWalletStatus ? $wallet->status->value : (string) $wallet->status,
+                    'canonical_for_agency' => $wallet->isCanonicalForAgency() ? AgentWallet::CANONICAL_MARKER : null,
                     'role_label' => $isCanonical ? 'Canonical wallet' : 'Historical duplicate wallet',
                     'last_movement_at' => $lastMovements[(int) $wallet->id] ?? null,
                 ];
@@ -365,12 +389,15 @@ class AgentWalletService
 
         $wallet = $this->walletFor($agent);
         if ($wallet->status !== AgentWalletStatus::Active) {
-            throw new InvalidArgumentException('Wallet is not active.');
+            throw new \InvalidArgumentException('Wallet is not active.');
+        }
+        if (! $wallet->isCanonicalForAgency()) {
+            throw new \InvalidArgumentException('Deposit submission requires the agency canonical wallet.');
         }
 
         $amount = round((float) $data['amount'], 2);
         if ($amount <= 0) {
-            throw new InvalidArgumentException('Deposit amount must be greater than zero.');
+            throw new \InvalidArgumentException('Deposit amount must be greater than zero.');
         }
 
         $deposit = DB::transaction(function () use ($agent, $actor, $wallet, $data, $amount): AgentDepositRequest {
@@ -433,17 +460,31 @@ class AgentWalletService
         $this->platformModuleEnforcer->ensureAgentDepositsEnabled();
 
         if ($deposit->status !== AgentDepositRequestStatus::Submitted) {
-            throw new InvalidArgumentException('Deposit is not awaiting approval.');
+            throw new \InvalidArgumentException('Deposit is not awaiting approval.');
         }
 
         $deposit = DB::transaction(function () use ($deposit, $reviewer): AgentDepositRequest {
             $deposit = AgentDepositRequest::query()->whereKey($deposit->id)->lockForUpdate()->firstOrFail();
 
             if ($deposit->status !== AgentDepositRequestStatus::Submitted) {
-                throw new InvalidArgumentException('Deposit is not awaiting approval.');
+                throw new \InvalidArgumentException('Deposit is not awaiting approval.');
             }
 
-            $wallet = AgentWallet::query()->whereKey($deposit->agent_wallet_id)->lockForUpdate()->firstOrFail();
+            $canonical = $this->canonicalWalletForAgency((int) $deposit->agency_id);
+            if (
+                $canonical === null
+                || ! $canonical->isCanonicalForAgency()
+                || (int) $deposit->agent_wallet_id !== (int) $canonical->id
+            ) {
+                throw new NonCanonicalWalletDepositException(
+                    depositId: (int) $deposit->id,
+                    agencyId: (int) $deposit->agency_id,
+                    depositWalletId: (int) $deposit->agent_wallet_id,
+                    canonicalWalletId: $canonical?->id !== null ? (int) $canonical->id : null,
+                );
+            }
+
+            $wallet = AgentWallet::query()->whereKey($canonical->id)->lockForUpdate()->firstOrFail();
             $balanceBefore = (float) $wallet->balance;
             $amount = (float) $deposit->amount;
             $balanceAfter = round($balanceBefore + $amount, 2);
@@ -509,14 +550,14 @@ class AgentWalletService
         $this->platformModuleEnforcer->ensureAgentDepositsEnabled();
 
         if ($deposit->status !== AgentDepositRequestStatus::Submitted) {
-            throw new InvalidArgumentException('Deposit is not awaiting review.');
+            throw new \InvalidArgumentException('Deposit is not awaiting review.');
         }
 
         $deposit = DB::transaction(function () use ($deposit, $reviewer, $adminNote): AgentDepositRequest {
             $deposit = AgentDepositRequest::query()->whereKey($deposit->id)->lockForUpdate()->firstOrFail();
 
             if ($deposit->status !== AgentDepositRequestStatus::Submitted) {
-                throw new InvalidArgumentException('Deposit is not awaiting review.');
+                throw new \InvalidArgumentException('Deposit is not awaiting review.');
             }
 
             $wallet = AgentWallet::query()->whereKey($deposit->agent_wallet_id)->lockForUpdate()->firstOrFail();
@@ -573,8 +614,39 @@ class AgentWalletService
     }
 
     /**
-     * @param  array<string, mixed>  $recipientContext
+     * Pre-marker / fixture fallback. Read-only; does not mutate rows.
+     *
+     * Priority: (1) active non-zero balance; (2) if several non-zero, latest wallet transaction;
+     * (3) agency owner/admin agent wallet; (4) oldest active wallet.
+     *
+     * @param  Collection<int, AgentWallet>  $active
      */
+    protected function legacyHeuristicCanonicalWallet(Collection $active, int $agencyId): ?AgentWallet
+    {
+        if ($active->isEmpty()) {
+            return null;
+        }
+
+        $nonZero = $active->filter(fn (AgentWallet $wallet): bool => abs((float) $wallet->balance) > 0.001);
+        if ($nonZero->count() === 1) {
+            return $nonZero->first();
+        }
+
+        if ($nonZero->count() > 1) {
+            return $this->walletWithLatestTransactionActivity($nonZero);
+        }
+
+        $primaryAgent = $this->primaryAgentForAgency($agencyId);
+        if ($primaryAgent !== null) {
+            $ownerWallet = $active->firstWhere('agent_id', $primaryAgent->id);
+            if ($ownerWallet !== null) {
+                return $ownerWallet;
+            }
+        }
+
+        return $active->sortBy('id')->first();
+    }
+
     /**
      * @param  Collection<int, AgentWallet>  $wallets
      */
@@ -596,7 +668,7 @@ class AgentWalletService
         }
 
         return $wallets->sortByDesc('id')->first()
-            ?? throw new InvalidArgumentException('No wallet available for selection.');
+            ?? throw new \InvalidArgumentException('No wallet available for selection.');
     }
 
     public function primaryAgentForAgency(Agency|int $agency): ?Agent

@@ -171,6 +171,7 @@ trait BuildsAgentPortalScenario
             'credit_limit' => $creditLimit,
             'currency' => 'PKR',
             'status' => AgentWalletStatus::Active,
+            'canonical_for_agency' => AgentWallet::CANONICAL_MARKER,
         ]);
     }
 
