@@ -1,0 +1,222 @@
+# OPS-DEF-0013 — Production Closure
+
+```
+PROTECTED_MAIN_SHA=cc21dc9261dd8124b0b9744ee2f6c6a0a1c3b7bf
+PRE_DEPLOY_RUNTIME_SHA=7fe1cd8088ff15d4e27bbc512521dc1055e7a12c
+POST_DEPLOY_RUNTIME_SHA=cc21dc9261dd8124b0b9744ee2f6c6a0a1c3b7bf
+MERGED_PR=#81
+PR_HEAD_SHA=8b0862f6a890e88724d182f42372ea6e60702653
+PR_MERGED_SHA=cc21dc9261dd8124b0b9744ee2f6c6a0a1c3b7bf
+DEPLOY_MODE=SCOPED_RUNTIME_FILES + PATH_SCOPED_MIGRATION
+OPS_DEF_0013_STATUS=CLOSED
+CLOSED_AT_UTC=2026-10-15T18:51:00Z
+```
+
+## Closure basis
+
+Deployed code parity from `cc21dc92`  
++ successful path-scoped production schema migration  
++ production schema/index proof  
++ clean production historical preflight  
++ automated idempotency tests (premerge PR #81)
+
+**NO LIVE ABHIPAY CHARGE OR CALLBACK WAS EXECUTED.**
+
+---
+
+## PRE_RUNTIME / HEALTH
+
+```
+RUNTIME_SHA_PRE=7fe1cd8088ff15d4e27bbc512521dc1055e7a12c
+HTTP /up=200 / =200 /login=200 /admin=302 /agent=200
+BUILD_ID_PRE=QClrSvr5W0V2GqllIeLKE
+FAILED_JOBS_PRE=1 (id=148, notifications-transactional, QA SMTP 550)
+FAILED_JOB_PAYMENT_RELATED=NO
+PENDING_DEFAULT_PRE=0
+DEFAULT_WORKER_RUNNING_PRE=NO
+DISK_USED_PERCENT_PRE=48%
+```
+
+Note: prompt expected BUILD_ID `7-iZf4RbaJmGpuDjO1tsh` but production frontend BUILD_ID is `QClrSvr5W0V2GqllIeLKE`. Frontend was not rebuilt in this loop; PRE=POST.
+
+## PRODUCTION_PREFLIGHT (fresh, read-only)
+
+```
+DB_ENGINE=mariadb.org binary distribution
+DB_VERSION=10.11.18-MariaDB-ubu2404
+PAYMENT_TRANSACTIONS_TOTAL=0
+BOOKING_PAYMENTS_TOTAL=3
+ABHIPAY_TRANSACTIONS_TOTAL=0
+ABHIPAY_BOOKING_PAYMENTS_TOTAL=0
+DUPLICATE_CLIENT_TRANSACTION_IDS=0
+DUPLICATE_PROVIDER_ORDER_GROUPS=0
+DUPLICATE_ABHIPAY_PAYMENT_REFERENCES=0
+AMBIGUOUS_BACKFILL_ROWS=0
+HAS_PAYMENT_TRANSACTION_ID=false (pre-migrate)
+TARGET_MIGRATION_PRESENT=false (pre-migrate)
+MIGRATIONS_DIR_WRITABLE=false
+```
+
+Immediate pre-migrate recheck: duplicates=0, ambiguous=0.
+
+## BACKUP
+
+```
+BACKUP_DIR=/home/pkjetp/backups/ops-def-0013-pre-mig-20261015T184905Z
+APP_ARCHIVE=jetpk_app-runtime-20261015T184905Z.tar.gz
+DB_DUMP=jetpk-db-20261015T184905Z.sql.gz
+ARCHIVE_RUNTIME_SHA=7fe1cd8088ff15d4e27bbc512521dc1055e7a12c
+APP_SHA256=6c532b4a3e71c92d85a1c15fa1bbe52cb9539f21edbdae85919daaa2e6965de5
+DB_SHA256=d12f96a4ae42c68bc8f50795318e42172c1496bb0cd5148e40610036dd1c85f7
+PRE_MIGRATION_APP_BACKUP=PASS
+PRE_MIGRATION_DB_BACKUP=PASS
+PRE_MIGRATION_BACKUP_INTEGRITY=PASS
+CHECKSUMS_RECORDED=YES
+```
+
+Prior pinned backups (including OPS-DEF-0007) untouched.
+
+## FILES_DEPLOYED
+
+Exact merged SHA `cc21dc92` bytes (git archive LF):
+
+| Path | sha256 |
+|---|---|
+| `app/Models/BookingPayment.php` | e2d3afe0de5646e5fd65bba17f28b40e96955bb72b2ad2edb60e5f70aa44a641 |
+| `app/Models/PaymentTransaction.php` | 788dd0043c3c2411059917c89622a83a8a2c647c7d66fc1e78fd6d928ad17cef |
+| `app/Services/Payments/BookingPaymentService.php` | 80de4fa3db327beeab4a5d4e5864aaa71cbba0adf46af3ac1a2b55ba9e7bbc6d |
+| `app/Services/Payments/Gateways/AbhiPayGateway.php` | 02779968edf9fbe76867d9797d0921b0dba51ebd03a1e300c6e79711c2d1ac5a |
+| `app/Services/Payments/PaymentTransactionService.php` | ec1a9198a33c5a177a65f70aff73ee7f67e6b2edc613ceb830548efe9fe3e348 |
+| migration | staged under `storage/app/ops-def-0013-migrations/` (database/migrations root-owned) |
+
+```
+UNEXPECTED_RUNTIME_FILES=0
+FRONTEND_FILES_CHANGED=0
+UNRELATED_MIGRATIONS_CHANGED=0
+RUNTIME_FILE_PARITY=PASS
+PHP_SYNTAX=PASS
+```
+
+## MIGRATION
+
+```
+MIGRATION_COMMAND=/usr/local/lsws/lsphp83/bin/php artisan migrate --path=storage/app/ops-def-0013-migrations/2026_10_15_180000_add_payment_idempotency_constraints.php --force
+MIGRATION_EXIT=0
+MIGRATION_BATCH=25
+MIGRATION_NAME=2026_10_15_180000_add_payment_idempotency_constraints
+UNRELATED_PENDING_MIGRATIONS=0
+MIGRATION_RESULT=DONE (~493ms)
+```
+
+## SCHEMA_PROOF
+
+```
+PAYMENT_TX_LINK_COLUMN_PRESENT=YES (bigint unsigned)
+PAYMENT_TX_LINK_NULLABLE=YES
+PAYMENT_TX_LINK_FK_PRESENT=YES (on delete SET NULL)
+PAYMENT_TX_LINK_UNIQUE_PRESENT=YES (booking_payments_payment_transaction_id_unique)
+PROVIDER_ORDER_UNIQUE_PRESENT=YES (gateway, environment, gateway_order_id)
+LEGACY_GATEWAY_ORDER_INDEX_PRESENT=NO
+CLIENT_TX_ID_UNIQUE_PRESERVED=YES
+UUID_UNIQUE_PRESERVED=YES
+```
+
+## DATA_PROOF
+
+```
+BOOKING_PAYMENTS_POST=3
+PAYMENT_TRANSACTIONS_POST=0
+LINKED_BOOKING_PAYMENTS_POST=0
+NULL_PAYMENT_TX_LINKS_POST=3
+ABHIPAY_LINKED_ROWS_POST=0
+DUPLICATE_PAYMENT_TX_LINKS_POST=0
+DUPLICATE_PROVIDER_ORDER_GROUPS_POST=0
+MANUAL_PAYMENT_ROWS_PRESERVED=YES
+```
+
+## CONSTRAINT / IDEMPOTENCY PROOF
+
+```
+SECOND_BOOKING_PAYMENT_SAME_TX_DB_BLOCKED=PASS_BY_SCHEMA_AND_PREMERGE_TEST
+PROVIDER_ORDER_COLLISION_DB_BLOCKED=PASS_BY_SCHEMA_AND_PREMERGE_TEST
+```
+
+No production payment test rows created (zero PaymentTransactions).
+
+Premerge PR #81 suite: 40 tests / 107 assertions PASS including OpsDef0013PaymentIdempotencyTest.
+
+```
+DUPLICATE_CALLBACK_BOOKING_PAYMENT_COUNT=1
+DUPLICATE_CALLBACK_LEDGER_POSTS=0
+DUPLICATE_CALLBACK_NOTIFICATIONS=0
+DUPLICATE_CALLBACK_AUDIT_EVENTS=1
+PAID_STATE_NOT_DOWNGRADED=PASS
+SECOND_VALID_TX_CAN_SETTLE=PASS
+MANUAL_PAYMENT_REGRESSION=PASS
+```
+
+## PAYMENT_SETTLEMENT_CODE_DEPLOYED
+
+```
+lockForUpdate + isPaid short-circuit=YES
+payment_transaction_id required for gateway settlement=YES
+created-flag side-effect gating=YES
+provider-order collision fail-closed=YES
+callback gateway-order scoped + ambiguous refuse=YES
+PAYMENT_SETTLEMENT_CODE_DEPLOYED=YES
+```
+
+## OPS-DEF-0006 / 0007 REGRESSION
+
+```
+OPS_DEF_0006_RUNTIME_INVARIANT=PASS (recordAgencyDepositApprovedOrFail present)
+OPS_DEF_0007_RUNTIME_INVARIANT=PASS (canonical_for_agency column + unique index present)
+```
+
+## READ SURFACES / HEALTH POST
+
+```
+HTTP /admin/ledger=302 /admin/bookings=302 /admin/settings/payments=302 /staff/ledger=302 /agent/bookings=200
+PAYMENT_READ_SURFACES=PASS
+FINANCE_READ_SURFACES=PASS
+BUILD_ID_POST=QClrSvr5W0V2GqllIeLKE
+FRONTEND_REGRESSION=NO
+FAILED_JOBS_POST=1 (same id=148 QA SMTP)
+FAILED_JOB_PAYMENT_RELATED=NO
+PENDING_DEFAULT_POST=0
+DEFAULT_WORKER_RUNNING_POST=NO
+PRODUCTION_HEALTH=PASS
+```
+
+## MARKERS
+
+```
+.jetpk-runtime-sha=cc21dc9261dd8124b0b9744ee2f6c6a0a1c3b7bf
+.jetpk-authorized-sha=cc21dc9261dd8124b0b9744ee2f6c6a0a1c3b7bf
+storage/app/deploy-sha.txt=cc21dc9261dd8124b0b9744ee2f6c6a0a1c3b7bf
+RUNTIME_SHA_MARKERS_CONSISTENT=YES
+```
+
+Scoped 6-file deploy; markers claim authorized engineering SHA (same pattern as OPS-DEF-0006/0007).
+
+## MUTATION ACCOUNTING
+
+```
+PRODUCTION_PAYMENT_MUTATIONS=0
+PRODUCTION_LEDGER_MUTATIONS=0
+PRODUCTION_WALLET_MUTATIONS=0
+PRODUCTION_ABHIPAY_CALLS=0
+FAILED_JOB_RETRY_OR_DELETE=0
+SUPPLIER_MUTATIONS=0
+OPS_DEF_0020_TOUCHED=NO
+FRONTEND_CHANGED=NO
+```
+
+## STATUS DISTINCTION
+
+```
+IDEMPOTENCY_ARCHITECTURE=CLOSED
+LIVE_GATEWAY_ACTIVATION_CERTIFICATION=OPEN (OPS-DEF-0017)
+OPS_DEF_0013_STATUS=CLOSED
+NEXT_PRIORITY=OPS-DEF-0004
+```

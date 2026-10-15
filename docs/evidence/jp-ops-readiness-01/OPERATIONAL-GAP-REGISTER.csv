@@ -16,4 +16,4 @@ GAP-014,MONITORING_MISSING,Automated failed_jobs/disk alerts,OPS-DEF-0014/0015,P
 GAP-015,MISSING_CONFIGURATION,Default queue mail backlog / routing defect,OPS-DEF-0019,P1,CLOSED
 GAP-016,CODE_DEFECT,public/storage not symlink,OPS-DEF-0020,P2,OPEN
 GAP-017,DATA_CLEANUP_REQUIRED,Residual communication_logs queued w/o jobs,OPS-DEF-0021,P3,OPEN
-GAP-018,CODE_DEFECT,Gateway settlement DB idempotency incomplete,OPS-DEF-0013,P2,FIX_READY_NOT_DEPLOYED
+GAP-018,CODE_DEFECT,Gateway settlement DB idempotency incomplete,OPS-DEF-0013,P2,CLOSED
