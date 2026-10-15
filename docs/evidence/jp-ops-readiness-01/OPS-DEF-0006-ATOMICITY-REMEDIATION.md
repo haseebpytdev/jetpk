@@ -88,11 +88,13 @@ Paired with failure injection (`shouldNotReceive('send')`).
 
 ```
 php vendor/bin/phpunit tests/Feature/AgentWalletDepositTest.php
-→ passed: 13 tests, 57 assertions
+→ passed: 13 tests, 57 assertions (re-run captured _ops-def-0006-phpunit.txt)
 
 php vendor/bin/phpunit --filter="test_approving_deposit|test_approving_same_deposit|test_deposit_ledger" tests/Feature/Finance/LedgerLivePostingTest.php
-→ passed: 3 tests, 6 assertions
+→ passed: 3 tests, 6 assertions (re-run captured _ops-def-0006-ledger-live.txt)
 ```
+
+Adjacent smoke (not OPS-DEF-0006 closure proof): ManualWalletAdjustment credit sample 2/2 PASS after recorder refactor.
 
 ## PRODUCTION_MUTATIONS
 
