@@ -58,7 +58,7 @@ Critical Sabre:
 |------|--------|
 | SABRE_BOOKING_ENABLED | true |
 | SABRE_BOOKING_LIVE_CALL_ENABLED | true |
-| SABRE_PNR_CREATE_ENABLED (raw env) | unset/null → config null (service may treat unset as derived) |
+| SABRE_PNR_CREATE_ENABLED | false (effective env/config probe); PNR still gated by booking_enabled + booking_live_call + readiness classes |
 | SABRE_ADMIN_MANUAL_PNR_ENABLED | true |
 | SABRE_PNR_RETRIEVE_ENABLED | true |
 | SABRE_UNTICKETED_CANCEL_ENABLED | true |
@@ -107,7 +107,7 @@ No One API / IATI / Duffel / Ameer-e-Millat connection rows.
 SABRE_GDS_SEARCH_ALLOWED=YES (kill switch off; branded fares search on)
 CERTIFIED_ROUTE_SELECTOR_ENABLED=true
 SEARCH_CERTIFICATION=ACTIVE_AND_CERTIFIED (historical + config; no fresh call)
-SABRE_NDC_SEARCH=NOT_INTENDED (ndc.enabled=false)
+SABRE_NDC_SEARCH=NOT_INTENDED (ndc.enabled=false; FLAGS SABRE_NDC_SEARCH_ENABLED=false; nested SABRE_BOOLEAN_GATES ndc.search_enabled=true is inert without ndc.enabled)
 ```
 
 ### PNR by itinerary class (effective posture)

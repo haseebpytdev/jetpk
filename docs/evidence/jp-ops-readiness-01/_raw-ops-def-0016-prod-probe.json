@@ -13,5 +13,13 @@
     "HTTP": { "/up": 200, "/": 200, "/login": 200, "/admin": 302, "/agent": 200 }
   },
   "NOTE": "READ_ONLY_NO_SUPPLIER_CALLS_NO_SECRETS",
-  "LIVE_SUPPLIER_CALLS": 0
+  "LIVE_SUPPLIER_CALLS": 0,
+  "PNR_MUTATIONS": 0,
+  "TICKET_MUTATIONS": 0,
+  "CANCELLATION_MUTATIONS": 0,
+  "REFUND_VOID_MUTATIONS": 0,
+  "SUPPLIER_CONNECTION_MUTATIONS": 0,
+  "ENV_CHANGES": 0,
+  "DB_MUTATIONS": 0,
+  "COMMIT_TREE_PROOF": "c068cc69 docs-only under docs/evidence/jp-ops-readiness-01/; follow-up evidence nits in next commit"
 }
