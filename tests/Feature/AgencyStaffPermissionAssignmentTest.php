@@ -199,6 +199,7 @@ class AgencyStaffPermissionAssignmentTest extends TestCase
             [
                 AgentPermission::BookingsView,
                 AgentPermission::BookingsCreate,
+                AgentPermission::CancellationsRequest,
                 AgentPermission::TravelersManage,
                 AgentPermission::AgencyView,
             ],

@@ -35,8 +35,14 @@ class BookingCancellationPolicy
         }
 
         if ($user->isAgentPortalUser()) {
-            if ($user->isAgentStaff() && ! $user->hasAgentPermission(AgentPermission::BookingsView)) {
-                return false;
+            // Agent staff: view alone must never authorize cancellation requests.
+            // Require BookingsView + CancellationsRequest plus agency/agent ownership.
+            // Agent owners/admins retain ownership-scoped access without the explicit key.
+            if ($user->isAgentStaff()) {
+                if (! $user->hasAgentPermission(AgentPermission::BookingsView)
+                    || ! $user->hasAgentPermission(AgentPermission::CancellationsRequest)) {
+                    return false;
+                }
             }
 
             $agent = $user->agent();
