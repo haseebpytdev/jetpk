@@ -1,0 +1,18 @@
+{
+  "POST_DEPLOY_RUNTIME_SHA": "922f15774ece177d8b3cc23207e98379b8a2755b",
+  "DEPLOY_SHA": "922f15774ece177d8b3cc23207e98379b8a2755b",
+  "AUTHORIZED_SHA": "922f15774ece177d8b3cc23207e98379b8a2755b",
+  "BUILD_ID_POST": "QClrSvr5W0V2GqllIeLKE",
+  "FAILED_JOBS_POST": 1,
+  "FAILED_JOB_ID": 148,
+  "KNOWN_QA_SMTP_BOUNCE": "YES",
+  "PENDING_DEFAULT_POST": 0,
+  "DEFAULT_WORKER_RUNNING_POST": "NO",
+  "FILE_SHA256": {
+    "app/Support/Agents/AgentPermission.php": "f60d629fee28b85017082f342ce2297fe51ff72292c3816e6b2400a6537d0085",
+    "app/Policies/BookingCancellationPolicy.php": "b40fdacb1631fe34e1d23ffcb7240ea9c04a7e9a5c281949e7acb6a55d46a0c3",
+    "app/Support/Agencies/AgencyRolePermissionMatrix.php": "d89aa379252cf69efd7afca63ca1f955ef9d5a7af6031a47736ac0e8ccc4c63b",
+    "app/Support/AgentPortal/AgentPortalBookingDetailPresenter.php": "c7b4cc3a6ef8e60b8170b808a203464656d8d4ded0e44be5f13ef906e72c32e4"
+  },
+  "BACKUP_DIR": "/home/pkjetp/backups/ops-def-0004-scoped-20261015T193139Z"
+}
