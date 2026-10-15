@@ -77,6 +77,7 @@ final class AgencyRolePermissionMatrix
             AgencyRole::Manager => [
                 AgentPermission::BookingsView,
                 AgentPermission::BookingsCreate,
+                AgentPermission::CancellationsRequest,
                 AgentPermission::WalletView,
                 AgentPermission::LedgerView,
                 AgentPermission::LedgerManage,
@@ -96,17 +97,21 @@ final class AgencyRolePermissionMatrix
                 AgentPermission::PaymentsUpload,
                 AgentPermission::AgencyView,
             ],
+            // Sales agents create bookings; cancel-request is an adjacent lifecycle mutation.
             AgencyRole::SalesAgent => [
                 AgentPermission::BookingsView,
                 AgentPermission::BookingsCreate,
+                AgentPermission::CancellationsRequest,
                 AgentPermission::TravelersManage,
                 AgentPermission::AgencyView,
             ],
             AgencyRole::SupportStaff => [
                 AgentPermission::BookingsView,
+                AgentPermission::CancellationsRequest,
                 AgentPermission::SupportManage,
                 AgentPermission::AgencyView,
             ],
+            // Ticketing staff remain view-scoped; cancel request is assignable manually if needed.
             AgencyRole::TicketingStaff => [
                 AgentPermission::BookingsView,
                 AgentPermission::AgencyView,

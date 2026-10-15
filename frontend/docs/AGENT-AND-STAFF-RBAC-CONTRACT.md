@@ -17,6 +17,7 @@ Defined in `App\Support\Agents\AgentPermission`:
 |----------|-----|-------|
 | `BookingsView` | `agent.bookings.view` | View bookings |
 | `BookingsCreate` | `agent.bookings.create` | Create bookings |
+| `CancellationsRequest` | `agent.cancellations.request` | Request booking cancellations |
 | `WalletView` | `agent.wallet.view` | View wallet |
 | `LedgerView` | `agent.ledger.view` | View ledger |
 | `LedgerManage` | `agent.ledger.manage` | Manage ledger actions |
@@ -61,6 +62,8 @@ Example: wallet JSON requires `agent.wallet.view` **and** `platform.module:agent
 | `staff_manage` | `StaffManage` |
 
 Platform module flags: `agent_wallet`, `agent_deposits`, `agent_ledger`, `agent_support`, `payment_proofs`.
+
+Booking cancellation **request** is not a global navigation flag. Detail JSON exposes `actions[].code=request_cancellation` only when `BookingCancellationPolicy::request` allows (agent staff need `BookingsView` **and** `CancellationsRequest`). `BookingsView` alone is insufficient (OPS-DEF-0004).
 
 ## Navigation gating
 

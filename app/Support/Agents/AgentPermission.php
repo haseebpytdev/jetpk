@@ -12,6 +12,8 @@ final class AgentPermission
 
     public const BookingsCreate = 'agent.bookings.create';
 
+    public const CancellationsRequest = 'agent.cancellations.request';
+
     public const WalletView = 'agent.wallet.view';
 
     public const LedgerView = 'agent.ledger.view';
@@ -42,6 +44,7 @@ final class AgentPermission
         return [
             self::BookingsView,
             self::BookingsCreate,
+            self::CancellationsRequest,
             self::WalletView,
             self::LedgerView,
             self::LedgerManage,
@@ -77,6 +80,7 @@ final class AgentPermission
         return [
             self::BookingsView => 'View bookings',
             self::BookingsCreate => 'Create bookings',
+            self::CancellationsRequest => 'Request booking cancellations',
             self::WalletView => 'View wallet',
             self::LedgerView => 'View ledger',
             self::LedgerManage => 'Manage ledger actions',

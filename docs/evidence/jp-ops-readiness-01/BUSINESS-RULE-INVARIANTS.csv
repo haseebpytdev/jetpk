@@ -1,7 +1,9 @@
 RULE_ID,DOMAIN,RULE,SOURCE,TEST_METHOD,RESULT,DEFECT_ID
 BRI-001,RBAC,agent cannot access another agency booking,BookingPolicy,source,PASS_LIKELY,—
 BRI-002,RBAC,customer cannot access another customer booking,BookingPolicy,source,PASS_LIKELY,—
-BRI-003,RBAC,viewer cannot mutate bookings,AgencyRolePermissionMatrix + cancel route,source,FAIL,OPS-DEF-0004
+BRI-003,RBAC,viewer cannot mutate bookings,AgencyRolePermissionMatrix + cancel route,source+tests,PASS_LOCAL_FIX_READY,OPS-DEF-0004
+BRI-015,RBAC,READ_ONLY_AGENT_STAFF_CANNOT_CREATE_CANCELLATION_REQUEST,BookingCancellationPolicy::request + OpsDef0004ViewerCancellationAuthTest,source+tests,PASS_LOCAL_FIX_READY,OPS-DEF-0004
+BRI-016,RBAC,CANCELLATION_REQUEST_REQUIRES_EXPLICIT_MUTATION_PERMISSION,agent.cancellations.request + BookingsView dual-gate,source+tests,PASS_LOCAL_FIX_READY,OPS-DEF-0004
 BRI-004,FINANCE,financial posting cannot occur twice for same source,ledger unique,source+tests,PASS,—
 BRI-005,FINANCE,wallet credit implies ledger mirror,AgentWalletService,source,FAIL,OPS-DEF-0006
 BRI-006,FINANCE,agency has one operational wallet balance truth,canonicalWalletForAgency,source,PASS,OPS-DEF-0007 CLOSED

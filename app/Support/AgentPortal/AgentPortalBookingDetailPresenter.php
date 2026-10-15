@@ -6,6 +6,7 @@ use App\Enums\BookingCancellationStatus;
 use App\Enums\BookingDocumentType;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Models\BookingCancellationRequest;
 use App\Support\Booking\StandardBookingJsonPresenter;
 use App\Support\Bookings\BookingSupplierConfirmationNoticeResolver;
 use App\Support\Payments\PublicAbhiPayCheckoutPresenter;
@@ -150,7 +151,10 @@ class AgentPortalBookingDetailPresenter
             ];
         }
 
-        if ($booking->status !== BookingStatus::Cancelled && Gate::forUser($user)->allows('view', $booking)) {
+        // Capability must mirror BookingCancellationPolicy::request — not BookingPolicy::view.
+        if ($booking->status !== BookingStatus::Cancelled
+            && $user !== null
+            && Gate::forUser($user)->allows('request', [BookingCancellationRequest::class, $booking])) {
             $openCancellation = $booking->cancellationRequests->contains(
                 fn ($row) => in_array($row->status->value, [
                     BookingCancellationStatus::Requested->value,

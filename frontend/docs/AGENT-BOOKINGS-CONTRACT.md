@@ -14,6 +14,7 @@ Route binding uses `{booking:booking_reference}` — public booking reference, n
 - Requires `agent.bookings.view` (`AgentPermission::BookingsView`)
 - Ownership: booking `agent_id` must match authenticated user's agency agent
 - Cross-agency detail returns 403
+- Cancellation **request** action (`actions[].code=request_cancellation`) requires `BookingCancellationPolicy::request` — agent staff need `BookingsView` **and** `agent.cancellations.request` (OPS-DEF-0004). View alone is insufficient.
 
 ## Bookings list
 
