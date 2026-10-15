@@ -18,6 +18,7 @@ use App\Services\Suppliers\PiaNdc\PiaNdcBookingStatusRefreshService;
 use App\Support\Payments\BookingPayableResolver;
 use App\Support\Platform\PlatformModuleEnforcer;
 use App\Support\References\CompactReferenceGenerator;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -114,31 +115,69 @@ class BookingPaymentService
     /**
      * Record a gateway-verified payment (AbhiPay, etc.) without auto-ticketing.
      *
+     * Idempotency is anchored on UNIQUE booking_payments.payment_transaction_id.
+     * Side effects (ledger, notification, audit) run only when a new row is created.
+     *
      * @param  array<string, mixed>  $data
+     * @return array{payment: BookingPayment, created: bool}
      */
-    public function recordVerifiedGatewayPayment(Booking $booking, array $data, ?User $actor = null): BookingPayment
+    public function recordVerifiedGatewayPayment(Booking $booking, array $data, ?User $actor = null): array
     {
-        $payment = DB::transaction(function () use ($booking, $data): BookingPayment {
-            $payment = $booking->payments()->create([
-                'agency_id' => $booking->agency_id,
-                'payer_user_id' => $data['payer_user_id'] ?? $booking->customer_id,
-                'received_by' => null,
-                'payment_reference' => (string) ($data['payment_reference'] ?? ''),
-                'method' => $data['method'],
-                'status' => BookingPaymentStatus::Verified,
-                'amount' => $data['amount'],
-                'currency' => $data['currency'] ?? $booking->currency ?? 'PKR',
-                'proof_path' => null,
-                'notes' => $data['notes'] ?? 'Online gateway payment verified.',
-                'submitted_at' => now(),
-                'verified_at' => now(),
-                'meta' => $data['meta'] ?? null,
-            ]);
+        $paymentTransactionId = (int) ($data['payment_transaction_id'] ?? 0);
+        if ($paymentTransactionId <= 0) {
+            throw new InvalidArgumentException('payment_transaction_id is required for gateway settlement.');
+        }
 
-            $this->recalculateBookingPaymentStatus($booking);
+        /** @var array{payment: BookingPayment, created: bool} $result */
+        $result = DB::transaction(function () use ($booking, $data, $paymentTransactionId): array {
+            $existing = BookingPayment::query()
+                ->where('payment_transaction_id', $paymentTransactionId)
+                ->lockForUpdate()
+                ->first();
 
-            return $payment->fresh();
+            if ($existing !== null) {
+                return ['payment' => $existing, 'created' => false];
+            }
+
+            try {
+                $payment = $booking->payments()->create([
+                    'agency_id' => $booking->agency_id,
+                    'payment_transaction_id' => $paymentTransactionId,
+                    'payer_user_id' => $data['payer_user_id'] ?? $booking->customer_id,
+                    'received_by' => null,
+                    'payment_reference' => (string) ($data['payment_reference'] ?? ''),
+                    'method' => $data['method'],
+                    'status' => BookingPaymentStatus::Verified,
+                    'amount' => $data['amount'],
+                    'currency' => $data['currency'] ?? $booking->currency ?? 'PKR',
+                    'proof_path' => null,
+                    'notes' => $data['notes'] ?? 'Online gateway payment verified.',
+                    'submitted_at' => now(),
+                    'verified_at' => now(),
+                    'meta' => $data['meta'] ?? null,
+                ]);
+
+                $this->recalculateBookingPaymentStatus($booking);
+
+                return ['payment' => $payment->fresh() ?? $payment, 'created' => true];
+            } catch (UniqueConstraintViolationException $e) {
+                $refetch = BookingPayment::query()
+                    ->where('payment_transaction_id', $paymentTransactionId)
+                    ->first();
+
+                if ($refetch !== null) {
+                    return ['payment' => $refetch, 'created' => false];
+                }
+
+                throw $e;
+            }
         });
+
+        if (! $result['created']) {
+            return $result;
+        }
+
+        $payment = $result['payment'];
 
         if ($actor !== null) {
             $this->writeAudit($booking, $actor, 'booking.payment_recorded', [
@@ -147,6 +186,7 @@ class BookingPaymentService
                 'method' => $payment->method->value,
                 'status' => $payment->status->value,
                 'gateway' => data_get($payment->meta, 'gateway'),
+                'payment_transaction_id' => $paymentTransactionId,
             ]);
         }
 
@@ -162,7 +202,7 @@ class BookingPaymentService
             report($e);
         }
 
-        return $payment;
+        return $result;
     }
 
     public function verifyPayment(BookingPayment $payment, User $actor): BookingPayment

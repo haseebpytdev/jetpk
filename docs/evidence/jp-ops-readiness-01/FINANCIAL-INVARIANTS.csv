@@ -3,7 +3,7 @@ FIN-INV-001,At most one ledger tx per (source_type source_id transaction_type),L
 FIN-INV-002,Deposit approval credits wallet once for Submitted deposit,Wallet,AgentWalletService.approveDeposit,lockForUpdate + status gate,HELD,P3,AgentWalletService.php,—
 FIN-INV-003,Approved deposit emits one AgencyDepositApproved ledger post,Wallet→Ledger,LedgerEventRecorder,idempotent recorder,HELD,P3,LedgerLivePostingTest,—
 FIN-INV-004,Wallet credit and ledger post atomic,Wallet→Ledger,AgentWalletService,OrFail inside TX on deposit approval path; deployed a1317098,CLOSED,P1,OPS-DEF-0006-PROD-CLOSURE.md,OPS-DEF-0006
-FIN-INV-005,Gateway verified payment at most one verified AbhiPay booking_payment,Payments,PaymentTransactionService,App-level exists check; no DB unique,PARTIAL,P2,PaymentTransactionService,OPS-DEF-0013
+FIN-INV-005,Gateway verified payment at most one verified AbhiPay booking_payment,Payments,booking_payments.payment_transaction_id,UNIQUE FK + settle by PaymentTransaction.id; app exists() defensive only,FIX_READY_NOT_DEPLOYED,P2,OPS-DEF-0013-PAYMENT-IDEMPOTENCY-REMEDIATION.md,OPS-DEF-0013
 FIN-INV-006,AbhiPay settlement row-locks before transition,Payments,applyVerificationResult,lockForUpdate + isPaid short-circuit,HELD,P3,PaymentTransactionService,—
 FIN-INV-007,Operational wallet singular per agency,Wallet,canonicalWalletForAgency,canonical_for_agency=1 + UNIQUE(agency_id,canonical_for_agency); historical NULL rows retained,PASS,P1,AgentWalletService,OPS-DEF-0007 CLOSED
 FIN-INV-008,Deposit credit posts to canonical agency wallet,Wallet,approveDeposit,Fail-closed if deposit.agent_wallet_id != current canonical marker,PASS,P1,AgentWalletService,OPS-DEF-0007 CLOSED

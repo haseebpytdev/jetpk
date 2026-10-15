@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'agency_id',
     'booking_id',
+    'payment_transaction_id',
     'payer_user_id',
     'received_by',
     'payment_reference',
@@ -51,6 +52,12 @@ class BookingPayment extends Model
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    /** @return BelongsTo<PaymentTransaction, $this> */
+    public function paymentTransaction(): BelongsTo
+    {
+        return $this->belongsTo(PaymentTransaction::class);
     }
 
     /** @return BelongsTo<User, $this> */
