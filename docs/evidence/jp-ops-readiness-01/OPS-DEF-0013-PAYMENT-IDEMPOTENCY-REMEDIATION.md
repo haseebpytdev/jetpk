@@ -4,7 +4,10 @@
 **Branch:** `fix/ops-def-0013-payment-idempotency`  
 **Base main SHA:** `803f0ce6d0c43420314e63981407b73a7c5101f5`  
 **Production runtime SHA (read-only probe):** `7fe1cd8088ff15d4e27bbc512521dc1055e7a12c`  
-**Status:** `FIX_READY_NOT_DEPLOYED`
+**Status:** `FIX_READY_NOT_DEPLOYED`  
+**HEAD SHA:** `6dce003bb53df018365c2f61308177a729d2bf3c`  
+**PR:** https://github.com/haseebpytdev/jetpk/pull/81  
+**RELEASE_GUARDS:** PASS (run 38786897524)
 
 ---
 
