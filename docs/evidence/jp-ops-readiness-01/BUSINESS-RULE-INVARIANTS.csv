@@ -4,7 +4,7 @@ BRI-002,RBAC,customer cannot access another customer booking,BookingPolicy,sourc
 BRI-003,RBAC,viewer cannot mutate bookings,AgencyRolePermissionMatrix + cancel route,source,FAIL,OPS-DEF-0004
 BRI-004,FINANCE,financial posting cannot occur twice for same source,ledger unique,source+tests,PASS,—
 BRI-005,FINANCE,wallet credit implies ledger mirror,AgentWalletService,source,FAIL,OPS-DEF-0006
-BRI-006,FINANCE,agency has one operational wallet balance truth,canonicalWalletForAgency,source,FAIL,OPS-DEF-0007
+BRI-006,FINANCE,agency has one operational wallet balance truth,canonicalWalletForAgency,source,PASS,OPS-DEF-0007 CLOSED
 BRI-007,PAYMENT,paid gateway callback cannot double-settle,PaymentTransactionService,source,PARTIAL,OPS-DEF-0013
 BRI-008,BOOKING,confirmed requires allowed transition (non-admin),BookingService,source,PASS,—
 BRI-009,BOOKING,supplier failure not represented as confirmed success,adapters+status,runtime,UNTESTED,OPS-DEF-0018
