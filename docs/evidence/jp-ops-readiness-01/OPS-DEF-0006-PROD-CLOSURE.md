@@ -6,9 +6,14 @@ PR=#77
 PR_HEAD=6eb74209856f09f0ed85d473d925fb765f2fc8a1
 PRE_DEPLOY_RUNTIME_SHA=a138eb570b05910046df7fb251beeef839b25395
 DEPLOYED_RUNTIME_SHA=a13170988c3f2f7916ae1fb0caf3db6719a8df4f
+DEPLOY_MODE=SCOPED_TWO_FILE_PATCH
+BASE_RUNTIME_BEFORE_PATCH=a138eb570b05910046df7fb251beeef839b25395
+APP_TREE_DELTA_VS_BASE=ONLY_TWO_PHP_FILES (docs/tests/scripts on main are non-runtime)
 OPS_DEF_0006_STATUS=CLOSED
 CLOSED_AT_UTC=2026-10-15T01:07:11Z
 ```
+
+Note: Markers were set to merged SHA per task Phase 7 after exact file parity. This is a **scoped finance-code patch**, not a full release-tree extract of every path on `a1317098`. Under `app/`, the Git delta from prior runtime `a138eb57` to `a1317098` is exactly the two deployed files.
 
 ## FILES_DEPLOYED
 
@@ -36,7 +41,7 @@ Runtime-diff `a138eb57…` → `a1317098…` under `app/`: only the two files ab
 5. `lsphp83 php -l` both files
 6. `php artisan optimize:clear`
 7. Bootstrap + ReflectionMethod presence
-8. Markers: `.jetpk-runtime-sha` + `storage/app/deploy-sha.txt` → `a1317098…`
+8. Markers: `.jetpk-runtime-sha` + `storage/app/deploy-sha.txt` + `.jetpk-authorized-sha` → `a1317098…`
 
 No migrations, npm, frontend/dashboard rebuild, `.env` changes, or finance mutations.
 
