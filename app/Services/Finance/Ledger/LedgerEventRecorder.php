@@ -23,7 +23,9 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Go-forward parallel ledger posting for live finance events (Phase 4).
- * Idempotent; failures are logged and never block source-of-truth updates.
+ * Soft events use safeRecord (log + null). Deposit approval used by
+ * {@see \App\Services\Agents\AgentWalletService::approveDeposit} must call
+ * {@see recordAgencyDepositApprovedOrFail} inside the wallet DB transaction.
  */
 class LedgerEventRecorder
 {
@@ -33,41 +35,62 @@ class LedgerEventRecorder
         protected LedgerAccountService $accounts,
     ) {}
 
+    /**
+     * Soft/best-effort deposit ledger post (does not throw). Prefer
+     * {@see recordAgencyDepositApprovedOrFail} when mutating wallet balances.
+     */
     public function recordAgencyDepositApproved(AgentDepositRequest $deposit, ?User $actor = null): ?LedgerTransaction
     {
-        return $this->safeRecord(function () use ($deposit, $actor): ?LedgerTransaction {
-            $type = LedgerTransactionType::AgencyDepositApproved;
-            $existing = $this->findExistingPost($deposit, $type);
-            if ($existing !== null) {
-                return $existing;
-            }
+        return $this->safeRecord(
+            fn (): LedgerTransaction => $this->recordAgencyDepositApprovedStrict($deposit, $actor),
+            'recordAgencyDepositApproved',
+            $deposit,
+        );
+    }
 
-            $deposit->loadMissing('agency');
-            $amount = (float) $deposit->amount;
-            $context = [
-                'source_type' => $deposit->getMorphClass(),
-                'source_id' => $deposit->id,
-                'agency_id' => $deposit->agency_id,
-                'actor_user_id' => $actor?->id ?? $deposit->reviewed_by,
-                'actor_identifier' => ActorIdentifier::forUser($actor ?? User::query()->find($deposit->reviewed_by)),
-                'transaction_type' => $type,
-                'description' => 'Approved agency deposit '.$deposit->reference,
-                'occurred_at' => $deposit->reviewed_at ?? now(),
-                'currency' => $deposit->currency ?? 'PKR',
-                'properties' => $this->buildProperties(
-                    model: $deposit,
-                    method: 'recordAgencyDepositApproved',
-                    extra: [
-                        'status' => $deposit->status->value ?? (string) $deposit->status,
-                        'reference' => $deposit->reference,
-                        'original_amount' => $amount,
-                        'agency_id' => $deposit->agency_id,
-                    ],
-                ),
-            ];
+    /**
+     * Strict deposit ledger post — throws on failure (atomic with wallet approval).
+     */
+    public function recordAgencyDepositApprovedOrFail(AgentDepositRequest $deposit, ?User $actor = null): LedgerTransaction
+    {
+        $this->accounts->ensureAccountsExist();
 
-            return $this->posting->postFromRule('agency_deposit_approved', $amount, $context);
-        }, 'recordAgencyDepositApproved', $deposit);
+        return $this->recordAgencyDepositApprovedStrict($deposit, $actor);
+    }
+
+    protected function recordAgencyDepositApprovedStrict(AgentDepositRequest $deposit, ?User $actor = null): LedgerTransaction
+    {
+        $type = LedgerTransactionType::AgencyDepositApproved;
+        $existing = $this->findExistingPost($deposit, $type);
+        if ($existing !== null) {
+            return $existing;
+        }
+
+        $deposit->loadMissing('agency');
+        $amount = (float) $deposit->amount;
+        $context = [
+            'source_type' => $deposit->getMorphClass(),
+            'source_id' => $deposit->id,
+            'agency_id' => $deposit->agency_id,
+            'actor_user_id' => $actor?->id ?? $deposit->reviewed_by,
+            'actor_identifier' => ActorIdentifier::forUser($actor ?? User::query()->find($deposit->reviewed_by)),
+            'transaction_type' => $type,
+            'description' => 'Approved agency deposit '.$deposit->reference,
+            'occurred_at' => $deposit->reviewed_at ?? now(),
+            'currency' => $deposit->currency ?? 'PKR',
+            'properties' => $this->buildProperties(
+                model: $deposit,
+                method: 'recordAgencyDepositApproved',
+                extra: [
+                    'status' => $deposit->status->value ?? (string) $deposit->status,
+                    'reference' => $deposit->reference,
+                    'original_amount' => $amount,
+                    'agency_id' => $deposit->agency_id,
+                ],
+            ),
+        ];
+
+        return $this->posting->postFromRule('agency_deposit_approved', $amount, $context);
     }
 
     public function recordBookingPaymentVerified(BookingPayment $payment, ?User $actor = null): ?LedgerTransaction

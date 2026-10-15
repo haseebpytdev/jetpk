@@ -2,23 +2,36 @@
 
 namespace Tests\Feature;
 
+use App\Enums\AgentDepositRequestStatus;
+use App\Enums\AgentWalletTransactionStatus;
+use App\Enums\AgentWalletTransactionType;
+use App\Enums\LedgerTransactionStatus;
+use App\Enums\LedgerTransactionType;
 use App\Enums\OtaNotificationEvent;
 use App\Models\Agency;
 use App\Models\AgencyCommunicationSetting;
 use App\Models\Agent;
 use App\Models\AgentDepositRequest;
+use App\Models\AgentWalletTransaction;
+use App\Models\LedgerTransaction;
 use App\Models\User;
 use App\Services\Agents\AgentWalletService;
 use App\Services\Communication\NotificationRecipientResolver;
+use App\Services\Communication\OtaNotificationService;
+use App\Services\Finance\Ledger\LedgerEventRecorder;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Mockery;
+use RuntimeException;
+use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AgentWalletDepositTest extends TestCase
 {
+    use BuildsOtaFinanceScenario;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -26,6 +39,7 @@ class AgentWalletDepositTest extends TestCase
     {
         parent::setUp();
         $this->seed(OtaFoundationSeeder::class);
+        $this->seedLedgerInfrastructure();
     }
 
     public function test_approved_agent_sees_wallet_summary_on_dashboard(): void
@@ -149,12 +163,134 @@ class AgentWalletDepositTest extends TestCase
         $wallet->refresh();
         $this->assertSame(2500.0, (float) $wallet->balance);
 
+        $this->assertSame(1, AgentWalletTransaction::query()
+            ->where('agent_deposit_request_id', $deposit->id)
+            ->where('type', AgentWalletTransactionType::DepositApproved)
+            ->count());
+        $this->assertSame(1, LedgerTransaction::query()
+            ->where('source_type', $deposit->getMorphClass())
+            ->where('source_id', $deposit->id)
+            ->where('transaction_type', LedgerTransactionType::AgencyDepositApproved)
+            ->count());
+
         $this->actingAs($admin)->patch(route('admin.agent-deposits.approve', $deposit->fresh()))
             ->assertRedirect()
             ->assertSessionHasErrors('deposit');
 
         $wallet->refresh();
         $this->assertSame(2500.0, (float) $wallet->balance);
+        $this->assertSame(1, AgentWalletTransaction::query()
+            ->where('agent_deposit_request_id', $deposit->id)
+            ->where('type', AgentWalletTransactionType::DepositApproved)
+            ->count());
+        $this->assertSame(1, LedgerTransaction::query()
+            ->where('source_type', $deposit->getMorphClass())
+            ->where('source_id', $deposit->id)
+            ->where('transaction_type', LedgerTransactionType::AgencyDepositApproved)
+            ->count());
+    }
+
+    public function test_approve_deposit_is_fully_atomic_with_ledger(): void
+    {
+        [$agentUser, $agent] = $this->seededAgent();
+        $admin = $this->platformAdmin();
+        $wallet = app(AgentWalletService::class)->walletFor($agent);
+        $wallet->update(['balance' => 1000]);
+
+        $deposit = app(AgentWalletService::class)->submitDepositRequest($agent, $agentUser, [
+            'amount' => 500,
+            'payment_method' => 'Bank',
+            'reference' => 'DEP-ATOMIC',
+        ]);
+
+        $approved = app(AgentWalletService::class)->approveDeposit($deposit, $admin);
+
+        $this->assertSame(AgentDepositRequestStatus::Approved, $approved->status);
+        $this->assertSame($admin->id, $approved->reviewed_by);
+        $this->assertNotNull($approved->reviewed_at);
+
+        $wallet->refresh();
+        $this->assertSame(1500.0, (float) $wallet->balance);
+
+        $requestTx = AgentWalletTransaction::query()
+            ->where('agent_deposit_request_id', $deposit->id)
+            ->where('type', AgentWalletTransactionType::DepositRequest)
+            ->firstOrFail();
+        $this->assertSame(AgentWalletTransactionStatus::Approved, $requestTx->status);
+
+        $this->assertSame(1, AgentWalletTransaction::query()
+            ->where('agent_deposit_request_id', $deposit->id)
+            ->where('type', AgentWalletTransactionType::DepositApproved)
+            ->count());
+
+        $ledger = LedgerTransaction::query()
+            ->where('source_type', $deposit->getMorphClass())
+            ->where('source_id', $deposit->id)
+            ->where('transaction_type', LedgerTransactionType::AgencyDepositApproved)
+            ->firstOrFail();
+        $this->assertSame(LedgerTransactionStatus::Posted, $ledger->status);
+        $this->assertSame(500.0, (float) $ledger->amount_total);
+
+        $debit = round((float) $ledger->entries->sum('debit'), 2);
+        $credit = round((float) $ledger->entries->sum('credit'), 2);
+        $this->assertSame($debit, $credit);
+        $this->assertSame(500.0, $debit);
+    }
+
+    public function test_ledger_failure_rolls_back_wallet_deposit_and_blocks_notification(): void
+    {
+        [$agentUser, $agent] = $this->seededAgent();
+        $admin = $this->platformAdmin();
+        $wallet = app(AgentWalletService::class)->walletFor($agent);
+        $wallet->update(['balance' => 2000]);
+
+        $deposit = app(AgentWalletService::class)->submitDepositRequest($agent, $agentUser, [
+            'amount' => 750,
+            'payment_method' => 'Bank',
+            'reference' => 'DEP-FAIL',
+        ]);
+
+        $notifications = Mockery::mock(OtaNotificationService::class);
+        $notifications->shouldNotReceive('send');
+        $this->app->instance(OtaNotificationService::class, $notifications);
+
+        $ledger = Mockery::mock(LedgerEventRecorder::class);
+        $ledger->shouldReceive('recordAgencyDepositApprovedOrFail')
+            ->once()
+            ->andThrow(new RuntimeException('forced ledger failure'));
+        $this->app->instance(LedgerEventRecorder::class, $ledger);
+
+        try {
+            app(AgentWalletService::class)->approveDeposit($deposit, $admin);
+            $this->fail('Expected ledger failure to abort approval.');
+        } catch (RuntimeException $e) {
+            $this->assertSame('forced ledger failure', $e->getMessage());
+        }
+
+        $deposit->refresh();
+        $wallet->refresh();
+
+        $this->assertSame(AgentDepositRequestStatus::Submitted, $deposit->status);
+        $this->assertNull($deposit->reviewed_by);
+        $this->assertNull($deposit->reviewed_at);
+        $this->assertSame(2000.0, (float) $wallet->balance);
+
+        $requestTx = AgentWalletTransaction::query()
+            ->where('agent_deposit_request_id', $deposit->id)
+            ->where('type', AgentWalletTransactionType::DepositRequest)
+            ->firstOrFail();
+        $this->assertSame(AgentWalletTransactionStatus::Pending, $requestTx->status);
+
+        $this->assertSame(0, AgentWalletTransaction::query()
+            ->where('agent_deposit_request_id', $deposit->id)
+            ->where('type', AgentWalletTransactionType::DepositApproved)
+            ->count());
+
+        $this->assertSame(0, LedgerTransaction::query()
+            ->where('source_type', $deposit->getMorphClass())
+            ->where('source_id', $deposit->id)
+            ->where('transaction_type', LedgerTransactionType::AgencyDepositApproved)
+            ->count());
     }
 
     public function test_admin_reject_does_not_change_balance(): void
