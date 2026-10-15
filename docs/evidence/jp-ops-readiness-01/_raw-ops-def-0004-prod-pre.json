@@ -1,0 +1,49 @@
+{
+  "PRE_DEPLOY_RUNTIME_SHA": "cc21dc9261dd8124b0b9744ee2f6c6a0a1c3b7bf",
+  "DEPLOY_SHA": "cc21dc9261dd8124b0b9744ee2f6c6a0a1c3b7bf",
+  "AUTHORIZED_SHA": "cc21dc9261dd8124b0b9744ee2f6c6a0a1c3b7bf",
+  "BUILD_ID_PRE": "QClrSvr5W0V2GqllIeLKE",
+  "DASH_BUILD_ID": "7-iZf4RbaJmGpuDjO1tsh",
+  "DISK_USED_PERCENT_PRE": 48,
+  "FAILED_JOBS_PRE": 1,
+  "FAILED_JOB_ID": 148,
+  "FAILED_JOB_QUEUE": "notifications-transactional",
+  "FAILED_JOB_PAYMENT_RELATED": "NO",
+  "FAILED_JOB_CANCELLATION_RELATED": "NO",
+  "KNOWN_QA_SMTP_BOUNCE": "YES",
+  "PENDING_DEFAULT_PRE": 0,
+  "DEFAULT_WORKER_RUNNING_PRE": "NO",
+  "HTTP": {
+    "/up": 200,
+    "/": 200,
+    "/login": 200,
+    "/admin": 302,
+    "/agent": 200
+  },
+  "PRE_FILE_SHA256": {
+    "app/Support/Agents/AgentPermission.php": "baabd792b4397ff2181620e47f349a21ecdd5ff15253103ff63a76add0164248",
+    "app/Policies/BookingCancellationPolicy.php": "8e730901bd3c958a0f7dbe92ccec20c812615a9ab49733311bf15fcad5dde7be",
+    "app/Support/Agencies/AgencyRolePermissionMatrix.php": "43405636efe1a5290690b75ae69a09feb8fcce369629e7ec30578d363ae977ae",
+    "app/Support/AgentPortal/AgentPortalBookingDetailPresenter.php": "40725f907d363ea8f56b25b00e5c60617b6f7eac43b9775ccc1abb82a0caf976"
+  },
+  "PERMISSION_INVENTORY": {
+    "AGENT_STAFF_TOTAL": 7,
+    "AGENT_STAFF_WITH_BOOKINGS_VIEW": 7,
+    "AGENT_STAFF_WITH_CANCELLATIONS_REQUEST": 0,
+    "AGENT_STAFF_BOOKINGS_VIEW_WITHOUT_CANCEL_PERMISSION": 7,
+    "ROLE_VIEWER_WITH_CANCEL_PERMISSION": 0
+  },
+  "GATE_BASELINE": {
+    "VIEWER_BOOKING_VIEW": "DENY",
+    "VIEWER_CANCELLATION_REQUEST": "DENY",
+    "OWNERSHIP_MATCH": "NO",
+    "PRE_DEPLOY_VULNERABLE_PATH_NOT_REPRODUCIBLE_WITH_CURRENT_DATA": "YES",
+    "BOOKING_REF": "JPQA-20261008-BOOKING",
+    "VIEWER_AGENT_ID": 4,
+    "BOOKING_AGENT_ID": 3
+  },
+  "UNEXPECTED_RUNTIME_FILES": 0,
+  "FRONTEND_RUNTIME_FILES_CHANGED": 0,
+  "MIGRATIONS_CHANGED": 0,
+  "NOTE": "Captured during Phase 0-3 preflight before scoped deploy"
+}
