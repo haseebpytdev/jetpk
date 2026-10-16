@@ -19,7 +19,8 @@ class GuestBookingDetailJsonTest extends TestCase
         $booking = $this->guestBooking();
         $token = $this->guestToken($booking);
 
-        $this->getJson(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])
+            ->getJson(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertJsonPath('ok', true)
             ->assertJsonPath('source', 'guest_lookup')
@@ -39,7 +40,7 @@ class GuestBookingDetailJsonTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $booking = $this->guestBooking();
 
-        $this->getJson(route('guest.bookings.show', ['booking' => $booking, 'token' => 'invalid-token']))
+        $this->getJson(route('guest.bookings.exchange', ['booking' => $booking, 'token' => 'invalid-token']))
             ->assertForbidden()
             ->assertJsonPath('ok', false)
             ->assertJsonPath('code', 'access_denied')
@@ -53,7 +54,7 @@ class GuestBookingDetailJsonTest extends TestCase
         $bookingB = $this->guestBooking(['booking_reference' => 'GUEST-B-01']);
         $tokenForA = $this->guestToken($bookingA);
 
-        $this->getJson(route('guest.bookings.show', ['booking' => $bookingB, 'token' => $tokenForA]))
+        $this->getJson(route('guest.bookings.exchange', ['booking' => $bookingB, 'token' => $tokenForA]))
             ->assertForbidden()
             ->assertJsonPath('ok', false);
     }
@@ -64,7 +65,8 @@ class GuestBookingDetailJsonTest extends TestCase
         $booking = $this->guestBooking();
         $token = $this->guestToken($booking);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])
+            ->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertSee('data-testid="guest-booking-detail-layout"', false);
     }
@@ -75,11 +77,13 @@ class GuestBookingDetailJsonTest extends TestCase
         $booking = $this->guestBooking();
         $token = $this->guestToken($booking);
 
-        $json = $this->getJson(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $json = $this->withSession(['guest_booking_access.'.$booking->id => $token])
+            ->getJson(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->json('booking_reference');
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])
+            ->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertSee($booking->booking_reference, false);
 
@@ -106,7 +110,8 @@ class GuestBookingDetailJsonTest extends TestCase
             ->assertJsonStructure(['redirect_url']);
 
         $redirectUrl = (string) $response->json('redirect_url');
-        $this->assertStringContainsString('/guest/bookings/'.$booking->id.'/access/', $redirectUrl);
+        $this->assertStringContainsString('/guest/bookings/'.$booking->id, $redirectUrl);
+        $this->assertStringNotContainsString('/access/', $redirectUrl);
     }
 
     public function test_guest_payment_proof_json_mutation_requires_valid_token(): void
@@ -115,7 +120,8 @@ class GuestBookingDetailJsonTest extends TestCase
         $booking = $this->guestBooking();
         $token = $this->guestToken($booking);
 
-        $this->postJson(route('guest.bookings.payment-proof', ['booking' => $booking, 'token' => $token]), [
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])
+            ->postJson(route('guest.bookings.payment-proof', ['booking' => $booking]), [
             'method' => 'bank_transfer',
             'amount' => 5000,
             'payment_reference' => 'REF-01',
@@ -123,7 +129,8 @@ class GuestBookingDetailJsonTest extends TestCase
             ->assertCreated()
             ->assertJsonPath('ok', true);
 
-        $this->postJson(route('guest.bookings.payment-proof', ['booking' => $booking, 'token' => 'bad-token']), [
+        $this->flushSession();
+        $this->postJson(route('guest.bookings.payment-proof', ['booking' => $booking]), [
             'method' => 'bank_transfer',
             'amount' => 5000,
         ])

@@ -221,7 +221,7 @@ class PlatformModuleRouteGuardTest extends TestCase
             'payment_status' => 'unpaid',
         ]);
 
-        $this->postJson(route('guest.bookings.payment-proof', [$booking, 'test-token']), [
+        $this->postJson(route('guest.bookings.payment-proof.legacy', [$booking, 'test-token']), [
             'method' => 'bank_transfer',
             'amount' => 1000,
         ])

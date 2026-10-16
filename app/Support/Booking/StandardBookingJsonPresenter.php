@@ -438,7 +438,8 @@ class StandardBookingJsonPresenter
             'next_url' => $nextPath,
             'confirmation_handoff_url' => '/booking/confirmation',
             'progress' => $this->progressStateForCheckout($isCard ? 'payment' : 'payment'),
-            'guest_abhipay_token' => $request->session()->get('guest_abhipay_token'),
+            // Raw guest token stays in encrypted session only (OPS-DEF-0011).
+            'guest_abhipay_token' => null,
         ];
     }
 
@@ -862,11 +863,10 @@ class StandardBookingJsonPresenter
      */
     private function presentCardPaymentState(Booking $booking, array $abhiPay, ?string $guestToken): array
     {
+        // Guest AbhiPay start is token-free; session cookie authorizes (OPS-DEF-0011).
         $startPath = Auth::check()
             ? '/payments/abhipay/start/'.$booking->id
-            : ($guestToken !== null && $guestToken !== ''
-                ? '/guest/bookings/'.$booking->id.'/access/'.$guestToken.'/abhipay/start'
-                : null);
+            : '/guest/bookings/'.$booking->id.'/abhipay/start';
 
         return [
             'can_start' => (bool) ($abhiPay['can_start'] ?? false),

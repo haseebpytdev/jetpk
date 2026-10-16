@@ -14,9 +14,9 @@
     $availableDocs = collect($documents);
     $hasAnyAvailable = $availableDocs->isNotEmpty();
     $canDownload = in_array($viewerMode, ['customer', 'guest'], true);
-    $downloadUrlFor = function ($document) use ($guest, $guestToken) {
+    $downloadUrlFor = function ($document) use ($guest) {
         if ($guest) {
-            return route('guest.documents.download', ['bookingDocument' => $document, 'token' => $guestToken]);
+            return route('guest.documents.download', ['bookingDocument' => $document]);
         }
 
         return route('customer.documents.download', $document);

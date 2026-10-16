@@ -65,10 +65,10 @@ function unwrapGuestPayload<T>(result: ApiResult<Record<string, unknown>>): Gues
 
 export async function fetchGuestBookingDetail(
   bookingId: string,
-  token: string,
 ): Promise<GuestApiResult<GuestBookingDetailPayload>> {
+  // Token-free: Laravel session cookie authorizes (credentials included by laravelRequest).
   const result = await laravelRequest<Record<string, unknown>>(
-    `/guest/bookings/${encodeURIComponent(bookingId)}/access/${encodeURIComponent(token)}?format=json`,
+    `/guest/bookings/${encodeURIComponent(bookingId)}?format=json`,
     { method: "GET", retryOnNetworkError: true },
   );
 

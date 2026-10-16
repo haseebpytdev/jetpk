@@ -51,7 +51,7 @@ class BookingLookupOverviewConsistencyTest extends TestCase
         $this->post(route('lookup-booking.submit'), [
             'booking_reference' => $booking->booking_reference,
             'email' => 'lookup-only@example.test',
-        ])->assertRedirectContains('/guest/bookings/'.$booking->id.'/access/');
+        ])->assertRedirectContains('/guest/bookings/'.$booking->id);
     }
 
     public function test_lookup_still_requires_captcha_when_enabled(): void
@@ -137,7 +137,7 @@ class BookingLookupOverviewConsistencyTest extends TestCase
             null,
         );
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertSee('data-testid="guest-masked-email"', false)
             ->assertDontSee('guestmask@example.test', false)

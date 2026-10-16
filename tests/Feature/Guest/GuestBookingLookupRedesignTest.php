@@ -27,7 +27,7 @@ class GuestBookingLookupRedesignTest extends TestCase
 
         $this->assertGuest();
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertSee('data-testid="guest-booking-detail-layout"', false)
             ->assertSee('data-testid="booking-detail-summary"', false)
@@ -55,7 +55,7 @@ class GuestBookingLookupRedesignTest extends TestCase
         $token = $this->guestToken($booking->fresh(['contact', 'passengers']));
 
         $this->actingAs($admin)
-            ->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+            ->withSession(['guest_booking_access.'.$booking->id => $token])->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertSee('data-testid="guest-booking-detail-layout"', false)
             ->assertSee('data-testid="guest-masked-email"', false)
@@ -83,7 +83,7 @@ class GuestBookingLookupRedesignTest extends TestCase
         ]);
         $token = $this->guestToken($booking);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertSee('data-testid="guest-masked-email"', false)
             ->assertSee('data-testid="guest-masked-phone"', false)
@@ -99,7 +99,7 @@ class GuestBookingLookupRedesignTest extends TestCase
         [, $booking] = $this->guestLookupBooking();
         $token = $this->guestToken($booking);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertSee('data-testid="guest-linked-account-cta"', false)
             ->assertSee('data-testid="guest-payment-proof-login-hint"', false)
@@ -118,7 +118,7 @@ class GuestBookingLookupRedesignTest extends TestCase
         ]);
         $token = $this->guestToken($booking);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertSee('data-testid="guest-payment-proof-form"', false)
             ->assertDontSee('data-testid="guest-linked-account-cta"', false);
@@ -130,7 +130,7 @@ class GuestBookingLookupRedesignTest extends TestCase
         $this->documentForBooking($booking, BookingDocumentType::Invoice);
         $token = $this->guestToken($booking);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertSee('data-testid="booking-document-row-invoice"', false)
             ->assertSee('data-testid="booking-document-download-invoice"', false)
@@ -145,7 +145,7 @@ class GuestBookingLookupRedesignTest extends TestCase
         [, $booking] = $this->guestLookupBooking(['customer_id' => null]);
         $token = $this->guestToken($booking);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertSee('data-testid="guest-cancellation-form"', false)
             ->assertDontSee('Your requests', false);

@@ -311,21 +311,44 @@ Route::get('/booking/confirmation', [BookingController::class, 'confirmation'])-
 Route::middleware('platform.module:customer_booking_lookup')->group(function (): void {
     Route::get('/lookup-booking', [GuestBookingLookupController::class, 'showLookupForm'])->name('booking.lookup');
     Route::post('/lookup-booking', [GuestBookingLookupController::class, 'lookup'])->middleware('throttle:lookup-booking')->name('lookup-booking.submit');
-    Route::get('/guest/bookings/{booking}/access/{token}', [GuestBookingLookupController::class, 'showGuestBooking'])->name('guest.bookings.show');
+    // Token-free primary guest detail (session cookie auth).
+    Route::get('/guest/bookings/{booking}', [GuestBookingLookupController::class, 'showGuestBooking'])->name('guest.bookings.show');
+    // Legacy path bearer: exchange into session then redirect (OPS-DEF-0011 phase-1 compat).
+    Route::get('/guest/bookings/{booking}/access/{token}', [GuestBookingLookupController::class, 'exchangeGuestBookingToken'])->name('guest.bookings.exchange');
     Route::get('/guest/documents/{bookingDocument}/download', [GuestBookingLookupController::class, 'downloadGuestDocument'])->name('guest.documents.download');
 });
-Route::post('/guest/bookings/{booking}/access/{token}/payment-proof', [GuestBookingLookupController::class, 'submitGuestPaymentProof'])
+// Token-free guest mutations (session auth; optional legacy token route kept below).
+Route::post('/guest/bookings/{booking}/payment-proof', [GuestBookingLookupController::class, 'submitGuestPaymentProof'])
     ->middleware(['platform.module:payment_proofs', 'throttle:payment-proof-submit'])
     ->name('guest.bookings.payment-proof');
-Route::post('/guest/bookings/{booking}/access/{token}/promo/apply', [BookingCheckoutPromoController::class, 'apply'])
+Route::post('/guest/bookings/{booking}/promo/apply', [BookingCheckoutPromoController::class, 'apply'])
     ->middleware('throttle:promo-apply')
     ->name('guest.bookings.promo.apply');
-Route::post('/guest/bookings/{booking}/access/{token}/promo/remove', [BookingCheckoutPromoController::class, 'remove'])
+Route::post('/guest/bookings/{booking}/promo/remove', [BookingCheckoutPromoController::class, 'remove'])
     ->middleware('throttle:promo-apply')
     ->name('guest.bookings.promo.remove');
-Route::post('/guest/bookings/{booking}/access/{token}/abhipay/start', [AbhiPayPaymentController::class, 'start'])
+Route::post('/guest/bookings/{booking}/abhipay/start', [AbhiPayPaymentController::class, 'start'])
     ->middleware('throttle:abhipay-payment-start')
     ->name('guest.bookings.abhipay.start');
+Route::post('/guest/bookings/{booking}/cancellations', [GuestBookingCancellationController::class, 'store'])
+    ->middleware('throttle:guest-token')
+    ->name('guest.bookings.cancellations.store');
+// Legacy token-in-path mutations (compat entry; authorize via route token then bind session).
+Route::post('/guest/bookings/{booking}/access/{token}/payment-proof', [GuestBookingLookupController::class, 'submitGuestPaymentProof'])
+    ->middleware(['platform.module:payment_proofs', 'throttle:payment-proof-submit'])
+    ->name('guest.bookings.payment-proof.legacy');
+Route::post('/guest/bookings/{booking}/access/{token}/promo/apply', [BookingCheckoutPromoController::class, 'apply'])
+    ->middleware('throttle:promo-apply')
+    ->name('guest.bookings.promo.apply.legacy');
+Route::post('/guest/bookings/{booking}/access/{token}/promo/remove', [BookingCheckoutPromoController::class, 'remove'])
+    ->middleware('throttle:promo-apply')
+    ->name('guest.bookings.promo.remove.legacy');
+Route::post('/guest/bookings/{booking}/access/{token}/abhipay/start', [AbhiPayPaymentController::class, 'start'])
+    ->middleware('throttle:abhipay-payment-start')
+    ->name('guest.bookings.abhipay.start.legacy');
+Route::post('/guest/bookings/{booking}/access/{token}/cancellations', [GuestBookingCancellationController::class, 'store'])
+    ->middleware('throttle:guest-token')
+    ->name('guest.bookings.cancellations.store.legacy');
 Route::post('/payments/abhipay/start/{booking}', [AbhiPayPaymentController::class, 'start'])
     ->middleware(['auth', 'throttle:abhipay-payment-start'])
     ->name('payments.abhipay.start');
@@ -335,7 +358,6 @@ Route::any('/payments/abhipay/callback', [AbhiPayPaymentController::class, 'call
 Route::get('/payment/success', [AbhiPayPaymentController::class, 'success'])->name('payments.success');
 Route::get('/payment/cancel', [AbhiPayPaymentController::class, 'cancel'])->name('payments.cancel');
 Route::get('/payment/decline', [AbhiPayPaymentController::class, 'decline'])->name('payments.decline');
-Route::post('/guest/bookings/{booking}/access/{token}/cancellations', [GuestBookingCancellationController::class, 'store'])->middleware('throttle:guest-token')->name('guest.bookings.cancellations.store');
 
 Route::get('/testdash/{path?}', [BackOfficeDashboardController::class, 'testdashRedirect'])
     ->where('path', '.*')

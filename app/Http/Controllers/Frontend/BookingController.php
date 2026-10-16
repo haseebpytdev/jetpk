@@ -3009,14 +3009,13 @@ class BookingController extends Controller
             return '';
         }
 
-        $sessionKey = $this->guestAbhiPaySessionKey($booking);
-        $token = (string) $request->session()->get($sessionKey, '');
+        $token = $this->guestAccessService->rawTokenFromSession($request, $booking);
         if ($token === '') {
             $token = (string) $request->session()->get('guest_abhipay_token', '');
         }
 
         if ($token !== '' && $this->guestAccessService->validateToken($booking, $token)) {
-            $request->session()->put($sessionKey, $token);
+            $this->guestAccessService->bindSession($request, $booking, $token);
 
             return $token;
         }
@@ -3027,7 +3026,7 @@ class BookingController extends Controller
             $booking->contact?->email,
             $booking->contact?->phone,
         );
-        $request->session()->put($sessionKey, $token);
+        $this->guestAccessService->bindSession($request, $booking, $token);
 
         return $token;
     }
@@ -4574,8 +4573,8 @@ class BookingController extends Controller
                         $booking->contact?->email,
                         $booking->contact?->phone,
                     );
-                    $request->session()->put($this->guestAbhiPaySessionKey($booking), $guestAbhiPayToken);
-                    $redirect = $redirect->with('guest_abhipay_token', $guestAbhiPayToken);
+                    $this->guestAccessService->bindSession($request, $booking, $guestAbhiPayToken);
+                    // Do not flash raw token into the next HTML/JSON response (OPS-DEF-0011).
                 }
 
                 if ($sabreCheckoutNotice !== null) {

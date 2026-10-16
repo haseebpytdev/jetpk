@@ -15,7 +15,7 @@
     $isAccount = $shell === 'account';
     $currency = $summary['currency'] ?? ($booking->currency ?? 'PKR');
     $proofAction = $proofAction ?? ($guest
-        ? route('guest.bookings.payment-proof', ['booking' => $booking, 'token' => $guestToken])
+        ? route('guest.bookings.payment-proof', ['booking' => $booking])
         : ($audience === 'agent'
             ? route('agent.bookings.payment-proof', $booking)
             : route('customer.bookings.payment-proof', $booking)));
@@ -29,8 +29,8 @@
     };
     $paymentService = app(\App\Services\Payments\PaymentTransactionService::class);
     $abhiPayAvailable = $abhiPayAvailable ?? $paymentService->isAbhiPayAvailableForBooking($booking);
-    $abhiPayStartUrl = $abhiPayStartUrl ?? ($guest && filled($guestToken)
-        ? route('guest.bookings.abhipay.start', ['booking' => $booking, 'token' => $guestToken])
+    $abhiPayStartUrl = $abhiPayStartUrl ?? ($guest
+        ? route('guest.bookings.abhipay.start', ['booking' => $booking])
         : route('payments.abhipay.start', $booking));
     $showAbhiPay = $abhiPayAvailable
         && ! $summary['show_verified']

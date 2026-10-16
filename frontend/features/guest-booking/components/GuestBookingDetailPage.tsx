@@ -25,10 +25,9 @@ import { GuestPaymentProofPanel } from "./GuestPaymentProofPanel";
 
 type GuestBookingDetailPageProps = {
   bookingId: string;
-  token: string;
 };
 
-export function GuestBookingDetailPage({ bookingId, token }: GuestBookingDetailPageProps) {
+export function GuestBookingDetailPage({ bookingId }: GuestBookingDetailPageProps) {
   const [data, setData] = useState<GuestBookingDetailPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +35,7 @@ export function GuestBookingDetailPage({ bookingId, token }: GuestBookingDetailP
   const load = async () => {
     setLoading(true);
     setError(null);
-    const result = await fetchGuestBookingDetail(bookingId, token);
+    const result = await fetchGuestBookingDetail(bookingId);
     if (!result.ok) {
       setError(guestApiErrorMessage(result));
       setData(null);
@@ -48,7 +47,7 @@ export function GuestBookingDetailPage({ bookingId, token }: GuestBookingDetailP
 
   useEffect(() => {
     void load();
-  }, [bookingId, token]);
+  }, [bookingId]);
 
   const passengerRows =
     data?.passengers?.map((passenger) => ({

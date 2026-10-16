@@ -24,9 +24,9 @@ class GuestBookingCancellationController extends Controller
         protected BookingCancellationService $service,
     ) {}
 
-    public function store(Request $request, Booking $booking, string $token): RedirectResponse|JsonResponse
+    public function store(Request $request, Booking $booking, ?string $token = null): RedirectResponse|JsonResponse
     {
-        if (! $this->guestAccessService->validateToken($booking, $token)) {
+        if (! $this->guestAccessService->authorizeGuestAccess($request, $booking, $token)) {
             if ($this->wantsGuestBookingJson($request)) {
                 return $this->guestBookingAccessDenied();
             }

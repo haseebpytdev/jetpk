@@ -14,11 +14,11 @@
     $canChangePromo = ! ($summary['show_verified'] ?? false)
         && (float) ($summary['balance_due'] ?? 0) > 0
         && ! in_array((string) ($booking->status->value ?? ''), ['cancelled'], true);
-    $applyAction = $applyAction ?? ($guest && filled($guestToken)
-        ? route('guest.bookings.promo.apply', ['booking' => $booking, 'token' => $guestToken])
+    $applyAction = $applyAction ?? ($guest
+        ? route('guest.bookings.promo.apply', ['booking' => $booking])
         : route('customer.bookings.promo.apply', $booking));
-    $removeAction = $removeAction ?? ($guest && filled($guestToken)
-        ? route('guest.bookings.promo.remove', ['booking' => $booking, 'token' => $guestToken])
+    $removeAction = $removeAction ?? ($guest
+        ? route('guest.bookings.promo.remove', ['booking' => $booking])
         : route('customer.bookings.promo.remove', $booking));
     $hasPromo = filled($summary['promo_code'] ?? null);
 @endphp
