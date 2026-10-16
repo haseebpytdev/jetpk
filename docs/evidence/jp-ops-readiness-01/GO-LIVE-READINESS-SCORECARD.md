@@ -36,6 +36,6 @@
 **OPS-DEF-0006 + OPS-DEF-0007 + OPS-DEF-0013 + OPS-DEF-0004:** CLOSED on production runtime `922f1577`.  
 **OPS-DEF-0016:** `CLOSED_LAUNCH_SCOPE_DEFINED` — Sabre GDS search + limited PNR; ticketing/void/refund disabled; PIA FROZEN; AirBlue/OneAPI/IATI/Duffel/group excluded.  
 **OPS-DEF-0017:** `OPEN_DEFERRED_MANUAL_PAYMENT_LAUNCH` — AbhiPay unfinished/uncertified; intentionally out of initial launch scope. Historical forensics preserved. Wake stopped.  
-**OPS-DEF-0018:** `PARTIAL_BLOCKED_SABRE_PNR_UAT` — manual payment UAT **PASS** on disposable `JPQAMPAY9B8E85CF` (id=40, local_qa_inert; submit→verify; ledger+audit; no supplier/wallet/AbhiPay). Sabre PNR live UAT remains residual. AbhiPay out of initial launch scope.  
+**OPS-DEF-0018:** `PARTIAL_BLOCKED_SABRE_PNR_UAT` — manual payment UAT PASS; Sabre PNR UAT readiness `READY_AWAITING_LIVE_SUPPLIER_MUTATION_AUTHORIZATION` (DIRECT ONE-WAY admin-manual; no live call this loop; human traveler approval required). AbhiPay deferred.  
 **PERMISSION_ASSIGNMENT_FOLLOWUP:** existing Manager/Support/Sales staff lack `agent.cancellations.request` until explicit grant (security-safe; does not reopen 0004).  
-**Next priority:** Controlled Sabre PNR UAT (separate authorization). Restore vhost access logging (OPS-RISK-0017). Do not reopen AbhiPay until business trigger.
+**Next priority:** Explicit dual approval (QA traveler/contact + one live admin CreatePNR) then separate unticketed cancel auth. Restore vhost access logging (OPS-RISK-0017). Do not reopen AbhiPay until business trigger.
