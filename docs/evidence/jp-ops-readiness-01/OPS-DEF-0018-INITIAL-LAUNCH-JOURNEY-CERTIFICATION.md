@@ -82,7 +82,7 @@ Still open / residual: OPS-DEF-0024 (legacy over-permissioned support QA fixture
 
 | Item | Status |
 |------|--------|
-| SABRE_SEARCH_CERTIFIED | YES (prior 0016 posture; search active in launch scope) |
+| SABRE_SEARCH_CERTIFIED | ACTIVE_HISTORICAL_CONFIG (OPS-DEF-0016; no fresh search call this loop) |
 | SABRE_PNR_LAUNCH_STATUS | LIMITED_ARMED_UAT_INCOMPLETE (`booking_live_call` ON; itinerary-class live PNR UAT not executed) |
 | TICKETING_LAUNCH_MODE | MANUAL_EXTERNAL_DISABLED_IN_PRODUCT |
 | Excluded suppliers | Not blockers for initial launch |
