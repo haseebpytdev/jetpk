@@ -18,3 +18,5 @@ BRI-014,SUPPLIER,Ticketing/void/refund remain disabled without LNIATA+live UAT,p
 BRI-012,SECURITY,guest lookup requires matching identity,GuestBookingAccessService,source,FAIL_OR,OPS-DEF-0005
 BRI-013,ADMIN,admin status override must keep satellite fields consistent,BookingService admin bypass,source,RISK,OPS-RISK-0007
 BRI-014,OPS,failed background work must be visible,failed_jobs,SSH,FAIL_BACKLOG,OPS-DEF-0015
+BRI-017,PAYMENT,Initial launch settles via MANUAL payment proof not AbhiPay gateway,OPS-DEF-0017-DEFERRED-MANUAL-PAYMENT-LAUNCH.md,policy+routes,PASS_SCOPE_DEFINED,OPS-DEF-0017
+BRI-018,PAYMENT,AbhiPay checkout UI must stay unavailable when gateway row absent/inactive,PublicAbhiPayCheckoutPresenter,source+prod_status,PASS,OPS-DEF-0017
