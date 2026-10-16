@@ -11,7 +11,7 @@ OJ-ADMIN-001,platform_admin,go-live+suppliers,activate modules,production on,adm
 OJ-STAFF-001,staff,ops inbox,service booking read + payment verify routes,capability-proven staff shell,permissions,loginUsingId staff perms=14,PARTIAL,browser depth; no ticket/verify mutation,OPS-DEF-0018
 OJ-PAY-001,system,AbhiPay callback,verify→settle,paid,AbhiPay,route presence,OUT_OF_INITIAL_LAUNCH_SCOPE,AbhiPay deferred OPEN_DEFERRED_MANUAL_PAYMENT_LAUNCH,OPS-DEF-0017
 OJ-FIN-001,admin,approve deposit,wallet+ledger,posted,wallet,source+OPS-DEF-0006 CLOSED,PARTIAL,deposit approve not executed this loop,OPS-DEF-0018
-OJ-PAY-MANUAL-001,customer/agent/staff,payment proof,submit→review→verify/reject,verified/rejected,BookingPaymentService+routes,source+route inventory,SOURCE_READY_MANUAL_UAT_REQUIRED,live proof/verify mutation not executed,OPS-DEF-0018
+OJ-PAY-MANUAL-001,customer/agent/staff,payment proof,submit→review→verify/reject,verified/rejected,BookingPaymentService+routes,OPS-DEF-0018-MANUAL-PAYMENT-UAT-READINESS.md,READY_AWAITING_MUTATION_AUTHORIZATION,fixture JPQAOPS08E4590; guest token or admin-pending path; no mutation this loop,OPS-DEF-0018
 OJ-PNR-001,staff,issue/void,ticketing adapters,ticketed,supplier,source,MANUAL_ACTIVATION_REQUIRED,ticketing flags false; Sabre book live-call true unused,OPS-DEF-0016
 OJ-NOTIF-001,system,queue mail,deliver,delivered,smtp+queue,Wave1C canary + SSH,PARTIAL,canary PASS; residual queued logs OPS-DEF-0021; historical replay deferred,OPS-DEF-0021
 OJ-CMS-001,admin,CMS/SEO,publish,public updated,CMS,QA reversible,INVENTORIED_NOT_AUDITED,no auth CMS browser session; storage dir untouched,OPS-DEF-0018
