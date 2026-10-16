@@ -67,6 +67,8 @@ Selection basis: `config('ota.default_agency_slug')=asif-travels` + all B2C (`ag
 | D Connectivity | NOT_RUN (gates not met — no persisted row) |
 | E Live UAT | BLOCKED |
 
-**Classification:** `BLOCKED_CONFIGURATION`
+**Classification:** `BLOCKED_CONFIGURATION` / forensics=`UNKNOWN_REQUIRES_CONTROLLED_RESAVE_TRACE`
 
-**Operator action:** Re-save on canonical `https://jetpakistan.pk/admin/settings/payments?agency_id=1`, confirm success flash, then prove with `payments:abhipay-status --agency_id=1` (Checkout ready=yes). Never paste secrets into chat/logs/git.
+**Do not use** `/admin/dashboard/settings/*` (Next) — no AbhiPay form there.
+
+**Operator action:** Controlled resave on Blade `https://jetpakistan.pk/admin/settings/payments?agency_id=1` as platform_admin; require flash “AbhiPay settings saved.”; immediately prove with `payments:abhipay-status --agency_id=1` + DB row/audit. Never paste secrets into chat/logs/git.
