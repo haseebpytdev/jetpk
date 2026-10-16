@@ -74,6 +74,17 @@ class DashboardDepositsReadService
             $query->where('agency_id', $user->current_agency_id);
         }
 
+        // Agent portal callers must be limited to their own agent_id (OPS-DEF-0008).
+        // viewAny authorizes WalletView, but index must not list peer agents in the same agency.
+        if ($user->isAgentPortalUser()) {
+            $agent = $user->agent();
+            if ($agent === null) {
+                $query->whereRaw('0 = 1');
+            } else {
+                $query->where('agent_id', $agent->id);
+            }
+        }
+
         return $query;
     }
 }

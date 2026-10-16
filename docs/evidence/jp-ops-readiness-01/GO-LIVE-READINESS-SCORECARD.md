@@ -21,7 +21,7 @@
 | Notifications | AMBER | OPS-DEF-0019 CLOSED; failed_jobs SMTP residual |
 | Documents | AMBER | Inventoried; values unproven |
 | CMS/SEO | AMBER | Inventoried; not re-audited |
-| Security | AMBER | OPS-DEF-0004 CLOSED on runtime 922f1577; OPS-DEF-0024 QA fixture drift |
+| Security | AMBER | OPS-DEF-0004 CLOSED; OPS-DEF-0005/0008 FIX_READY_FOR_DEPLOYMENT (not deployed); OPS-DEF-0024 QA fixture drift |
 | Data integrity | AMBER | Source risks; OPS-DEF-0027 stale QA balance_due rows |
 | Background jobs | AMBER | failed_jobs residual; default worker posture per prior waves |
 | Observability | AMBER | disk-health ACTIVE; OPS-RISK-0017 vhost access.log broken; OPS-DEF-0022 alert delivery open |
