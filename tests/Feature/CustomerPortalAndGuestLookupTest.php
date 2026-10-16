@@ -98,6 +98,137 @@ class CustomerPortalAndGuestLookupTest extends TestCase
         ])->assertSessionHasErrors('email');
     }
 
+    public function test_guest_lookup_both_email_and_phone_match_succeeds(): void
+    {
+        [, $booking] = $this->customerBooking();
+        $booking->contact()->update([
+            'email' => 'guestmatch@example.test',
+            'phone' => '03001234567',
+        ]);
+
+        $tokensBefore = GuestBookingAccessToken::query()->where('booking_id', $booking->id)->count();
+
+        $this->post(route('lookup-booking.submit'), [
+            'booking_reference' => $booking->booking_reference,
+            'email' => 'guestmatch@example.test',
+            'phone' => '03001234567',
+        ])->assertRedirectContains('/guest/bookings/'.$booking->id.'/access/');
+
+        $this->assertSame(
+            $tokensBefore + 1,
+            GuestBookingAccessToken::query()->where('booking_id', $booking->id)->count()
+        );
+    }
+
+    public function test_guest_lookup_email_match_phone_wrong_is_denied_without_token(): void
+    {
+        [, $booking] = $this->customerBooking();
+        $booking->contact()->update([
+            'email' => 'guestmatch@example.test',
+            'phone' => '03001234567',
+        ]);
+        $tokensBefore = GuestBookingAccessToken::query()->where('booking_id', $booking->id)->count();
+
+        $this->assertNull(app(GuestBookingAccessService::class)->findBookingForLookup(
+            $booking->booking_reference,
+            'guestmatch@example.test',
+            '03009999999',
+        ));
+
+        $response = $this->from(route('booking.lookup'))->post(route('lookup-booking.submit'), [
+            'booking_reference' => $booking->booking_reference,
+            'email' => 'guestmatch@example.test',
+            'phone' => '03009999999',
+        ]);
+        $response->assertRedirect(route('booking.lookup'));
+        $response->assertSessionHasErrors('lookup');
+
+        $this->assertSame(
+            $tokensBefore,
+            GuestBookingAccessToken::query()->where('booking_id', $booking->id)->count()
+        );
+    }
+
+    public function test_guest_lookup_email_wrong_phone_match_is_denied_without_token(): void
+    {
+        [, $booking] = $this->customerBooking();
+        $booking->contact()->update([
+            'email' => 'guestmatch@example.test',
+            'phone' => '03001234567',
+        ]);
+        $tokensBefore = GuestBookingAccessToken::query()->where('booking_id', $booking->id)->count();
+
+        $this->assertNull(app(GuestBookingAccessService::class)->findBookingForLookup(
+            $booking->booking_reference,
+            'attacker@example.test',
+            '03001234567',
+        ));
+
+        $response = $this->from(route('booking.lookup'))->post(route('lookup-booking.submit'), [
+            'booking_reference' => $booking->booking_reference,
+            'email' => 'attacker@example.test',
+            'phone' => '03001234567',
+        ]);
+        $response->assertRedirect(route('booking.lookup'));
+        $response->assertSessionHasErrors('lookup');
+
+        $this->assertSame(
+            $tokensBefore,
+            GuestBookingAccessToken::query()->where('booking_id', $booking->id)->count()
+        );
+    }
+
+    public function test_guest_lookup_both_wrong_is_denied(): void
+    {
+        [, $booking] = $this->customerBooking();
+        $booking->contact()->update([
+            'email' => 'guestmatch@example.test',
+            'phone' => '03001234567',
+        ]);
+
+        $this->assertNull(app(GuestBookingAccessService::class)->findBookingForLookup(
+            $booking->booking_reference,
+            'attacker@example.test',
+            '03009999999',
+        ));
+    }
+
+    public function test_guest_lookup_phone_normalization_matches_e164_equivalent(): void
+    {
+        [, $booking] = $this->customerBooking();
+        $booking->contact()->update([
+            'email' => 'guestmatch@example.test',
+            'phone' => '03001234567',
+        ]);
+
+        $found = app(GuestBookingAccessService::class)->findBookingForLookup(
+            $booking->booking_reference,
+            'guestmatch@example.test',
+            '+92 300 1234567',
+        );
+
+        $this->assertNotNull($found);
+        $this->assertSame($booking->id, $found->id);
+    }
+
+    public function test_guest_lookup_service_phone_only_match_still_supported(): void
+    {
+        [, $booking] = $this->customerBooking();
+        $booking->contact()->update([
+            'email' => 'guestmatch@example.test',
+            'phone' => '03001234567',
+        ]);
+
+        $found = app(GuestBookingAccessService::class)->findBookingForLookup(
+            $booking->booking_reference,
+            null,
+            '03001234567',
+        );
+
+        $this->assertNotNull($found);
+        $this->assertSame($booking->id, $found->id);
+    }
+
     public function test_guest_access_token_is_hashed_at_rest(): void
     {
         [, $booking] = $this->customerBooking();

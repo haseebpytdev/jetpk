@@ -73,7 +73,9 @@ class GuestBookingAccessService
             $phoneMatch = $normalizedPhone !== null
                 && $this->normalizeLookupPhone((string) $contact->phone) === $normalizedPhone;
 
-            if ($normalizedEmail !== null && $normalizedPhone !== null && ($emailMatch || $phoneMatch)) {
+            // When both factors are supplied, require AND match so one correct
+            // factor cannot compensate for an incorrect second factor (OPS-DEF-0005).
+            if ($normalizedEmail !== null && $normalizedPhone !== null && $emailMatch && $phoneMatch) {
                 return $booking;
             }
             if ($normalizedEmail !== null && $normalizedPhone === null && $emailMatch) {
