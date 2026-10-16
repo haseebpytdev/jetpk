@@ -86,7 +86,7 @@ class CustomerPortalAndGuestLookupTest extends TestCase
         $this->post(route('lookup-booking.submit'), [
             'booking_reference' => $booking->booking_reference,
             'email' => 'guestmatch@example.test',
-        ])->assertRedirectContains('/guest/bookings/'.$booking->id.'/access/');
+        ])->assertRedirectContains('/guest/bookings/'.$booking->id);
     }
 
     public function test_guest_lookup_rejects_reference_only_access(): void
@@ -112,7 +112,7 @@ class CustomerPortalAndGuestLookupTest extends TestCase
             'booking_reference' => $booking->booking_reference,
             'email' => 'guestmatch@example.test',
             'phone' => '03001234567',
-        ])->assertRedirectContains('/guest/bookings/'.$booking->id.'/access/');
+        ])->assertRedirectContains('/guest/bookings/'.$booking->id);
 
         $this->assertSame(
             $tokensBefore + 1,
@@ -244,7 +244,7 @@ class CustomerPortalAndGuestLookupTest extends TestCase
         [, $booking] = $this->customerBooking();
         $token = app(GuestBookingAccessService::class)->createTokenForBooking($booking, 'a@example.test', null);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))->assertOk();
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])->get(route('guest.bookings.show', ['booking' => $booking]))->assertOk();
     }
 
     public function test_expired_guest_token_is_denied(): void
@@ -253,7 +253,7 @@ class CustomerPortalAndGuestLookupTest extends TestCase
         $token = app(GuestBookingAccessService::class)->createTokenForBooking($booking, 'a@example.test', null);
         GuestBookingAccessToken::query()->where('booking_id', $booking->id)->update(['expires_at' => now()->subMinute()]);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))->assertForbidden();
+        $this->get(route('guest.bookings.exchange', ['booking' => $booking, 'token' => $token]))->assertForbidden();
     }
 
     public function test_guest_can_download_allowed_document_with_valid_token(): void
@@ -277,7 +277,8 @@ class CustomerPortalAndGuestLookupTest extends TestCase
         ]);
         $token = app(GuestBookingAccessService::class)->createTokenForBooking($booking, 'a@example.test', null);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])
+            ->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertDontSee('Internal Admin Secret Note');
     }
@@ -423,7 +424,8 @@ class CustomerPortalAndGuestLookupTest extends TestCase
             null,
         );
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])
+            ->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertSee('data-testid="customer-booking-timeline"', false)
             ->assertSee('PNR / airline booking', false)
@@ -535,7 +537,8 @@ class CustomerPortalAndGuestLookupTest extends TestCase
         ]);
         $token = app(GuestBookingAccessService::class)->createTokenForBooking($booking, 'a@example.test', null);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $this->withSession(['guest_booking_access.'.$booking->id => $token])
+            ->get(route('guest.bookings.show', ['booking' => $booking]))
             ->assertOk()
             ->assertSee('data-testid="booking-payment-summary"', false)
             ->assertSee('data-testid="booking-documents-center"', false)

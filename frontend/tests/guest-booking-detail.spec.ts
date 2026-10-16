@@ -29,46 +29,46 @@ const guestDetailFixture = {
     can_request_cancellation: true,
     can_upload_payment_proof: true,
     mutation_urls: {
-      request_cancellation: "/laravel/guest/bookings/1/access/test-token/cancellations?format=json",
-      payment_proof: "/laravel/guest/bookings/1/access/test-token/payment-proof?format=json",
+      request_cancellation: "/laravel/guest/bookings/1/cancellations?format=json",
+      payment_proof: "/laravel/guest/bookings/1/payment-proof?format=json",
     },
     blade_fallback_urls: {
-      guest_detail: "/laravel/guest/bookings/1/access/test-token",
-      abhipay_start: "/laravel/guest/bookings/1/access/test-token/abhipay/start",
+      guest_detail: "/laravel/guest/bookings/1",
+      abhipay_start: "/laravel/guest/bookings/1/abhipay/start",
     },
   },
   cancellation: { state: "available", label: "Cancellation available", message: "You can submit a cancellation request for review.", request: null },
-  blade_fallback_url: "/laravel/guest/bookings/1/access/test-token",
+  blade_fallback_url: "/laravel/guest/bookings/1",
 };
 
 test.describe("JP-FULLSTACK-01E guest booking detail", () => {
-  test("loads authoritative JSON on canonical route", async ({ page }) => {
-    await page.route("**/laravel/guest/bookings/1/access/test-token?format=json", async (route) => {
+  test("loads authoritative JSON on token-free route", async ({ page }) => {
+    await page.route("**/laravel/guest/bookings/1?format=json", async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(guestDetailFixture) });
     });
-    await page.goto("/guest/bookings/1/access/test-token");
+    await page.goto("/guest/bookings/1");
     await expect(page.getByTestId("guest-booking-detail-page")).toBeVisible();
     await expect(page.getByTestId("payment-status-card")).toContainText("Unpaid");
     await expect(page.getByTestId("guest-blade-fallback-link")).toBeVisible();
   });
 
-  test("invalid access shows error state", async ({ page }) => {
-    await page.route("**/laravel/guest/bookings/1/access/bad-token?format=json", async (route) => {
+  test("unauthorized clean access shows error state", async ({ page }) => {
+    await page.route("**/laravel/guest/bookings/1?format=json", async (route) => {
       await route.fulfill({
         status: 403,
         contentType: "application/json",
         body: JSON.stringify({ ok: false, code: "access_denied", message: "Access denied." }),
       });
     });
-    await page.goto("/guest/bookings/1/access/bad-token");
+    await page.goto("/guest/bookings/1");
     await expect(page.getByTestId("guest-booking-access-error")).toBeVisible();
   });
 
   test("does not persist token in localStorage", async ({ page }) => {
-    await page.route("**/laravel/guest/bookings/1/access/test-token?format=json", async (route) => {
+    await page.route("**/laravel/guest/bookings/1?format=json", async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(guestDetailFixture) });
     });
-    await page.goto("/guest/bookings/1/access/test-token");
+    await page.goto("/guest/bookings/1");
     const storage = await page.evaluate(() => ({
       local: localStorage.getItem("guest-token"),
       session: sessionStorage.getItem("guest-token"),

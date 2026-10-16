@@ -131,8 +131,7 @@ class AbhiPayPaymentController extends Controller
             return;
         }
 
-        $token = (string) ($routeToken ?? $request->input('guest_token', ''));
-        if ($token !== '' && $this->guestAccessService->validateToken($booking, $token)) {
+        if ($this->guestAccessService->authorizeGuestAccess($request, $booking, $routeToken)) {
             return;
         }
 
@@ -228,7 +227,14 @@ class AbhiPayPaymentController extends Controller
         }
 
         if ($token !== '' && $this->guestAccessService->validateToken($booking, $token)) {
-            return redirect()->route('guest.bookings.show', ['booking' => $booking, 'token' => $token])
+            $this->guestAccessService->bindSession($request, $booking, $token);
+
+            return redirect()->route('guest.bookings.show', ['booking' => $booking])
+                ->withErrors(['payment' => $message]);
+        }
+
+        if ($this->guestAccessService->authorizeGuestAccess($request, $booking)) {
+            return redirect()->route('guest.bookings.show', ['booking' => $booking])
                 ->withErrors(['payment' => $message]);
         }
 

@@ -15,7 +15,7 @@
     $loginUrl = $loginUrl ?? client_route('login', ['redirect' => '/customer/bookings/'.$booking->id]);
     $allowGuestProofUpload = ($allowGuestProofUpload ?? false) && ! $hasLinkedAccount;
     $showGuestCancelForm = ($showGuestCancelForm ?? false) && ! $hasLinkedAccount;
-    $cancelAction = route('guest.bookings.cancellations.store', ['booking' => $booking, 'token' => $guestToken]);
+    $cancelAction = route('guest.bookings.cancellations.store', ['booking' => $booking]);
 @endphp
 
 @section('title', 'Booking '.$booking->display_reference)

@@ -334,7 +334,7 @@
                                 $abhiPayStartUrl = auth()->check()
                                     ? route('payments.abhipay.start', $booking)
                                     : (filled($guestAbhiPayToken ?? '')
-                                        ? route('guest.bookings.abhipay.start', ['booking' => $booking, 'token' => $guestAbhiPayToken])
+                                        ? route('guest.bookings.abhipay.start', ['booking' => $booking])
                                         : null);
                             @endphp
                             @if ($abhiPayStartUrl)

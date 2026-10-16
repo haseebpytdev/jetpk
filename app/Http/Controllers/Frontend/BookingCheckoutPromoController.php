@@ -62,8 +62,7 @@ class BookingCheckoutPromoController extends Controller
             return;
         }
 
-        $token = (string) ($routeToken ?? '');
-        if ($token !== '' && $this->guestAccessService->validateToken($booking, $token)) {
+        if ($this->guestAccessService->authorizeGuestAccess($request, $booking, $routeToken)) {
             return;
         }
 

@@ -72,7 +72,7 @@ test.describe("booking lookup turnstile", () => {
       submittedToken = match?.[1] ?? null;
       await route.fulfill({
         status: 302,
-        headers: { Location: "/guest/bookings/1/access/test-token-123" },
+        headers: { Location: "/guest/bookings/1" },
       });
     });
 
@@ -183,11 +183,11 @@ test.describe("booking lookup turnstile", () => {
         contentType: "application/json",
         body: JSON.stringify({
           ok: true,
-          redirect_url: `${playwrightBaseUrl}/guest/bookings/1/access/redirect-token`,
+          redirect_url: `${playwrightBaseUrl}/guest/bookings/1`,
         }),
       });
     });
-    await page.route("**/laravel/guest/bookings/1/access/redirect-token?format=json", async (route) => {
+    await page.route("**/laravel/guest/bookings/1?format=json", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -199,7 +199,7 @@ test.describe("booking lookup turnstile", () => {
     await lookupForm(page).getByRole("textbox", { name: /Booking reference/ }).fill("GUEST01E01");
     await lookupForm(page).getByRole("textbox", { name: /Email address/ }).fill("guest@example.test");
     await page.getByTestId("lookup-submit").click();
-    await expect(page).toHaveURL(/\/guest\/bookings\/1\/access\/redirect-token/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/guest\/bookings\/1\/?$/, { timeout: 15000 });
   });
 
   test("arbitrary success URL is rejected", async ({ page }) => {

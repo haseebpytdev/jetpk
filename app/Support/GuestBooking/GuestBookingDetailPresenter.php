@@ -26,7 +26,7 @@ class GuestBookingDetailPresenter
     /**
      * @return array<string, mixed>
      */
-    public function present(Booking $booking, string $token, Request $request): array
+    public function present(Booking $booking, Request $request): array
     {
         $booking->loadMissing([
             'passengers',
@@ -92,7 +92,8 @@ class GuestBookingDetailPresenter
             'criteria' => $criteria,
             'booking' => $booking,
             'abhiPayCheckout' => $this->abhiPayPresenter->forBooking($booking, afterSubmission: true),
-            'guestAbhiPayToken' => $token,
+            // Session-bound AbhiPay start uses token-free route; do not leak raw token into JSON.
+            'guestAbhiPayToken' => null,
             'supplierConfirmationNotice' => BookingSupplierConfirmationNoticeResolver::resolveForBooking(
                 $booking,
                 is_array($meta['sabre_checkout_outcome'] ?? null) ? $meta['sabre_checkout_outcome'] : null,
@@ -112,10 +113,10 @@ class GuestBookingDetailPresenter
             'email_masked' => TravelDocumentFormatter::maskEmail($contact?->email),
             'phone_masked' => TravelDocumentFormatter::maskPhone($contact?->phone),
         ];
-        $payload['capabilities'] = $this->presentCapabilities($booking, $token, $canUploadProof, $canRequestCancellation);
+        $payload['capabilities'] = $this->presentCapabilities($booking, $canUploadProof, $canRequestCancellation);
         $payload['cancellation'] = $this->presentCancellationSummary($booking);
         $payload['refund'] = $this->presentRefundSummary($booking);
-        $payload['blade_fallback_url'] = client_route('guest.bookings.show', ['booking' => $booking, 'token' => $token]);
+        $payload['blade_fallback_url'] = client_route('guest.bookings.show', ['booking' => $booking]);
         $payload['lookup_url'] = '/lookup-booking';
 
         return $payload;
@@ -148,12 +149,12 @@ class GuestBookingDetailPresenter
      */
     private function presentCapabilities(
         Booking $booking,
-        string $token,
         bool $canUploadProof,
         bool $canRequestCancellation,
     ): array {
         $bookingId = $booking->id;
-        $base = "/laravel/guest/bookings/{$bookingId}/access/{$token}";
+        // Token-free Laravel paths; authorization via guest session cookie (OPS-DEF-0011).
+        $base = "/laravel/guest/bookings/{$bookingId}";
 
         $invoiceDoc = $booking->documents
             ->first(fn ($doc) => $doc->document_type === BookingDocumentType::Invoice && filled($doc->file_path));
@@ -167,7 +168,7 @@ class GuestBookingDetailPresenter
                 'id' => $doc->id,
                 'title' => (string) ($doc->title ?? $doc->document_type?->value ?? 'Document'),
                 'status' => (string) ($doc->status?->value ?? 'available'),
-                'download_url' => '/laravel/guest/documents/'.$doc->id.'/download?token='.urlencode($token),
+                'download_url' => '/laravel/guest/documents/'.$doc->id.'/download',
             ])
             ->values()
             ->all();
@@ -192,10 +193,10 @@ class GuestBookingDetailPresenter
             ],
             'download_urls' => [
                 'invoice' => $invoiceDoc !== null
-                    ? '/laravel/guest/documents/'.$invoiceDoc->id.'/download?token='.urlencode($token)
+                    ? '/laravel/guest/documents/'.$invoiceDoc->id.'/download'
                     : null,
                 'ticket' => $ticketDoc !== null
-                    ? '/laravel/guest/documents/'.$ticketDoc->id.'/download?token='.urlencode($token)
+                    ? '/laravel/guest/documents/'.$ticketDoc->id.'/download'
                     : null,
             ],
             'documents' => $documents,
