@@ -74,12 +74,18 @@ Phase-2 residual: remove legacy `/access/{token}` entirely; server access-log re
 
 ## Security headers (guest surfaces)
 
+Applied via `GuestBookingLookupController::withGuestAccessHeaders` on lookup success, exchange, clean detail (HTML/JSON), document download, and payment-proof responses:
+
 ```
 Referrer-Policy=no-referrer
 Cache-Control=private, no-store, no-cache, must-revalidate
 Pragma=no-cache
 X-Robots-Tag=noindex, nofollow
 ```
+
+Promo / cancellation / AbhiPay guest mutation responses rely on session auth + token-free URLs; extending the same header helper to those controllers is a Phase-1.1 follow-up (not required to keep tokens out of URLs).
+
+`TOKEN_ROTATION_ATOMIC=YES` means expire-then-create runs inside one `DB::transaction` with `lockForUpdate` on prior active rows (sequential tests covered; no parallel race harness).
 
 ## Tests
 
