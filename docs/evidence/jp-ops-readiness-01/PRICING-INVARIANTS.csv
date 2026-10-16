@@ -1,0 +1,15 @@
+INVARIANT_ID,DESCRIPTION,CANONICAL_SOURCE,SURFACE_CHECK,SAMPLE_REF,RESULT,DEFECT_ID,NOTES
+INV_1,Displayed selected fare total equals booking fare at booking boundary,booking_fare_breakdowns.total,CheckoutFareBreakdownPresenter prefers DB total,architecture+code,PASS,,DB overrides offer snapshot when total>0
+INV_2,customerPayableTotal matches amount customer asked to pay,BookingPayableResolver::customerPayableTotal,Blade summary + payableAmountForBooking,JPQAMP…85CF,PASS,,payable_after_promo else fare total
+INV_3,Manual payment balance_due uses same payable,BookingPaymentService::recalculateBookingPaymentStatus,amount_paid/balance_due columns,JPQAMP…85CF,PASS,,verified sum vs customerPayableTotal
+INV_4,Verified payment reduces balance exactly once,verified payments sum,booking 40 after UAT,JPQAMP…85CF,PASS,,1.00 verified → balance 0; single payment id=4
+INV_5,Promo discount consistent across customer/admin/agent,payable_after_promo + resolver,Blade aligned; Next pricing.total fare-only,code+presenter,PASS_WITH_RESIDUAL,OPS-DEF-0026,Soft Next display divergence when promo applied
+INV_6,Currency consistent booking/payment surfaces,booking.currency,payments + summary currency,JPQAMP…85CF,PASS,,PKR end-to-end on sample
+INV_7,Taxes/fees/markup/discount compose to displayed total,fare breakdown columns,booking 40 breakdown,JPQAMP…85CF,PASS,,1+0+0+0+0=1
+INV_8,Local payable display needs no supplier PNR,BookingPayableResolver,local_qa_inert paid without PNR,JPQAMP…85CF,PASS,,
+INV_9,balance_due = payable - verified,BookingPayableResolver::balanceDue,booking 40,JPQAMP…85CF,PASS,,stale column risk on zero-fare fixtures → OPS-DEF-0027
+INV_10,Fully verified → payment_status=paid and balance_due=0,BookingPaymentService recalc,booking 40,JPQAMP…85CF,PASS,,
+PROMO_FORMULA,final=round(max(0 original-discount) 2) with caps,PromoCodeCalculator,unit/feature tests,PromoCodeCheckoutTest,PASS,,overdiscount blocked unless zero-payable testing
+ROUNDING,money calc round 2dp,resolver+calculator+decimal casts,display number_format 0dp Next,code,PASS,,display formatting residual only
+CURRENCY_FX,search FX to PKR; payment same as booking currency,PricingRuleService+AbhiPay currency check,no FX txn this loop,code,PASS,,CROSS_CURRENCY_PAYMENT_BLOCKED=YES
+FORMULA_DIVERGENCE,Next pricing.total vs promo payable,StandardBookingJsonPresenter vs resolver,Next vs Blade,code,YES_SOFT,OPS-DEF-0026,Not payment-math defect
