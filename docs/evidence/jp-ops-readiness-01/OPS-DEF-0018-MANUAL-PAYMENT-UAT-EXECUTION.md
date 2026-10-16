@@ -120,6 +120,20 @@ QA booking/payment/ledger rows **retained** as certification evidence (`local_qa
 
 ---
 
+## Post-run DB readback (sanitized)
+
+See `_raw-ops-def-0018-manual-payment-uat-capture.txt`.
+
+```
+READBACK_BOOKING_ID=40 REF=JPQAMPAY9B8E85CF SUP=local_qa_inert ST=paid PAY=paid PAID=1.00 DUE=0.00
+READBACK_PAYMENT_ID=4 ST=verified AMT=1.00 METHOD=bank_transfer BOOKING=40
+READBACK_LEDGER_ID=1 AMT=1.00 BOOKING=40
+READBACK_AUDIT_ID=1396 ACTION=booking.payment_verified ACTOR=9
+PTX_FOR_BOOKING=0
+```
+
+---
+
 ## Follow-ups
 
 1. **Sabre PNR live UAT** remains the primary residual for OPS-DEF-0018 close.  
