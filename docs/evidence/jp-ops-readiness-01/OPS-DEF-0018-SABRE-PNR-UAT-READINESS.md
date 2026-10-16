@@ -1,22 +1,30 @@
 # OPS-DEF-0018 — Sabre PNR UAT Readiness (READ ONLY)
 
 **Date:** 2026-10-16  
-**PROTECTED_MAIN_SHA:** `5ce2d9ec8d31839dbcf9c8ad66833cdf96b2a3a6`  
+**PROTECTED_MAIN_SHA:** `045c3fe642c5061b0cb4fb46ad7948e9613c5cf1`  
 **PRODUCTION_RUNTIME_SHA:** `922f15774ece177d8b3cc23207e98379b8a2755b`  
 **BUILD_ID (authoritative task):** `QClrSvr5W0V2GqllIeLKE`
 
 ```
-SABRE_PNR_UAT_READINESS=READY_AWAITING_LIVE_SUPPLIER_MUTATION_AUTHORIZATION
+TECHNICAL_READINESS=READY
+LIVE_SUPPLIER_CERTIFICATION=DEFERRED_UNTIL_GO_LIVE_WINDOW
+SABRE_PNR_UAT_READINESS=READY_AWAITING_GO_LIVE_AUTHORIZATION
 CONTROLLED_SABRE_PNR_UAT_REQUIRES_EXPLICIT_APPROVAL=YES
 LIVE_PNR_REQUIRES_HUMAN_TRAVELER_APPROVAL=YES
-OPS_DEF_0018_STATUS=PARTIAL_BLOCKED_SABRE_PNR_UAT
+LIVE_PNR_EXECUTION_REQUIRED_BEFORE_GO_LIVE=YES
+LIVE_PNR_EXECUTION_ALLOWED_NOW=NO
+LIVE_PNR_DEFERRAL_REASON=Supplier financial/fine exposure before production launch
+GO_LIVE_GATE_SABRE_PNR_001=PENDING_FUTURE_GO_LIVE_WINDOW
+OPS_DEF_0018_STATUS=PARTIAL_DEFERRED_LIVE_SABRE_PNR_UAT
 FRESH_SEARCH_EXECUTED=NO
 LIVE_SUPPLIER_CALLS=0
 ```
 
-This loop **did not** create a PNR, cancel, ticket, charge, or invoke any supplier HTTP client.
+**Governance update (2026-10-16):** Live Sabre PNR creation/booking/cancel is **not authorized now** (supplier fine/ADM exposure before go-live). See `GO-LIVE-GATE-SABRE-PNR-001.md`. Do **not** mark this defect CLOSED or PASS.
 
-Do **not** reuse payment fixture `JPQAMPAY9B8E85CF` (OPS-DEF-0018 manual payment UAT).
+This readiness document **did not** create a PNR, cancel, ticket, charge, or invoke any supplier HTTP client.
+
+Do **not** reuse payment fixture `JPQAMPAY9B8E85CF` (OPS-DEF-0018 manual payment UAT) for future PNR UAT.
 
 ---
 
@@ -226,10 +234,15 @@ SABRE_PNR_UAT_READINESS=READY_AWAITING_LIVE_SUPPLIER_MUTATION_AUTHORIZATION
 
 ---
 
-## Active P1 blockers (initial launch)
+## Active blockers (initial launch)
 
-1. **Controlled Sabre DIRECT ONE-WAY live PNR UAT** (this readiness complete; execution pending dual approvals).  
+1. **GO_LIVE_GATE_SABRE_PNR_001** — live Sabre PNR **deferred** until go-live window (technical readiness READY; execution NOT allowed now).  
 2. AbhiPay remains deferred (not launch-blocking under MANUAL payment).  
-3. Browser-depth residual for some OJ roles (non-supplier).
+3. Browser-depth residual for some OJ roles (non-supplier).  
+4. Pricing read-side: `PASS_FOR_INITIAL_LAUNCH_PROFILE` (scorecard AMBER) — see `OPS-DEF-0018-PRICING-READINESS.md`.
 
-**NEXT_REQUIRED_ACTION:** Explicit user approval for (a) QA traveler/contact identity and (b) one live admin-manual Sabre CreatePNR on a new disposable booking — then separate cancel authorization.
+```
+CURRENT_NON_DEFERRED_P1_BLOCKERS=NONE
+```
+
+**NEXT_REQUIRED_ACTION:** Continue non-mutating readiness work. Execute `GO_LIVE_GATE_SABRE_PNR_001` only in the actual go-live window with explicit authorization. Do not spend loops waiting on Sabre live auth.
