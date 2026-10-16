@@ -1,16 +1,17 @@
 JOURNEY_ID,ACTOR,START,STEPS,END_STATE,DEPENDENCIES,SAFE_TEST_METHOD,RESULT,BLOCKER,DEFECT_ID
-OJ-B2C-001,customer,home,search→results→fare→pax→review boundary,stop before Sabre dispatch,supplier+payment,server-side auth + route presence,PASS_TO_SAFE_BOUNDARY,STOP_BEFORE_SABRE; live book not certified,OPS-DEF-0016
-OJ-B2B-OWN-001,agent_owner,login,dash→bookings/wallet/staff/reports read,capability-proven shell,wallet read,loginUsingId + AgentPermission matrix,PARTIAL,browser session blocked; no wallet mutation,OPS-DEF-0018
-OJ-B2B-MGR-001,manager,login,staff ops read surfaces,capability-proven shell,RBAC,loginUsingId + capability matrix,PARTIAL,browser session blocked (no password env),OPS-DEF-0018
-OJ-B2B-ACC-001,accountant,login,ledger/reports/deposits read,capability-proven finance shell,ledger,loginUsingId + capability matrix,PARTIAL_BLOCKED_KNOWN_DEFECT_OPS_DEF_0006,wallet approve atomicity open; no approve executed,OPS-DEF-0006
-OJ-B2B-SALES-001,sales_agent,login,create booking capability,booking create permitted,permissions+supplier,capability matrix only,BLOCKED_EXTERNAL,supplier live book not executed,OPS-DEF-0016
-OJ-B2B-SUP-001,support_staff,login,support+bookings view denies finance,capability-proven support shell,support module,FINAL-11 support loginUsingId,PARTIAL,browser session blocked; writes not executed,OPS-DEF-0018
-OJ-B2B-TKT-001,ticketing_staff,login,issue ticket,ticketed,ticketing module,capability matrix,MANUAL_ACTIVATION_REQUIRED,live ticketing flags off,OPS-DEF-0016
-OJ-B2B-VIEW-001,viewer,login,read-only + cancel policy check,no cancel mutation executed,RBAC,policy probe on QA booking,PARTIAL_BLOCKED_KNOWN_DEFECT_OPS_DEF_0004,policy allows BookingsView-only when agent_id matches,OPS-DEF-0004
-OJ-ADMIN-001,platform_admin,go-live+suppliers,activate modules,production on,admin,loginUsingId proven,MANUAL_ACTIVATION_REQUIRED,supplier/payment modules still off,OPS-DEF-0016
-OJ-STAFF-001,staff,ops inbox,service booking read paths,capability-proven staff shell,permissions,loginUsingId staff perms=14,PARTIAL,browser session blocked; no ticket issuance,OPS-DEF-0018
-OJ-PAY-001,system,AbhiPay callback,verify→settle,paid,AbhiPay,route presence,PARTIAL,ABHIPAY_* MISSING; no live charge; booking_payments uniqueness,OPS-DEF-0017
-OJ-FIN-001,admin,approve deposit,wallet+ledger,posted,wallet,source,PARTIAL,wallet commits before safeRecord ledger,OPS-DEF-0006
+OJ-B2C-001,customer,home,search→results→fare→pax→review→manual payment boundary,stop before Sabre PNR + before proof mutation,supplier+manual_payment,server-side auth + routes + BookingPaymentService,PASS_TO_SAFE_BOUNDARY,SABRE_PNR_UAT + MANUAL_PAYMENT_UAT; AbhiPay out of scope,OPS-DEF-0018
+OJ-B2B-OWN-001,agent_owner,login,dash→bookings/wallet/staff/reports read + payment-proof capability,capability-proven shell,wallet read,loginUsingId + AgentPermission matrix,PARTIAL,browser depth; no wallet mutation; Sabre PNR UAT open,OPS-DEF-0018
+OJ-B2B-MGR-001,manager,login,staff ops read surfaces,capability-proven shell,RBAC,loginUsingId + capability matrix,PARTIAL,browser depth; cancel perm assignment follow-up,OPS-DEF-0018
+OJ-B2B-ACC-001,accountant,login,ledger/reports/deposits read,capability-proven finance shell,ledger,loginUsingId + capability matrix,PARTIAL,OPS-DEF-0006 CLOSED; no deposit approve executed; browser depth,OPS-DEF-0018
+OJ-B2B-SALES-001,sales_agent,login,create booking capability,booking create permitted,permissions+supplier,capability matrix only,PARTIAL,Sabre limited launch; live book UAT incomplete,OPS-DEF-0018
+OJ-B2B-SUP-001,support_staff,login,support+bookings view denies finance,capability-proven support shell,support module,FINAL-11 support loginUsingId,PARTIAL,browser depth; OPS-DEF-0024 fixture drift,OPS-DEF-0018
+OJ-B2B-TKT-001,ticketing_staff,login,issue ticket,ticketed,ticketing module,capability matrix,OUT_OF_INITIAL_LAUNCH_SCOPE,live ticketing flags off / manual-external,OPS-DEF-0016
+OJ-B2B-VIEW-001,viewer,login,read-only + cancel DENY,no cancel mutation,RBAC,OPS-DEF-0004 prod closure DENY,PARTIAL_READ_SAFE,0004 CLOSED; browser depth residual,OPS-DEF-0018
+OJ-ADMIN-001,platform_admin,go-live+suppliers,activate modules,production on,admin,loginUsingId proven,PARTIAL,AbhiPay deferred; Sabre scope defined,OPS-DEF-0018
+OJ-STAFF-001,staff,ops inbox,service booking read + payment verify routes,capability-proven staff shell,permissions,loginUsingId staff perms=14,PARTIAL,browser depth; no ticket/verify mutation,OPS-DEF-0018
+OJ-PAY-001,system,AbhiPay callback,verify→settle,paid,AbhiPay,route presence,OUT_OF_INITIAL_LAUNCH_SCOPE,AbhiPay deferred OPEN_DEFERRED_MANUAL_PAYMENT_LAUNCH,OPS-DEF-0017
+OJ-FIN-001,admin,approve deposit,wallet+ledger,posted,wallet,source+OPS-DEF-0006 CLOSED,PARTIAL,deposit approve not executed this loop,OPS-DEF-0018
+OJ-PAY-MANUAL-001,customer/agent/staff,payment proof,submit→review→verify/reject,verified/rejected,BookingPaymentService+routes,source+route inventory,SOURCE_READY_MANUAL_UAT_REQUIRED,live proof/verify mutation not executed,OPS-DEF-0018
 OJ-PNR-001,staff,issue/void,ticketing adapters,ticketed,supplier,source,MANUAL_ACTIVATION_REQUIRED,ticketing flags false; Sabre book live-call true unused,OPS-DEF-0016
 OJ-NOTIF-001,system,queue mail,deliver,delivered,smtp+queue,Wave1C canary + SSH,PARTIAL,canary PASS; residual queued logs OPS-DEF-0021; historical replay deferred,OPS-DEF-0021
 OJ-CMS-001,admin,CMS/SEO,publish,public updated,CMS,QA reversible,INVENTORIED_NOT_AUDITED,no auth CMS browser session; storage dir untouched,OPS-DEF-0018

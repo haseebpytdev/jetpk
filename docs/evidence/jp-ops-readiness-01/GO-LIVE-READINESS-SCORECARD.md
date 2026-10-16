@@ -36,6 +36,6 @@
 **OPS-DEF-0006 + OPS-DEF-0007 + OPS-DEF-0013 + OPS-DEF-0004:** CLOSED on production runtime `922f1577`.  
 **OPS-DEF-0016:** `CLOSED_LAUNCH_SCOPE_DEFINED` — Sabre GDS search + limited PNR; ticketing/void/refund disabled; PIA FROZEN; AirBlue/OneAPI/IATI/Duffel/group excluded.  
 **OPS-DEF-0017:** `OPEN_DEFERRED_MANUAL_PAYMENT_LAUNCH` — AbhiPay unfinished/uncertified; intentionally out of initial launch scope. Historical forensics preserved. Wake stopped.  
-**OPS-DEF-0018:** Re-certify journeys against MANUAL payment + Sabre limited launch (AbhiPay not an active blocker for this profile).  
+**OPS-DEF-0018:** `PARTIAL_BLOCKED_SABRE_PNR_UAT` — journeys rebased under MANUAL payment + Sabre limited launch; AbhiPay not an active blocker; manual payment architecture SOURCE_READY; live PNR + proof/verify UAT still required.  
 **PERMISSION_ASSIGNMENT_FOLLOWUP:** existing Manager/Support/Sales staff lack `agent.cancellations.request` until explicit grant (security-safe; does not reopen 0004).  
-**Next priority:** OPS-DEF-0018 initial-launch journey certification (manual payment path + Sabre safe-boundary). Restore vhost access logging separately (OPS-RISK-0017).
+**Next priority:** Authorized Sabre PNR UAT + authorized manual payment proof/verify UAT. Restore vhost access logging separately (OPS-RISK-0017). Do not reopen AbhiPay until business trigger.
