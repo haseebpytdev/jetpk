@@ -5,10 +5,15 @@ Callback route registered,READY,/payments/abhipay/callback,—
 Callback CSRF exempt by design,READY,bootstrap/app.php,—
 Server-side verify mandatory,READY,PaymentTransactionService,—
 Idempotency under replay,READY,OPS-DEF-0013 CLOSED: ptx FK unique + client_tx unique + gateway order unique + paid lock,OPS-DEF-0013 CLOSED
-Production credentials activated,BLOCKED_CONFIGURATION,operator claimed save; jetpk_prod payment_gateways=0; no abhipay audit (2026-10-16),OPS-DEF-0017
-Callback URL registered at AbhiPay,EXTERNAL_DEPENDENCY,provider dashboard UNVERIFIED_EXTERNAL,OPS-DEF-0017
+Production credentials activated,DEFERRED_NOT_IN_INITIAL_LAUNCH,jetpk_prod payment_gateways abhipay=0; business decision 2026-10-16 MANUAL launch,OPS-DEF-0017
+Callback URL registered at AbhiPay,DEFERRED_EXTERNAL,provider dashboard not required until AbhiPay reopen,OPS-DEF-0017
 PIA NDC online pay without PNR,BLOCKED_BY_CODE,piaNdcOnlinePaymentBlockedReason,—
-Live charge UAT this workstream,BLOCKED,no gateway row; governance forbids unapproved charge,OPS-DEF-0017
-Payment→booking→ledger→notification trace,SOURCE_MAPPED,services mapped; live UNTESTED,OPS-DEF-0018
+Live charge UAT this workstream,DEFERRED_NOT_IN_INITIAL_LAUNCH,governance + business decision forbids unapproved charge; out of launch scope,OPS-DEF-0017
+Payment→booking→ledger→notification trace,SOURCE_MAPPED,services mapped; manual path to certify under 0018,OPS-DEF-0018
 Public callback reachability,PASS,GET empty→302 decline; routes present; throttle 60/min,OPS-DEF-0017
-Checkout UI hides AbhiPay when not configured,READY,PublicAbhiPayCheckoutPresenter gateway_available gate,OPS-DEF-0017
+Checkout UI hides AbhiPay when not configured,READY,PublicAbhiPayCheckoutPresenter gateway_available gate; row=0 ⇒ ABHIPAY_UI_AVAILABLE=NO,OPS-DEF-0017
+INITIAL_LAUNCH_PAYMENT_MODE,MANUAL,Bank transfer / cash / card_manual / easypaisa / jazzcash proof workflows,OPS-DEF-0017-DEFER
+Manual payment proof submit routes,READY,customer+agent+guest payment-proof routes + platform.module:payment_proofs,OPS-DEF-0018
+Staff/admin payment verify/reject routes,READY,admin+staff bookings.payments.verify/reject,OPS-DEF-0018
+Auto gateway settlement in launch scope,NOT_IN_LAUNCH_SCOPE,AbhiPay deferred,OPS-DEF-0017
+Auto-ticketing after payment,NO,OPS-DEF-0016 ticketing disabled / manual-external,OPS-DEF-0016

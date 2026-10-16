@@ -9,3 +9,5 @@ FIN-INV-007,Operational wallet singular per agency,Wallet,canonicalWalletForAgen
 FIN-INV-008,Deposit credit posts to canonical agency wallet,Wallet,approveDeposit,Fail-closed if deposit.agent_wallet_id != current canonical marker,PASS,P1,AgentWalletService,OPS-DEF-0007 CLOSED
 FIN-INV-009,Verified booking payment ledger idempotent,Ledger,recordBookingPaymentVerified,findExistingPost,HELD,P3,LedgerEventRecorder,—
 FIN-INV-010,Manual wallet adjustment ledger fail-closed,Ledger,recordManualWallet*,throws in TX,HELD,P3,LedgerEventRecorder,—
+FIN-INV-011,Initial launch forbids AbhiPay auto-settlement until 0017 reopened,Payments,payment_gateways abhipay,business deferral + row_count=0,PASS_SCOPE_DEFINED,P1,OPS-DEF-0017-DEFERRED-MANUAL-PAYMENT-LAUNCH.md,OPS-DEF-0017
+FIN-INV-012,Manual payment proof verify/reject only via admin/staff BookingPaymentController,Payments,admin+staff verify/reject routes,route+policy gates; live mutation MANUAL_UAT_REQUIRED,HELD,P2,routes/admin.php+staff.php,OPS-DEF-0018
