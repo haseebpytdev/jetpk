@@ -10,4 +10,5 @@ FIN-INV-008,Deposit credit posts to canonical agency wallet,Wallet,approveDeposi
 FIN-INV-009,Verified booking payment ledger idempotent,Ledger,recordBookingPaymentVerified,findExistingPost,HELD,P3,LedgerEventRecorder,—
 FIN-INV-010,Manual wallet adjustment ledger fail-closed,Ledger,recordManualWallet*,throws in TX,HELD,P3,LedgerEventRecorder,—
 FIN-INV-011,Initial launch forbids AbhiPay auto-settlement until 0017 reopened,Payments,payment_gateways abhipay,business deferral + row_count=0,PASS_SCOPE_DEFINED,P1,OPS-DEF-0017-DEFERRED-MANUAL-PAYMENT-LAUNCH.md,OPS-DEF-0017
-FIN-INV-012,Manual payment proof verify/reject only via admin/staff BookingPaymentController,Payments,admin+staff verify/reject routes,route+policy gates; live mutation MANUAL_UAT_REQUIRED,HELD,P2,routes/admin.php+staff.php,OPS-DEF-0018
+FIN-INV-012,Manual payment proof verify/reject only via admin/staff BookingPaymentController,Payments,admin+staff verify/reject routes,route+policy gates; disposable UAT PASS JPQAMPAY9B8E85CF,PASS,P2,OPS-DEF-0018-MANUAL-PAYMENT-UAT-EXECUTION.md,OPS-DEF-0018
+FIN-INV-013,Disposable QA manual verify posts one ledger BookingPaymentVerified amount=1.00 PKR,Payments,ledger_transactions,recordBookingPaymentVerified; UAT ledger id=1 retained,PASS,P2,OPS-DEF-0018-MANUAL-PAYMENT-UAT-EXECUTION.md,OPS-DEF-0018

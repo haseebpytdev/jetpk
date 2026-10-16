@@ -16,7 +16,7 @@
 | Supplier | AMBER | OPS-DEF-0016 CLOSED_LAUNCH_SCOPE_DEFINED: Sabre GDS limited; others excluded/frozen/disabled |
 | Pricing | RED | Cross-surface invariants untested |
 | Finance | AMBER | OPS-DEF-0006+0007+0013 CLOSED; runtime 922f1577 |
-| Payments | AMBER | INITIAL_PAYMENT_MODE=MANUAL; AbhiPay deferred OPEN_DEFERRED_MANUAL_PAYMENT_LAUNCH (0017); not GREEN until manual E2E certified |
+| Payments | AMBER | INITIAL_PAYMENT_MODE=MANUAL; manual proof UAT PASS on disposable local_qa_inert; AbhiPay deferred (0017); not GREEN (no AbhiPay + Sabre PNR residual) |
 | PNR/ticketing | RED | Sabre PNR live-call ON but itinerary-class UAT incomplete; ticketing OFF (no LNIATA) — residual for OPS-DEF-0018 |
 | Notifications | AMBER | OPS-DEF-0019 CLOSED; failed_jobs SMTP residual |
 | Documents | AMBER | Inventoried; values unproven |
@@ -36,6 +36,6 @@
 **OPS-DEF-0006 + OPS-DEF-0007 + OPS-DEF-0013 + OPS-DEF-0004:** CLOSED on production runtime `922f1577`.  
 **OPS-DEF-0016:** `CLOSED_LAUNCH_SCOPE_DEFINED` — Sabre GDS search + limited PNR; ticketing/void/refund disabled; PIA FROZEN; AirBlue/OneAPI/IATI/Duffel/group excluded.  
 **OPS-DEF-0017:** `OPEN_DEFERRED_MANUAL_PAYMENT_LAUNCH` — AbhiPay unfinished/uncertified; intentionally out of initial launch scope. Historical forensics preserved. Wake stopped.  
-**OPS-DEF-0018:** `PARTIAL_BLOCKED_SABRE_PNR_UAT` — manual payment UAT readiness `READY_AWAITING_MUTATION_AUTHORIZATION` (fixture `JPQAOPS08E4590` / local_qa_inert; module enabled; no mutation executed). Sabre PNR live UAT remains residual. AbhiPay out of initial launch scope.  
+**OPS-DEF-0018:** `PARTIAL_BLOCKED_SABRE_PNR_UAT` — manual payment UAT **PASS** on disposable `JPQAMPAY9B8E85CF` (id=40, local_qa_inert; submit→verify; ledger+audit; no supplier/wallet/AbhiPay). Sabre PNR live UAT remains residual. AbhiPay out of initial launch scope.  
 **PERMISSION_ASSIGNMENT_FOLLOWUP:** existing Manager/Support/Sales staff lack `agent.cancellations.request` until explicit grant (security-safe; does not reopen 0004).  
-**Next priority:** Explicit authorization for one-shot manual payment UAT (guest-token prep or admin-pending path) on JPQAOPS08E4590; separately Sabre PNR UAT. Restore vhost access logging (OPS-RISK-0017). Do not reopen AbhiPay until business trigger.
+**Next priority:** Controlled Sabre PNR UAT (separate authorization). Restore vhost access logging (OPS-RISK-0017). Do not reopen AbhiPay until business trigger.
