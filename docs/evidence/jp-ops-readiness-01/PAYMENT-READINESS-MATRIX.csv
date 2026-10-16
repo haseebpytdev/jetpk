@@ -5,7 +5,7 @@ Callback route registered,READY,/payments/abhipay/callback,—
 Callback CSRF exempt by design,READY,bootstrap/app.php,—
 Server-side verify mandatory,READY,PaymentTransactionService,—
 Idempotency under replay,READY,OPS-DEF-0013 CLOSED: ptx FK unique + client_tx unique + gateway order unique + paid lock,OPS-DEF-0013 CLOSED
-Production credentials activated,BLOCKED_WAITING_FOR_ABHIPAY_CREDENTIALS,target agency_id=1 selected; rows=0; no live secret available to operator (2026-10-16),OPS-DEF-0017
+Production credentials activated,BLOCKED_CONFIGURATION,operator claimed save; jetpk_prod payment_gateways=0; no abhipay audit (2026-10-16),OPS-DEF-0017
 Callback URL registered at AbhiPay,EXTERNAL_DEPENDENCY,provider dashboard UNVERIFIED_EXTERNAL,OPS-DEF-0017
 PIA NDC online pay without PNR,BLOCKED_BY_CODE,piaNdcOnlinePaymentBlockedReason,—
 Live charge UAT this workstream,BLOCKED,no gateway row; governance forbids unapproved charge,OPS-DEF-0017

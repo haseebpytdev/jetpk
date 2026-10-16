@@ -56,17 +56,17 @@ Selection basis: `config('ota.default_agency_slug')=asif-travels` + all B2C (`ag
 - [ ] Ledger/notification once; no duplicate settlement; no auto-ticket
 - [ ] Refund/void remains separate scope
 
-## Current production snapshot (2026-10-16 config-connectivity loop)
+## Current production snapshot (2026-10-16 config-connectivity continuation)
 
 | Gate | Status |
 |------|--------|
 | Target agency | SELECTED — agency_id=1 JetPakistan |
-| A Configuration | FAIL — AbhiPay rows still 0; **waiting for live credentials** |
+| A Configuration | FAIL — `payment_gateways` still **0 rows** on `jetpk_prod` after claimed admin entry; no `payment_gateway.abhipay.updated` audit |
 | B Callback local | PASS (routes + public reachability) |
 | C Merchant dashboard | UNVERIFIED_EXTERNAL |
-| D Connectivity | BLOCKED (credentials unavailable to operator) |
+| D Connectivity | NOT_RUN (gates not met — no persisted row) |
 | E Live UAT | BLOCKED |
 
-**Classification:** `BLOCKED_WAITING_FOR_ABHIPAY_CREDENTIALS`
+**Classification:** `BLOCKED_CONFIGURATION`
 
-**Admin fields requiring human entry:** Active, Environment=Live, Merchant ID, Merchant secret key (never paste into chat/logs/git).
+**Operator action:** Re-save on canonical `https://jetpakistan.pk/admin/settings/payments?agency_id=1`, confirm success flash, then prove with `payments:abhipay-status --agency_id=1` (Checkout ready=yes). Never paste secrets into chat/logs/git.
