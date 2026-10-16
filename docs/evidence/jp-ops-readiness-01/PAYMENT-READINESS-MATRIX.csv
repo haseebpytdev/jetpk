@@ -4,9 +4,11 @@ Other card gateways,NOT_APPLICABLE,only AbhiPay in code,—
 Callback route registered,READY,/payments/abhipay/callback,—
 Callback CSRF exempt by design,READY,bootstrap/app.php,—
 Server-side verify mandatory,READY,PaymentTransactionService,—
-Idempotency under replay,PARTIAL,paid short-circuit + lock; no DB unique payment ref,OPS-DEF-0013
-Production credentials activated,MANUAL_ACTIVATION_REQUIRED,admin-stored gateway,OPS-DEF-0017
-Callback URL registered at AbhiPay,EXTERNAL_DEPENDENCY,provider dashboard,OPS-DEF-0017
+Idempotency under replay,READY,OPS-DEF-0013 CLOSED: ptx FK unique + client_tx unique + gateway order unique + paid lock,OPS-DEF-0013 CLOSED
+Production credentials activated,BLOCKED_NO_GATEWAY_ROW,payment_gateways abhipay rows=0 (2026-10-15),OPS-DEF-0017
+Callback URL registered at AbhiPay,EXTERNAL_DEPENDENCY,provider dashboard UNVERIFIED_EXTERNAL,OPS-DEF-0017
 PIA NDC online pay without PNR,BLOCKED_BY_CODE,piaNdcOnlinePaymentBlockedReason,—
-Live charge UAT this workstream,BLOCKED,governance forbids real charges,OPS-DEF-0017
+Live charge UAT this workstream,BLOCKED,no gateway row; governance forbids unapproved charge,OPS-DEF-0017
 Payment→booking→ledger→notification trace,SOURCE_MAPPED,services mapped; live UNTESTED,OPS-DEF-0018
+Public callback reachability,PASS,GET empty→302 decline; routes present; throttle 60/min,OPS-DEF-0017
+Checkout UI hides AbhiPay when not configured,READY,PublicAbhiPayCheckoutPresenter gateway_available gate,OPS-DEF-0017
