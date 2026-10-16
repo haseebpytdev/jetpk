@@ -1,7 +1,7 @@
 # JP-OPS-READINESS-01 — Go-Live Readiness Scorecard
 
 **Rule:** Do not average away P0/P1 blockers.  
-**Date:** 2026-10-16 (OPS-DEF-0018 PNR deferred; pricing read-side certified for initial MANUAL launch)
+**Date:** 2026-10-16 (OPS-DEF-0005/0008 CLOSED on prod; OPS-DEF-0018 PNR deferred; pricing read-side certified for initial MANUAL launch)
 
 | Domain | Status | Driver |
 |--------|--------|--------|
@@ -21,12 +21,12 @@
 | Notifications | AMBER | OPS-DEF-0019 CLOSED; failed_jobs SMTP residual |
 | Documents | AMBER | Inventoried; values unproven |
 | CMS/SEO | AMBER | Inventoried; not re-audited |
-| Security | AMBER | OPS-DEF-0004 CLOSED; OPS-DEF-0005/0008 FIX_READY_FOR_DEPLOYMENT (not deployed); OPS-DEF-0024 QA fixture drift |
+| Security | AMBER | OPS-DEF-0004/0005/0008 CLOSED on prod (scoped patches); OPS-RISK-0006 RESIDUAL_RISK_ONLY; OPS-DEF-0024 QA fixture drift |
 | Data integrity | AMBER | Source risks; OPS-DEF-0027 stale QA balance_due rows |
 | Background jobs | AMBER | failed_jobs residual; default worker posture per prior waves |
 | Observability | AMBER | disk-health ACTIVE; OPS-RISK-0017 vhost access.log broken; OPS-DEF-0022 alert delivery open |
 | Performance | AMBER | Disk ~48%; no live latency cert |
-| Server operations | AMBER | Runtime SHA 922f1577; frontend BUILD_ID QClrSvr5W0V2GqllIeLKE |
+| Server operations | AMBER | Runtime base SHA 922f1577 + ops-def-0005-0008@79da5477; dashboard BUILD_ID 7-iZf4RbaJmGpuDjO1tsh |
 | Admin activation | AMBER | AbhiPay activation deferred by business decision; not required for INITIAL MANUAL launch |
 
 **PRODUCTION_OPERATIONAL_READY = NO**  
@@ -36,6 +36,8 @@
 **PRICING_READINESS = PASS_FOR_INITIAL_LAUNCH_PROFILE**
 
 **OPS-DEF-0006 + OPS-DEF-0007 + OPS-DEF-0013 + OPS-DEF-0004:** CLOSED on production runtime `922f1577`.  
+**OPS-DEF-0005 + OPS-DEF-0008:** CLOSED — scoped two-file deploy from `79da5477` onto runtime base `922f1577` (see `OPS-DEF-0005-0008-PROD-CLOSURE.md`).  
+**OPS-RISK-0006:** `RESIDUAL_RISK_ONLY` — guest dual-factor + deposits agent scope closed; other isolation surfaces may remain.  
 **OPS-DEF-0016:** `CLOSED_LAUNCH_SCOPE_DEFINED` — Sabre GDS search + limited PNR; ticketing/void/refund disabled; PIA FROZEN; AirBlue/OneAPI/IATI/Duffel/group excluded.  
 **OPS-DEF-0017:** `OPEN_DEFERRED_MANUAL_PAYMENT_LAUNCH` — AbhiPay unfinished/uncertified; intentionally out of initial launch scope.  
 **OPS-DEF-0018:** `PARTIAL_DEFERRED_LIVE_SABRE_PNR_UAT` — manual payment UAT PASS; Sabre live PNR deferred to `GO_LIVE_GATE_SABRE_PNR_001`; pricing read-side PASS_FOR_INITIAL_LAUNCH_PROFILE (AMBER residual).  
