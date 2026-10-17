@@ -21,10 +21,10 @@
 | Notifications | AMBER | OPS-DEF-0019 CLOSED; failed_jobs SMTP residual |
 | Documents | AMBER | Inventoried; values unproven |
 | CMS/SEO | AMBER | Inventoried; not re-audited |
-| Security | AMBER | OPS-DEF-0004/0005/0008 CLOSED; OPS-DEF-0012 CLOSED on prod; OPS-DEF-0011 MITIGATED_PHASE1_DEPLOYED_PHASE2_PENDING (legacy hop residual); OPS-RISK-0006 RESIDUAL_RISK_ONLY; OPS-DEF-0024 QA fixture drift |
+| Security | AMBER | OPS-DEF-0004/0005/0008/0012 CLOSED; OPS-DEF-0011 MITIGATED_PHASE1_DEPLOYED_PHASE2_SUNSET_PENDING (decision C; no hard remove yet); OPS-RISK-0006 RESIDUAL; OPS-RISK-0017 OPEN_ACCESS_LOGGING_UNAVAILABLE; OPS-DEF-0024 QA fixture drift |
 | Data integrity | AMBER | Source risks; OPS-DEF-0027 stale QA balance_due rows |
 | Background jobs | AMBER | failed_jobs residual; default worker posture per prior waves |
-| Observability | AMBER | disk-health ACTIVE; OPS-RISK-0017 vhost access.log broken; OPS-DEF-0022 alert delivery open |
+| Observability | AMBER | disk-health ACTIVE; OPS-RISK-0017 OPEN_ACCESS_LOGGING_UNAVAILABLE (stale 153B access.log); OPS-DEF-0022 alert delivery open |
 | Performance | AMBER | Disk ~48%; no live latency cert |
 | Server operations | AMBER | Runtime base SHA 922f1577 + ops-def-0005-0008@79da5477 + ops-def-0011-0012@9a3f2ba2; public FE BUILD_ID HNDspC9CoB4Bat_x0DwZ6; dashboard BUILD_ID 7-iZf4RbaJmGpuDjO1tsh |
 | Admin activation | AMBER | AbhiPay activation deferred by business decision; not required for INITIAL MANUAL launch |
@@ -38,8 +38,9 @@
 **OPS-DEF-0006 + OPS-DEF-0007 + OPS-DEF-0013 + OPS-DEF-0004:** CLOSED on production runtime `922f1577`.  
 **OPS-DEF-0005 + OPS-DEF-0008:** CLOSED — scoped two-file deploy from `79da5477` onto runtime base `922f1577` (see `OPS-DEF-0005-0008-PROD-CLOSURE.md`).  
 **OPS-DEF-0012:** CLOSED — atomic guest token rotation deployed (`OPS-DEF-0011-0012-PROD-CLOSURE.md`).  
-**OPS-DEF-0011:** `MITIGATED_PHASE1_DEPLOYED_PHASE2_PENDING` — clean guest URLs + session bind + legacy exchange deployed; Phase-2 still required for legacy path removal + access-log redaction.  
-**OPS-RISK-0006:** `RESIDUAL_RISK_ONLY` — guest dual-factor + deposits agent scope closed; 0011 Phase-2 legacy hop residual; other isolation surfaces may remain.  
+**OPS-DEF-0011:** `MITIGATED_PHASE1_DEPLOYED_PHASE2_SUNSET_PENDING` — generators no longer emit legacy token URLs; hard remove deferred (decision C) until usage measurable or owner waiver; see `OPS-DEF-0011-PHASE2-READINESS.md`.  
+**OPS-RISK-0006:** `RESIDUAL_RISK_ONLY` — guest dual-factor + deposits agent scope closed; 0011 legacy hop retained under controlled sunset; other isolation surfaces may remain.  
+**OPS-RISK-0017:** `OPEN_ACCESS_LOGGING_UNAVAILABLE` — access.log stale; blocks evidence-based 0011 Phase-2 cutover; redaction follow-up after logging restore.  
 **OPS-DEF-0016:** `CLOSED_LAUNCH_SCOPE_DEFINED` — Sabre GDS search + limited PNR; ticketing/void/refund disabled; PIA FROZEN; AirBlue/OneAPI/IATI/Duffel/group excluded.  
 **OPS-DEF-0017:** `OPEN_DEFERRED_MANUAL_PAYMENT_LAUNCH` — AbhiPay unfinished/uncertified; intentionally out of initial launch scope.  
 **OPS-DEF-0018:** `PARTIAL_DEFERRED_LIVE_SABRE_PNR_UAT` — manual payment UAT PASS; Sabre live PNR deferred to `GO_LIVE_GATE_SABRE_PNR_001`; pricing read-side PASS_FOR_INITIAL_LAUNCH_PROFILE (AMBER residual).  
