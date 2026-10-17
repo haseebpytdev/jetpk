@@ -6,17 +6,21 @@ use App\Enums\SupplierProvider;
 use App\Models\Booking;
 use App\Models\SupplierConnection;
 use App\Models\User;
+use App\Console\Commands\Concerns\GuardsAirBlueLiveNetwork;
 use App\Services\Suppliers\AirBlue\AirBlueBookingService;
 use Illuminate\Console\Command;
 
 class AirBlueTestBookingCommand extends Command
 {
+    use GuardsAirBlueLiveNetwork;
+
     protected $signature = 'airblue:test-booking
         {booking : OTA booking ID}
         {--connection= : Supplier connection ID}
-        {--dry-run : Build payloads only without live call}';
+        {--dry-run : Build payloads only without live call}
+        {--allow-live : Explicitly allow outbound Zapways booking call}';
 
-    protected $description = 'Execute or dry-run AirBlue DoOrderCreate for an OTA booking';
+    protected $description = 'Execute or dry-run AirBlue DoOrderCreate for an OTA booking (live-gated)';
 
     public function handle(AirBlueBookingService $bookingService): int
     {
@@ -24,6 +28,10 @@ class AirBlueTestBookingCommand extends Command
             $this->warn('Dry-run: payload validation only — live booking not implemented in CLI dry-run.');
 
             return self::SUCCESS;
+        }
+
+        if (! $this->guardAirBlueLiveNetwork('airblue:test-booking')) {
+            return self::FAILURE;
         }
 
         $booking = Booking::query()->find((int) $this->argument('booking'));

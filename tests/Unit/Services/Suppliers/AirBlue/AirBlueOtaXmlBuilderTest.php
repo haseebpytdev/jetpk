@@ -12,7 +12,7 @@ use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
 use Tests\TestCase;
 
-class AirBlueOtaXmlBuilderTest extends TestCase
+class AirBlueOtaXmlBuilderTest extends AirBlueOfflineTestCase
 {
     /**
      * @return array<string, mixed>

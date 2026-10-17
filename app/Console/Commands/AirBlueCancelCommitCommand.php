@@ -5,20 +5,28 @@ namespace App\Console\Commands;
 use App\Enums\SupplierProvider;
 use App\Models\Booking;
 use App\Models\SupplierConnection;
+use App\Console\Commands\Concerns\GuardsAirBlueLiveNetwork;
 use App\Services\Suppliers\AirBlue\AirBlueCancelService;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueCancellationException;
 use Illuminate\Console\Command;
 
 class AirBlueCancelCommitCommand extends Command
 {
+    use GuardsAirBlueLiveNetwork;
+
     protected $signature = 'airblue:cancel-commit
         {booking : OTA booking ID}
-        {--connection= : Supplier connection ID}';
+        {--connection= : Supplier connection ID}
+        {--allow-live : Explicitly allow outbound Zapways cancel commit}';
 
-    protected $description = 'Run AirBlue DoOrderCancelCommit for an OTA booking';
+    protected $description = 'Run AirBlue DoOrderCancelCommit for an OTA booking (live-gated)';
 
     public function handle(AirBlueCancelService $cancelService): int
     {
+        if (! $this->guardAirBlueLiveNetwork('airblue:cancel-commit')) {
+            return self::FAILURE;
+        }
+
         $booking = Booking::query()->find((int) $this->argument('booking'));
         if ($booking === null) {
             $this->error('Booking not found.');

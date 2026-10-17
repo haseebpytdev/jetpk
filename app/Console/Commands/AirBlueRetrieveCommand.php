@@ -5,21 +5,29 @@ namespace App\Console\Commands;
 use App\Enums\SupplierProvider;
 use App\Models\Booking;
 use App\Models\SupplierConnection;
+use App\Console\Commands\Concerns\GuardsAirBlueLiveNetwork;
 use App\Services\Suppliers\AirBlue\AirBlueRetrieveService;
 use Illuminate\Console\Command;
 
 class AirBlueRetrieveCommand extends Command
 {
+    use GuardsAirBlueLiveNetwork;
+
     protected $signature = 'airblue:retrieve
         {--booking= : OTA booking ID}
         {--order= : AirBlue order ID}
         {--owner= : Owner code (e.g. PK)}
-        {--connection= : Supplier connection ID}';
+        {--connection= : Supplier connection ID}
+        {--allow-live : Explicitly allow outbound Zapways retrieve call}';
 
-    protected $description = 'Retrieve and sync AirBlue order by OTA booking ID';
+    protected $description = 'Retrieve and sync AirBlue order by OTA booking ID (live-gated)';
 
     public function handle(AirBlueRetrieveService $retrieveService): int
     {
+        if (! $this->guardAirBlueLiveNetwork('airblue:retrieve')) {
+            return self::FAILURE;
+        }
+
         $bookingId = $this->option('booking');
         if (! $bookingId) {
             $this->error('Provide --booking=ID');

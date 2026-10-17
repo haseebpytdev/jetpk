@@ -6,7 +6,7 @@ use App\Data\FlightSearchRequestData;
 use App\Services\Suppliers\AirBlue\AirBlueXmlBuilder;
 use Tests\TestCase;
 
-class AirBlueXmlBuilderTest extends TestCase
+class AirBlueXmlBuilderTest extends AirBlueOfflineTestCase
 {
     public function test_air_shopping_one_way_contains_party_and_route(): void
     {

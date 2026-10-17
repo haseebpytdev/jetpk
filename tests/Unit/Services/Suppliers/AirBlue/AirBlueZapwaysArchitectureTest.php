@@ -11,7 +11,7 @@ use App\Services\Suppliers\AirBlue\Exceptions\AirBlueValidationException;
 use ReflectionClass;
 use Tests\TestCase;
 
-class AirBlueZapwaysArchitectureTest extends TestCase
+class AirBlueZapwaysArchitectureTest extends AirBlueOfflineTestCase
 {
     public function test_call_ndc_always_fails_closed(): void
     {

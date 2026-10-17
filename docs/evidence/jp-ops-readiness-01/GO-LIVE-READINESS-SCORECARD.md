@@ -13,7 +13,7 @@
 | Admin | AMBER | Surfaces exist; AbhiPay admin config deferred (not launch-blocking) |
 | Staff | AMBER | Staff login+perms proven; manual payment review routes exist |
 | Booking | AMBER | State machine mapped; live Sabre PNR deferred to go-live gate |
-| Supplier | AMBER | OPS-DEF-0016 CLOSED_LAUNCH_SCOPE_DEFINED: Sabre GDS limited; others excluded/frozen/disabled |
+| Supplier | AMBER | OPS-DEF-0016 launch scope; AirBlue offline finalization STRENGTHENED (`AIRBLUE-ZAPWAYS-NON-LIVE-FINALIZATION.md`); live Zapways DEFERRED |
 | Pricing | AMBER | Read-side invariants PASS_FOR_INITIAL_LAUNCH_PROFILE; live supplier revalidation unexecuted; OPS-DEF-0026 Next promo display residual |
 | Finance | AMBER | OPS-DEF-0006+0007+0013 CLOSED; runtime 922f1577 |
 | Payments | AMBER | INITIAL_PAYMENT_MODE=MANUAL; manual proof UAT PASS; AbhiPay deferred (0017); Sabre PNR residual deferred |
@@ -45,4 +45,4 @@
 **OPS-DEF-0017:** `OPEN_DEFERRED_MANUAL_PAYMENT_LAUNCH` — AbhiPay unfinished/uncertified; intentionally out of initial launch scope.  
 **OPS-DEF-0018:** `PARTIAL_DEFERRED_LIVE_SABRE_PNR_UAT` — manual payment UAT PASS; Sabre live PNR deferred to `GO_LIVE_GATE_SABRE_PNR_001`; pricing read-side PASS_FOR_INITIAL_LAUNCH_PROFILE (AMBER residual).  
 **CURRENT_NON_DEFERRED_P1_BLOCKERS:** NONE (deferred: Sabre live PNR go-live gate; AbhiPay).  
-**Next priority:** `AIRBLUE_ZAPWAYS_FINALIZATION_NON_LIVE`. Parallel: observe OPS-DEF-0011 legacy `outcome=success` before Phase-2 hard remove. Sabre PNR only in go-live window.
+**Next priority:** Complete AirBlue offline finalization PR review (`supplier/airblue-zapways-finalization`); live Zapways + Sabre PNR only in go-live window. Parallel: observe OPS-DEF-0011 legacy `outcome=success`.

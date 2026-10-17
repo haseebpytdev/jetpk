@@ -11,15 +11,18 @@ use App\Models\SupplierConnection;
 use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AirBlue\AirBlueOfflineHttp;
 use Tests\TestCase;
 
 class AirBlueZapwaysConnectionStoreTest extends TestCase
 {
     use RefreshDatabase;
+    use AirBlueOfflineHttp;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->setUpAirBlueOfflineHttp();
         $this->seed(OtaFoundationSeeder::class);
         config([
             'suppliers.airblue.default_tls_cert_path' => '/secure/zapways/jetpakistan-zapways.crt.pem',

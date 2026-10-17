@@ -6,7 +6,7 @@ use App\Services\Suppliers\AirBlue\AirBlueClient;
 use ReflectionClass;
 use Tests\TestCase;
 
-class AirBlueClientSoapActionTest extends TestCase
+class AirBlueClientSoapActionTest extends AirBlueOfflineTestCase
 {
     public function test_read_soap_action_uses_test_host_for_test_config(): void
     {

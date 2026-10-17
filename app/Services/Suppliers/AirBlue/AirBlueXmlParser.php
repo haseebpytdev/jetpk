@@ -12,6 +12,8 @@ use DOMXPath;
  */
 class AirBlueXmlParser
 {
+    private const MAX_XML_BYTES = 5_000_000;
+
     /**
      * @return array{
      *     parsed: array<string, mixed>,
@@ -28,9 +30,20 @@ class AirBlueXmlParser
             throw new AirBlueXmlException('empty_xml', 502, 'Provider returned an empty response.');
         }
 
-        $dom = new DOMDocument;
-        if (@$dom->loadXML($xml) !== true) {
-            throw new AirBlueXmlException('malformed_xml', 502, 'Provider returned an invalid XML response.');
+        if (strlen($xml) > self::MAX_XML_BYTES) {
+            throw new AirBlueXmlException('xml_too_large', 502, 'Provider returned an oversized XML response.');
+        }
+
+        $previous = libxml_use_internal_errors(true);
+        try {
+            $dom = new DOMDocument;
+            $loaded = @$dom->loadXML($xml, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
+            if ($loaded !== true) {
+                throw new AirBlueXmlException('malformed_xml', 502, 'Provider returned an invalid XML response.');
+            }
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
         }
 
         $xpath = new DOMXPath($dom);

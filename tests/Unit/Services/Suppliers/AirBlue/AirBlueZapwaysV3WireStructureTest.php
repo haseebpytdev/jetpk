@@ -16,7 +16,7 @@ use DOMXPath;
 use ReflectionClass;
 use Tests\TestCase;
 
-class AirBlueZapwaysV3WireStructureTest extends TestCase
+class AirBlueZapwaysV3WireStructureTest extends AirBlueOfflineTestCase
 {
     /**
      * @return array<string, mixed>

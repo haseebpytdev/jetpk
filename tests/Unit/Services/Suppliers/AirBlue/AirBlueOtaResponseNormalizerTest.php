@@ -9,7 +9,7 @@ use App\Services\Suppliers\AirBlue\AirBlueOtaResponseNormalizer;
 use App\Services\Suppliers\AirBlue\AirBlueOtaXmlParser;
 use Tests\TestCase;
 
-class AirBlueOtaResponseNormalizerTest extends TestCase
+class AirBlueOtaResponseNormalizerTest extends AirBlueOfflineTestCase
 {
     public function test_normalizes_search_offers_with_pa_carrier(): void
     {

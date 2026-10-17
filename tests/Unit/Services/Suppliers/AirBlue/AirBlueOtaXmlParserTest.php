@@ -6,7 +6,7 @@ use App\Services\Suppliers\AirBlue\AirBlueOtaXmlParser;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueXmlException;
 use Tests\TestCase;
 
-class AirBlueOtaXmlParserTest extends TestCase
+class AirBlueOtaXmlParserTest extends AirBlueOfflineTestCase
 {
     public function test_parses_successful_search_response(): void
     {
