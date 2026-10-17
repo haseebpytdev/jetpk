@@ -21,7 +21,7 @@
 | Notifications | AMBER | OPS-DEF-0019 CLOSED; failed_jobs SMTP residual |
 | Documents | AMBER | Inventoried; values unproven |
 | CMS/SEO | AMBER | Inventoried; not re-audited |
-| Security | AMBER | OPS-DEF-0004/0005/0008/0012 CLOSED; OPS-DEF-0011 MITIGATED_PHASE1_DEPLOYED_PHASE2_SUNSET_PENDING (decision C; sanitized counter still required); OPS-RISK-0006 RESIDUAL; OPS-DEF-0024 QA fixture drift |
+| Security | AMBER | OPS-DEF-0004/0005/0008/0012 CLOSED; OPS-DEF-0011 TELEMETRY_FIX_READY_FOR_DEPLOYMENT (legacy hop retained); OPS-RISK-0006 RESIDUAL; OPS-DEF-0024 QA fixture drift |
 | Data integrity | AMBER | Source risks; OPS-DEF-0027 stale QA balance_due rows |
 | Background jobs | AMBER | failed_jobs residual; default worker posture per prior waves |
 | Observability | AMBER | disk-health ACTIVE; OPS-RISK-0017 CLOSED_GENERAL_LOGGING_RESTORED (URI-free Strategy A); OPS-DEF-0022 alert delivery open |
@@ -38,11 +38,11 @@
 **OPS-DEF-0006 + OPS-DEF-0007 + OPS-DEF-0013 + OPS-DEF-0004:** CLOSED on production runtime `922f1577`.  
 **OPS-DEF-0005 + OPS-DEF-0008:** CLOSED — scoped two-file deploy from `79da5477` onto runtime base `922f1577` (see `OPS-DEF-0005-0008-PROD-CLOSURE.md`).  
 **OPS-DEF-0012:** CLOSED — atomic guest token rotation deployed (`OPS-DEF-0011-0012-PROD-CLOSURE.md`).  
-**OPS-DEF-0011:** `MITIGATED_PHASE1_DEPLOYED_PHASE2_SUNSET_PENDING` — generators no longer emit legacy token URLs; hard remove deferred (decision C) until sanitized legacy-route counter or owner waiver; see `OPS-DEF-0011-PHASE2-READINESS.md`.  
+**OPS-DEF-0011:** `TELEMETRY_FIX_READY_FOR_DEPLOYMENT` — sanitized legacy-route middleware telemetry implemented (`OPS-DEF-0011-LEGACY-TELEMETRY.md`); deploy then observe `outcome=success` before Phase-2 hard remove.  
 **OPS-RISK-0006:** `RESIDUAL_RISK_ONLY` — guest dual-factor + deposits agent scope closed; 0011 legacy hop retained under controlled sunset; other isolation surfaces may remain.  
-**OPS-RISK-0017:** `CLOSED_GENERAL_LOGGING_RESTORED` — vhost access.log writing with URI-free Strategy A; path-level legacy usage still needs sanitized app counter (`OPS-RISK-0017-ACCESS-LOGGING-RESTORATION.md`).  
+**OPS-RISK-0017:** `CLOSED_GENERAL_LOGGING_RESTORED` — URI-free vhost access.log; 0011 app telemetry covers legacy path usage measurement after deploy.  
 **OPS-DEF-0016:** `CLOSED_LAUNCH_SCOPE_DEFINED` — Sabre GDS search + limited PNR; ticketing/void/refund disabled; PIA FROZEN; AirBlue/OneAPI/IATI/Duffel/group excluded.  
 **OPS-DEF-0017:** `OPEN_DEFERRED_MANUAL_PAYMENT_LAUNCH` — AbhiPay unfinished/uncertified; intentionally out of initial launch scope.  
 **OPS-DEF-0018:** `PARTIAL_DEFERRED_LIVE_SABRE_PNR_UAT` — manual payment UAT PASS; Sabre live PNR deferred to `GO_LIVE_GATE_SABRE_PNR_001`; pricing read-side PASS_FOR_INITIAL_LAUNCH_PROFILE (AMBER residual).  
 **CURRENT_NON_DEFERRED_P1_BLOCKERS:** NONE (deferred: Sabre live PNR go-live gate; AbhiPay).  
-**Next priority:** Implement OPS-DEF-0011 sanitized legacy-route counter; continue non-mutating readiness; Sabre PNR only in go-live window. Do not reopen AbhiPay until business trigger.
+**Next priority:** Review/merge + deploy OPS-DEF-0011 legacy telemetry; observe successful legacy usage; then Phase-2 hard remove. Sabre PNR only in go-live window.
