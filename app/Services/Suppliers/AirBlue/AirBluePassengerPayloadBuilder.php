@@ -3,6 +3,7 @@
 namespace App\Services\Suppliers\AirBlue;
 
 use App\Models\Booking;
+use App\Services\Suppliers\AirBlue\Exceptions\AirBlueValidationException;
 use App\Support\Phone\SupplierContactFormatter;
 
 /**
@@ -18,6 +19,8 @@ class AirBluePassengerPayloadBuilder
         $booking->loadMissing('passengers');
         $passengers = [];
         $counter = ['ADT' => 1, 'CHD' => 1, 'INF' => 1];
+        $adultRphs = [];
+        $rph = 1;
         foreach ($booking->passengers as $passenger) {
             $ptc = strtoupper((string) ($passenger->type ?? 'ADT'));
             if (! in_array($ptc, ['ADT', 'CHD', 'INF'], true)) {
@@ -34,9 +37,10 @@ class AirBluePassengerPayloadBuilder
             };
             $birthdate = $passenger->date_of_birth?->format('Y-m-d') ?? trim((string) ($passenger->date_of_birth ?? ''));
             $passportExpiry = $passenger->passport_expiry_date?->format('Y-m-d') ?? trim((string) ($passenger->passport_expiry_date ?? ''));
-            $passengers[] = [
+            $row = [
                 'pax_id' => 'PAX-'.$ptc.$idx,
                 'ptc' => $ptc,
+                'rph' => $rph,
                 'title' => (string) ($passenger->title ?? ''),
                 'given_name' => (string) ($passenger->first_name ?? ''),
                 'surname' => (string) ($passenger->last_name ?? ''),
@@ -48,6 +52,30 @@ class AirBluePassengerPayloadBuilder
                 'document_expiry' => $passportExpiry,
                 'contact_info_ref_id' => 'Contact-1',
             ];
+            if ($ptc === 'ADT') {
+                $adultRphs[] = $rph;
+            }
+            $passengers[] = $row;
+            $rph++;
+        }
+
+        $infantCount = count(array_filter($passengers, fn (array $p): bool => ($p['ptc'] ?? '') === 'INF'));
+        $adultCount = count($adultRphs);
+        if ($infantCount > $adultCount) {
+            throw new AirBlueValidationException(
+                'invalid_infant_count',
+                422,
+                'AirBlue OTA booking requires infants not to exceed adults.',
+            );
+        }
+
+        $adultCursor = 0;
+        foreach ($passengers as $index => $passenger) {
+            if (($passenger['ptc'] ?? '') !== 'INF') {
+                continue;
+            }
+            $passengers[$index]['associated_adult_rph'] = $adultRphs[$adultCursor] ?? null;
+            $adultCursor++;
         }
 
         return $passengers;

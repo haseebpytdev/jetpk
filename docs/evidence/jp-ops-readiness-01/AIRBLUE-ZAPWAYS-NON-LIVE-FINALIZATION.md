@@ -76,6 +76,11 @@ Harness: `Tests\Support\AirBlue\AirBlueOfflineHttp` + `AirBlueOfflineTestCase` u
 3. **Uncertain booking outcome** after transport timeout / unexpected failure — attempt status `uncertain`, supplier booking `pending_reconciliation`, **no auto-retry AirBook**.
 4. **CLI live gates** on `airblue:test-search`, `test-booking`, `retrieve`, `cancel-commit`, `test-ticketing` — require `--allow-live` + `AIRBLUE_CLI_LIVE_ENABLED=true`.
 5. **Wire `AirBlueConnectionSearchPolicy`** into `FlightSearchService` public search fan-out.
+6. **Cancel normalizer bugfix** — no longer `unset($parsedResponse)` before reading it; failed SOAP/errors map to `cancellation_status=failed`.
+7. **Baggage honesty** — stop inventing `20 KG` / `7 KG` when Zapways search response omits baggage (`null` = unavailable).
+8. **Multi-city search** — emit explicit segments (max 4); reject empty/invalid multicity segments; reject infants > adults.
+9. **Infant association metadata** — assign `associated_adult_rph` + validate infants ≤ adults in passenger payload (wire association attribute remains `BLOCKED_MISSING_PROVIDER_SPEC` until Zapways docs confirm).
+10. **Retrieve reconciliation** — successful read with PNR+instance clears `booking_outcome=uncertain` → `reconciled` and updates attempt/supplier booking rows.
 
 ## Command classification (Phase 28)
 
@@ -153,7 +158,7 @@ AIRBLUE_OVERALL_READINESS=READY_AWAITING_LIVE_CERTIFICATION
 ## Test evidence
 
 ```text
-AIRBLUE_UNIT+CLI suite: tests=104 passed=104 assertions=283
+AIRBLUE_UNIT+CLI suite: see latest `_phpunit-airblue-finalization.txt` on branch
 AIRBLUE_TEST_EXTERNAL_NETWORK_CALLS=0
 ```
 
