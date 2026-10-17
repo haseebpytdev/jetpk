@@ -8,10 +8,11 @@
 ## Status
 
 ```text
-OPS_DEF_0011_STATUS=TELEMETRY_FIX_READY_FOR_DEPLOYMENT
+OPS_DEF_0011_STATUS=SUNSET_TELEMETRY_DEPLOYED_OBSERVATION_ACTIVE
+SUNSET_OBSERVATION_ACTIVE=YES
 ```
 
-Legacy routes remain until a post-deploy observation window shows zero successful legacy usage (or owner waiver).
+Production deploy evidence: `OPS-DEF-0011-LEGACY-TELEMETRY-PROD.md`. Legacy routes remain until an observation window shows zero successful legacy usage (or owner waiver). Not closed.
 
 ## Mechanism
 
