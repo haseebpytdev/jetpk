@@ -314,7 +314,9 @@ Route::middleware('platform.module:customer_booking_lookup')->group(function ():
     // Token-free primary guest detail (session cookie auth).
     Route::get('/guest/bookings/{booking}', [GuestBookingLookupController::class, 'showGuestBooking'])->name('guest.bookings.show');
     // Legacy path bearer: exchange into session then redirect (OPS-DEF-0011 phase-1 compat).
-    Route::get('/guest/bookings/{booking}/access/{token}', [GuestBookingLookupController::class, 'exchangeGuestBookingToken'])->name('guest.bookings.exchange');
+    Route::get('/guest/bookings/{booking}/access/{token}', [GuestBookingLookupController::class, 'exchangeGuestBookingToken'])
+        ->middleware('guest.legacy.telemetry')
+        ->name('guest.bookings.exchange');
     Route::get('/guest/documents/{bookingDocument}/download', [GuestBookingLookupController::class, 'downloadGuestDocument'])->name('guest.documents.download');
 });
 // Token-free guest mutations (session auth; optional legacy token route kept below).
@@ -335,19 +337,19 @@ Route::post('/guest/bookings/{booking}/cancellations', [GuestBookingCancellation
     ->name('guest.bookings.cancellations.store');
 // Legacy token-in-path mutations (compat entry; authorize via route token then bind session).
 Route::post('/guest/bookings/{booking}/access/{token}/payment-proof', [GuestBookingLookupController::class, 'submitGuestPaymentProof'])
-    ->middleware(['platform.module:payment_proofs', 'throttle:payment-proof-submit'])
+    ->middleware(['platform.module:payment_proofs', 'throttle:payment-proof-submit', 'guest.legacy.telemetry'])
     ->name('guest.bookings.payment-proof.legacy');
 Route::post('/guest/bookings/{booking}/access/{token}/promo/apply', [BookingCheckoutPromoController::class, 'apply'])
-    ->middleware('throttle:promo-apply')
+    ->middleware(['throttle:promo-apply', 'guest.legacy.telemetry'])
     ->name('guest.bookings.promo.apply.legacy');
 Route::post('/guest/bookings/{booking}/access/{token}/promo/remove', [BookingCheckoutPromoController::class, 'remove'])
-    ->middleware('throttle:promo-apply')
+    ->middleware(['throttle:promo-apply', 'guest.legacy.telemetry'])
     ->name('guest.bookings.promo.remove.legacy');
 Route::post('/guest/bookings/{booking}/access/{token}/abhipay/start', [AbhiPayPaymentController::class, 'start'])
-    ->middleware('throttle:abhipay-payment-start')
+    ->middleware(['throttle:abhipay-payment-start', 'guest.legacy.telemetry'])
     ->name('guest.bookings.abhipay.start.legacy');
 Route::post('/guest/bookings/{booking}/access/{token}/cancellations', [GuestBookingCancellationController::class, 'store'])
-    ->middleware('throttle:guest-token')
+    ->middleware(['throttle:guest-token', 'guest.legacy.telemetry'])
     ->name('guest.bookings.cancellations.store.legacy');
 Route::post('/payments/abhipay/start/{booking}', [AbhiPayPaymentController::class, 'start'])
     ->middleware(['auth', 'throttle:abhipay-payment-start'])

@@ -27,6 +27,7 @@ use App\Http\Middleware\EnsureGoogleOnboardingComplete;
 use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsurePlatformModuleRouteEnabled;
 use App\Http\Middleware\EnsureStaffPermission;
+use App\Http\Middleware\LogLegacyGuestTokenUsage;
 use App\Http\Middleware\PersistClientPreviewContext;
 use App\Http\Middleware\ProtectClientUiPreview;
 use App\Http\Middleware\ResolveClientUiVersion;
@@ -214,6 +215,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'ai.lab.canary.fault' => ApplyAiLabCanaryFaultHeader::class,
             'ai.embed.frame' => ApplyAiEmbedFrameHeaders::class,
             'ai.embed.session' => AuthenticateAiEmbedSession::class,
+            'guest.legacy.telemetry' => LogLegacyGuestTokenUsage::class,
         ]);
 
         $middleware->prependToPriorityList(
