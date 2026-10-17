@@ -158,7 +158,7 @@ AIRBLUE_OVERALL_READINESS=READY_AWAITING_LIVE_CERTIFICATION
 ## Test evidence
 
 ```text
-AIRBLUE_UNIT+CLI suite: see latest `_phpunit-airblue-finalization.txt` on branch
+AIRBLUE_UNIT+CLI suite: tests=108 passed=108 assertions=301
 AIRBLUE_TEST_EXTERNAL_NETWORK_CALLS=0
 ```
 
