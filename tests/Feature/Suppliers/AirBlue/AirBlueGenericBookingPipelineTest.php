@@ -23,8 +23,10 @@ use App\Services\Suppliers\AirBlue\Exceptions\AirBlueUnavailableException;
 use App\Support\Bookings\SupplierBookingAttemptGuard;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\RefreshDatabaseState;
 use Illuminate\Support\Facades\Http;
 use Mockery;
+use RuntimeException;
 use Tests\Support\AirBlue\AirBlueOfflineHttp;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
@@ -34,6 +36,21 @@ class AirBlueGenericBookingPipelineTest extends TestCase
     use AirBlueOfflineHttp;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
+
+    /**
+     * No wrapping test transaction so DB::afterCommit (uncertain notify) runs when
+     * SupplierBookingService's transaction commits. Remigrate each test because
+     * :memory: sqlite is empty after application refresh without a shared tx.
+     *
+     * @var list<string>
+     */
+    protected $connectionsToTransact = [];
+
+    protected function refreshTestDatabase(): void
+    {
+        $this->artisan('migrate:fresh', $this->migrateFreshUsing());
+        RefreshDatabaseState::$migrated = true;
+    }
 
     protected function setUp(): void
     {
@@ -101,7 +118,7 @@ class AirBlueGenericBookingPipelineTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_uncertain_path_updates_same_attempt_and_blocks_retry(): void
+    public function test_uncertain_path_notifies_after_commit_and_blocks_retry(): void
     {
         $fixture = $this->eligibleAirBlueBooking();
         $actor = $this->platformAdmin();
@@ -144,12 +161,83 @@ class AirBlueGenericBookingPipelineTest extends TestCase
         $meta = is_array($booking->meta) ? $booking->meta : [];
         $this->assertSame('uncertain', $meta['airblue_context']['booking_outcome'] ?? null);
         $this->assertTrue((bool) ($meta['airblue_context']['supplier_outcome_unknown'] ?? false));
-        $this->assertSame(1, $manualReview);
+        $this->assertSame(1, $manualReview, 'manual-review notification must run after commit');
+        $this->assertTrue(
+            AuditLog::query()
+                ->where('auditable_id', $booking->id)
+                ->where('action', 'booking.supplier_booking_uncertain')
+                ->exists(),
+        );
 
         $retry = app(BookingProviderRouter::class)->createSupplierBooking($booking->fresh(), $actor);
         $this->assertFalse($retry->success);
         $this->assertSame('booking_outcome_uncertain', $retry->error_code);
         $this->assertSame(2, SupplierBookingAttempt::query()->where('booking_id', $booking->id)->count()); // blocked attempt recorded
+        $this->assertSame(1, SupplierBooking::query()->where('booking_id', $booking->id)->count());
+        Http::assertNothingSent();
+    }
+
+    public function test_uncertain_notification_failure_does_not_roll_back_state_or_allow_retry(): void
+    {
+        $fixture = $this->eligibleAirBlueBooking();
+        $actor = $this->platformAdmin();
+        $providerCalls = 0;
+        $notifyForced = false;
+
+        $this->mock(BookingCommunicationService::class, function ($mock) use (&$notifyForced): void {
+            $mock->shouldReceive('notifyManualReviewRequired')
+                ->once()
+                ->andReturnUsing(function () use (&$notifyForced): void {
+                    $notifyForced = true;
+                    throw new RuntimeException('forced notification failure');
+                });
+            $mock->shouldReceive('sendSupplierBookingCreated')->never();
+            $mock->shouldReceive('notifySupplierFailure')->never();
+            $mock->shouldReceive('logSystemEvent')->zeroOrMoreTimes();
+        });
+
+        $this->mock(AirBlueClient::class, function ($mock) use (&$providerCalls): void {
+            $mock->shouldReceive('callOta')
+                ->once()
+                ->andReturnUsing(function () use (&$providerCalls) {
+                    $providerCalls++;
+                    throw new AirBlueUnavailableException(
+                        'supplier_transport_failed',
+                        503,
+                        'Provider temporarily unavailable.',
+                    );
+                });
+        });
+
+        $result = app(BookingProviderRouter::class)->createSupplierBooking($fixture['booking']->fresh(), $actor);
+
+        $this->assertTrue($notifyForced, 'AIRBLUE_NOTIFICATION_EXCEPTION_FORCED');
+        $this->assertSame(1, $providerCalls);
+        $this->assertFalse($result->success);
+        $this->assertSame('manual_review', $result->status);
+        $this->assertSame('booking_outcome_uncertain', $result->error_code);
+
+        $this->assertSame(1, SupplierBookingAttempt::query()->where('booking_id', $fixture['booking']->id)->count());
+        $this->assertSame(1, SupplierBooking::query()->where('booking_id', $fixture['booking']->id)->count());
+        $this->assertSame('uncertain', SupplierBookingAttempt::query()->where('booking_id', $fixture['booking']->id)->value('status'));
+        $this->assertSame('pending_reconciliation', SupplierBooking::query()->where('booking_id', $fixture['booking']->id)->value('status'));
+
+        $booking = $fixture['booking']->fresh();
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $this->assertSame('uncertain', $meta['airblue_context']['booking_outcome'] ?? null);
+        $this->assertTrue((bool) ($meta['airblue_context']['supplier_outcome_unknown'] ?? false));
+        $this->assertSame('pending_reconciliation', (string) $booking->supplier_booking_status);
+        $this->assertTrue(
+            AuditLog::query()
+                ->where('auditable_id', $booking->id)
+                ->where('action', 'booking.supplier_booking_uncertain')
+                ->exists(),
+        );
+
+        $retry = app(BookingProviderRouter::class)->createSupplierBooking($booking->fresh(), $actor);
+        $this->assertFalse($retry->success);
+        $this->assertSame('booking_outcome_uncertain', $retry->error_code);
+        $this->assertSame(1, $providerCalls, 'SECOND_PROVIDER_CALL must remain 0 after notification failure');
         $this->assertSame(1, SupplierBooking::query()->where('booking_id', $booking->id)->count());
         Http::assertNothingSent();
     }

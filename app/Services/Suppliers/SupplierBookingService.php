@@ -693,9 +693,12 @@ class SupplierBookingService
             'supplier_booking_status' => 'pending_reconciliation',
         ]);
 
-        $this->communicationService->notifyManualReviewRequired(
-            $booking,
-            $actor,
+        // Notify only after the uncertain persistence transaction commits so a
+        // communication failure cannot roll back SupplierBooking / attempt state.
+        $this->scheduleUncertainManualReviewNotification(
+            (int) $booking->id,
+            (int) $actor->id,
+            (int) $attempt->id,
             'supplier_booking_outcome_uncertain',
         );
 
@@ -711,6 +714,43 @@ class SupplierBookingService
             error_message: $result->error_message ?: 'Supplier booking outcome is uncertain. Retrieve before any retry.',
             warnings: $result->warnings,
         );
+    }
+
+    /**
+     * Schedule manual-review notification after the current DB transaction commits.
+     * Failures are logged only — they must never undo uncertain supplier state.
+     */
+    protected function scheduleUncertainManualReviewNotification(
+        int $bookingId,
+        int $actorId,
+        int $attemptId,
+        string $reason,
+    ): void {
+        DB::afterCommit(function () use ($bookingId, $actorId, $attemptId, $reason): void {
+            try {
+                $booking = Booking::query()->find($bookingId);
+                if ($booking === null) {
+                    Log::warning('supplier_booking.uncertain_notify_skipped', [
+                        'booking_id' => $bookingId,
+                        'attempt_id' => $attemptId,
+                        'reason' => 'booking_missing_after_commit',
+                    ]);
+
+                    return;
+                }
+
+                $actor = $actorId > 0 ? User::query()->find($actorId) : null;
+                $this->communicationService->notifyManualReviewRequired($booking, $actor, $reason);
+            } catch (\Throwable $exception) {
+                Log::warning('supplier_booking.uncertain_notify_failed', [
+                    'booking_id' => $bookingId,
+                    'attempt_id' => $attemptId,
+                    'actor_id' => $actorId,
+                    'exception' => $exception::class,
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+        });
     }
 
     /**
