@@ -49,7 +49,9 @@
 | FAILED_JOBS_BY_QUEUE | `notifications-transactional`: 8 |
 | FAILED_JOBS_BY_JOB_CLASS | `DeliverQueuedOperationalMail`: 8 |
 | FAILED_JOBS_BY_EXCEPTION_CLASS | `UnexpectedResponseException`: 8 |
+| FAILED_JOBS_SMTP_CODES (sanitized) | `550 5.1.1` recipient rejected: 5; `450 4.7.1` recipient deferred/rejected: 3 |
 | FAILED_JOBS_BY_CATEGORY | SMTP/MAIL: 8 |
+
 | FAILED_JOBS_OLDEST_AT | 2026-10-15 07:17:08 |
 | FAILED_JOBS_NEWEST_AT | 2026-10-19 07:17:06 |
 | FAILED_JOBS_CREATED_AFTER_FINAL_HARDENING_DEPLOY | **0** (hardening backup stamp `20261019T200928Z`) |
