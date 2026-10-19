@@ -110,7 +110,7 @@ export function GuestBookingDetailPage({ bookingId }: GuestBookingDetailPageProp
               {data.capabilities?.can_upload_payment_proof && data.capabilities.mutation_urls?.payment_proof ? (
                 <GuestPaymentProofPanel
                   submitUrl={data.capabilities.mutation_urls.payment_proof}
-                  balanceDue={data.pricing.total}
+                  balanceDue={data.pricing.balance_due ?? data.pricing.total}
                   currency={data.pricing.currency}
                   onSubmitted={load}
                 />

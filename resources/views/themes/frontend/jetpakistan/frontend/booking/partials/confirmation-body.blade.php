@@ -264,7 +264,7 @@
                         <div class="jp-payment-cta" data-testid="abhipay-confirmation-option">
                             <p class="jp-payment-cta__title">Pay online by card</p>
                             <p class="jp-checkout-card__muted">Pay Rs {{ number_format((float) ($abhiPay['payable_amount'] ?? 0), 0) }} securely with your card.</p>
-                            <p class="jp-checkout-card__muted">{{ $abhiPay['ticketing_note'] ?? 'Ticketing will happen after payment verification.' }}</p>
+                            <p class="jp-checkout-card__muted">{{ $abhiPay['ticketing_note'] ?? 'After payment is confirmed, your booking proceeds for processing and review. Ticketing is handled separately and is not automatic.' }}</p>
                             @php
                                 $abhiPayStartUrl = auth()->check()
                                     ? route('payments.abhipay.start', $booking)
@@ -284,7 +284,7 @@
                     @elseif (!empty($abhiPay['blocked_message']))
                         <div class="jp-alert jp-alert--warning" data-testid="abhipay-pia-ndc-blocked">{{ $abhiPay['blocked_message'] }}</div>
                     @elseif (($abhiPay['payment_status_label'] ?? '') === 'Paid')
-                        <p class="jp-checkout-card__note">{{ $abhiPay['ticketing_note'] ?? 'Ticketing will happen after payment verification.' }}</p>
+                        <p class="jp-checkout-card__note">{{ $abhiPay['ticketing_note'] ?? 'After payment is confirmed, your booking proceeds for processing and review. Ticketing is handled separately and is not automatic.' }}</p>
                     @else
                         <p class="jp-checkout-card__note">No payment has been taken at this stage.</p>
                     @endif

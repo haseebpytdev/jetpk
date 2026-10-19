@@ -18,8 +18,14 @@ export type AuthoritativePricing = {
   base_fare: number;
   taxes: number;
   service_charges: number;
+  /** Promo-aware customer payable (authoritative display total). */
   total: number;
   formatted_total: string;
+  original_fare?: number;
+  promo_discount?: number;
+  customer_payable?: number;
+  amount_paid?: number;
+  balance_due?: number;
   rows?: Array<Record<string, unknown>>;
   passenger_mix?: Record<string, number> | null;
 };

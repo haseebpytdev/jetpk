@@ -10,6 +10,7 @@ use App\Support\Bookings\BookingPaymentSummaryPresenter;
 use App\Support\Bookings\CheckoutFareBreakdownPresenter;
 use App\Support\Bookings\PublicCheckoutFareChangeState;
 use App\Support\Branding\PublicAgencyContactResolver;
+use App\Support\Payments\BookingPayableResolver;
 use App\Support\Payments\PublicAbhiPayCheckoutPresenter;
 use App\Support\PublicBooking;
 use Illuminate\Http\Request;
@@ -707,15 +708,28 @@ class StandardBookingJsonPresenter
     private function presentAuthoritativePricing(array $checkoutFareBreakdown, Booking $booking): array
     {
         $currency = (string) ($checkoutFareBreakdown['currency'] ?? $booking->currency ?? 'PKR');
-        $total = (float) ($checkoutFareBreakdown['total'] ?? $booking->fareBreakdown?->total ?? 0);
+        $originalFare = BookingPayableResolver::fareTotal($booking);
+        if ($originalFare <= 0) {
+            $originalFare = round((float) ($checkoutFareBreakdown['total'] ?? 0), 2);
+        }
+        $promoDiscount = BookingPayableResolver::promoDiscount($booking);
+        $customerPayable = BookingPayableResolver::customerPayableTotal($booking);
+        $amountPaid = BookingPayableResolver::verifiedPaidAmount($booking);
+        $balanceDue = BookingPayableResolver::balanceDue($booking);
 
         return [
             'currency' => $currency,
             'base_fare' => (float) ($booking->fareBreakdown?->base_fare ?? 0),
             'taxes' => (float) ($booking->fareBreakdown?->taxes ?? 0),
             'service_charges' => (float) ($booking->fareBreakdown?->service_fee ?? 0),
-            'total' => $total,
-            'formatted_total' => 'Rs. '.number_format($total, 0),
+            'original_fare' => $originalFare,
+            'promo_discount' => $promoDiscount,
+            'customer_payable' => $customerPayable,
+            'amount_paid' => $amountPaid,
+            'balance_due' => $balanceDue,
+            // Customer-facing total = promo-aware payable (not raw fare when a promo applies).
+            'total' => $customerPayable,
+            'formatted_total' => 'Rs. '.number_format($customerPayable, 0),
             'rows' => $checkoutFareBreakdown['rows'] ?? [],
             'passenger_mix' => $checkoutFareBreakdown['passenger_mix'] ?? null,
         ];
@@ -876,7 +890,7 @@ class StandardBookingJsonPresenter
             'formatted_amount' => 'Rs. '.number_format((float) ($abhiPay['payable_amount'] ?? 0), 0),
             'payment_status_label' => (string) ($abhiPay['payment_status_label'] ?? 'Unpaid'),
             'blocked_message' => $abhiPay['blocked_message'] ?? null,
-            'ticketing_note' => (string) ($abhiPay['ticketing_note'] ?? 'Ticketing will happen after payment verification.'),
+            'ticketing_note' => (string) ($abhiPay['ticketing_note'] ?? 'After payment is confirmed, your booking proceeds for processing and review. Ticketing is handled separately and is not automatic.'),
             'start_endpoint' => $startPath,
             'latest_transaction_reference' => $abhiPay['latest_transaction_reference'] ?? null,
         ];

@@ -76,7 +76,9 @@ class BookingPolicy
         }
 
         if ($user->isStaff()) {
-            return $user->current_agency_id === $booking->agency_id;
+            // Fail-closed: legacy staff without explicit meta.staff_permissions must not mutate.
+            return $user->current_agency_id === $booking->agency_id
+                && $user->hasExplicitStaffPermission(StaffPermission::BookingsUpdateStatus);
         }
 
         return false;
@@ -200,8 +202,14 @@ class BookingPolicy
 
     public function submitPaymentProof(User $user, Booking $booking): bool
     {
-        if ($user->isPlatformAdmin() || $user->isStaff()) {
-            return $user->current_agency_id === $booking->agency_id;
+        if ($user->isPlatformAdmin()) {
+            return true;
+        }
+
+        if ($user->isStaff()) {
+            // Fail-closed: legacy staff without explicit meta.staff_permissions must not submit proof.
+            return $user->current_agency_id === $booking->agency_id
+                && $user->hasExplicitStaffPermission(StaffPermission::PaymentsRecord);
         }
 
         if ($user->isAgentPortalUser()) {

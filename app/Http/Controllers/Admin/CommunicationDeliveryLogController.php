@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\CommunicationLog;
 use App\Services\Communication\OtaNotificationService;
+use App\Support\Communication\ActionableCommunicationLogScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -39,6 +40,9 @@ class CommunicationDeliveryLogController extends Controller
         }
 
         $failedTotal = (clone $base)->whereIn('status', ['failed', 'error'])->count();
+        $queuedTotal = (clone $base)->where('status', 'queued')->count();
+        $queuedActionable = ActionableCommunicationLogScope::actionableQueued(clone $base)->count();
+        $queuedHistoricalResidual = ActionableCommunicationLogScope::historicalQueuedResidual(clone $base)->count();
         $qaLike = (clone $base)->whereIn('status', ['failed', 'error', 'skipped'])
             ->where(function ($q): void {
                 $q->where('recipient_email', 'like', '%@example.%')
@@ -67,6 +71,9 @@ class CommunicationDeliveryLogController extends Controller
                 'filter' => $filter,
                 'kpis' => [
                     'failed_total' => $failedTotal,
+                    'queued_total' => $queuedTotal,
+                    'queued_actionable' => $queuedActionable,
+                    'queued_historical_residual' => $queuedHistoricalResidual,
                     'qa_test_like' => $qaLike,
                     'booking_linked' => $bookingLinked,
                     'unlinked' => $unlinked,

@@ -6,6 +6,7 @@ use App\Enums\OtaNotificationEvent;
 use App\Models\Agency;
 use App\Models\Booking;
 use App\Models\BookingPayment;
+use App\Support\Bookings\QaFixtureBookingScope;
 use App\Models\CommunicationLog;
 use App\Services\Reports\BookingReportService;
 use Carbon\CarbonImmutable;
@@ -31,9 +32,15 @@ class AdminReportMailerService
             'bookings_by_status' => Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])->select('status', DB::raw('COUNT(*) as total'))->groupBy('status')->pluck('total', 'status')->all(),
             'payment_proofs_submitted' => BookingPayment::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])->count(),
             'payments_verified' => BookingPayment::query()->where('agency_id', $agency->id)->where('status', 'verified')->whereBetween('updated_at', [$start, $end])->count(),
-            'unpaid_balance' => (float) Booking::query()->where('agency_id', $agency->id)->sum('balance_due'),
-            'gross_sales' => (float) Booking::query()->where('agency_id', $agency->id)->sum('amount_paid'),
-            'unassigned_bookings' => Booking::query()->where('agency_id', $agency->id)->whereNull('assigned_staff_id')->count(),
+            'unpaid_balance' => (float) QaFixtureBookingScope::excludeFromOperationalMetrics(
+                Booking::query()->where('agency_id', $agency->id)
+            )->sum('balance_due'),
+            'gross_sales' => (float) QaFixtureBookingScope::excludeFromOperationalMetrics(
+                Booking::query()->where('agency_id', $agency->id)
+            )->sum('amount_paid'),
+            'unassigned_bookings' => QaFixtureBookingScope::excludeFromOperationalMetrics(
+                Booking::query()->where('agency_id', $agency->id)->whereNull('assigned_staff_id')
+            )->count(),
         ];
 
         $this->notificationService->send(
@@ -187,7 +194,9 @@ class AdminReportMailerService
         $payload = [
             'period' => $start->toDateString().' to '.$end->toDateString(),
             'bookings_created' => Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])->count(),
-            'gross_sales' => (float) Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])->sum('amount_paid'),
+            'gross_sales' => (float) QaFixtureBookingScope::excludeFromOperationalMetrics(
+                Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])
+            )->sum('amount_paid'),
             'top_routes' => Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])->select('route', DB::raw('COUNT(*) as total'))->groupBy('route')->orderByDesc('total')->limit(5)->pluck('total', 'route')->all(),
             'top_airlines' => Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])->select('airline', DB::raw('COUNT(*) as total'))->groupBy('airline')->orderByDesc('total')->limit(5)->pluck('total', 'airline')->all(),
         ];
@@ -210,8 +219,12 @@ class AdminReportMailerService
 
         $payload = [
             'period' => $start->format('F Y'),
-            'gross_sales' => (float) Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])->sum('amount_paid'),
-            'unpaid_balance' => (float) Booking::query()->where('agency_id', $agency->id)->sum('balance_due'),
+            'gross_sales' => (float) QaFixtureBookingScope::excludeFromOperationalMetrics(
+                Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])
+            )->sum('amount_paid'),
+            'unpaid_balance' => (float) QaFixtureBookingScope::excludeFromOperationalMetrics(
+                Booking::query()->where('agency_id', $agency->id)
+            )->sum('balance_due'),
             'verified_payments' => BookingPayment::query()->where('agency_id', $agency->id)->where('status', 'verified')->whereBetween('updated_at', [$start, $end])->count(),
             'refunds_paid' => BookingPayment::query()->where('agency_id', $agency->id)->where('status', 'refunded')->whereBetween('updated_at', [$start, $end])->count(),
             'top_routes' => Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])->select('route', DB::raw('COUNT(*) as total'))->groupBy('route')->orderByDesc('total')->limit(5)->pluck('total', 'route')->all(),
