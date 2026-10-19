@@ -3,11 +3,12 @@
 namespace App\Support\Communication;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
 
 /**
  * Distinguishes actionable queued communication_logs from historical residual noise
  * (OPS-DEF-0021). Does not mutate, resend, or delete rows.
+ *
+ * Age alone is never sufficient to hide a non-noise queued message.
  */
 final class ActionableCommunicationLogScope
 {
@@ -26,21 +27,23 @@ final class ActionableCommunicationLogScope
     ];
 
     /**
+     * Queued, undelivered, non-noise rows remain actionable regardless of age.
+     *
      * @param  Builder<\App\Models\CommunicationLog>  $query
      * @return Builder<\App\Models\CommunicationLog>
      */
-    public static function actionableQueued(Builder $query, ?Carbon $notOlderThan = null): Builder
+    public static function actionableQueued(Builder $query): Builder
     {
-        $cutoff = $notOlderThan ?? now()->subDays(7);
-
         return $query
             ->where('status', 'queued')
             ->whereNotIn('event', self::HISTORICAL_NOISE_EVENTS)
-            ->where('created_at', '>=', $cutoff)
             ->whereNull('sent_at');
     }
 
     /**
+     * Historical residual = known login/auth noise still marked queued (or already sent).
+     * Does not age-hide legitimate booking/payment/ops messages.
+     *
      * @param  Builder<\App\Models\CommunicationLog>  $query
      * @return Builder<\App\Models\CommunicationLog>
      */
@@ -50,7 +53,6 @@ final class ActionableCommunicationLogScope
             ->where('status', 'queued')
             ->where(function (Builder $inner): void {
                 $inner->whereIn('event', self::HISTORICAL_NOISE_EVENTS)
-                    ->orWhere('created_at', '<', now()->subDays(7))
                     ->orWhereNotNull('sent_at');
             });
     }

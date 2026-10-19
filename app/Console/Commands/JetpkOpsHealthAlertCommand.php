@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Support\Ops\OpsExternalAlertRouter;
+use App\Support\Ops\OpsHealthAlertTriggers;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -13,34 +14,73 @@ use Throwable;
 class JetpkOpsHealthAlertCommand extends Command
 {
     protected $signature = 'jetpk:ops-health-alert
-        {--category=disk_pressure : Alert category}
-        {--level=HIGH : Severity label}
+        {--category= : Single alert category (disk_pressure|queue_failure|...)}
+        {--level=HIGH : Severity label for single-category mode}
+        {--disk-level= : When set with --failed-jobs, dispatch all triggered categories}
+        {--failed-jobs= : Failed job count for dispatch mode (omit to probe DB)}
         {--dry-run : Force dry-run (no send)}
-        {--probe-failed-jobs : Include failed_jobs count in body}';
+        {--probe-failed-jobs : Include failed_jobs count in body (single-category mode)}';
 
-    protected $description = 'Route a non-customer operational health alert via configured OPS_ALERT_EMAIL (opt-in)';
+    protected $description = 'Route non-customer operational health alerts via configured OPS_ALERT_EMAIL (opt-in)';
 
     public function handle(OpsExternalAlertRouter $router): int
     {
-        $category = (string) $this->option('category');
-        $level = strtoupper((string) $this->option('level'));
         $dryRun = (bool) $this->option('dry-run');
+        $diskLevel = $this->option('disk-level');
 
-        $failedJobs = null;
-        if ($this->option('probe-failed-jobs')) {
-            try {
-                $failedJobs = (int) DB::table('failed_jobs')->count();
-            } catch (Throwable) {
-                $failedJobs = -1;
-            }
+        if ($diskLevel !== null && $diskLevel !== '') {
+            return $this->dispatchFromHealth($router, (string) $diskLevel, $dryRun);
         }
 
+        $category = (string) ($this->option('category') ?: OpsExternalAlertRouter::LEVEL_DISK);
+
+        return $this->routeOne(
+            $router,
+            $category,
+            strtoupper((string) $this->option('level')),
+            $this->resolveFailedJobsCount((bool) $this->option('probe-failed-jobs')),
+            $dryRun,
+        );
+    }
+
+    private function dispatchFromHealth(OpsExternalAlertRouter $router, string $diskLevel, bool $dryRun): int
+    {
+        $failedJobs = $this->option('failed-jobs');
+        if ($failedJobs === null || $failedJobs === '') {
+            $count = $this->resolveFailedJobsCount(true) ?? 0;
+        } else {
+            $count = max(0, (int) $failedJobs);
+        }
+
+        $triggers = OpsHealthAlertTriggers::forDiskAndFailedJobs($diskLevel, $count);
+        $this->line('OPS_ALERT_TRIGGER_COUNT='.count($triggers));
+
+        if ($triggers === []) {
+            $this->line('OPS_ALERT_DISPATCH=NONE');
+
+            return self::SUCCESS;
+        }
+
+        foreach ($triggers as $trigger) {
+            $this->routeOne($router, $trigger['category'], $trigger['level'], $count, $dryRun);
+        }
+
+        return self::SUCCESS;
+    }
+
+    private function routeOne(
+        OpsExternalAlertRouter $router,
+        string $category,
+        string $level,
+        ?int $failedJobs,
+        bool $dryRun,
+    ): int {
         $subject = "Health {$level} ({$category})";
         $body = "JetPakistan operational health alert\n"
             ."category={$category}\n"
             ."level={$level}\n"
             .'failed_jobs='.($failedJobs === null ? 'n/a' : (string) $failedJobs)."\n"
-            ."generated_at=".now()->utc()->toIso8601String()."\n";
+            .'generated_at='.now()->utc()->toIso8601String()."\n";
 
         $result = $router->route(
             category: $category,
@@ -63,5 +103,18 @@ class JetpkOpsHealthAlertCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    private function resolveFailedJobsCount(bool $probe): ?int
+    {
+        if (! $probe) {
+            return null;
+        }
+
+        try {
+            return (int) DB::table('failed_jobs')->count();
+        } catch (Throwable) {
+            return -1;
+        }
     }
 }

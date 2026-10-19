@@ -160,6 +160,41 @@ class BookingPolicyUpdateAndPaymentProofTest extends TestCase
         $this->assertTrue($this->policy->verifyPayment($verifier, $booking));
     }
 
+    public function test_legacy_staff_missing_staff_permissions_cannot_update_or_submit_proof(): void
+    {
+        [$booking, $staff] = $this->bookingAndLegacyStaff(omitKey: true);
+
+        $this->assertTrue($staff->usesLegacyStaffPermissions());
+        $this->assertTrue($staff->hasStaffPermission(StaffPermission::BookingsUpdateStatus));
+        $this->assertFalse($staff->hasExplicitStaffPermission(StaffPermission::BookingsUpdateStatus));
+        $this->assertFalse($this->policy->update($staff, $booking));
+        $this->assertFalse($this->policy->submitPaymentProof($staff, $booking));
+    }
+
+    public function test_staff_permissions_null_cannot_update_or_submit_proof(): void
+    {
+        [$booking, $staff] = $this->bookingAndLegacyStaff(staffPermissionsValue: null);
+
+        $this->assertFalse($this->policy->update($staff, $booking));
+        $this->assertFalse($this->policy->submitPaymentProof($staff, $booking));
+    }
+
+    public function test_staff_permissions_malformed_non_array_cannot_update_or_submit_proof(): void
+    {
+        [$booking, $staff] = $this->bookingAndLegacyStaff(staffPermissionsValue: 'all');
+
+        $this->assertFalse($this->policy->update($staff, $booking));
+        $this->assertFalse($this->policy->submitPaymentProof($staff, $booking));
+    }
+
+    public function test_staff_permissions_empty_array_cannot_update_or_submit_proof(): void
+    {
+        [$booking, $staff] = $this->bookingAndStaff([]);
+
+        $this->assertFalse($this->policy->update($staff, $booking));
+        $this->assertFalse($this->policy->submitPaymentProof($staff, $booking));
+    }
+
     /**
      * @param  list<string>  $permissions
      * @return array{0: Booking, 1: User}
@@ -167,6 +202,27 @@ class BookingPolicyUpdateAndPaymentProofTest extends TestCase
     private function bookingAndStaff(array $permissions): array
     {
         $staff = $this->staffWithPermissions($permissions);
+        $booking = Booking::factory()->create([
+            'agency_id' => $staff->current_agency_id,
+        ]);
+
+        return [$booking, $staff];
+    }
+
+    /**
+     * @return array{0: Booking, 1: User}
+     */
+    private function bookingAndLegacyStaff(bool $omitKey = false, mixed $staffPermissionsValue = null): array
+    {
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
+        $meta = is_array($staff->meta) ? $staff->meta : [];
+        if ($omitKey) {
+            unset($meta['staff_permissions']);
+        } else {
+            $meta['staff_permissions'] = $staffPermissionsValue;
+        }
+        $staff->forceFill(['meta' => $meta])->save();
+        $staff = $staff->fresh();
         $booking = Booking::factory()->create([
             'agency_id' => $staff->current_agency_id,
         ]);

@@ -194,7 +194,9 @@ class AdminReportMailerService
         $payload = [
             'period' => $start->toDateString().' to '.$end->toDateString(),
             'bookings_created' => Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])->count(),
-            'gross_sales' => (float) Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])->sum('amount_paid'),
+            'gross_sales' => (float) QaFixtureBookingScope::excludeFromOperationalMetrics(
+                Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])
+            )->sum('amount_paid'),
             'top_routes' => Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])->select('route', DB::raw('COUNT(*) as total'))->groupBy('route')->orderByDesc('total')->limit(5)->pluck('total', 'route')->all(),
             'top_airlines' => Booking::query()->where('agency_id', $agency->id)->whereBetween('created_at', [$start, $end])->select('airline', DB::raw('COUNT(*) as total'))->groupBy('airline')->orderByDesc('total')->limit(5)->pluck('total', 'airline')->all(),
         ];

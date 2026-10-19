@@ -76,8 +76,9 @@ class BookingPolicy
         }
 
         if ($user->isStaff()) {
+            // Fail-closed: legacy staff without explicit meta.staff_permissions must not mutate.
             return $user->current_agency_id === $booking->agency_id
-                && $user->hasStaffPermission(StaffPermission::BookingsUpdateStatus);
+                && $user->hasExplicitStaffPermission(StaffPermission::BookingsUpdateStatus);
         }
 
         return false;
@@ -206,8 +207,9 @@ class BookingPolicy
         }
 
         if ($user->isStaff()) {
+            // Fail-closed: legacy staff without explicit meta.staff_permissions must not submit proof.
             return $user->current_agency_id === $booking->agency_id
-                && $user->hasStaffPermission(StaffPermission::PaymentsRecord);
+                && $user->hasExplicitStaffPermission(StaffPermission::PaymentsRecord);
         }
 
         if ($user->isAgentPortalUser()) {
