@@ -12,7 +12,7 @@ use App\Services\Suppliers\AirBlue\Exceptions\AirBlueValidationException;
 use ReflectionClass;
 use Tests\TestCase;
 
-class AirBlueConnectionSearchPolicyCertificationTest extends TestCase
+class AirBlueConnectionSearchPolicyCertificationTest extends AirBlueOfflineTestCase
 {
     public function test_healthy_v3_without_certification_metadata_is_not_public(): void
     {

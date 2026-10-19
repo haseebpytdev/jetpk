@@ -6,7 +6,7 @@ use App\Services\Suppliers\AirBlue\AirBlueClient;
 use ReflectionClass;
 use Tests\TestCase;
 
-class AirBlueClientRedactionTest extends TestCase
+class AirBlueClientRedactionTest extends AirBlueOfflineTestCase
 {
     public function test_sanitize_xml_redacts_zapways_secrets_and_pii(): void
     {

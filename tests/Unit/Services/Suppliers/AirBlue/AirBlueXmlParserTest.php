@@ -5,7 +5,7 @@ namespace Tests\Unit\Services\Suppliers\AirBlue;
 use App\Services\Suppliers\AirBlue\AirBlueXmlParser;
 use Tests\TestCase;
 
-class AirBlueXmlParserTest extends TestCase
+class AirBlueXmlParserTest extends AirBlueOfflineTestCase
 {
     public function test_parses_air_shopping_fixture(): void
     {

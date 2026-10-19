@@ -8,6 +8,7 @@ use App\Enums\SupplierProvider;
 use App\Models\Agency;
 use App\Models\SupplierConnection;
 use App\Services\Pricing\PricingRuleService;
+use App\Services\Suppliers\AirBlue\AirBlueConnectionSearchPolicy;
 use App\Services\Suppliers\SupplierAdapterResolver;
 use App\Services\TravelData\AirportProximityService;
 use App\Support\FlightSearch\DirectFlightsOfferFilter;
@@ -40,6 +41,7 @@ class FlightSearchService
         protected DirectFlightsOfferFilter $directFlightsOfferFilter,
         protected FlightSearchSupplierResultCache $supplierResultCache,
         protected FlightSearchCriteriaCacheKey $criteriaCacheKey,
+        protected AirBlueConnectionSearchPolicy $airBlueConnectionSearchPolicy,
     ) {}
 
     /**
@@ -70,6 +72,7 @@ class FlightSearchService
                 })
                 ->orderBy('id')
                 ->get();
+            $connections = $this->airBlueConnectionSearchPolicy->dedupeForSearch($connections);
         }
 
         if ($connections->isEmpty()) {

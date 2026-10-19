@@ -135,9 +135,19 @@ class AirBlueOtaResponseNormalizer
      */
     public function normalizeCancelResponse(array $parsedResponse): array
     {
-        unset($parsedResponse);
-
         $parsed = is_array($parsedResponse['parsed'] ?? null) ? $parsedResponse['parsed'] : [];
+        $errors = is_array($parsedResponse['errors'] ?? null) ? $parsedResponse['errors'] : [];
+        $soapFault = is_array($parsedResponse['soap_fault'] ?? null) ? $parsedResponse['soap_fault'] : null;
+
+        if ($soapFault !== null || $errors !== []) {
+            return [
+                'cancellation_status' => 'failed',
+                'api_channel' => AirBlueApiChannel::ZapwaysOta->value,
+                'held_seats_removed' => false,
+                'held_items_removed' => false,
+                'error_code' => (string) ($soapFault['code'] ?? ($errors[0]['code'] ?? 'cancel_failed')),
+            ];
+        }
 
         return [
             'cancellation_status' => 'cancelled',
@@ -258,7 +268,8 @@ class AirBlueOtaResponseNormalizer
             refundable: false,
             seats_left: null,
             segments: $segmentRows,
-            baggage: new BaggageAllowanceData(checked: '20 KG', cabin: '7 KG', summary: null),
+            // Zapways search fixtures do not expose baggage — do not invent allowances.
+            baggage: new BaggageAllowanceData(checked: null, cabin: null, summary: null),
             fare_breakdown: new FareBreakdownData(
                 base_fare: $base,
                 taxes: $taxes,

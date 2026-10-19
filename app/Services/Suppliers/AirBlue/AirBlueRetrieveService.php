@@ -4,6 +4,8 @@ namespace App\Services\Suppliers\AirBlue;
 
 use App\Enums\SupplierProvider;
 use App\Models\Booking;
+use App\Models\SupplierBooking;
+use App\Models\SupplierBookingAttempt;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueException;
 use Illuminate\Support\Facades\Log;
@@ -75,6 +77,40 @@ class AirBlueRetrieveService
             $existing[$key] = $value;
         }
         $existing['last_sync_at'] = now()->toIso8601String();
+
+        // Successful retrieve with PNR/instance clears uncertain local outcome so ops can proceed.
+        $resolvedPnr = trim((string) ($existing['pnr'] ?? ''));
+        $resolvedInstance = trim((string) ($existing['instance'] ?? ''));
+        if (($existing['booking_outcome'] ?? null) === 'uncertain' && $resolvedPnr !== '' && $resolvedInstance !== '') {
+            $existing['booking_outcome'] = 'reconciled';
+            $existing['supplier_outcome_unknown'] = false;
+            $existing['reconciled_at'] = now()->toIso8601String();
+
+            SupplierBookingAttempt::query()
+                ->where('booking_id', $booking->id)
+                ->where('provider', SupplierProvider::Airblue->value)
+                ->where('action', 'create_pnr')
+                ->where('status', 'uncertain')
+                ->update([
+                    'status' => 'reconciled',
+                    'completed_at' => now(),
+                    'safe_summary' => [
+                        'reason_code' => 'booking_outcome_reconciled_via_retrieve',
+                        'requires_retrieve_before_retry' => false,
+                    ],
+                ]);
+
+            SupplierBooking::query()
+                ->where('booking_id', $booking->id)
+                ->where('provider', SupplierProvider::Airblue->value)
+                ->where('status', 'pending_reconciliation')
+                ->update([
+                    'status' => 'confirmed',
+                    'supplier_reference' => $resolvedPnr,
+                    'pnr' => $resolvedPnr,
+                ]);
+        }
+
         $meta['airblue_context'] = $existing;
         $meta['supplier_provider'] = SupplierProvider::Airblue->value;
         $booking->meta = $meta;

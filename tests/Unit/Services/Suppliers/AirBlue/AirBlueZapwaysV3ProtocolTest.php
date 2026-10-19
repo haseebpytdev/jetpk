@@ -22,7 +22,7 @@ use Illuminate\Support\Collection;
 use ReflectionClass;
 use Tests\TestCase;
 
-class AirBlueZapwaysV3ProtocolTest extends TestCase
+class AirBlueZapwaysV3ProtocolTest extends AirBlueOfflineTestCase
 {
     public function test_protocol_defaults_to_v2(): void
     {

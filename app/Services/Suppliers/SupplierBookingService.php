@@ -339,6 +339,16 @@ class SupplierBookingService
 
             return DB::transaction(function () use ($booking, $actor, $attempt, $connection, $result): SupplierBookingResultData {
                 if (! $result->success) {
+                    if ($this->isUncertainSupplierBookingOutcome($result)) {
+                        return $this->persistUncertainSupplierBookingOutcome(
+                            $booking,
+                            $actor,
+                            $attempt,
+                            $connection,
+                            $result,
+                        );
+                    }
+
                     $attempt->forceFill([
                         'status' => $result->status === 'not_supported' ? 'failed' : 'failed',
                         'safe_summary' => SensitiveDataRedactor::redact($result->safe_summary),
@@ -380,6 +390,12 @@ class SupplierBookingService
                 }
 
                 $supplierStatus = (string) ($result->safe_summary['supplier_booking_status'] ?? 'pending_ticketing');
+                $persistedSupplierStatus = match ($supplierStatus) {
+                    'on_hold' => 'on_hold',
+                    'confirmed' => 'confirmed',
+                    'pending_reconciliation' => 'pending_reconciliation',
+                    default => 'pending_ticketing',
+                };
                 $meta = is_array($booking->meta) ? $booking->meta : [];
                 if (($result->safe_summary['hold_deadline'] ?? null) !== null) {
                     $meta['one_api_hold'] = [
@@ -392,6 +408,7 @@ class SupplierBookingService
                         ['last_transaction_identifier' => $result->safe_summary['transaction_identifier']],
                     );
                 }
+                $meta = $this->mergeAirBlueContextIntoBookingMeta($meta, $connection, $result);
 
                 SupplierBooking::query()->create([
                     'agency_id' => $booking->agency_id,
@@ -401,7 +418,7 @@ class SupplierBookingService
                     'supplier_api_booking_id' => $result->supplier_reference,
                     'supplier_reference' => $result->supplier_reference,
                     'pnr' => $result->pnr,
-                    'status' => $supplierStatus === 'on_hold' ? 'on_hold' : 'pending_ticketing',
+                    'status' => $persistedSupplierStatus,
                     'raw_summary' => SensitiveDataRedactor::redact($result->safe_summary),
                     'created_by' => $actor->id,
                     'created_at_supplier' => now(),
@@ -595,5 +612,175 @@ class SupplierBookingService
                 'new_values' => $newValues,
             ],
         ]);
+    }
+
+    protected function isUncertainSupplierBookingOutcome(SupplierBookingResultData $result): bool
+    {
+        if ($result->error_code === 'booking_outcome_uncertain') {
+            return true;
+        }
+
+        return in_array(strtolower(trim($result->status)), ['manual_review', 'uncertain'], true)
+            && (($result->safe_summary['supplier_outcome_unknown'] ?? false) === true
+                || ($result->safe_summary['pending_reconciliation'] ?? false) === true
+                || ($result->safe_summary['requires_retrieve_before_retry'] ?? false) === true);
+    }
+
+    protected function persistUncertainSupplierBookingOutcome(
+        Booking $booking,
+        User $actor,
+        SupplierBookingAttempt $attempt,
+        SupplierConnection $connection,
+        SupplierBookingResultData $result,
+    ): SupplierBookingResultData {
+        $safeSummary = array_merge(
+            is_array($result->safe_summary) ? $result->safe_summary : [],
+            [
+                'supplier_booking_status' => 'pending_reconciliation',
+                'supplier_outcome_unknown' => true,
+                'requires_retrieve_before_retry' => true,
+                'block_retry' => true,
+                'pending_reconciliation' => true,
+            ],
+        );
+
+        $meta = $this->mergeAirBlueContextIntoBookingMeta(
+            is_array($booking->meta) ? $booking->meta : [],
+            $connection,
+            $result,
+            [
+                'booking_outcome' => 'uncertain',
+                'supplier_outcome_unknown' => true,
+                'uncertain_error_code' => (string) ($result->error_code ?? 'booking_outcome_uncertain'),
+                'uncertain_at' => now()->toIso8601String(),
+                'requires_retrieve_before_retry' => true,
+            ],
+        );
+
+        SupplierBooking::query()->create([
+            'agency_id' => $booking->agency_id,
+            'booking_id' => $booking->id,
+            'supplier_connection_id' => $connection->id,
+            'provider' => $result->provider !== '' ? $result->provider : $connection->provider->value,
+            'supplier_api_booking_id' => $result->supplier_reference,
+            'supplier_reference' => $result->supplier_reference,
+            'pnr' => $result->pnr,
+            'status' => 'pending_reconciliation',
+            'raw_summary' => SensitiveDataRedactor::redact($safeSummary),
+            'created_by' => $actor->id,
+            'created_at_supplier' => now(),
+        ]);
+
+        $attempt->forceFill([
+            'status' => 'uncertain',
+            'safe_summary' => SensitiveDataRedactor::redact($safeSummary),
+            'response_payload' => SensitiveDataRedactor::redact($result->response_payload),
+            'error_code' => $result->error_code ?: 'booking_outcome_uncertain',
+            'error_message' => $result->error_message ?: 'Supplier booking outcome is uncertain. Retrieve before any retry.',
+            'completed_at' => now(),
+        ])->save();
+
+        $booking->forceFill([
+            'supplier_booking_status' => 'pending_reconciliation',
+            'meta' => $meta,
+        ])->save();
+
+        $this->writeAudit($booking, $actor, 'booking.supplier_booking_uncertain', [
+            'attempt_id' => $attempt->id,
+            'status' => 'uncertain',
+            'provider' => $result->provider,
+            'error_code' => $result->error_code,
+            'supplier_booking_status' => 'pending_reconciliation',
+        ]);
+
+        // Notify only after the uncertain persistence transaction commits so a
+        // communication failure cannot roll back SupplierBooking / attempt state.
+        $this->scheduleUncertainManualReviewNotification(
+            (int) $booking->id,
+            (int) $actor->id,
+            (int) $attempt->id,
+            'supplier_booking_outcome_uncertain',
+        );
+
+        return new SupplierBookingResultData(
+            success: false,
+            status: 'manual_review',
+            provider: $result->provider,
+            supplier_reference: $result->supplier_reference,
+            pnr: $result->pnr,
+            safe_summary: SensitiveDataRedactor::redact($safeSummary),
+            response_payload: $result->response_payload,
+            error_code: $result->error_code ?: 'booking_outcome_uncertain',
+            error_message: $result->error_message ?: 'Supplier booking outcome is uncertain. Retrieve before any retry.',
+            warnings: $result->warnings,
+        );
+    }
+
+    /**
+     * Schedule manual-review notification after the current DB transaction commits.
+     * Failures are logged only — they must never undo uncertain supplier state.
+     */
+    protected function scheduleUncertainManualReviewNotification(
+        int $bookingId,
+        int $actorId,
+        int $attemptId,
+        string $reason,
+    ): void {
+        DB::afterCommit(function () use ($bookingId, $actorId, $attemptId, $reason): void {
+            try {
+                $booking = Booking::query()->find($bookingId);
+                if ($booking === null) {
+                    Log::warning('supplier_booking.uncertain_notify_skipped', [
+                        'booking_id' => $bookingId,
+                        'attempt_id' => $attemptId,
+                        'reason' => 'booking_missing_after_commit',
+                    ]);
+
+                    return;
+                }
+
+                $actor = $actorId > 0 ? User::query()->find($actorId) : null;
+                $this->communicationService->notifyManualReviewRequired($booking, $actor, $reason);
+            } catch (\Throwable $exception) {
+                Log::warning('supplier_booking.uncertain_notify_failed', [
+                    'booking_id' => $bookingId,
+                    'attempt_id' => $attemptId,
+                    'actor_id' => $actorId,
+                    'exception' => $exception::class,
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $meta
+     * @param  array<string, mixed>  $airblueOverrides
+     * @return array<string, mixed>
+     */
+    protected function mergeAirBlueContextIntoBookingMeta(
+        array $meta,
+        SupplierConnection $connection,
+        SupplierBookingResultData $result,
+        array $airblueOverrides = [],
+    ): array {
+        if ($connection->provider !== SupplierProvider::Airblue
+            && strtolower(trim((string) $result->provider)) !== SupplierProvider::Airblue->value) {
+            return $meta;
+        }
+
+        $fromSummary = is_array($result->safe_summary['airblue_context'] ?? null)
+            ? $result->safe_summary['airblue_context']
+            : [];
+        $fromPayload = is_array($result->response_payload['provider_context'] ?? null)
+            ? $result->response_payload['provider_context']
+            : [];
+        $existing = is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [];
+
+        $meta['supplier_provider'] = SupplierProvider::Airblue->value;
+        $meta['supplier_connection_id'] = $connection->id;
+        $meta['airblue_context'] = array_merge($existing, $fromPayload, $fromSummary, $airblueOverrides);
+
+        return $meta;
     }
 }

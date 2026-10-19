@@ -77,6 +77,26 @@ class AirBlueTicketingService
      */
     private function issueTicketsOta(Booking $booking, SupplierConnection $connection, array $context): TicketingResultData
     {
+        if (! $this->isTicketingFeatureEnabled($connection)) {
+            return new TicketingResultData(
+                success: false,
+                status: 'failed',
+                provider: SupplierProvider::Airblue->value,
+                error_code: 'ticketing_feature_disabled',
+                error_message: 'AirBlue ticketing is not enabled for this connection.',
+            );
+        }
+
+        if (! (bool) config('suppliers.airblue.external_calls_enabled', false)) {
+            return new TicketingResultData(
+                success: false,
+                status: 'failed',
+                provider: SupplierProvider::Airblue->value,
+                error_code: 'external_calls_disabled',
+                error_message: 'AirBlue external network calls are disabled.',
+            );
+        }
+
         $pnr = trim((string) ($context['pnr'] ?? $booking->pnr ?? $booking->supplier_reference ?? ''));
         $instance = trim((string) ($context['instance'] ?? ''));
         if ($pnr === '' || $instance === '') {
@@ -137,6 +157,16 @@ class AirBlueTicketingService
                 $exception,
             );
         }
+    }
+
+    /**
+     * Product ticketing requires an explicit connection feature flag (default false).
+     */
+    private function isTicketingFeatureEnabled(SupplierConnection $connection): bool
+    {
+        $credentials = is_array($connection->credentials) ? $connection->credentials : [];
+
+        return filter_var($credentials['ticketing_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
     }
 
     /**

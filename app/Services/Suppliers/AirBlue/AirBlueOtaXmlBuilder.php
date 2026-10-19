@@ -17,17 +17,19 @@ class AirBlueOtaXmlBuilder
      */
     public function buildAirLowFareSearchRequest(FlightSearchRequestData $request, array $config): string
     {
-        $segments = [];
-        $segments[] = $this->originDestinationSegment($request->origin, $request->destination, $request->departure_date, 1);
-        if ($request->return_date) {
-            $segments[] = $this->originDestinationSegment($request->destination, $request->returnOrigin(), $request->return_date, 2);
-        }
+        $segments = $this->searchOriginDestinationSegments($request);
 
         if (count($segments) > 4) {
             throw new AirBlueValidationException('too_many_segments', 422, 'AirBlue OTA search supports at most 4 origin-destination segments.');
         }
 
-        $totalPax = max(0, (int) $request->adults) + max(0, (int) $request->children) + max(0, (int) $request->infants);
+        $adults = max(0, (int) $request->adults);
+        $infants = max(0, (int) $request->infants);
+        if ($infants > $adults) {
+            throw new AirBlueValidationException('invalid_infant_count', 422, 'AirBlue OTA search requires infants not to exceed adults.');
+        }
+
+        $totalPax = $adults + max(0, (int) $request->children) + $infants;
         if ($totalPax > 6) {
             throw new AirBlueValidationException('too_many_passengers', 422, 'AirBlue OTA search supports at most 6 passengers.');
         }
@@ -686,6 +688,65 @@ XML;
         return <<<XML
                         <ota:Document DocID="{$docIdAttr}" DocType="{$docType}"{$issueAttr}{$expireAttr}{$holderNationalityAttr}/>
 XML;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function searchOriginDestinationSegments(FlightSearchRequestData $request): array
+    {
+        if ($request->trip_type === 'multi_city') {
+            $legs = is_array($request->segments) ? $request->segments : [];
+            if ($legs === []) {
+                throw new AirBlueValidationException(
+                    'multicity_segments_required',
+                    422,
+                    'AirBlue OTA multi-city search requires explicit segments.',
+                );
+            }
+
+            $segments = [];
+            foreach ($legs as $index => $leg) {
+                if (! is_array($leg)) {
+                    continue;
+                }
+                $origin = strtoupper(trim((string) ($leg['origin'] ?? '')));
+                $destination = strtoupper(trim((string) ($leg['destination'] ?? '')));
+                $date = trim((string) ($leg['departure_date'] ?? ''));
+                if ($origin === '' || $destination === '' || $date === '') {
+                    throw new AirBlueValidationException(
+                        'invalid_multicity_segment',
+                        422,
+                        'AirBlue OTA multi-city segments require origin, destination, and departure_date.',
+                    );
+                }
+                $segments[] = $this->originDestinationSegment($origin, $destination, $date, $index + 1);
+            }
+
+            if ($segments === []) {
+                throw new AirBlueValidationException(
+                    'multicity_segments_required',
+                    422,
+                    'AirBlue OTA multi-city search requires explicit segments.',
+                );
+            }
+
+            return $segments;
+        }
+
+        $segments = [
+            $this->originDestinationSegment($request->origin, $request->destination, $request->departure_date, 1),
+        ];
+        if ($request->return_date) {
+            $segments[] = $this->originDestinationSegment(
+                $request->destination,
+                $request->returnOrigin(),
+                $request->return_date,
+                2,
+            );
+        }
+
+        return $segments;
     }
 
     private function originDestinationSegment(string $origin, string $destination, string $date, int $rph): string

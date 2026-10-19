@@ -8,7 +8,7 @@ use App\Models\SupplierConnection;
 use App\Services\Suppliers\AirBlue\AirBlueConfigResolver;
 use Tests\TestCase;
 
-class AirBlueConfigResolverTest extends TestCase
+class AirBlueConfigResolverTest extends AirBlueOfflineTestCase
 {
     public function test_sandbox_resolves_test_endpoint_and_target(): void
     {

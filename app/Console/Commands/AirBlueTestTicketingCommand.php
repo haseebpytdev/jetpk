@@ -6,20 +6,28 @@ use App\Enums\SupplierProvider;
 use App\Models\Booking;
 use App\Models\SupplierConnection;
 use App\Models\User;
+use App\Console\Commands\Concerns\GuardsAirBlueLiveNetwork;
 use App\Services\Suppliers\AirBlue\AirBlueTicketingService;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueTicketingException;
 use Illuminate\Console\Command;
 
 class AirBlueTestTicketingCommand extends Command
 {
+    use GuardsAirBlueLiveNetwork;
+
     protected $signature = 'airblue:test-ticketing
         {booking : OTA booking ID}
-        {--connection= : Supplier connection ID}';
+        {--connection= : Supplier connection ID}
+        {--allow-live : Explicitly allow outbound Zapways ticketing call}';
 
-    protected $description = 'Issue AirBlue tickets (DoOrderChange) for a booking';
+    protected $description = 'Issue AirBlue tickets (DoOrderChange) for a booking (live-gated)';
 
     public function handle(AirBlueTicketingService $ticketingService): int
     {
+        if (! $this->guardAirBlueLiveNetwork('airblue:test-ticketing')) {
+            return self::FAILURE;
+        }
+
         $booking = Booking::query()->with('latestSupplierBooking.supplierConnection')->find((int) $this->argument('booking'));
         if ($booking === null) {
             $this->error('Booking not found.');

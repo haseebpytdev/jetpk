@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Data\FlightSearchRequestData;
 use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
+use App\Console\Commands\Concerns\GuardsAirBlueLiveNetwork;
 use App\Services\Suppliers\AirBlue\AirBlueFlightSearchService;
 use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Console\Command;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\File;
 
 class AirBlueTestSearchCommand extends Command
 {
+    use GuardsAirBlueLiveNetwork;
+
     protected $signature = 'airblue:test-search
         {--connection= : Supplier connection ID}
         {--from=ISB : Origin}
@@ -21,12 +24,17 @@ class AirBlueTestSearchCommand extends Command
         {--adults=1}
         {--children=0}
         {--infants=0}
-        {--currency=PKR}';
+        {--currency=PKR}
+        {--allow-live : Explicitly allow outbound Zapways network call}';
 
-    protected $description = 'Run AirBlue test search and save sanitized fixture';
+    protected $description = 'Run AirBlue test search and save sanitized fixture (live-gated)';
 
     public function handle(AirBlueFlightSearchService $searchService): int
     {
+        if (! $this->guardAirBlueLiveNetwork('airblue:test-search')) {
+            return self::FAILURE;
+        }
+
         $connection = $this->resolveConnection();
         if ($connection === null) {
             $this->error('No AirBlue SupplierConnection found.');
