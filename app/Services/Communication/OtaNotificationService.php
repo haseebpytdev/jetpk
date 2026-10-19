@@ -20,7 +20,6 @@ use App\Support\Emails\OtaOperationalEmailRenderer;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Throwable;
 
