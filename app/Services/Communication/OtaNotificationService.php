@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Support\Branding\BrandDisplayResolver;
 use App\Support\Emails\EmailBaseVariables;
 use App\Support\Emails\JetpkEmailEventRenderer;
+use App\Support\Communication\NotificationErrorSanitizer;
 use App\Support\Emails\JetpkOperationalEmailEventRegistry;
 use App\Support\Emails\OtaOperationalEmailRenderer;
 use Illuminate\Support\Facades\Log;
@@ -526,15 +527,7 @@ class OtaNotificationService
 
     private function safeError(string $message, ?string $smtpPassword): string
     {
-        $m = $message;
-        if (filled($smtpPassword)) {
-            $m = str_replace((string) $smtpPassword, '[REDACTED]', $m);
-        }
-        $m = preg_replace('/Bearer\s+[A-Za-z0-9._\-]+/i', 'Bearer [redacted]', $m) ?? $m;
-        $m = preg_replace('/duffel_(test|live)_[A-Za-z0-9._\-]+/i', 'duffel_$1_[redacted]', $m) ?? $m;
-        $m = preg_replace('/(api[_-]?key|access[_-]?token|client[_-]?secret)\s*[:=]\s*\S+/i', '$1=[redacted]', $m) ?? $m;
-
-        return Str::limit((string) $m, 2000);
+        return NotificationErrorSanitizer::sanitize($message, $smtpPassword);
     }
 
     private function isImmediateMailer(): bool

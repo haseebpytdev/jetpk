@@ -5,6 +5,8 @@ namespace App\Jobs\Notifications;
 use App\Mail\BookingUniversalNotification;
 use App\Mail\OtaOperationalNotificationMail;
 use App\Models\CommunicationLog;
+use App\Support\Communication\NotificationErrorSanitizer;
+use App\Support\Communication\SmtpDeliveryFailureClassifier;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -78,11 +80,32 @@ class DeliverQueuedOperationalMail implements ShouldQueue
                 ]);
             }
         } catch (Throwable $e) {
+            $classification = (new SmtpDeliveryFailureClassifier)->classify($e);
+            $smtpPassword = config('mail.mailers.'.config('mail.default').'.password');
+            $sanitized = NotificationErrorSanitizer::sanitize(
+                $e->getMessage(),
+                is_string($smtpPassword) ? $smtpPassword : null,
+            );
+
             if ($this->communicationLogId !== null) {
-                CommunicationLog::query()->whereKey($this->communicationLogId)->update([
-                    'status' => 'failed',
-                    'error_message' => mb_substr($e->getMessage(), 0, 2000),
-                ]);
+                $log = CommunicationLog::query()->whereKey($this->communicationLogId)->first();
+                if ($log !== null) {
+                    $meta = is_array($log->meta) ? $log->meta : [];
+                    $meta['delivery_failure_class'] = $classification['delivery_failure_class'];
+                    $meta['smtp_code'] = $classification['smtp_code'];
+                    $meta['smtp_enhanced_status'] = $classification['smtp_enhanced_status'];
+                    $meta['retry_recommended'] = $classification['retry_recommended'];
+
+                    $log->forceFill([
+                        'status' => 'failed',
+                        'error_message' => $sanitized,
+                        'meta' => $meta,
+                    ])->save();
+                }
+            }
+
+            if ($classification['delivery_failure_class'] === SmtpDeliveryFailureClassifier::PERMANENT_RECIPIENT_REJECT) {
+                return;
             }
 
             throw $e;
