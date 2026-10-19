@@ -9,18 +9,21 @@ use App\Models\SupplierBooking;
 use App\Models\SupplierBookingAttempt;
 use App\Models\SupplierConnection;
 use App\Models\User;
-use App\Services\Suppliers\AirBlue\Exceptions\AirBlueBookingException;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueException;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueUnavailableException;
 use App\Services\Suppliers\SupplierDiagnosticLogger;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * AirBlue Zapways OTA booking orchestrator with duplicate guards.
+ * AirBlue Zapways OTA booking orchestrator — validate, call provider, normalize, return DTO.
+ *
+ * Canonical SupplierBooking / SupplierBookingAttempt persistence is owned by
+ * {@see \App\Services\Suppliers\SupplierBookingService}. This service must not create
+ * a second successful attempt or SupplierBooking row.
  *
  * Transport timeouts after air_book may mean the provider accepted the reservation.
- * Those outcomes are recorded as uncertain and must not auto-retry AirBook.
+ * Those outcomes return status=manual_review / error_code=booking_outcome_uncertain
+ * and must not auto-retry AirBook.
  */
 class AirBlueBookingService
 {
@@ -56,12 +59,14 @@ class AirBlueBookingService
         }
 
         if (($airblueContext['booking_outcome'] ?? null) === 'uncertain') {
-            return $this->failure(
+            return $this->uncertainResult(
+                $connection,
                 'booking_outcome_uncertain',
                 'Supplier booking outcome is uncertain. Retrieve before any retry.',
-                $connection,
             );
         }
+
+        $airBookAttempted = false;
 
         try {
             $this->protocolGuard->assertCompatible($connection, $providerContext, 'booking');
@@ -69,51 +74,56 @@ class AirBlueBookingService
             $contact = $this->passengerPayloadBuilder->buildContactFromBooking($booking);
             $config = $this->configResolver->resolveOta($connection);
             $xml = $this->otaXmlBuilder->buildAirBookRequest($config, $providerContext, $passengers, $contact);
+
+            $airBookAttempted = true;
             $response = $this->client->callOta($connection, 'air_book', $xml, [
                 'request_context' => 'air_book',
                 'booking_id' => $booking->id,
                 'user_id' => $actor->id,
             ]);
             $normalized = $this->otaNormalizer->normalizeBookingResponse($response, $providerContext);
-            $this->persistBookingState($booking, $connection, $normalized, $actor);
+            $providerCtx = is_array($normalized['provider_context'] ?? null) ? $normalized['provider_context'] : [];
+            $pnr = (string) ($normalized['pnr'] ?? '');
+            $supplierReference = (string) ($normalized['provider_booking_reference'] ?? $pnr);
 
             return new SupplierBookingResultData(
                 success: true,
                 status: 'confirmed',
                 provider: SupplierProvider::Airblue->value,
-                supplier_reference: (string) ($normalized['provider_booking_reference'] ?? ''),
-                pnr: (string) ($normalized['pnr'] ?? ''),
-                response_payload: ['provider_context' => $normalized['provider_context'] ?? []],
+                supplier_reference: $supplierReference,
+                pnr: $pnr,
+                safe_summary: [
+                    'supplier_booking_status' => 'pending_ticketing',
+                    'airblue_context' => $providerCtx,
+                ],
+                response_payload: ['provider_context' => $providerCtx],
             );
         } catch (AirBlueUnavailableException $exception) {
             // Request may already have been accepted — never auto-retry AirBook.
-            $this->recordAttempt($booking, $connection, $actor, 'uncertain', $exception->normalizedCode);
-            $this->markUncertainBookingState($booking, $connection, $exception->normalizedCode);
-
-            return $this->failure(
-                'booking_outcome_uncertain',
-                'Supplier booking outcome is uncertain. Retrieve before any retry.',
+            return $this->uncertainResult(
                 $connection,
+                $exception->normalizedCode !== '' ? $exception->normalizedCode : 'supplier_transport_failed',
+                'Supplier booking outcome is uncertain. Retrieve before any retry.',
             );
         } catch (AirBlueException $exception) {
-            $this->recordAttempt($booking, $connection, $actor, 'failed', $exception->normalizedCode);
-
+            // Pre-network gates (e.g. external_calls_disabled) and provider rejections are ordinary failures.
             return $this->failure($exception->normalizedCode, $exception->safeMessage, $connection);
         } catch (\Throwable $exception) {
             Log::channel('air-blue')->warning('airblue.booking.unexpected', [
                 'booking_id' => $booking->id,
                 'exception' => $exception::class,
+                'air_book_attempted' => $airBookAttempted,
             ]);
-            // Unknown local failure after possible provider acceptance — treat as uncertain.
-            $this->recordAttempt($booking, $connection, $actor, 'uncertain', 'unexpected');
-            $this->markUncertainBookingState($booking, $connection, 'unexpected');
 
-            throw new AirBlueBookingException(
-                'booking_outcome_uncertain',
-                500,
+            if (! $airBookAttempted) {
+                return $this->failure('unexpected', 'AirBlue booking failed before the provider request was sent.', $connection);
+            }
+
+            // Unknown failure after possible provider acceptance — uncertain DTO for outer persistence.
+            return $this->uncertainResult(
+                $connection,
+                'unexpected',
                 'Supplier booking outcome is uncertain. Retrieve before any retry.',
-                ['booking_id' => $booking->id],
-                $exception,
             );
         }
     }
@@ -133,100 +143,53 @@ class AirBlueBookingService
     }
 
     /**
-     * @param  array<string, mixed>  $normalized
+     * Read-only duplicate / uncertain guards (no persistence).
      */
-    private function persistBookingState(Booking $booking, SupplierConnection $connection, array $normalized, User $actor): void
-    {
-        DB::transaction(function () use ($booking, $connection, $normalized, $actor): void {
-            $meta = is_array($booking->meta) ? $booking->meta : [];
-            $airblueContext = array_merge(
-                is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [],
-                is_array($normalized['provider_context'] ?? null) ? $normalized['provider_context'] : [],
-            );
-            $meta['supplier_provider'] = SupplierProvider::Airblue->value;
-            $meta['supplier_connection_id'] = $connection->id;
-            $meta['airblue_context'] = $airblueContext;
-            $booking->meta = $meta;
-            $booking->supplier_reference = (string) ($normalized['pnr'] ?? $booking->supplier_reference);
-            $booking->save();
-
-            SupplierBooking::query()->updateOrCreate(
-                ['booking_id' => $booking->id, 'provider' => SupplierProvider::Airblue->value],
-                [
-                    'agency_id' => $booking->agency_id,
-                    'supplier_connection_id' => $connection->id,
-                    'provider_reference' => (string) ($normalized['provider_booking_reference'] ?? ''),
-                    'status' => 'confirmed',
-                    'meta' => ['airblue_context' => $airblueContext],
-                ],
-            );
-
-            $this->recordAttempt($booking, $connection, $actor, 'success', null);
-        });
-    }
-
     private function hasBlockingCreateAttempt(Booking $booking): bool
     {
         return SupplierBookingAttempt::query()
             ->where('booking_id', $booking->id)
             ->where('provider', SupplierProvider::Airblue->value)
             ->where('action', 'create_pnr')
-            ->whereIn('status', ['success', 'created', 'uncertain'])
+            ->whereIn('status', ['success', 'created', 'uncertain', 'reconciled'])
             ->exists()
             || $booking->supplierBookings()
                 ->where('provider', SupplierProvider::Airblue->value)
-                ->whereIn('status', ['created', 'confirmed', 'pending_ticketing', 'ticketed', 'pending_reconciliation'])
+                ->whereIn('status', ['created', 'confirmed', 'pending_ticketing', 'ticketed', 'pending_reconciliation', 'on_hold'])
                 ->exists();
     }
 
-    private function markUncertainBookingState(Booking $booking, SupplierConnection $connection, string $errorCode): void
-    {
-        DB::transaction(function () use ($booking, $connection, $errorCode): void {
-            $meta = is_array($booking->meta) ? $booking->meta : [];
-            $airblueContext = is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [];
-            $airblueContext['booking_outcome'] = 'uncertain';
-            $airblueContext['supplier_outcome_unknown'] = true;
-            $airblueContext['uncertain_error_code'] = $errorCode;
-            $airblueContext['uncertain_at'] = now()->toIso8601String();
-            $meta['supplier_provider'] = SupplierProvider::Airblue->value;
-            $meta['supplier_connection_id'] = $connection->id;
-            $meta['airblue_context'] = $airblueContext;
-            $booking->meta = $meta;
-            $booking->save();
+    private function uncertainResult(
+        SupplierConnection $connection,
+        string $underlyingCode,
+        string $message,
+    ): SupplierBookingResultData {
+        $this->diagnosticLogger->log(
+            connection: $connection,
+            action: 'create_order',
+            status: 'manual_review',
+            safeMessage: $message,
+            meta: [
+                'error_code' => 'booking_outcome_uncertain',
+                'underlying_error_code' => $underlyingCode,
+            ],
+        );
 
-            SupplierBooking::query()->updateOrCreate(
-                ['booking_id' => $booking->id, 'provider' => SupplierProvider::Airblue->value],
-                [
-                    'agency_id' => $booking->agency_id,
-                    'supplier_connection_id' => $connection->id,
-                    'provider_reference' => (string) ($airblueContext['order_id'] ?? $airblueContext['pnr'] ?? ''),
-                    'status' => 'pending_reconciliation',
-                    'meta' => ['airblue_context' => $airblueContext],
-                ],
-            );
-        });
-    }
-
-    private function recordAttempt(Booking $booking, SupplierConnection $connection, User $actor, string $status, ?string $errorCode): void
-    {
-        SupplierBookingAttempt::query()->create([
-            'agency_id' => $booking->agency_id,
-            'booking_id' => $booking->id,
-            'supplier_connection_id' => $connection->id,
-            'provider' => SupplierProvider::Airblue->value,
-            'action' => 'create_pnr',
-            'status' => $status,
-            'error_code' => $errorCode,
-            'attempted_by' => $actor->id,
-            'attempted_at' => now(),
-            'completed_at' => now(),
-            'safe_summary' => $status === 'uncertain'
-                ? [
-                    'reason_code' => 'booking_outcome_uncertain',
-                    'requires_retrieve_before_retry' => true,
-                ]
-                : null,
-        ]);
+        return new SupplierBookingResultData(
+            success: false,
+            status: 'manual_review',
+            provider: SupplierProvider::Airblue->value,
+            error_code: 'booking_outcome_uncertain',
+            error_message: $message,
+            safe_summary: [
+                'supplier_booking_status' => 'pending_reconciliation',
+                'supplier_outcome_unknown' => true,
+                'requires_retrieve_before_retry' => true,
+                'block_retry' => true,
+                'pending_reconciliation' => true,
+                'underlying_error_code' => $underlyingCode,
+            ],
+        );
     }
 
     private function failure(string $code, string $message, SupplierConnection $connection): SupplierBookingResultData

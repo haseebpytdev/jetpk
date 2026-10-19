@@ -33,7 +33,7 @@ class AirBlueBookingUncertainStateTest extends AirBlueOfflineTestCase
         $this->seed(OtaFoundationSeeder::class);
     }
 
-    public function test_transport_timeout_marks_uncertain_and_blocks_retry(): void
+    public function test_transport_timeout_returns_uncertain_dto_without_persisting(): void
     {
         $agency = Agency::query()->firstOrFail();
         $actor = User::factory()->create();
@@ -46,9 +46,11 @@ class AirBlueBookingUncertainStateTest extends AirBlueOfflineTestCase
             'credentials' => [
                 'api_channel' => 'zapways_ota',
                 'protocol_version' => '2.0',
-                'username' => 'fixture-user',
-                'password' => 'fixture-pass',
                 'client_id' => 'fixture-client',
+                'client_key' => 'fixture-key',
+                'agent_type' => '5',
+                'agent_id' => 'fixture-agent',
+                'agent_password' => 'fixture-secret',
             ],
         ]);
 
@@ -57,7 +59,7 @@ class AirBlueBookingUncertainStateTest extends AirBlueOfflineTestCase
             'meta' => [
                 'airblue_context' => [
                     'protocol_version' => '2.0',
-                    'priced_itinerary_xml' => '<PricedItinerary/>',
+                    'priced_itineraries' => [['segments' => [['flight_number' => '401']], 'fare_breakdowns' => [['base' => 1, 'taxes' => 1, 'total' => 2]]]],
                 ],
             ],
         ]);
@@ -101,29 +103,95 @@ class AirBlueBookingUncertainStateTest extends AirBlueOfflineTestCase
         $first = $service->createSupplierBooking($booking, $connection, $actor);
 
         $this->assertFalse($first->success);
+        $this->assertSame('manual_review', $first->status);
         $this->assertSame('booking_outcome_uncertain', $first->error_code);
+        $this->assertTrue((bool) ($first->safe_summary['supplier_outcome_unknown'] ?? false));
+        $this->assertTrue((bool) ($first->safe_summary['requires_retrieve_before_retry'] ?? false));
+        $this->assertSame('pending_reconciliation', $first->safe_summary['supplier_booking_status'] ?? null);
+
+        // Provider service must not own canonical persistence.
+        $this->assertSame(0, SupplierBookingAttempt::query()->where('booking_id', $booking->id)->count());
+        $this->assertSame(0, SupplierBooking::query()->where('booking_id', $booking->id)->count());
 
         $booking->refresh();
         $meta = is_array($booking->meta) ? $booking->meta : [];
-        $this->assertSame('uncertain', $meta['airblue_context']['booking_outcome'] ?? null);
-        $this->assertTrue((bool) ($meta['airblue_context']['supplier_outcome_unknown'] ?? false));
+        $this->assertNotSame('uncertain', $meta['airblue_context']['booking_outcome'] ?? null);
+    }
 
-        $this->assertTrue(
-            SupplierBookingAttempt::query()
-                ->where('booking_id', $booking->id)
-                ->where('status', 'uncertain')
-                ->exists(),
+    public function test_external_calls_disabled_is_ordinary_failure_not_uncertain(): void
+    {
+        $agency = Agency::query()->firstOrFail();
+        $actor = User::factory()->create();
+        $connection = SupplierConnection::query()->create([
+            'agency_id' => $agency->id,
+            'provider' => SupplierProvider::Airblue,
+            'name' => 'AirBlue Gate Fixture',
+            'environment' => SupplierEnvironment::Sandbox,
+            'is_active' => true,
+            'credentials' => [
+                'api_channel' => 'zapways_ota',
+                'protocol_version' => '2.0',
+                'client_id' => 'fixture-client',
+                'client_key' => 'fixture-key',
+                'agent_type' => '5',
+                'agent_id' => 'fixture-agent',
+                'agent_password' => 'fixture-secret',
+            ],
+        ]);
+
+        $booking = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'meta' => [
+                'airblue_context' => [
+                    'protocol_version' => '2.0',
+                    'priced_itineraries' => [['segments' => [['flight_number' => '401']], 'fare_breakdowns' => [['base' => 1, 'taxes' => 1, 'total' => 2]]]],
+                ],
+            ],
+        ]);
+
+        $client = Mockery::mock(AirBlueClient::class);
+        $client->shouldReceive('callOta')
+            ->once()
+            ->andThrow(new \App\Services\Suppliers\AirBlue\Exceptions\AirBlueValidationException(
+                'external_calls_disabled',
+                503,
+                'AirBlue external network calls are disabled.',
+            ));
+
+        $passengers = Mockery::mock(AirBluePassengerPayloadBuilder::class);
+        $passengers->shouldReceive('buildPassengersFromBooking')->andReturn([['ptc' => 'ADT']]);
+        $passengers->shouldReceive('buildContactFromBooking')->andReturn(['email' => 'fixture@example.test']);
+
+        $configResolver = Mockery::mock(AirBlueConfigResolver::class);
+        $configResolver->shouldReceive('resolveOta')->andReturn([
+            'endpoint_url' => 'https://example.test/ota',
+            'protocol_version' => '2.0',
+            'is_test' => true,
+        ]);
+
+        $xmlBuilder = Mockery::mock(AirBlueOtaXmlBuilder::class);
+        $xmlBuilder->shouldReceive('buildAirBookRequest')->andReturn('<AirBookRQ/>');
+
+        $protocolGuard = Mockery::mock(AirBlueProtocolGuard::class);
+        $protocolGuard->shouldReceive('assertCompatible')->once();
+
+        $service = new AirBlueBookingService(
+            $client,
+            $configResolver,
+            $passengers,
+            $xmlBuilder,
+            Mockery::mock(AirBlueOtaResponseNormalizer::class),
+            $protocolGuard,
+            app(SupplierDiagnosticLogger::class),
         );
 
-        $this->assertTrue(
-            SupplierBooking::query()
-                ->where('booking_id', $booking->id)
-                ->where('status', 'pending_reconciliation')
-                ->exists(),
-        );
+        $result = $service->createSupplierBooking($booking, $connection, $actor);
 
-        $second = $service->createSupplierBooking($booking, $connection, $actor);
-        $this->assertFalse($second->success);
-        $this->assertContains($second->error_code, ['booking_outcome_uncertain', 'duplicate_booking_guard']);
+        $this->assertFalse($result->success);
+        $this->assertSame('failed', $result->status);
+        $this->assertSame('external_calls_disabled', $result->error_code);
+        $this->assertNotSame('booking_outcome_uncertain', $result->error_code);
+        $this->assertSame(0, SupplierBookingAttempt::query()->where('booking_id', $booking->id)->count());
+        $this->assertSame(0, SupplierBooking::query()->where('booking_id', $booking->id)->count());
     }
 }

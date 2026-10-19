@@ -58,8 +58,48 @@ final class SupplierBookingPreflightGuard
         }
 
         $existingRecord = $booking->supplierBookings
-            ->first(fn (SupplierBooking $row) => in_array((string) $row->status, ['created', 'pending_ticketing', 'ticketed'], true));
+            ->first(fn (SupplierBooking $row) => in_array((string) $row->status, [
+                'created',
+                'confirmed',
+                'pending_ticketing',
+                'ticketed',
+                'on_hold',
+                'pending_reconciliation',
+            ], true));
         if ($existingRecord !== null) {
+            if ((string) $existingRecord->status === 'pending_reconciliation') {
+                Log::notice('supplier_booking.uncertain_blocked', [
+                    'booking_id' => $booking->id,
+                    'provider' => (string) $existingRecord->provider,
+                    'action' => 'create_supplier_booking',
+                    'source' => $source,
+                    'reason' => 'pending_reconciliation_supplier_booking',
+                ]);
+
+                $this->recordBlockedAttempt(
+                    $booking,
+                    $actor,
+                    (string) ($existingRecord->provider ?: $provider),
+                    $source,
+                    'booking_outcome_uncertain',
+                    'Supplier booking outcome is uncertain. Retrieve before any retry.',
+                );
+
+                return new SupplierBookingResultData(
+                    success: false,
+                    status: 'blocked',
+                    provider: (string) ($existingRecord->provider ?: $provider),
+                    error_code: 'booking_outcome_uncertain',
+                    error_message: 'Supplier booking outcome is uncertain. Retrieve before any retry.',
+                    safe_summary: [
+                        'source' => $source,
+                        'reason' => 'pending_reconciliation_supplier_booking',
+                        'requires_retrieve_before_retry' => true,
+                        'block_retry' => true,
+                    ],
+                );
+            }
+
             Log::notice('supplier_booking.existing_reference_reused', [
                 'booking_id' => $booking->id,
                 'provider' => (string) $existingRecord->provider,
@@ -116,6 +156,47 @@ final class SupplierBookingPreflightGuard
         $meaningfulCreateAttempt = $latestCreateAttempt;
         $latestAttempt = $booking->supplierBookingAttempts->sortByDesc('id')->first();
         $successAttempt = $meaningfulCreateAttempt ?? $latestAttempt;
+
+        $uncertainAttempt = $booking->supplierBookingAttempts
+            ->sortByDesc('id')
+            ->first(fn (SupplierBookingAttempt $row) => strtolower((string) $row->action) === 'create_pnr'
+                && in_array(strtolower((string) $row->status), ['uncertain', 'manual_review'], true));
+        if ($uncertainAttempt !== null) {
+            Log::notice('supplier_booking.uncertain_blocked', [
+                'booking_id' => $booking->id,
+                'provider' => $provider,
+                'action' => 'create_supplier_booking',
+                'source' => $source,
+                'reason' => 'uncertain_attempt_exists',
+                'attempt_id' => $uncertainAttempt->id,
+            ]);
+
+            $this->recordBlockedAttempt(
+                $booking,
+                $actor,
+                $provider,
+                $source,
+                'booking_outcome_uncertain',
+                'Supplier booking outcome is uncertain. Retrieve before any retry.',
+                $uncertainAttempt->error_code,
+            );
+
+            return new SupplierBookingResultData(
+                success: false,
+                status: 'blocked',
+                provider: $provider,
+                error_code: 'booking_outcome_uncertain',
+                error_message: 'Supplier booking outcome is uncertain. Retrieve before any retry.',
+                safe_summary: [
+                    'source' => $source,
+                    'reason' => 'uncertain_attempt_exists',
+                    'requires_retrieve_before_retry' => true,
+                    'block_retry' => true,
+                    'prior_attempt_id' => $uncertainAttempt->id,
+                ],
+            );
+        }
+
         if ($successAttempt !== null
             && strtolower((string) $successAttempt->status) === 'success'
             && ! $explicitRetry) {

@@ -452,6 +452,8 @@ return [
         ],
     ],
     'airblue' => [
+        // Central transport kill switch — fail closed before any Zapways HTTP.
+        'external_calls_enabled' => (bool) env('AIRBLUE_EXTERNAL_CALLS_ENABLED', false),
         'timeout_seconds' => (int) env('AIRBLUE_TIMEOUT_SECONDS', 60),
         'connect_timeout_seconds' => (int) env('AIRBLUE_CONNECT_TIMEOUT_SECONDS', 10),
         'username_header' => env('AIRBLUE_USERNAME_HEADER', 'username'),

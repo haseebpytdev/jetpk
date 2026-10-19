@@ -106,7 +106,8 @@ class AirBlueRetrieveService
                 ->where('status', 'pending_reconciliation')
                 ->update([
                     'status' => 'confirmed',
-                    'provider_reference' => $resolvedPnr,
+                    'supplier_reference' => $resolvedPnr,
+                    'pnr' => $resolvedPnr,
                 ]);
         }
 

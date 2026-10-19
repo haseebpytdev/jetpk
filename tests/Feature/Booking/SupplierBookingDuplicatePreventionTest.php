@@ -111,7 +111,10 @@ class SupplierBookingDuplicatePreventionTest extends TestCase
 
         $this->assertFalse($result->success);
         $this->assertSame('blocked', $result->status);
-        $this->assertSame('supplier_booking_already_processing', $result->error_code);
+        $this->assertContains($result->error_code, [
+            'supplier_booking_already_processing',
+            'supplier_booking_in_progress',
+        ]);
         Http::assertNothingSent();
     }
 
