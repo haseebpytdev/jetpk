@@ -67,7 +67,7 @@ final class PublicAbhiPayCheckoutPresenter
             'payment_status_label' => $statusLabel,
             'show_pay_button' => $showPayButton,
             'show_review_option' => ! $afterSubmission && $gatewayAvailable && $payableAmount > 0,
-            'ticketing_note' => 'Ticketing will happen after payment verification.',
+            'ticketing_note' => 'After payment is confirmed, your booking proceeds for processing and review. Ticketing is handled separately and is not automatic.',
             'latest_transaction_reference' => $latestTransaction?->client_transaction_id,
         ];
     }

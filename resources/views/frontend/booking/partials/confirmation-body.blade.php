@@ -329,7 +329,7 @@
                         <div class="mt-3 p-3 border rounded" data-testid="abhipay-confirmation-option">
                             <div class="fw-semibold mb-1">Pay online by card / AbhiPay</div>
                             <p class="small text-secondary mb-2">Pay Rs {{ number_format((float) ($abhiPay['payable_amount'] ?? 0), 0) }} securely with your card.</p>
-                            <p class="small text-secondary mb-2">{{ $abhiPay['ticketing_note'] ?? 'Ticketing will happen after payment verification.' }}</p>
+                            <p class="small text-secondary mb-2">{{ $abhiPay['ticketing_note'] ?? 'After payment is confirmed, your booking proceeds for processing and review. Ticketing is handled separately and is not automatic.' }}</p>
                             @php
                                 $abhiPayStartUrl = auth()->check()
                                     ? route('payments.abhipay.start', $booking)
@@ -351,7 +351,7 @@
                             {{ $abhiPay['blocked_message'] }}
                         </div>
                     @elseif (($abhiPay['payment_status_label'] ?? '') === 'Paid')
-                        <p class="ota-confirm-card__note mt-2 mb-0">Payment received. {{ $abhiPay['ticketing_note'] ?? 'Ticketing will happen after payment verification.' }}</p>
+                        <p class="ota-confirm-card__note mt-2 mb-0">Payment received. {{ $abhiPay['ticketing_note'] ?? 'After payment is confirmed, your booking proceeds for processing and review. Ticketing is handled separately and is not automatic.' }}</p>
                     @else
                         <p class="ota-confirm-card__note mt-2 mb-0">No payment has been taken at this stage.</p>
                     @endif

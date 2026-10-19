@@ -558,7 +558,7 @@ async function setupPaymentFixture(page: Page, fixtureId: string): Promise<void>
         formatted_amount: "Rs. 124,999",
         payment_status_label: "Unpaid",
         start_endpoint: "/booking/1/pay/card",
-        ticketing_note: "Ticket will be issued after payment confirmation.",
+        ticketing_note: "After payment is confirmed, your booking proceeds for processing and review. Ticketing is handled separately and is not automatic.",
         blocked_message: null,
       },
     }),
