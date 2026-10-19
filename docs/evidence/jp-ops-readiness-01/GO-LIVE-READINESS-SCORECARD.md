@@ -1,33 +1,33 @@
 # JP-OPS-READINESS-01 — Go-Live Readiness Scorecard
 
 **Rule:** Do not average away P0/P1 blockers.  
-**Date:** 2026-10-19 (FINAL-NONLIVE-HARDENING-PROD-01; PR #106 deployed scoped)
+**Date:** 2026-10-19 (FINAL-OPS-RESIDUAL-CLOSURE-01; read-only audit)
 
 | Domain | Status | Driver |
 |--------|--------|--------|
-| Public website | AMBER | HTTP live; /up / /login /lookup-booking /agent /admin healthy post-deploy |
+| Public website | AMBER | HTTP /up / /login /lookup-booking /agent /admin healthy |
 | Authentication | AMBER | Server-side QA auth PASS; browser passwords missing |
-| B2C | AMBER | PASS_TO_SAFE_BOUNDARY; AbhiPay out of initial launch scope; manual payment PASS |
+| B2C | AMBER | Manual payment launch profile; AbhiPay deferred |
 | B2B owner | AMBER | Server-side capability PARTIAL; browser depth residual |
-| B2B delegated staff | AMBER | Manager/Accountant/Support/Viewer capability proven; OPS-DEF-0004 CLOSED; 0024 Support QA CLOSED_PROD |
-| Admin | AMBER | Surfaces exist; AbhiPay admin config deferred (not launch-blocking) |
-| Staff | AMBER | 0009/0010 CLOSED_PROD fail-closed explicit gates; 1 empty Staff intentional DENY |
-| Booking | AMBER | State machine mapped; live Sabre PNR deferred to go-live gate |
-| Supplier | AMBER | AirBlue kill switch OFF; live Zapways/Sabre certification DEFERRED_GO_LIVE_GATE |
-| Pricing | AMBER | OPS-DEF-0026 CLOSED_PROD (payable-aligned presenter + FE cutover) |
-| Finance | AMBER | OPS-DEF-0006+0007+0013 CLOSED; QA fixture KPI exclusion CLOSED_PROD_HISTORICAL_QA_DATA |
-| Payments | AMBER | INITIAL_PAYMENT_MODE=MANUAL; AbhiPay deferred (0017); checkout copy not auto-ticket |
-| PNR/ticketing | AMBER | Live CreatePNR DEFERRED; ticketing OFF; AUTO_TICKETING_IMPLIED_IN_UI=NO |
-| Notifications | AMBER | OPS-DEF-0021 CLOSED_PROD_HISTORICAL_RESIDUAL; actionable old non-noise retained |
-| Documents | AMBER | Inventoried; values unproven |
-| CMS/SEO | AMBER | Inventoried; not re-audited |
-| Security | AMBER | 0009/0010/0024/0025 CLOSED_PROD; 0011 observation ACTIVE |
-| Data integrity | AMBER | OPS-DEF-0027 CLOSED_PROD_HISTORICAL_QA_DATA |
-| Background jobs | AMBER | failed_jobs=8 residual; no retry/delete this loop |
-| Observability | AMBER | OPS-DEF-0022 PARTIAL_EXTERNAL_CONFIG (no approved OPS_ALERT_EMAIL) |
-| Performance | AMBER | No live latency cert this loop |
-| Server operations | AMBER | public/storage CLOSED_SAFE_AS_IS; scoped patch marker appended |
-| Admin activation | AMBER | AbhiPay deferred; not required for INITIAL MANUAL launch |
+| B2B delegated staff | AMBER | Support QA reconciled; Viewer cancel CLOSED |
+| Admin | AMBER | Surfaces exist; AbhiPay admin deferred |
+| Staff | AMBER | Explicit gates CLOSED_PROD; legacy UID empty fail-closed (no grant) |
+| Booking | AMBER | Live Sabre PNR deferred |
+| Supplier | AMBER | AirBlue kill switch OFF; live certs deferred |
+| Pricing | AMBER | Payable-aligned presenter CLOSED_PROD |
+| Finance | AMBER | Wallet/ledger/idempotency CLOSED; QA KPI exclusion CLOSED_PROD |
+| Payments | AMBER | MANUAL launch; AbhiPay deferred |
+| PNR/ticketing | AMBER | Live CreatePNR deferred; ticketing OFF |
+| Notifications | AMBER | OPS-DEF-0029 OPEN recurring operational-mail SMTP failures (8); 0015 remains CLOSED historical |
+| Documents | AMBER | Inventoried |
+| CMS/SEO | AMBER | Inventoried |
+| Security | AMBER | 0011 observation ACTIVE (~2.4d); success=0 |
+| Data integrity | AMBER | QA historical data excluded from KPIs |
+| Background jobs | AMBER | default pending=0 (0019 OK); failed_jobs=8 SMTP residual stream |
+| Observability | AMBER | OPS-DEF-0022 PARTIAL_EXTERNAL_CONFIG |
+| Performance | AMBER | No live latency cert |
+| Server operations | AMBER | Disk 44%/54G free; OPS-DEF-0023 OPEN sudo cleanup optional |
+| Admin activation | AMBER | AbhiPay deferred |
 
 **PRODUCTION_OPERATIONAL_READY = NO**  
 **INITIAL_LAUNCH_PAYMENT_MODE = MANUAL**  
@@ -35,6 +35,8 @@
 **AIRBLUE_LIVE_API_CERTIFICATION = DEFERRED_GO_LIVE_GATE**  
 **AIRBLUE_EXTERNAL_CALLS_EFFECTIVELY_ENABLED = NO**
 
-**CURRENT_NON_DEFERRED_P1_BLOCKERS:** NONE (deferred: Sabre live PNR; AbhiPay; AirBlue live cert).
+**CURRENT_NON_DEFERRED_P0_BLOCKERS:** NONE  
+**CURRENT_NON_DEFERRED_P1_BLOCKERS:** NONE  
+**CURRENT_NON_DEFERRED_P2_BLOCKERS:** OPS-DEF-0029; OPS-DEF-0022; OPS-DEF-0023  
 
-**Next required action:** Merge evidence PR `ops/final-nonlive-hardening-prod-closure`; optionally set approved `OPS_ALERT_EMAIL` then enable external alerts; continue 0011 observation; schedule supplier live UAT in launch window.
+**Next required action:** SMTP diagnosis for OPS-DEF-0029 (no blind retry); optional approved OPS_ALERT_EMAIL; optional sudo cleanup for 0023; continue 0011 observation.
