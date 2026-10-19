@@ -1,7 +1,7 @@
 # JP-OPS-READINESS-01 — Go-Live Readiness Scorecard
 
 **Rule:** Do not average away P0/P1 blockers.  
-**Date:** 2026-10-17 (OPS-DEF-0011 legacy telemetry deployed + observation active; OPS-DEF-0012 CLOSED; OPS-DEF-0005/0008 CLOSED; OPS-DEF-0018 PNR deferred; MANUAL launch)
+**Date:** 2026-10-19 (AirBlue Zapways PR #104 prod-deployed with external calls disabled; OPS-DEF-0011 observation still active; MANUAL launch)
 
 | Domain | Status | Driver |
 |--------|--------|--------|
@@ -13,7 +13,7 @@
 | Admin | AMBER | Surfaces exist; AbhiPay admin config deferred (not launch-blocking) |
 | Staff | AMBER | Staff login+perms proven; manual payment review routes exist |
 | Booking | AMBER | State machine mapped; live Sabre PNR deferred to go-live gate |
-| Supplier | AMBER | OPS-DEF-0016 launch scope; AirBlue offline finalization STRENGTHENED (`AIRBLUE-ZAPWAYS-NON-LIVE-FINALIZATION.md`); live Zapways DEFERRED |
+| Supplier | AMBER | OPS-DEF-0016 launch scope; AirBlue PR #104 deployed (`AIRBLUE-ZAPWAYS-PROD-DEPLOY.md`); kill switch OFF; live Zapways DEFERRED_GO_LIVE_GATE |
 | Pricing | AMBER | Read-side invariants PASS_FOR_INITIAL_LAUNCH_PROFILE; live supplier revalidation unexecuted; OPS-DEF-0026 Next promo display residual |
 | Finance | AMBER | OPS-DEF-0006+0007+0013 CLOSED; runtime 922f1577 |
 | Payments | AMBER | INITIAL_PAYMENT_MODE=MANUAL; manual proof UAT PASS; AbhiPay deferred (0017); Sabre PNR residual deferred |
@@ -26,7 +26,7 @@
 | Background jobs | AMBER | failed_jobs residual; default worker posture per prior waves |
 | Observability | AMBER | disk-health ACTIVE; OPS-RISK-0017 CLOSED_GENERAL_LOGGING_RESTORED (URI-free Strategy A); OPS-DEF-0022 alert delivery open |
 | Performance | AMBER | Disk ~48%; no live latency cert |
-| Server operations | AMBER | Runtime base SHA 922f1577 + ops-def-0005-0008@79da5477 + ops-def-0011-0012@9a3f2ba2 + ops-def-0011-legacy-telemetry@9c5a0e8a; public FE BUILD_ID HNDspC9CoB4Bat_x0DwZ6; dashboard BUILD_ID 7-iZf4RbaJmGpuDjO1tsh |
+| Server operations | AMBER | Runtime base SHA 922f1577 + ops overlays incl. airblue-zapways-finalization@ff148b1f; public FE BUILD_ID HNDspC9CoB4Bat_x0DwZ6; dashboard BUILD_ID 3z0ZMmB40wEnJ1kRq0f1M |
 | Admin activation | AMBER | AbhiPay activation deferred by business decision; not required for INITIAL MANUAL launch |
 
 **PRODUCTION_OPERATIONAL_READY = NO**  
@@ -45,4 +45,5 @@
 **OPS-DEF-0017:** `OPEN_DEFERRED_MANUAL_PAYMENT_LAUNCH` — AbhiPay unfinished/uncertified; intentionally out of initial launch scope.  
 **OPS-DEF-0018:** `PARTIAL_DEFERRED_LIVE_SABRE_PNR_UAT` — manual payment UAT PASS; Sabre live PNR deferred to `GO_LIVE_GATE_SABRE_PNR_001`; pricing read-side PASS_FOR_INITIAL_LAUNCH_PROFILE (AMBER residual).  
 **CURRENT_NON_DEFERRED_P1_BLOCKERS:** NONE (deferred: Sabre live PNR go-live gate; AbhiPay).  
-**Next priority:** Complete AirBlue offline finalization PR review (`supplier/airblue-zapways-finalization`); live Zapways + Sabre PNR only in go-live window. Parallel: observe OPS-DEF-0011 legacy `outcome=success`.
+**OPS-DEF-0028:** `READY_AWAITING_LIVE_CERTIFICATION` — PR #104 scoped prod deploy complete; `AIRBLUE_EXTERNAL_CALLS_ENABLED` effectively false; live Zapways certification remains `DEFERRED_GO_LIVE_GATE`.  
+**Next priority:** Live Zapways + Sabre PNR only in an approved go-live window. Parallel: observe OPS-DEF-0011 legacy `outcome=success`.
