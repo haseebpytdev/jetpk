@@ -52,7 +52,18 @@ echo "DISK_USED_PERCENT=$USED_PCT"
 echo "DISK_FREE_GB=$FREE_GB"
 echo "FAILED_JOBS=$FAILED"
 
-# Notification integration gap: local log only until mail/Slack hook wired.
+# Optional external alert (OPS-DEF-0022): opt-in via OPS_EXTERNAL_ALERTS_ENABLED + OPS_ALERT_EMAIL.
+# Never blocks the health check; never targets customers. Failures are non-fatal.
+if [[ "$LEVEL" == "HIGH" || "$LEVEL" == "CRITICAL" ]]; then
+  if [[ -x "$PHP_BIN" && -f "$APP/artisan" ]]; then
+    "$PHP_BIN" "$APP/artisan" jetpk:ops-health-alert \
+      --category=disk_pressure \
+      --level="$LEVEL" \
+      --probe-failed-jobs \
+      >/dev/null 2>&1 || true
+  fi
+fi
+
 # Exit codes for monitoring wrappers:
 # 0 NORMAL/WARNING, 2 HIGH, 3 CRITICAL
 case "$LEVEL" in
