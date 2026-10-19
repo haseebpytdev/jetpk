@@ -15,6 +15,7 @@ use App\Models\SupplierBookingAttempt;
 use App\Models\SupplierConnection;
 use App\Models\SupplierDiagnosticLog;
 use App\Models\User;
+use App\Support\Bookings\QaFixtureBookingScope;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -249,7 +250,7 @@ class BookingReportService
 
     protected function scopedBookingsQuery(User $user): Builder
     {
-        $query = Booking::query();
+        $query = QaFixtureBookingScope::excludeFromOperationalMetrics(Booking::query());
 
         if ($user->isPlatformAdmin() || $user->isStaff()) {
             return $query;
