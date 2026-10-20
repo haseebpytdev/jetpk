@@ -14,12 +14,12 @@ use App\Models\User;
 use App\Support\Branding\BrandDisplayResolver;
 use App\Support\Emails\EmailBaseVariables;
 use App\Support\Emails\JetpkEmailEventRenderer;
+use App\Support\Communication\NotificationErrorSanitizer;
 use App\Support\Emails\JetpkOperationalEmailEventRegistry;
 use App\Support\Emails\OtaOperationalEmailRenderer;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Throwable;
 
@@ -28,6 +28,7 @@ class OtaNotificationService
     public function __construct(
         protected AgencyCommunicationSettingsService $communicationSettingsService,
         protected NotificationRecipientResolver $recipientResolver,
+        protected RecipientDeliverySafetyService $recipientDeliverySafety,
         protected NotificationPayloadSanitizer $payloadSanitizer,
         protected NotificationTemplateRenderer $templateRenderer,
         protected OtaOperationalEmailRenderer $operationalEmailRenderer,
@@ -131,6 +132,20 @@ class OtaNotificationService
             return;
         }
 
+        $recipientBundle = $this->applyPermanentRecipientSuppression(
+            $agency,
+            $eventKey,
+            $booking,
+            $actor,
+            $recipientBundle,
+            $safePayload,
+            $recipientContext,
+        );
+
+        if ($recipientBundle['to'] === []) {
+            return;
+        }
+
         $log = CommunicationLog::query()->create([
             'agency_id' => $agency->id,
             'booking_id' => $booking?->id,
@@ -207,6 +222,7 @@ class OtaNotificationService
             ->filter(fn (string $e): bool => $e !== '' && filter_var($e, FILTER_VALIDATE_EMAIL))
             ->values()
             ->all();
+        $to = $this->recipientDeliverySafety->partitionEmails($to)['allowed'];
 
         if ($to === []) {
             throw new InvalidArgumentException('Original log has no valid recipient addresses.');
@@ -215,6 +231,8 @@ class OtaNotificationService
         $meta = is_array($original->meta) ? $original->meta : [];
         $cc = isset($meta['cc']) && is_array($meta['cc']) ? array_values(array_filter($meta['cc'], fn ($e): bool => is_string($e) && filter_var($e, FILTER_VALIDATE_EMAIL))) : [];
         $bcc = isset($meta['bcc']) && is_array($meta['bcc']) ? array_values(array_filter($meta['bcc'], fn ($e): bool => is_string($e) && filter_var($e, FILTER_VALIDATE_EMAIL))) : [];
+        $cc = $this->recipientDeliverySafety->partitionEmails($cc)['allowed'];
+        $bcc = $this->recipientDeliverySafety->partitionEmails($bcc)['allowed'];
 
         $subject = (string) ($original->subject ?? 'Notification resend');
         $plainBody = (string) ($original->message ?? '');
@@ -411,6 +429,7 @@ class OtaNotificationService
                 'recipient_buckets' => $recipientBundle['buckets'],
                 'skipped_recipient_buckets' => $recipientBundle['skipped_buckets'],
                 'skipped_reason' => $reason,
+                'permanent_recipient_suppressed' => (bool) ($recipientContext['permanent_recipient_suppressed'] ?? false),
                 'deduplicated_recipient_buckets' => $this->deduplicatedRecipientBuckets($eventKey, $recipientContext),
                 'agent_staff_creator_source' => $recipientContext['agent_staff_creator_source'] ?? null,
                 'agent_staff_creator_user_id' => $recipientContext['agent_staff_creator_user_id'] ?? null,
@@ -419,6 +438,57 @@ class OtaNotificationService
                 'booking_creator_source' => $recipientContext['booking_creator_source'] ?? null,
             ],
         ]);
+    }
+
+    /**
+     * @param  array{to: array<int, string>, cc: array<int, string>, bcc: array<int, string>, scope: string, buckets: list<string>, skipped_buckets: list<array{bucket: string, reason: string}>}  $recipientBundle
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $recipientContext
+     * @return array{to: array<int, string>, cc: array<int, string>, bcc: array<int, string>, scope: string, buckets: list<string>, skipped_buckets: list<array{bucket: string, reason: string}>}
+     */
+    private function applyPermanentRecipientSuppression(
+        Agency $agency,
+        string $eventKey,
+        ?Booking $booking,
+        ?User $actor,
+        array $recipientBundle,
+        array $payload,
+        array $recipientContext,
+    ): array {
+        $toPartition = $this->recipientDeliverySafety->partitionEmails($recipientBundle['to']);
+        $ccPartition = $this->recipientDeliverySafety->partitionEmails($recipientBundle['cc'] ?? []);
+        $bccPartition = $this->recipientDeliverySafety->partitionEmails($recipientBundle['bcc'] ?? []);
+
+        foreach ($toPartition['suppressed'] as $suppressedEmail) {
+            $this->logSkipped(
+                $agency,
+                $eventKey,
+                $booking,
+                $actor,
+                [
+                    'to' => [$suppressedEmail],
+                    'cc' => [],
+                    'bcc' => [],
+                    'scope' => $recipientBundle['scope'],
+                    'buckets' => $recipientBundle['buckets'],
+                    'skipped_buckets' => $recipientBundle['skipped_buckets'],
+                ],
+                $payload,
+                RecipientDeliverySafetyService::SUPPRESSION_REASON,
+                array_merge($recipientContext, ['permanent_recipient_suppressed' => true]),
+            );
+        }
+
+        $recipientBundle['to'] = $toPartition['allowed'];
+        $recipientBundle['cc'] = $ccPartition['allowed'];
+        $recipientBundle['bcc'] = $bccPartition['allowed'];
+
+        if ($toPartition['allowed'] === [] && $toPartition['suppressed'] !== []) {
+            // All primary recipients suppressed — auditable skip logs already written above.
+            return $recipientBundle;
+        }
+
+        return $recipientBundle;
     }
 
     /**
@@ -526,15 +596,7 @@ class OtaNotificationService
 
     private function safeError(string $message, ?string $smtpPassword): string
     {
-        $m = $message;
-        if (filled($smtpPassword)) {
-            $m = str_replace((string) $smtpPassword, '[REDACTED]', $m);
-        }
-        $m = preg_replace('/Bearer\s+[A-Za-z0-9._\-]+/i', 'Bearer [redacted]', $m) ?? $m;
-        $m = preg_replace('/duffel_(test|live)_[A-Za-z0-9._\-]+/i', 'duffel_$1_[redacted]', $m) ?? $m;
-        $m = preg_replace('/(api[_-]?key|access[_-]?token|client[_-]?secret)\s*[:=]\s*\S+/i', '$1=[redacted]', $m) ?? $m;
-
-        return Str::limit((string) $m, 2000);
+        return NotificationErrorSanitizer::sanitize($message, $smtpPassword);
     }
 
     private function isImmediateMailer(): bool
@@ -591,6 +653,31 @@ class OtaNotificationService
                         'bucket' => $bucket,
                         'recipient_email_masked' => $this->maskEmail($email),
                     ]);
+
+                    continue;
+                }
+                if ($this->recipientDeliverySafety->isPermanentlyRejected($normalized)) {
+                    $this->logSkipped(
+                        $agency,
+                        $eventKey,
+                        $booking,
+                        $actor,
+                        [
+                            'to' => [$normalized],
+                            'cc' => [],
+                            'bcc' => [],
+                            'scope' => $bucket,
+                            'buckets' => [$bucket],
+                            'skipped_buckets' => [],
+                        ],
+                        $this->payloadSanitizer->sanitizeForScope($payload, $bucket),
+                        RecipientDeliverySafetyService::SUPPRESSION_REASON,
+                        array_merge($recipientContext, [
+                            'delivery_bucket' => $bucket,
+                            'permanent_recipient_suppressed' => true,
+                        ]),
+                    );
+                    $seenEmails[$normalized] = true;
 
                     continue;
                 }
