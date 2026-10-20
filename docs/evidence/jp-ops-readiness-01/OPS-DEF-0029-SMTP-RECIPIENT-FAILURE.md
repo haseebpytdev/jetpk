@@ -4,7 +4,9 @@
 **Protected main base:** `27961bb210bcd52d0509a0e2c1149ff6fc915714`  
 **Branch:** `fix/ops-def-0029-smtp-recipient-failures`  
 **Mode:** CODE + TEST + READ-ONLY prod forensics  
-**Status:** **FIX_READY** (PR #109 draft; durable exact-address suppression + legacy 5.1.1 evidence bridge for pre-classifier failed logs). Not CLOSED_PROD — no production deploy this loop.
+**Status:** **DEPLOYED_OBSERVATION_PENDING** (PR #109 merged + scoped runtime deploy; awaiting natural ~07:10 agency-summary cycle). Not CLOSED_PROD.  
+**Deploy evidence:** `OPS-DEF-0029-PRODUCTION-DEPLOY.md`  
+**Merged main:** `273c59c84dcc68a615a9445ad5b66816e503dbdb` (from approved head `1f1f493…`)
 
 ## Absolute mutation assertions
 
@@ -149,7 +151,7 @@ Do **not** invent a replacement address. Agency-admin mailbox must be corrected 
 
 | ID | Status |
 |----|--------|
-| OPS-DEF-0029 | **FIX_READY** |
+| OPS-DEF-0029 | **DEPLOYED_OBSERVATION_PENDING** |
 | OPS-DEF-0015 | CLOSED (unchanged) |
 | OPS-DEF-0019 | CLOSED (unchanged; no default-queue regression) |
 
