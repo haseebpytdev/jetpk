@@ -1,7 +1,7 @@
 # JP-OPS-READINESS-01 — Go-Live Readiness Scorecard
 
 **Rule:** Do not average away P0/P1 blockers.
-**Date:** 2026-10-20 (OPS-DEF-0029 SMTP recipient suppress+clear-meta review fixes on PR #109; FIX_READY, not deployed)
+**Date:** 2026-10-20 (OPS-DEF-0029 durable exact-address suppression + skip-audit fix on PR #109; FIX_READY, not deployed)
 
 | Domain | Status | Driver |
 |--------|--------|--------|
@@ -18,7 +18,7 @@
 | Finance | AMBER | Wallet/ledger/idempotency CLOSED; QA KPI exclusion CLOSED_PROD |
 | Payments | AMBER | MANUAL launch; AbhiPay deferred |
 | PNR/ticketing | AMBER | Live CreatePNR deferred; ticketing OFF |
-| Notifications | AMBER | OPS-DEF-0029 FIX_READY: permanent 5.1.1 terminal + exact-address suppression; AGENCY_ADMIN mailbox correction still required (operator) |
+| Notifications | AMBER | OPS-DEF-0029 FIX_READY: permanent 5.1.1 terminal + durable exact-address suppression (skipped audits do not clear); AGENCY_ADMIN mailbox correction still required (operator) |
 | Documents | AMBER | Inventoried |
 | CMS/SEO | AMBER | Inventoried |
 | Security | AMBER | 0011 observation ACTIVE (~2.4d); success=0 |
@@ -39,4 +39,4 @@
 **CURRENT_NON_DEFERRED_P1_BLOCKERS:** NONE
 **CURRENT_NON_DEFERRED_P2_BLOCKERS:** OPS-DEF-0029 (deploy after ChatGPT re-review + agency_admin email correction); OPS-DEF-0022; OPS-DEF-0023
 
-**Next required action:** ChatGPT re-review of PR #109 after suppress/clear-meta/scorecard/artifact fixes; do not merge/deploy until approved; operator corrects rejected agency_admin mailbox separately; continue 0011 observation.
+**Next required action:** ChatGPT re-review of PR #109 after durable-suppression fix; do not merge/deploy until approved; operator corrects rejected agency_admin mailbox separately; continue 0011 observation.

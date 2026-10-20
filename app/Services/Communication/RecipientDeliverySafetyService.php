@@ -8,9 +8,11 @@ use App\Support\Communication\SmtpDeliveryFailureClassifier;
 /**
  * Exact-address permanent SMTP recipient suppression from CommunicationLog evidence.
  *
- * Suppresses only when the latest relevant log for that exact normalized address is a
- * permanent_recipient_reject with retry_recommended=false. Transient/unknown failures
- * and later successful deliveries to the same address do not suppress.
+ * Suppresses only when the latest actual delivery outcome for that exact normalized
+ * address is failed with delivery_failure_class=permanent_recipient_reject and
+ * retry_recommended=false. Mailbox health ignores suppression-only skipped audit rows
+ * so they cannot clear durable permanent-reject state. Transient/unknown failures and
+ * later successful sent/delivered outcomes to the same address do not suppress.
  */
 final class RecipientDeliverySafetyService
 {
@@ -28,9 +30,10 @@ final class RecipientDeliverySafetyService
             return false;
         }
 
+        // Actual delivery outcomes only — skipped suppression audits must not override.
         $latest = CommunicationLog::query()
             ->whereRaw('LOWER(TRIM(recipient_email)) = ?', [$normalized])
-            ->whereIn('status', ['failed', 'sent', 'delivered', 'skipped'])
+            ->whereIn('status', ['failed', 'sent', 'delivered'])
             ->orderByDesc('id')
             ->first(['id', 'status', 'meta']);
 

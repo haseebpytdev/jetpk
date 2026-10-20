@@ -4,7 +4,7 @@
 **Protected main base:** `27961bb210bcd52d0509a0e2c1149ff6fc915714`  
 **Branch:** `fix/ops-def-0029-smtp-recipient-failures`  
 **Mode:** CODE + TEST + READ-ONLY prod forensics  
-**Status:** **FIX_READY** (PR #109 draft; ChatGPT review corrections applied — exact-address suppression, clear-meta, scorecard restore, artifact sanitize). Not CLOSED — no production deploy this loop.
+**Status:** **FIX_READY** (PR #109 draft; durable exact-address suppression — skipped audit rows do not clear permanent reject; clear-meta; scorecard restore; artifact sanitize). Not CLOSED_PROD — no production deploy this loop.
 
 ## Absolute mutation assertions
 
@@ -56,13 +56,33 @@
 
 No recipient addresses exposed in evidence.
 
+### Permanent 5.1.1 recipient cardinality (read-only failed_jobs probe)
+
+| Aggregate | Value |
+|-----------|-------|
+| PERMANENT_SINGLE_TO_COUNT | 5 |
+| PERMANENT_MULTI_TO_COUNT | 0 |
+| PERMANENT_WITH_CC_COUNT | 0 |
+| PERMANENT_WITH_BCC_COUNT | 0 |
+| PERMANENT_SINGLE_RECIPIENT_FAILURES | 5 |
+| PERMANENT_MULTI_RECIPIENT_FAILURES | 0 |
+
+All five historical permanent rejects were single-TO deliveries with empty CC/BCC.
+
+| Claim | Value |
+|-------|-------|
+| KNOWN_BAD_RECIPIENT_FILTERING_IN_MULTI_RECIPIENT_BUNDLE | PASS (exact known-bad address filtered; valid peers continue) |
+| FIRST_TIME_MULTI_RECIPIENT_PERMANENT_FAILURE_LEARNING | NOT_REQUIRED_FOR_CURRENT_0029 / DOCUMENTED_LIMITATION |
+
+`recipient_email` on queued multi-TO logs may be an implode of addresses; first-time permanent rejection attribution across multiple TO addresses is **not** implemented in this PR because production evidence shows zero multi-TO permanent failures.
+
 ## Phase 4–9 — code changes
 
 | Component | Behavior |
 |-----------|----------|
 | `SmtpDeliveryFailureClassifier` | Enhanced-status-first; permanent only for `5.1.1`; transient for `4.x` / reply `4xx`; else unknown |
 | `DeliverQueuedOperationalMail` | Permanent: log `failed` + meta, **do not rethrow**; transient/unknown: log + **rethrow**; success clears failure meta keys |
-| `RecipientDeliverySafetyService` | Exact-address suppression from latest permanent_recipient_reject evidence; auditable skipped CommunicationLog |
+| `RecipientDeliverySafetyService` | Exact-address suppression from latest **actual delivery** outcome (`failed`/`sent`/`delivered` only). Suppression `skipped` audit rows do **not** clear permanent-reject state. Later real `sent`/`delivered` clears suppression. |
 | `NotificationErrorSanitizer` | Shared with `OtaNotificationService::safeError`; strips secrets + emails from error_message |
 | `NotificationRecipientResolver::normalizeEmails` | Already `FILTER_VALIDATE_EMAIL` (proven by test) |
 
@@ -107,9 +127,9 @@ Do **not** invent a replacement address. Agency-admin mailbox must be corrected 
 
 | Suite | Result |
 |-------|--------|
-| Classifier + DeliverQueued + RecipientDeliverySafety | **PASS (23 tests / 76 assertions)** |
+| Classifier + DeliverQueued + RecipientDeliverySafety | See `_phpunit-ops-def-0029-summary.md` (includes durability regression) |
 | Artifact | `_phpunit-ops-def-0029-summary.md` (sanitized; no local paths) |
-| Broader Communication layout suites | Pre-existing subject/copy mismatches unrelated to 0029 |
+| Broader Communication / routing / operational suites | Baseline-proven vs `27961bb` — see summary; no HEAD-only regressions allowed |
 
 ## Defect status
 

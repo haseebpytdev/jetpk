@@ -58,6 +58,76 @@ class RecipientDeliverySafetyServiceTest extends TestCase
     }
 
     #[Test]
+    public function suppression_survives_its_own_skipped_audit_rows_and_clears_after_real_sent(): void
+    {
+        $this->seedPermanentReject('durable@example.test');
+
+        $safety = app(RecipientDeliverySafetyService::class);
+        $this->assertTrue($safety->isPermanentlyRejected('durable@example.test'));
+
+        Queue::fake();
+        Mail::fake();
+        config([
+            'queue.default' => 'database',
+            'mail.default' => 'smtp',
+            'mail.notification_queue' => 'notifications-transactional',
+        ]);
+
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+
+        $this->invokeSendWithRecipients($agency, 'ops.def0029.durable.1', ['durable@example.test']);
+
+        $this->assertTrue(
+            CommunicationLog::query()
+                ->where('event', 'ops.def0029.durable.1')
+                ->where('status', 'skipped')
+                ->where('recipient_email', 'durable@example.test')
+                ->exists()
+        );
+        $this->assertTrue($safety->isPermanentlyRejected('durable@example.test'));
+        Queue::assertNotPushed(DeliverQueuedOperationalMail::class);
+
+        Queue::fake();
+        $this->invokeSendWithRecipients($agency, 'ops.def0029.durable.2', ['durable@example.test']);
+
+        $this->assertTrue(
+            CommunicationLog::query()
+                ->where('event', 'ops.def0029.durable.2')
+                ->where('status', 'skipped')
+                ->where('recipient_email', 'durable@example.test')
+                ->exists()
+        );
+        $this->assertTrue($safety->isPermanentlyRejected('durable@example.test'));
+        Queue::assertNotPushed(DeliverQueuedOperationalMail::class);
+
+        CommunicationLog::query()->create([
+            'agency_id' => $agency->id,
+            'channel' => 'email',
+            'event' => 'ops.def0029.durable.sent',
+            'status' => 'sent',
+            'recipient_email' => 'durable@example.test',
+            'subject' => 'later success',
+            'sent_at' => now(),
+            'meta' => [],
+        ]);
+        $this->assertFalse($safety->isPermanentlyRejected('durable@example.test'));
+
+        $this->seedPermanentReject('durable-delivered@example.test');
+        $this->assertTrue($safety->isPermanentlyRejected('durable-delivered@example.test'));
+        CommunicationLog::query()->create([
+            'agency_id' => $agency->id,
+            'channel' => 'email',
+            'event' => 'ops.def0029.durable.delivered',
+            'status' => 'delivered',
+            'recipient_email' => 'durable-delivered@example.test',
+            'subject' => 'later delivered',
+            'sent_at' => now(),
+            'meta' => [],
+        ]);
+        $this->assertFalse($safety->isPermanentlyRejected('durable-delivered@example.test'));
+    }
+
+    #[Test]
     public function transient_450_address_is_not_suppressed(): void
     {
         $this->seedFailedClassification(
