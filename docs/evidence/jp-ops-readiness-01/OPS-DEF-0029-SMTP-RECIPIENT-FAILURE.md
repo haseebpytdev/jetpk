@@ -4,7 +4,7 @@
 **Protected main base:** `27961bb210bcd52d0509a0e2c1149ff6fc915714`  
 **Branch:** `fix/ops-def-0029-smtp-recipient-failures`  
 **Mode:** CODE + TEST + READ-ONLY prod forensics  
-**Status:** **FIX_READY** (not CLOSED — no production deploy this loop)
+**Status:** **FIX_READY** (PR #109 draft; ChatGPT review corrections applied — exact-address suppression, clear-meta, scorecard restore, artifact sanitize). Not CLOSED — no production deploy this loop.
 
 ## Absolute mutation assertions
 
@@ -61,7 +61,8 @@ No recipient addresses exposed in evidence.
 | Component | Behavior |
 |-----------|----------|
 | `SmtpDeliveryFailureClassifier` | Enhanced-status-first; permanent only for `5.1.1`; transient for `4.x` / reply `4xx`; else unknown |
-| `DeliverQueuedOperationalMail` | Permanent: log `failed` + meta, **do not rethrow**; transient/unknown: log + **rethrow** |
+| `DeliverQueuedOperationalMail` | Permanent: log `failed` + meta, **do not rethrow**; transient/unknown: log + **rethrow**; success clears failure meta keys |
+| `RecipientDeliverySafetyService` | Exact-address suppression from latest permanent_recipient_reject evidence; auditable skipped CommunicationLog |
 | `NotificationErrorSanitizer` | Shared with `OtaNotificationService::safeError`; strips secrets + emails from error_message |
 | `NotificationRecipientResolver::normalizeEmails` | Already `FILTER_VALIDATE_EMAIL` (proven by test) |
 
@@ -106,9 +107,9 @@ Do **not** invent a replacement address. Agency-admin mailbox must be corrected 
 
 | Suite | Result |
 |-------|--------|
-| `SmtpDeliveryFailureClassifierTest` + `DeliverQueuedOperationalMailTest` | **PASS (13 tests / 45 assertions)** |
-| Artifact | `_phpunit-ops-def-0029.txt` (+ junit xml when present) |
-| Broader Communication layout suites | Pre-existing subject/copy mismatches unrelated to 0029; not treated as regression from this change |
+| Classifier + DeliverQueued + RecipientDeliverySafety | **PASS (23 tests / 76 assertions)** |
+| Artifact | `_phpunit-ops-def-0029-summary.md` (sanitized; no local paths) |
+| Broader Communication layout suites | Pre-existing subject/copy mismatches unrelated to 0029 |
 
 ## Defect status
 

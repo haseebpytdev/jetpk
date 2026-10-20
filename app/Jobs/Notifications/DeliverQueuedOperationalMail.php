@@ -73,11 +73,23 @@ class DeliverQueuedOperationalMail implements ShouldQueue
             $pending->send($mail);
 
             if ($this->communicationLogId !== null) {
-                CommunicationLog::query()->whereKey($this->communicationLogId)->update([
-                    'status' => 'sent',
-                    'sent_at' => now(),
-                    'error_message' => null,
-                ]);
+                $log = CommunicationLog::query()->whereKey($this->communicationLogId)->first();
+                if ($log !== null) {
+                    $meta = is_array($log->meta) ? $log->meta : [];
+                    unset(
+                        $meta['delivery_failure_class'],
+                        $meta['smtp_code'],
+                        $meta['smtp_enhanced_status'],
+                        $meta['retry_recommended'],
+                    );
+
+                    $log->forceFill([
+                        'status' => 'sent',
+                        'sent_at' => now(),
+                        'error_message' => null,
+                        'meta' => $meta,
+                    ])->save();
+                }
             }
         } catch (Throwable $e) {
             $classification = (new SmtpDeliveryFailureClassifier)->classify($e);

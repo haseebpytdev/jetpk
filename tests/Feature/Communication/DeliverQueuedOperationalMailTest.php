@@ -154,7 +154,10 @@ class DeliverQueuedOperationalMailTest extends TestCase
     {
         $log = $this->makeLog('ops.wave1c.retry', 'failed', meta: [
             'delivery_failure_class' => SmtpDeliveryFailureClassifier::TRANSIENT,
+            'smtp_code' => '450',
+            'smtp_enhanced_status' => '4.7.1',
             'retry_recommended' => true,
+            'bucket' => 'keep_me',
         ]);
         $log->forceFill(['error_message' => 'prior transient'])->save();
 
@@ -165,6 +168,11 @@ class DeliverQueuedOperationalMailTest extends TestCase
         $this->assertSame('sent', $fresh->status);
         $this->assertNull($fresh->error_message);
         $this->assertNotNull($fresh->sent_at);
+        $this->assertArrayNotHasKey('delivery_failure_class', $fresh->meta ?? []);
+        $this->assertArrayNotHasKey('smtp_code', $fresh->meta ?? []);
+        $this->assertArrayNotHasKey('smtp_enhanced_status', $fresh->meta ?? []);
+        $this->assertArrayNotHasKey('retry_recommended', $fresh->meta ?? []);
+        $this->assertSame('keep_me', $fresh->meta['bucket'] ?? null);
     }
 
     #[Test]
