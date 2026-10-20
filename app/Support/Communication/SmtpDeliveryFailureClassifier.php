@@ -28,7 +28,21 @@ final class SmtpDeliveryFailureClassifier
      */
     public function classify(Throwable $e): array
     {
-        $message = $this->messageCorpus($e);
+        return $this->classifyMessage($this->messageCorpus($e));
+    }
+
+    /**
+     * Classify from a stored SMTP exception corpus (legacy CommunicationLog error_message).
+     *
+     * @return array{
+     *     delivery_failure_class: self::PERMANENT_RECIPIENT_REJECT|self::TRANSIENT|self::UNKNOWN,
+     *     smtp_code: ?string,
+     *     smtp_enhanced_status: ?string,
+     *     retry_recommended: bool
+     * }
+     */
+    public function classifyMessage(string $message): array
+    {
         $smtpCode = $this->parseSmtpReplyCode($message);
         $enhanced = $this->parseEnhancedStatus($message);
 

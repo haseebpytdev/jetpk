@@ -306,6 +306,117 @@ class RecipientDeliverySafetyServiceTest extends TestCase
     }
 
     #[Test]
+    public function legacy_failed_log_with_5_1_1_error_and_no_meta_is_suppressed(): void
+    {
+        $this->seedLegacyFailed(
+            'legacy-perm@example.test',
+            'Expected response code "250/251/252" but got code "550", with message "550 5.1.1 <legacy-perm@example.test>: Recipient address rejected: User unknown"',
+        );
+
+        $this->assertTrue(app(RecipientDeliverySafetyService::class)->isPermanentlyRejected('legacy-perm@example.test'));
+    }
+
+    #[Test]
+    public function legacy_failed_log_with_450_4_7_1_and_no_meta_is_not_suppressed(): void
+    {
+        $this->seedLegacyFailed(
+            'legacy-temp@example.test',
+            'Expected response code "250/251/252" but got code "450", with message "450 4.7.1 Recipient address rejected: Greylisted"',
+        );
+
+        $this->assertFalse(app(RecipientDeliverySafetyService::class)->isPermanentlyRejected('legacy-temp@example.test'));
+    }
+
+    #[Test]
+    public function legacy_ambiguous_bare_550_without_5_1_1_is_not_suppressed(): void
+    {
+        $this->seedLegacyFailed(
+            'legacy-bare550@example.test',
+            'Expected response code "250/251/252" but got code "550", with message "550 Recipient rejected"',
+        );
+
+        $this->assertFalse(app(RecipientDeliverySafetyService::class)->isPermanentlyRejected('legacy-bare550@example.test'));
+    }
+
+    #[Test]
+    public function legacy_permanent_failure_survives_skipped_audit_and_clears_after_sent_or_delivered(): void
+    {
+        $this->seedLegacyFailed(
+            'legacy-durable@example.test',
+            'Expected response code "250/251/252" but got code "550", with message "550 5.1.1 User unknown"',
+        );
+
+        $safety = app(RecipientDeliverySafetyService::class);
+        $this->assertTrue($safety->isPermanentlyRejected('legacy-durable@example.test'));
+
+        Queue::fake();
+        config([
+            'queue.default' => 'database',
+            'mail.default' => 'smtp',
+            'mail.notification_queue' => 'notifications-transactional',
+        ]);
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $this->invokeSendWithRecipients($agency, 'ops.def0029.legacy.durable', ['legacy-durable@example.test']);
+
+        $this->assertTrue(
+            CommunicationLog::query()
+                ->where('event', 'ops.def0029.legacy.durable')
+                ->where('status', 'skipped')
+                ->exists()
+        );
+        $this->assertTrue($safety->isPermanentlyRejected('legacy-durable@example.test'));
+
+        CommunicationLog::query()->create([
+            'agency_id' => $agency->id,
+            'channel' => 'email',
+            'event' => 'ops.def0029.legacy.sent',
+            'status' => 'sent',
+            'recipient_email' => 'legacy-durable@example.test',
+            'subject' => 'later success',
+            'sent_at' => now(),
+            'meta' => [],
+        ]);
+        $this->assertFalse($safety->isPermanentlyRejected('legacy-durable@example.test'));
+
+        $this->seedLegacyFailed(
+            'legacy-delivered@example.test',
+            'Expected response code "250/251/252" but got code "550", with message "550 5.1.1 User unknown"',
+        );
+        $this->assertTrue($safety->isPermanentlyRejected('legacy-delivered@example.test'));
+        CommunicationLog::query()->create([
+            'agency_id' => $agency->id,
+            'channel' => 'email',
+            'event' => 'ops.def0029.legacy.delivered',
+            'status' => 'delivered',
+            'recipient_email' => 'legacy-delivered@example.test',
+            'subject' => 'later delivered',
+            'sent_at' => now(),
+            'meta' => [],
+        ]);
+        $this->assertFalse($safety->isPermanentlyRejected('legacy-delivered@example.test'));
+    }
+
+    #[Test]
+    public function legacy_multi_recipient_recipient_email_never_infers_permanent_reject(): void
+    {
+        CommunicationLog::query()->create([
+            'agency_id' => Agency::query()->where('slug', 'asif-travels')->value('id'),
+            'channel' => 'email',
+            'event' => 'ops.def0029.legacy.multi',
+            'status' => 'failed',
+            'recipient_email' => 'a@example.test, b@example.test',
+            'subject' => 'legacy multi',
+            'error_message' => 'Expected response code "250/251/252" but got code "550", with message "550 5.1.1 User unknown"',
+            'meta' => [],
+        ]);
+
+        $safety = app(RecipientDeliverySafetyService::class);
+        $this->assertFalse($safety->isPermanentlyRejected('a@example.test'));
+        $this->assertFalse($safety->isPermanentlyRejected('b@example.test'));
+        $this->assertFalse($safety->isPermanentlyRejected('a@example.test, b@example.test'));
+    }
+
+    #[Test]
     public function permanent_job_failure_then_suppression_without_rethrow(): void
     {
         Mail::shouldReceive('to')->once()->andThrow(new UnexpectedResponseException(
@@ -348,6 +459,20 @@ class RecipientDeliverySafetyServiceTest extends TestCase
             '550',
             '5.1.1',
         );
+    }
+
+    private function seedLegacyFailed(string $email, string $errorMessage): void
+    {
+        CommunicationLog::query()->create([
+            'agency_id' => Agency::query()->where('slug', 'asif-travels')->value('id'),
+            'channel' => 'email',
+            'event' => 'ops.def0029.legacy.seed',
+            'status' => 'failed',
+            'recipient_email' => strtolower(trim($email)),
+            'subject' => 'legacy seed',
+            'error_message' => $errorMessage,
+            'meta' => [],
+        ]);
     }
 
     private function seedFailedClassification(

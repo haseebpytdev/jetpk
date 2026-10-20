@@ -8,11 +8,11 @@ use App\Support\Communication\SmtpDeliveryFailureClassifier;
 /**
  * Exact-address permanent SMTP recipient suppression from CommunicationLog evidence.
  *
- * Suppresses only when the latest actual delivery outcome for that exact normalized
- * address is failed with delivery_failure_class=permanent_recipient_reject and
- * retry_recommended=false. Mailbox health ignores suppression-only skipped audit rows
- * so they cannot clear durable permanent-reject state. Transient/unknown failures and
- * later successful sent/delivered outcomes to the same address do not suppress.
+ * Suppresses when the latest actual delivery outcome for that exact normalized
+ * address is failed and either (1) modern meta marks permanent_recipient_reject with
+ * retry_recommended=false, or (2) legacy fallback: classification meta absent, stored
+ * error unambiguously contains enhanced 5.1.1, and recipient_email is one exact address.
+ * Skipped audit rows never override; later sent/delivered clears suppression.
  */
 final class RecipientDeliverySafetyService
 {
@@ -35,18 +35,45 @@ final class RecipientDeliverySafetyService
             ->whereRaw('LOWER(TRIM(recipient_email)) = ?', [$normalized])
             ->whereIn('status', ['failed', 'sent', 'delivered'])
             ->orderByDesc('id')
-            ->first(['id', 'status', 'meta']);
+            ->first(['id', 'status', 'meta', 'error_message', 'recipient_email']);
 
         if ($latest === null || (string) $latest->status !== 'failed') {
             return false;
         }
 
-        $meta = is_array($latest->meta) ? $latest->meta : [];
-        $class = (string) ($meta['delivery_failure_class'] ?? '');
-        $retryRecommended = $meta['retry_recommended'] ?? null;
+        if (! $this->isSingleExactStoredRecipient((string) ($latest->recipient_email ?? ''), $normalized)) {
+            return false;
+        }
 
-        return $class === SmtpDeliveryFailureClassifier::PERMANENT_RECIPIENT_REJECT
-            && ($retryRecommended === false || $retryRecommended === 0);
+        $meta = is_array($latest->meta) ? $latest->meta : [];
+
+        // Modern path: any delivery_failure_class key means classifier already ran.
+        if (array_key_exists('delivery_failure_class', $meta)) {
+            $class = (string) ($meta['delivery_failure_class'] ?? '');
+            $retryRecommended = $meta['retry_recommended'] ?? null;
+
+            return $class === SmtpDeliveryFailureClassifier::PERMANENT_RECIPIENT_REJECT
+                && ($retryRecommended === false || $retryRecommended === 0);
+        }
+
+        // Legacy bridge: pre-classifier failed rows with unambiguous enhanced 5.1.1 only.
+        $classified = (new SmtpDeliveryFailureClassifier)->classifyMessage((string) ($latest->error_message ?? ''));
+
+        return $classified['delivery_failure_class'] === SmtpDeliveryFailureClassifier::PERMANENT_RECIPIENT_REJECT
+            && $classified['retry_recommended'] === false;
+    }
+
+    private function isSingleExactStoredRecipient(string $storedRecipient, string $normalizedLookup): bool
+    {
+        $stored = $this->normalizeEmail($storedRecipient);
+        if ($stored === '' || $stored !== $normalizedLookup) {
+            return false;
+        }
+        if (str_contains($stored, ',') || str_contains($stored, ';') || preg_match('/\s/', $stored) === 1) {
+            return false;
+        }
+
+        return filter_var($stored, FILTER_VALIDATE_EMAIL) !== false;
     }
 
     /**

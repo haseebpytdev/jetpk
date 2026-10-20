@@ -4,7 +4,7 @@
 **Protected main base:** `27961bb210bcd52d0509a0e2c1149ff6fc915714`  
 **Branch:** `fix/ops-def-0029-smtp-recipient-failures`  
 **Mode:** CODE + TEST + READ-ONLY prod forensics  
-**Status:** **FIX_READY** (PR #109 draft; durable exact-address suppression — skipped audit rows do not clear permanent reject; clear-meta; scorecard restore; artifact sanitize). Not CLOSED_PROD — no production deploy this loop.
+**Status:** **FIX_READY** (PR #109 draft; durable exact-address suppression + legacy 5.1.1 evidence bridge for pre-classifier failed logs). Not CLOSED_PROD — no production deploy this loop.
 
 ## Absolute mutation assertions
 
@@ -76,13 +76,27 @@ All five historical permanent rejects were single-TO deliveries with empty CC/BC
 
 `recipient_email` on queued multi-TO logs may be an implode of addresses; first-time permanent rejection attribution across multiple TO addresses is **not** implemented in this PR because production evidence shows zero multi-TO permanent failures.
 
+### Pre-merge legacy classification-meta bridge (read-only CommunicationLog)
+
+| Aggregate | Value |
+|-----------|-------|
+| HISTORICAL_PERMANENT_LOGS_TOTAL | 5 |
+| HISTORICAL_PERMANENT_LOGS_WITH_CLASSIFICATION_META | 0 |
+| HISTORICAL_PERMANENT_LOGS_WITHOUT_CLASSIFICATION_META | 5 |
+| LEGACY_5_1_1_FALLBACK | YES (error corpus still contains enhanced `5.1.1`; no DB backfill) |
+| LEGACY_4XX_SUPPRESSION | NO |
+| LEGACY_AMBIGUOUS_550_SUPPRESSION | NO |
+| LEGACY_MULTI_RECIPIENT_INFERENCE | NO |
+
+All five historical permanent single-TO failed logs pre-date classifier meta. Suppression uses `SmtpDeliveryFailureClassifier::classifyMessage` on stored `error_message` only when meta lacks `delivery_failure_class`.
+
 ## Phase 4–9 — code changes
 
 | Component | Behavior |
 |-----------|----------|
-| `SmtpDeliveryFailureClassifier` | Enhanced-status-first; permanent only for `5.1.1`; transient for `4.x` / reply `4xx`; else unknown |
+| `SmtpDeliveryFailureClassifier` | Enhanced-status-first; permanent only for `5.1.1`; transient for `4.x` / reply `4xx`; else unknown; `classifyMessage()` shared with legacy bridge |
 | `DeliverQueuedOperationalMail` | Permanent: log `failed` + meta, **do not rethrow**; transient/unknown: log + **rethrow**; success clears failure meta keys |
-| `RecipientDeliverySafetyService` | Exact-address suppression from latest **actual delivery** outcome (`failed`/`sent`/`delivered` only). Suppression `skipped` audit rows do **not** clear permanent-reject state. Later real `sent`/`delivered` clears suppression. |
+| `RecipientDeliverySafetyService` | Exact-address suppression from latest **actual delivery** outcome (`failed`/`sent`/`delivered` only). Modern meta path first; legacy fallback for failed rows without classification meta when enhanced `5.1.1` is unambiguous and recipient is one exact address. Suppression `skipped` audit rows do **not** clear permanent-reject state. Later real `sent`/`delivered` clears suppression. |
 | `NotificationErrorSanitizer` | Shared with `OtaNotificationService::safeError`; strips secrets + emails from error_message |
 | `NotificationRecipientResolver::normalizeEmails` | Already `FILTER_VALIDATE_EMAIL` (proven by test) |
 
