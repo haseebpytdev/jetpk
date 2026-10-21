@@ -1,0 +1,21 @@
+{
+  "CHEAPEST_FAMILY_PRODUCTION": "PASS",
+  "FASTEST_FAMILY_PRODUCTION": "PASS",
+  "SHORTEST_LAYOVER_FAMILY_PRODUCTION": "PASS",
+  "BEST_VALUE_FAMILY_PRODUCTION": "PASS",
+  "phrases": {
+    "cheapest": "CHEAPEST",
+    "cheap": "CHEAPEST",
+    "sasti": "CHEAPEST",
+    "سستی": "CHEAPEST",
+    "fastest": "FASTEST",
+    "fast": "FASTEST",
+    "jaldi": "FASTEST",
+    "shortest layover": "SHORTEST_LAYOVER",
+    "long layover nahi": "SHORTEST_LAYOVER",
+    "best value": "BEST_VALUE",
+    "best option": "BEST_VALUE",
+    "best": "BEST_VALUE"
+  },
+  "per_phrase": "lead_name=null; MODEL_CALLS=0; SEARCH_CALLS=0"
+}
