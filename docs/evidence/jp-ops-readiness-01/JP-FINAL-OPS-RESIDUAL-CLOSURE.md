@@ -1,9 +1,11 @@
 # JP-FINAL-OPS-RESIDUAL-CLOSURE + AIRBLUE-ZAPWAYS-LIVE-CERT-PREFLIGHT
 
 **Date (UTC):** 2026-10-22  
-**CURRENT_MAIN_SHA:** `5174959f7604af8c47c808aa64636ea8a9f3fb64`  
+**JETPK_MAIN_SHA (branch base):** `5174959f7604af8c47c808aa64636ea8a9f3fb64`  
+**DOCS_HEAD:** see git tip on `docs/jp-final-ops-residual-closure`  
 **Production root:** `/home/pkjetp/jetpk_app`  
-**Loop network:** `AIRBLUE_EXTERNAL_NETWORK_CALLS=0` (no Zapways HTTP)
+**Loop network:** `AIRBLUE_EXTERNAL_NETWORK_CALLS=0` (no Zapways HTTP)  
+**Machine-captured verify:** `_raw-final-residual-verify-capture.txt` (UTC `2026-10-22T10:18:15Z`)
 
 ## Phase 0 — Baseline
 

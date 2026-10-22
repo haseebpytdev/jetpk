@@ -1,0 +1,11 @@
+﻿COMMIT=3b4ac83ccecffaa59e664e1c4c0003f32288b408
+SUBJECT=docs: close OPS-DEF-0023 and record residual ops + AirBlue preflight
+
+docs/evidence/jp-ops-readiness-01/DEFECT-LEDGER.csv
+docs/evidence/jp-ops-readiness-01/GO-LIVE-READINESS-SCORECARD.md
+docs/evidence/jp-ops-readiness-01/JP-FINAL-OPS-RESIDUAL-CLOSURE.md
+docs/evidence/jp-ops-readiness-01/RISK-REGISTER.csv
+docs/evidence/jp-ops-readiness-01/_final-residual-cleanup-root.sh
+docs/evidence/jp-ops-readiness-01/_final-residual-closure-probe.sh
+docs/evidence/jp-ops-readiness-01/_final-residual-postops.sh
+docs/evidence/jp-ops-readiness-01/_final-residual-tls-sudo.sh
