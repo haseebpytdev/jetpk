@@ -4,7 +4,7 @@
 **Protected main base:** `27961bb210bcd52d0509a0e2c1149ff6fc915714`  
 **Branch:** `fix/ops-def-0029-smtp-recipient-failures`  
 **Mode:** CODE + TEST + READ-ONLY prod forensics  
-**Status:** **DEPLOYED_OBSERVATION_PENDING** (PR #109 merged + scoped runtime deploy; awaiting natural ~07:10 agency-summary cycle). Not CLOSED_PROD.  
+**Status:** **CLOSED_PROD** (natural agency-summary cycle proven 2026-10-22T07:10:04Z; no new permanent 5.1.1 failed_jobs).  
 **Deploy evidence:** `OPS-DEF-0029-PRODUCTION-DEPLOY.md`  
 **Merged main:** `273c59c84dcc68a615a9445ad5b66816e503dbdb` (from approved head `1f1f493…`)
 
@@ -26,27 +26,25 @@
 | TICKETING_CALLS | 0 |
 | LIVE_PAYMENT_CALLS | 0 |
 
-## Phase 1–3 — sanitized forensics (8 failed jobs)
+## Phase 1–3 — sanitized forensics (final historical baseline = 9)
+
+Original investigation recorded **8** SMTP-ish `failed_jobs` (5 permanent + 3 transient). A **ninth** row was created at `2026-10-20 07:17:05 UTC` **before** deployment: also `agency_booking_activity_summary` / `550` / `5.1.1` / same OPS-DEF-0029 family. Final reconciled baseline:
 
 | Aggregate | Value |
 |-----------|-------|
-| FAILED_JOBS_TOTAL | 8 |
-| PERMANENT_REJECT_COUNT | 5 (`550` / enhanced `5.1.1`) |
-| TRANSIENT_REJECT_COUNT | 3 (`450` / enhanced `4.7.1`) |
-| FAILED_EVENT_COUNTS | `agency_booking_activity_summary`:5; `payment_proof_submitted`:1; `booking_status_changed`:1; `payment_verified`:1 |
-| FAILED_RECIPIENT_SOURCE_COUNTS | `AGENCY_ADMIN`:5; transient non-user contacts:3 (`staff`×2, `agent`×1) |
-| FAILED_DELIVERY_BUCKET_COUNTS | meta `delivery_bucket` unset on all 8; `recipient_buckets` present |
-| FAILED_BOOKING_LINKED_COUNT | 3 |
-| FAILED_NON_BOOKING_COUNT | 5 |
-| PERMANENT_REJECT_RECIPIENT_STILL_CURRENT_COUNT | 5 |
+| FAILED_JOBS_HISTORICAL_BASELINE | 9 |
+| PERMANENT_550_5_1_1_HISTORICAL | 6 |
+| TRANSIENT_450_4_7_1_HISTORICAL | 3 |
+| FAILED_EVENT_COUNTS (original 8 sample) | `agency_booking_activity_summary`:5; `payment_proof_submitted`:1; `booking_status_changed`:1; `payment_verified`:1 |
+| NINTH_JOB | pre-deploy permanent `agency_booking_activity_summary` (historical; not post-deploy regression) |
 | TRANSIENT_RECIPIENT_LATER_SUCCESS_COUNT | 0 |
-| TRANSIENT_FAILURE_STILL_ACTIVE_COUNT | 3 |
+| TRANSIENT_FAILURE_STILL_ACTIVE_COUNT | 3 (historical; manual review; not retried this loop) |
 
 ### Source classification
 
 | Class | Count | Notes |
 |-------|-------|-------|
-| PERMANENT → `AGENCY_ADMIN` | 5 | Same hashed mailbox; `users.account_type=agency_admin`; daily activity summary |
+| PERMANENT → `AGENCY_ADMIN` | 6 | Same hashed mailbox family; daily activity summary (includes ninth pre-deploy row) |
 | TRANSIENT → staff/agent contact | 3 | Not matched to `users.email`; booking-linked operational/agent buckets |
 
 | Gate | Value |
@@ -62,14 +60,14 @@ No recipient addresses exposed in evidence.
 
 | Aggregate | Value |
 |-----------|-------|
-| PERMANENT_SINGLE_TO_COUNT | 5 |
+| PERMANENT_SINGLE_TO_COUNT | 6 (final baseline; original probe of first five + ninth same family) |
 | PERMANENT_MULTI_TO_COUNT | 0 |
 | PERMANENT_WITH_CC_COUNT | 0 |
 | PERMANENT_WITH_BCC_COUNT | 0 |
-| PERMANENT_SINGLE_RECIPIENT_FAILURES | 5 |
+| PERMANENT_SINGLE_RECIPIENT_FAILURES | 6 |
 | PERMANENT_MULTI_RECIPIENT_FAILURES | 0 |
 
-All five historical permanent rejects were single-TO deliveries with empty CC/BCC.
+All historical permanent rejects in the final baseline were single-TO deliveries with empty CC/BCC.
 
 | Claim | Value |
 |-------|-------|
@@ -147,19 +145,30 @@ Do **not** invent a replacement address. Agency-admin mailbox must be corrected 
 | Artifact | `_phpunit-ops-def-0029-summary.md` (sanitized; no local paths) |
 | Broader Communication / routing / operational suites | Baseline-proven vs `27961bb` — see summary; no HEAD-only regressions allowed |
 
+## Natural-cycle closure (2026-10-22)
+
+| Gate | Value |
+|------|-------|
+| NATURAL_POSTDEPLOY_CYCLE_OCCURRED | YES (`2026-10-22 07:10:04` UTC) |
+| KNOWN_PERMANENT_RECIPIENT_ATTEMPTED | NO |
+| PERMANENT_RECIPIENT_SKIPPED_AUDIT_CREATED | YES |
+| NEW_AGENCY_SUMMARY_5_1_1_FAILED_JOBS | 0 |
+| NEW_PERMANENT_5_1_1_FAILED_JOBS_SINCE_DEPLOY | 0 |
+| VALID_RECIPIENT_DELIVERY_PATH_UNCHANGED | YES |
+| CLOSURE_DECISION | PASS |
+
 ## Defect status
 
 | ID | Status |
 |----|--------|
-| OPS-DEF-0029 | **DEPLOYED_OBSERVATION_PENDING** |
+| OPS-DEF-0029 | **CLOSED_PROD** |
 | OPS-DEF-0015 | CLOSED (unchanged) |
 | OPS-DEF-0019 | CLOSED (unchanged; no default-queue regression) |
 
-## Next
+## Next (non-runtime)
 
-1. ChatGPT code review of PR.  
-2. Protected deploy of classifier + job.  
-3. Operator corrects agency-admin email (user data).  
-4. Optional later historical failed_job terminal marking — separate approval.
+1. Operator corrects rejected AGENCY_ADMIN mailbox (separate authorized data action).  
+2. Optional later historical failed_job terminal marking — separate approval.  
+3. Transient historical 450 rows remain manual-review; do not auto-retry.
 
 END
