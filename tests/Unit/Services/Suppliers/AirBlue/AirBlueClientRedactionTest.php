@@ -47,4 +47,19 @@ XML;
         $this->assertStringNotContainsString('AB1234567', $redacted);
         $this->assertStringContainsString('[REDACTED]', $redacted);
     }
+
+    public function test_summarize_soap_fault_classifies_gender_and_nre(): void
+    {
+        $client = app(AirBlueClient::class);
+        $method = (new ReflectionClass($client))->getMethod('summarizeSoapFault');
+        $method->setAccessible(true);
+
+        $gender = $method->invoke($client, '<soap:Fault><faultstring>Instance validation error: \'M\' is not a valid value for DocumentTypeGender.</faultstring></soap:Fault>');
+        $this->assertSame('soap_client_schema_gender', $gender['fault_class']);
+        $this->assertStringContainsString('DocumentTypeGender', (string) $gender['fault_snippet']);
+
+        $nre = $method->invoke($client, '<soap:Fault><faultstring>Server was unable to process request. ---&gt; Object reference not set to an instance of an object.</faultstring></soap:Fault>');
+        $this->assertSame('provider_nre', $nre['fault_class']);
+        $this->assertStringContainsString('Object reference', (string) $nre['fault_snippet']);
+    }
 }

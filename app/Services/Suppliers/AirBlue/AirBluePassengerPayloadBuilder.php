@@ -3,6 +3,7 @@
 namespace App\Services\Suppliers\AirBlue;
 
 use App\Models\Booking;
+use App\Models\BookingPassenger;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueValidationException;
 use App\Support\Phone\SupplierContactFormatter;
 
@@ -22,10 +23,7 @@ class AirBluePassengerPayloadBuilder
         $adultRphs = [];
         $rph = 1;
         foreach ($booking->passengers as $passenger) {
-            $ptc = strtoupper((string) ($passenger->type ?? 'ADT'));
-            if (! in_array($ptc, ['ADT', 'CHD', 'INF'], true)) {
-                $ptc = 'ADT';
-            }
+            $ptc = $this->resolvePassengerTypeCode($passenger);
             $idx = $counter[$ptc]++;
             $genderRaw = strtoupper(trim((string) ($passenger->gender ?? '')));
             $gender = match (true) {
@@ -100,5 +98,20 @@ class AirBluePassengerPayloadBuilder
             'ctcm_text' => $xml['ctcm_text'],
             'ctcb_text' => $xml['ctcb_text'],
         ];
+    }
+
+    /**
+     * Map BookingPassenger.passenger_type (adult/child/infant) or legacy PTC codes to Zapways PTC.
+     */
+    private function resolvePassengerTypeCode(BookingPassenger $passenger): string
+    {
+        $raw = strtoupper(trim((string) ($passenger->passenger_type ?? $passenger->type ?? 'ADT')));
+
+        return match ($raw) {
+            'ADT', 'ADULT' => 'ADT',
+            'CHD', 'CHILD' => 'CHD',
+            'INF', 'INFANT' => 'INF',
+            default => 'ADT',
+        };
     }
 }

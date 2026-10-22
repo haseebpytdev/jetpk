@@ -153,12 +153,18 @@ class AirBlueClient
 
         if ($status < 200 || $status >= 300) {
             $this->logCall($connection, $config, $operation, $correlationId, $startedAt, $status, $requestXml, $body, 'failed', 'supplier_http_error', $diagnosticContext);
+            $faultSummary = $this->summarizeSoapFault($body);
 
             throw new AirBlueProviderException(
                 'supplier_http_error',
                 $status,
                 'Provider temporarily unavailable.',
-                ['correlation_id' => $correlationId, 'http_status' => $status],
+                [
+                    'correlation_id' => $correlationId,
+                    'http_status' => $status,
+                    'fault_class' => $faultSummary['fault_class'],
+                    'fault_snippet' => $faultSummary['fault_snippet'],
+                ],
             );
         }
 
@@ -172,6 +178,7 @@ class AirBlueClient
 
         if ($parsed['soap_fault'] !== null) {
             $this->logCall($connection, $config, $operation, $correlationId, $startedAt, $status, $requestXml, $body, 'failed', 'soap_fault', $diagnosticContext);
+            $faultSummary = $this->summarizeSoapFault($body);
 
             throw new AirBlueProviderException(
                 'soap_fault',
@@ -180,6 +187,8 @@ class AirBlueClient
                 [
                     'correlation_id' => $correlationId,
                     'fault_code' => $parsed['soap_fault']['code'],
+                    'fault_class' => $faultSummary['fault_class'],
+                    'fault_snippet' => $faultSummary['fault_snippet'],
                 ],
             );
         }
@@ -294,6 +303,20 @@ class AirBlueClient
     ): void {
         $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
 
+        $logPath = storage_path('logs/airblue.log');
+        $logDir = dirname($logPath);
+        if (! is_dir($logDir)) {
+            @mkdir($logDir, 0755, true);
+        }
+        if (! is_file($logPath)) {
+            @touch($logPath);
+        }
+
+        $faultSummary = $responseXml !== null ? $this->summarizeSoapFault($responseXml) : [
+            'fault_class' => null,
+            'fault_snippet' => null,
+        ];
+
         Log::channel('air-blue')->info('airblue.provider_call', SensitiveDataRedactor::redact([
             'correlation_id' => $correlationId,
             'supplier_connection_id' => $connection->id,
@@ -307,11 +330,45 @@ class AirBlueClient
             'http_status' => $httpStatus,
             'status' => $status,
             'error_code' => $errorCode,
+            'fault_class' => $faultSummary['fault_class'],
+            'fault_snippet' => $faultSummary['fault_snippet'],
             'booking_id' => $diagnosticContext['booking_id'] ?? null,
             'user_id' => $diagnosticContext['user_id'] ?? null,
             'request_xml' => $this->sanitizeXml($requestXml),
             'response_xml' => $responseXml !== null ? $this->sanitizeXml($responseXml) : null,
         ]));
+    }
+
+    /**
+     * Extract a redacted, classification-only SOAP fault summary for diagnostics.
+     *
+     * @return array{fault_class: ?string, fault_snippet: ?string}
+     */
+    private function summarizeSoapFault(string $body): array
+    {
+        $fault = '';
+        if (preg_match('/<(?:[\w]+:)?faultstring[^>]*>([^<]+)<\/(?:[\w]+:)?faultstring>/i', $body, $m)) {
+            $fault = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_XML1);
+        }
+
+        if ($fault === '') {
+            return ['fault_class' => null, 'fault_snippet' => null];
+        }
+
+        $fault = preg_replace('/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i', '[REDACTED_EMAIL]', $fault) ?? $fault;
+        $fault = preg_replace('/[A-Za-z0-9+\/=]{40,}/', '[REDACTED]', $fault) ?? $fault;
+
+        $class = match (true) {
+            str_contains($fault, 'DocumentTypeGender') => 'soap_client_schema_gender',
+            str_contains($fault, 'Object reference not set') => 'provider_nre',
+            str_contains($fault, 'Instance validation error') => 'soap_client_schema_validation',
+            default => 'soap_fault',
+        };
+
+        return [
+            'fault_class' => $class,
+            'fault_snippet' => substr($fault, 0, 220),
+        ];
     }
 
     private function sanitizeXml(string $xml): string
