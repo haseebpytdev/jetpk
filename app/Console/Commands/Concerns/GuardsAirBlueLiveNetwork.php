@@ -3,24 +3,23 @@
 namespace App\Console\Commands\Concerns;
 
 /**
- * Fail-closed gate for AirBlue artisan commands that can reach Zapways.
+ * Explicit operator confirmation for AirBlue Artisan commands that reach Zapways.
  *
- * Requires both AIRBLUE_CLI_LIVE_ENABLED=true and --allow-live.
- * Live certification remains DEFERRED_GO_LIVE_GATE.
+ * There is no global AirBlue network kill switch. Normal/public supplier eligibility
+ * is controlled by SupplierConnection state and AirBlueConnectionSearchPolicy.
+ * The existing --allow-live option is retained as a backwards-compatible CLI
+ * acknowledgement for intentional supplier calls; it is not an environment gate.
  */
 trait GuardsAirBlueLiveNetwork
 {
     protected function guardAirBlueLiveNetwork(string $operation): bool
     {
-        $envAllowed = filter_var(env('AIRBLUE_CLI_LIVE_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
-        $flagAllowed = (bool) $this->option('allow-live');
-
-        if ($envAllowed && $flagAllowed) {
+        if ((bool) $this->option('allow-live')) {
             return true;
         }
 
         $this->error(sprintf(
-            'Blocked: %s requires --allow-live and AIRBLUE_CLI_LIVE_ENABLED=true. Live Airblue/Zapways calls are deferred to the go-live gate.',
+            'Blocked: %s requires explicit --allow-live acknowledgement for this Artisan supplier call.',
             $operation,
         ));
 

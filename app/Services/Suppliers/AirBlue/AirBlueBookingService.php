@@ -107,7 +107,17 @@ class AirBlueBookingService
             );
         } catch (AirBlueException $exception) {
             // Pre-network gates (e.g. external_calls_disabled) and provider rejections are ordinary failures.
-            return $this->failure($exception->normalizedCode, $exception->safeMessage, $connection);
+            return $this->failure(
+                $exception->normalizedCode,
+                $exception->safeMessage,
+                $connection,
+                [
+                    'http_status' => $exception->context['http_status'] ?? $exception->getCode(),
+                    'fault_class' => $exception->context['fault_class'] ?? null,
+                    'fault_snippet' => $exception->context['fault_snippet'] ?? null,
+                    'underlying_error_code' => $exception->normalizedCode,
+                ],
+            );
         } catch (\Throwable $exception) {
             Log::channel('air-blue')->warning('airblue.booking.unexpected', [
                 'booking_id' => $booking->id,
@@ -192,14 +202,27 @@ class AirBlueBookingService
         );
     }
 
-    private function failure(string $code, string $message, SupplierConnection $connection): SupplierBookingResultData
-    {
+    /**
+     * @param  array<string, mixed>  $meta
+     */
+    private function failure(
+        string $code,
+        string $message,
+        SupplierConnection $connection,
+        array $meta = [],
+    ): SupplierBookingResultData {
         $this->diagnosticLogger->log(
             connection: $connection,
             action: 'create_order',
             status: 'failed',
             safeMessage: $message,
-            meta: ['error_code' => $code],
+            meta: array_filter([
+                'error_code' => $code,
+                'http_status' => $meta['http_status'] ?? null,
+                'fault_class' => $meta['fault_class'] ?? null,
+                'fault_snippet' => $meta['fault_snippet'] ?? null,
+                'underlying_error_code' => $meta['underlying_error_code'] ?? null,
+            ], static fn ($v) => $v !== null && $v !== ''),
         );
 
         return new SupplierBookingResultData(
@@ -208,6 +231,10 @@ class AirBlueBookingService
             provider: SupplierProvider::Airblue->value,
             error_code: $code,
             error_message: $message,
+            safe_summary: array_filter([
+                'fault_class' => $meta['fault_class'] ?? null,
+                'http_status' => $meta['http_status'] ?? null,
+            ], static fn ($v) => $v !== null && $v !== ''),
         );
     }
 }
