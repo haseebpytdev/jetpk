@@ -1,0 +1,13 @@
+﻿=== HTTP_STATUS_DIAG ===
+BOOKING_ID=41
+HOST=otatest4.zapways.com
+EXT=YES
+XML_BYTES=3344
+XML_HAS_PASSENGER=YES
+XML_HAS_ITIN=YES
+CALL_OK=NO
+ERROR_CODE=supplier_http_error
+HTTP_STATUS=500
+SAFE_MSG=Provider temporarily unavailable.
+CTX_KEYS=correlation_id,http_status
+=== AIRBLUE_LOG_TAIL ===

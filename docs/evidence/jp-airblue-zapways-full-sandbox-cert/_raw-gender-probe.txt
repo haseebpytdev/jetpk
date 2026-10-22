@@ -1,0 +1,5 @@
+﻿VARIANT=as_is_M HTTP=500 HAS_RS=NO HAS_PNR_ATTR=NO FAULT=Server was unable to read request. ---> There is an error in XML document (41, 105). ---> Instance validation error: 'M' is not a valid value for DocumentTypeGender.
+VARIANT=omit_gender HTTP=500 HAS_RS=NO HAS_PNR_ATTR=NO FAULT=Server was unable to process request. ---> Object reference not set to an instance of an object.
+VARIANT=gender_Male HTTP=500 HAS_RS=NO HAS_PNR_ATTR=NO FAULT=Server was unable to process request. ---> Object reference not set to an instance of an object.
+VARIANT=gender_male HTTP=500 HAS_RS=NO HAS_PNR_ATTR=NO FAULT=Server was unable to read request. ---> There is an error in XML document (41, 105). ---> Instance validation error: 'male' is not a valid value for DocumentTypeGender.
+VARIANT=gender_1 HTTP=500 HAS_RS=NO HAS_PNR_ATTR=NO FAULT=Server was unable to read request. ---> There is an error in XML document (41, 105). ---> Instance validation error: '1' is not a valid value for DocumentTypeGender.

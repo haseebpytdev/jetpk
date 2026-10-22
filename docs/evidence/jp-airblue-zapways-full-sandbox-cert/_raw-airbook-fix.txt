@@ -1,0 +1,8 @@
+﻿HTTP_STATUS=500
+HAS_AIRBOOKRS=NO
+HAS_SUCCESS=NO
+PNR_PRESENT=NO
+FAULT=Server was unable to process request. ---> Object reference not set to an instance of an object.
+REQ_HAS_FAREBASIS=YES
+REQ_GENDER_MALE=YES
+BODY_BYTES=441
