@@ -21,6 +21,11 @@ use Illuminate\Support\Facades\Log;
  * {@see \App\Services\Suppliers\SupplierBookingService}. This service must not create
  * a second successful attempt or SupplierBooking row.
  *
+ * On successful AirBook, `safe_summary.airblue_context` includes supplier-only
+ * ticketing payment fields (`supplier_payable_amount`, `payment_currency`,
+ * `payment_type`) derived from offer `fare_breakdown.supplier_total` — never from
+ * customer payable / markup-inclusive totals.
+ *
  * Transport timeouts after air_book may mean the provider accepted the reservation.
  * Those outcomes return status=manual_review / error_code=booking_outcome_uncertain
  * and must not auto-retry AirBook.
@@ -83,6 +88,7 @@ class AirBlueBookingService
             ]);
             $normalized = $this->otaNormalizer->normalizeBookingResponse($response, $providerContext);
             $providerCtx = is_array($normalized['provider_context'] ?? null) ? $normalized['provider_context'] : [];
+            $providerCtx = array_merge($providerCtx, $this->resolveTicketingPaymentContext($booking, $meta, $config));
             $pnr = (string) ($normalized['pnr'] ?? '');
             $supplierReference = (string) ($normalized['provider_booking_reference'] ?? $pnr);
 
@@ -150,6 +156,64 @@ class AirBlueBookingService
         $fromSnapshot = is_array($raw['provider_context'] ?? null) ? $raw['provider_context'] : [];
 
         return array_merge($fromSnapshot, $fromMeta);
+    }
+
+    /**
+     * Supplier-only PaymentInfo fields for later AirDemandTicket.
+     *
+     * Amounts come from offer fare_breakdown.supplier_total (or provider itinerary
+     * total_fare). Never from customer payable / markup-inclusive booking totals.
+     *
+     * @param  array<string, mixed>  $meta
+     * @param  array<string, mixed>  $config
+     * @return array<string, mixed>
+     */
+    private function resolveTicketingPaymentContext(Booking $booking, array $meta, array $config): array
+    {
+        $snapshot = $this->resolveOfferSnapshot($booking, $meta);
+        $fareBreakdown = is_array($snapshot['fare_breakdown'] ?? null) ? $snapshot['fare_breakdown'] : [];
+        $amount = $fareBreakdown['supplier_total'] ?? null;
+        $currency = $fareBreakdown['currency'] ?? null;
+
+        if ($amount === null || $amount === '' || (float) $amount <= 0) {
+            $airblueContext = is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [];
+            $itinerary = is_array($airblueContext['priced_itineraries'][0] ?? null)
+                ? $airblueContext['priced_itineraries'][0]
+                : [];
+            $totalFare = is_array($itinerary['total_fare'] ?? null) ? $itinerary['total_fare'] : [];
+            $amount = $totalFare['total'] ?? null;
+            $currency = $currency ?? ($totalFare['currency'] ?? null);
+        }
+
+        if ($amount === null || $amount === '' || (float) $amount <= 0) {
+            return [];
+        }
+
+        return [
+            'supplier_payable_amount' => round((float) $amount, 2),
+            'payment_currency' => strtoupper(trim((string) ($currency ?? $config['currency'] ?? 'PKR'))) ?: 'PKR',
+            'payment_type' => 'Cash',
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    private function resolveOfferSnapshot(Booking $booking, array $meta): array
+    {
+        foreach ([
+            'normalized_offer_snapshot',
+            'validated_offer_snapshot',
+            'flight_offer_snapshot',
+            'offer_snapshot',
+        ] as $key) {
+            if (is_array($meta[$key] ?? null) && $meta[$key] !== []) {
+                return $meta[$key];
+            }
+        }
+
+        return is_array($booking->offer_snapshot) ? $booking->offer_snapshot : [];
     }
 
     /**
