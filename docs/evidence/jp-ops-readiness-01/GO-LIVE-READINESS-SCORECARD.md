@@ -33,11 +33,11 @@
 **INITIAL_LAUNCH_PAYMENT_MODE = MANUAL**
 **SABRE_LIVE_API_CERTIFICATION = DEFERRED_GO_LIVE_GATE**
 **AIRBLUE_LIVE_API_CERTIFICATION = DEFERRED_GO_LIVE_GATE**
-**AIRBLUE_LIVE_CERT_PREFLIGHT = COMPLETE_ZERO_NETWORK (SEARCH_CERT_READY=NO — TLS paths configured but files absent)**
+**AIRBLUE_SANDBOX_CERT_PREFLIGHT = COMPLETE_ZERO_NETWORK (SEARCH_CERT_READY=NO — previously certified TEST mTLS files currently absent)**
 **AIRBLUE_EXTERNAL_CALLS_EFFECTIVELY_ENABLED = NO**
 
 **CURRENT_NON_DEFERRED_P0_BLOCKERS:** NONE
 **CURRENT_NON_DEFERRED_P1_BLOCKERS:** NONE
 **CURRENT_NON_DEFERRED_P2_BLOCKERS:** OPS-DEF-0022
 
-**Next required action:** Approve non-customer `OPS_ALERT_EMAIL` then enable OPS-DEF-0022 delivery tests; operator supplies authoritative AGENCY_ADMIN replacement email; resolve AirBlue TLS material before sandbox live-cert loop; continue 0011 observation; deferred Sabre/AbhiPay unchanged.
+**Next required action:** Approve non-customer `OPS_ALERT_EMAIL` then enable OPS-DEF-0022 delivery tests; operator supplies authoritative AGENCY_ADMIN replacement email; restore the previously certified AirBlue Zapways TEST mTLS material before sandbox certification; continue 0011 observation; deferred Sabre/AbhiPay unchanged.
