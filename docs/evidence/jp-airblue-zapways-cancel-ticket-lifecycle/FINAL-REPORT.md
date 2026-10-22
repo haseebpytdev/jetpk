@@ -98,7 +98,9 @@ Booking B metadata was **not** manually patched. Application defect confirmed: s
 
 ## Runtime fix (unmerged)
 
-Branch: `fix/airblue-ticketing-payment-context`
+Branch: `fix/airblue-ticketing-payment-context`  
+Runtime PR: `#120`  
+Runtime head: `0a70fc3afee1e38caf5042a77974b236b16afa4f`
 
 - Persist `supplier_payable_amount`, `payment_currency`, `payment_type` from offer `fare_breakdown.supplier_total` during AirBook success in `AirBlueBookingService`.
 - Never use `BookingPayableResolver` / customer payable for Zapways PaymentInfo.
