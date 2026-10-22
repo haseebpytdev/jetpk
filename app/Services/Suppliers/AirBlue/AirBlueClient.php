@@ -69,18 +69,6 @@ class AirBlueClient
         string $requestXml,
         array $diagnosticContext = [],
     ): array {
-        if (! (bool) config('suppliers.airblue.external_calls_enabled', false)) {
-            throw new AirBlueValidationException(
-                'external_calls_disabled',
-                503,
-                'AirBlue external network calls are disabled.',
-                [
-                    'operation' => $operation,
-                    'supplier_connection_id' => $connection->id,
-                ],
-            );
-        }
-
         $config = $this->configResolver->resolveOta($connection);
         $correlationId = (string) ($diagnosticContext['correlation_id'] ?? $this->correlationContext->newCorrelationId());
         $soapAction = $this->resolveOtaSoapAction($operation, $config);
