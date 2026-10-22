@@ -80,6 +80,17 @@ FILES=AirBlueOtaXmlParser.php,AirBlueOtaXmlBuilder.php
 
 Do **not** cancel or ticket this PNR until PR review completes.
 
+## ChatGPT pre-PR review hardening
+
+After the successful one-way TEST AirBook/Read, review found and corrected two documentation-level issues **offline only**:
+
+- Zapways v2.06 round-trip AirBook requires one `OriginDestinationOptions` wrapper containing separate `OriginDestinationOption` children. The builder now merges preserved per-leg search fragments into that single wrapper and combines per-leg `PTC_FareBreakdown` nodes under one `PriceInfo/PTC_FareBreakdowns` container.
+- Zapways v2.06 defines `PhoneLocationType`: 6=Home, 7=Business, 10=Mobile. The default mobile contact type is now correctly `10` (the successful TEST call used the earlier accepted value 6).
+
+No additional Zapways calls were made for these review changes. The one-way supplier result remains the certified evidence; round-trip composition is covered offline and still requires later supplier lifecycle certification.
+
+Checkout integrity note: the canonical checkout resolves the selected offer from the server-side `FlightSearchResultStore` using `search_id + offer_id`; booking does not treat a client-posted raw supplier XML fragment as authoritative.
+
 ## Next
 
 1. Runtime PR review (do not merge from agent).
