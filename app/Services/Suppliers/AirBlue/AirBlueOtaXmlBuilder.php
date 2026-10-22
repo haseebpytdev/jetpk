@@ -115,7 +115,7 @@ XML
      */
     private function airBookItineraryXml(array $itineraries, array $config): string
     {
-        $preserved = '';
+        $preservedOptions = '';
         foreach ($itineraries as $itinerary) {
             if (! is_array($itinerary)) {
                 continue;
@@ -124,13 +124,16 @@ XML
             if ($fragment === '') {
                 continue;
             }
-            // Fragment is already <ota:OriginDestinationOptions>...</ota:OriginDestinationOptions>
-            if (str_contains($fragment, 'OriginDestinationOptions')) {
-                $preserved .= $fragment;
+
+            // Zapways v2.06 round-trip/multi-city AirBook requires a single
+            // OriginDestinationOptions wrapper containing each selected option.
+            if (preg_match('/<ota:OriginDestinationOptions\b[^>]*>(.*)<\/ota:OriginDestinationOptions>/s', $fragment, $m)) {
+                $preservedOptions .= trim($m[1]);
             }
         }
-        if ($preserved !== '') {
-            return $preserved;
+
+        if ($preservedOptions !== '') {
+            return '<ota:OriginDestinationOptions>'.$preservedOptions.'</ota:OriginDestinationOptions>';
         }
 
         $segmentsXml = '';
@@ -162,22 +165,48 @@ XML;
      */
     private function airBookPriceInfoXml(array $itineraries): string
     {
+        $preserved = [];
         foreach ($itineraries as $itinerary) {
             if (! is_array($itinerary)) {
                 continue;
             }
+
             $fragment = trim((string) ($itinerary['air_itinerary_pricing_info_xml'] ?? ''));
             if ($fragment === '') {
                 continue;
             }
-            // Strip RuleInfo (docs: not required for AirBook) and rename wrapper to PriceInfo.
+
+            // Zapways v2.06 explicitly allows RuleInfo to be omitted from AirBook.
             $fragment = preg_replace('/<ota:RuleInfo\b[^>]*>.*?<\/ota:RuleInfo>/s', '', $fragment) ?? $fragment;
             $fragment = preg_replace('/<ota:RuleInfo\b[^>]*\/>/', '', $fragment) ?? $fragment;
+            $preserved[] = $fragment;
+        }
+
+        // Preserve the already supplier-certified one-way wire unchanged.
+        if (count($preserved) === 1) {
+            $fragment = $preserved[0];
             if (preg_match('/<ota:AirItineraryPricingInfo\b[^>]*>(.*)<\/ota:AirItineraryPricingInfo>/s', $fragment, $m)) {
                 return '<ota:PriceInfo>'.$m[1].'</ota:PriceInfo>';
             }
             if (str_starts_with($fragment, '<ota:PriceInfo')) {
                 return $fragment;
+            }
+        }
+
+        // Zapways v2.06 round-trip sample uses one PriceInfo/PTC_FareBreakdowns
+        // wrapper containing the fare-breakdown nodes for each selected leg.
+        if (count($preserved) > 1) {
+            $breakdowns = '';
+            foreach ($preserved as $fragment) {
+                if (preg_match('/<ota:PTC_FareBreakdowns\b[^>]*>(.*)<\/ota:PTC_FareBreakdowns>/s', $fragment, $m)) {
+                    $breakdowns .= trim($m[1]);
+                }
+            }
+
+            if ($breakdowns !== '') {
+                return '<ota:PriceInfo><ota:PTC_FareBreakdowns>'
+                    .$breakdowns
+                    .'</ota:PTC_FareBreakdowns></ota:PriceInfo>';
             }
         }
 
@@ -776,10 +805,11 @@ XML;
         if ($country === '') {
             $country = '92';
         }
-        // OTA PhoneLocationType: 6 = mobile (documented Zapways traveler samples).
-        $locationType = trim((string) ($contact['phone_location_type'] ?? '6'));
+
+        // Zapways OTA v2.06: 6 = Home, 7 = Business, 10 = Mobile.
+        $locationType = trim((string) ($contact['phone_location_type'] ?? '10'));
         if ($locationType === '') {
-            $locationType = '6';
+            $locationType = '10';
         }
 
         return '<ota:Telephone'
