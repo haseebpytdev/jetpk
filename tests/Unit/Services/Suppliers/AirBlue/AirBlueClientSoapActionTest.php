@@ -2,9 +2,12 @@
 
 namespace Tests\Unit\Services\Suppliers\AirBlue;
 
+use App\Enums\SupplierEnvironment;
+use App\Enums\SupplierProvider;
+use App\Models\SupplierConnection;
 use App\Services\Suppliers\AirBlue\AirBlueClient;
+use Illuminate\Support\Facades\Http;
 use ReflectionClass;
-use Tests\TestCase;
 
 class AirBlueClientSoapActionTest extends AirBlueOfflineTestCase
 {
@@ -28,5 +31,44 @@ class AirBlueClientSoapActionTest extends AirBlueOfflineTestCase
         $action = $method->invoke($client, 'read', ['is_test' => false]);
 
         $this->assertSame('https://ota4.zapways.com/Read', $action);
+    }
+
+    public function test_sandbox_call_does_not_depend_on_global_external_call_kill_switch(): void
+    {
+        config(['suppliers.airblue.external_calls_enabled' => false]);
+
+        $connection = new SupplierConnection([
+            'provider' => SupplierProvider::Airblue,
+            'environment' => SupplierEnvironment::Sandbox,
+            'base_url' => 'https://otatest4.zapways.com/v2.0/OTAAPI.asmx',
+            'is_active' => true,
+            'credentials' => [
+                'api_channel' => 'zapways_ota',
+                'protocol_version' => '2.0',
+                'client_id' => 'client',
+                'client_key' => 'key',
+                'agent_type' => '5',
+                'agent_id' => 'agent',
+                'agent_password' => 'secret',
+                'service_target' => 'Test',
+            ],
+        ]);
+        $connection->id = 22;
+
+        $fixture = file_get_contents(base_path('tests/Fixtures/airblue/ota_air_low_fare_search_success.xml'));
+        $this->assertIsString($fixture);
+
+        Http::fake([
+            'otatest4.zapways.com/*' => Http::response($fixture, 200, ['Content-Type' => 'text/xml']),
+        ]);
+
+        $result = app(AirBlueClient::class)->call(
+            $connection,
+            'air_low_fare_search',
+            '<ota:test xmlns:ota="http://www.opentravel.org/OTA/2003/05"/>',
+        );
+
+        $this->assertIsArray($result);
+        Http::assertSentCount(1);
     }
 }
