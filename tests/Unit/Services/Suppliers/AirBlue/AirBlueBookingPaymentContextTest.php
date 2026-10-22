@@ -20,6 +20,7 @@ use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 
+/** Regression coverage: supplier payable must never inherit customer markup. */
 class AirBlueBookingPaymentContextTest extends AirBlueOfflineTestCase
 {
     use RefreshDatabase;
