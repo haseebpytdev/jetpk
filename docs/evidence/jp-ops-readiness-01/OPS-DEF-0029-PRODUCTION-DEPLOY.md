@@ -1,14 +1,14 @@
 # OPS-DEF-0029 — Production deployment evidence
 
-**PR:** #109  
-**Approved head:** `1f1f49363df60f9a3b142e6b00e40915a9c3625a`  
-**Merge method:** squash (merge commits forbidden by branch protection)  
-**Merged main SHA:** `273c59c84dcc68a615a9445ad5b66816e503dbdb`  
-**Release guard (runtime):** `39438694764` PASS  
-**Deploy time (UTC):** 2026-10-20T14:45:34Z  
-**Observation start (UTC):** 2026-10-20T14:46:30Z  
-**Evidence PR (deploy docs):** #110 → `bce79f4a0b81ca38bede1fe8202179c32344293e`  
-**Closure docs PR:** #111  
+**PR:** #109
+**Approved head:** `1f1f49363df60f9a3b142e6b00e40915a9c3625a`
+**Merge method:** squash (merge commits forbidden by branch protection)
+**Merged main SHA:** `273c59c84dcc68a615a9445ad5b66816e503dbdb`
+**Release guard (runtime):** `39438694764` PASS
+**Deploy time (UTC):** 2026-10-20T14:45:34Z
+**Observation start (UTC):** 2026-10-20T14:46:30Z
+**Evidence PR (deploy docs):** #110 → `bce79f4a0b81ca38bede1fe8202179c32344293e`
+**Closure docs PR:** #111
 **Status:** **CLOSED_PROD** (natural-cycle observation proven 2026-10-22; deployment audit trail preserved below)
 
 ## Runtime files deployed
