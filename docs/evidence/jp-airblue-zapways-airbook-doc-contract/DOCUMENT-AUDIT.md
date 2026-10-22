@@ -14,7 +14,7 @@
 | FareInfo/@FareBasisCode | PTC_FareBreakdown | Parsed only FareBasisCodes/text | NO | Attribute ignored; RBD fallback common | Parse attr first |
 | NameTitle | PersonName | NamePrefix | NO | Wrong element name per v2.06 | Emit NameTitle |
 | PassengerTypeQuantity | AirTraveler child | PassengerTypeCode attribute | NO | Attribute vs documented child | Emit PassengerTypeQuantity child |
-| Telephone attrs | AirTraveler | PhoneNumber only | NO | Missing PhoneLocationType, CountryAccessCode | Full telephone attrs |
+| Telephone attrs | AirTraveler | PhoneNumber only | NO | Missing PhoneLocationType, CountryAccessCode; v2.06 defines 10=Mobile | Full telephone attrs; default mobile type 10 |
 | Document | AirTraveler | DocID/Type/Issue/Expire/Nationality | YES | Aligned | Keep |
 | Gender | AirTraveler | Male/Female | YES | After PR113 | Keep |
 | RuleInfo | Pricing | N/A (not sent) | YES | Docs say omit OK | Strip if present in preserved XML |
@@ -30,4 +30,15 @@ NAME_TITLE_MATCH=NO→FIXED
 PASSENGER_TYPE_STRUCTURE_MATCH=NO→FIXED
 TELEPHONE_STRUCTURE_MATCH=NO→FIXED
 DOCUMENT_STRUCTURE_MATCH=YES
+```
+
+
+## Review hardening
+
+```
+ROUND_TRIP_WRAPPER_COMPOSITION=FIXED_OFFLINE
+ROUND_TRIP_SUPPLIER_CERTIFICATION=NOT_YET_RUN
+PHONE_LOCATION_TYPE_MOBILE=10
+CHECKOUT_PROVIDER_CONTEXT_AUTHORITY=SERVER_SIDE_SEARCH_STORE
+ADDITIONAL_PROVIDER_CALLS_AFTER_ONE_WAY_PASS=0
 ```
