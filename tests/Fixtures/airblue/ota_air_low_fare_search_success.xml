@@ -8,10 +8,12 @@
             <AirItinerary>
               <OriginDestinationOptions>
                 <OriginDestinationOption>
-                  <FlightSegment DepartureDateTime="2026-10-15T08:00:00" ArrivalDateTime="2026-10-15T10:00:00" FlightNumber="401" ResBookDesigCode="Y">
+                  <FlightSegment DepartureDateTime="2026-10-15T08:00:00" ArrivalDateTime="2026-10-15T10:00:00" StopQuantity="0" FlightNumber="401" ResBookDesigCode="Y" Status="26" RPH="1">
                     <DepartureAirport LocationCode="KHI"/>
                     <ArrivalAirport LocationCode="ISB"/>
+                    <OperatingAirline Code="PA"/>
                     <MarketingAirline Code="PA"/>
+                    <Equipment AirEquipType="A320"/>
                   </FlightSegment>
                 </OriginDestinationOption>
               </OriginDestinationOptions>
@@ -25,9 +27,13 @@
               <PTC_FareBreakdowns>
                 <PTC_FareBreakdown>
                   <PassengerTypeQuantity Code="ADT" Quantity="1"/>
+                  <FareInfo FareBasisCode="YOW" DepartureDate="2026-10-15" DepartureAirport="KHI" ArrivalAirport="ISB"/>
                   <PassengerFare>
                     <BaseFare Amount="12000.00" CurrencyCode="PKR"/>
-                    <Taxes Amount="2500.00" CurrencyCode="PKR"/>
+                    <Taxes Amount="2500.00" CurrencyCode="PKR">
+                      <Tax TaxCode="YR" Amount="500.00" CurrencyCode="PKR"/>
+                      <Tax TaxCode="PK" Amount="2000.00" CurrencyCode="PKR"/>
+                    </Taxes>
                     <TotalFare Amount="14500.00" CurrencyCode="PKR"/>
                     <FareBasisCodes>
                       <FareBasisCode>YOW</FareBasisCode>

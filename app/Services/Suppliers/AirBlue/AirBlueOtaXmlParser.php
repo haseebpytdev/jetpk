@@ -132,11 +132,16 @@ class AirBlueOtaXmlParser
             if (! $node instanceof DOMNode) {
                 continue;
             }
+            $odoNode = $this->firstNode($xpath, './/*[local-name()="OriginDestinationOptions"]', $node);
+            $pricingNode = $this->firstNode($xpath, './/*[local-name()="AirItineraryPricingInfo"]', $node);
             $itineraries[] = [
                 'origin_destination_ref' => $node->attributes?->getNamedItem('OriginDestinationRefNumber')?->nodeValue,
                 'segments' => $this->parseFlightSegments($xpath, $node),
                 'total_fare' => $this->parseItinTotalFare($xpath, $node),
                 'fare_breakdowns' => $this->parseFareBreakdowns($xpath, $node),
+                // Lossless booking fragments (no POS/credentials) for document-faithful AirBook.
+                'origin_destination_options_xml' => $odoNode !== null ? $this->serializeAsOtaPrefixed($odoNode) : null,
+                'air_itinerary_pricing_info_xml' => $pricingNode !== null ? $this->serializeAsOtaPrefixed($pricingNode) : null,
             ];
         }
 
@@ -223,7 +228,10 @@ class AirBlueOtaXmlParser
             $baseCurrency = $this->firstText($xpath, './/*[local-name()="PassengerFare"]/*[local-name()="BaseFare"]/@CurrencyCode', $node);
             $taxes = $this->firstText($xpath, './/*[local-name()="PassengerFare"]/*[local-name()="Taxes"]/@Amount', $node);
             $taxCurrency = $this->firstText($xpath, './/*[local-name()="PassengerFare"]/*[local-name()="Taxes"]/@CurrencyCode', $node);
-            $fareBasis = $this->firstText($xpath, './/*[local-name()="FareBasisCodes"]/*[local-name()="FareBasisCode"]', $node);
+            // Zapways v2.06 samples expose FareInfo/@FareBasisCode; keep FareBasisCodes text as fallback.
+            $fareBasisAttr = $this->firstText($xpath, './/*[local-name()="FareInfo"]/@FareBasisCode', $node);
+            $fareBasisNested = $this->firstText($xpath, './/*[local-name()="FareBasisCodes"]/*[local-name()="FareBasisCode"]', $node);
+            $fareBasis = $fareBasisAttr !== '' ? $fareBasisAttr : $fareBasisNested;
             $breakdowns[] = [
                 'ptc' => $ptc,
                 'quantity' => $qty !== '' ? (int) $qty : 1,
@@ -234,6 +242,7 @@ class AirBlueOtaXmlParser
                 'total' => $total !== '' ? (float) $total : 0.0,
                 'currency' => $currency !== '' ? $currency : 'PKR',
                 'fare_basis' => $fareBasis !== '' ? $fareBasis : null,
+                'fare_basis_source' => $fareBasisAttr !== '' ? 'fare_info_attr' : ($fareBasisNested !== '' ? 'fare_basis_codes' : null),
             ];
         }
 
@@ -514,5 +523,76 @@ class AirBlueOtaXmlParser
         }
 
         return trim($node->nodeValue ?? '');
+    }
+
+    private function firstNode(DOMXPath $xpath, string $query, ?DOMNode $context = null): ?DOMNode
+    {
+        $nodes = $context !== null ? $xpath->query($query, $context) : $xpath->query($query);
+        if ($nodes === false || $nodes->length === 0) {
+            return null;
+        }
+        $node = $nodes->item(0);
+
+        return $node instanceof DOMNode ? $node : null;
+    }
+
+    /**
+     * Serialize a search-response subtree with ota: prefixes for AirBook envelope injection.
+     * Does not include SOAP/POS/credentials.
+     */
+    private function serializeAsOtaPrefixed(DOMNode $node): string
+    {
+        $doc = new DOMDocument('1.0', 'UTF-8');
+        $cloned = $this->cloneAsOtaPrefixed($node, $doc);
+        $doc->appendChild($cloned);
+        $xml = $doc->saveXML($cloned);
+        if (! is_string($xml) || $xml === '') {
+            return '';
+        }
+
+        $xml = preg_replace('/\sxmlns(:\w+)?="[^"]*"/', '', $xml) ?? $xml;
+
+        return trim($xml);
+    }
+
+    private function cloneAsOtaPrefixed(DOMNode $source, DOMDocument $doc): DOMNode
+    {
+        if ($source->nodeType !== XML_ELEMENT_NODE) {
+            return $doc->importNode($source, true);
+        }
+
+        $local = (string) ($source->localName ?: $source->nodeName);
+        if (str_contains($local, ':')) {
+            $local = substr($local, (int) strrpos($local, ':') + 1);
+        }
+
+        $element = $doc->createElementNS('http://www.opentravel.org/OTA/2003/05', 'ota:'.$local);
+        if ($source->hasAttributes()) {
+            foreach (iterator_to_array($source->attributes ?? []) as $attr) {
+                if (! $attr instanceof \DOMAttr || str_starts_with($attr->nodeName, 'xmlns')) {
+                    continue;
+                }
+                $element->setAttribute($attr->nodeName, (string) $attr->nodeValue);
+            }
+        }
+
+        foreach (iterator_to_array($source->childNodes ?? []) as $child) {
+            if (! $child instanceof DOMNode) {
+                continue;
+            }
+            if ($child->nodeType === XML_TEXT_NODE || $child->nodeType === XML_CDATA_SECTION_NODE) {
+                $text = trim((string) $child->nodeValue);
+                if ($text !== '') {
+                    $element->appendChild($doc->createTextNode((string) $child->nodeValue));
+                }
+
+                continue;
+            }
+            if ($child->nodeType === XML_ELEMENT_NODE) {
+                $element->appendChild($this->cloneAsOtaPrefixed($child, $doc));
+            }
+        }
+
+        return $element;
     }
 }
