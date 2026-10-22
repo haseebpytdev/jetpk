@@ -113,7 +113,7 @@ class AirBlueOtaXmlBuilderTest extends AirBlueOfflineTestCase
         $this->assertStringNotContainsString('<ota:NamePrefix>', $xml);
         $this->assertStringContainsString('<ota:OperatingAirline Code="PA"/>', $xml);
         $this->assertStringContainsString('FareBasisCode="YOW"', $xml);
-        $this->assertStringContainsString('PhoneLocationType="6"', $xml);
+        $this->assertStringContainsString('PhoneLocationType="10"', $xml);
         $this->assertStringContainsString('CountryAccessCode="92"', $xml);
         $this->assertStringContainsString('<ota:PassengerTypeQuantity Code="ADT" Quantity="1"/>', $xml);
         // Exact OriginDestinationOptions / pricing fragments from search preserved.
@@ -159,10 +159,48 @@ class AirBlueOtaXmlBuilderTest extends AirBlueOfflineTestCase
 
         $this->assertStringContainsString('<ota:NameTitle>MR</ota:NameTitle>', $xml);
         $this->assertMatchesRegularExpression(
-            '/<ota:Telephone[^>]*PhoneLocationType="6"[^>]*CountryAccessCode="92"[^>]*PhoneNumber="3001234567"/',
+            '/<ota:Telephone[^>]*PhoneLocationType="10"[^>]*CountryAccessCode="92"[^>]*PhoneNumber="3001234567"/',
             $xml,
         );
         $this->assertStringNotContainsString('PassengerTypeCode=', $xml);
+    }
+
+    public function test_round_trip_preserved_fragments_use_single_odo_and_price_wrappers(): void
+    {
+        $providerContext = $this->providerContextFromSearchFixture();
+        $outbound = $providerContext['priced_itineraries'][0];
+        $inbound = $outbound;
+
+        $inbound['origin_destination_options_xml'] = str_replace(
+            ['RPH="0-0"', 'LocationCode="KHI"', 'LocationCode="ISB"', 'FlightNumber="401"'],
+            ['RPH="1-0"', 'LocationCode="ISB"', 'LocationCode="KHI"', 'FlightNumber="402"'],
+            (string) $outbound['origin_destination_options_xml'],
+        );
+        $inbound['air_itinerary_pricing_info_xml'] = str_replace(
+            ['FareBasisCode="YOW"', '<ota:FareBasisCode>YOW</ota:FareBasisCode>'],
+            ['FareBasisCode="YRT"', '<ota:FareBasisCode>YRT</ota:FareBasisCode>'],
+            (string) $outbound['air_itinerary_pricing_info_xml'],
+        );
+        $providerContext['priced_itineraries'] = [$outbound, $inbound];
+
+        $xml = (new AirBlueOtaXmlBuilder)->buildAirBookRequest(
+            $this->baseConfig(),
+            $providerContext,
+            [['ptc' => 'ADT', 'given_name' => 'JOHN', 'surname' => 'DOE', 'gender' => 'M', 'title' => 'MR']],
+            ['email' => 'booker@example.com', 'phone_country' => '92', 'phone_number' => '3001234567'],
+        );
+
+        $this->assertSame(1, substr_count($xml, '<ota:OriginDestinationOptions>'));
+        $this->assertSame(2, substr_count($xml, '<ota:FlightSegment '));
+        $this->assertStringContainsString('FlightNumber="401"', $xml);
+        $this->assertStringContainsString('FlightNumber="402"', $xml);
+
+        $this->assertSame(1, substr_count($xml, '<ota:PriceInfo>'));
+        $this->assertSame(1, substr_count($xml, '<ota:PTC_FareBreakdowns>'));
+        $this->assertSame(2, substr_count($xml, '<ota:PTC_FareBreakdown>'));
+        $this->assertStringContainsString('FareBasisCode="YOW"', $xml);
+        $this->assertStringContainsString('FareBasisCode="YRT"', $xml);
+        $this->assertStringNotContainsString('<ota:RuleInfo', $xml);
     }
 
     public function test_search_to_air_book_preserves_fare_fields(): void
