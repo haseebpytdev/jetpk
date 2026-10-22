@@ -87,16 +87,6 @@ class AirBlueTicketingService
             );
         }
 
-        if (! (bool) config('suppliers.airblue.external_calls_enabled', false)) {
-            return new TicketingResultData(
-                success: false,
-                status: 'failed',
-                provider: SupplierProvider::Airblue->value,
-                error_code: 'external_calls_disabled',
-                error_message: 'AirBlue external network calls are disabled.',
-            );
-        }
-
         $pnr = trim((string) ($context['pnr'] ?? $booking->pnr ?? $booking->supplier_reference ?? ''));
         $instance = trim((string) ($context['instance'] ?? ''));
         if ($pnr === '' || $instance === '') {
