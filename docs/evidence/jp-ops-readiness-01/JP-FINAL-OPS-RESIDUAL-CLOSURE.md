@@ -1,4 +1,4 @@
-# JP-FINAL-OPS-RESIDUAL-CLOSURE + AIRBLUE-ZAPWAYS-LIVE-CERT-PREFLIGHT
+# JP-FINAL-OPS-RESIDUAL-CLOSURE + AIRBLUE-ZAPWAYS-SANDBOX-CERT-PREFLIGHT
 
 **Date (UTC):** 2026-10-22  
 **JETPK_MAIN_SHA (branch base):** `5174959f7604af8c47c808aa64636ea8a9f3fb64`  
@@ -109,7 +109,7 @@ Forbidden broad deletes were not used.
 | FINANCIAL_MUTATIONS | 0 |
 | EXCEPTION_ALLOWED_DATA_MUTATION | none (mailbox blocked) |
 
-## Phases 8–12 — AirBlue/Zapways ZERO-NETWORK preflight
+## Phases 8–12 — AirBlue/Zapways ZERO-NETWORK sandbox preflight
 
 | Field | Value |
 |-------|-------|
@@ -159,17 +159,17 @@ Forbidden broad deletes were not used.
 
 | Gate | Value |
 |------|-------|
-| AIRBLUE_SANDBOX_SEARCH_CERT_READY | **NO** — TLS paths configured but files absent (unresolved config mismatch); kill switches correctly OFF |
+| AIRBLUE_SANDBOX_SEARCH_CERT_READY | **NO** — TEST mTLS paths configured but files absent (current server regression vs prior certified TEST state); kill switches correctly OFF |
 | AIRBLUE_SANDBOX_BOOK_RETRIEVE_CANCEL_CERT_READY | **NO** — blocked on search preflight TLS mismatch (code/safeguards otherwise present; env=sandbox) |
 | AIRBLUE_SANDBOX_TICKETING_CERT_READY | **BLOCKED_FEATURE_FLAG_AND_PROVIDER_ENTITLEMENT_CONFIRMATION** |
 | AIRBLUE_SANDBOX_VOID_CERT_READY | **NO** |
 | AIRBLUE_VOID_BLOCKER | VOID_PROVIDER_CONTRACT_NOT_IMPLEMENTED |
-| Overall AirBlue posture | **READY_AWAITING_LIVE_CERTIFICATION** (unchanged) |
+| Overall AirBlue posture | **SANDBOX_CERTIFICATION_BLOCKED_TLS_MATERIAL**; production-live activation remains deferred |
 
 ### Recommended next certification sequence (next loop only)
 
-1. Resolve TLS material (place readable cert/key **or** clear stale credential paths if mTLS not required for QA).  
-2. Controlled sandbox connectivity/search (`AIRBLUE_EXTERNAL_CALLS_ENABLED` + `AIRBLUE_CLI_LIVE_ENABLED` + `--allow-live` only for that loop).  
+1. Restore/locate the previously certified Zapways TEST mTLS certificate/key and make them readable to the runtime user. Do **not** clear the TLS paths: prior TEST certification proved mTLS was required for this tenant.  
+2. Controlled sandbox connectivity/search against `otatest4.zapways.com`; keep the production/live AirBlue lane separate and disabled.  
 3. Validate fare/provenance/price/currency/taxes/baggage.  
 4. Dedicated QA OTA booking from **same** fresh search result (one AirBook).  
 5. Retrieve → verify PNR/instance/local persistence.  
@@ -178,7 +178,7 @@ Forbidden broad deletes were not used.
 8. Ticketing only after entitlement + explicit `ticketing_enabled`.  
 9. Void only after Zapways/AirBlue contract obtained and offline implementation.
 
-**This loop did not enable external calls and did not contact Zapways.**
+**This loop did not enable external calls and did not contact Zapways. The configured AirBlue connection uses dedicated TEST/sandbox credentials; production/live AirBlue credentials are not in use.**
 
 ## Scorecard reconciliation
 
