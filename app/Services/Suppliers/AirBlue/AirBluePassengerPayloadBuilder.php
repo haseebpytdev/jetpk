@@ -41,7 +41,7 @@ class AirBluePassengerPayloadBuilder
                 'pax_id' => 'PAX-'.$ptc.$idx,
                 'ptc' => $ptc,
                 'rph' => $rph,
-                'title' => (string) ($passenger->title ?? ''),
+                'title' => strtoupper(trim((string) ($passenger->title ?? ''))),
                 'given_name' => (string) ($passenger->first_name ?? ''),
                 'surname' => (string) ($passenger->last_name ?? ''),
                 'gender' => $gender,

@@ -384,7 +384,16 @@ XML;
         $rbd = htmlspecialchars((string) ($segment['rbd'] ?? 'Y'), ENT_XML1);
         $origin = htmlspecialchars(strtoupper((string) ($segment['departure_airport'] ?? '')), ENT_XML1);
         $destination = htmlspecialchars(strtoupper((string) ($segment['arrival_airport'] ?? '')), ENT_XML1);
-        $carrier = htmlspecialchars(strtoupper((string) ($segment['marketing_carrier'] ?? 'PA')), ENT_XML1);
+        $marketingRaw = strtoupper(trim((string) ($segment['marketing_carrier'] ?? $segment['carrier'] ?? 'PA')));
+        if ($marketingRaw === '') {
+            $marketingRaw = 'PA';
+        }
+        $operatingRaw = strtoupper(trim((string) ($segment['operating_carrier'] ?? $marketingRaw)));
+        if ($operatingRaw === '') {
+            $operatingRaw = $marketingRaw;
+        }
+        $carrier = htmlspecialchars($marketingRaw, ENT_XML1);
+        $operating = htmlspecialchars($operatingRaw, ENT_XML1);
         $rph = htmlspecialchars((string) ($segment['rph'] ?? ''), ENT_XML1);
         $rphAttr = $rph !== '' ? ' RPH="'.$rph.'"' : '';
         $fareType = htmlspecialchars(trim((string) ($segment['fare_type'] ?? '')), ENT_XML1);
@@ -397,6 +406,7 @@ XML;
                                 <ota:DepartureAirport LocationCode="{$origin}"/>
                                 <ota:ArrivalAirport LocationCode="{$destination}"/>
                                 <ota:MarketingAirline Code="{$carrier}"/>
+                                <ota:OperatingAirline Code="{$operating}"/>
                             </ota:FlightSegment>
 XML;
     }
@@ -551,9 +561,27 @@ XML;
             $totalAmount += (float) ($fare['total'] ?? 0);
             $currency = (string) ($fare['currency'] ?? $currency);
 
+            $fallbackFareBasis = '';
+            foreach (is_array($itinerary['segments'] ?? null) ? $itinerary['segments'] : [] as $segment) {
+                if (! is_array($segment)) {
+                    continue;
+                }
+                $candidate = trim((string) ($segment['fare_basis'] ?? ''));
+                if ($candidate === '') {
+                    $candidate = trim((string) ($segment['rbd'] ?? ''));
+                }
+                if ($candidate !== '') {
+                    $fallbackFareBasis = $candidate;
+                    break;
+                }
+            }
+
             foreach (is_array($itinerary['fare_breakdowns'] ?? null) ? $itinerary['fare_breakdowns'] : [] as $breakdown) {
                 if (! is_array($breakdown)) {
                     continue;
+                }
+                if (trim((string) ($breakdown['fare_basis'] ?? '')) === '' && $fallbackFareBasis !== '') {
+                    $breakdown['fare_basis'] = $fallbackFareBasis;
                 }
                 $breakdownXml .= $this->ptcFareBreakdownXml($breakdown);
             }
@@ -630,7 +658,9 @@ XML;
         $email = htmlspecialchars((string) ($contact['email'] ?? ''), ENT_XML1);
         $phone = htmlspecialchars((string) ($contact['phone_number'] ?? ''), ENT_XML1);
         $birthdate = trim((string) ($passenger['birthdate'] ?? ''));
-        $gender = strtoupper(trim((string) ($passenger['gender'] ?? '')));
+        // Zapways OTA DocumentTypeGender XSD rejects "M"/"F"; requires Male/Female.
+        $gender = $this->zapwaysDocumentGender((string) ($passenger['gender'] ?? ''));
+        $namePrefix = $this->zapwaysNamePrefix((string) ($passenger['title'] ?? ''), $gender);
 
         if (in_array($ptc, ['CHD', 'INF'], true) && $birthdate === '') {
             throw new AirBlueValidationException(
@@ -644,17 +674,21 @@ XML;
         if ($birthdate !== '') {
             $attrs .= ' BirthDate="'.htmlspecialchars($birthdate, ENT_XML1).'"';
         }
-        if (in_array($gender, ['M', 'F'], true)) {
+        if ($gender !== '') {
             $attrs .= ' Gender="'.htmlspecialchars($gender, ENT_XML1).'"';
         }
 
         $emailXml = $email !== '' ? "<ota:Email>{$email}</ota:Email>" : '';
         $phoneXml = $phone !== '' ? '<ota:Telephone PhoneNumber="'.$phone.'"/>' : '';
         $documentXml = $this->travelerDocumentXml($passenger);
+        $namePrefixXml = $namePrefix !== ''
+            ? '<ota:NamePrefix>'.htmlspecialchars($namePrefix, ENT_XML1).'</ota:NamePrefix>'
+            : '';
 
         return <<<XML
                     <ota:AirTraveler{$attrs}>
                         <ota:PersonName>
+                            {$namePrefixXml}
                             <ota:GivenName>{$given}</ota:GivenName>
                             <ota:Surname>{$surname}</ota:Surname>
                         </ota:PersonName>
@@ -774,5 +808,37 @@ XML;
             'CHD' => max(0, (int) $request->children),
             'INF' => max(0, (int) $request->infants),
         ];
+    }
+
+    /**
+     * Map local gender codes to Zapways OTA DocumentTypeGender enum values.
+     */
+    private function zapwaysDocumentGender(string $gender): string
+    {
+        $normalized = strtoupper(trim($gender));
+
+        return match ($normalized) {
+            'M', 'MALE' => 'Male',
+            'F', 'FEMALE' => 'Female',
+            default => '',
+        };
+    }
+
+    /**
+     * Prefer explicit title; otherwise derive a Zapways-safe NamePrefix from gender.
+     */
+    private function zapwaysNamePrefix(string $title, string $documentGender): string
+    {
+        $title = strtoupper(trim($title));
+        $title = rtrim($title, '.');
+        if (in_array($title, ['MR', 'MRS', 'MS', 'MISS', 'MSTR', 'DR'], true)) {
+            return $title;
+        }
+
+        return match ($documentGender) {
+            'Male' => 'MR',
+            'Female' => 'MS',
+            default => '',
+        };
     }
 }

@@ -93,7 +93,7 @@ class AirBlueOtaXmlBuilderTest extends AirBlueOfflineTestCase
         $xml = $builder->buildAirBookRequest(
             $this->baseConfig(),
             $providerContext,
-            [['ptc' => 'ADT', 'given_name' => 'JOHN', 'surname' => 'DOE', 'gender' => 'M']],
+            [['ptc' => 'ADT', 'given_name' => 'JOHN', 'surname' => 'DOE', 'gender' => 'M', 'title' => 'MR']],
             ['email' => 'booker@example.com', 'phone_number' => '3001234567'],
         );
 
@@ -105,6 +105,29 @@ class AirBlueOtaXmlBuilderTest extends AirBlueOfflineTestCase
         $this->assertStringContainsString('Amount="14500.00"', $xml);
         $this->assertStringContainsString('YOW', $xml);
         $this->assertStringContainsString('ResBookDesigCode="Y"', $xml);
+        // Zapways DocumentTypeGender rejects M/F; wire Male/Female.
+        $this->assertStringContainsString('Gender="Male"', $xml);
+        $this->assertStringNotContainsString('Gender="M"', $xml);
+        $this->assertStringContainsString('<ota:NamePrefix>MR</ota:NamePrefix>', $xml);
+        $this->assertStringContainsString('<ota:OperatingAirline Code="PA"/>', $xml);
+    }
+
+    public function test_air_book_falls_back_fare_basis_to_segment_rbd(): void
+    {
+        $providerContext = $this->providerContextFromSearchFixture();
+        $providerContext['priced_itineraries'][0]['fare_breakdowns'][0]['fare_basis'] = null;
+        $providerContext['priced_itineraries'][0]['segments'][0]['fare_basis'] = '';
+        $providerContext['priced_itineraries'][0]['segments'][0]['rbd'] = 'U';
+
+        $xml = (new AirBlueOtaXmlBuilder)->buildAirBookRequest(
+            $this->baseConfig(),
+            $providerContext,
+            [['ptc' => 'ADT', 'given_name' => 'JOHN', 'surname' => 'DOE', 'gender' => 'F']],
+            ['email' => 'booker@example.com'],
+        );
+
+        $this->assertStringContainsString('<ota:FareBasisCode>U</ota:FareBasisCode>', $xml);
+        $this->assertStringContainsString('Gender="Female"', $xml);
     }
 
     public function test_search_to_air_book_preserves_fare_fields(): void
