@@ -60,14 +60,14 @@ No recipient addresses exposed in evidence.
 
 | Aggregate | Value |
 |-----------|-------|
-| PERMANENT_SINGLE_TO_COUNT | 6 (final baseline; original probe of first five + ninth same family) |
+| PERMANENT_SINGLE_TO_COUNT | 6 |
 | PERMANENT_MULTI_TO_COUNT | 0 |
 | PERMANENT_WITH_CC_COUNT | 0 |
 | PERMANENT_WITH_BCC_COUNT | 0 |
 | PERMANENT_SINGLE_RECIPIENT_FAILURES | 6 |
 | PERMANENT_MULTI_RECIPIENT_FAILURES | 0 |
 
-All historical permanent rejects in the final baseline were single-TO deliveries with empty CC/BCC.
+Original permanent cardinality probe: first five permanent jobs were single-TO (CC/BCC empty). Ninth permanent job (`failed_jobs.id=156`, hash `0fecf9247f3d`) independently proven read-only: `TO=1`, `CC=0`, `BCC=0` (`NINTH_JOB_SINGLE_TO=YES`). Not inferred from family alone.
 
 | Claim | Value |
 |-------|-------|
