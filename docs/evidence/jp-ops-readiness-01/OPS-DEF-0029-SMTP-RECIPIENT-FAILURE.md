@@ -116,16 +116,16 @@ All five historical permanent single-TO failed logs pre-date classifier meta. Su
 
 Backoff `[15,45,90]` + `tries=5` retained (sensible for SMTP greylist).
 
-## Phase 11 — disposition of current 8 (no mutation)
+## Phase 11 — final historical disposition baseline (no mutation)
 
 | Disposition | Count |
 |-------------|-------|
-| CURRENT_8_PERMANENT_NO_RETRY | 5 |
-| CURRENT_8_TRANSIENT_REVIEW | 3 |
-| CURRENT_8_ALREADY_SUPERSEDED | 0 |
-| CURRENT_8_UNKNOWN_REVIEW | 0 |
+| HISTORICAL_PERMANENT_NO_RETRY | 6 |
+| HISTORICAL_TRANSIENT_REVIEW | 3 |
+| HISTORICAL_ALREADY_SUPERSEDED | 0 |
+| HISTORICAL_UNKNOWN_REVIEW | 0 |
 
-**Later data disposition (not this loop):** `MARK_HISTORICAL_TERMINAL` for the 5 permanent rows after deploy; keep 3 transient for manual SMTP/recipient review.  
+**Later data disposition (not this loop):** optional `MARK_HISTORICAL_TERMINAL` for the 6 permanent rows after deploy under separate explicit approval; keep 3 transient rows for manual SMTP/recipient review.  
 `FAILED_JOB_ROWS_MUTATED=0` / `COMMUNICATION_ROWS_MUTATED=0` this loop.
 
 ## Phase 12 — data correction plan
