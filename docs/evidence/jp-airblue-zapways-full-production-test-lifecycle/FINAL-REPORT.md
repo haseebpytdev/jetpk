@@ -1,0 +1,195 @@
+# JP-AIRBLUE-ZAPWAYS-FULL-PRODUCTION-TEST-LIFECYCLE — Final Report
+
+**Date (UTC):** 2026-10-22  
+**MAIN_SHA:** `cab8428af06a9120074de935cb717fb29f74c74e`  
+**PRODUCTION:** `https://jetpakistan.pk` (`/home/pkjetp/jetpk_app`)  
+**AIRBLUE_CONNECTION_ID:** 22  
+**AIRBLUE_ENVIRONMENT:** sandbox  
+**AIRBLUE_HOST:** `otatest4.zapways.com`  
+**AIRBLUE_PROTOCOL_VERSION:** 2.0  
+**AIRBLUE_API_CHANNEL:** zapways_ota  
+
+## Executive result
+
+Canonical JetPakistan path (search → price revalidate → checkout → manual pay → verify → `BookingProviderRouter` AirBook) reached **provider_nre** again after paid QA booking.
+
+**FINAL_BLOCKER=ZAPWAYS_TEST_PROVIDER_NRE**  
+**ZAPWAYS_PROVIDER_ESCALATION_REQUIRED=YES**
+
+No retrieve / cancel / ticket / void supplier calls after AirBook failure. No second AirBook.
+
+## Phase 0 — baseline
+
+```
+REMOTE_MAIN_SHA=cab8428af06a9120074de935cb717fb29f74c74e
+MAIN_MATCH=YES
+PRODUCTION_RUNTIME_HEALTH=PASS (HTTP_UP=200, LARAVEL_BOOTSTRAP=PASS)
+AIRBLUE_RUNTIME_PARITY=PASS (AirBlue + checkout/payment hash set matched main blobs; no deploy)
+NON_AIRBLUE_CONNECTION_SNAPSHOT_CREATED=YES
+AIRBLUE_SEAT_SELECTION_REQUIRED=NO
+```
+
+Conn 22: active=YES, search_certified=NO, certification_status=pending, ticketing_enabled=NO, cancel_enabled=NO.
+
+## Phase 1 — Sabre UX parity (read-only)
+
+Shared Next.js + `BookingController` pipeline for search → results → fare → passengers → review → manual payment → confirmation. AirBlue reuses the same components; gaps are lifecycle/backend (public search exclusion via `AirBlueConnectionSearchPolicy`, Sabre-only revalidation/dry-run, generic AirBlue confirmation notices).
+
+| Surface | SHARED | GAP |
+|---------|--------|-----|
+| SEARCH_PAGE | YES | AirBlue excluded while uncertified |
+| RESULT_CARD | YES | FE revalidation hook Sabre/IATI only |
+| FARE_SELECTION | YES | No AirBlue fare-change dialog path |
+| PRICE_BREAKDOWN | YES | none at component level |
+| CHECKOUT_PAGE | YES | Sabre review dry-run only |
+| PASSENGER_FORM | YES | Sabre pre-checkout side effects only |
+| MANUAL_PAYMENT | YES | none |
+| PAYMENT_VERIFICATION | YES | none |
+| CONFIRMATION_PAGE | PARTIAL | Sabre-rich notices vs generic |
+| PNR_DISPLAY | YES (Next) | Sabre blade labels richer |
+| TICKET_DISPLAY | YES | issuance path differs by adapter |
+
+**SABRE_UX_PARITY=SHARED_SHELL_PASS** (provider differences only where real; no parallel AirBlue checkout built)
+
+## Phases 3–10 — Booking A (canonical)
+
+```
+SEARCH_CALLS=2
+SEARCH=PASS
+OFFER_COUNT=6
+PROVIDER_RETURNS_BRANDED_FARES=NO
+PROVIDER_RETURNS_FARE_FAMILY=NO
+BRANDED_FARE=NOT_SUPPLIED_BY_ZAPWAYS_V2_TEST_RESPONSE
+SELECTED_OFFER_ID_HASH=7d1193d80061
+SELECTED_OFFER_FINGERPRINT_HASH=b8d08140a8d6d227
+SELECTED_ROUTE=ISB-KHI flight=201 RBD/FB=U total=26000 PKR
+SUPPLIER_IDENTITY_CONTINUITY=PASS
+CONNECTION_ID_CONTINUITY=PASS
+SEGMENT_CONTINUITY=PASS
+RBD_CONTINUITY=PASS
+FARE_BASIS_CONTINUITY=PASS
+AIRBLUE_SEPARATE_OFFER_PRICE_SUPPORTED=NO
+FRESH_REVALIDATION_SEARCH_CALLS=1
+PRICE_CHECK=PASS
+PRICE_CHANGED=NO
+SELECTED_FARE_STILL_AVAILABLE=YES
+BASE_FARE_RECONCILES=YES
+TAX_RECONCILES=YES
+SUPPLIER_TOTAL_RECONCILES=YES
+MARKUP_SINGLE_APPLICATION=YES
+CUSTOMER_PAYABLE_RECONCILES=YES
+CHECKOUT=PASS
+CHECKOUT_SUPPLIER_PROVIDER=airblue
+CHECKOUT_SUPPLIER_CONNECTION_ID=22
+PASSENGER_DETAILS=PASS
+MANUAL_PAYMENT_FLOW=PASS
+PAYMENT_METHOD=bank_transfer
+PAYMENT_AMOUNT_MATCH=YES
+PAYMENT_VERIFICATION=PASS
+CANONICAL_AIRBOOK_CALLS=1
+AIRBOOK_SUCCESS=NO
+AIRBOOK_HTTP_STATUS=500
+AIRBOOK_FAULT_CLASS=provider_nre
+AIRBOOK_ERROR_CODE=supplier_http_error
+SAFE_SUMMARY={"fault_class":"provider_nre","http_status":500}
+PNR_PRESENT=NO
+INSTANCE_PRESENT=NO
+```
+
+QA booking marked: `qa_fixture`, `local_qa`, `airblue_zapways_test`, `exclude_from_financial_kpi`.  
+Mail::fake() — no customer email delivery.
+
+## Phases 11–16 — blocked
+
+```
+PNR_GENERATION=BLOCKED
+PNR_RETRIEVE=BLOCKED
+CANCEL_CALLS=0
+UNTICKETED_CANCEL=BLOCKED
+POST_CANCEL_RETRIEVE=BLOCKED
+BOOKING_B_CHECKOUT=BLOCKED
+BOOKING_B_MANUAL_PAYMENT=BLOCKED
+BOOKING_B_AIRBOOK=BLOCKED
+BOOKING_B_RETRIEVE=BLOCKED
+SEAT_SELECTION_REQUIRED=NO
+SEAT_MAP_CALLS=0
+TICKETING_CALLS=0
+TICKETING_SUCCESS=BLOCKED
+POST_TICKET_RETRIEVE=BLOCKED
+DUPLICATE_TICKING_GUARD=NOT_REACHED
+SECOND_TICKETING_PROVIDER_CALLS=0
+```
+
+## Phase 17 — void contract (read-only WSDL mTLS)
+
+```
+WSDL_HTTP=200
+OPS_LIST=Cancel,Read,AirLowFareSearch,AirDemandTicket,AirBookModify,AirBook
+ZAPWAYS_V2_VOID_OPERATION_FOUND=NO
+ZAPWAYS_V2_VOID_SOAPACTION=NONE
+AIRBLUE_VOID=NOT_SUPPORTED_BY_CURRENT_ZAPWAYS_V2_CONTRACT
+POST_VOID_RETRIEVE=NOT_APPLICABLE
+```
+
+No void request sent.
+
+## Phase 20 — isolation
+
+```
+NON_CONN22_SUPPLIER_CONNECTION_ROWS_CHANGED=0
+NON_AIRBLUE_CONNECTION_ROWS_CHANGED=0
+SABRE_CONNECTION_CHANGED=NO
+PIA_NDC_CONNECTION_CHANGED=NO
+IATI_CONNECTION_CHANGED=NO (no IATI connection row present)
+DUFFEL_CONNECTION_CHANGED=NO (no Duffel connection row present)
+ONEAPI_CONNECTION_CHANGED=NO (no OneAPI connection row present)
+OTHER_AIRBLUE_CONNECTION_CHANGED=NO
+CONN22 flags unchanged (cancel/ticketing still NO; search_certified still NO)
+TEST_INITIATED_NON_AIRBLUE_SUPPLIER_CALLS=0
+```
+
+## Final matrix
+
+```
+SEARCH=CERTIFIED
+BRANDED_FARE=NOT_SUPPLIED_BY_ZAPWAYS_V2_TEST_RESPONSE
+FARE_SELECTION=PASS
+PRICE_CHECK=PASS
+PRICE_BREAKDOWN=PASS
+CHECKOUT=PASS
+PASSENGER_DETAILS=PASS
+MANUAL_PAYMENT=PASS
+PAYMENT_VERIFICATION=PASS
+AIRBOOK=BLOCKED_PROVIDER_NRE
+PNR_GENERATION=BLOCKED
+PNR_RETRIEVE=BLOCKED
+UNTICKETED_CANCEL=BLOCKED
+POST_CANCEL_RETRIEVE=BLOCKED
+SECOND_BOOKING=BLOCKED
+TICKETING=BLOCKED
+POST_TICKET_RETRIEVE=BLOCKED
+DUPLICATE_TICK_GUARD=NOT_REACHED
+SEAT_SELECTION_REQUIRED=NO
+SEAT_SELECTION_RESULT=NOT_APPLICABLE
+VOID_CONTRACT_FOUND=NO
+VOID=NOT_SUPPORTED_BY_CURRENT_ZAPWAYS_V2_CONTRACT
+POST_VOID_RETRIEVE=NOT_APPLICABLE
+SABRE_UX_PARITY=SHARED_SHELL_PASS
+OTHER_SUPPLIER_CONNECTIONS_UNCHANGED=YES
+```
+
+## Escalation
+
+Reuse sanitized pack shape from `docs/evidence/jp-airblue-zapways-airbook-nre-closure/SUPPLIER-ESCALATION-PACK.md`.
+
+This loop proves NRE persists on the **canonical paid checkout → BookingProviderRouter** path (not only cert CLIs).
+
+Do **not** auto-email Zapways.
+
+## Runtime / evidence PRs
+
+```
+RUNTIME_PR=NONE
+EVIDENCE_PR=pending_docs_only
+FINAL_AIRBLUE_TEST_CERTIFICATION=PARTIAL_CANONICAL_PATH_PROVIDER_NRE
+```
