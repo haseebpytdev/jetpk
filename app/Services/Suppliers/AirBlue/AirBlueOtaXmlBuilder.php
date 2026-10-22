@@ -78,20 +78,8 @@ XML
             throw new AirBlueValidationException('missing_offer_context', 422, 'AirBlue OTA booking requires priced itinerary context.');
         }
 
-        $segmentsXml = '';
-        foreach ($itineraries as $itinerary) {
-            if (! is_array($itinerary)) {
-                continue;
-            }
-            foreach (is_array($itinerary['segments'] ?? null) ? $itinerary['segments'] : [] as $segment) {
-                if (! is_array($segment)) {
-                    continue;
-                }
-                $segmentsXml .= $this->flightSegmentXml($segment, $config);
-            }
-        }
-
-        $priceInfoXml = $this->priceInfoXml($itineraries);
+        $airItineraryInner = $this->airBookItineraryXml($itineraries, $config);
+        $priceInfoXml = $this->airBookPriceInfoXml($itineraries);
         $travelersXml = '';
         $rph = 1;
         foreach ($passengers as $passenger) {
@@ -109,11 +97,7 @@ XML
             <<<XML
                 {$this->posBlock($config)}
                 <ota:AirItinerary>
-                    <ota:OriginDestinationOptions>
-                        <ota:OriginDestinationOption>
-                            {$segmentsXml}
-                        </ota:OriginDestinationOption>
-                    </ota:OriginDestinationOptions>
+                    {$airItineraryInner}
                 </ota:AirItinerary>
                 {$priceInfoXml}
                 <ota:TravelerInfo>
@@ -121,6 +105,83 @@ XML
                 </ota:TravelerInfo>
 XML
         );
+    }
+
+    /**
+     * Prefer exact OriginDestinationOptions from LowFareSearch; fallback to reconstructed segments.
+     *
+     * @param  list<array<string, mixed>>  $itineraries
+     * @param  array<string, mixed>  $config
+     */
+    private function airBookItineraryXml(array $itineraries, array $config): string
+    {
+        $preserved = '';
+        foreach ($itineraries as $itinerary) {
+            if (! is_array($itinerary)) {
+                continue;
+            }
+            $fragment = trim((string) ($itinerary['origin_destination_options_xml'] ?? ''));
+            if ($fragment === '') {
+                continue;
+            }
+            // Fragment is already <ota:OriginDestinationOptions>...</ota:OriginDestinationOptions>
+            if (str_contains($fragment, 'OriginDestinationOptions')) {
+                $preserved .= $fragment;
+            }
+        }
+        if ($preserved !== '') {
+            return $preserved;
+        }
+
+        $segmentsXml = '';
+        foreach ($itineraries as $itinerary) {
+            if (! is_array($itinerary)) {
+                continue;
+            }
+            foreach (is_array($itinerary['segments'] ?? null) ? $itinerary['segments'] : [] as $segment) {
+                if (! is_array($segment)) {
+                    continue;
+                }
+                $segmentsXml .= $this->flightSegmentXml($segment, $config);
+            }
+        }
+
+        return <<<XML
+                    <ota:OriginDestinationOptions>
+                        <ota:OriginDestinationOption>
+                            {$segmentsXml}
+                        </ota:OriginDestinationOption>
+                    </ota:OriginDestinationOptions>
+XML;
+    }
+
+    /**
+     * Prefer exact AirItineraryPricingInfo children wrapped as PriceInfo; fallback to reconstructed totals.
+     *
+     * @param  list<array<string, mixed>>  $itineraries
+     */
+    private function airBookPriceInfoXml(array $itineraries): string
+    {
+        foreach ($itineraries as $itinerary) {
+            if (! is_array($itinerary)) {
+                continue;
+            }
+            $fragment = trim((string) ($itinerary['air_itinerary_pricing_info_xml'] ?? ''));
+            if ($fragment === '') {
+                continue;
+            }
+            // Strip RuleInfo (docs: not required for AirBook) and rename wrapper to PriceInfo.
+            $fragment = preg_replace('/<ota:RuleInfo\b[^>]*>.*?<\/ota:RuleInfo>/s', '', $fragment) ?? $fragment;
+            $fragment = preg_replace('/<ota:RuleInfo\b[^>]*\/>/', '', $fragment) ?? $fragment;
+            if (preg_match('/<ota:AirItineraryPricingInfo\b[^>]*>(.*)<\/ota:AirItineraryPricingInfo>/s', $fragment, $m)) {
+                return '<ota:PriceInfo>'.$m[1].'</ota:PriceInfo>';
+            }
+            if (str_starts_with($fragment, '<ota:PriceInfo')) {
+                return $fragment;
+            }
+        }
+
+        return $this->priceInfoXml($itineraries);
     }
 
     /**
@@ -656,11 +717,11 @@ XML;
         $ptc = strtoupper((string) ($passenger['ptc'] ?? 'ADT'));
         $ptcAttr = htmlspecialchars($ptc, ENT_XML1);
         $email = htmlspecialchars((string) ($contact['email'] ?? ''), ENT_XML1);
-        $phone = htmlspecialchars((string) ($contact['phone_number'] ?? ''), ENT_XML1);
         $birthdate = trim((string) ($passenger['birthdate'] ?? ''));
         // Zapways OTA DocumentTypeGender XSD rejects "M"/"F"; requires Male/Female.
         $gender = $this->zapwaysDocumentGender((string) ($passenger['gender'] ?? ''));
-        $namePrefix = $this->zapwaysNamePrefix((string) ($passenger['title'] ?? ''), $gender);
+        // Zapways OTA v2.06 documents NameTitle (not NamePrefix).
+        $nameTitle = $this->zapwaysNamePrefix((string) ($passenger['title'] ?? ''), $gender);
 
         if (in_array($ptc, ['CHD', 'INF'], true) && $birthdate === '') {
             throw new AirBlueValidationException(
@@ -670,7 +731,7 @@ XML;
             );
         }
 
-        $attrs = ' PassengerTypeCode="'.$ptcAttr.'"';
+        $attrs = '';
         if ($birthdate !== '') {
             $attrs .= ' BirthDate="'.htmlspecialchars($birthdate, ENT_XML1).'"';
         }
@@ -679,25 +740,52 @@ XML;
         }
 
         $emailXml = $email !== '' ? "<ota:Email>{$email}</ota:Email>" : '';
-        $phoneXml = $phone !== '' ? '<ota:Telephone PhoneNumber="'.$phone.'"/>' : '';
+        $phoneXml = $this->travelerTelephoneXml($contact);
         $documentXml = $this->travelerDocumentXml($passenger);
-        $namePrefixXml = $namePrefix !== ''
-            ? '<ota:NamePrefix>'.htmlspecialchars($namePrefix, ENT_XML1).'</ota:NamePrefix>'
+        $nameTitleXml = $nameTitle !== ''
+            ? '<ota:NameTitle>'.htmlspecialchars($nameTitle, ENT_XML1).'</ota:NameTitle>'
             : '';
 
         return <<<XML
                     <ota:AirTraveler{$attrs}>
                         <ota:PersonName>
-                            {$namePrefixXml}
                             <ota:GivenName>{$given}</ota:GivenName>
                             <ota:Surname>{$surname}</ota:Surname>
+                            {$nameTitleXml}
                         </ota:PersonName>
-                        {$documentXml}
                         {$phoneXml}
                         {$emailXml}
+                        {$documentXml}
+                        <ota:PassengerTypeQuantity Code="{$ptcAttr}" Quantity="1"/>
                         <ota:TravelerRefNumber RPH="{$rph}"/>
                     </ota:AirTraveler>
 XML;
+    }
+
+    /**
+     * @param  array<string, mixed>  $contact
+     */
+    private function travelerTelephoneXml(array $contact): string
+    {
+        $phone = trim((string) ($contact['phone_number'] ?? ''));
+        if ($phone === '') {
+            return '';
+        }
+
+        $country = preg_replace('/\D+/', '', (string) ($contact['phone_country'] ?? '')) ?? '';
+        if ($country === '') {
+            $country = '92';
+        }
+        // OTA PhoneLocationType: 6 = mobile (documented Zapways traveler samples).
+        $locationType = trim((string) ($contact['phone_location_type'] ?? '6'));
+        if ($locationType === '') {
+            $locationType = '6';
+        }
+
+        return '<ota:Telephone'
+            .' PhoneLocationType="'.htmlspecialchars($locationType, ENT_XML1).'"'
+            .' CountryAccessCode="'.htmlspecialchars($country, ENT_XML1).'"'
+            .' PhoneNumber="'.htmlspecialchars($phone, ENT_XML1).'"/>';
     }
 
     /**

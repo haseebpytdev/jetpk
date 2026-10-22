@@ -108,13 +108,26 @@ class AirBlueOtaXmlBuilderTest extends AirBlueOfflineTestCase
         // Zapways DocumentTypeGender rejects M/F; wire Male/Female.
         $this->assertStringContainsString('Gender="Male"', $xml);
         $this->assertStringNotContainsString('Gender="M"', $xml);
-        $this->assertStringContainsString('<ota:NamePrefix>MR</ota:NamePrefix>', $xml);
+        // Zapways OTA v2.06 documents NameTitle (not NamePrefix).
+        $this->assertStringContainsString('<ota:NameTitle>MR</ota:NameTitle>', $xml);
+        $this->assertStringNotContainsString('<ota:NamePrefix>', $xml);
         $this->assertStringContainsString('<ota:OperatingAirline Code="PA"/>', $xml);
+        $this->assertStringContainsString('FareBasisCode="YOW"', $xml);
+        $this->assertStringContainsString('PhoneLocationType="6"', $xml);
+        $this->assertStringContainsString('CountryAccessCode="92"', $xml);
+        $this->assertStringContainsString('<ota:PassengerTypeQuantity Code="ADT" Quantity="1"/>', $xml);
+        // Exact OriginDestinationOptions / pricing fragments from search preserved.
+        $this->assertStringContainsString('<ota:OriginDestinationOptions>', $xml);
+        $this->assertStringContainsString('StopQuantity="0"', $xml);
+        $this->assertStringContainsString('TaxCode="YR"', $xml);
     }
 
     public function test_air_book_falls_back_fare_basis_to_segment_rbd(): void
     {
         $providerContext = $this->providerContextFromSearchFixture();
+        // Force reconstruct path (no lossless pricing/ODO fragments).
+        $providerContext['priced_itineraries'][0]['origin_destination_options_xml'] = null;
+        $providerContext['priced_itineraries'][0]['air_itinerary_pricing_info_xml'] = null;
         $providerContext['priced_itineraries'][0]['fare_breakdowns'][0]['fare_basis'] = null;
         $providerContext['priced_itineraries'][0]['segments'][0]['fare_basis'] = '';
         $providerContext['priced_itineraries'][0]['segments'][0]['rbd'] = 'U';
@@ -128,6 +141,28 @@ class AirBlueOtaXmlBuilderTest extends AirBlueOfflineTestCase
 
         $this->assertStringContainsString('<ota:FareBasisCode>U</ota:FareBasisCode>', $xml);
         $this->assertStringContainsString('Gender="Female"', $xml);
+    }
+
+    public function test_air_book_uses_documented_name_title_and_telephone(): void
+    {
+        $providerContext = $this->providerContextFromSearchFixture();
+        $xml = (new AirBlueOtaXmlBuilder)->buildAirBookRequest(
+            $this->baseConfig(),
+            $providerContext,
+            [['ptc' => 'ADT', 'given_name' => 'JOHN', 'surname' => 'DOE', 'gender' => 'M', 'title' => 'MR']],
+            [
+                'email' => 'booker@example.com',
+                'phone_country' => '92',
+                'phone_number' => '3001234567',
+            ],
+        );
+
+        $this->assertStringContainsString('<ota:NameTitle>MR</ota:NameTitle>', $xml);
+        $this->assertMatchesRegularExpression(
+            '/<ota:Telephone[^>]*PhoneLocationType="6"[^>]*CountryAccessCode="92"[^>]*PhoneNumber="3001234567"/',
+            $xml,
+        );
+        $this->assertStringNotContainsString('PassengerTypeCode=', $xml);
     }
 
     public function test_search_to_air_book_preserves_fare_fields(): void
@@ -162,6 +197,8 @@ class AirBlueOtaXmlBuilderTest extends AirBlueOfflineTestCase
     public function test_passenger_mix_adt_chd_inf_includes_birthdates(): void
     {
         $providerContext = $this->providerContextFromSearchFixture();
+        // Reconstruct pricing for multi-PTC mix (search fixture is ADT-only).
+        $providerContext['priced_itineraries'][0]['air_itinerary_pricing_info_xml'] = null;
         $providerContext['priced_itineraries'][0]['fare_breakdowns'] = [
             ['ptc' => 'ADT', 'quantity' => 1, 'base' => 10000, 'taxes' => 2000, 'total' => 12000, 'currency' => 'PKR'],
             ['ptc' => 'CHD', 'quantity' => 1, 'base' => 8000, 'taxes' => 1500, 'total' => 9500, 'currency' => 'PKR'],
@@ -179,9 +216,11 @@ class AirBlueOtaXmlBuilderTest extends AirBlueOfflineTestCase
             ['email' => 'booker@example.com'],
         );
 
-        $this->assertStringContainsString('PassengerTypeCode="ADT"', $xml);
-        $this->assertStringContainsString('PassengerTypeCode="CHD" BirthDate="2015-06-01"', $xml);
-        $this->assertStringContainsString('PassengerTypeCode="INF" BirthDate="2024-01-15"', $xml);
+        $this->assertStringContainsString('<ota:PassengerTypeQuantity Code="ADT" Quantity="1"/>', $xml);
+        $this->assertStringContainsString('BirthDate="2015-06-01"', $xml);
+        $this->assertStringContainsString('<ota:PassengerTypeQuantity Code="CHD" Quantity="1"/>', $xml);
+        $this->assertStringContainsString('BirthDate="2024-01-15"', $xml);
+        $this->assertStringContainsString('<ota:PassengerTypeQuantity Code="INF" Quantity="1"/>', $xml);
         $this->assertSame(3, substr_count($xml, '<ota:PTC_FareBreakdown>'));
     }
 
