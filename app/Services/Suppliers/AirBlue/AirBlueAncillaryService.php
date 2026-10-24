@@ -17,6 +17,7 @@ class AirBlueAncillaryService
         private readonly AirBlueClient $client,
         private readonly AirBlueOtaXmlBuilder $xmlBuilder,
         private readonly AirBlueOtaXmlParser $xmlParser,
+        private readonly AirBlueSeatModifyOutcomeGate $seatModifyOutcomeGate,
     ) {}
 
     public function isSupported(SupplierConnection $connection): bool
@@ -65,6 +66,42 @@ class AirBlueAncillaryService
         return [
             'ancillary_items' => is_array($parsed['ancillary_items'] ?? null) ? $parsed['ancillary_items'] : [],
             'protocol_version' => $config['protocol_version'],
+        ];
+    }
+
+    /**
+     * Type=5 seat modify. Provider Success without SeatRequest is rejected.
+     *
+     * @param  array<string, mixed>  $modifyContext
+     * @return array{seats: list<array<string, mixed>>, protocol_version: string}
+     */
+    public function modifySeats(SupplierConnection $connection, array $modifyContext): array
+    {
+        if (! $this->isSupported($connection)) {
+            throw new AirBlueValidationException('ancillary_unsupported', 422, 'Seat modify is only available on AirBlue Zapways OTA v3.0.');
+        }
+
+        $config = $this->configResolver->resolveOta($connection);
+        $modifyContext['modification_type'] = (string) ($modifyContext['modification_type'] ?? '5');
+        $xml = $this->xmlBuilder->buildAirBookModifyRequest($config, $modifyContext);
+        $response = $this->client->callOta($connection, 'air_book_modify', $xml, [
+            'request_context' => 'air_book_modify_seat',
+        ]);
+
+        $expected = null;
+        $changes = is_array($modifyContext['seat_changes'] ?? null) ? $modifyContext['seat_changes'] : [];
+        if (count($changes) === 1 && is_array($changes[0] ?? null)) {
+            $expected = [
+                'row_number' => trim((string) ($changes[0]['row_number'] ?? '')),
+                'seat_number' => trim((string) ($changes[0]['seat_number'] ?? '')),
+            ];
+        }
+
+        $this->seatModifyOutcomeGate->assertSeatAttached($response, $expected);
+
+        return [
+            'seats' => $this->seatModifyOutcomeGate->reservedSeats($response),
+            'protocol_version' => (string) $config['protocol_version'],
         ];
     }
 
