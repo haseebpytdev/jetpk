@@ -74,4 +74,4 @@ TEST_INITIATED_NON_AIRBLUE_SUPPLIER_CALLS=0
 PROVIDER_POST_CALLS=0
 ```
 
-Full WSDL not committed (large binary/metadata). Parse summary retained in `_raw-wsdl-fetch.txt` / this report.
+Full WSDL was intentionally not committed. The structured parse summary is retained in `_wsdl-parse.json` and this report.
