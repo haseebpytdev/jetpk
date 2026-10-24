@@ -17,6 +17,8 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 ## Changelog (high level)
 
+| 2026-10-24 | AirBlue Zapways v2 Read SOAPAction WSDL align | TEST Read `soap_action_test` → `http://zapways.com/air/ota/2.0/Read` per otatest4 WSDL/`?op=Read` (PDF `ota.qa` host rejected). LIVE + v3 unchanged until LIVE WSDL verified. Endpoint + Read XML unchanged. |
+
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
 | 2026-10-16 | OPS-DEF-0011/0012 guest token hardening | **TWO_PHASE:** atomic token rotation (expire prior active rows); session bind + token-free /guest/bookings/{id} + mutation/doc URLs; legacy /access/{token} exchange-only; guest Referrer-Policy: no-referrer + no-store; Next clean page. Status: **FIX_READY_FOR_DEPLOYMENT** (no prod deploy). |

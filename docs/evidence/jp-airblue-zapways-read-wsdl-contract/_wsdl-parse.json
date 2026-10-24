@@ -1,0 +1,70 @@
+﻿{
+  "WSDL_READ_OPERATION_FOUND": true,
+  "WSDL_READ_SOAP_ACTION": "http://zapways.com/air/ota/2.0/Read",
+  "WSDL_SOAP_VERSION": "1.1",
+  "WSDL_BINDING_NAME": "IOTA_Air1",
+  "WSDL_SERVICE_ENDPOINT": "https://otatest4.zapways.com/v2.0/OTAAPI.asmx",
+  "WSDL_SERVICE_NAME": "OTAAPI",
+  "WSDL_PORT_NAME": "IOTA_Air",
+  "WSDL_BINDINGS": [
+    {
+      "name": "IOTA_Air",
+      "style": null,
+      "transport": "http://schemas.xmlsoap.org/soap/http"
+    },
+    {
+      "name": "OTAAPISoap",
+      "style": null,
+      "transport": "http://schemas.xmlsoap.org/soap/http"
+    },
+    {
+      "name": "IOTA_Air1",
+      "style": null,
+      "transport": null
+    },
+    {
+      "name": "OTAAPISoap12",
+      "style": null,
+      "transport": null
+    }
+  ],
+  "WSDL_SERVICES": [
+    {
+      "service": "OTAAPI",
+      "port": "IOTA_Air",
+      "location": "https://otatest4.zapways.com/v2.0/OTAAPI.asmx",
+      "binding": "tns:IOTA_Air"
+    },
+    {
+      "service": "OTAAPI",
+      "port": "OTAAPISoap",
+      "location": "https://otatest4.zapways.com/v2.0/OTAAPI.asmx",
+      "binding": "tns:OTAAPISoap"
+    },
+    {
+      "service": "OTAAPI",
+      "port": "IOTA_Air1",
+      "location": null,
+      "binding": "tns:IOTA_Air1"
+    },
+    {
+      "service": "OTAAPI",
+      "port": "OTAAPISoap12",
+      "location": null,
+      "binding": "tns:OTAAPISoap12"
+    }
+  ],
+  "HELP_PAGE_READ_SOAP_ACTIONS": [
+    "http://zapways.com/air/ota/2.0/Read"
+  ],
+  "READ_OPS_RAW": [
+    {
+      "action": "http://zapways.com/air/ota/2.0/Read",
+      "soap_version": "1.1"
+    },
+    {
+      "action": "http://zapways.com/air/ota/2.0/Read",
+      "soap_version": "1.2"
+    }
+  ]
+}

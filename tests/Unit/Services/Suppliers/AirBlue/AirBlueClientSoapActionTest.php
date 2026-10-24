@@ -19,8 +19,9 @@ class AirBlueClientSoapActionTest extends AirBlueOfflineTestCase
 
         $action = $method->invoke($client, 'read', ['is_test' => true, 'protocol_version' => '2.0']);
 
-        $this->assertSame('https://ota.qa.zapways.com/Read', $action);
-        // SOAPAction host ≠ HTTP endpoint (nested "2.0" key cannot use dotted config()).
+        // otatest4 WSDL soap:operation/@soapAction for Read (namespace form; not PDF ota.qa host).
+        $this->assertSame('http://zapways.com/air/ota/2.0/Read', $action);
+        // SOAPAction ≠ HTTP endpoint (nested "2.0" key cannot use dotted config()).
         $v2 = (array) (config('suppliers.airblue.protocol_versions')['2.0'] ?? []);
         $this->assertSame('https://otatest4.zapways.com/v2.0/OTAAPI.asmx', (string) ($v2['default_qa_base_url'] ?? ''));
         $this->assertSame('https://otatest4.zapways.com/v2.0/OTAAPI.asmx', (string) config('suppliers.airblue.default_ota_qa_base_url'));
