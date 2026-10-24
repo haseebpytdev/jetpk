@@ -41,9 +41,14 @@ class AirBlueRetrieveService
             return ['synced' => false, 'reason' => 'missing_order_context'];
         }
 
-        // Zapways v2.06: Instance is optional. Normal/current PNR Read is PNR-only.
-        // Specific historical/pending instance Read only when explicitly requested.
+        // Zapways v2.06/v3.00: Instance is optional for a normal/current PNR Read.
+        // When a caller explicitly asks for a historical/pending instance, fail closed
+        // if that instance is unavailable rather than silently retrieving the current PNR.
+        $specificInstanceRequested = $this->isSpecificInstanceReadRequested($context);
         $instance = $this->resolveReadInstance($context);
+        if ($specificInstanceRequested && $instance === null) {
+            return ['synced' => false, 'reason' => 'missing_order_context'];
+        }
 
         try {
             $config = $this->configResolver->resolveOta($connection);
@@ -71,17 +76,24 @@ class AirBlueRetrieveService
      */
     private function resolveReadInstance(array $context): ?string
     {
-        $mode = strtolower(trim((string) ($context['retrieve_mode'] ?? $context['read_mode'] ?? '')));
-        $explicit = filter_var($context['read_specific_instance'] ?? false, FILTER_VALIDATE_BOOLEAN)
-            || in_array($mode, ['specific_instance', 'historical', 'pending_instance'], true);
-
-        if (! $explicit) {
+        if (! $this->isSpecificInstanceReadRequested($context)) {
             return null;
         }
 
         $instance = trim((string) ($context['instance'] ?? ''));
 
         return $instance !== '' ? $instance : null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     */
+    private function isSpecificInstanceReadRequested(array $context): bool
+    {
+        $mode = strtolower(trim((string) ($context['retrieve_mode'] ?? $context['read_mode'] ?? '')));
+
+        return filter_var($context['read_specific_instance'] ?? false, FILTER_VALIDATE_BOOLEAN)
+            || in_array($mode, ['specific_instance', 'historical', 'pending_instance'], true);
     }
 
     /**
