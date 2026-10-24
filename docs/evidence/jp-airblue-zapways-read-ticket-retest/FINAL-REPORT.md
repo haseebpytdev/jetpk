@@ -123,10 +123,8 @@ REFUND_TESTS=
 
 | File | Role |
 |---|---|
-| `_raw-pr123-deploy.txt` | Deploy + config-cache + HTTP health |
-| `_raw-phase-read-first.txt` | Booking C Read-first probe |
-| `_raw-verify-restore.txt` | Conn22 restore + log tail |
-| `_deploy-pr123.sh` | Deploy script |
-| `_phase-read-first-ticket.php` | Certification probe (not deployed as product) |
+| `_deploy-pr123.sh` | Scoped PR123 deploy/config-cache/health procedure |
+| `_phase-read-first-ticket.php` | Controlled Read-first certification probe |
+| `_verify-restore.php` | Conn22 restore + supplier-isolation verification |
 
-Raw PNR, Instance, credentials, certificates, and full SOAP omitted.
+The final report records the observed runtime results. Empty raw transcript placeholders were removed before review. Raw PNR, Instance, credentials, certificates, passenger PII, and full SOAP are omitted.
