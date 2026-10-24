@@ -299,45 +299,111 @@ class AirBlueOtaXmlParser
             if (! $mapNode instanceof DOMNode) {
                 continue;
             }
+
             $rows = [];
-            // Prefer documented CabinClass/RowInfo hierarchy; fall back to any RowInfo under the map.
             $rowNodes = $xpath->query('.//*[local-name()="SeatMapDetails"]/*[local-name()="CabinClass"]/*[local-name()="RowInfo"]', $mapNode);
             if ($rowNodes === false || $rowNodes->length === 0) {
                 $rowNodes = $xpath->query('.//*[local-name()="RowInfo"]', $mapNode);
             }
+
             if ($rowNodes !== false) {
                 foreach ($rowNodes as $rowNode) {
                     if (! $rowNode instanceof DOMNode) {
                         continue;
                     }
+
                     $rowNumber = $rowNode->attributes?->getNamedItem('RowNumber')?->nodeValue;
                     $seats = [];
-                    $seatNodes = $xpath->query('.//*[local-name()="Seat"]', $rowNode);
+
+                    // Zapways v3.00 documents RowInfo -> SeatInfo -> Summary.
+                    // Keep direct Seat as a backward-compatible fallback for older fixtures/providers.
+                    $seatNodes = $xpath->query('./*[local-name()="SeatInfo"]', $rowNode);
+                    if ($seatNodes === false || $seatNodes->length === 0) {
+                        $seatNodes = $xpath->query('./*[local-name()="Seat"]', $rowNode);
+                    }
+
                     if ($seatNodes !== false) {
                         foreach ($seatNodes as $seatNode) {
                             if (! $seatNode instanceof DOMNode) {
                                 continue;
                             }
-                            $availableInd = $seatNode->attributes?->getNamedItem('AvailableInd')?->nodeValue;
-                            $occupiedInd = $seatNode->attributes?->getNamedItem('OccupiedInd')?->nodeValue;
-                            $cost = $this->firstText($xpath, './/*[local-name()="Service"]/@Amount', $seatNode);
-                            $isAvailable = $this->isTruthyInd($availableInd) && ! $this->isTruthyInd($occupiedInd);
+
+                            $summaryNode = $this->firstNode($xpath, './*[local-name()="Summary"]', $seatNode) ?? $seatNode;
+                            $seatNumber = $summaryNode->attributes?->getNamedItem('SeatNumber')?->nodeValue;
+                            $availableInd = $summaryNode->attributes?->getNamedItem('AvailableInd')?->nodeValue;
+                            $occupiedInd = $summaryNode->attributes?->getNamedItem('OccupiedInd')?->nodeValue;
+                            $availability = $this->firstText($xpath, './*[local-name()="Availability"]', $seatNode);
+
+                            $costService = $this->firstNode(
+                                $xpath,
+                                './*[local-name()="Service" and @Code="Cost"]',
+                                $seatNode,
+                            );
+                            $cost = '';
+                            $currency = '';
+                            if ($costService !== null) {
+                                $cost = $this->firstText($xpath, './/*[local-name()="Fee"]/@Amount', $costService);
+                                $currency = $this->firstText($xpath, './/*[local-name()="Fee"]/@CurrencyCode', $costService);
+                            }
+
+                            // Backward-compatible fallback for the previous synthetic direct-Seat fixture.
+                            if ($cost === '') {
+                                $cost = $this->firstText($xpath, './/*[local-name()="Service"]/@Amount', $seatNode);
+                            }
+                            if ($currency === '') {
+                                $currency = $this->firstText($xpath, './/*[local-name()="Service"]/@CurrencyCode', $seatNode);
+                            }
+
+                            $availabilityNormalized = strtolower(trim($availability));
+                            $isNoSeatHere = $availabilityNormalized === 'noseathere';
+                            $isAvailable = (
+                                $this->isTruthyInd($availableInd)
+                                || $availabilityNormalized === 'seatavailable'
+                            ) && ! $this->isTruthyInd($occupiedInd) && ! $isNoSeatHere;
+
                             $costAmount = is_numeric($cost) ? (float) $cost : null;
-                            $isComplimentary = $isAvailable && ($cost === '' || ($costAmount !== null && $costAmount <= 0.0));
+                            $hasCostService = $costService !== null || $cost !== '';
+                            $isComplimentary = $isAvailable
+                                && (! $hasCostService || ($costAmount !== null && $costAmount <= 0.0));
+                            $isPaid = $isAvailable
+                                && $hasCostService
+                                && $costAmount !== null
+                                && $costAmount > 0.0;
+
+                            $features = [];
+                            $featureNodes = $xpath->query('./*[local-name()="Features"]', $seatNode);
+                            if ($featureNodes !== false) {
+                                foreach ($featureNodes as $featureNode) {
+                                    if (! $featureNode instanceof DOMNode) {
+                                        continue;
+                                    }
+                                    $value = trim((string) ($featureNode->attributes?->getNamedItem('extension')?->nodeValue ?? ''));
+                                    if ($value === '') {
+                                        $value = trim((string) $featureNode->textContent);
+                                    }
+                                    if ($value !== '') {
+                                        $features[] = $value;
+                                    }
+                                }
+                            }
+
                             $seats[] = [
-                                'seat_number' => $seatNode->attributes?->getNamedItem('SeatNumber')?->nodeValue,
+                                'seat_number' => $seatNumber,
                                 'available_ind' => $availableInd,
                                 'occupied_ind' => $occupiedInd,
+                                'availability' => $availability !== '' ? $availability : null,
                                 'is_available' => $isAvailable,
                                 'is_complimentary' => $isComplimentary,
-                                'is_paid' => $isAvailable && ! $isComplimentary,
+                                'is_paid' => $isPaid,
                                 'cost' => $cost,
-                                'currency' => $this->firstText($xpath, './/*[local-name()="Service"]/@CurrencyCode', $seatNode),
+                                'currency' => $currency,
+                                'features' => $features,
                                 'characteristics' => $this->collectAttributeValues($xpath, './/*[local-name()="SeatCharacteristics"]/*', $seatNode, 'Code'),
                                 'restrictions' => $this->collectAttributeValues($xpath, './/*[local-name()="Restrictions"]/*', $seatNode, 'Code'),
                             ];
                         }
                     }
+
                     $rows[] = [
                         'row_number' => $rowNumber,
                         'seats' => $seats,
