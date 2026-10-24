@@ -41,7 +41,7 @@ class AirBlueTicketingProviderErrorDiagnosticsTest extends AirBlueOfflineTestCas
                         [
                             'code' => '318',
                             'type' => '3',
-                            'message' => 'Inventory unavailable. AgentPassword=SuperSecretValue ClientKey=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCD john@example.com',
+                            'message' => 'Inventory unavailable for SECRETPNR / INST1. AgentPassword=SuperSecretValue ClientKey=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCD john@example.com',
                         ],
                     ],
                 ],
@@ -83,6 +83,9 @@ class AirBlueTicketingProviderErrorDiagnosticsTest extends AirBlueOfflineTestCas
         $this->assertStringNotContainsString('SuperSecretValue', $message);
         $this->assertStringNotContainsString('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCD', $message);
         $this->assertStringNotContainsString('john@example.com', $message);
+        $this->assertStringNotContainsString('SECRETPNR', $message);
+        $this->assertStringNotContainsString('INST1', $message);
+        $this->assertStringContainsString('[REDACTED_REFERENCE]', $message);
         $encoded = json_encode($result->safe_summary);
         $this->assertIsString($encoded);
         $this->assertStringNotContainsString('AgentPassword=SuperSecret', $encoded);
