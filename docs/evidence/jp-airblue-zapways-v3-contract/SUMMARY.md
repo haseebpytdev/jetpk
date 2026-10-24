@@ -81,18 +81,21 @@ See `CONN-V3-DESIGN.md`.
 | V3_READ_UNTICKETED | YES |
 | V3_SEAT_MAP_CALLS | 1 |
 | V3_SEAT_MAP_HTTP | 200 |
+| V3_SEAT_MAP_SUCCESS (raw probe) | YES (maps non-empty; see note) |
 | V3_SEAT_COUNT (prod parser) | 0 |
-| FREE_SEAT_CERTIFICATION_POSSIBLE | UNKNOWN (empty seat inventory in parsed maps) |
-| PAID_SEAT_PAYMENT_FLOW_REQUIRED | UNKNOWN |
+| FREE_SEAT_CERTIFICATION_POSSIBLE | NO in raw counters; treat as **UNKNOWN** for cert (seat_count=0) |
+| PAID_SEAT_PAYMENT_FLOW_REQUIRED | YES in raw counters; treat as **UNKNOWN** for cert (seat_count=0) |
 | PROVIDER_MUTATION_CALLS | 0 |
 | CONN22_CHANGED | NO |
 
 Classification: **v2 Booking C PNR is interoperable with v3 Read**.
-AirSeatMap accepted (HTTP 200) but returned/parsed **zero seats** with the
-currently deployed parser/shape — offline PR adds broader `RowInfo` discovery +
-free/paid flags; re-measure seats after merge/deploy of parser (next loop).
+AirSeatMap accepted (HTTP 200). Parsed **zero seats** on production parser —
+do **not** treat seat inventory / free-seat certification as proven.
+Committed probe script later tightened SUCCESS/FREE/PAID labels; raw file is the
+authoritative one-shot run (no second SeatMap; budget = 1). Offline PR adds
+broader `RowInfo` discovery + free/paid flags; re-measure seats after merge/deploy.
 
-No second SeatMap in this loop (budget = 1).
+Raw `FINAL_STATUS=V3_COMPAT_PROBE_PASS` means wire compatibility only, not seat inventory.
 
 ## Isolation
 
@@ -116,6 +119,10 @@ Read → AirDemandTicket → Read → duplicate-ticket guard → refund Type=1 �
 
 STOP before any of those mutations in this loop.
 
+## Tests
+
+Focused AirBlue suite artifact: `_phpunit-focused.txt` (local HEAD).
+
 ## FINAL_STATUS
 
-`V3_FOUNDATION_READY_FOR_REVIEW`
+`V3_FOUNDATION_READY_FOR_REVIEW` (Read interoperable; SeatMap HTTP OK; seat inventory UNKNOWN)
