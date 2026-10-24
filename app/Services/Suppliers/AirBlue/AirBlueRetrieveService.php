@@ -62,13 +62,69 @@ class AirBlueRetrieveService
 
             return ['synced' => true, 'data' => $normalized];
         } catch (AirBlueException $exception) {
+            $diagnostic = $this->safeFailureDiagnostic($exception, $booking, $context);
+
             Log::channel('air-blue')->warning('airblue.retrieve.failed', [
                 'booking_id' => $booking->id,
                 'error_code' => $exception->normalizedCode,
+                'diagnostic' => $diagnostic,
             ]);
 
-            return ['synced' => false, 'reason' => $exception->normalizedCode];
+            return [
+                'synced' => false,
+                'reason' => $exception->normalizedCode,
+                'diagnostic' => $diagnostic,
+            ];
         }
+    }
+
+    /**
+     * Preserve only the provider diagnostics needed to classify a failed Read.
+     * Never include raw XML, PNR, Instance, credentials, or passenger data.
+     *
+     * @param  array<string, mixed>  $context
+     * @return array<string, mixed>
+     */
+    private function safeFailureDiagnostic(AirBlueException $exception, Booking $booking, array $context): array
+    {
+        $diagnostic = [];
+
+        $correlationId = $exception->context['correlation_id'] ?? null;
+        if (is_string($correlationId) && trim($correlationId) !== '') {
+            $diagnostic['correlation_id'] = substr(trim($correlationId), 0, 80);
+        }
+
+        $httpStatus = $exception->context['http_status'] ?? $exception->httpStatus ?? null;
+        if (is_numeric($httpStatus)) {
+            $diagnostic['http_status'] = (int) $httpStatus;
+        }
+
+        $faultClass = $exception->context['fault_class'] ?? null;
+        if (is_string($faultClass) && trim($faultClass) !== '') {
+            $diagnostic['fault_class'] = substr(trim($faultClass), 0, 80);
+        }
+
+        $faultSnippet = $exception->context['fault_snippet'] ?? null;
+        if (is_string($faultSnippet) && trim($faultSnippet) !== '') {
+            $sensitiveReferences = array_values(array_filter(array_unique([
+                trim((string) ($booking->pnr ?? '')),
+                trim((string) ($booking->supplier_reference ?? '')),
+                trim((string) ($context['pnr'] ?? '')),
+                trim((string) ($context['instance'] ?? '')),
+            ]), static fn (string $value): bool => strlen($value) >= 3));
+
+            $faultSnippet = html_entity_decode($faultSnippet, ENT_QUOTES | ENT_XML1);
+            foreach ($sensitiveReferences as $reference) {
+                $faultSnippet = str_ireplace($reference, '[REDACTED_REFERENCE]', $faultSnippet);
+            }
+            $faultSnippet = preg_replace('/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i', '[REDACTED_EMAIL]', $faultSnippet) ?? $faultSnippet;
+            $faultSnippet = preg_replace('/[A-Za-z0-9+\\/=]{40,}/', '[REDACTED]', $faultSnippet) ?? $faultSnippet;
+            $faultSnippet = preg_replace('/\\s+/', ' ', $faultSnippet) ?? $faultSnippet;
+
+            $diagnostic['fault_snippet'] = substr(trim($faultSnippet), 0, 220);
+        }
+
+        return $diagnostic;
     }
 
     /**

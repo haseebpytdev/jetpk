@@ -9,6 +9,7 @@ use App\Models\Booking;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\AirBlue\AirBlueClient;
 use App\Services\Suppliers\AirBlue\AirBlueRetrieveService;
+use App\Services\Suppliers\AirBlue\Exceptions\AirBlueProviderException;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -86,6 +87,62 @@ class AirBlueRetrieveServiceTest extends AirBlueOfflineTestCase
         $this->assertIsString($captured);
         $this->assertStringContainsString('<ota:UniqueID ID="TESTPNR"/>', (string) $captured);
         $this->assertStringNotContainsString('SHOULD-NOT-BE-SENT-BY-DEFAULT', (string) $captured);
+    }
+
+    public function test_supplier_http_error_returns_only_safe_allowlisted_diagnostics(): void
+    {
+        $client = Mockery::mock(AirBlueClient::class);
+        $client->shouldReceive('callOta')
+            ->once()
+            ->andThrow(new AirBlueProviderException(
+                'supplier_http_error',
+                500,
+                'Provider temporarily unavailable.',
+                [
+                    'correlation_id' => 'corr-read-1',
+                    'http_status' => 500,
+                    'fault_class' => 'soap_fault',
+                    'fault_snippet' => 'Read rejected for TESTPNR / INST1 and john@example.com',
+                    'request_xml' => '<secret>must-not-leak</secret>',
+                    'credentials' => ['agent_password' => 'secret'],
+                ],
+            ));
+        $this->app->instance(AirBlueClient::class, $client);
+
+        $agency = Agency::query()->firstOrFail();
+        $booking = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'pnr' => 'TESTPNR',
+            'supplier_reference' => 'TESTPNR',
+            'supplier' => SupplierProvider::Airblue->value,
+            'meta' => [
+                'airblue_context' => [
+                    'pnr' => 'TESTPNR',
+                    'instance' => 'INST1',
+                    'protocol_version' => '2.0',
+                    'api_channel' => 'zapways_ota',
+                ],
+            ],
+        ]);
+
+        $result = app(AirBlueRetrieveService::class)->retrieveAndSync($booking->fresh(), $this->connection());
+
+        $this->assertFalse($result['synced']);
+        $this->assertSame('supplier_http_error', $result['reason']);
+        $this->assertSame('corr-read-1', $result['diagnostic']['correlation_id'] ?? null);
+        $this->assertSame(500, $result['diagnostic']['http_status'] ?? null);
+        $this->assertSame('soap_fault', $result['diagnostic']['fault_class'] ?? null);
+        $snippet = (string) ($result['diagnostic']['fault_snippet'] ?? '');
+        $this->assertStringContainsString('[REDACTED_REFERENCE]', $snippet);
+        $this->assertStringContainsString('[REDACTED_EMAIL]', $snippet);
+        $this->assertStringNotContainsString('TESTPNR', $snippet);
+        $this->assertStringNotContainsString('INST1', $snippet);
+        $encoded = json_encode($result['diagnostic']);
+        $this->assertIsString($encoded);
+        $this->assertStringNotContainsString('request_xml', $encoded);
+        $this->assertStringNotContainsString('credentials', $encoded);
+        $this->assertStringNotContainsString('must-not-leak', $encoded);
+        $this->assertStringNotContainsString('secret', $encoded);
     }
 
     public function test_specific_instance_mode_without_instance_fails_closed(): void
