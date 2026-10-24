@@ -51,8 +51,9 @@ Certified v3 ranks above v2 (300 vs 200).
 | Read UniqueID (no Type=14; Instance optional) | PASS |
 | AirAncillaryItems | PASS |
 | AirDemandTicket PaymentInfo | PASS |
-| Seat map free/paid classification | FIXED offline (`is_available` / `is_complimentary` / `is_paid`) |
-| V3_WIRE_AUDIT | PASS_WITH_SEAT_PARSER_ENHANCEMENT |
+| Seat map response parsing | FIXED offline to documented `RowInfo → SeatInfo → Summary` + `Service Code="Cost" → Fee` |
+| Seat free/paid classification | Conservative flags added; requires one post-deploy SeatMap re-measure |
+| V3_WIRE_AUDIT | PASS_WITH_DOCUMENTED_SEAT_PARSER_FIX |
 
 ## Phase 5–6 — Config + dedicated v3 lane design
 
@@ -92,8 +93,9 @@ Classification: **v2 Booking C PNR is interoperable with v3 Read**.
 AirSeatMap accepted (HTTP 200). Parsed **zero seats** on production parser —
 do **not** treat seat inventory / free-seat certification as proven.
 Committed probe script later tightened SUCCESS/FREE/PAID labels; raw file is the
-authoritative one-shot run (no second SeatMap; budget = 1). Offline PR adds
-broader `RowInfo` discovery + free/paid flags; re-measure seats after merge/deploy.
+authoritative one-shot run (no second SeatMap; budget = 1). Offline PR now parses the documented v3.00 `SeatInfo/Summary` response shape and
+`Service Code="Cost"/Fee` pricing, while retaining the legacy direct-Seat fallback.
+Re-measure seats once after merge/deploy; do not infer availability from the old zero-seat parse.
 
 Raw `FINAL_STATUS=V3_COMPAT_PROBE_PASS` means wire compatibility only, not seat inventory.
 
