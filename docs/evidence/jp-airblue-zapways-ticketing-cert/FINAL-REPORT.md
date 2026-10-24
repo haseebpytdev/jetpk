@@ -217,14 +217,10 @@ Probe called `Mail::fake()`, but production logs show outbound SMTP notification
 
 | File | Role |
 |---|---|
-| `_raw-pr120-deploy.txt` | Deploy + health |
-| `_phpunit-phase2.txt` | Local focused tests |
-| `_raw-phase3.txt` | Conn snapshot |
-| `_raw-phase4-16.txt` | Booking C lifecycle |
-| `_raw-conn-verify.txt` | Same-algo restore verify |
-| `_deploy-pr120.sh` | Deploy script used |
-| `_phase3-conn-snapshot.php` | Snapshot probe |
-| `_phase4-16-booking-c.php` | Lifecycle probe |
-| `_verify-conn-restore.php` | Isolation verify |
+| `_deploy-pr120.sh` | Scoped PR120 deploy/health procedure |
+| `_phase3-conn-snapshot.php` | Supplier-connection baseline probe |
+| `_phase4-16-booking-c.php` | Booking C lifecycle probe used for the controlled TEST call |
+| `_verify-conn-restore.php` | Independent same-algorithm isolation/restore verification |
+| `_inspect-booking-c.php` | Read-only post-run booking/attempt inspection helper |
 
-Raw PNR, ticket numbers, credentials, certificates, and full authenticated SOAP are omitted.
+The final report records the observed results. Empty transcript placeholders were intentionally removed before review. Raw PNR, ticket numbers, credentials, certificates, passenger PII, and full authenticated SOAP are omitted.
