@@ -219,8 +219,8 @@ class AirBlueConnectionSearchPolicyCertificationTest extends AirBlueOfflineTestC
 
         $this->assertSame('http://zapways.com/air/ota/2.0/AirLowFareSearch', $search);
         $this->assertSame('http://zapways.com/air/ota/2.0/AirBook', $book);
-        // v2.06 documented Read SOAPAction hosts (HTTP endpoint remains otatest4/ota4).
-        $this->assertSame('https://ota.qa.zapways.com/Read', $readTest);
+        // TEST Read follows otatest4 WSDL; LIVE remains PDF host until LIVE WSDL verified.
+        $this->assertSame('http://zapways.com/air/ota/2.0/Read', $readTest);
         $this->assertSame('https://ota.zapways.com/Read', $readLive);
     }
 

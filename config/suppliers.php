@@ -467,9 +467,10 @@ return [
                     'air_book' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirBook'],
                     'air_demand_ticket' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirDemandTicket'],
                     'read' => [
-                        // Zapways OTA API v2.06 documented Read SOAPAction hosts (distinct from HTTP endpoint).
+                        // LIVE still follows published v2.06 PDF until LIVE WSDL is independently verified.
                         'soap_action_live' => 'https://ota.zapways.com/Read',
-                        'soap_action_test' => 'https://ota.qa.zapways.com/Read',
+                        // TEST: otatest4 WSDL + ?op=Read both require the namespace action (PDF host rejected).
+                        'soap_action_test' => 'http://zapways.com/air/ota/2.0/Read',
                     ],
                     'cancel' => ['soap_action' => 'http://zapways.com/air/ota/2.0/Cancel'],
                     'air_book_modify' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirBookModify'],
@@ -505,9 +506,10 @@ return [
             'air_book' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirBook'],
             'air_demand_ticket' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirDemandTicket'],
             'read' => [
-                // Zapways OTA API v2.06 documented Read SOAPAction hosts (distinct from HTTP endpoint).
+                // LIVE still follows published v2.06 PDF until LIVE WSDL is independently verified.
                 'soap_action_live' => 'https://ota.zapways.com/Read',
-                'soap_action_test' => 'https://ota.qa.zapways.com/Read',
+                // TEST: otatest4 WSDL + ?op=Read both require the namespace action (PDF host rejected).
+                'soap_action_test' => 'http://zapways.com/air/ota/2.0/Read',
             ],
             'cancel' => ['soap_action' => 'http://zapways.com/air/ota/2.0/Cancel'],
             'air_book_modify' => ['soap_action' => 'http://zapways.com/air/ota/2.0/AirBookModify'],
