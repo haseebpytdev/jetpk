@@ -41,6 +41,30 @@ class AirBlueClientSoapActionTest extends AirBlueOfflineTestCase
         $this->assertSame('https://ota4.zapways.com/v2.0/OTAAPI.asmx', (string) config('suppliers.airblue.default_ota_base_url'));
     }
 
+    public function test_v3_test_read_soap_action_uses_otatest4_wsdl_namespace_form(): void
+    {
+        $client = app(AirBlueClient::class);
+        $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
+        $method->setAccessible(true);
+
+        $action = $method->invoke($client, 'read', ['is_test' => true, 'protocol_version' => '3.0']);
+
+        $this->assertSame('http://zapways.com/air/ota/3.0/Read', $action);
+        $v3 = (array) (config('suppliers.airblue.protocol_versions')['3.0'] ?? []);
+        $this->assertSame('https://otatest4.zapways.com/v3.0/OTAAPI.asmx', (string) ($v3['default_qa_base_url'] ?? ''));
+    }
+
+    public function test_v3_live_read_soap_action_remains_documented_host(): void
+    {
+        $client = app(AirBlueClient::class);
+        $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
+        $method->setAccessible(true);
+
+        $action = $method->invoke($client, 'read', ['is_test' => false, 'protocol_version' => '3.0']);
+
+        $this->assertSame('https://ota.zapways.com/Read', $action);
+    }
+
     public function test_sandbox_call_does_not_depend_on_global_external_call_kill_switch(): void
     {
         config(['suppliers.airblue.external_calls_enabled' => false]);

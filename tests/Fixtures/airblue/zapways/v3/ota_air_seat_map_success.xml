@@ -23,6 +23,11 @@
                       <Restriction Code="PERMANENTLY_BLOCKED"/>
                     </Restrictions>
                   </Seat>
+                  <Seat SeatNumber="C" AvailableInd="true" OccupiedInd="false">
+                    <SeatCharacteristics>
+                      <Characteristic Code="AISLE"/>
+                    </SeatCharacteristics>
+                  </Seat>
                 </RowInfo>
               </CabinClass>
             </SeatMapDetails>

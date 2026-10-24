@@ -158,9 +158,18 @@ class AirBlueZapwaysV3ProtocolTest extends AirBlueOfflineTestCase
 
         $this->assertSame('A', $seat['seat_number']);
         $this->assertSame('true', $seat['available_ind']);
+        $this->assertTrue($seat['is_available']);
+        $this->assertTrue($seat['is_paid']);
+        $this->assertFalse($seat['is_complimentary']);
         $this->assertSame('1500.00', $seat['cost']);
         $this->assertSame('PKR', $seat['currency']);
         $this->assertContains('NOT_SUITABLE_FOR_CHILD', $seat['restrictions']);
+
+        $freeSeat = $parsed['parsed']['seat_maps'][0]['rows'][0]['seats'][2];
+        $this->assertSame('C', $freeSeat['seat_number']);
+        $this->assertTrue($freeSeat['is_available']);
+        $this->assertTrue($freeSeat['is_complimentary']);
+        $this->assertFalse($freeSeat['is_paid']);
     }
 
     public function test_air_ancillary_items_request_and_parser(): void
@@ -304,15 +313,23 @@ class AirBlueZapwaysV3ProtocolTest extends AirBlueOfflineTestCase
         $this->assertTrue(true);
     }
 
-    public function test_v3_soap_actions_fail_closed_when_not_configured(): void
+    public function test_v3_soap_actions_fail_closed_when_blanked(): void
     {
+        $versions = (array) config('suppliers.airblue.protocol_versions');
+        $v3 = is_array($versions['3.0'] ?? null) ? $versions['3.0'] : [];
+        $operations = is_array($v3['ota_operations'] ?? null) ? $v3['ota_operations'] : [];
+        $operations['air_seat_map'] = ['soap_action' => ''];
+        $v3['ota_operations'] = $operations;
+        $versions['3.0'] = $v3;
+        config(['suppliers.airblue.protocol_versions' => $versions]);
+
         $client = app(AirBlueClient::class);
         $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
         $method->setAccessible(true);
 
         try {
             $method->invoke($client, 'air_seat_map', ['is_test' => true, 'protocol_version' => '3.0']);
-            $this->fail('Expected missing_soap_action for unconfigured v3 air_seat_map');
+            $this->fail('Expected missing_soap_action for blanked v3 air_seat_map');
         } catch (AirBlueValidationException $exception) {
             $this->assertSame('missing_soap_action', $exception->normalizedCode);
         }

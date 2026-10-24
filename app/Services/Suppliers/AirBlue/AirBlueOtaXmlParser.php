@@ -300,7 +300,11 @@ class AirBlueOtaXmlParser
                 continue;
             }
             $rows = [];
+            // Prefer documented CabinClass/RowInfo hierarchy; fall back to any RowInfo under the map.
             $rowNodes = $xpath->query('.//*[local-name()="SeatMapDetails"]/*[local-name()="CabinClass"]/*[local-name()="RowInfo"]', $mapNode);
+            if ($rowNodes === false || $rowNodes->length === 0) {
+                $rowNodes = $xpath->query('.//*[local-name()="RowInfo"]', $mapNode);
+            }
             if ($rowNodes !== false) {
                 foreach ($rowNodes as $rowNode) {
                     if (! $rowNode instanceof DOMNode) {
@@ -314,11 +318,20 @@ class AirBlueOtaXmlParser
                             if (! $seatNode instanceof DOMNode) {
                                 continue;
                             }
+                            $availableInd = $seatNode->attributes?->getNamedItem('AvailableInd')?->nodeValue;
+                            $occupiedInd = $seatNode->attributes?->getNamedItem('OccupiedInd')?->nodeValue;
+                            $cost = $this->firstText($xpath, './/*[local-name()="Service"]/@Amount', $seatNode);
+                            $isAvailable = $this->isTruthyInd($availableInd) && ! $this->isTruthyInd($occupiedInd);
+                            $costAmount = is_numeric($cost) ? (float) $cost : null;
+                            $isComplimentary = $isAvailable && ($cost === '' || ($costAmount !== null && $costAmount <= 0.0));
                             $seats[] = [
                                 'seat_number' => $seatNode->attributes?->getNamedItem('SeatNumber')?->nodeValue,
-                                'available_ind' => $seatNode->attributes?->getNamedItem('AvailableInd')?->nodeValue,
-                                'occupied_ind' => $seatNode->attributes?->getNamedItem('OccupiedInd')?->nodeValue,
-                                'cost' => $this->firstText($xpath, './/*[local-name()="Service"]/@Amount', $seatNode),
+                                'available_ind' => $availableInd,
+                                'occupied_ind' => $occupiedInd,
+                                'is_available' => $isAvailable,
+                                'is_complimentary' => $isComplimentary,
+                                'is_paid' => $isAvailable && ! $isComplimentary,
+                                'cost' => $cost,
                                 'currency' => $this->firstText($xpath, './/*[local-name()="Service"]/@CurrencyCode', $seatNode),
                                 'characteristics' => $this->collectAttributeValues($xpath, './/*[local-name()="SeatCharacteristics"]/*', $seatNode, 'Code'),
                                 'restrictions' => $this->collectAttributeValues($xpath, './/*[local-name()="Restrictions"]/*', $seatNode, 'Code'),
@@ -509,6 +522,13 @@ class AirBlueOtaXmlParser
         }
 
         return $values;
+    }
+
+    private function isTruthyInd(?string $value): bool
+    {
+        $normalized = strtolower(trim((string) $value));
+
+        return in_array($normalized, ['true', '1', 'yes', 'y'], true);
     }
 
     private function firstText(DOMXPath $xpath, string $query, ?DOMNode $context = null): string

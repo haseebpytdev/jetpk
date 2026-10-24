@@ -1,0 +1,88 @@
+{
+  "V3_WSDL_NAMESPACE": "http://zapways.com/air/ota/3.0",
+  "V3_WSDL_ENDPOINT": "https://otatest4.zapways.com/v3.0/OTAAPI.asmx",
+  "V3_WSDL_SERVICE": "OTAAPI",
+  "V3_WSDL_PORT": "IOTA_Air",
+  "V3_SOAP_VERSION_PRIMARY": "1.1",
+  "V3_METADATA_ACTIONS_MATCH": true,
+  "operations": {
+    "AirLowFareSearch": {
+      "wsdl": "http://zapways.com/air/ota/3.0/AirLowFareSearch",
+      "help": [
+        "http://zapways.com/air/ota/3.0/AirLowFareSearch"
+      ],
+      "match": true,
+      "soap_version": "1.1"
+    },
+    "AirBook": {
+      "wsdl": "http://zapways.com/air/ota/3.0/AirBook",
+      "help": [
+        "http://zapways.com/air/ota/3.0/AirBook"
+      ],
+      "match": true,
+      "soap_version": "1.1"
+    },
+    "AirSeatMap": {
+      "wsdl": "http://zapways.com/air/ota/3.0/AirSeatMap",
+      "help": [
+        "http://zapways.com/air/ota/3.0/AirSeatMap"
+      ],
+      "match": true,
+      "soap_version": "1.1"
+    },
+    "AirAncillaryItems": {
+      "wsdl": "http://zapways.com/air/ota/3.0/AirAncillaryItems",
+      "help": [
+        "http://zapways.com/air/ota/3.0/AirAncillaryItems"
+      ],
+      "match": true,
+      "soap_version": "1.1"
+    },
+    "AirDemandTicket": {
+      "wsdl": "http://zapways.com/air/ota/3.0/AirDemandTicket",
+      "help": [
+        "http://zapways.com/air/ota/3.0/AirDemandTicket"
+      ],
+      "match": true,
+      "soap_version": "1.1"
+    },
+    "AirBookModify": {
+      "wsdl": "http://zapways.com/air/ota/3.0/AirBookModify",
+      "help": [
+        "http://zapways.com/air/ota/3.0/AirBookModify"
+      ],
+      "match": true,
+      "soap_version": "1.1"
+    },
+    "Read": {
+      "wsdl": "http://zapways.com/air/ota/3.0/Read",
+      "help": [
+        "http://zapways.com/air/ota/3.0/Read"
+      ],
+      "match": true,
+      "soap_version": "1.1"
+    },
+    "Cancel": {
+      "wsdl": "http://zapways.com/air/ota/3.0/Cancel",
+      "help": [
+        "http://zapways.com/air/ota/3.0/Cancel"
+      ],
+      "match": true,
+      "soap_version": "1.1"
+    }
+  },
+  "services": [
+    {
+      "service": "OTAAPI",
+      "port": "IOTA_Air",
+      "location": "https://otatest4.zapways.com/v3.0/OTAAPI.asmx",
+      "binding": "tns:IOTA_Air"
+    },
+    {
+      "service": "OTAAPI",
+      "port": "OTAAPISoap",
+      "location": "https://otatest4.zapways.com/v3.0/OTAAPI.asmx",
+      "binding": "tns:OTAAPISoap"
+    }
+  ]
+}
