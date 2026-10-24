@@ -65,6 +65,29 @@ class AirBlueClientSoapActionTest extends AirBlueOfflineTestCase
         $this->assertSame('https://ota.zapways.com/Read', $action);
     }
 
+    public function test_v3_test_non_read_action_uses_otatest4_wsdl_default(): void
+    {
+        $client = app(AirBlueClient::class);
+        $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
+        $method->setAccessible(true);
+
+        $action = $method->invoke($client, 'air_seat_map', ['is_test' => true, 'protocol_version' => '3.0']);
+
+        $this->assertSame('http://zapways.com/air/ota/3.0/AirSeatMap', $action);
+    }
+
+    public function test_v3_live_non_read_action_fails_closed_without_live_wsdl_config(): void
+    {
+        $client = app(AirBlueClient::class);
+        $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
+        $method->setAccessible(true);
+
+        $this->expectException(\App\Services\Suppliers\AirBlue\Exceptions\AirBlueValidationException::class);
+        $this->expectExceptionMessage('SOAPAction for AirBlue operation "air_seat_map" on protocol 3.0 is not configured.');
+
+        $method->invoke($client, 'air_seat_map', ['is_test' => false, 'protocol_version' => '3.0']);
+    }
+
     public function test_sandbox_call_does_not_depend_on_global_external_call_kill_switch(): void
     {
         config(['suppliers.airblue.external_calls_enabled' => false]);
