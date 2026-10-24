@@ -88,6 +88,30 @@ class AirBlueRetrieveServiceTest extends AirBlueOfflineTestCase
         $this->assertStringNotContainsString('SHOULD-NOT-BE-SENT-BY-DEFAULT', (string) $captured);
     }
 
+    public function test_specific_instance_mode_without_instance_fails_closed(): void
+    {
+        $agency = Agency::query()->firstOrFail();
+        $booking = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'pnr' => 'TESTPNR',
+            'supplier' => SupplierProvider::Airblue->value,
+            'meta' => [
+                'airblue_context' => [
+                    'pnr' => 'TESTPNR',
+                    'read_specific_instance' => true,
+                    'protocol_version' => '2.0',
+                    'api_channel' => 'zapways_ota',
+                ],
+            ],
+        ]);
+
+        $result = app(AirBlueRetrieveService::class)->retrieveAndSync($booking->fresh(), $this->connection());
+
+        $this->assertFalse($result['synced']);
+        $this->assertSame('missing_order_context', $result['reason']);
+        Http::assertNothingSent();
+    }
+
     public function test_specific_instance_mode_includes_instance(): void
     {
         $captured = null;
