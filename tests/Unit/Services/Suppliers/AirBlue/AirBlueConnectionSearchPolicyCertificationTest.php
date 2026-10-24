@@ -219,8 +219,9 @@ class AirBlueConnectionSearchPolicyCertificationTest extends AirBlueOfflineTestC
 
         $this->assertSame('http://zapways.com/air/ota/2.0/AirLowFareSearch', $search);
         $this->assertSame('http://zapways.com/air/ota/2.0/AirBook', $book);
-        $this->assertSame('https://otatest4.zapways.com/Read', $readTest);
-        $this->assertSame('https://ota4.zapways.com/Read', $readLive);
+        // v2.06 documented Read SOAPAction hosts (HTTP endpoint remains otatest4/ota4).
+        $this->assertSame('https://ota.qa.zapways.com/Read', $readTest);
+        $this->assertSame('https://ota.zapways.com/Read', $readLive);
     }
 
     private function assertAirBlueExcludedFromSearch(SupplierConnection $connection): void

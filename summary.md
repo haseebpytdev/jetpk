@@ -17,6 +17,8 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 ## Changelog (high level)
 
+| 2026-10-24 | AirBlue Zapways v2 Read + ticketing diagnostics | v2 Read SOAPAction → documented `ota.qa`/`ota` hosts (endpoint unchanged). Read UniqueID is PNR-only (no Type=14; Instance only for explicit historical mode). `AirBlueRetrieveService` no longer requires Instance. `AirBlueTicketingService` preserves sanitized `provider_errors` + `correlation_id` in `safe_summary`. Cert probe stops when `synced!==true`. |
+
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
 | 2026-10-16 | OPS-DEF-0011/0012 guest token hardening | **TWO_PHASE:** atomic token rotation (expire prior active rows); session bind + token-free /guest/bookings/{id} + mutation/doc URLs; legacy /access/{token} exchange-only; guest Referrer-Policy: no-referrer + no-store; Next clean page. Status: **FIX_READY_FOR_DEPLOYMENT** (no prod deploy). |
@@ -1202,7 +1204,8 @@ Dual-channel AirBlue (PA): **`crane_ndc`** (Hitit Crane NDC 20.1) and **`zapways
 | `AirBlueOtaXmlBuilder.php` / `AirBlueOtaXmlParser.php` / `AirBlueOtaResponseNormalizer.php` | Zapways OTA stack. | `AirLowFareSearch`, book/retrieve normalizers |
 | `AirBlueFlightSearchService.php` | Channel branch search. | `search` |
 | `AirBlueBookingService.php` | NDC `DoOrderCreate` (+ OTA path when channel=ota). | `createSupplierBooking` |
-| `AirBlueRetrieveService.php` | Retrieve/sync `airblue_context`. | `retrieveAndSync` |
+| `AirBlueRetrieveService.php` | Retrieve/sync `airblue_context` (v2 PNR required; Instance optional / explicit historical only). | `retrieveAndSync` |
+| `AirBlueTicketingService.php` | OTA AirDemandTicket; sanitized provider_errors in `safe_summary`. | `issueTickets` |
 | `AirBlueAncillaryService.php` | NDC ancillary probe (seat/baggage samples). | `isSupported`, `logUnavailable` |
 | `Adapters/AirBlueFlightSupplierAdapter.php` | `FlightSupplierInterface`. | `search`, `validateOffer` |
 | `BookingAdapters/AirBlueSupplierBookingAdapter.php` | `SupplierBookingInterface`. | `createSupplierBooking` |

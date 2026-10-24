@@ -260,15 +260,18 @@ XML;
     }
 
     /**
+     * Zapways OTA v2.06 normal Read uses UniqueID/@ID only.
+     * Instance is optional and only for a specific historical/pending PNR instance.
+     *
      * @param  array<string, mixed>  $config
      */
-    public function buildReadRequest(array $config, string $pnr, string $instance): string
+    public function buildReadRequest(array $config, string $pnr, ?string $instance = null): string
     {
         return $this->envelope(
             $config,
             'Read',
             'readRQ',
-            $this->posBlock($config).$this->uniqueIdXml($pnr, $instance),
+            $this->posBlock($config).$this->readUniqueIdXml($pnr, $instance),
         );
     }
 
@@ -591,12 +594,27 @@ XML;
         return $instance !== '' ? ' Instance="'.htmlspecialchars($instance, ENT_XML1).'"' : '';
     }
 
+    /**
+     * Cancel UniqueID contract (Type="14"; Instance optional).
+     * Do not reuse for normal Read — see {@see readUniqueIdXml()}.
+     */
     private function uniqueIdXml(string $pnr, string $instance): string
     {
         $pnr = htmlspecialchars(trim($pnr), ENT_XML1);
         $instanceAttr = $this->optionalInstanceAttribute($instance);
 
         return '<ota:UniqueID ID="'.$pnr.'"'.$instanceAttr.' Type="14"/>';
+    }
+
+    /**
+     * Document-faithful Read UniqueID: ID required; Type omitted; Instance only when explicit.
+     */
+    private function readUniqueIdXml(string $pnr, ?string $instance = null): string
+    {
+        $pnr = htmlspecialchars(trim($pnr), ENT_XML1);
+        $instanceAttr = $this->optionalInstanceAttribute((string) ($instance ?? ''));
+
+        return '<ota:UniqueID ID="'.$pnr.'"'.$instanceAttr.'/>';
     }
 
     private function bookingReferenceIdXml(string $pnr, string $instance): string

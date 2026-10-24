@@ -203,6 +203,7 @@ class AirBlueZapwaysV3WireStructureTest extends AirBlueOfflineTestCase
         $node = $xpath->query('//*[local-name()="UniqueID"]')->item(0);
         $this->assertNotNull($node);
         $this->assertFalse($node->hasAttribute('Instance'));
+        $this->assertFalse($node->hasAttribute('Type'));
     }
 
     public function test_read_with_instance_includes_attribute(): void
@@ -212,6 +213,7 @@ class AirBlueZapwaysV3WireStructureTest extends AirBlueOfflineTestCase
         $node = $xpath->query('//*[local-name()="UniqueID"]')->item(0);
         $this->assertNotNull($node);
         $this->assertSame('INST1', $node->getAttribute('Instance'));
+        $this->assertFalse($node->hasAttribute('Type'));
     }
 
     public function test_cancel_without_instance_omits_attribute(): void
@@ -221,6 +223,7 @@ class AirBlueZapwaysV3WireStructureTest extends AirBlueOfflineTestCase
         $node = $xpath->query('//*[local-name()="UniqueID"]')->item(0);
         $this->assertNotNull($node);
         $this->assertFalse($node->hasAttribute('Instance'));
+        $this->assertSame('14', $node->getAttribute('Type'));
     }
 
     public function test_exchange_cancel_with_instance_includes_attribute(): void
@@ -230,6 +233,7 @@ class AirBlueZapwaysV3WireStructureTest extends AirBlueOfflineTestCase
         $node = $xpath->query('//*[local-name()="UniqueID"]')->item(0);
         $this->assertNotNull($node);
         $this->assertSame('EXCH1', $node->getAttribute('Instance'));
+        $this->assertSame('14', $node->getAttribute('Type'));
     }
 
     public function test_unresolved_v3_soap_action_fails_closed(): void

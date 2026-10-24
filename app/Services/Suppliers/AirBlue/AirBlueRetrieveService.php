@@ -37,10 +37,13 @@ class AirBlueRetrieveService
     private function retrieveOta(Booking $booking, SupplierConnection $connection, array $context): array
     {
         $pnr = trim((string) ($context['pnr'] ?? $booking->pnr ?? $booking->supplier_reference ?? ''));
-        $instance = trim((string) ($context['instance'] ?? ''));
-        if ($pnr === '' || $instance === '') {
+        if ($pnr === '') {
             return ['synced' => false, 'reason' => 'missing_order_context'];
         }
+
+        // Zapways v2.06: Instance is optional. Normal/current PNR Read is PNR-only.
+        // Specific historical/pending instance Read only when explicitly requested.
+        $instance = $this->resolveReadInstance($context);
 
         try {
             $config = $this->configResolver->resolveOta($connection);
@@ -61,6 +64,24 @@ class AirBlueRetrieveService
 
             return ['synced' => false, 'reason' => $exception->normalizedCode];
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     */
+    private function resolveReadInstance(array $context): ?string
+    {
+        $mode = strtolower(trim((string) ($context['retrieve_mode'] ?? $context['read_mode'] ?? '')));
+        $explicit = filter_var($context['read_specific_instance'] ?? false, FILTER_VALIDATE_BOOLEAN)
+            || in_array($mode, ['specific_instance', 'historical', 'pending_instance'], true);
+
+        if (! $explicit) {
+            return null;
+        }
+
+        $instance = trim((string) ($context['instance'] ?? ''));
+
+        return $instance !== '' ? $instance : null;
     }
 
     /**
