@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <AirBookModifyResponse xmlns="http://zapways.com/air/ota/3.0">
+      <AirBookModifyResult Version="1.04" xmlns="http://www.opentravel.org/OTA/2003/05">
+        <Success />
+        <AirReservation>
+          <BookingReferenceID ID="ABC123" Instance="INST1"/>
+          <TravelerInfo>
+            <SpecialReqDetails>
+              <SeatRequests>
+                <SeatRequest SeatNumber="F" RowNumber="27" Status="Held" TravelerRefNumberRPHList="T1" FlightRefNumberRPHList="1"/>
+              </SeatRequests>
+            </SpecialReqDetails>
+          </TravelerInfo>
+        </AirReservation>
+      </AirBookModifyResult>
+    </AirBookModifyResponse>
+  </soap:Body>
+</soap:Envelope>
