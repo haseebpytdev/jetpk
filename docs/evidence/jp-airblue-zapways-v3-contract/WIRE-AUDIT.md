@@ -22,11 +22,12 @@ Config defaults updated to namespace form for TEST only; LIVE Read host unchange
 
 | Area | Status |
 | --- | --- |
-| SeatNumber / RowNumber / AvailableInd / OccupiedInd | Present |
-| SeatCharacteristics / RowCharacteristics / Restrictions | Present |
-| Service Amount/Currency | Present |
-| is_available / is_complimentary / is_paid | Added this PR |
-| Broader RowInfo discovery | Added this PR |
+| Documented RowInfo → SeatInfo → Summary | Implemented this PR |
+| Summary SeatNumber / AvailableInd / OccupiedInd | Implemented |
+| Availability text (SeatAvailable / NoSeatHere) | Implemented |
+| Service Code="Cost" → Fee Amount/CurrencyCode | Implemented |
+| is_available / is_complimentary / is_paid | Conservative classification added |
+| Legacy direct-Seat fallback | Retained for backward compatibility |
 | Traveler/Flight RPH on reserved seats | Present on reserved-seat path |
 
 ## Architecture
