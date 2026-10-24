@@ -236,8 +236,16 @@ class AirBlueZapwaysV3WireStructureTest extends AirBlueOfflineTestCase
         $this->assertSame('14', $node->getAttribute('Type'));
     }
 
-    public function test_unresolved_v3_soap_action_fails_closed(): void
+    public function test_blank_v3_soap_action_override_fails_closed(): void
     {
+        $versions = (array) config('suppliers.airblue.protocol_versions');
+        $v3 = is_array($versions['3.0'] ?? null) ? $versions['3.0'] : [];
+        $operations = is_array($v3['ota_operations'] ?? null) ? $v3['ota_operations'] : [];
+        $operations['air_seat_map'] = ['soap_action' => ''];
+        $v3['ota_operations'] = $operations;
+        $versions['3.0'] = $v3;
+        config(['suppliers.airblue.protocol_versions' => $versions]);
+
         $client = app(AirBlueClient::class);
         $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
         $method->setAccessible(true);
@@ -269,7 +277,7 @@ class AirBlueZapwaysV3WireStructureTest extends AirBlueOfflineTestCase
         $this->assertSame('https://example.test/AirSeatMap', $action);
     }
 
-    public function test_v3_read_soap_action_uses_supplier_document_hosts(): void
+    public function test_v3_read_soap_action_uses_wsdl_test_and_documented_live_hosts(): void
     {
         $client = app(AirBlueClient::class);
         $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
@@ -278,8 +286,26 @@ class AirBlueZapwaysV3WireStructureTest extends AirBlueOfflineTestCase
         $test = $method->invoke($client, 'read', ['is_test' => true, 'protocol_version' => '3.0']);
         $live = $method->invoke($client, 'read', ['is_test' => false, 'protocol_version' => '3.0']);
 
-        $this->assertSame('https://ota.qa.zapways.com/Read', $test);
+        // TEST: otatest4 v3 WSDL namespace action (not PDF ota.qa host).
+        $this->assertSame('http://zapways.com/air/ota/3.0/Read', $test);
+        // LIVE unchanged until LIVE WSDL is independently verified.
         $this->assertSame('https://ota.zapways.com/Read', $live);
+    }
+
+    public function test_v3_test_soap_actions_match_otatest4_wsdl(): void
+    {
+        $client = app(AirBlueClient::class);
+        $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
+        $method->setAccessible(true);
+        $config = ['is_test' => true, 'protocol_version' => '3.0'];
+
+        $this->assertSame('http://zapways.com/air/ota/3.0/AirLowFareSearch', $method->invoke($client, 'air_low_fare_search', $config));
+        $this->assertSame('http://zapways.com/air/ota/3.0/AirBook', $method->invoke($client, 'air_book', $config));
+        $this->assertSame('http://zapways.com/air/ota/3.0/AirSeatMap', $method->invoke($client, 'air_seat_map', $config));
+        $this->assertSame('http://zapways.com/air/ota/3.0/AirAncillaryItems', $method->invoke($client, 'air_ancillary_items', $config));
+        $this->assertSame('http://zapways.com/air/ota/3.0/AirDemandTicket', $method->invoke($client, 'air_demand_ticket', $config));
+        $this->assertSame('http://zapways.com/air/ota/3.0/AirBookModify', $method->invoke($client, 'air_book_modify', $config));
+        $this->assertSame('http://zapways.com/air/ota/3.0/Cancel', $method->invoke($client, 'cancel', $config));
     }
 
     public function test_uncertified_v3_does_not_displace_legacy_v2(): void

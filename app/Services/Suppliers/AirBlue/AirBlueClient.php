@@ -245,7 +245,10 @@ class AirBlueClient
         $ops = $this->configResolver->protocolOperationsConfig($protocol);
         $operationConfig = is_array($ops[$operation] ?? null) ? $ops[$operation] : [];
 
-        if ($operation === 'read') {
+        $hasEnvironmentSpecificAction = array_key_exists('soap_action_test', $operationConfig)
+            || array_key_exists('soap_action_live', $operationConfig);
+
+        if ($hasEnvironmentSpecificAction) {
             $soapAction = trim((bool) ($config['is_test'] ?? false)
                 ? (string) ($operationConfig['soap_action_test'] ?? '')
                 : (string) ($operationConfig['soap_action_live'] ?? ''));

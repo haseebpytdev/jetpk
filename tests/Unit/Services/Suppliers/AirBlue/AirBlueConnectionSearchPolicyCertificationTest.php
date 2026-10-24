@@ -148,8 +148,9 @@ class AirBlueConnectionSearchPolicyCertificationTest extends AirBlueOfflineTestC
         $this->assertFalse(app(AirBlueConnectionSearchPolicy::class)->isEligibleForPublicSearch($connection));
     }
 
-    public function test_blank_v3_search_soap_action_fails_closed(): void
+    public function test_blank_v3_search_soap_action_override_fails_closed(): void
     {
+        $this->withV3SoapAction('air_low_fare_search', '');
         $this->assertMissingSoapAction('air_low_fare_search');
     }
 
@@ -162,8 +163,16 @@ class AirBlueConnectionSearchPolicyCertificationTest extends AirBlueOfflineTestC
         $this->assertSame('https://supplier.example/AirLowFareSearch', $action);
     }
 
-    public function test_blank_v3_air_book_soap_action_fails_closed(): void
+    public function test_default_v3_search_soap_action_matches_otatest4_wsdl(): void
     {
+        $action = $this->resolveSoapAction('air_low_fare_search', ['protocol_version' => '3.0']);
+
+        $this->assertSame('http://zapways.com/air/ota/3.0/AirLowFareSearch', $action);
+    }
+
+    public function test_blank_v3_air_book_soap_action_override_fails_closed(): void
+    {
+        $this->withV3SoapAction('air_book', '');
         $this->assertMissingSoapAction('air_book');
     }
 
@@ -176,11 +185,11 @@ class AirBlueConnectionSearchPolicyCertificationTest extends AirBlueOfflineTestC
         $this->assertSame('https://supplier.example/AirBook', $action);
     }
 
-    public function test_v3_read_test_default_resolves_to_documented_host(): void
+    public function test_v3_read_test_default_resolves_to_otatest4_wsdl_action(): void
     {
         $action = $this->resolveSoapAction('read', ['is_test' => true, 'protocol_version' => '3.0']);
 
-        $this->assertSame('https://ota.qa.zapways.com/Read', $action);
+        $this->assertSame('http://zapways.com/air/ota/3.0/Read', $action);
     }
 
     public function test_v3_read_live_default_resolves_to_documented_host(): void

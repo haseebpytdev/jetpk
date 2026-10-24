@@ -2,33 +2,42 @@
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Body>
     <AirSeatMapResponse xmlns="http://zapways.com/air/ota/3.0">
-      <OTA_AirSeatMapRS xmlns="http://www.opentravel.org/OTA/2003/05" Version="1.04">
+      <AirSeatMapResult xmlns="http://www.opentravel.org/OTA/2003/05" Version="1.04">
+        <Success/>
         <SeatMapResponses>
           <SeatMapResponse>
             <FlightSegmentInfo DepartureDateTime="2026-10-15T08:00:00" FlightNumber="401" ResBookDesigCode="Y" FareType="PUBLISHED" CabinClass="ECONOMY"/>
             <SeatMapDetails>
               <CabinClass>
                 <RowInfo RowNumber="12">
-                  <Seat SeatNumber="A" AvailableInd="true" OccupiedInd="false">
-                    <Service Amount="1500.00" CurrencyCode="PKR"/>
-                    <SeatCharacteristics>
-                      <Characteristic Code="WINDOW"/>
-                    </SeatCharacteristics>
-                    <Restrictions>
-                      <Restriction Code="NOT_SUITABLE_FOR_CHILD"/>
-                    </Restrictions>
-                  </Seat>
-                  <Seat SeatNumber="B" AvailableInd="false" OccupiedInd="true">
-                    <Restrictions>
-                      <Restriction Code="PERMANENTLY_BLOCKED"/>
-                    </Restrictions>
-                  </Seat>
+                  <SeatInfo>
+                    <Summary SeatNumber="A" AvailableInd="true" OccupiedInd="false"/>
+                    <Availability>SeatAvailable</Availability>
+                    <Features>Window</Features>
+                    <Service Code="Cost">
+                      <Description>Seat Cost</Description>
+                      <Fee Amount="1500.00" CurrencyCode="PKR"/>
+                    </Service>
+                  </SeatInfo>
+                  <SeatInfo>
+                    <Summary SeatNumber="B" AvailableInd="false" OccupiedInd="true"/>
+                    <Availability>SeatOccupied</Availability>
+                  </SeatInfo>
+                  <SeatInfo>
+                    <Summary SeatNumber="C" AvailableInd="true" OccupiedInd="false"/>
+                    <Availability>SeatAvailable</Availability>
+                    <Features>Aisle</Features>
+                  </SeatInfo>
+                  <SeatInfo>
+                    <Summary SeatNumber=" " AvailableInd="false" OccupiedInd="false"/>
+                    <Availability>NoSeatHere</Availability>
+                  </SeatInfo>
                 </RowInfo>
               </CabinClass>
             </SeatMapDetails>
           </SeatMapResponse>
         </SeatMapResponses>
-      </OTA_AirSeatMapRS>
+      </AirSeatMapResult>
     </AirSeatMapResponse>
   </soap:Body>
 </soap:Envelope>

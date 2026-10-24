@@ -1,0 +1,53 @@
+ssh : PHP Warning:  The use statement with non-compound name 'ReflectionClass' has no effect 
+in /tmp/_phase-v3-compat-probe.php on line 22
+At C:\Users\khadi\AppData\Local\Temp\ps-script-2ce7c5f4-f179-40ea-abad-dc79ac979762.ps1:90 
+char:226
++ ... -probe.php; ssh -i "$env:USERPROFILE\.ssh\jetpk_contabo_2026_v2" -o B ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (PHP Warning:  T....php on line 22:String) [], R 
+   emoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+PROVIDER_MUTATION_CALLS=0
+AIRBOOK_CALLS=0
+AIRBOOK_MODIFY_CALLS=0
+TICKETING_CALLS=0
+CANCEL_CALLS=0
+REFUND_CALLS=0
+TEST_INITIATED_NON_AIRBLUE_SUPPLIER_CALLS=0
+CONN22_PROTOCOL_PRE=2.0
+CONN22_HOST_PRE=otatest4.zapways.com
+CLONE_SAVED=NO
+CLONE_PROTOCOL=3.0
+CLONE_BASE_HOST=otatest4.zapways.com
+RUNTIME_V3_READ_SOAP_ACTION=http://zapways.com/air/ota/3.0/Read
+RUNTIME_V3_SEAT_MAP_SOAP_ACTION=http://zapways.com/air/ota/3.0/AirSeatMap
+RUNTIME_V3_ENDPOINT=https://otatest4.zapways.com/v3.0/OTAAPI.asmx
+RUNTIME_V3_NAMESPACE=http://zapways.com/air/ota/3.0
+BOOKING_C_MATCH_COUNT=1
+BOOKING_C_FOUND=YES
+PNR_C_HASH=94b2bd04b019
+BOOKING_C_CONNECTION_ID=22
+V3_READ_CALLS=1
+V3_READ_HTTP=200
+V3_READ_SYNCED=YES
+V3_READ_REASON=synced
+V3_READ_PNR_MATCH=YES
+V3_READ_INSTANCE_PRESENT=YES
+V3_READ_UNTICKETED=YES
+V3_READ_SEGMENT_COUNT=1
+V3_SEAT_MAP_CALLS=1
+V3_SEAT_MAP_HTTP=200
+V3_SEAT_MAP_SUCCESS=YES
+V3_SEAT_COUNT=0
+V3_AVAILABLE_SEAT_COUNT=0
+V3_FREE_AVAILABLE_SEAT_COUNT=0
+V3_PAID_AVAILABLE_SEAT_COUNT=0
+FREE_SEAT_CERTIFICATION_POSSIBLE=NO
+PAID_SEAT_PAYMENT_FLOW_REQUIRED=YES
+FINAL_STATUS=V3_COMPAT_PROBE_PASS
+CONN22_CHANGED=NO
+NON_CONN22_CONNECTION_ROWS_CHANGED=0
+CONNECTION_ROWS_CHANGED_TOTAL=0
+CLONE_WAS_PERSISTED=NO
+DONE=YES
