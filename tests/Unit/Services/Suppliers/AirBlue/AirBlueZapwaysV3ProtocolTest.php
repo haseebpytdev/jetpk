@@ -161,15 +161,25 @@ class AirBlueZapwaysV3ProtocolTest extends AirBlueOfflineTestCase
         $this->assertTrue($seat['is_available']);
         $this->assertTrue($seat['is_paid']);
         $this->assertFalse($seat['is_complimentary']);
+        $this->assertSame('SeatAvailable', $seat['availability']);
         $this->assertSame('1500.00', $seat['cost']);
         $this->assertSame('PKR', $seat['currency']);
-        $this->assertContains('NOT_SUITABLE_FOR_CHILD', $seat['restrictions']);
+        $this->assertContains('Window', $seat['features']);
 
         $freeSeat = $parsed['parsed']['seat_maps'][0]['rows'][0]['seats'][2];
         $this->assertSame('C', $freeSeat['seat_number']);
+        $this->assertSame('SeatAvailable', $freeSeat['availability']);
         $this->assertTrue($freeSeat['is_available']);
         $this->assertTrue($freeSeat['is_complimentary']);
         $this->assertFalse($freeSeat['is_paid']);
+        $this->assertSame('', $freeSeat['cost']);
+        $this->assertContains('Aisle', $freeSeat['features']);
+
+        $noSeat = $parsed['parsed']['seat_maps'][0]['rows'][0]['seats'][3];
+        $this->assertSame('NoSeatHere', $noSeat['availability']);
+        $this->assertFalse($noSeat['is_available']);
+        $this->assertFalse($noSeat['is_paid']);
+        $this->assertFalse($noSeat['is_complimentary']);
     }
 
     public function test_air_ancillary_items_request_and_parser(): void
