@@ -132,6 +132,7 @@ class AirBlueTicketingService
                 provider: SupplierProvider::Airblue->value,
                 error_code: $exception->normalizedCode,
                 error_message: $exception->safeMessage,
+                safe_summary: $this->safeProviderErrorSummary($exception, $booking),
             );
         } catch (\Throwable $exception) {
             Log::channel('air-blue')->warning('airblue.ticketing.unexpected', [
@@ -182,5 +183,81 @@ class AirBlueTicketingService
             'payment_type' => $context['payment_type'] ?? 'Cash',
             'ticketing_mode' => $context['ticketing_mode'] ?? 'ticket',
         ];
+    }
+
+    /**
+     * Sanitized provider diagnostics for ops — never credentials, full XML, PNR, tickets, or PII.
+     *
+     * @return array<string, mixed>
+     */
+    private function safeProviderErrorSummary(AirBlueException $exception, Booking $booking): array
+    {
+        $summary = [];
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $context = is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [];
+        $sensitiveReferences = array_values(array_filter(array_unique([
+            trim((string) ($booking->pnr ?? '')),
+            trim((string) ($booking->supplier_reference ?? '')),
+            trim((string) ($context['pnr'] ?? '')),
+            trim((string) ($context['instance'] ?? '')),
+        ]), static fn (string $value): bool => strlen($value) >= 3));
+        $correlationId = $exception->context['correlation_id'] ?? null;
+        if (is_string($correlationId) && trim($correlationId) !== '') {
+            $summary['correlation_id'] = substr(trim($correlationId), 0, 80);
+        }
+
+        $errors = $exception->context['provider_errors'] ?? null;
+        if (! is_array($errors) || $errors === []) {
+            return $summary;
+        }
+
+        $sanitized = [];
+        foreach ($errors as $error) {
+            if (! is_array($error)) {
+                continue;
+            }
+            $message = $this->sanitizeProviderErrorMessage(
+                (string) ($error['message'] ?? ''),
+                $sensitiveReferences,
+            );
+            $code = substr(trim((string) ($error['code'] ?? '')), 0, 64);
+            $type = isset($error['type']) && $error['type'] !== null && $error['type'] !== ''
+                ? substr(trim((string) $error['type']), 0, 64)
+                : null;
+            if ($code === '' && $message === '' && $type === null) {
+                continue;
+            }
+            $sanitized[] = [
+                'code' => $code,
+                'type' => $type,
+                'message' => $message,
+            ];
+        }
+
+        if ($sanitized !== []) {
+            $summary['provider_errors'] = $sanitized;
+        }
+
+        return $summary;
+    }
+
+    /**
+     * @param  list<string>  $sensitiveReferences
+     */
+    private function sanitizeProviderErrorMessage(string $message, array $sensitiveReferences = []): string
+    {
+        $message = html_entity_decode($message, ENT_QUOTES | ENT_XML1);
+        foreach ($sensitiveReferences as $reference) {
+            if ($reference !== '') {
+                $message = str_ireplace($reference, '[REDACTED_REFERENCE]', $message);
+            }
+        }
+        $message = preg_replace('/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i', '[REDACTED_EMAIL]', $message) ?? $message;
+        $message = preg_replace('/(?i)\b(agentpassword|messagepassword|client[_-]?key|client[_-]?id|password|secret)\b\s*[:=]\s*\S+/', '$1=[REDACTED]', $message) ?? $message;
+        $message = preg_replace('/[A-Za-z0-9+\/=]{40,}/', '[REDACTED]', $message) ?? $message;
+        $message = preg_replace('/<(?:[\w]+:)?(?:Email|GivenName|Surname|DocID|MessagePassword)[^>]*>.*?<\/(?:[\w]+:)?(?:Email|GivenName|Surname|DocID|MessagePassword)>/is', '[REDACTED]', $message) ?? $message;
+        $message = preg_replace('/\s+/', ' ', $message) ?? $message;
+
+        return substr(trim($message), 0, 220);
     }
 }

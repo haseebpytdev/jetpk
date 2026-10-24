@@ -54,16 +54,26 @@ class AirBlueOtaXmlBuilderTest extends AirBlueOfflineTestCase
         $this->assertStringContainsString('Target="Production"', $xml);
     }
 
-    public function test_read_request_contains_pnr_and_instance(): void
+    public function test_read_current_pnr_omits_type_and_instance(): void
+    {
+        $builder = new AirBlueOtaXmlBuilder;
+        $xml = $builder->buildReadRequest($this->baseConfig('Test'), 'TESTPNR');
+
+        $this->assertStringContainsString('readRQ', $xml);
+        $this->assertStringContainsString('xmlns:zap="http://zapways.com/air/ota/2.0"', $xml);
+        $this->assertStringContainsString('<ota:UniqueID ID="TESTPNR"/>', $xml);
+        $this->assertStringNotContainsString('Type="14"', $xml);
+        $this->assertStringNotContainsString('Instance=', $xml);
+        $this->assertStringContainsString('Target="Test"', $xml);
+    }
+
+    public function test_read_specific_instance_includes_instance_without_type(): void
     {
         $builder = new AirBlueOtaXmlBuilder;
         $xml = $builder->buildReadRequest($this->baseConfig('Test'), 'ABC123', 'INST1');
 
-        $this->assertStringContainsString('readRQ', $xml);
-        $this->assertStringContainsString('xmlns:zap="http://zapways.com/air/ota/2.0"', $xml);
-        $this->assertStringContainsString('ID="ABC123"', $xml);
-        $this->assertStringContainsString('Instance="INST1"', $xml);
-        $this->assertStringContainsString('Target="Test"', $xml);
+        $this->assertStringContainsString('<ota:UniqueID ID="ABC123" Instance="INST1"/>', $xml);
+        $this->assertStringNotContainsString('Type="14"', $xml);
     }
 
     public function test_air_demand_ticket_and_cancel_builders(): void
@@ -81,6 +91,8 @@ class AirBlueOtaXmlBuilderTest extends AirBlueOfflineTestCase
 
         $this->assertStringContainsString('airDemandTicketRQ', $ticketXml);
         $this->assertStringContainsString('cancelRQ', $cancelXml);
+        $this->assertStringContainsString('Type="14"', $cancelXml);
+        $this->assertStringContainsString('Instance="INST1"', $cancelXml);
         $this->assertStringContainsString('airBookModifyRQ', $modifyXml);
         $this->assertStringContainsString('Version="1.04"', $ticketXml);
     }

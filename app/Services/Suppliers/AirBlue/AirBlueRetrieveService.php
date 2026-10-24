@@ -37,8 +37,16 @@ class AirBlueRetrieveService
     private function retrieveOta(Booking $booking, SupplierConnection $connection, array $context): array
     {
         $pnr = trim((string) ($context['pnr'] ?? $booking->pnr ?? $booking->supplier_reference ?? ''));
-        $instance = trim((string) ($context['instance'] ?? ''));
-        if ($pnr === '' || $instance === '') {
+        if ($pnr === '') {
+            return ['synced' => false, 'reason' => 'missing_order_context'];
+        }
+
+        // Zapways v2.06/v3.00: Instance is optional for a normal/current PNR Read.
+        // When a caller explicitly asks for a historical/pending instance, fail closed
+        // if that instance is unavailable rather than silently retrieving the current PNR.
+        $specificInstanceRequested = $this->isSpecificInstanceReadRequested($context);
+        $instance = $this->resolveReadInstance($context);
+        if ($specificInstanceRequested && $instance === null) {
             return ['synced' => false, 'reason' => 'missing_order_context'];
         }
 
@@ -61,6 +69,31 @@ class AirBlueRetrieveService
 
             return ['synced' => false, 'reason' => $exception->normalizedCode];
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     */
+    private function resolveReadInstance(array $context): ?string
+    {
+        if (! $this->isSpecificInstanceReadRequested($context)) {
+            return null;
+        }
+
+        $instance = trim((string) ($context['instance'] ?? ''));
+
+        return $instance !== '' ? $instance : null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     */
+    private function isSpecificInstanceReadRequested(array $context): bool
+    {
+        $mode = strtolower(trim((string) ($context['retrieve_mode'] ?? $context['read_mode'] ?? '')));
+
+        return filter_var($context['read_specific_instance'] ?? false, FILTER_VALIDATE_BOOLEAN)
+            || in_array($mode, ['specific_instance', 'historical', 'pending_instance'], true);
     }
 
     /**

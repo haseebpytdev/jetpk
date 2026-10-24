@@ -6,7 +6,12 @@
  * → post retrieve → local duplicate guard → restore ticketing flag.
  *
  * Exactly one search, one AirBook, one pre-ticket retrieve, one AirDemandTicket,
- * one post-ticket retrieve. Mail::fake(). Conn 22 only. No seat map. No refund.
+ * one post-ticket retrieve. Conn 22 only. No seat map. No refund.
+ *
+ * NOTIFICATION SAFETY: Do NOT rely on Mail::fake() alone on production — queued
+ * workers bypass in-process fakes. Prefer Notification::fake() for in-process
+ * coverage; remaining SMTP risk must be accepted only with owner authorization
+ * or a dedicated no-notify path (not implemented globally here).
  */
 declare(strict_types=1);
 
@@ -38,6 +43,7 @@ use App\Support\Bookings\CheckoutSupplierIdentity;
 use App\Support\Payments\BookingPayableResolver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 
 function out(string $k, string|int|float|bool|null $v): void
@@ -75,7 +81,10 @@ function connFingerprint(SupplierConnection $c): string
 }
 
 Mail::fake();
+Notification::fake();
 out('MAIL_FAKE', 'YES');
+out('NOTIFICATION_FAKE', 'YES');
+out('NOTIFICATION_SAFETY_NOTE', 'Mail::fake+Notification::fake are in-process only; queued workers may still deliver');
 out('TEST_INITIATED_NON_AIRBLUE_SUPPLIER_CALLS', '0');
 out('SEAT_SELECTION_REQUIRED', 'NO');
 out('SEAT_MAP_CALLS', '0');
@@ -384,16 +393,22 @@ try {
     $meta = is_array($booking->meta) ? $booking->meta : [];
     $ctx = is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [];
     $pnr2 = trim((string) ($booking->pnr ?? ''));
-    $inst2 = trim((string) ($ctx['instance'] ?? ''));
     $tickets = is_array($ctx['ticket_numbers'] ?? null) ? $ctx['ticket_numbers'] : [];
     $ticketed = ($ctx['ticketing_status'] ?? '') === 'ticketed' || $tickets !== [];
-    $retrievePass = $pnr2 === $pnr && $inst2 !== '' && ! $ticketed;
+    $synced = is_array($retrieve) && ($retrieve['synced'] ?? false) === true;
+    // Never infer Retrieve PASS from locally stored PNR/Instance alone.
+    $retrievePass = $synced && $pnr2 === $pnr && ! $ticketed;
     out('PRE_TICKET_RETRIEVE', $retrievePass ? 'PASS' : 'FAIL');
+    out('PRE_TICKET_RETRIEVE_SYNCED', $synced ? 'YES' : 'NO');
+    out('PRE_TICKET_RETRIEVE_REASON', is_array($retrieve) ? (string) ($retrieve['reason'] ?? ($synced ? 'synced' : 'unknown')) : 'invalid');
     out('TICKET_NUMBERS_PRESENT_PRE', $tickets !== [] ? 'YES' : 'NO');
     out('TICKET_NUMBERS_PRESENT', $tickets !== [] ? 'YES' : 'NO');
     out('RETRIEVE_KEYS', is_array($retrieve) ? implode(',', array_keys($retrieve)) : gettype($retrieve));
     if (! $retrievePass) {
         out('PHASE', 'STOP_PRE_TICKET_RETRIEVE');
+        out('TICKETING_CALLS', '0');
+        out('TICKETING_SUCCESS', 'NOT_RUN');
+        out('FATAL', 'retrieve_not_synced_no_airdemandticket');
         exit(31);
     }
 

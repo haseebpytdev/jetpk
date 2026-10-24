@@ -17,9 +17,13 @@ class AirBlueClientSoapActionTest extends AirBlueOfflineTestCase
         $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
         $method->setAccessible(true);
 
-        $action = $method->invoke($client, 'read', ['is_test' => true]);
+        $action = $method->invoke($client, 'read', ['is_test' => true, 'protocol_version' => '2.0']);
 
-        $this->assertSame('https://otatest4.zapways.com/Read', $action);
+        $this->assertSame('https://ota.qa.zapways.com/Read', $action);
+        // SOAPAction host ≠ HTTP endpoint (nested "2.0" key cannot use dotted config()).
+        $v2 = (array) (config('suppliers.airblue.protocol_versions')['2.0'] ?? []);
+        $this->assertSame('https://otatest4.zapways.com/v2.0/OTAAPI.asmx', (string) ($v2['default_qa_base_url'] ?? ''));
+        $this->assertSame('https://otatest4.zapways.com/v2.0/OTAAPI.asmx', (string) config('suppliers.airblue.default_ota_qa_base_url'));
     }
 
     public function test_read_soap_action_uses_live_host_for_production_config(): void
@@ -28,9 +32,12 @@ class AirBlueClientSoapActionTest extends AirBlueOfflineTestCase
         $method = (new ReflectionClass($client))->getMethod('resolveOtaSoapAction');
         $method->setAccessible(true);
 
-        $action = $method->invoke($client, 'read', ['is_test' => false]);
+        $action = $method->invoke($client, 'read', ['is_test' => false, 'protocol_version' => '2.0']);
 
-        $this->assertSame('https://ota4.zapways.com/Read', $action);
+        $this->assertSame('https://ota.zapways.com/Read', $action);
+        $v2 = (array) (config('suppliers.airblue.protocol_versions')['2.0'] ?? []);
+        $this->assertSame('https://ota4.zapways.com/v2.0/OTAAPI.asmx', (string) ($v2['default_base_url'] ?? ''));
+        $this->assertSame('https://ota4.zapways.com/v2.0/OTAAPI.asmx', (string) config('suppliers.airblue.default_ota_base_url'));
     }
 
     public function test_sandbox_call_does_not_depend_on_global_external_call_kill_switch(): void
