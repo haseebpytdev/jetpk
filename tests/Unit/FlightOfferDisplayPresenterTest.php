@@ -623,6 +623,46 @@ class FlightOfferDisplayPresenterTest extends TestCase
         $this->assertSame('Sabre', $summary['provider_label']);
     }
 
+    public function test_airblue_unknown_refundability_omits_refund_status_and_is_not_known(): void
+    {
+        $offer = [
+            'supplier_provider' => 'airblue',
+            'airline_code' => 'PA',
+            'flight_number' => '201',
+            'cabin' => 'economy',
+            'fare_family' => 'EV',
+            'refundable' => false,
+            'provider_context' => [
+                'refundability_known' => false,
+                'fare_type_code' => 'EV',
+                'rbd' => 'U',
+            ],
+            'baggage' => ['checked' => null, 'cabin' => null, 'summary' => null],
+            'segments' => [
+                ['origin' => 'ISB', 'destination' => 'KHI', 'departure_at' => '2026-12-29T10:45:00', 'arrival_at' => '2026-12-29T12:45:00', 'duration_minutes' => 120, 'airline_code' => 'PA'],
+            ],
+        ];
+
+        $this->assertFalse(FlightOfferDisplayPresenter::isRefundabilityKnown($offer));
+        $summary = FlightOfferDisplayPresenter::buildFareSummaryDisplay($offer, 'AirBlue', null, null, null);
+        $this->assertNull($summary['refund_status']);
+        $this->assertSame('AirBlue', $summary['provider_label']);
+    }
+
+    public function test_known_non_refundable_provider_still_shows_non_refundable(): void
+    {
+        $offer = [
+            'supplier_provider' => 'sabre',
+            'airline_code' => 'EK',
+            'refundable' => false,
+            'segments' => [],
+        ];
+
+        $this->assertTrue(FlightOfferDisplayPresenter::isRefundabilityKnown($offer));
+        $summary = FlightOfferDisplayPresenter::buildFareSummaryDisplay($offer, 'Emirates', null, null, null);
+        $this->assertSame('Non-refundable', $summary['refund_status']);
+    }
+
     public function test_fare_family_options_display_single_synthetic_default_when_universal_choice_enabled(): void
     {
         Config::set('ota.universal_fare_choice_enabled', true);

@@ -184,12 +184,14 @@ class ItineraryFareConsolidatorTest extends TestCase
                 'fare_type_code' => $fareType,
                 'rbd' => 'U',
                 'fare_basis' => $fareBasis,
+                'refundability_known' => false,
             ],
             'raw_payload' => [
                 'provider_context' => [
                     'fare_type_code' => $fareType,
                     'rbd' => 'U',
                     'fare_basis' => $fareBasis,
+                    'refundability_known' => false,
                     'priced_itineraries' => [['offer_ref' => $id]],
                 ],
                 'customer_display_fields' => [
@@ -230,5 +232,11 @@ class ItineraryFareConsolidatorTest extends TestCase
 
         $this->assertFalse(ItineraryFareConsolidator::isConsolidatedParent($parents['207']));
         $this->assertSame('EF', $parents['207']['fare_family']);
+
+        $unknown = $this->baseAirBlueOffer('ab-ev', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EV', 25000, 'UEV1');
+        $this->assertFalse(ItineraryFareConsolidator::offerMatchesRefundableFilter($unknown, '1'));
+        $this->assertFalse(ItineraryFareConsolidator::offerMatchesRefundableFilter($unknown, '0'));
+        $this->assertFalse(ItineraryFareConsolidator::offerMatchesRefundableFilter($parents['201'], '1'));
+        $this->assertFalse(ItineraryFareConsolidator::offerMatchesRefundableFilter($parents['201'], '0'));
     }
 }

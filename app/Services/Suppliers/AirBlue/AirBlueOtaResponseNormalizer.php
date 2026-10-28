@@ -492,6 +492,9 @@ class AirBlueOtaResponseNormalizer
             'rbd' => $rbd !== '' ? $rbd : null,
             'fare_basis' => $fareBasis !== '' ? $fareBasis : null,
         ], static fn (mixed $v): bool => $v !== null && $v !== '');
+        // Zapways AirLowFareSearch does not assert refundability — keep explicit false
+        // (array_filter above would strip boolean false).
+        $providerContext['refundability_known'] = false;
 
         $customerDisplayFields = array_filter([
             'booking_class' => $rbd !== '' ? $rbd : null,

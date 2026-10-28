@@ -147,20 +147,56 @@ Mutation/ticket/cancel/refund/seat services, Conn22, Booking F, public allow-lis
 | Merge | NO |
 | Deploy | NO |
 
-## Final decision (code-change path)
+## Post-review refundability truth closure (PR #134)
+
+```
+POST_REVIEW_REFUNDABILITY_BLOCKER_FOUND=YES
+POST_REVIEW_REFUNDABILITY_BLOCKER_CLOSED=YES
+REFUNDABILITY_SUPPLIER_TRUTH_PRESENT=NO
+CUSTOMER_REFUNDABILITY_STATE=UNKNOWN
+FALSE_NONREFUNDABLE_PRESENTATION_REMOVED=YES
+REFUNDABLE_FILTER_UNKNOWN_EXCLUDED=YES
+PROVIDER_CALLS_THIS_CORRECTION=0
+CUMULATIVE_PHASE1_AIRLOWFARESEARCH_PROVIDER_CALLS=1
+```
+
+### Pre-fix leak (offline reproduction)
+
+| Gate | Value |
+|------|-------|
+| PRE_FIX_CARD_FALSE_NONREFUNDABLE | YES (`refundable=false` → FareBadge Non-refundable) |
+| PRE_FIX_DETAILS_FALSE_NONREFUNDABLE | YES (`refund_status=Non-refundable`) |
+| PRE_FIX_NONREFUNDABLE_FILTER_MATCH | YES (filter=0 matched unknown AirBlue) |
+
+### Fix
+
+1. `provider_context.refundability_known=false` on Zapways search normalize
+2. `FlightOfferDisplayPresenter::isRefundabilityKnown()` — AirBlue unknown unless marker true
+3. `mapOfferForResultsApi` omits `refundable` when unknown
+4. `buildFareSummaryDisplay` → `refund_status=null` when unknown; AirBlue provider label
+5. `offerMatchesRefundableFilter` / `buildFilterMeta` exclude unknown from both buckets
+6. Grouped fare options still omit invented `refundable_display`
+
+Evidence: `_raw-refundability-truth-phpunit.txt` (48 passed / 232 assertions including refundability suite).
+
+## Final decision (after refundability closure)
 
 ```
 AIRBLUE_FRONTEND_SEARCH_PRESENTATION_CERTIFIED=NO
 AIRBLUE_FRONTEND_CHECKOUT_PREBOOK_CERTIFIED=NO
 FRONTEND_UAT_IMPLEMENTATION_PR_READY=YES
-FINAL_STATUS=AIRBLUE_V3_FRONTEND_FARE_PRESENTATION_PR_READY
-NEXT_PATH=REVIEW_MERGE_SCOPED_DEPLOY_THEN_RESUME_FRONTEND_UAT
+PR134_READY_FOR_FINAL_REVIEW=YES
+FINAL_STATUS=AIRBLUE_V3_FARE_PRESENTATION_REVIEW_BLOCKER_CLOSED
+NEXT_PATH=PR134_FINAL_REVIEW_BEFORE_MERGE
 ```
+
+Browser UAT still **NOT_RUN** until review → merge → scoped deploy.
 
 ## Call counts
 
 ```
 AIRLOWFARESEARCH_PROVIDER_CALLS=1
+PROVIDER_CALLS_THIS_CORRECTION=0
 REVALIDATION_AIRBLUE_PROVIDER_CALLS=0
 AIRBOOK_PROVIDER_CALLS=0
 READ_PROVIDER_CALLS=0

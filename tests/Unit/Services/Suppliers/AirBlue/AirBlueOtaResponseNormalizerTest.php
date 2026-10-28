@@ -38,6 +38,8 @@ class AirBlueOtaResponseNormalizerTest extends AirBlueOfflineTestCase
         $this->assertNull($offers[0]->baggage->cabin);
         $this->assertSame('economy', $offers[0]->cabin);
         $this->assertSame([], $offers[0]->branded_fares);
+        $this->assertFalse($offers[0]->refundable);
+        $this->assertFalse($offers[0]->raw_payload['provider_context']['refundability_known'] ?? true);
     }
 
     public function test_preserves_exact_faretype_rbd_cabin_and_fare_basis_for_variants(): void
@@ -85,6 +87,7 @@ class AirBlueOtaResponseNormalizerTest extends AirBlueOfflineTestCase
         $this->assertNull($ev->baggage->cabin);
         $this->assertFalse($ev->refundable);
         $this->assertSame('EV', $ev->raw_payload['provider_context']['fare_type_code'] ?? null);
+        $this->assertFalse($ev->raw_payload['provider_context']['refundability_known'] ?? true);
         $this->assertSame('U', $ev->raw_payload['provider_context']['rbd'] ?? null);
         $this->assertSame('UEV1', $ev->raw_payload['provider_context']['fare_basis'] ?? null);
         $this->assertSame('U', $ev->raw_payload['customer_display_fields']['booking_class'] ?? null);
