@@ -98,7 +98,7 @@ class AirBlueRefundService
             );
         }
 
-        $transmitted = false;
+        $enteredProviderCall = false;
 
         try {
             $this->protocolGuard->assertCompatible($connection, $context, 'refund');
@@ -108,7 +108,7 @@ class AirBlueRefundService
                 'modification_type' => '1',
             ]);
 
-            $transmitted = true;
+            $enteredProviderCall = true;
             $response = $this->client->callOta($connection, 'air_book_modify', $xml, [
                 'booking_id' => $booking->id,
                 'request_context' => 'air_book_modify_full_refund',
@@ -135,7 +135,8 @@ class AirBlueRefundService
                 error_code: $success ? null : 'refund_not_confirmed',
                 error_message: $success ? null : 'Provider did not confirm full coupon refund.',
             );
-        } catch (AirBlueUnavailableException $exception) {
+        } catch (AirBlueUnavailableException|AirBlueXmlException $exception) {
+            $transmitted = AirBlueAmbiguousMutationClassifier::requestMayHaveBeenSent($exception);
             if ($transmitted) {
                 $this->persistUncertain($booking, $context);
 
@@ -158,52 +159,18 @@ class AirBlueRefundService
                 success: false,
                 status: 'failed',
                 provider: SupplierProvider::Airblue->value,
-                outcome: 'DEFINITIVE_PROVIDER_REJECTION',
+                outcome: 'PRE_SEND_FAILURE',
                 error_code: $exception->normalizedCode,
                 error_message: $exception->safeMessage,
                 provider_calls: 0,
                 safe_summary: $this->safeProviderErrorSummary($exception, $booking),
             );
-        } catch (AirBlueXmlException $exception) {
-            if ($transmitted) {
-                $this->persistUncertain($booking, $context);
-
-                return new RefundResultData(
-                    success: false,
-                    status: 'uncertain',
-                    provider: SupplierProvider::Airblue->value,
-                    outcome: 'UNCERTAIN_AFTER_TRANSMISSION',
-                    error_code: $exception->normalizedCode,
-                    error_message: $exception->safeMessage,
-                    provider_calls: 1,
-                    safe_summary: ['refund_outcome' => 'UNCERTAIN'],
-                );
-            }
-
-            return new RefundResultData(
-                success: false,
-                status: 'failed',
-                provider: SupplierProvider::Airblue->value,
-                outcome: 'DEFINITIVE_PROVIDER_REJECTION',
-                error_code: $exception->normalizedCode,
-                error_message: $exception->safeMessage,
-                provider_calls: 0,
-            );
         } catch (AirBlueException $exception) {
             // OTA Error/@Code after HTTP 200 is definitive. Transport/HTTP/SOAP-fault after
             // send is ambiguous — persist uncertain and never auto-retry Type=1.
+            $transmitted = AirBlueAmbiguousMutationClassifier::requestMayHaveBeenSent($exception);
             $code = (string) $exception->normalizedCode;
-            $ambiguousAfterSend = $transmitted && in_array($code, [
-                'supplier_transport_failed',
-                'supplier_http_error',
-                'soap_fault',
-                'supplier_auth_failed',
-                'malformed_xml',
-                'empty_xml',
-                'xml_too_large',
-            ], true);
-
-            if ($ambiguousAfterSend) {
+            if (AirBlueAmbiguousMutationClassifier::isUncertainAfterTransmission($transmitted, $code)) {
                 $this->persistUncertain($booking, $context);
 
                 return new RefundResultData(
@@ -225,7 +192,7 @@ class AirBlueRefundService
                 success: false,
                 status: 'failed',
                 provider: SupplierProvider::Airblue->value,
-                outcome: 'DEFINITIVE_PROVIDER_REJECTION',
+                outcome: $transmitted ? 'DEFINITIVE_PROVIDER_REJECTION' : 'PRE_SEND_FAILURE',
                 error_code: $code,
                 error_message: $exception->safeMessage,
                 provider_calls: $transmitted ? 1 : 0,
@@ -235,10 +202,10 @@ class AirBlueRefundService
             Log::channel('air-blue')->warning('airblue.refund.unexpected', [
                 'booking_id' => $booking->id,
                 'exception' => $exception::class,
-                'transmitted' => $transmitted,
+                'entered_provider_call' => $enteredProviderCall,
             ]);
 
-            if ($transmitted) {
+            if ($enteredProviderCall) {
                 $this->persistUncertain($booking, $context);
 
                 return new RefundResultData(
@@ -257,7 +224,7 @@ class AirBlueRefundService
                 success: false,
                 status: 'failed',
                 provider: SupplierProvider::Airblue->value,
-                outcome: 'DEFINITIVE_PROVIDER_REJECTION',
+                outcome: 'PRE_SEND_FAILURE',
                 error_code: 'refund_unexpected',
                 error_message: 'Full refund failed, admin review required.',
                 provider_calls: 0,

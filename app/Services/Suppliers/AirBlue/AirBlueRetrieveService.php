@@ -200,6 +200,10 @@ class AirBlueRetrieveService
                 ]);
         }
 
+        $this->reconcileUncertainTicketing($booking, $existing, $normalized);
+        $this->reconcileUncertainSeatModify($existing, $normalized);
+        // Cancel uncertain is intentionally NOT auto-cleared: Read rarely proves Cancel conclusively.
+
         $meta['airblue_context'] = $existing;
         $meta['supplier_provider'] = SupplierProvider::Airblue->value;
         $booking->meta = $meta;
@@ -209,5 +213,154 @@ class AirBlueRetrieveService
             $booking->supplier_reference = (string) $normalized['pnr'];
         }
         $booking->save();
+    }
+
+    /**
+     * @param  array<string, mixed>  $existing
+     * @param  array<string, mixed>  $normalized
+     */
+    private function reconcileUncertainTicketing(Booking $booking, array &$existing, array $normalized): void
+    {
+        if (($existing['ticketing_outcome'] ?? '') !== 'uncertain') {
+            return;
+        }
+
+        $ticketNumbers = [];
+        if (is_array($normalized['ticket_numbers'] ?? null)) {
+            $ticketNumbers = array_values(array_filter(array_map(
+                static fn ($n): string => trim((string) $n),
+                $normalized['ticket_numbers'],
+            ), static fn (string $n): bool => $n !== ''));
+        }
+        if ($ticketNumbers === [] && is_array($existing['ticket_numbers'] ?? null)) {
+            $ticketNumbers = array_values(array_filter(array_map(
+                static fn ($n): string => trim((string) $n),
+                $existing['ticket_numbers'],
+            ), static fn (string $n): bool => $n !== ''));
+        }
+
+        $providerContext = is_array($normalized['provider_context'] ?? null) ? $normalized['provider_context'] : [];
+        if ($ticketNumbers === [] && is_array($providerContext['ticket_numbers'] ?? null)) {
+            $ticketNumbers = array_values(array_filter(array_map(
+                static fn ($n): string => trim((string) $n),
+                $providerContext['ticket_numbers'],
+            ), static fn (string $n): bool => $n !== ''));
+        }
+
+        $ticketingStatus = strtolower(trim((string) (
+            $normalized['ticketing_status']
+            ?? $providerContext['ticketing_status']
+            ?? $existing['ticketing_status']
+            ?? ''
+        )));
+
+        if ($ticketNumbers !== [] || $ticketingStatus === 'ticketed') {
+            $existing['ticketing_outcome'] = 'reconciled_ticketed';
+            $existing['ticketing_status'] = 'ticketed';
+            if ($ticketNumbers !== []) {
+                $existing['ticket_numbers'] = $ticketNumbers;
+            }
+            $existing['supplier_outcome_unknown'] = false;
+            $existing['requires_retrieve_before_retry'] = false;
+            $existing['reconciled_at'] = now()->toIso8601String();
+
+            SupplierBooking::query()
+                ->where('booking_id', $booking->id)
+                ->where('provider', SupplierProvider::Airblue->value)
+                ->update(['status' => 'ticketed']);
+
+            return;
+        }
+
+        // Successful Read with definitive absence of ticket documents.
+        $existing['ticketing_outcome'] = 'reconciled_unticketed';
+        $existing['ticketing_status'] = 'pending_ticketing';
+        $existing['supplier_outcome_unknown'] = false;
+        $existing['requires_retrieve_before_retry'] = false;
+        $existing['reconciled_at'] = now()->toIso8601String();
+
+        SupplierBooking::query()
+            ->where('booking_id', $booking->id)
+            ->where('provider', SupplierProvider::Airblue->value)
+            ->where('status', 'pending_reconciliation')
+            ->update(['status' => 'confirmed']);
+    }
+
+    /**
+     * @param  array<string, mixed>  $existing
+     * @param  array<string, mixed>  $normalized
+     */
+    private function reconcileUncertainSeatModify(array &$existing, array $normalized): void
+    {
+        if (($existing['seat_modify_outcome'] ?? '') !== 'uncertain') {
+            return;
+        }
+
+        $expected = is_array($existing['seat_modify_expected'] ?? null) ? $existing['seat_modify_expected'] : null;
+        if ($expected === null) {
+            return;
+        }
+
+        $wantRow = trim((string) ($expected['row_number'] ?? ''));
+        $wantSeat = trim((string) ($expected['seat_number'] ?? ''));
+        $wantTraveler = trim((string) ($expected['traveler_ref_number_rph'] ?? ''));
+        $wantFlight = trim((string) ($expected['flight_ref_number_rph'] ?? ''));
+        if ($wantRow === '' || $wantSeat === '') {
+            return;
+        }
+
+        // Only treat seat absence as conclusive when this Read included a seats payload.
+        if (! array_key_exists('seats', $normalized)) {
+            return;
+        }
+
+        $seats = is_array($normalized['seats']) ? $normalized['seats'] : [];
+
+        $exactMatch = false;
+        $rowSeatSeenElsewhere = false;
+        foreach ($seats as $seat) {
+            if (! is_array($seat)) {
+                continue;
+            }
+            $row = trim((string) ($seat['row_number'] ?? ''));
+            $number = trim((string) ($seat['seat_number'] ?? ''));
+            $traveler = trim((string) ($seat['traveler_ref_number_rph'] ?? ''));
+            $flight = trim((string) ($seat['flight_ref_number_rph'] ?? ''));
+
+            if ($row === $wantRow && $number === $wantSeat) {
+                if ($wantTraveler !== '' && $traveler !== '' && $traveler !== $wantTraveler) {
+                    $rowSeatSeenElsewhere = true;
+
+                    continue;
+                }
+                if ($wantFlight !== '' && $flight !== '' && $flight !== $wantFlight) {
+                    $rowSeatSeenElsewhere = true;
+
+                    continue;
+                }
+                if (($wantTraveler === '' || $traveler === '' || $traveler === $wantTraveler)
+                    && ($wantFlight === '' || $flight === '' || $flight === $wantFlight)) {
+                    $exactMatch = true;
+                }
+            }
+        }
+
+        if ($exactMatch) {
+            $existing['seat_modify_outcome'] = 'reconciled_applied';
+            $existing['seat_modify_requires_read'] = false;
+            unset($existing['seat_modify_expected']);
+
+            return;
+        }
+
+        if ($rowSeatSeenElsewhere) {
+            // Wrong pax/segment association — leave uncertain for manual review.
+            return;
+        }
+
+        // Successful Read with seats payload and expected seat absent.
+        $existing['seat_modify_outcome'] = 'reconciled_not_applied';
+        $existing['seat_modify_requires_read'] = false;
+        unset($existing['seat_modify_expected']);
     }
 }

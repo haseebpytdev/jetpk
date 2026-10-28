@@ -10,6 +10,8 @@ use App\Models\SupplierConnection;
 use App\Models\User;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueException;
 use App\Services\Suppliers\AirBlue\Exceptions\AirBlueTicketingException;
+use App\Services\Suppliers\AirBlue\Exceptions\AirBlueUnavailableException;
+use App\Services\Suppliers\AirBlue\Exceptions\AirBlueXmlException;
 use Illuminate\Support\Facades\Log;
 
 class AirBlueTicketingService
@@ -34,6 +36,21 @@ class AirBlueTicketingService
                 provider: SupplierProvider::Airblue->value,
                 error_code: 'duplicate_ticketing_guard',
                 error_message: 'Tickets have already been issued for this booking.',
+                outcome: 'DUPLICATE',
+                provider_calls: 0,
+            );
+        }
+
+        if ($this->isTicketingUncertain($booking)) {
+            return new TicketingResultData(
+                success: false,
+                status: 'uncertain',
+                provider: SupplierProvider::Airblue->value,
+                error_code: 'ticketing_outcome_uncertain',
+                error_message: 'Prior ticketing mutation is uncertain; reconcile with Read only — do not retry AirDemandTicket.',
+                outcome: 'UNCERTAIN_AFTER_TRANSMISSION',
+                provider_calls: 0,
+                safe_summary: ['ticketing_outcome' => 'UNCERTAIN'],
             );
         }
 
@@ -53,6 +70,13 @@ class AirBlueTicketingService
             is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [],
             is_array($normalized['provider_context'] ?? null) ? $normalized['provider_context'] : [],
         );
+        unset(
+            $context['supplier_outcome_unknown'],
+            $context['requires_retrieve_before_retry'],
+        );
+        if (($normalized['ticketing_status'] ?? '') === 'ticketed') {
+            $context['ticketing_outcome'] = 'ticketed';
+        }
         $meta['airblue_context'] = $context;
         $booking->meta = $meta;
         $booking->save();
@@ -63,6 +87,28 @@ class AirBlueTicketingService
             ->update(['status' => ($normalized['ticketing_status'] ?? '') === 'ticketed' ? 'ticketed' : 'confirmed']);
     }
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
+    private function persistUncertain(Booking $booking, array $context): void
+    {
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $existing = is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [];
+        $merged = array_merge($existing, $context);
+        $merged['ticketing_outcome'] = 'uncertain';
+        $merged['ticketing_status'] = 'pending_reconciliation';
+        $merged['supplier_outcome_unknown'] = true;
+        $merged['requires_retrieve_before_retry'] = true;
+        $meta['airblue_context'] = $merged;
+        $booking->meta = $meta;
+        $booking->save();
+
+        SupplierBooking::query()
+            ->where('booking_id', $booking->id)
+            ->where('provider', SupplierProvider::Airblue->value)
+            ->update(['status' => 'pending_reconciliation']);
+    }
+
     private function isAlreadyTicketed(Booking $booking): bool
     {
         $meta = is_array($booking->meta) ? $booking->meta : [];
@@ -70,6 +116,14 @@ class AirBlueTicketingService
 
         return ($context['ticketing_status'] ?? '') === 'ticketed'
             || (is_array($context['ticket_numbers'] ?? null) && $context['ticket_numbers'] !== []);
+    }
+
+    private function isTicketingUncertain(Booking $booking): bool
+    {
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $context = is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [];
+
+        return ($context['ticketing_outcome'] ?? '') === 'uncertain';
     }
 
     /**
@@ -84,6 +138,8 @@ class AirBlueTicketingService
                 provider: SupplierProvider::Airblue->value,
                 error_code: 'ticketing_feature_disabled',
                 error_message: 'AirBlue ticketing is not enabled for this connection.',
+                outcome: 'PRE_SEND_FAILURE',
+                provider_calls: 0,
             );
         }
 
@@ -96,8 +152,12 @@ class AirBlueTicketingService
                 provider: SupplierProvider::Airblue->value,
                 error_code: 'missing_order_context',
                 error_message: 'Ticketing failed, admin review required.',
+                outcome: 'PRE_SEND_FAILURE',
+                provider_calls: 0,
             );
         }
+
+        $enteredProviderCall = false;
 
         try {
             $this->protocolGuard->assertCompatible($connection, $context, 'ticketing');
@@ -107,6 +167,8 @@ class AirBlueTicketingService
             ]);
             $paymentContext = $this->resolvePaymentContext($context, $config);
             $xml = $this->otaXmlBuilder->buildAirDemandTicketRequest($config, $pnr, $instance, $paymentContext);
+
+            $enteredProviderCall = true;
             $response = $this->client->callOta($connection, 'air_demand_ticket', $xml, [
                 'booking_id' => $booking->id,
                 'request_context' => 'air_demand_ticket',
@@ -117,28 +179,86 @@ class AirBlueTicketingService
             $tickets = array_map(fn (string $num) => ['ticket_number' => $num], $ticketNumbers);
 
             $status = (string) ($normalized['ticketing_status'] ?? 'failed');
+            $success = in_array($status, ['ticketed', 'paid'], true);
 
             return new TicketingResultData(
-                success: in_array($status, ['ticketed', 'paid'], true),
+                success: $success,
                 status: $status,
                 provider: SupplierProvider::Airblue->value,
                 tickets: $tickets,
-                safe_summary: ['pnr' => $pnr],
+                safe_summary: ['ticket_count' => count($tickets)],
+                outcome: $success ? 'DEFINITIVE_SUCCESS' : 'DEFINITIVE_PROVIDER_REJECTION',
+                provider_calls: 1,
             );
+        } catch (AirBlueUnavailableException|AirBlueXmlException $exception) {
+            $transmitted = AirBlueAmbiguousMutationClassifier::requestMayHaveBeenSent($exception);
+            if ($transmitted) {
+                $this->persistUncertain($booking, $context);
+
+                return new TicketingResultData(
+                    success: false,
+                    status: 'uncertain',
+                    provider: SupplierProvider::Airblue->value,
+                    error_code: $exception->normalizedCode,
+                    error_message: $exception->safeMessage,
+                    outcome: 'UNCERTAIN_AFTER_TRANSMISSION',
+                    provider_calls: 1,
+                    safe_summary: array_merge(
+                        ['ticketing_outcome' => 'UNCERTAIN'],
+                        $this->safeProviderErrorSummary($exception, $booking),
+                    ),
+                );
+            }
+
+            return $this->failedResult($exception, 0, 'PRE_SEND_FAILURE', $booking);
         } catch (AirBlueException $exception) {
-            return new TicketingResultData(
-                success: false,
-                status: 'failed',
-                provider: SupplierProvider::Airblue->value,
-                error_code: $exception->normalizedCode,
-                error_message: $exception->safeMessage,
-                safe_summary: $this->safeProviderErrorSummary($exception, $booking),
+            $transmitted = AirBlueAmbiguousMutationClassifier::requestMayHaveBeenSent($exception);
+            $code = (string) $exception->normalizedCode;
+            if (AirBlueAmbiguousMutationClassifier::isUncertainAfterTransmission($transmitted, $code)) {
+                $this->persistUncertain($booking, $context);
+
+                return new TicketingResultData(
+                    success: false,
+                    status: 'uncertain',
+                    provider: SupplierProvider::Airblue->value,
+                    error_code: $code,
+                    error_message: $exception->safeMessage,
+                    outcome: 'UNCERTAIN_AFTER_TRANSMISSION',
+                    provider_calls: 1,
+                    safe_summary: array_merge(
+                        ['ticketing_outcome' => 'UNCERTAIN'],
+                        $this->safeProviderErrorSummary($exception, $booking),
+                    ),
+                );
+            }
+
+            return $this->failedResult(
+                $exception,
+                $transmitted ? 1 : 0,
+                $transmitted ? 'DEFINITIVE_PROVIDER_REJECTION' : 'PRE_SEND_FAILURE',
+                $booking,
             );
         } catch (\Throwable $exception) {
             Log::channel('air-blue')->warning('airblue.ticketing.unexpected', [
                 'booking_id' => $booking->id,
                 'exception' => $exception::class,
+                'entered_provider_call' => $enteredProviderCall,
             ]);
+
+            if ($enteredProviderCall) {
+                $this->persistUncertain($booking, $context);
+
+                return new TicketingResultData(
+                    success: false,
+                    status: 'uncertain',
+                    provider: SupplierProvider::Airblue->value,
+                    error_code: 'ticketing_unexpected',
+                    error_message: 'Ticketing mutation is uncertain; reconcile with Read only — do not retry AirDemandTicket.',
+                    outcome: 'UNCERTAIN_AFTER_TRANSMISSION',
+                    provider_calls: 1,
+                    safe_summary: ['ticketing_outcome' => 'UNCERTAIN'],
+                );
+            }
 
             throw new AirBlueTicketingException(
                 'ticketing_unexpected',
@@ -148,6 +268,24 @@ class AirBlueTicketingService
                 $exception,
             );
         }
+    }
+
+    private function failedResult(
+        AirBlueException $exception,
+        int $providerCalls,
+        string $outcome,
+        Booking $booking,
+    ): TicketingResultData {
+        return new TicketingResultData(
+            success: false,
+            status: 'failed',
+            provider: SupplierProvider::Airblue->value,
+            error_code: $exception->normalizedCode,
+            error_message: $exception->safeMessage,
+            outcome: $outcome,
+            provider_calls: $providerCalls,
+            safe_summary: $this->safeProviderErrorSummary($exception, $booking),
+        );
     }
 
     /**
