@@ -1,0 +1,10 @@
+COMMAND=php artisan test tests/Feature/Phase2PublicFlightSearchSecurityTest.php --filter=test_public_guest_debug_fares_is_blocked_in_results_json
+ERROR=Call to a member function all() on array
+PHPUNIT_ATTRIBUTED_FILE=tests/Feature/Phase2PublicFlightSearchSecurityTest.php
+PHPUNIT_ATTRIBUTED_LINE=20
+HELPER_PATH=storeSabreSearchWithDigest -> storeSearch
+STORESEARCH_BEHAVIOR=mocks FlightSearchService then GET /flights/results HTML bootstrap
+RESULTS_DATA_ENDPOINT=/flights/results/data (not reached when helper throws)
+ERROR_OCCURS_DURING_STORESEARCH_PAGE_BOOTSTRAP=YES
+ERROR_OCCURS_DURING_RESULTS_DATA_ENDPOINT=NO
+NOTE=Full native PHPUnit stack suppressed by JSON test reporter; failure occurs before assertOk on results/data because storeSearch never returns a search_id when /flights/results page bootstrap fatals.
