@@ -95,10 +95,10 @@ class AirBlueCancelService
         $config = $this->configResolver->resolveOta($connection);
         $xml = $this->otaXmlBuilder->buildCancelRequest($config, $pnr, $instance);
 
-        $transmitted = false;
+        $enteredProviderCall = false;
 
         try {
-            $transmitted = true;
+            $enteredProviderCall = true;
             $response = $this->client->callOta($connection, 'cancel', $xml, [
                 'booking_id' => $booking->id,
                 'request_context' => 'cancel',
@@ -114,7 +114,7 @@ class AirBlueCancelService
 
             return array_merge($result, ['success' => true, 'status' => 'cancelled']);
         } catch (AirBlueUnavailableException|AirBlueXmlException $exception) {
-            if ($transmitted) {
+            if (AirBlueAmbiguousMutationClassifier::requestMayHaveBeenSent($exception)) {
                 $this->persistUncertain($booking, $context);
 
                 throw new AirBlueCancellationException(
@@ -135,6 +135,7 @@ class AirBlueCancelService
             );
         } catch (AirBlueException $exception) {
             $code = (string) $exception->normalizedCode;
+            $transmitted = AirBlueAmbiguousMutationClassifier::requestMayHaveBeenSent($exception);
             if (AirBlueAmbiguousMutationClassifier::isUncertainAfterTransmission($transmitted, $code)) {
                 $this->persistUncertain($booking, $context);
 
@@ -158,10 +159,10 @@ class AirBlueCancelService
             Log::channel('air-blue')->warning('airblue.cancel.unexpected', [
                 'booking_id' => $booking->id,
                 'exception' => $exception::class,
-                'transmitted' => $transmitted,
+                'entered_provider_call' => $enteredProviderCall,
             ]);
 
-            if ($transmitted) {
+            if ($enteredProviderCall) {
                 $this->persistUncertain($booking, $context);
 
                 throw new AirBlueCancellationException(

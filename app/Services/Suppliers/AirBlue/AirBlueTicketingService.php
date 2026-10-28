@@ -157,7 +157,7 @@ class AirBlueTicketingService
             );
         }
 
-        $transmitted = false;
+        $enteredProviderCall = false;
 
         try {
             $this->protocolGuard->assertCompatible($connection, $context, 'ticketing');
@@ -168,7 +168,7 @@ class AirBlueTicketingService
             $paymentContext = $this->resolvePaymentContext($context, $config);
             $xml = $this->otaXmlBuilder->buildAirDemandTicketRequest($config, $pnr, $instance, $paymentContext);
 
-            $transmitted = true;
+            $enteredProviderCall = true;
             $response = $this->client->callOta($connection, 'air_demand_ticket', $xml, [
                 'booking_id' => $booking->id,
                 'request_context' => 'air_demand_ticket',
@@ -190,7 +190,8 @@ class AirBlueTicketingService
                 outcome: $success ? 'DEFINITIVE_SUCCESS' : 'DEFINITIVE_PROVIDER_REJECTION',
                 provider_calls: 1,
             );
-        } catch (AirBlueUnavailableException $exception) {
+        } catch (AirBlueUnavailableException|AirBlueXmlException $exception) {
+            $transmitted = AirBlueAmbiguousMutationClassifier::requestMayHaveBeenSent($exception);
             if ($transmitted) {
                 $this->persistUncertain($booking, $context);
 
@@ -210,24 +211,8 @@ class AirBlueTicketingService
             }
 
             return $this->failedResult($exception, 0, 'PRE_SEND_FAILURE', $booking);
-        } catch (AirBlueXmlException $exception) {
-            if ($transmitted) {
-                $this->persistUncertain($booking, $context);
-
-                return new TicketingResultData(
-                    success: false,
-                    status: 'uncertain',
-                    provider: SupplierProvider::Airblue->value,
-                    error_code: $exception->normalizedCode,
-                    error_message: $exception->safeMessage,
-                    outcome: 'UNCERTAIN_AFTER_TRANSMISSION',
-                    provider_calls: 1,
-                    safe_summary: ['ticketing_outcome' => 'UNCERTAIN'],
-                );
-            }
-
-            return $this->failedResult($exception, 0, 'PRE_SEND_FAILURE', $booking);
         } catch (AirBlueException $exception) {
+            $transmitted = AirBlueAmbiguousMutationClassifier::requestMayHaveBeenSent($exception);
             $code = (string) $exception->normalizedCode;
             if (AirBlueAmbiguousMutationClassifier::isUncertainAfterTransmission($transmitted, $code)) {
                 $this->persistUncertain($booking, $context);
@@ -257,10 +242,10 @@ class AirBlueTicketingService
             Log::channel('air-blue')->warning('airblue.ticketing.unexpected', [
                 'booking_id' => $booking->id,
                 'exception' => $exception::class,
-                'transmitted' => $transmitted,
+                'entered_provider_call' => $enteredProviderCall,
             ]);
 
-            if ($transmitted) {
+            if ($enteredProviderCall) {
                 $this->persistUncertain($booking, $context);
 
                 return new TicketingResultData(

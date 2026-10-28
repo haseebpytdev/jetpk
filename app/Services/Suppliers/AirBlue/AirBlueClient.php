@@ -69,12 +69,12 @@ class AirBlueClient
         string $requestXml,
         array $diagnosticContext = [],
     ): array {
-        $config = $this->configResolver->resolveOta($connection);
         $correlationId = (string) ($diagnosticContext['correlation_id'] ?? $this->correlationContext->newCorrelationId());
-        $soapAction = $this->resolveOtaSoapAction($operation, $config);
         $startedAt = microtime(true);
 
         try {
+            $config = $this->configResolver->resolveOta($connection);
+            $soapAction = $this->resolveOtaSoapAction($operation, $config);
             $client = $this->baseHttpClient()
                 ->withHeaders([
                     'Content-Type' => 'text/xml; charset=utf-8',
@@ -82,8 +82,15 @@ class AirBlueClient
                     'X-Correlation-ID' => $correlationId,
                 ])
                 ->withBody($requestXml, 'text/xml; charset=utf-8');
-
             $client = $this->applyOtaTlsOptions($client, $config);
+        } catch (\App\Services\Suppliers\AirBlue\Exceptions\AirBlueException $exception) {
+            throw $this->ensureTransmissionState(
+                $exception,
+                AirBlueAmbiguousMutationClassifier::TRANSMISSION_PRE_SEND,
+            );
+        }
+
+        try {
             $response = $client->post($config['endpoint_url']);
         } catch (ConnectionException $exception) {
             $this->logCall($connection, $config, $operation, $correlationId, $startedAt, null, $requestXml, null, 'failed', 'supplier_transport_failed', $diagnosticContext);
@@ -92,21 +99,53 @@ class AirBlueClient
                 'supplier_transport_failed',
                 503,
                 'Provider temporarily unavailable.',
-                ['correlation_id' => $correlationId],
+                AirBlueAmbiguousMutationClassifier::withTransmissionState(
+                    ['correlation_id' => $correlationId],
+                    AirBlueAmbiguousMutationClassifier::TRANSMISSION_SENT_OR_UNCERTAIN,
+                ),
                 $exception,
             );
         }
 
-        return $this->finalizeResponse(
-            $response->status(),
-            (string) $response->body(),
-            $connection,
-            $config,
-            $operation,
-            $correlationId,
-            $startedAt,
-            $requestXml,
-            $diagnosticContext,
+        try {
+            return $this->finalizeResponse(
+                $response->status(),
+                (string) $response->body(),
+                $connection,
+                $config,
+                $operation,
+                $correlationId,
+                $startedAt,
+                $requestXml,
+                $diagnosticContext,
+            );
+        } catch (\App\Services\Suppliers\AirBlue\Exceptions\AirBlueException $exception) {
+            throw $this->ensureTransmissionState(
+                $exception,
+                AirBlueAmbiguousMutationClassifier::TRANSMISSION_SENT_OR_UNCERTAIN,
+            );
+        }
+    }
+
+    /**
+     * Annotate exceptions that lack a transmission marker.
+     */
+    private function ensureTransmissionState(
+        \App\Services\Suppliers\AirBlue\Exceptions\AirBlueException $exception,
+        string $defaultState,
+    ): \App\Services\Suppliers\AirBlue\Exceptions\AirBlueException {
+        if (isset($exception->context[AirBlueAmbiguousMutationClassifier::CONTEXT_KEY])) {
+            return $exception;
+        }
+
+        $context = AirBlueAmbiguousMutationClassifier::withTransmissionState($exception->context, $defaultState);
+
+        return new ($exception::class)(
+            $exception->normalizedCode,
+            $exception->httpStatus,
+            $exception->safeMessage,
+            $context,
+            $exception,
         );
     }
 

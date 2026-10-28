@@ -103,10 +103,10 @@ class AirBlueAncillaryService
         $xml = $this->xmlBuilder->buildAirBookModifyRequest($config, $wireContext);
 
         $expected = $this->expectedSeatFromContext($wireContext);
-        $transmitted = false;
+        $enteredProviderCall = false;
 
         try {
-            $transmitted = true;
+            $enteredProviderCall = true;
             $response = $this->client->callOta($connection, 'air_book_modify', $xml, [
                 'request_context' => 'air_book_modify_seat',
                 'booking_id' => $booking?->id,
@@ -127,9 +127,22 @@ class AirBlueAncillaryService
             ];
         } catch (AirBlueValidationException $exception) {
             // Pre-send validation / definitive outcome-gate rejection — not uncertain.
+            // missing_soap_action is also ValidationException with pre_send marker.
+            if (AirBlueAmbiguousMutationClassifier::isUncertainAfterSend($exception)) {
+                $this->persistSeatModifyUncertain($booking, $expected);
+
+                throw new AirBlueValidationException(
+                    $exception->normalizedCode,
+                    $exception->httpStatus,
+                    'Seat modify mutation is uncertain; reconcile with Read only — do not retry Type=5.',
+                    $exception->context,
+                    $exception,
+                );
+            }
+
             throw $exception;
         } catch (AirBlueUnavailableException|AirBlueXmlException $exception) {
-            if ($transmitted) {
+            if (AirBlueAmbiguousMutationClassifier::requestMayHaveBeenSent($exception)) {
                 $this->persistSeatModifyUncertain($booking, $expected);
 
                 throw new AirBlueValidationException(
@@ -150,6 +163,7 @@ class AirBlueAncillaryService
             );
         } catch (AirBlueException $exception) {
             $code = (string) $exception->normalizedCode;
+            $transmitted = AirBlueAmbiguousMutationClassifier::requestMayHaveBeenSent($exception);
             if (AirBlueAmbiguousMutationClassifier::isUncertainAfterTransmission($transmitted, $code)) {
                 $this->persistSeatModifyUncertain($booking, $expected);
 
@@ -173,10 +187,10 @@ class AirBlueAncillaryService
             Log::channel('air-blue')->warning('airblue.seat_modify.unexpected', [
                 'booking_id' => $booking?->id,
                 'exception' => $exception::class,
-                'transmitted' => $transmitted,
+                'entered_provider_call' => $enteredProviderCall,
             ]);
 
-            if ($transmitted) {
+            if ($enteredProviderCall) {
                 $this->persistSeatModifyUncertain($booking, $expected);
 
                 throw new AirBlueValidationException(
