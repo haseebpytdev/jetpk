@@ -2780,14 +2780,25 @@ class FlightOfferDisplayPresenter
         }
         $offer['selected_fare_family_option'] = $selectedId;
 
+        // Supplier layer may sync from the selected option; customer payable / markup /
+        // displayed_price must stay on the selected member (or existing offer) truth.
+        // Never collapse final_customer_price / displayed_price to supplier_total.
         $supplierTotal = self::selectedFareFamilySupplierTotal($resolved['option'], $brand);
         if ($supplierTotal !== null && $supplierTotal > 0) {
             $fareBreakdown = is_array($offer['fare_breakdown'] ?? null) ? $offer['fare_breakdown'] : [];
-            $fareBreakdown['supplier_total'] = $supplierTotal;
-            $offer['fare_breakdown'] = $fareBreakdown;
-            $offer['supplier_total_source'] = $supplierTotal;
-            $offer['final_customer_price'] = $supplierTotal;
-            $offer['displayed_price'] = $supplierTotal;
+            $existingSupplier = isset($fareBreakdown['supplier_total']) && is_numeric($fareBreakdown['supplier_total'])
+                ? (float) $fareBreakdown['supplier_total']
+                : 0.0;
+            if ($existingSupplier <= 0) {
+                $fareBreakdown['supplier_total'] = $supplierTotal;
+                $offer['fare_breakdown'] = $fareBreakdown;
+            }
+            $existingSource = isset($offer['supplier_total_source']) && is_numeric($offer['supplier_total_source'])
+                ? (float) $offer['supplier_total_source']
+                : 0.0;
+            if ($existingSource <= 0) {
+                $offer['supplier_total_source'] = $supplierTotal;
+            }
         }
 
         return [

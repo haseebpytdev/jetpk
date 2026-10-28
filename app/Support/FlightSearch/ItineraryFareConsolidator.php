@@ -18,6 +18,41 @@ class ItineraryFareConsolidator
     }
 
     /**
+     * Persist-time scope: only AirBlue needs grouped parents in search storage so
+     * checkout findOffer() retains fare_family_options / members_by_id.
+     * Other suppliers stay raw; displayOffersFromPayload() still consolidates for cards.
+     *
+     * @param  list<array<string, mixed>>  $offers
+     * @return list<array<string, mixed>>
+     */
+    public static function consolidateAirblueForStorage(array $offers): array
+    {
+        if (! self::enabled() || $offers === []) {
+            return $offers;
+        }
+
+        $airblue = [];
+        $others = [];
+        foreach ($offers as $offer) {
+            if (! is_array($offer)) {
+                continue;
+            }
+            $provider = strtolower(trim((string) ($offer['supplier_provider'] ?? $offer['provider'] ?? '')));
+            if ($provider === SupplierProvider::Airblue->value) {
+                $airblue[] = $offer;
+            } else {
+                $others[] = $offer;
+            }
+        }
+
+        if ($airblue === []) {
+            return $offers;
+        }
+
+        return array_values(array_merge(self::consolidate($airblue), $others));
+    }
+
+    /**
      * @param  list<array<string, mixed>>  $offers
      * @return list<array<string, mixed>>
      */

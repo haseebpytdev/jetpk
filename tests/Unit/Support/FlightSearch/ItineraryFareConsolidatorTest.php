@@ -239,4 +239,82 @@ class ItineraryFareConsolidatorTest extends TestCase
         $this->assertFalse(ItineraryFareConsolidator::offerMatchesRefundableFilter($parents['201'], '1'));
         $this->assertFalse(ItineraryFareConsolidator::offerMatchesRefundableFilter($parents['201'], '0'));
     }
+
+    #[Test]
+    public function test_airblue_for_storage_consolidates_airblue_only_and_leaves_other_suppliers_raw(): void
+    {
+        $airblue = [
+            $this->baseAirBlueOffer('ab-ev', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EV', 25000, 'UEV1'),
+            $this->baseAirBlueOffer('ab-ef', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EF', 26000, 'UEF1'),
+            $this->baseAirBlueOffer('ab-ex', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EX', 27100, 'UEX1'),
+        ];
+        $sabre = $this->baseIatiOffer('sabre-1', 90000, '20 kg', 'sk1');
+        $sabre['supplier_provider'] = 'sabre';
+        $sabre['id'] = 'sabre-1';
+        $sabre['offer_id'] = 'sabre-1';
+        $iatiA = $this->baseIatiOffer('iati_offer_20', 80000, '20 kg', 'fare-key-20');
+        $iatiB = $this->baseIatiOffer('iati_offer_30', 85435, '30 kg', 'fare-key-30');
+        $pia = $this->baseIatiOffer('pia-1', 70000, '20 kg', 'pia-k1');
+        $pia['supplier_provider'] = 'pia_ndc';
+        $pia['id'] = 'pia-1';
+        $pia['offer_id'] = 'pia-1';
+        $duffel = $this->baseIatiOffer('duffel-1', 75000, '20 kg', 'duffel-k1');
+        $duffel['supplier_provider'] = 'duffel';
+        $duffel['id'] = 'duffel-1';
+        $duffel['offer_id'] = 'duffel-1';
+
+        $mixed = array_merge($airblue, [$sabre, $iatiA, $iatiB, $pia, $duffel]);
+        $beforeIds = array_map(
+            static fn (array $o): string => (string) ($o['offer_id'] ?? $o['id'] ?? ''),
+            $mixed,
+        );
+
+        $stored = ItineraryFareConsolidator::consolidateAirblueForStorage($mixed);
+
+        $airblueStored = array_values(array_filter(
+            $stored,
+            static fn (array $o): bool => strtolower((string) ($o['supplier_provider'] ?? '')) === 'airblue',
+        ));
+        $this->assertCount(1, $airblueStored);
+        $this->assertTrue(ItineraryFareConsolidator::isConsolidatedParent($airblueStored[0]));
+        $this->assertCount(3, $airblueStored[0]['fare_family_options'] ?? []);
+
+        $nonAirblue = array_values(array_filter(
+            $stored,
+            static fn (array $o): bool => strtolower((string) ($o['supplier_provider'] ?? '')) !== 'airblue',
+        ));
+        $nonAirblueIds = array_map(
+            static fn (array $o): string => (string) ($o['offer_id'] ?? $o['id'] ?? ''),
+            $nonAirblue,
+        );
+        sort($nonAirblueIds);
+        $expectedNonAirblue = ['sabre-1', 'iati_offer_20', 'iati_offer_30', 'pia-1', 'duffel-1'];
+        sort($expectedNonAirblue);
+        $this->assertSame($expectedNonAirblue, $nonAirblueIds);
+
+        foreach ($nonAirblue as $row) {
+            $this->assertFalse(
+                ItineraryFareConsolidator::isConsolidatedParent($row),
+                'non-AirBlue offer must remain raw at storage scope',
+            );
+        }
+
+        // Broad consolidate would collapse the IATI pair; storage scope must not.
+        $broad = ItineraryFareConsolidator::consolidate($mixed);
+        $broadIatiParents = array_values(array_filter(
+            $broad,
+            static fn (array $o): bool => strtolower((string) ($o['supplier_provider'] ?? '')) === 'iati'
+                && ItineraryFareConsolidator::isConsolidatedParent($o),
+        ));
+        $this->assertNotSame([], $broadIatiParents);
+        $storedIatiParents = array_values(array_filter(
+            $stored,
+            static fn (array $o): bool => strtolower((string) ($o['supplier_provider'] ?? '')) === 'iati'
+                && ItineraryFareConsolidator::isConsolidatedParent($o),
+        ));
+        $this->assertSame([], $storedIatiParents);
+
+        $this->assertContains('sabre-1', $beforeIds);
+        $this->assertContains('sabre-1', $nonAirblueIds);
+    }
 }

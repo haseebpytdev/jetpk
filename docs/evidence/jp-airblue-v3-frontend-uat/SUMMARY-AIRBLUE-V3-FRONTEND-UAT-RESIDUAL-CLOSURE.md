@@ -135,26 +135,26 @@ Fix: restore card `array_slice(..., 0, 3)` + `branded_fares_more_count`.
 | PUBLIC_FLIGHT_SECURITY | PASS |
 | SERVER_SIDE_ROUTING_IDENTITY | PASS |
 
-## Phase M/N — tests
+## Phase M/N — tests (post revenue-integrity)
 
-Targeted full files (103 tests):
+Targeted (includes AirBlueBookingPaymentContextTest):
 
-`_raw-residual-closure-targeted-phpunit.txt` → **103 passed / 521 assertions / fail=0 / errors=0**
+`_raw-residual-closure-targeted-phpunit.txt` → **107 passed / 568 assertions / fail=0 / errors=0**
 
-Broad historical filter (prior 48 + residual stickiness tests):
+Broad historical filter + revenue/storage tests:
 
-`_raw-residual-closure-broad-phpunit.txt` → **52 passed / 287 assertions / fail=0 / errors=0**
+`_raw-residual-closure-broad-phpunit.txt` → **54 passed / 317 assertions / fail=0 / errors=0**
 
 | Metric | Value |
 | --- | --- |
-| TARGETED_TESTS_PASSED | 103 |
+| TARGETED_TESTS_PASSED | 107 |
 | TARGETED_TESTS_FAILED | 0 |
 | TARGETED_TESTS_ERRORS | 0 |
-| BROAD_TEST_PASSED | 52 |
+| BROAD_TEST_PASSED | 54 |
 | BROAD_TEST_FAILURES | 0 |
 | BROAD_TEST_ERRORS | 0 |
 | BROAD_TEST_SKIPPED | 0 |
-| BROAD_TEST_ASSERTIONS | 287 |
+| BROAD_TEST_ASSERTIONS | 317 |
 
 ## Phase O — frontend source contract
 
@@ -174,13 +174,31 @@ No TS/TSX edits in this loop. Stickiness + total contract proven offline via PHP
 | Field | Value |
 | --- | --- |
 | RECOVERED_HOTFIX_PARITY | PASS |
-| ADDITIONAL_FIXES_PENDING_DEPLOY | card slice max-3; strip public `pricing_information_index`; `total_formatted` on checkout breakdown; passengers apply-selected-fare; `selectedFareFamilyLabel`; RefreshDatabase harness; stickiness regression tests |
+| ADDITIONAL_FIXES_PENDING_DEPLOY | card slice max-3; strip public `pricing_information_index`; `total_formatted` on checkout breakdown; passengers apply-selected-fare; `selectedFareFamilyLabel`; RefreshDatabase harness; stickiness regression tests; **customer-payable preserve on grouped apply**; **AirBlue-only pre-store consolidation** |
+
+## Post-review — revenue integrity + storage scope (PR #135)
+
+| Gate | Result |
+| --- | --- |
+| POST_REVIEW_REVENUE_INTEGRITY_BLOCKER_FOUND | YES |
+| POST_REVIEW_REVENUE_INTEGRITY_BLOCKER_CLOSED | YES |
+| CUSTOMER_PAYABLE_COLLAPSE_REPRODUCED | YES (at `46b907a1`: apply set `final_customer_price`/`displayed_price` = supplier total) |
+| SUPPLIER_CUSTOMER_PRICE_SEPARATION | PASS |
+| AIRBLUE_GROUPED_SELECTION_MARKUP_PRESERVED | PASS |
+| CHECKOUT_CUSTOMER_PAYABLE | PASS (`PKR 26,500`) |
+| TICKETING_SUPPLIER_PAYABLE | PASS (`Amount="26000.00"`; customer 26500 never ticketed) |
+| PRESTORE_CONSOLIDATION_SCOPE | AIRBLUE_ONLY (`ItineraryFareConsolidator::consolidateAirblueForStorage`) |
+| NON_AIRBLUE_OFFER_IDS_UNCHANGED | PASS |
+| NON_AIRBLUE_STORED_STRUCTURE_UNCHANGED | PASS |
+| SELECTED_FARE_STICKINESS | PASS (EF) |
+
+Permanent gate test: `test_airblue_grouped_selected_fare_preserves_customer_markup_separate_from_supplier_payable`.
 
 ## Stop
 
 Do **not** merge. Do **not** deploy. Do **not** start final AirBook UAT.  
-Next: `REVIEW_MERGE_SCOPED_DEPLOY_THEN_FINAL_FRONTEND_AIRBOOK_UAT`
+Next: `PR135_FINAL_REVIEW_BEFORE_MERGE`
 
 ## FINAL_STATUS
 
-`AIRBLUE_V3_FRONTEND_UAT_RESIDUALS_CLOSED`
+`AIRBLUE_V3_FRONTEND_UAT_REVENUE_INTEGRITY_CLOSED`
