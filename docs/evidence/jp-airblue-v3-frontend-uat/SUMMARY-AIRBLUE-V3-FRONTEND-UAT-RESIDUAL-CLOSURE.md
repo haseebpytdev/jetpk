@@ -135,26 +135,26 @@ Fix: restore card `array_slice(..., 0, 3)` + `branded_fares_more_count`.
 | PUBLIC_FLIGHT_SECURITY | PASS |
 | SERVER_SIDE_ROUTING_IDENTITY | PASS |
 
-## Phase M/N — tests (post exact-option-price + order)
+## Phase M/N — tests (post public commercial privacy)
 
 Targeted (includes AirBlueBookingPaymentContextTest):
 
-`_raw-residual-closure-targeted-phpunit.txt` → **109 passed / 611 assertions / fail=0 / errors=0**
+`_raw-residual-closure-targeted-phpunit.txt` → **110 passed / 654 assertions / fail=0 / errors=0**
 
-Broad historical filter + exact price/order tests:
+Broad historical filter + privacy tests:
 
-`_raw-residual-closure-broad-phpunit.txt` → **56 passed / 360 assertions / fail=0 / errors=0**
+`_raw-residual-closure-broad-phpunit.txt` → **57 passed / 403 assertions / fail=0 / errors=0**
 
 | Metric | Value |
 | --- | --- |
-| TARGETED_TESTS_PASSED | 109 |
+| TARGETED_TESTS_PASSED | 110 |
 | TARGETED_TESTS_FAILED | 0 |
 | TARGETED_TESTS_ERRORS | 0 |
-| BROAD_TEST_PASSED | 56 |
+| BROAD_TEST_PASSED | 57 |
 | BROAD_TEST_FAILURES | 0 |
 | BROAD_TEST_ERRORS | 0 |
 | BROAD_TEST_SKIPPED | 0 |
-| BROAD_TEST_ASSERTIONS | 360 |
+| BROAD_TEST_ASSERTIONS | 403 |
 
 ## Phase O — frontend source contract
 
@@ -247,6 +247,41 @@ Permanent gates:
 - `test_airblue_grouped_ev_ef_ex_options_show_exact_customer_displayed_price_not_supplier_total`
 - `test_airblue_for_storage_preserves_interleaved_mixed_supplier_order`
 
+## Final review — public commercial-pricing privacy (PR #135)
+
+| Gate | Result |
+| --- | --- |
+| FINAL_REVIEW_PUBLIC_SUPPLIER_COST_LEAK_FOUND | YES (`supplier_total`/`base_fare`/`taxes` on `/flights/results/data`; markup already stripped) |
+| FINAL_REVIEW_PUBLIC_SUPPLIER_COST_LEAK_CLOSED | YES |
+| PUBLIC_SUPPLIER_TOTAL_PRESENT_PRE_FIX | YES |
+| PUBLIC_BASE_FARE_PRESENT_PRE_FIX | YES |
+| PUBLIC_TAXES_PRESENT_PRE_FIX | YES |
+| PUBLIC_SUPPLIER_TOTAL_RECONSTRUCTABLE_PRE_FIX | YES (`base_fare + taxes = supplier payable`) |
+| PUBLIC_MARKUP_PRESENT_PRE_FIX | NO |
+| PUBLIC_SUPPLIER_TOTAL_PRESENT | NO |
+| PUBLIC_SUPPLIER_TOTAL_SOURCE_PRESENT | NO |
+| PUBLIC_BASE_FARE_PRESENT | NO |
+| PUBLIC_TAXES_PRESENT | NO |
+| PUBLIC_MARKUP_PRESENT | NO |
+| PUBLIC_PRICING_COMPONENTS_PRESENT | NO |
+| PUBLIC_SUPPLIER_TOTAL_RECONSTRUCTABLE | NO |
+| PUBLIC_CUSTOMER_PRICE | 26500 (EF member) / 25500 (parent EV card) |
+| AIRBLUE_OPTION_CUSTOMER_PRICES_PRESERVED | PASS (EV/EF/EX `25500/26500/27600`) |
+| AIRBLUE_OPTION_SUPPLIER_PAYABLE_EXPOSED | NO |
+| SERVER_SUPPLIER_PRICING_PRESERVED | PASS (`FlightSearchResultStore` retains supplier layers) |
+| CUSTOMER_PRICE_PRESENTATION_PRESERVED | PASS |
+| FRONTEND_USES_PUBLIC_SUPPLIER_TOTAL | NO |
+| FRONTEND_USES_PUBLIC_BASE_FARE | NO |
+| FRONTEND_USES_PUBLIC_TAXES | NO |
+| PROVIDER_CALLS_THIS_LOOP | 0 |
+
+Fix: `PublicFlightSearchSecurity::SENSITIVE_OFFER_KEYS` now strips global commercial keys (`supplier_total`, `supplier_total_source`, `base_fare`, `taxes`, `fare_breakdown`) in addition to existing `markup` / `pricing_components`. Store + checkout/ticketing unchanged.
+
+Permanent gates:
+
+- `Phase2PublicFlightSearchSecurityTest::test_results_json_excludes_private_supplier_fields` (extended)
+- `Phase2PublicFlightSearchSecurityTest::test_airblue_results_data_hides_supplier_commercial_cost_and_keeps_customer_option_prices`
+
 ## Stop
 
 Do **not** merge. Do **not** deploy. Do **not** start final AirBook UAT.  
@@ -254,4 +289,4 @@ Next: `PR135_FINAL_REVIEW_BEFORE_MERGE`
 
 ## FINAL_STATUS
 
-`AIRBLUE_V3_FRONTEND_UAT_FINAL_REVIEW_BLOCKERS_CLOSED`
+`AIRBLUE_V3_FRONTEND_UAT_PUBLIC_COMMERCIAL_PRIVACY_CLOSED`

@@ -81,10 +81,90 @@ class Phase2PublicFlightSearchSecurityTest extends TestCase
             ->json('offers.0');
 
         $this->assertArrayHasKey('final_customer_price', $offer);
+        $this->assertSame(112500.0, (float) ($offer['final_customer_price'] ?? 0));
         $this->assertArrayHasKey('select_url', $offer);
         $this->assertArrayNotHasKey('raw_payload', $offer);
         $this->assertArrayNotHasKey('fare_verification_digest', $offer);
         $this->assertArrayNotHasKey('supplier_connection_id', $offer);
+        $this->assertArrayNotHasKey('supplier_total', $offer);
+        $this->assertArrayNotHasKey('supplier_total_source', $offer);
+        $this->assertArrayNotHasKey('markup', $offer);
+        $this->assertArrayNotHasKey('pricing_components', $offer);
+        $this->assertArrayNotHasKey('base_fare', $offer);
+        $this->assertArrayNotHasKey('taxes', $offer);
+        $this->assertArrayNotHasKey('fare_breakdown', $offer);
+        $this->assertFalse(
+            isset($offer['base_fare'], $offer['taxes'])
+            && abs(((float) $offer['base_fare'] + (float) $offer['taxes']) - 110000.0) < 0.01,
+            'supplier payable must not be reconstructable from public base_fare+taxes',
+        );
+
+        $stored = app(FlightSearchResultStore::class)->get($searchId);
+        $serverOffer = is_array($stored['offers'][0] ?? null) ? $stored['offers'][0] : [];
+        $this->assertSame(100000.0, (float) ($serverOffer['base_fare'] ?? 0));
+        $this->assertSame(10000.0, (float) ($serverOffer['taxes'] ?? 0));
+        $this->assertSame(2500.0, (float) ($serverOffer['markup'] ?? 0));
+        $this->assertSame(112500.0, (float) ($serverOffer['final_customer_price'] ?? 0));
+    }
+
+    public function test_airblue_results_data_hides_supplier_commercial_cost_and_keeps_customer_option_prices(): void
+    {
+        $offers = [
+            $this->airbluePa201Member('ab-ev', 'EV', 25000.0, 25500.0, 500.0, 'UEV1'),
+            $this->airbluePa201Member('ab-ef', 'EF', 26000.0, 26500.0, 500.0, 'UEF1'),
+            $this->airbluePa201Member('ab-ex', 'EX', 27100.0, 27600.0, 500.0, 'UEX1'),
+        ];
+        $parent = \App\Support\FlightSearch\ItineraryFareConsolidator::consolidate($offers)[0];
+        $searchId = $this->storeSearch([$parent]);
+
+        $public = $this->getJson('/flights/results/data?search_id='.$searchId)
+            ->assertOk()
+            ->json('offers.0');
+
+        $this->assertSame(25500.0, (float) ($public['final_customer_price'] ?? 0));
+        $this->assertSame(25500, (int) ($public['displayed_price'] ?? 0));
+        $this->assertArrayNotHasKey('supplier_total', $public);
+        $this->assertArrayNotHasKey('supplier_total_source', $public);
+        $this->assertArrayNotHasKey('markup', $public);
+        $this->assertArrayNotHasKey('pricing_components', $public);
+        $this->assertArrayNotHasKey('base_fare', $public);
+        $this->assertArrayNotHasKey('taxes', $public);
+        $this->assertArrayNotHasKey('fare_breakdown', $public);
+
+        $optionByName = [];
+        foreach ($public['fare_family_options_display'] ?? ($public['branded_fares_display_options'] ?? []) as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $optionByName[(string) ($row['name'] ?? '')] = $row;
+        }
+        $this->assertSame(25500, (int) ($optionByName['EV']['displayed_price'] ?? 0));
+        $this->assertSame(26500, (int) ($optionByName['EF']['displayed_price'] ?? 0));
+        $this->assertSame(27600, (int) ($optionByName['EX']['displayed_price'] ?? 0));
+        $this->assertSame(25500.0, (float) ($optionByName['EV']['price_total'] ?? 0));
+        $this->assertSame(26500.0, (float) ($optionByName['EF']['price_total'] ?? 0));
+        $this->assertSame(27600.0, (float) ($optionByName['EX']['price_total'] ?? 0));
+        $this->assertNotSame(26000, (int) ($optionByName['EF']['displayed_price'] ?? 0));
+        $this->assertNotSame(26000.0, (float) ($optionByName['EF']['price_total'] ?? 0));
+
+        $stored = app(FlightSearchResultStore::class)->get($searchId);
+        $server = is_array($stored['offers'][0] ?? null) ? $stored['offers'][0] : [];
+        $this->assertSame(25000.0, (float) ($server['supplier_total_source'] ?? 0));
+        $this->assertSame(25000.0, (float) data_get($server, 'fare_breakdown.supplier_total'));
+        $this->assertSame(22000.0, (float) ($server['base_fare'] ?? 0));
+        $this->assertSame(3000.0, (float) ($server['taxes'] ?? 0));
+        $this->assertSame(25500.0, (float) ($server['final_customer_price'] ?? 0));
+        $this->assertSame(500.0, (float) ($server['markup'] ?? 0));
+
+        $efMember = is_array(data_get($server, 'itinerary_fare_group.members_by_id.ab-ef'))
+            ? data_get($server, 'itinerary_fare_group.members_by_id.ab-ef')
+            : [];
+        $this->assertSame(26000.0, (float) ($efMember['supplier_total_source'] ?? 0));
+        $this->assertSame(26000.0, (float) data_get($efMember, 'fare_breakdown.supplier_total'));
+        $this->assertSame(23000.0, (float) ($efMember['base_fare'] ?? 0));
+        $this->assertSame(3000.0, (float) ($efMember['taxes'] ?? 0));
+        $this->assertSame(26500.0, (float) ($efMember['final_customer_price'] ?? 0));
+        $this->assertSame(500.0, (float) ($efMember['markup'] ?? 0));
     }
 
     public function test_invalid_search_id_is_rejected_with_clean_json(): void
@@ -252,5 +332,93 @@ class Phase2PublicFlightSearchSecurityTest extends TestCase
         ];
 
         return app(FlightSearchResultStore::class)->store($criteria, $offers, []);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function airbluePa201Member(
+        string $id,
+        string $fareType,
+        float $supplierTotal,
+        float $customerPayable,
+        float $markup,
+        string $fareBasis,
+    ): array {
+        return [
+            'offer_id' => $id,
+            'id' => $id,
+            'supplier_provider' => 'airblue',
+            'supplier_connection_id' => 22,
+            'airline_code' => 'PA',
+            'airline_name' => 'AirBlue',
+            'flight_number' => '201',
+            'origin' => 'ISB',
+            'destination' => 'KHI',
+            'departure_at' => '2026-12-29T10:45:00',
+            'arrival_at' => '2026-12-29T12:45:00',
+            'cabin' => 'economy',
+            'fare_family' => $fareType,
+            'refundable' => false,
+            'stops' => 0,
+            'duration_h' => 2,
+            'duration_m' => 0,
+            'baggage' => '',
+            'currency' => 'PKR',
+            'pricing_currency' => 'PKR',
+            'conversion_status' => 'same_currency',
+            'base_fare' => $supplierTotal - 3000,
+            'taxes' => 3000,
+            'markup' => $markup,
+            'service_fee' => 0,
+            'supplier_total_source' => $supplierTotal,
+            'final_customer_price' => $customerPayable,
+            'displayed_price' => $customerPayable,
+            'fare_breakdown' => [
+                'base_fare' => $supplierTotal - 3000,
+                'taxes' => 3000,
+                'supplier_total' => $supplierTotal,
+                'currency' => 'PKR',
+            ],
+            'pricing_components' => [
+                'base_fare' => $supplierTotal - 3000,
+                'taxes' => 3000,
+                'final_total' => $customerPayable,
+                'conversion_status' => 'same_currency',
+                'pricing_currency' => 'PKR',
+                'service_fee' => 0.0,
+                'admin_markup' => $markup,
+                'applied_rules' => [
+                    ['bucket' => 'admin_markup', 'amount' => $markup],
+                ],
+            ],
+            'segments' => [[
+                'origin' => 'ISB',
+                'destination' => 'KHI',
+                'departure_at' => '2026-12-29T10:45:00',
+                'arrival_at' => '2026-12-29T12:45:00',
+                'airline_code' => 'PA',
+                'flight_number' => '201',
+                'booking_class' => 'U',
+                'fare_basis' => $fareBasis,
+                'cabin' => 'economy',
+                'fare_type' => $fareType,
+                'cabin_class' => 'Y',
+            ]],
+            'provider_context' => [
+                'fare_type_code' => $fareType,
+                'rbd' => 'U',
+                'fare_basis' => $fareBasis,
+                'refundability_known' => false,
+            ],
+            'raw_payload' => [
+                'provider_context' => [
+                    'fare_type_code' => $fareType,
+                    'rbd' => 'U',
+                    'fare_basis' => $fareBasis,
+                    'refundability_known' => false,
+                ],
+            ],
+        ];
     }
 }
