@@ -580,7 +580,7 @@ class ItineraryFareConsolidator
     protected static function fareOptionBaggageBuckets(array $offer): array
     {
         if (! self::isConsolidatedParent($offer)) {
-            return [self::baggageBucketFromText((string) ($offer['baggage'] ?? ''))];
+            return [OfferBaggageResolver::filterBucketFromOffer($offer)];
         }
 
         $buckets = [];

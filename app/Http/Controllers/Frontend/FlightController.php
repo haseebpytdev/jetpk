@@ -26,6 +26,7 @@ use App\Support\Bookings\CheckoutFareBreakdownPresenter;
 use App\Support\FlightSearch\AirlineDisplayNameResolver;
 use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use App\Support\FlightSearch\ItineraryFareConsolidator;
+use App\Support\FlightSearch\OfferBaggageResolver;
 use App\Support\FlightSearch\PublicFlightSearchSecurity;
 use App\Support\FlightSearch\PublicMulticityInquiryPolicy;
 use App\Support\FlightSearch\PublicOfferRevalidationPresenter;
@@ -1485,7 +1486,7 @@ class FlightController extends Controller
             'arrival_time' => $presentation['arrival_time_display'],
             'duration' => $durationLabel,
             'stops' => (int) ($offer['stops'] ?? 0),
-            'baggage' => (string) ($offer['baggage'] ?? ''),
+            'baggage' => OfferBaggageResolver::summaryTextFromOffer($offer),
             'currency' => (string) ($offer['currency'] ?? 'PKR'),
             'supplier_currency' => (string) ($offer['supplier_currency'] ?? $pricingCurrency),
             'supplier_total' => $supplierTotal,
@@ -2132,8 +2133,7 @@ class FlightController extends Controller
                 $cabinCounts[$cabin] = ($cabinCounts[$cabin] ?? 0) + 1;
             }
 
-            $bag = strtolower((string) ($offer['baggage'] ?? ''));
-            $bagKey = str_contains($bag, 'kg') ? 'checked_baggage' : ($bag !== '' ? 'cabin_baggage' : 'no_baggage_info');
+            $bagKey = OfferBaggageResolver::filterBucketFromOffer($offer);
             $baggageCounts[$bagKey]++;
 
             $depWindow = $this->timeWindow((string) ($offer['depart_at'] ?? ''));

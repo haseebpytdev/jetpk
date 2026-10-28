@@ -6,6 +6,7 @@ use App\Enums\HomepageFeaturedFareRefreshStatus;
 use App\Models\Agency;
 use App\Models\HomepageFeaturedFare;
 use App\Services\FlightSearch\FlightSearchService;
+use App\Support\FlightSearch\OfferBaggageResolver;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -140,7 +141,7 @@ class HomepageFeaturedFareRefreshService
             'departure_time' => $this->extractTime($departureAt),
             'arrival_time' => $this->extractTime($arrivalAt),
             'duration' => $this->formatDuration($durationMinutes),
-            'baggage_summary' => (string) ($offer['baggage'] ?? ''),
+            'baggage_summary' => OfferBaggageResolver::summaryTextFromOffer($offer),
             'refundable_label' => ! empty($offer['refundable']) ? 'Refundable' : 'Non-refundable',
             'price_total' => $this->offerTotal($offer),
             'currency' => (string) ($offer['pricing_currency'] ?? $offer['currency'] ?? 'PKR'),

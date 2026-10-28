@@ -40,4 +40,28 @@ class OfferBaggageResolverTest extends TestCase
         $this->assertSame('20 kg', $row['check_in_summary'] ?? null);
         $this->assertSame('7 kg', $row['carry_on_summary'] ?? null);
     }
+
+    #[Test]
+    public function test_summary_text_from_structured_null_baggage_is_empty(): void
+    {
+        $this->assertSame('', OfferBaggageResolver::summaryTextFromOffer([
+            'baggage' => [
+                'checked' => null,
+                'cabin' => null,
+                'summary' => null,
+            ],
+        ]));
+    }
+
+    #[Test]
+    public function test_filter_bucket_prefers_checked_over_cabin(): void
+    {
+        $this->assertSame('checked_baggage', OfferBaggageResolver::filterBucketFromOffer([
+            'baggage' => [
+                'checked' => '20 kg',
+                'cabin' => '7 kg',
+                'summary' => '20 kg / 7 kg',
+            ],
+        ]));
+    }
 }
