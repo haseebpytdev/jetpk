@@ -171,7 +171,7 @@ class StandardBookingJsonPresenter
             'airline_logo_url' => $viewData['airlineLogo'] ?? null,
             'flight_number' => $offer['flight_number'] ?? null,
             'cabin' => (string) ($criteria['cabin'] ?? 'economy'),
-            'fare_family' => $offer['fare_family'] ?? ($offer['branded_fare_label'] ?? null),
+            'fare_family' => $this->selectedFareFamilyLabel($viewData, $offer),
             'stops' => $offer['stops'] ?? null,
             'duration' => $presentation['duration_label'] ?? null,
             'baggage' => $offer['baggage'] ?? null,
@@ -198,6 +198,32 @@ class StandardBookingJsonPresenter
             'passenger_counts' => $counts,
             'lines' => $fareBreakdown['lines'] ?? [],
         ];
+    }
+
+    /**
+     * Prefer the customer-selected branded/grouped fare label over the consolidated parent default.
+     *
+     * @param  array<string, mixed>  $viewData
+     * @param  array<string, mixed>|null  $offer
+     */
+    private function selectedFareFamilyLabel(array $viewData, ?array $offer): ?string
+    {
+        $draft = is_array($viewData['draft'] ?? null) ? $viewData['draft'] : [];
+        $intent = is_array($draft['selected_fare_family_option'] ?? null)
+            ? $draft['selected_fare_family_option']
+            : [];
+        $fromIntent = trim((string) ($intent['name'] ?? $intent['brand_name'] ?? $intent['brand_code'] ?? ''));
+        if ($fromIntent !== '') {
+            return $fromIntent;
+        }
+
+        if (! is_array($offer)) {
+            return null;
+        }
+
+        $fromOffer = trim((string) ($offer['fare_family'] ?? $offer['branded_fare_label'] ?? ''));
+
+        return $fromOffer !== '' ? $fromOffer : null;
     }
 
     /**

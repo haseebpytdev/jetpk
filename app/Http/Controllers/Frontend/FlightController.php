@@ -2500,6 +2500,10 @@ class FlightController extends Controller
         $multicityDiagnostics = is_array($result['multicity_diagnostics'] ?? null)
             ? $result['multicity_diagnostics']
             : [];
+        // Persist consolidated parents so checkout findOffer retains fare_family_options
+        // (display consolidator alone does not patch raw member rows used by Book Now).
+        $storedOffers = ItineraryFareConsolidator::consolidate($storedOffers);
+
         $searchId = $this->searchStore->store($criteria, $storedOffers, $warnings, [
             'mixed_carrier_filter' => $mixedCarrierFilter,
             'multicity_diagnostics' => $multicityDiagnostics,

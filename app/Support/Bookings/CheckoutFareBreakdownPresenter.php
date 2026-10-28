@@ -562,6 +562,7 @@ class CheckoutFareBreakdownPresenter
      *     mode: string,
      *     currency: string,
      *     total: float,
+     *     total_formatted: string|null,
      *     rows: list<array{label: string, amount: float, type?: string}>,
      *     show_passenger_mix: bool,
      *     passenger_mix: array{adults: int, children: int, infants: int, total: int},
@@ -579,10 +580,18 @@ class CheckoutFareBreakdownPresenter
         array $feeSource,
         float $reconciliationDelta,
     ): array {
+        $currency = strtoupper(trim($currency));
+        if ($currency === '') {
+            $currency = 'PKR';
+        }
+
         return [
             'mode' => $mode,
             'currency' => $currency,
             'total' => $total,
+            'total_formatted' => $total > 0
+                ? $currency.' '.number_format($total, 0, '.', ',')
+                : null,
             'rows' => $rows,
             'show_passenger_mix' => $showPassengerMix,
             'passenger_mix' => $passengerMix,
