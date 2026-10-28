@@ -19,6 +19,7 @@ use App\Services\FlightSearch\FlightSearchResultStore;
 use App\Services\FlightSearch\FlightSearchService;
 use App\Services\Suppliers\OfferValidationService;
 use App\Support\Bookings\SabreBookingValidationManualRequestPolicy;
+use App\Support\Bookings\SabreSafeRefreshContext;
 use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use App\Support\PublicBooking;
 use Database\Seeders\OtaFoundationSeeder;
@@ -842,17 +843,8 @@ class BookingBrandedFareSelectionIntentTest extends TestCase
         $postResponse = $this->withSession([PublicBooking::SESSION_BOOKING_ID => $booking->id])
             ->post(route('booking.review'), ['booking_method' => 'pay_later']);
 
-        // Sabre staff-confirmation gate can bounce back to review depending on
-        // freshness/strategy config; when confirmation is reached, branded Freedom
-        // intent and manual-review deferral must still stick.
-        if ((string) $postResponse->headers->get('Location') === route('booking.review')) {
-            $this->markTestSkipped(
-                'Sabre staff-confirmation gate redirected review submit to review (pre-existing vs fare-stickiness).'
-            );
-        }
-
         $postResponse->assertRedirect(route('booking.confirmation'));
-        $this->assertFalse($postResponse->getSession()->has('errors'));
+        $postResponse->assertSessionDoesntHaveErrors(['booking']);
 
         $booking->refresh();
         $this->assertSame(BookingStatus::Pending, $booking->status);
@@ -885,26 +877,37 @@ class BookingBrandedFareSelectionIntentTest extends TestCase
 
     protected function configureSabreValidationFailureReviewSubmit(): void
     {
-        Config::set('suppliers.sabre.branded_fares_display_enabled', true);
-        Config::set('suppliers.sabre.branded_fares_selection_enabled', true);
-        Config::set('suppliers.sabre.booking_enabled', true);
-        Config::set('suppliers.sabre.booking_live_call_enabled', true);
-        Config::set('suppliers.sabre.verified_multiseg_auto_pnr_enabled', false);
-        Config::set('suppliers.sabre.cpnr_connecting_same_carrier_public_checkout_enabled', false);
-        Config::set('suppliers.sabre.ticketing_enabled', false);
-        Config::set('suppliers.sabre.revalidate_before_booking', false);
-        Config::set('suppliers.sabre.allow_createbooking_without_revalidation', false);
-        Config::set('suppliers.sabre.refresh_offer_before_public_pnr', false);
-        Config::set('suppliers.sabre.certified_route_selector_public_checkout_enabled', false);
-        Config::set('suppliers.sabre.passenger_records_allow_verified_multi_segment', false);
-        Config::set('suppliers.sabre.passenger_records_fresh_shop_guard_before_live', false);
-        Config::set('suppliers.sabre.createbooking_payload_style', 'trip_orders_create_booking_v1_current');
-        Config::set('suppliers.sabre.booking_path', '/v1/trip/orders/createBooking');
-        Config::set('suppliers.sabre.booking_schema', null);
+        // Deterministic review→confirmation path for branded Freedom drafts:
+        // same Sabre checkout guards as SabreBrandedFarePublicAutoPnrCheckoutWiringTest,
+        // plus branded display/selection so Freedom intent is asserted on confirmation.
+        Config::set([
+            'suppliers.sabre.branded_fares_display_enabled' => true,
+            'suppliers.sabre.branded_fares_selection_enabled' => true,
+            'suppliers.sabre.booking_enabled' => true,
+            'suppliers.sabre.booking_live_call_enabled' => true,
+            'suppliers.sabre.verified_multiseg_auto_pnr_enabled' => false,
+            'suppliers.sabre.cpnr_connecting_same_carrier_public_checkout_enabled' => false,
+            'suppliers.sabre.ticketing_enabled' => false,
+            'suppliers.sabre.revalidate_before_booking' => false,
+            'suppliers.sabre.allow_createbooking_without_revalidation' => false,
+            'suppliers.sabre.refresh_offer_before_public_pnr' => false,
+            'suppliers.sabre.certified_route_selector_public_checkout_enabled' => false,
+            'suppliers.sabre.passenger_records_allow_verified_multi_segment' => false,
+            'suppliers.sabre.passenger_records_fresh_shop_guard_before_live' => false,
+            'suppliers.sabre.passenger_records_block_risky_itinerary_live' => false,
+            'suppliers.sabre.branded_fares_airprice_brand_shape_compare_enabled' => false,
+            'suppliers.sabre.createbooking_payload_style' => 'trip_orders_create_booking_v1_current',
+            'suppliers.sabre.booking_path' => '/v1/trip/orders/createBooking',
+            'suppliers.sabre.booking_schema' => null,
+        ]);
     }
 
     protected function createSabreFreedomDraftBookingForValidationReview(): Booking
     {
+        // Deterministic fixture: PK one-way branded Freedom with full shop/booking
+        // handoff (same shape as SabreBrandedFarePublicAutoPnrCheckoutWiringTest) so
+        // GDS strategy selection can reach the stubbed live 422 path. EK bare drafts
+        // hit sabre_gds_no_eligible_pnr_strategy / staff confirmation before HTTP.
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $sabreConn = SupplierConnection::query()
             ->where('agency_id', $agency->id)
@@ -922,22 +925,23 @@ class BookingBrandedFareSelectionIntentTest extends TestCase
             'id' => 'sabre-freedom-offer-422',
             'supplier_provider' => SupplierProvider::Sabre->value,
             'supplier_connection_id' => $sabreConn->id,
-            'airline_code' => 'EK',
-            'airline_name' => 'Emirates',
+            'airline_code' => 'PK',
+            'airline_name' => 'PIA',
             'depart_at' => $depart.'T08:00:00Z',
-            'arrive_at' => $depart.'T14:00:00Z',
+            'arrive_at' => $depart.'T10:00:00Z',
             'total' => 165000,
             'currency' => 'PKR',
             'fare_family' => 'FREEDOM',
+            'validating_carrier' => 'PK',
             'segments' => [
                 [
                     'origin' => 'LHE',
-                    'destination' => 'DXB',
+                    'destination' => 'KHI',
                     'departure_at' => $depart.'T08:00:00Z',
-                    'arrival_at' => $depart.'T14:00:00Z',
-                    'carrier' => 'EK',
-                    'flight_number' => '601',
-                    'booking_class' => 'Y',
+                    'arrival_at' => $depart.'T10:00:00Z',
+                    'carrier' => 'PK',
+                    'flight_number' => '301',
+                    'booking_class' => 'V',
                     'fare_basis_code' => 'FLWOPPK1',
                 ],
             ],
@@ -945,6 +949,27 @@ class BookingBrandedFareSelectionIntentTest extends TestCase
                 'supplier_total' => 165000,
                 'currency' => 'PKR',
                 'passenger_counts' => ['adults' => 1, 'children' => 0, 'infants' => 0],
+            ],
+            'raw_payload' => [
+                'distribution_channel' => 'GDS',
+                'sabre_shop_context' => [
+                    'pricing_information_ref' => 'pi-1',
+                    'offer_ref' => 'offer-freedom-422',
+                    'itinerary_ref' => 'itin-1',
+                    'validating_carrier' => 'PK',
+                    'fare_basis_codes' => ['FLWOPPK1'],
+                ],
+                'sabre_booking_context' => [
+                    'itinerary_reference' => '1',
+                    'pricing_information_index' => 0,
+                    'booking_classes_by_segment' => ['V'],
+                    'fare_basis_codes_by_segment' => ['FLWOPPK1'],
+                    'segment_slice_count' => 1,
+                    'brand_code' => 'FRD',
+                    'selected_brand_code' => 'FRD',
+                    'validating_carrier' => 'PK',
+                    'ready_for_booking_payload' => true,
+                ],
             ],
         ];
 
@@ -960,19 +985,34 @@ class BookingBrandedFareSelectionIntentTest extends TestCase
                 'fare_option_key' => 'frd-pi1',
                 'selected_fare_family_option' => [
                     'name' => 'Freedom',
+                    'brand_name' => 'Freedom',
                     'brand_code' => 'FRD',
+                    'fare_option_key' => 'frd-pi1',
                     'baggage_summary' => '30kg',
+                    'baggage' => '30kg',
                     'fare_basis_codes' => ['FLWOPPK1'],
                     'booking_classes_by_segment' => ['V'],
                     'displayed_price' => 165000,
                     'price_display' => 'Approx. PKR 165,000',
+                ],
+                'validating_carrier' => 'PK',
+                'sabre_booking_context' => [
+                    'itinerary_reference' => '1',
+                    'pricing_information_index' => 0,
+                    'booking_classes_by_segment' => ['V'],
+                    'fare_basis_codes_by_segment' => ['FLWOPPK1'],
+                    'segment_slice_count' => 1,
+                    'brand_code' => 'FRD',
+                    'selected_brand_code' => 'FRD',
+                    'validating_carrier' => 'PK',
+                    'ready_for_booking_payload' => true,
                 ],
                 'supplier_total' => 165000,
                 'flight_offer_snapshot' => $offer,
                 'normalized_offer_snapshot' => $offer,
                 'search_criteria' => [
                     'origin' => 'LHE',
-                    'destination' => 'DXB',
+                    'destination' => 'KHI',
                     'depart_date' => $depart,
                     'trip_type' => 'one_way',
                     'cabin' => 'economy',
@@ -983,18 +1023,21 @@ class BookingBrandedFareSelectionIntentTest extends TestCase
             ],
         ]);
 
-        BookingPassenger::factory()->create(array_merge([
+        BookingPassenger::factory()->create([
             'booking_id' => $booking->id,
-            'passenger_index' => 1,
+            'passenger_index' => 0,
             'passenger_type' => 'adult',
             'is_lead_passenger' => true,
-        ], [
+            'first_name' => 'Freedom',
+            'last_name' => 'Tester',
+            'date_of_birth' => now()->subYears(30)->toDateString(),
+            'gender' => 'male',
             'passport_number' => 'AB9999999',
             'passport_issuing_country' => 'PK',
             'passport_expiry_date' => '2035-12-31',
             'nationality' => 'PK',
             'document_type' => 'passport',
-        ]));
+        ]);
 
         BookingContact::query()->create([
             'booking_id' => $booking->id,
@@ -1017,7 +1060,29 @@ class BookingBrandedFareSelectionIntentTest extends TestCase
             'breakdown' => [],
         ]);
 
-        return $booking;
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $meta[SabreSafeRefreshContext::META_KEY] = app(SabreSafeRefreshContext::class)->buildFromCheckout($offer, [
+            'trip_type' => 'one_way',
+            'origin' => 'LHE',
+            'destination' => 'KHI',
+            'depart_date' => $depart,
+            'adults' => 1,
+        ], [
+            'checkout_search_id' => 'freedom-validation-search',
+            'checkout_offer_id' => 'sabre-freedom-offer-422',
+            'supplier_total' => 165000.0,
+            'supplier_currency' => 'PKR',
+        ]);
+        $meta['offer_freshness'] = [
+            'revalidation_status' => 'success',
+            'last_revalidated_at' => now()->toIso8601String(),
+            'requires_revalidation_before_checkout' => false,
+            'high_risk_cached_offer' => false,
+            'high_risk_reasons' => [],
+        ];
+        $booking->forceFill(['meta' => $meta])->save();
+
+        return $booking->fresh(['passengers', 'contact', 'fareBreakdown']);
     }
 
     protected function stubSabreValidationFailureHttp(): void
