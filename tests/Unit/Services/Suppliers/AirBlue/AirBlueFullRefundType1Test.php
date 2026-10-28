@@ -331,6 +331,35 @@ class AirBlueFullRefundType1Test extends AirBlueOfflineTestCase
         $this->assertSame(1, $result->provider_calls);
     }
 
+    public function test_http_error_after_send_is_uncertain_and_blocks_retry(): void
+    {
+        $client = Mockery::mock(AirBlueClient::class);
+        $client->shouldReceive('callOta')
+            ->once()
+            ->andThrow(new AirBlueProviderException(
+                'supplier_http_error',
+                502,
+                'Provider temporarily unavailable.',
+                ['correlation_id' => 'corr-refund-http-1', 'http_status' => 502],
+            ));
+        $this->app->instance(AirBlueClient::class, $client);
+
+        $booking = $this->ticketedBooking(['protocol_version' => '3.0']);
+        $service = app(AirBlueRefundService::class);
+        $connection = $this->connection(['refund_enabled' => true, 'protocol_version' => '3.0']);
+        $actor = User::factory()->create();
+
+        $first = $service->refundFull($booking->fresh(), $connection, $actor);
+        $this->assertSame('UNCERTAIN_AFTER_TRANSMISSION', $first->outcome);
+        $this->assertSame('supplier_http_error', $first->error_code);
+        $this->assertSame(1, $first->provider_calls);
+        $this->assertSame('uncertain', $booking->fresh()->meta['airblue_context']['refund_status'] ?? null);
+
+        $second = $service->refundFull($booking->fresh(), $connection, $actor);
+        $this->assertSame('UNCERTAIN_AFTER_TRANSMISSION', $second->outcome);
+        $this->assertSame(0, $second->provider_calls);
+    }
+
     public function test_definitive_provider_error_is_safe_normalized(): void
     {
         $client = Mockery::mock(AirBlueClient::class);

@@ -190,13 +190,43 @@ class AirBlueRefundService
                 provider_calls: 0,
             );
         } catch (AirBlueException $exception) {
-            // Provider Error/@Code responses after HTTP 200 are definitive rejections.
+            // OTA Error/@Code after HTTP 200 is definitive. Transport/HTTP/SOAP-fault after
+            // send is ambiguous — persist uncertain and never auto-retry Type=1.
+            $code = (string) $exception->normalizedCode;
+            $ambiguousAfterSend = $transmitted && in_array($code, [
+                'supplier_transport_failed',
+                'supplier_http_error',
+                'soap_fault',
+                'supplier_auth_failed',
+                'malformed_xml',
+                'empty_xml',
+                'xml_too_large',
+            ], true);
+
+            if ($ambiguousAfterSend) {
+                $this->persistUncertain($booking, $context);
+
+                return new RefundResultData(
+                    success: false,
+                    status: 'uncertain',
+                    provider: SupplierProvider::Airblue->value,
+                    outcome: 'UNCERTAIN_AFTER_TRANSMISSION',
+                    error_code: $code,
+                    error_message: $exception->safeMessage,
+                    provider_calls: 1,
+                    safe_summary: array_merge(
+                        ['refund_outcome' => 'UNCERTAIN'],
+                        $this->safeProviderErrorSummary($exception, $booking),
+                    ),
+                );
+            }
+
             return new RefundResultData(
                 success: false,
                 status: 'failed',
                 provider: SupplierProvider::Airblue->value,
                 outcome: 'DEFINITIVE_PROVIDER_REJECTION',
-                error_code: $exception->normalizedCode,
+                error_code: $code,
                 error_message: $exception->safeMessage,
                 provider_calls: $transmitted ? 1 : 0,
                 safe_summary: $this->safeProviderErrorSummary($exception, $booking),
