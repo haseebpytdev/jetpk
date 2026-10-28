@@ -114,6 +114,16 @@ class BookingCheckoutProviderRoutingTest extends TestCase
             'stops' => 0,
         ]], []);
 
+        // Public results JSON intentionally strips supplier_connection_id / supplier_offer_id
+        // (PublicFlightSearchSecurity::SENSITIVE_OFFER_KEYS + Phase2PublicFlightSearchSecurityTest).
+        // Routing identity stays in the server-side FlightSearchResultStore snapshot; checkout
+        // reloads via search_id + flight_id on select_url — never trusts client-supplied IDs.
+        $stored = $store->findOffer($searchId, 'offer-json-1');
+        $this->assertIsArray($stored);
+        $this->assertSame($duffelConn->id, (int) ($stored['supplier_connection_id'] ?? 0));
+        $this->assertSame('off_json', (string) ($stored['supplier_offer_id'] ?? ''));
+        $this->assertSame('duffel', strtolower((string) ($stored['supplier_provider'] ?? '')));
+
         $response = $this->getJson('/flights/results/data?search_id='.$searchId.'&page=1&per_page=12');
         $response->assertOk();
         $offers = $response->json('offers');
@@ -121,8 +131,9 @@ class BookingCheckoutProviderRoutingTest extends TestCase
         $this->assertNotEmpty($offers);
         $first = $offers[0];
         $this->assertSame('duffel', $first['supplier_provider'] ?? null);
-        $this->assertSame($duffelConn->id, (int) ($first['supplier_connection_id'] ?? 0));
-        $this->assertNotSame('', (string) ($first['supplier_offer_id'] ?? ''));
+        $this->assertArrayNotHasKey('supplier_connection_id', $first);
+        $this->assertArrayNotHasKey('supplier_offer_id', $first);
+        $this->assertArrayNotHasKey('raw_payload', $first);
         $selectUrl = (string) ($first['select_url'] ?? '');
         $this->assertStringContainsString('search_id=', $selectUrl);
         $this->assertStringContainsString('flight_id=', $selectUrl);
@@ -166,6 +177,12 @@ class BookingCheckoutProviderRoutingTest extends TestCase
             'stops' => 0,
         ]], []);
 
+        $stored = $store->findOffer($searchId, 'sabre-offer-json-1');
+        $this->assertIsArray($stored);
+        $this->assertSame($sabreConn->id, (int) ($stored['supplier_connection_id'] ?? 0));
+        $this->assertSame('sabre-shop-ref-1', (string) ($stored['supplier_offer_id'] ?? ''));
+        $this->assertSame('sabre', strtolower((string) ($stored['supplier_provider'] ?? '')));
+
         $response = $this->getJson('/flights/results/data?search_id='.$searchId.'&page=1&per_page=12');
         $response->assertOk();
         $offers = $response->json('offers');
@@ -173,10 +190,13 @@ class BookingCheckoutProviderRoutingTest extends TestCase
         $this->assertNotEmpty($offers);
         $first = $offers[0];
         $this->assertSame('sabre', $first['supplier_provider'] ?? null);
+        $this->assertArrayNotHasKey('supplier_connection_id', $first);
+        $this->assertArrayNotHasKey('supplier_offer_id', $first);
         $this->assertTrue((bool) ($first['can_book'] ?? false));
         $selectUrl = (string) ($first['select_url'] ?? '');
         $this->assertStringContainsString('/booking/passengers', $selectUrl);
         $this->assertStringContainsString('sabre-offer-json-1', $selectUrl);
         $this->assertStringContainsString('search_id=', $selectUrl);
+        $this->assertStringNotContainsString('raw_payload', $selectUrl);
     }
 }
