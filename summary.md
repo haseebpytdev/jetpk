@@ -19,6 +19,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
+| 2026-10-28 | AirBlue Zapways v3 Type=1 full refund | **`AirBlueRefundService::refundFull`** (fail-closed `credentials.refund_enabled`); Type=1 AirBookModify builder omits Instance; Ticketing REFUNDED + negative fare parse; duplicate/uncertain guards (no Type=1 retry). Tests: **`AirBlueFullRefundType1Test`**. Status: **RUNTIME_PR_READY** (no provider mutation / no deploy). |
 | 2026-10-16 | OPS-DEF-0011/0012 guest token hardening | **TWO_PHASE:** atomic token rotation (expire prior active rows); session bind + token-free /guest/bookings/{id} + mutation/doc URLs; legacy /access/{token} exchange-only; guest Referrer-Policy: no-referrer + no-store; Next clean page. Status: **FIX_READY_FOR_DEPLOYMENT** (no prod deploy). |
 | 2026-10-15 | OPS-DEF-0004 viewer cancel RBAC | **`AgentPermission::CancellationsRequest`** (`agent.cancellations.request`). **`BookingCancellationPolicy::request`** requires agent staff **BookingsView + CancellationsRequest** (owners keep ownership-scoped access). Presenter `request_cancellation` gates on Gate `request`, not `view`. Role templates: Manager/Support/Sales include; Viewer/Accountant/Ticketing exclude. Tests: **`OpsDef0004ViewerCancellationAuthTest`**. Status: **FIX_READY_NOT_DEPLOYED**. |
 | 2026-10-15 | OPS-DEF-0006 wallet/ledger atomicity | **`LedgerEventRecorder::recordAgencyDepositApprovedOrFail`** (strict, throws). Soft **`recordAgencyDepositApproved`** wraps the same strict helper via **`safeRecord`**. **`AgentWalletService::approveDeposit`** posts ledger **inside** the wallet/deposit `DB::transaction`; **`AgentDepositApproved`** notify remains after commit. Tests: **`AgentWalletDepositTest`** failure-injection rollback + success atomicity + strengthened double-approve ledger count. Status: **FIX_READY_NOT_DEPLOYED**. |
@@ -1203,6 +1204,7 @@ Dual-channel AirBlue (PA): **`crane_ndc`** (Hitit Crane NDC 20.1) and **`zapways
 | `AirBlueFlightSearchService.php` | Channel branch search. | `search` |
 | `AirBlueBookingService.php` | NDC `DoOrderCreate` (+ OTA path when channel=ota). | `createSupplierBooking` |
 | `AirBlueRetrieveService.php` | Retrieve/sync `airblue_context`. | `retrieveAndSync` |
+| `AirBlueRefundService.php` | Zapways v3 Type=1 full refund (fail-closed `refund_enabled`). | `refundFull` |
 | `AirBlueAncillaryService.php` | NDC ancillary probe (seat/baggage samples). | `isSupported`, `logUnavailable` |
 | `Adapters/AirBlueFlightSupplierAdapter.php` | `FlightSupplierInterface`. | `search`, `validateOffer` |
 | `BookingAdapters/AirBlueSupplierBookingAdapter.php` | `SupplierBookingInterface`. | `createSupplierBooking` |

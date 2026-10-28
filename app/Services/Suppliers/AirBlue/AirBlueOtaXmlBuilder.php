@@ -226,6 +226,13 @@ XML;
         }
 
         $modificationType = trim((string) ($modifyContext['modification_type'] ?? '5'));
+
+        // Zapways v3.00 §4.6.11 — ModificationType=1 refunds all coupons on the latest
+        // ticketed PNR instance. Instance MUST NOT appear on BookingReferenceID.
+        if ($modificationType === '1') {
+            return $this->buildAirBookModifyFullRefundRequest($config, $pnr);
+        }
+
         if ($modificationType !== '5') {
             throw new AirBlueValidationException(
                 'unsupported_modification_type',
@@ -249,6 +256,28 @@ XML;
             .'</ota:AirBookModifyRQ>'
             .'<ota:AirReservation>'
             .$this->bookingReferenceIdXml($pnr, $instance)
+            .'</ota:AirReservation>';
+
+        return $this->envelope(
+            $config,
+            'AirBookModify',
+            'airBookModifyRQ',
+            $body,
+        );
+    }
+
+    /**
+     * Full-refund AirBookModify (ModificationType=1). PNR only — never Instance.
+     *
+     * @param  array<string, mixed>  $config
+     */
+    private function buildAirBookModifyFullRefundRequest(array $config, string $pnr): string
+    {
+        $body = $this->posBlock($config)
+            .'<ota:AirBookModifyRQ ModificationType="1">'
+            .'</ota:AirBookModifyRQ>'
+            .'<ota:AirReservation>'
+            .$this->bookingReferenceIdXml($pnr, '')
             .'</ota:AirReservation>';
 
         return $this->envelope(

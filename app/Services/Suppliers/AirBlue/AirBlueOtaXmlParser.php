@@ -57,6 +57,7 @@ class AirBlueOtaXmlParser
                 'priced_itineraries' => $this->parsePricedItineraries($xpath),
                 'booking' => $this->parseBooking($xpath),
                 'tickets' => $this->parseTickets($xpath),
+                'ticketing_records' => $this->parseTicketingRecords($xpath),
                 'pnr' => $this->firstText($xpath, '//*[local-name()="BookingReferenceID"]/@ID'),
                 'instance' => $this->firstText($xpath, '//*[local-name()="BookingReferenceID"]/@Instance'),
                 'seat_maps' => $this->parseSeatMaps($xpath),
@@ -282,6 +283,49 @@ class AirBlueOtaXmlParser
         }
 
         return $tickets;
+    }
+
+    /**
+     * Zapways Read/AirBookModify Ticketing coupon nodes (status OK / REFUNDED, etc.).
+     *
+     * @return list<array{
+     *     ticket_document_number: string,
+     *     ticketing_status: string,
+     *     flight_segment_ref_number: string,
+     *     traveler_ref_number: string,
+     *     passenger_type_code: string
+     * }>
+     */
+    private function parseTicketingRecords(DOMXPath $xpath): array
+    {
+        $records = [];
+        $nodes = $xpath->query('//*[local-name()="Ticketing"]');
+        if ($nodes === false) {
+            return $records;
+        }
+
+        foreach ($nodes as $node) {
+            if (! $node instanceof DOMNode) {
+                continue;
+            }
+            $status = trim((string) ($node->attributes?->getNamedItem('TicketingStatus')?->nodeValue ?? ''));
+            $document = trim((string) ($node->attributes?->getNamedItem('TicketDocumentNbr')?->nodeValue ?? ''));
+            $flightRef = trim((string) ($node->attributes?->getNamedItem('FlightSegmentRefNumber')?->nodeValue ?? ''));
+            $travelerRef = trim((string) ($node->attributes?->getNamedItem('TravelerRefNumber')?->nodeValue ?? ''));
+            $paxType = trim((string) ($node->attributes?->getNamedItem('PassengerTypeCode')?->nodeValue ?? ''));
+            if ($status === '' && $document === '') {
+                continue;
+            }
+            $records[] = [
+                'ticket_document_number' => $document,
+                'ticketing_status' => $status,
+                'flight_segment_ref_number' => $flightRef,
+                'traveler_ref_number' => $travelerRef,
+                'passenger_type_code' => $paxType,
+            ];
+        }
+
+        return $records;
     }
 
     /**
