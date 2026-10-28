@@ -135,26 +135,26 @@ Fix: restore card `array_slice(..., 0, 3)` + `branded_fares_more_count`.
 | PUBLIC_FLIGHT_SECURITY | PASS |
 | SERVER_SIDE_ROUTING_IDENTITY | PASS |
 
-## Phase M/N — tests (post revenue-integrity)
+## Phase M/N — tests (post exact-option-price + order)
 
 Targeted (includes AirBlueBookingPaymentContextTest):
 
-`_raw-residual-closure-targeted-phpunit.txt` → **107 passed / 568 assertions / fail=0 / errors=0**
+`_raw-residual-closure-targeted-phpunit.txt` → **109 passed / 611 assertions / fail=0 / errors=0**
 
-Broad historical filter + revenue/storage tests:
+Broad historical filter + exact price/order tests:
 
-`_raw-residual-closure-broad-phpunit.txt` → **54 passed / 317 assertions / fail=0 / errors=0**
+`_raw-residual-closure-broad-phpunit.txt` → **56 passed / 360 assertions / fail=0 / errors=0**
 
 | Metric | Value |
 | --- | --- |
-| TARGETED_TESTS_PASSED | 107 |
+| TARGETED_TESTS_PASSED | 109 |
 | TARGETED_TESTS_FAILED | 0 |
 | TARGETED_TESTS_ERRORS | 0 |
-| BROAD_TEST_PASSED | 54 |
+| BROAD_TEST_PASSED | 56 |
 | BROAD_TEST_FAILURES | 0 |
 | BROAD_TEST_ERRORS | 0 |
 | BROAD_TEST_SKIPPED | 0 |
-| BROAD_TEST_ASSERTIONS | 317 |
+| BROAD_TEST_ASSERTIONS | 360 |
 
 ## Phase O — frontend source contract
 
@@ -194,6 +194,59 @@ No TS/TSX edits in this loop. Stickiness + total contract proven offline via PHP
 
 Permanent gate test: `test_airblue_grouped_selected_fare_preserves_customer_markup_separate_from_supplier_payable`.
 
+## Final review — exact option customer price + mixed-supplier order (PR #135)
+
+| Gate | Result |
+| --- | --- |
+| FINAL_REVIEW_EXACT_OPTION_PRICE_BLOCKER_FOUND | YES (EF ratio approx `26520` = `26000×25500/25000` when option `price_total` was supplier) |
+| FINAL_REVIEW_EXACT_OPTION_PRICE_BLOCKER_CLOSED | YES |
+| AIRBLUE_OPTION_PRICE_TOTAL_SOURCE | CUSTOMER_PAYABLE |
+| AIRBLUE_OPTION_CUSTOMER_PRICE_EXACT | PASS |
+| EV_OPTION_CUSTOMER_PRICE | 25500 (`PKR 25,500`) |
+| EF_OPTION_CUSTOMER_PRICE | 26500 (`PKR 26,500`) |
+| EX_OPTION_CUSTOMER_PRICE | 27600 (`PKR 27,600`) |
+| AIRBLUE_OPTION_PRICE_MAPPING | PASS |
+| AIRBLUE_OPTION_SUPPLIER_PRICE_NOT_PUBLIC | PASS |
+| AIRBLUE_PUBLIC_OPTION_SUPPLIER_PAYABLE_EXPOSED | NO |
+| EF_PUBLIC_PRICE_TOTAL | 26500 |
+| EF_PUBLIC_DISPLAYED_PRICE | 26500 |
+| SELECTED_FARE_FAMILY | EF |
+| SUPPLIER_TOTAL_SOURCE | 26000 |
+| FARE_BREAKDOWN_SUPPLIER_TOTAL | 26000 |
+| FINAL_CUSTOMER_PRICE | 26500 |
+| DISPLAYED_PRICE | 26500 |
+| MARKUP | 500 |
+| CHECKOUT_TOTAL | 26500 |
+| CHECKOUT_TOTAL_FORMATTED | `PKR 26,500` |
+| AIRDEMANDTICKET_PAYMENT_AMOUNT | 26000 |
+| CUSTOMER_PAYABLE_USED_FOR_TICKETING | NO |
+| FINAL_REVIEW_STORAGE_ORDER_BLOCKER_FOUND | YES (`array_merge(consolidatedAirblue, others)` moved AirBlue ahead of Sabre) |
+| FINAL_REVIEW_STORAGE_ORDER_BLOCKER_CLOSED | YES |
+| MIXED_SUPPLIER_ORDER_BUG_REPRODUCED | YES |
+| MIXED_SUPPLIER_ORDER_PRESERVED | PASS |
+| AIRBLUE_PARENT_POSITION | FIRST_MEMBER_POSITION |
+| NON_AIRBLUE_RELATIVE_ORDER_PRESERVED | PASS |
+| UNGROUPED_AIRBLUE_POSITION_PRESERVED | PASS |
+| PRESTORE_CONSOLIDATION_SCOPE | AIRBLUE_ONLY |
+| SABRE_STORAGE_UNCHANGED | PASS |
+| IATI_STORAGE_UNCHANGED | PASS |
+| PIA_NDC_STORAGE_UNCHANGED | PASS |
+| DUFFEL_STORAGE_UNCHANGED | PASS |
+| NON_AIRBLUE_OPTION_PRICE_SEMANTICS_UNCHANGED | PASS |
+| SELECTED_FARE_STICKINESS | PASS |
+| CUSTOMER_TOTAL_STICKINESS | PASS |
+| CARD_STRIP_COUNT | 3 |
+| FULL_OPTION_CATALOG_PRESERVED | YES |
+| PUBLIC_PRICING_INFORMATION_INDEX_PRESENT | NO |
+| AIRBLUE_UNKNOWN_REFUNDABILITY | PASS |
+| AIRLINES_TABLE_TEST_ERRORS | 0 |
+| PROVIDER_CALLS_THIS_LOOP | 0 |
+
+Permanent gates:
+
+- `test_airblue_grouped_ev_ef_ex_options_show_exact_customer_displayed_price_not_supplier_total`
+- `test_airblue_for_storage_preserves_interleaved_mixed_supplier_order`
+
 ## Stop
 
 Do **not** merge. Do **not** deploy. Do **not** start final AirBook UAT.  
@@ -201,4 +254,4 @@ Next: `PR135_FINAL_REVIEW_BEFORE_MERGE`
 
 ## FINAL_STATUS
 
-`AIRBLUE_V3_FRONTEND_UAT_REVENUE_INTEGRITY_CLOSED`
+`AIRBLUE_V3_FRONTEND_UAT_FINAL_REVIEW_BLOCKERS_CLOSED`

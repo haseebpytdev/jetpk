@@ -22,6 +22,9 @@ class ItineraryFareConsolidator
      * checkout findOffer() retains fare_family_options / members_by_id.
      * Other suppliers stay raw; displayOffersFromPayload() still consolidates for cards.
      *
+     * Preserves the original mixed-supplier order: the AirBlue parent occupies the
+     * position of the first member of its group; later members are skipped.
+     *
      * @param  list<array<string, mixed>>  $offers
      * @return list<array<string, mixed>>
      */
@@ -32,7 +35,6 @@ class ItineraryFareConsolidator
         }
 
         $airblue = [];
-        $others = [];
         foreach ($offers as $offer) {
             if (! is_array($offer)) {
                 continue;
@@ -40,8 +42,6 @@ class ItineraryFareConsolidator
             $provider = strtolower(trim((string) ($offer['supplier_provider'] ?? $offer['provider'] ?? '')));
             if ($provider === SupplierProvider::Airblue->value) {
                 $airblue[] = $offer;
-            } else {
-                $others[] = $offer;
             }
         }
 
@@ -49,7 +49,66 @@ class ItineraryFareConsolidator
             return $offers;
         }
 
-        return array_values(array_merge(self::consolidate($airblue), $others));
+        $consolidatedAirblue = self::consolidate($airblue);
+        $memberIdToParent = [];
+        foreach ($consolidatedAirblue as $row) {
+            if (! is_array($row) || ! self::isConsolidatedParent($row)) {
+                continue;
+            }
+            $memberIds = data_get($row, 'itinerary_fare_group.member_offer_ids');
+            if (! is_array($memberIds)) {
+                continue;
+            }
+            foreach ($memberIds as $memberId) {
+                $id = trim((string) $memberId);
+                if ($id !== '') {
+                    $memberIdToParent[$id] = $row;
+                }
+            }
+        }
+
+        if ($memberIdToParent === []) {
+            return $offers;
+        }
+
+        $out = [];
+        $emittedParents = [];
+        foreach ($offers as $offer) {
+            if (! is_array($offer)) {
+                continue;
+            }
+            $provider = strtolower(trim((string) ($offer['supplier_provider'] ?? $offer['provider'] ?? '')));
+            if ($provider !== SupplierProvider::Airblue->value) {
+                $out[] = $offer;
+
+                continue;
+            }
+
+            $offerId = trim((string) ($offer['offer_id'] ?? $offer['id'] ?? ''));
+            $parent = $offerId !== '' ? ($memberIdToParent[$offerId] ?? null) : null;
+            if (! is_array($parent)) {
+                $out[] = $offer;
+
+                continue;
+            }
+
+            $parentKey = trim((string) (
+                data_get($parent, 'itinerary_fare_group.parent_offer_id')
+                ?? $parent['offer_id']
+                ?? $parent['id']
+                ?? ''
+            ));
+            if ($parentKey === '') {
+                $parentKey = spl_object_hash((object) $parent);
+            }
+            if (isset($emittedParents[$parentKey])) {
+                continue;
+            }
+            $emittedParents[$parentKey] = true;
+            $out[] = $parent;
+        }
+
+        return array_values($out);
     }
 
     /**
@@ -358,6 +417,13 @@ class ItineraryFareConsolidator
             ?? data_get($member, 'fare_breakdown.supplier_total', 0)
             ?? ($member['base_fare'] ?? 0) + ($member['taxes'] ?? 0)
         );
+        $provider = strtolower(trim((string) ($member['supplier_provider'] ?? $member['provider'] ?? '')));
+        // AirBlue FareType cards must show exact customer payable, never supplier total
+        // and never a parent-ratio approximation of supplier totals.
+        $customerPayable = (float) ($member['final_customer_price'] ?? $member['displayed_price'] ?? 0);
+        $optionPriceTotal = $provider === SupplierProvider::Airblue->value && $customerPayable > 0
+            ? $customerPayable
+            : $supplierTotal;
         $currency = strtoupper(trim((string) (
             data_get($member, 'fare_breakdown.currency')
             ?? $member['supplier_currency']
@@ -385,7 +451,7 @@ class ItineraryFareConsolidator
             'option_key' => self::fareFamilyOptionKeyForMember($member, $sourceId),
             'source_offer_id' => $sourceId,
             'is_grouped_offer_option' => true,
-            'price_total' => $supplierTotal > 0 ? $supplierTotal : null,
+            'price_total' => $optionPriceTotal > 0 ? $optionPriceTotal : null,
             'currency' => $currency !== '' ? $currency : null,
             'carry_on_summary' => $baggage['cabin'],
             'check_in_summary' => $baggage['checked'],

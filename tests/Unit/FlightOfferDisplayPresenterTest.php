@@ -1238,6 +1238,71 @@ class FlightOfferDisplayPresenterTest extends TestCase
         $this->assertSame('PKR 26,500', data_get($json, 'checkout_summary.total_formatted'));
     }
 
+    public function test_airblue_grouped_ev_ef_ex_options_show_exact_customer_displayed_price_not_supplier_total(): void
+    {
+        Config::set('suppliers.airblue.branded_fares_display_enabled', true);
+        Config::set('suppliers.airblue.branded_fares_selection_enabled', true);
+        Config::set('ota.universal_fare_choice_enabled', true);
+
+        $offers = [
+            $this->airbluePa201Member('ab-ev', 'EV', 25000.0, 25500.0, 500.0, 'UEV1'),
+            $this->airbluePa201Member('ab-ef', 'EF', 26000.0, 26500.0, 500.0, 'UEF1'),
+            $this->airbluePa201Member('ab-ex', 'EX', 27100.0, 27600.0, 500.0, 'UEX1'),
+        ];
+        $parent = \App\Support\FlightSearch\ItineraryFareConsolidator::consolidate($offers)[0];
+
+        // Grouped row price_total must be exact customer payable (not supplier / not 26520 ratio).
+        $rawByName = [];
+        foreach ($parent['fare_family_options'] ?? [] as $row) {
+            $rawByName[(string) ($row['name'] ?? '')] = $row;
+        }
+        $this->assertSame(25500.0, (float) ($rawByName['EV']['price_total'] ?? 0));
+        $this->assertSame(26500.0, (float) ($rawByName['EF']['price_total'] ?? 0));
+        $this->assertSame(27600.0, (float) ($rawByName['EX']['price_total'] ?? 0));
+        $this->assertNotSame(26520.0, (float) ($rawByName['EF']['price_total'] ?? 0));
+
+        $mapped = FlightOfferDisplayPresenter::buildFareFamilyOptionsDisplay($parent);
+        $mappedByName = [];
+        foreach ($mapped as $row) {
+            $mappedByName[(string) ($row['name'] ?? '')] = $row;
+        }
+        $this->assertSame(26500.0, (float) ($mappedByName['EF']['price_total'] ?? 0));
+        // Pre-enrich mapping still carries customer payable in price_total (not supplier).
+        $this->assertNotSame(26000.0, (float) ($mappedByName['EF']['price_total'] ?? 0));
+
+        $fields = FlightOfferDisplayPresenter::buildBrandedFaresPresentationFields($mapped, $parent);
+        $byName = [];
+        foreach ($fields['fare_family_options_display'] ?? [] as $row) {
+            $byName[(string) ($row['name'] ?? '')] = $row;
+        }
+        $this->assertSame(25500, (int) ($byName['EV']['displayed_price'] ?? 0));
+        $this->assertSame(26500, (int) ($byName['EF']['displayed_price'] ?? 0));
+        $this->assertSame(27600, (int) ($byName['EX']['displayed_price'] ?? 0));
+        $this->assertSame('PKR 25,500', $byName['EV']['price_display'] ?? null);
+        $this->assertSame('PKR 26,500', $byName['EF']['price_display'] ?? null);
+        $this->assertSame('PKR 27,600', $byName['EX']['price_display'] ?? null);
+        $this->assertFalse((bool) ($byName['EF']['price_is_approximate'] ?? true));
+        // Public option fields must not expose supplier payable as the option price.
+        $this->assertNotSame(25000, (int) ($byName['EV']['displayed_price'] ?? 0));
+        $this->assertNotSame(26000, (int) ($byName['EF']['displayed_price'] ?? 0));
+        $this->assertNotSame(27100, (int) ($byName['EX']['displayed_price'] ?? 0));
+        $this->assertSame(26500.0, (float) ($byName['EF']['price_total'] ?? 0));
+
+        $cardByName = [];
+        foreach ($fields['branded_fares_display_options'] ?? [] as $row) {
+            $cardByName[(string) ($row['name'] ?? '')] = $row;
+        }
+        $this->assertSame(25500, (int) ($cardByName['EV']['displayed_price'] ?? 0));
+        $this->assertSame(26500, (int) ($cardByName['EF']['displayed_price'] ?? 0));
+        $this->assertSame(27600, (int) ($cardByName['EX']['displayed_price'] ?? 0));
+        $this->assertSame('PKR 25,500', $cardByName['EV']['price_display'] ?? null);
+        $this->assertSame('PKR 26,500', $cardByName['EF']['price_display'] ?? null);
+        $this->assertSame('PKR 27,600', $cardByName['EX']['price_display'] ?? null);
+
+        // Ratio bug would have produced EF displayed_price=26520 from 26000*(25500/25000).
+        $this->assertNotSame(26520, (int) ($byName['EF']['displayed_price'] ?? 0));
+    }
+
     public function test_airblue_grouped_selected_fare_preserves_customer_markup_separate_from_supplier_payable(): void
     {
         Config::set('suppliers.airblue.branded_fares_display_enabled', true);
