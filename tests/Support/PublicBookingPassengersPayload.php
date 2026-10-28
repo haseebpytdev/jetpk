@@ -29,6 +29,8 @@ class PublicBookingPassengersPayload
             'country' => 'Pakistan',
             'document_type' => 'passport',
             'create_account' => '0',
+            'terms_accepted' => '1',
+            'terms_version' => (string) config('ota_checkout_consent.terms_version', 'jetpk-checkout-terms-2026-08-22'),
         ], $overrides);
     }
 

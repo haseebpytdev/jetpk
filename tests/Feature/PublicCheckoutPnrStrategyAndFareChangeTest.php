@@ -906,8 +906,18 @@ class PublicCheckoutPnrStrategyAndFareChangeTest extends TestCase
             $safe['host_error_family'] ?? null,
         );
         $this->assertSame('admin_confirmed_fallback_only', $safe['retry_policy'] ?? null);
-        $encoded = json_encode($safe, JSON_THROW_ON_ERROR);
-        $this->assertStringNotContainsString('EnhancedAirBookRQ: FORMAT', $encoded);
+
+        // Contract keeps structured warning fields; assert decoded values (not raw JSON string search).
+        $structuredWarnings = is_array($safe['safe_application_warnings'] ?? null)
+            ? $safe['safe_application_warnings']
+            : (is_array($safe['safe_validation_excerpts_structured'] ?? null)
+                ? $safe['safe_validation_excerpts_structured']
+                : []);
+        $this->assertNotEmpty($structuredWarnings);
+        $warning = is_array($structuredWarnings[0] ?? null) ? $structuredWarnings[0] : [];
+        $this->assertSame('ERR.SP.PROVIDER_ERROR', (string) ($warning['code'] ?? ''));
+        $this->assertSame('EnhancedAirBookRQ: FORMAT', (string) ($warning['message'] ?? ''));
+        $this->assertSame('[REDACTED]', $safe['passenger_count'] ?? null);
     }
 
     public function test_application_error_attempt_safe_summary_includes_completion_diagnostics(): void

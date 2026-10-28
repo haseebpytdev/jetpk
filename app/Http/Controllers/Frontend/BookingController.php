@@ -240,8 +240,9 @@ class BookingController extends Controller
                 return $freshnessRedirect;
             }
 
+            $fareOptionKeyPost = trim((string) ($validated['fare_option_key'] ?? ''));
             $fareOptionRedirect = $this->applyValidatedFareOptionSelection(
-                trim((string) ($validated['fare_option_key'] ?? '')),
+                $fareOptionKeyPost,
                 $searchId,
                 $selectedOfferId,
                 $offer,
@@ -251,6 +252,24 @@ class BookingController extends Controller
             );
             if ($fareOptionRedirect !== null) {
                 return $fareOptionRedirect;
+            }
+
+            // Mirror passengers GET: project selected FareType onto the offer before
+            // validate/persist so EF supplier 26000 + customer 26500 survive draft booking
+            // (intent-only draft merge leaves parent EV pricing otherwise).
+            if ($fareOptionKeyPost !== '' && is_array($offer)) {
+                $resolutionOffer = $this->offerSnapshotForBrandedFareResolution(
+                    $offer,
+                    $searchId,
+                    $selectedOfferId,
+                );
+                $applied = FlightOfferDisplayPresenter::applySelectedFareFamilyOptionToOffer(
+                    $resolutionOffer,
+                    $fareOptionKeyPost,
+                );
+                if (($applied['error_code'] ?? null) === null && is_array($applied['offer'] ?? null)) {
+                    $offer = $applied['offer'];
+                }
             }
 
             $piaReadinessRedirect = $this->guardPiaNdcSelectedFareReadinessAtCheckout(
@@ -678,13 +697,18 @@ class BookingController extends Controller
                 }
                 $this->bookingService->attachContact($booking, $contactPayload);
 
+                // Customer payable total must stick to selected branded fare (e.g. EF 26500),
+                // not parent itinerary pricing.final_total (e.g. EV 25000).
+                $fareBreakdownCustomerTotal = $selectedFareTotal > 0
+                    ? $selectedFareTotal
+                    : (float) ($pricing['final_total'] ?? 0);
                 $this->bookingService->attachFareBreakdown($booking, [
                     'base_fare' => $pricing['base_fare'],
                     'taxes' => $pricing['taxes'],
                     'fees' => $pricing['service_fee'],
                     'markup' => (float) ($pricing['admin_markup'] ?? 0),
                     'discount' => 0,
-                    'total' => $pricing['final_total'],
+                    'total' => $fareBreakdownCustomerTotal,
                     'currency' => $offer['currency'] ?? 'PKR',
                     'breakdown' => [
                         ['label' => 'Base fare', 'amount' => $pricing['base_fare']],
@@ -2030,7 +2054,7 @@ class BookingController extends Controller
         return [
             'original_offer_id' => $selectedOfferId,
             'validated_offer_snapshot' => SensitiveDataRedactor::redact($offer),
-            'supplier_total' => (float) ($offer['total'] ?? 0),
+            'supplier_total' => $this->resolveSupplierTotalForBookingMeta($offer),
             'supplier_currency' => (string) ($offer['currency'] ?? 'PKR'),
             'price_changed' => (bool) ($validation->price_changed ?? false),
             'offer_validated_at' => now()->toIso8601String(),
@@ -2305,7 +2329,40 @@ class BookingController extends Controller
         if ($revalidatedChannel !== null) {
             $meta['distribution_channel'] = $revalidatedChannel;
         }
-        $meta['supplier_total'] = (float) ($presented['total'] ?? 0);
+        $resolvedSupplierTotal = $this->resolveSupplierTotalForBookingMeta(
+            array_merge($normalizedValidated, $presented),
+        );
+        $priorSupplierTotal = (float) ($meta['supplier_total'] ?? 0);
+        $selectedIntent = is_array($meta['selected_fare_family_option'] ?? null)
+            ? $meta['selected_fare_family_option']
+            : [];
+        $selectedFareName = trim((string) ($selectedIntent['name'] ?? $selectedIntent['brand_code'] ?? ''));
+        $snapshotFareFamily = trim((string) (
+            $normalizedValidated['fare_family']
+            ?? $presented['fare_family']
+            ?? ''
+        ));
+        // When selected branded FareType remains EF but revalidation snapshot regresses to
+        // parent EV, keep the prior supplier payable (26000) — never write customer 26500.
+        if (
+            $selectedBrandedTotal > 0
+            && $selectedFareName !== ''
+            && $snapshotFareFamily !== ''
+            && strcasecmp($selectedFareName, $snapshotFareFamily) !== 0
+            && $priorSupplierTotal > 0
+            && abs($priorSupplierTotal - $selectedBrandedTotal) > 0.01
+        ) {
+            $resolvedSupplierTotal = $priorSupplierTotal;
+        } elseif (
+            $selectedBrandedTotal > 0
+            && $resolvedSupplierTotal > 0
+            && abs($resolvedSupplierTotal - $selectedBrandedTotal) < 0.01
+            && $priorSupplierTotal > 0
+            && abs($priorSupplierTotal - $selectedBrandedTotal) > 0.01
+        ) {
+            $resolvedSupplierTotal = $priorSupplierTotal;
+        }
+        $meta['supplier_total'] = $resolvedSupplierTotal > 0 ? $resolvedSupplierTotal : $priorSupplierTotal;
         $meta['supplier_currency'] = (string) ($presented['currency'] ?? 'PKR');
         $meta['price_changed'] = $priceChanged;
         $meta['offer_validated_at'] = now()->toIso8601String();
@@ -2331,13 +2388,18 @@ class BookingController extends Controller
         }
         $booking->forceFill($bookingPatch)->save();
         $meta = is_array($booking->meta) ? $booking->meta : [];
+        // Keep fare_breakdown.total aligned with selected branded customer payable
+        // ($selectedBrandedTotal / $newTotal), not parent pricing.final_total.
+        $revalidatedBreakdownTotal = $selectedBrandedTotal > 0
+            ? $selectedBrandedTotal
+            : ($newTotal > 0 ? $newTotal : (float) ($pricing['final_total'] ?? 0));
         $this->bookingService->attachFareBreakdown($booking, [
             'base_fare' => (float) ($pricing['base_fare'] ?? 0),
             'taxes' => (float) ($pricing['taxes'] ?? 0),
             'fees' => (float) ($pricing['service_fee'] ?? 0),
             'markup' => (float) ($pricing['admin_markup'] ?? 0),
             'discount' => 0,
-            'total' => (float) ($pricing['final_total'] ?? 0),
+            'total' => $revalidatedBreakdownTotal,
             'currency' => (string) ($presented['currency'] ?? 'PKR'),
             'breakdown' => [
                 ['label' => 'Base fare', 'amount' => (float) ($pricing['base_fare'] ?? 0)],
@@ -4155,6 +4217,29 @@ class BookingController extends Controller
     }
 
     /**
+     * Supplier payable for booking meta / ticketing context.
+     * Prefer supplier_total_source / fare_breakdown.supplier_total over customer offer.total.
+     *
+     * @param  array<string, mixed>  $offer
+     */
+    protected function resolveSupplierTotalForBookingMeta(array $offer): float
+    {
+        foreach ([
+            $offer['supplier_total_source'] ?? null,
+            data_get($offer, 'fare_breakdown.supplier_total'),
+        ] as $candidate) {
+            if (is_numeric($candidate) && (float) $candidate > 0) {
+                return (float) $candidate;
+            }
+        }
+
+        return (float) ($offer['total'] ?? 0);
+    }
+
+    /**
+     * Customer-facing payable for the selected branded/grouped fare option.
+     * Never treats supplier_total / supplier_total_source as customer payable.
+     *
      * @param  array<string, mixed>|null  $selectedFareFamilyOption
      * @param  array<string, mixed>  $protectionOrMeta
      * @param  array<string, mixed>  $pricing
@@ -4165,7 +4250,7 @@ class BookingController extends Controller
         array $pricing = [],
     ): float {
         if (is_array($selectedFareFamilyOption)) {
-            foreach (['displayed_price', 'price_total', 'customer_total', 'total'] as $key) {
+            foreach (['displayed_price', 'final_customer_price', 'price_total', 'customer_total', 'total'] as $key) {
                 if (isset($selectedFareFamilyOption[$key]) && is_numeric($selectedFareFamilyOption[$key])) {
                     $value = (float) $selectedFareFamilyOption[$key];
                     if ($value > 0) {
@@ -4175,12 +4260,10 @@ class BookingController extends Controller
             }
         }
 
-        foreach (['selected_fare_total', 'supplier_total'] as $key) {
-            if (isset($protectionOrMeta[$key]) && is_numeric($protectionOrMeta[$key])) {
-                $value = (float) $protectionOrMeta[$key];
-                if ($value > 0) {
-                    return $value;
-                }
+        if (isset($protectionOrMeta['selected_fare_total']) && is_numeric($protectionOrMeta['selected_fare_total'])) {
+            $value = (float) $protectionOrMeta['selected_fare_total'];
+            if ($value > 0) {
+                return $value;
             }
         }
 
