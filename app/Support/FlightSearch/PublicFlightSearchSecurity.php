@@ -14,7 +14,13 @@ use Illuminate\Support\Str;
  */
 class PublicFlightSearchSecurity
 {
-    /** @var list<string> */
+    /**
+     * Keys stripped from customer-facing /flights/results/data offer rows.
+     * Supplier commercial cost (and fields that reconstruct it) must not reach the browser;
+     * authoritative values remain in FlightSearchResultStore for checkout/ticketing.
+     *
+     * @var list<string>
+     */
     private const SENSITIVE_OFFER_KEYS = [
         'supplier_connection_id',
         'supplier_offer_id',
@@ -31,6 +37,12 @@ class PublicFlightSearchSecurity
         'fare_debug',
         'markup',
         'branded_fare_display_pricing_baseline',
+        // Supplier commercial payable + reconstructors (base_fare + taxes ≈ supplier_total).
+        'supplier_total',
+        'supplier_total_source',
+        'base_fare',
+        'taxes',
+        'fare_breakdown',
     ];
 
     public static function allowsDebugFares(Request $request): bool

@@ -5,11 +5,14 @@ namespace Tests\Unit;
 use App\Data\FlightSegmentData;
 use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use App\Support\Suppliers\SabreSegmentChronologyRepair;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
 class FlightOfferDisplayPresenterTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_non_stop_itinerary_has_no_layover_between_segments(): void
     {
         $offer = [
@@ -1135,6 +1138,338 @@ class FlightOfferDisplayPresenterTest extends TestCase
 
         Config::set('suppliers.airblue.branded_fares_display_enabled', false);
         $this->assertFalse(FlightOfferDisplayPresenter::brandedFaresDisplayEnabledForOffer($offer));
+    }
+
+    public function test_airblue_pa201_ev_ef_ex_card_shows_exactly_three_provider_fares_without_synthetic_fourth(): void
+    {
+        Config::set('suppliers.airblue.branded_fares_display_enabled', true);
+        Config::set('suppliers.airblue.branded_fares_selection_enabled', true);
+        Config::set('ota.universal_fare_choice_enabled', true);
+
+        $offers = [
+            $this->airbluePa201Member('ab-ev', 'EV', 25000.0, 25500.0, 500.0, 'UEV1'),
+            $this->airbluePa201Member('ab-ef', 'EF', 26000.0, 26500.0, 500.0, 'UEF1'),
+            $this->airbluePa201Member('ab-ex', 'EX', 27100.0, 27600.0, 500.0, 'UEX1'),
+        ];
+        $parent = \App\Support\FlightSearch\ItineraryFareConsolidator::consolidate($offers)[0];
+        $this->assertSame('EV', $parent['fare_family'] ?? null);
+
+        $p = FlightOfferDisplayPresenter::buildPresentation($parent, ['origin' => 'ISB', 'destination' => 'KHI'], []);
+        $this->assertCount(3, $p['branded_fares_display_options']);
+        $this->assertCount(3, $p['fare_family_options_display']);
+        $this->assertFalse($p['has_synthetic_default_fare']);
+        $names = array_map(
+            static fn (array $row): string => (string) ($row['name'] ?? ''),
+            $p['branded_fares_display_options'],
+        );
+        $this->assertSame(['EV', 'EF', 'EX'], $names);
+        foreach ($p['branded_fares_display_options'] as $row) {
+            $this->assertTrue((bool) ($row['selection_key_authoritative'] ?? false));
+        }
+    }
+
+    public function test_airblue_selected_ef_overrides_parent_ev_on_offer_and_checkout_total(): void
+    {
+        Config::set('suppliers.airblue.branded_fares_display_enabled', true);
+        Config::set('suppliers.airblue.branded_fares_selection_enabled', true);
+
+        $offers = [
+            $this->airbluePa201Member('ab-ev', 'EV', 25000.0, 25500.0, 500.0, 'UEV1'),
+            $this->airbluePa201Member('ab-ef', 'EF', 26000.0, 26500.0, 500.0, 'UEF1'),
+            $this->airbluePa201Member('ab-ex', 'EX', 27100.0, 27600.0, 500.0, 'UEX1'),
+        ];
+        $parent = \App\Support\FlightSearch\ItineraryFareConsolidator::consolidate($offers)[0];
+        $this->assertSame('EV', $parent['fare_family'] ?? null);
+
+        $options = FlightOfferDisplayPresenter::buildFareFamilyOptionsDisplay($parent);
+        $ef = collect($options)->first(
+            static fn (array $row): bool => (string) ($row['name'] ?? '') === 'EF',
+        );
+        $this->assertIsArray($ef);
+        $efKey = (string) ($ef['option_key'] ?? '');
+        $this->assertNotSame('', $efKey);
+
+        // Pre-fix residual: parent identity stays EV until apply projects EF.
+        $this->assertSame('EV', $parent['fare_family']);
+        $this->assertSame('EF', $ef['name']);
+
+        $applied = FlightOfferDisplayPresenter::applySelectedFareFamilyOptionToOffer($parent, $efKey);
+        $this->assertArrayHasKey('error_code', $applied);
+        $this->assertNull($applied['error_code']);
+        $offer = $applied['offer'];
+        $this->assertSame('EF', $offer['fare_family'] ?? null);
+        $this->assertSame($efKey, $offer['selected_fare_family_option'] ?? null);
+        $this->assertSame(26500.0, (float) ($offer['final_customer_price'] ?? 0));
+        $this->assertSame(26500.0, (float) ($offer['displayed_price'] ?? 0));
+        $this->assertSame('EF', data_get($offer, 'provider_context.fare_type_code'));
+
+        $breakdown = \App\Support\Bookings\CheckoutFareBreakdownPresenter::present(
+            $offer,
+            null,
+            ['adults' => 1, 'children' => 0, 'infants' => 0, 'total' => 1],
+        );
+        $this->assertSame(26500.0, (float) ($breakdown['total'] ?? 0));
+        $this->assertNotNull($breakdown['total_formatted'] ?? null);
+        $this->assertSame('PKR 26,500', $breakdown['total_formatted']);
+
+        $intent = FlightOfferDisplayPresenter::sanitizeSelectedFareFamilyIntent($ef, $parent);
+        $this->assertSame('EF', $intent['name'] ?? null);
+        $this->assertArrayNotHasKey('pricing_information_index', $intent);
+
+        $json = (new \App\Support\Booking\StandardBookingJsonPresenter)->presentPassengersContext([
+            'draft' => [
+                'fare_option_key' => $efKey,
+                'selected_fare_family_option' => $intent,
+                'search_id' => 'test-search',
+                'offer_id' => (string) ($offer['offer_id'] ?? 'parent'),
+            ],
+            'offer' => $offer,
+            'criteria' => ['origin' => 'ISB', 'destination' => 'KHI', 'cabin' => 'economy'],
+            'checkoutFareBreakdown' => $breakdown,
+            'passengerCountSummary' => ['adults' => 1, 'children' => 0, 'infants' => 0, 'total' => 1],
+            'checkoutPresentation' => [],
+            'checkoutProtection' => [],
+            'expectedPassengers' => [],
+            'checkoutContactPrefill' => [],
+            'checkoutContactPhone' => [],
+        ], \Illuminate\Http\Request::create('/booking/passengers', 'GET'));
+        $this->assertSame('EF', data_get($json, 'itinerary.fare_family'));
+        $this->assertSame('PKR 26,500', data_get($json, 'itinerary.total_formatted'));
+        $this->assertSame('PKR 26,500', data_get($json, 'checkout_summary.total_formatted'));
+    }
+
+    public function test_airblue_grouped_ev_ef_ex_options_show_exact_customer_displayed_price_not_supplier_total(): void
+    {
+        Config::set('suppliers.airblue.branded_fares_display_enabled', true);
+        Config::set('suppliers.airblue.branded_fares_selection_enabled', true);
+        Config::set('ota.universal_fare_choice_enabled', true);
+
+        $offers = [
+            $this->airbluePa201Member('ab-ev', 'EV', 25000.0, 25500.0, 500.0, 'UEV1'),
+            $this->airbluePa201Member('ab-ef', 'EF', 26000.0, 26500.0, 500.0, 'UEF1'),
+            $this->airbluePa201Member('ab-ex', 'EX', 27100.0, 27600.0, 500.0, 'UEX1'),
+        ];
+        $parent = \App\Support\FlightSearch\ItineraryFareConsolidator::consolidate($offers)[0];
+
+        // Grouped row price_total must be exact customer payable (not supplier / not 26520 ratio).
+        $rawByName = [];
+        foreach ($parent['fare_family_options'] ?? [] as $row) {
+            $rawByName[(string) ($row['name'] ?? '')] = $row;
+        }
+        $this->assertSame(25500.0, (float) ($rawByName['EV']['price_total'] ?? 0));
+        $this->assertSame(26500.0, (float) ($rawByName['EF']['price_total'] ?? 0));
+        $this->assertSame(27600.0, (float) ($rawByName['EX']['price_total'] ?? 0));
+        $this->assertNotSame(26520.0, (float) ($rawByName['EF']['price_total'] ?? 0));
+
+        $mapped = FlightOfferDisplayPresenter::buildFareFamilyOptionsDisplay($parent);
+        $mappedByName = [];
+        foreach ($mapped as $row) {
+            $mappedByName[(string) ($row['name'] ?? '')] = $row;
+        }
+        $this->assertSame(26500.0, (float) ($mappedByName['EF']['price_total'] ?? 0));
+        // Pre-enrich mapping still carries customer payable in price_total (not supplier).
+        $this->assertNotSame(26000.0, (float) ($mappedByName['EF']['price_total'] ?? 0));
+
+        $fields = FlightOfferDisplayPresenter::buildBrandedFaresPresentationFields($mapped, $parent);
+        $byName = [];
+        foreach ($fields['fare_family_options_display'] ?? [] as $row) {
+            $byName[(string) ($row['name'] ?? '')] = $row;
+        }
+        $this->assertSame(25500, (int) ($byName['EV']['displayed_price'] ?? 0));
+        $this->assertSame(26500, (int) ($byName['EF']['displayed_price'] ?? 0));
+        $this->assertSame(27600, (int) ($byName['EX']['displayed_price'] ?? 0));
+        $this->assertSame('PKR 25,500', $byName['EV']['price_display'] ?? null);
+        $this->assertSame('PKR 26,500', $byName['EF']['price_display'] ?? null);
+        $this->assertSame('PKR 27,600', $byName['EX']['price_display'] ?? null);
+        $this->assertFalse((bool) ($byName['EF']['price_is_approximate'] ?? true));
+        // Public option fields must not expose supplier payable as the option price.
+        $this->assertNotSame(25000, (int) ($byName['EV']['displayed_price'] ?? 0));
+        $this->assertNotSame(26000, (int) ($byName['EF']['displayed_price'] ?? 0));
+        $this->assertNotSame(27100, (int) ($byName['EX']['displayed_price'] ?? 0));
+        $this->assertSame(26500.0, (float) ($byName['EF']['price_total'] ?? 0));
+
+        $cardByName = [];
+        foreach ($fields['branded_fares_display_options'] ?? [] as $row) {
+            $cardByName[(string) ($row['name'] ?? '')] = $row;
+        }
+        $this->assertSame(25500, (int) ($cardByName['EV']['displayed_price'] ?? 0));
+        $this->assertSame(26500, (int) ($cardByName['EF']['displayed_price'] ?? 0));
+        $this->assertSame(27600, (int) ($cardByName['EX']['displayed_price'] ?? 0));
+        $this->assertSame('PKR 25,500', $cardByName['EV']['price_display'] ?? null);
+        $this->assertSame('PKR 26,500', $cardByName['EF']['price_display'] ?? null);
+        $this->assertSame('PKR 27,600', $cardByName['EX']['price_display'] ?? null);
+
+        // Ratio bug would have produced EF displayed_price=26520 from 26000*(25500/25000).
+        $this->assertNotSame(26520, (int) ($byName['EF']['displayed_price'] ?? 0));
+    }
+
+    public function test_airblue_grouped_selected_fare_preserves_customer_markup_separate_from_supplier_payable(): void
+    {
+        Config::set('suppliers.airblue.branded_fares_display_enabled', true);
+        Config::set('suppliers.airblue.branded_fares_selection_enabled', true);
+
+        $offers = [
+            $this->airbluePa201Member('ab-ev', 'EV', 25000.0, 25500.0, 500.0, 'UEV1'),
+            $this->airbluePa201Member('ab-ef', 'EF', 26000.0, 26500.0, 500.0, 'UEF1'),
+            $this->airbluePa201Member('ab-ex', 'EX', 27100.0, 27600.0, 500.0, 'UEX1'),
+        ];
+        $parent = \App\Support\FlightSearch\ItineraryFareConsolidator::consolidate($offers)[0];
+        $options = FlightOfferDisplayPresenter::buildFareFamilyOptionsDisplay($parent);
+        $ef = collect($options)->first(
+            static fn (array $row): bool => (string) ($row['name'] ?? '') === 'EF',
+        );
+        $this->assertIsArray($ef);
+        $efKey = (string) ($ef['option_key'] ?? '');
+
+        $applied = FlightOfferDisplayPresenter::applySelectedFareFamilyOptionToOffer($parent, $efKey);
+        $this->assertNull($applied['error_code']);
+        $offer = $applied['offer'];
+
+        $this->assertSame('EF', $offer['fare_family'] ?? null);
+        $this->assertSame(26000.0, (float) ($offer['supplier_total_source'] ?? 0));
+        $this->assertSame(26000.0, (float) data_get($offer, 'fare_breakdown.supplier_total'));
+        $this->assertSame(26500.0, (float) ($offer['final_customer_price'] ?? 0));
+        $this->assertSame(26500.0, (float) ($offer['displayed_price'] ?? 0));
+        $this->assertSame(500.0, (float) ($offer['markup'] ?? 0));
+        $this->assertNotSame(
+            (float) ($offer['final_customer_price'] ?? 0),
+            (float) ($offer['supplier_total_source'] ?? 0),
+        );
+        $this->assertSame(
+            500.0,
+            (float) ($offer['final_customer_price'] ?? 0) - (float) ($offer['supplier_total_source'] ?? 0),
+        );
+
+        $breakdown = \App\Support\Bookings\CheckoutFareBreakdownPresenter::present(
+            $offer,
+            null,
+            ['adults' => 1, 'children' => 0, 'infants' => 0, 'total' => 1],
+        );
+        $this->assertSame(26500.0, (float) ($breakdown['total'] ?? 0));
+        $this->assertSame('PKR 26,500', $breakdown['total_formatted'] ?? null);
+        $this->assertNotSame(26000.0, (float) ($breakdown['total'] ?? 0));
+
+        $ticketAmount = (float) data_get($offer, 'fare_breakdown.supplier_total');
+        $this->assertSame(26000.0, $ticketAmount);
+        $this->assertNotSame((float) ($offer['final_customer_price'] ?? 0), $ticketAmount);
+
+        $ticketXml = (new \App\Services\Suppliers\AirBlue\AirBlueOtaXmlBuilder)->buildAirDemandTicketRequest(
+            [
+                'client_id' => 'CLIENT',
+                'client_key' => 'KEY',
+                'agent_type' => '5',
+                'agent_id' => 'AGENT',
+                'agent_password' => 'secret',
+                'service_target' => 'Test',
+                'service_version' => '1.04',
+                'currency' => 'PKR',
+            ],
+            'TESTPNR1',
+            'INST-1',
+            [
+                'amount' => $ticketAmount,
+                'currency' => 'PKR',
+                'payment_type' => 'Cash',
+            ],
+        );
+        $this->assertStringContainsString('Amount="26000.00"', $ticketXml);
+        $this->assertStringNotContainsString('Amount="26500.00"', $ticketXml);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function airbluePa201Member(
+        string $id,
+        string $fareType,
+        float $supplierTotal,
+        float $customerPayable,
+        float $markup,
+        string $fareBasis,
+    ): array {
+        return [
+            'offer_id' => $id,
+            'id' => $id,
+            'supplier_provider' => 'airblue',
+            'supplier_connection_id' => 22,
+            'airline_code' => 'PA',
+            'airline_name' => 'AirBlue',
+            'flight_number' => '201',
+            'origin' => 'ISB',
+            'destination' => 'KHI',
+            'departure_at' => '2026-12-29T10:45:00',
+            'arrival_at' => '2026-12-29T12:45:00',
+            'cabin' => 'economy',
+            'fare_family' => $fareType,
+            'refundable' => false,
+            'stops' => 0,
+            'duration_h' => 2,
+            'duration_m' => 0,
+            'baggage' => '',
+            'currency' => 'PKR',
+            'pricing_currency' => 'PKR',
+            'conversion_status' => 'same_currency',
+            'base_fare' => $supplierTotal - 3000,
+            'taxes' => 3000,
+            'markup' => $markup,
+            'service_fee' => 0,
+            'supplier_total_source' => $supplierTotal,
+            'final_customer_price' => $customerPayable,
+            'displayed_price' => $customerPayable,
+            'fare_breakdown' => [
+                'base_fare' => $supplierTotal - 3000,
+                'taxes' => 3000,
+                'supplier_total' => $supplierTotal,
+                'currency' => 'PKR',
+            ],
+            'pricing_components' => [
+                'base_fare' => $supplierTotal - 3000,
+                'taxes' => 3000,
+                'final_total' => $customerPayable,
+                'conversion_status' => 'same_currency',
+                'pricing_currency' => 'PKR',
+                'service_fee' => 0.0,
+                'admin_markup' => $markup,
+                // CheckoutFareBreakdownPresenter only surfaces admin_markup when an
+                // applied_rules bucket exists — mirrors live pricing-engine contracts.
+                'applied_rules' => [
+                    ['bucket' => 'admin_markup', 'amount' => $markup],
+                ],
+            ],
+            'segments' => [[
+                'origin' => 'ISB',
+                'destination' => 'KHI',
+                'departure_at' => '2026-12-29T10:45:00',
+                'arrival_at' => '2026-12-29T12:45:00',
+                'airline_code' => 'PA',
+                'flight_number' => '201',
+                'booking_class' => 'U',
+                'fare_basis' => $fareBasis,
+                'cabin' => 'economy',
+                'fare_type' => $fareType,
+                'cabin_class' => 'Y',
+            ]],
+            'provider_context' => [
+                'fare_type_code' => $fareType,
+                'rbd' => 'U',
+                'fare_basis' => $fareBasis,
+                'refundability_known' => false,
+            ],
+            'raw_payload' => [
+                'provider_context' => [
+                    'fare_type_code' => $fareType,
+                    'rbd' => 'U',
+                    'fare_basis' => $fareBasis,
+                    'refundability_known' => false,
+                    'priced_itineraries' => [['offer_ref' => $id]],
+                ],
+                'customer_display_fields' => [
+                    'booking_class' => 'U',
+                    'fare_basis' => $fareBasis,
+                    'fare_type' => $fareType,
+                ],
+            ],
+        ];
     }
 
     public function test_format_criteria_route_label_round_trip_and_multi_city(): void

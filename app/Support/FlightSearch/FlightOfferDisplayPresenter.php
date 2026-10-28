@@ -1631,9 +1631,11 @@ class FlightOfferDisplayPresenter
         ];
 
         if ($hasBrandedFares && $displayEnabled) {
-            $visible = $allOptions;
+            // Card strip shows at most 3; full catalog remains on fare_family_options_display.
+            $cardLimit = 3;
+            $cardSlice = array_slice($allOptions, 0, $cardLimit);
             $cardOptions = [];
-            foreach ($visible as $option) {
+            foreach ($cardSlice as $option) {
                 $cardOptions[] = self::mapBrandedFareCardDisplayOption($option, $selectionActive);
             }
 
@@ -1647,7 +1649,7 @@ class FlightOfferDisplayPresenter
                 'has_synthetic_default_fare' => false,
                 'universal_fare_selection_active' => $universalActive,
                 'branded_fares_display_options' => $cardOptions,
-                'branded_fares_more_count' => 0,
+                'branded_fares_more_count' => max(0, count($allOptions) - $cardLimit),
                 'branded_fares_display_label' => $selectionActive ? 'Choose fare family' : 'Fare family preview',
                 'fare_family_options_display' => $allOptions,
             ];
@@ -1863,6 +1865,7 @@ class FlightOfferDisplayPresenter
         $mapped['option_key'] = 'standard-fare-'.$offerId;
         $mapped['is_default'] = true;
         $mapped['is_synthetic_default'] = true;
+        $mapped['selection_key_authoritative'] = false;
         $mapped['branded_fare_supported'] = false;
         $mapped['selectable'] = true;
         $mapped['display_only'] = false;
@@ -2034,6 +2037,23 @@ class FlightOfferDisplayPresenter
             }
         }
 
+        // AirBlue grouped FareType options already carry exact customer payable in
+        // price_total — never re-scale against the consolidated parent supplier ratio.
+        $offerProvider = strtolower(trim((string) ($offer['supplier_provider'] ?? $offer['provider'] ?? '')));
+        if (
+            $offerProvider === SupplierProvider::Airblue->value
+            && ! empty($option['is_grouped_offer_option'])
+        ) {
+            $amount = (int) round($priceTotal);
+
+            return [
+                'displayed_price' => $amount,
+                'displayed_currency' => 'PKR',
+                'price_display' => 'PKR '.number_format($amount, 0, '.', ','),
+                'price_is_approximate' => false,
+            ];
+        }
+
         $optionCurrency = strtoupper(trim((string) ($option['currency'] ?? '')));
         $pricingCurrency = strtoupper(trim((string) ($offer['pricing_currency'] ?? $offer['currency'] ?? 'PKR')));
         $finalCustomerPrice = (float) ($offer['final_customer_price'] ?? 0);
@@ -2177,9 +2197,8 @@ class FlightOfferDisplayPresenter
             'fare_basis_codes' => $fareBasisBySeg !== [] ? $fareBasisBySeg : null,
             'cabin_by_segment' => $cabinBySeg !== [] ? $cabinBySeg : null,
             'segment_slice_count' => $segmentCount > 0 ? $segmentCount : null,
-            'pricing_information_index' => isset($enriched['pricing_information_index']) && is_numeric($enriched['pricing_information_index'])
-                ? (int) $enriched['pricing_information_index']
-                : null,
+            // pricing_information_index stays server-side on raw/option rows for Sabre routing;
+            // never echo into customer checkout intent / public JSON.
             'baggage_summary' => $baggageSummary,
             'baggage' => $baggageSummary,
             'branded_fare_supported' => empty($enriched['is_synthetic_default']),
@@ -2437,6 +2456,7 @@ class FlightOfferDisplayPresenter
             'source_offer_id' => self::nullableTrimmedString($option['source_offer_id'] ?? null),
             'is_grouped_offer_option' => (bool) ($option['is_grouped_offer_option'] ?? false),
             'is_synthetic_default' => (bool) ($option['is_synthetic_default'] ?? false),
+            'selection_key_authoritative' => (bool) ($option['selection_key_authoritative'] ?? false),
             'fare_product_disambiguator' => self::nullableTrimmedString($option['fare_product_disambiguator'] ?? null),
             'fare_variant_subtitle' => self::nullableTrimmedString($option['fare_variant_subtitle'] ?? $option['fare_product_disambiguator'] ?? null),
             'selectable' => (bool) ($option['selectable'] ?? $selectionActive),
@@ -2728,13 +2748,20 @@ class FlightOfferDisplayPresenter
                 'offer_id' => $parentId,
                 'id' => $parentId,
                 'itinerary_fare_group' => $group,
+                'fare_family_options' => $offer['fare_family_options'] ?? ($group['fare_family_options'] ?? null),
+                'has_grouped_fare_options' => true,
             ]);
             $resolved['brand'] = self::brandContextFromFareFamilyOptionRow($option);
         }
 
         $brand = $resolved['brand'];
+        $provider = strtolower(trim((string) ($offer['supplier_provider'] ?? $offer['provider'] ?? '')));
+        $isAirblueGrouped = $provider === SupplierProvider::Airblue->value
+            && ! empty($option['is_grouped_offer_option']);
+
         $departureKey = trim((string) ($brand['departure_fare_key'] ?? $option['departure_fare_key'] ?? ''));
-        if ($departureKey === '') {
+        // AirBlue Zapways OfferPrice is local/no-op — FareType variants do not carry Sabre departure_fare_key.
+        if ($departureKey === '' && ! $isAirblueGrouped) {
             return [
                 'offer' => $offer,
                 'resolved' => $resolved,
@@ -2745,24 +2772,52 @@ class FlightOfferDisplayPresenter
 
         $rawPayload = is_array($offer['raw_payload'] ?? null) ? $offer['raw_payload'] : [];
         $context = is_array($rawPayload['provider_context'] ?? null) ? $rawPayload['provider_context'] : [];
-        $context['departure_fare_key'] = $departureKey;
-        $returnKey = trim((string) ($brand['return_fare_key'] ?? ''));
-        $context['return_fare_key'] = $returnKey !== '' ? $returnKey : null;
+        if (is_array($offer['provider_context'] ?? null) && $offer['provider_context'] !== []) {
+            $context = array_merge($context, $offer['provider_context']);
+        }
+        if ($departureKey !== '') {
+            $context['departure_fare_key'] = $departureKey;
+            $returnKey = trim((string) ($brand['return_fare_key'] ?? $option['return_fare_key'] ?? ''));
+            $context['return_fare_key'] = $returnKey !== '' ? $returnKey : null;
+        }
         $context['selected_branded_fare_id'] = trim((string) ($brand['id'] ?? $resolved['option']['option_key'] ?? ''));
         $context['selected_fare_option_id'] = $selectedId;
+        if ($isAirblueGrouped) {
+            $fareType = trim((string) ($option['name'] ?? $option['brand_code'] ?? $brand['name'] ?? ''));
+            if ($fareType !== '') {
+                $context['fare_type_code'] = $fareType;
+            }
+        }
         $rawPayload['provider_context'] = $context;
         $offer['raw_payload'] = $rawPayload;
+        $offer['provider_context'] = $context;
 
-        if (trim((string) ($brand['name'] ?? '')) !== '') {
-            $offer['fare_family'] = (string) $brand['name'];
+        if (trim((string) ($brand['name'] ?? $option['name'] ?? '')) !== '') {
+            $offer['fare_family'] = (string) ($brand['name'] ?? $option['name']);
         }
         $offer['selected_fare_family_option'] = $selectedId;
 
-        $supplierTotal = self::selectedFareFamilySupplierTotal($resolved['option'], $brand);
-        if ($supplierTotal !== null && $supplierTotal > 0) {
-            $fareBreakdown = is_array($offer['fare_breakdown'] ?? null) ? $offer['fare_breakdown'] : [];
-            $fareBreakdown['supplier_total'] = $supplierTotal;
-            $offer['fare_breakdown'] = $fareBreakdown;
+        // AirBlue grouped: memberOffer already carries authoritative supplier + customer
+        // layers. Do not derive supplier payable from fare-option price_total (which is
+        // customer payable for AirBlue cards).
+        if (! $isAirblueGrouped) {
+            $supplierTotal = self::selectedFareFamilySupplierTotal($resolved['option'], $brand);
+            if ($supplierTotal !== null && $supplierTotal > 0) {
+                $fareBreakdown = is_array($offer['fare_breakdown'] ?? null) ? $offer['fare_breakdown'] : [];
+                $existingSupplier = isset($fareBreakdown['supplier_total']) && is_numeric($fareBreakdown['supplier_total'])
+                    ? (float) $fareBreakdown['supplier_total']
+                    : 0.0;
+                if ($existingSupplier <= 0) {
+                    $fareBreakdown['supplier_total'] = $supplierTotal;
+                    $offer['fare_breakdown'] = $fareBreakdown;
+                }
+                $existingSource = isset($offer['supplier_total_source']) && is_numeric($offer['supplier_total_source'])
+                    ? (float) $offer['supplier_total_source']
+                    : 0.0;
+                if ($existingSource <= 0) {
+                    $offer['supplier_total_source'] = $supplierTotal;
+                }
+            }
         }
 
         return [
@@ -2999,6 +3054,9 @@ class FlightOfferDisplayPresenter
             'departure_fare_key' => self::nullableTrimmedString($row['departure_fare_key'] ?? null),
             'return_fare_key' => self::nullableTrimmedString($row['return_fare_key'] ?? null),
             'selectable' => (bool) ($row['selectable'] ?? false),
+            // Next.js Book Now only forwards fare_option_key when this flag is true.
+            // Grouped consolidator options (AirBlue FareType variants) are authoritative keys.
+            'selection_key_authoritative' => self::selectionKeyAuthoritativeForFareFamilyRow($row),
             'provider_context' => is_array($row['provider_context'] ?? null) ? $row['provider_context'] : null,
             'pia_ndc_provider_backed' => (bool) ($row['pia_ndc_provider_backed'] ?? false),
         ];
@@ -3007,6 +3065,42 @@ class FlightOfferDisplayPresenter
             OfferBaggageResolver::enrichFareOptionRow($mapped, []),
             self::fareFamilyOptionReadinessDisplayFields($row),
         );
+    }
+
+    /**
+     * Next.js only forwards fare_option_key when this flag is true.
+     * Synthetic standard-fare / base-offer cards must remain false.
+     *
+     * @param  array<string, mixed>  $row
+     */
+    protected static function selectionKeyAuthoritativeForFareFamilyRow(array $row): bool
+    {
+        if (array_key_exists('selection_key_authoritative', $row)) {
+            return (bool) $row['selection_key_authoritative'];
+        }
+
+        if ((bool) ($row['is_synthetic_default'] ?? false) || (bool) ($row['is_base_offer_fare'] ?? false)) {
+            return false;
+        }
+
+        $key = trim((string) ($row['option_key'] ?? ''));
+        if ($key === '' || str_starts_with($key, 'standard-fare-') || $key === '__jp_base_offer__') {
+            return false;
+        }
+
+        if (! (bool) ($row['selectable'] ?? false)) {
+            return false;
+        }
+
+        if ((bool) ($row['is_grouped_offer_option'] ?? false)) {
+            return true;
+        }
+
+        if ((bool) ($row['pia_ndc_provider_backed'] ?? false)) {
+            return true;
+        }
+
+        return self::nullableTrimmedString($row['brand_code'] ?? $row['supplier_brand_code'] ?? null) !== null;
     }
 
     /**

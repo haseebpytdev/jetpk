@@ -922,6 +922,23 @@ class BookingController extends Controller
             if ($fareOptionRedirect !== null) {
                 return $fareOptionRedirect;
             }
+
+            // Validation only persisted draft intent; project selected FareType onto the
+            // offer snapshot used for passenger itinerary / checkout totals (AirBlue EV→EF).
+            if (is_array($offer)) {
+                $resolutionOffer = $this->offerSnapshotForBrandedFareResolution(
+                    $offer,
+                    (string) ($draft['search_id'] ?? ''),
+                    $effectiveFlightId,
+                );
+                $applied = FlightOfferDisplayPresenter::applySelectedFareFamilyOptionToOffer(
+                    $resolutionOffer,
+                    $fareOptionKey,
+                );
+                if (($applied['error_code'] ?? null) === null && is_array($applied['offer'] ?? null)) {
+                    $offer = $applied['offer'];
+                }
+            }
         }
 
         if ($offer !== null && PiaNdcFareFamilyPolicy::appliesToOffer($offer)) {

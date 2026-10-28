@@ -5,6 +5,7 @@ namespace Tests\Unit\Support\FlightSearch;
 use App\Http\Controllers\Frontend\FlightController;
 use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use App\Support\FlightSearch\ItineraryFareConsolidator;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
@@ -15,6 +16,8 @@ use Tests\TestCase;
  */
 class AirBlueRefundabilityTruthTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * @return array<string, mixed>
      */

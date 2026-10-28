@@ -239,4 +239,166 @@ class ItineraryFareConsolidatorTest extends TestCase
         $this->assertFalse(ItineraryFareConsolidator::offerMatchesRefundableFilter($parents['201'], '1'));
         $this->assertFalse(ItineraryFareConsolidator::offerMatchesRefundableFilter($parents['201'], '0'));
     }
+
+    #[Test]
+    public function test_airblue_for_storage_consolidates_airblue_only_and_leaves_other_suppliers_raw(): void
+    {
+        $airblue = [
+            $this->baseAirBlueOffer('ab-ev', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EV', 25000, 'UEV1'),
+            $this->baseAirBlueOffer('ab-ef', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EF', 26000, 'UEF1'),
+            $this->baseAirBlueOffer('ab-ex', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EX', 27100, 'UEX1'),
+        ];
+        $sabre = $this->baseIatiOffer('sabre-1', 90000, '20 kg', 'sk1');
+        $sabre['supplier_provider'] = 'sabre';
+        $sabre['id'] = 'sabre-1';
+        $sabre['offer_id'] = 'sabre-1';
+        $iatiA = $this->baseIatiOffer('iati_offer_20', 80000, '20 kg', 'fare-key-20');
+        $iatiB = $this->baseIatiOffer('iati_offer_30', 85435, '30 kg', 'fare-key-30');
+        $pia = $this->baseIatiOffer('pia-1', 70000, '20 kg', 'pia-k1');
+        $pia['supplier_provider'] = 'pia_ndc';
+        $pia['id'] = 'pia-1';
+        $pia['offer_id'] = 'pia-1';
+        $duffel = $this->baseIatiOffer('duffel-1', 75000, '20 kg', 'duffel-k1');
+        $duffel['supplier_provider'] = 'duffel';
+        $duffel['id'] = 'duffel-1';
+        $duffel['offer_id'] = 'duffel-1';
+
+        $mixed = array_merge($airblue, [$sabre, $iatiA, $iatiB, $pia, $duffel]);
+        $beforeIds = array_map(
+            static fn (array $o): string => (string) ($o['offer_id'] ?? $o['id'] ?? ''),
+            $mixed,
+        );
+
+        $stored = ItineraryFareConsolidator::consolidateAirblueForStorage($mixed);
+
+        $airblueStored = array_values(array_filter(
+            $stored,
+            static fn (array $o): bool => strtolower((string) ($o['supplier_provider'] ?? '')) === 'airblue',
+        ));
+        $this->assertCount(1, $airblueStored);
+        $this->assertTrue(ItineraryFareConsolidator::isConsolidatedParent($airblueStored[0]));
+        $this->assertCount(3, $airblueStored[0]['fare_family_options'] ?? []);
+
+        $nonAirblue = array_values(array_filter(
+            $stored,
+            static fn (array $o): bool => strtolower((string) ($o['supplier_provider'] ?? '')) !== 'airblue',
+        ));
+        $nonAirblueIds = array_map(
+            static fn (array $o): string => (string) ($o['offer_id'] ?? $o['id'] ?? ''),
+            $nonAirblue,
+        );
+        sort($nonAirblueIds);
+        $expectedNonAirblue = ['sabre-1', 'iati_offer_20', 'iati_offer_30', 'pia-1', 'duffel-1'];
+        sort($expectedNonAirblue);
+        $this->assertSame($expectedNonAirblue, $nonAirblueIds);
+
+        foreach ($nonAirblue as $row) {
+            $this->assertFalse(
+                ItineraryFareConsolidator::isConsolidatedParent($row),
+                'non-AirBlue offer must remain raw at storage scope',
+            );
+        }
+
+        // Broad consolidate would collapse the IATI pair; storage scope must not.
+        $broad = ItineraryFareConsolidator::consolidate($mixed);
+        $broadIatiParents = array_values(array_filter(
+            $broad,
+            static fn (array $o): bool => strtolower((string) ($o['supplier_provider'] ?? '')) === 'iati'
+                && ItineraryFareConsolidator::isConsolidatedParent($o),
+        ));
+        $this->assertNotSame([], $broadIatiParents);
+        $storedIatiParents = array_values(array_filter(
+            $stored,
+            static fn (array $o): bool => strtolower((string) ($o['supplier_provider'] ?? '')) === 'iati'
+                && ItineraryFareConsolidator::isConsolidatedParent($o),
+        ));
+        $this->assertSame([], $storedIatiParents);
+
+        $this->assertContains('sabre-1', $beforeIds);
+        $this->assertContains('sabre-1', $nonAirblueIds);
+    }
+
+    #[Test]
+    public function test_airblue_for_storage_preserves_interleaved_mixed_supplier_order(): void
+    {
+        $sabreA = $this->baseIatiOffer('sabre-a', 90000, '20 kg', 'sk-a');
+        $sabreA['supplier_provider'] = 'sabre';
+        $sabreA['id'] = 'sabre-a';
+        $sabreA['offer_id'] = 'sabre-a';
+
+        $abEv = $this->baseAirBlueOffer('ab-ev', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EV', 25000, 'UEV1');
+        $iatiA = $this->baseIatiOffer('iati-a', 80000, '20 kg', 'iati-a');
+        $iatiA['id'] = 'iati-a';
+        $abEf = $this->baseAirBlueOffer('ab-ef', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EF', 26000, 'UEF1');
+
+        $duffelA = $this->baseIatiOffer('duffel-a', 75000, '20 kg', 'duffel-a');
+        $duffelA['supplier_provider'] = 'duffel';
+        $duffelA['id'] = 'duffel-a';
+        $duffelA['offer_id'] = 'duffel-a';
+
+        $abEx = $this->baseAirBlueOffer('ab-ex', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EX', 27100, 'UEX1');
+
+        $piaA = $this->baseIatiOffer('pia-a', 70000, '20 kg', 'pia-a');
+        $piaA['supplier_provider'] = 'pia_ndc';
+        $piaA['id'] = 'pia-a';
+        $piaA['offer_id'] = 'pia-a';
+
+        $sabreB = $this->baseIatiOffer('sabre-b', 91000, '20 kg', 'sk-b');
+        $sabreB['supplier_provider'] = 'sabre';
+        $sabreB['id'] = 'sabre-b';
+        $sabreB['offer_id'] = 'sabre-b';
+
+        // Ungrouped AirBlue (different flight) must keep its original slot.
+        $abUngrouped = $this->baseAirBlueOffer(
+            'ab-solo',
+            '207',
+            '2026-12-29T19:30:00',
+            '2026-12-29T21:30:00',
+            'EF',
+            26000,
+            'UEF1',
+        );
+
+        $mixed = [
+            $sabreA,
+            $abEv,
+            $iatiA,
+            $abEf,
+            $duffelA,
+            $abEx,
+            $piaA,
+            $sabreB,
+            $abUngrouped,
+        ];
+
+        $stored = ItineraryFareConsolidator::consolidateAirblueForStorage($mixed);
+        $storedIds = array_map(
+            static fn (array $o): string => (string) ($o['offer_id'] ?? $o['id'] ?? ''),
+            $stored,
+        );
+
+        $this->assertCount(7, $stored);
+        $this->assertSame('sabre-a', $storedIds[0]);
+        $this->assertTrue(ItineraryFareConsolidator::isConsolidatedParent($stored[1]));
+        $this->assertSame('airblue', strtolower((string) ($stored[1]['supplier_provider'] ?? '')));
+        $this->assertCount(3, $stored[1]['fare_family_options'] ?? []);
+        $this->assertSame('iati-a', $storedIds[2]);
+        $this->assertSame('duffel-a', $storedIds[3]);
+        $this->assertSame('pia-a', $storedIds[4]);
+        $this->assertSame('sabre-b', $storedIds[5]);
+        $this->assertSame('ab-solo', $storedIds[6]);
+        $this->assertFalse(ItineraryFareConsolidator::isConsolidatedParent($stored[6]));
+
+        // AirBlue parent occupies first member position; later members are not re-appended.
+        $this->assertNotContains('ab-ef', $storedIds);
+        $this->assertNotContains('ab-ex', $storedIds);
+        $this->assertSame(
+            ['sabre-a', $storedIds[1], 'iati-a', 'duffel-a', 'pia-a', 'sabre-b', 'ab-solo'],
+            $storedIds,
+        );
+
+        foreach ([$stored[0], $stored[2], $stored[3], $stored[4], $stored[5]] as $row) {
+            $this->assertFalse(ItineraryFareConsolidator::isConsolidatedParent($row));
+        }
+    }
 }

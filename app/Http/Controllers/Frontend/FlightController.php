@@ -2500,6 +2500,11 @@ class FlightController extends Controller
         $multicityDiagnostics = is_array($result['multicity_diagnostics'] ?? null)
             ? $result['multicity_diagnostics']
             : [];
+        // AirBlue only: persist grouped parents so checkout findOffer retains
+        // fare_family_options / members_by_id. Other suppliers remain raw; display
+        // consolidation still runs in FlightSearchResultStore::displayOffersFromPayload().
+        $storedOffers = ItineraryFareConsolidator::consolidateAirblueForStorage($storedOffers);
+
         $searchId = $this->searchStore->store($criteria, $storedOffers, $warnings, [
             'mixed_carrier_filter' => $mixedCarrierFilter,
             'multicity_diagnostics' => $multicityDiagnostics,
