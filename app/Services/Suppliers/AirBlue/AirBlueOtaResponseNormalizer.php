@@ -405,6 +405,7 @@ class AirBlueOtaResponseNormalizer
         $base = 0.0;
         $taxes = 0.0;
         $currency = 'PKR';
+        $fareBasisFromPtc = null;
 
         foreach ($group as $itinerary) {
             $fare = is_array($itinerary['total_fare'] ?? null) ? $itinerary['total_fare'] : [];
@@ -412,21 +413,49 @@ class AirBlueOtaResponseNormalizer
             $base += (float) ($fare['base'] ?? 0);
             $taxes += (float) ($fare['taxes'] ?? 0) + (float) ($fare['fees'] ?? 0);
             $currency = (string) ($fare['currency'] ?? $currency);
+            if ($fareBasisFromPtc === null) {
+                foreach (is_array($itinerary['fare_breakdowns'] ?? null) ? $itinerary['fare_breakdowns'] : [] as $breakdown) {
+                    if (! is_array($breakdown)) {
+                        continue;
+                    }
+                    $candidate = trim((string) ($breakdown['fare_basis'] ?? ''));
+                    if ($candidate !== '') {
+                        $fareBasisFromPtc = $candidate;
+                        break;
+                    }
+                }
+            }
             foreach (is_array($itinerary['segments'] ?? null) ? $itinerary['segments'] : [] as $seg) {
                 if (! is_array($seg)) {
                     continue;
                 }
-                $segmentRows[] = [
-                    'departure_airport' => strtoupper((string) ($seg['departure_airport'] ?? '')),
-                    'arrival_airport' => strtoupper((string) ($seg['arrival_airport'] ?? '')),
+                $origin = strtoupper(trim((string) ($seg['departure_airport'] ?? '')));
+                $destination = strtoupper(trim((string) ($seg['arrival_airport'] ?? '')));
+                $carrierCode = strtoupper(trim((string) ($seg['marketing_carrier'] ?? 'PA'))) ?: 'PA';
+                $operating = strtoupper(trim((string) ($seg['operating_carrier'] ?? $carrierCode))) ?: $carrierCode;
+                $fareType = trim((string) ($seg['fare_type'] ?? ''));
+                $rbd = trim((string) ($seg['rbd'] ?? ''));
+                $cabinClass = trim((string) ($seg['cabin_class'] ?? ''));
+                $segmentFareBasis = trim((string) ($seg['fare_basis'] ?? ''));
+                $segmentRows[] = array_filter([
+                    // Canonical consolidator / presenter keys
+                    'origin' => $origin,
+                    'destination' => $destination,
+                    'airline_code' => $carrierCode,
+                    'operating_airline_code' => $operating,
                     'departure_at' => (string) ($seg['departure_datetime'] ?? ''),
                     'arrival_at' => (string) ($seg['arrival_datetime'] ?? ''),
-                    'carrier' => strtoupper((string) ($seg['marketing_carrier'] ?? 'PA')),
                     'flight_number' => (string) ($seg['flight_number'] ?? ''),
-                    'rbd' => (string) ($seg['rbd'] ?? ''),
-                    'fare_type' => (string) ($seg['fare_type'] ?? ''),
-                    'cabin_class' => (string) ($seg['cabin_class'] ?? ''),
-                ];
+                    'booking_class' => $rbd !== '' ? $rbd : null,
+                    'fare_basis' => $segmentFareBasis !== '' ? $segmentFareBasis : null,
+                    // Legacy AirBlue keys retained for booking/priced-itinerary consumers
+                    'departure_airport' => $origin,
+                    'arrival_airport' => $destination,
+                    'carrier' => $carrierCode,
+                    'rbd' => $rbd,
+                    'fare_type' => $fareType,
+                    'cabin_class' => $cabinClass,
+                ], static fn (mixed $v): bool => $v !== null && $v !== '');
             }
         }
 
@@ -436,20 +465,40 @@ class AirBlueOtaResponseNormalizer
 
         $first = $segmentRows[0];
         $last = $segmentRows[array_key_last($segmentRows)];
-        $carrier = strtoupper((string) ($first['carrier'] ?? 'PA'));
+        $carrier = strtoupper((string) ($first['airline_code'] ?? $first['carrier'] ?? 'PA'));
         $offerRef = 'airblue-ota-'.substr(sha1(json_encode($group).$correlationId), 0, 16);
 
         $credentials = is_array($connection->credentials) ? $connection->credentials : [];
         $protocolVersion = AirBlueZapwaysProtocolVersion::fromCredentials($credentials)->value;
 
-        $providerContext = [
+        $fareType = trim((string) ($first['fare_type'] ?? ''));
+        $rbd = trim((string) ($first['rbd'] ?? $first['booking_class'] ?? ''));
+        $cabinClassRaw = trim((string) ($first['cabin_class'] ?? ''));
+        $cabin = $this->mapCabinClass($cabinClassRaw);
+        $fareBasis = trim((string) ($first['fare_basis'] ?? ''));
+        if ($fareBasis === '' && is_string($fareBasisFromPtc)) {
+            $fareBasis = $fareBasisFromPtc;
+        }
+
+        $providerContext = array_filter([
             'api_channel' => AirBlueApiChannel::ZapwaysOta->value,
             'protocol_version' => $protocolVersion,
             'supplier_connection_id' => $connection->id,
             'correlation_id' => $correlationId,
             'priced_itineraries' => $group,
             'offer_ref_key' => $offerRef,
-        ];
+            // Exact supplier FareType / RBD for consolidator brand_code + booking_class.
+            'fare_type_code' => $fareType !== '' ? $fareType : null,
+            'rbd' => $rbd !== '' ? $rbd : null,
+            'fare_basis' => $fareBasis !== '' ? $fareBasis : null,
+        ], static fn (mixed $v): bool => $v !== null && $v !== '');
+
+        $customerDisplayFields = array_filter([
+            'booking_class' => $rbd !== '' ? $rbd : null,
+            'fare_basis' => $fareBasis !== '' ? $fareBasis : null,
+            'fare_type' => $fareType !== '' ? $fareType : null,
+            'cabin_class' => $cabinClassRaw !== '' ? $cabinClassRaw : null,
+        ], static fn (mixed $v): bool => $v !== null && $v !== '');
 
         return new NormalizedFlightOfferData(
             offer_id: $offerRef,
@@ -458,14 +507,16 @@ class AirBlueOtaResponseNormalizer
             airline_code: $carrier ?: 'PA',
             airline_name: 'AirBlue',
             flight_number: (string) ($first['flight_number'] ?? ''),
-            origin: (string) ($first['departure_airport'] ?? ''),
-            destination: (string) ($last['arrival_airport'] ?? ''),
+            origin: (string) ($first['origin'] ?? $first['departure_airport'] ?? ''),
+            destination: (string) ($last['destination'] ?? $last['arrival_airport'] ?? ''),
             departure_at: (string) ($first['departure_at'] ?? ''),
             arrival_at: (string) ($last['arrival_at'] ?? ''),
             duration_minutes: $this->durationMinutes((string) ($first['departure_at'] ?? ''), (string) ($last['arrival_at'] ?? '')),
             stops: max(0, count($segmentRows) - 1),
-            cabin: 'ECONOMY',
-            fare_family: null,
+            cabin: $cabin,
+            // Exact supplier FareType only — never invent marketing labels.
+            fare_family: $fareType !== '' ? $fareType : null,
+            // Do not invent refundability; false means unknown/not asserted as refundable.
             refundable: false,
             seats_left: null,
             segments: $segmentRows,
@@ -479,12 +530,35 @@ class AirBlueOtaResponseNormalizer
                 currency: $currency,
             ),
             raw_reference: $offerRef,
-            raw_payload: ['provider_context' => $providerContext],
+            raw_payload: [
+                'provider_context' => $providerContext,
+                'customer_display_fields' => $customerDisplayFields,
+            ],
             marketing_carrier_chain: [$carrier ?: 'PA'],
             operating_carrier_chain: [$carrier ?: 'PA'],
             validating_carrier: $carrier ?: 'PA',
             primary_display_carrier: $carrier ?: 'PA',
+            branded_fares: [],
         );
+    }
+
+    /**
+     * Map Zapways CabinClass onto JetPakistan cabin tokens without inventing a different cabin.
+     */
+    private function mapCabinClass(string $cabinClass): string
+    {
+        $raw = strtoupper(trim($cabinClass));
+        if ($raw === '') {
+            return 'economy';
+        }
+
+        return match ($raw) {
+            'Y', 'ECONOMY', 'ECO', 'COACH' => 'economy',
+            'W', 'PREMIUM_ECONOMY', 'PREMIUMECONOMY', 'PREMIUM ECONOMY' => 'premium_economy',
+            'C', 'J', 'BUSINESS' => 'business',
+            'F', 'FIRST' => 'first',
+            default => strtolower($cabinClass),
+        };
     }
 
     private function durationMinutes(string $departure, string $arrival): int

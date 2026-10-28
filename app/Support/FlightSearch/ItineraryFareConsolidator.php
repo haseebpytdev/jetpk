@@ -350,12 +350,13 @@ class ItineraryFareConsolidator
             'check_in_summary' => $baggage['checked'],
             'baggage_summary' => $baggage['summary'],
             'meal_included' => data_get($member, 'customer_display_fields.meal') ?? null,
-            'refundable_display' => (bool) ($member['refundable'] ?? false) ? 'Refundable' : 'Non-refundable',
+            // AirBlue Zapways search does not assert refund policy — omit invented labels.
+            'refundable_display' => self::refundableDisplayForMember($member),
             'refund_rule' => trim((string) ($member['refund_rule'] ?? '')) ?: null,
             'modification_rule' => trim((string) ($member['change_rule'] ?? '')) ?: null,
             'cancellation_rule' => trim((string) ($member['cancellation_rule'] ?? '')) ?: null,
             'cabin' => strtolower(trim((string) ($member['cabin'] ?? ''))) ?: null,
-            'booking_class' => trim((string) ($member['booking_class'] ?? data_get($member, 'customer_display_fields.booking_class', data_get($member, 'provider_context.rbd', '')))) ?: null,
+            'booking_class' => trim((string) ($member['booking_class'] ?? data_get($member, 'customer_display_fields.booking_class', data_get($member, 'provider_context.rbd', data_get($member, 'segments.0.rbd', data_get($member, 'segments.0.booking_class', '')))))) ?: null,
             'fare_basis' => trim((string) ($member['fare_basis'] ?? data_get($member, 'customer_display_fields.fare_basis', data_get($member, 'provider_context.fare_basis', '')))) ?: null,
             'brand_code' => trim((string) (data_get($member, 'provider_context.fare_type_code', ''))) ?: null,
             'departure_fare_key' => trim((string) (
@@ -370,6 +371,22 @@ class ItineraryFareConsolidator
             'pia_ndc_provider_backed' => self::memberHasPiaNdcProviderContext($member),
             'selectable' => true,
         ], static fn (mixed $v): bool => $v !== null && $v !== '');
+    }
+
+    /**
+     * @param  array<string, mixed>  $member
+     */
+    protected static function refundableDisplayForMember(array $member): ?string
+    {
+        $provider = strtolower(trim((string) ($member['supplier_provider'] ?? '')));
+        if ($provider === SupplierProvider::Airblue->value) {
+            $explicitRule = trim((string) ($member['refund_rule'] ?? $member['cancellation_rule'] ?? ''));
+            if ($explicitRule === '') {
+                return null;
+            }
+        }
+
+        return (bool) ($member['refundable'] ?? false) ? 'Refundable' : 'Non-refundable';
     }
 
     /**

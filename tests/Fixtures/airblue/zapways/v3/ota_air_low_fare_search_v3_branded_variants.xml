@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <AirLowFareSearchResponse xmlns="http://zapways.com/air/ota/3.0">
+      <OTA_AirLowFareSearchRS xmlns="http://www.opentravel.org/OTA/2003/05" Version="1.04">
+        <PricedItineraries>
+          <!-- PA201 — three FareType variants for the same itinerary -->
+          <PricedItinerary OriginDestinationRefNumber="1">
+            <AirItinerary>
+              <OriginDestinationOptions>
+                <OriginDestinationOption>
+                  <FlightSegment DepartureDateTime="2026-12-29T10:45:00" ArrivalDateTime="2026-12-29T12:45:00" FlightNumber="201" ResBookDesigCode="U" FareType="EV" CabinClass="Y" RPH="1">
+                    <DepartureAirport LocationCode="ISB"/>
+                    <ArrivalAirport LocationCode="KHI"/>
+                    <MarketingAirline Code="PA"/>
+                  </FlightSegment>
+                </OriginDestinationOption>
+              </OriginDestinationOptions>
+            </AirItinerary>
+            <AirItineraryPricingInfo>
+              <ItinTotalFare>
+                <BaseFare Amount="22000.00" CurrencyCode="PKR"/>
+                <Taxes Amount="3000.00" CurrencyCode="PKR"/>
+                <TotalFare Amount="25000.00" CurrencyCode="PKR"/>
+              </ItinTotalFare>
+              <PTC_FareBreakdowns>
+                <PTC_FareBreakdown>
+                  <PassengerTypeQuantity Code="ADT" Quantity="1"/>
+                  <PassengerFare>
+                    <BaseFare Amount="22000.00" CurrencyCode="PKR"/>
+                    <Taxes Amount="3000.00" CurrencyCode="PKR"/>
+                    <TotalFare Amount="25000.00" CurrencyCode="PKR"/>
+                    <FareBasisCodes>
+                      <FareBasisCode>UEV1</FareBasisCode>
+                    </FareBasisCodes>
+                  </PassengerFare>
+                </PTC_FareBreakdown>
+              </PTC_FareBreakdowns>
+            </AirItineraryPricingInfo>
+          </PricedItinerary>
+          <PricedItinerary OriginDestinationRefNumber="1">
+            <AirItinerary>
+              <OriginDestinationOptions>
+                <OriginDestinationOption>
+                  <FlightSegment DepartureDateTime="2026-12-29T10:45:00" ArrivalDateTime="2026-12-29T12:45:00" FlightNumber="201" ResBookDesigCode="U" FareType="EF" CabinClass="Y" RPH="1">
+                    <DepartureAirport LocationCode="ISB"/>
+                    <ArrivalAirport LocationCode="KHI"/>
+                    <MarketingAirline Code="PA"/>
+                  </FlightSegment>
+                </OriginDestinationOption>
+              </OriginDestinationOptions>
+            </AirItinerary>
+            <AirItineraryPricingInfo>
+              <ItinTotalFare>
+                <BaseFare Amount="23000.00" CurrencyCode="PKR"/>
+                <Taxes Amount="3000.00" CurrencyCode="PKR"/>
+                <TotalFare Amount="26000.00" CurrencyCode="PKR"/>
+              </ItinTotalFare>
+              <PTC_FareBreakdowns>
+                <PTC_FareBreakdown>
+                  <PassengerTypeQuantity Code="ADT" Quantity="1"/>
+                  <PassengerFare>
+                    <BaseFare Amount="23000.00" CurrencyCode="PKR"/>
+                    <Taxes Amount="3000.00" CurrencyCode="PKR"/>
+                    <TotalFare Amount="26000.00" CurrencyCode="PKR"/>
+                    <FareBasisCodes>
+                      <FareBasisCode>UEF1</FareBasisCode>
+                    </FareBasisCodes>
+                  </PassengerFare>
+                </PTC_FareBreakdown>
+              </PTC_FareBreakdowns>
+            </AirItineraryPricingInfo>
+          </PricedItinerary>
+          <PricedItinerary OriginDestinationRefNumber="1">
+            <AirItinerary>
+              <OriginDestinationOptions>
+                <OriginDestinationOption>
+                  <FlightSegment DepartureDateTime="2026-12-29T10:45:00" ArrivalDateTime="2026-12-29T12:45:00" FlightNumber="201" ResBookDesigCode="U" FareType="EX" CabinClass="Y" RPH="1">
+                    <DepartureAirport LocationCode="ISB"/>
+                    <ArrivalAirport LocationCode="KHI"/>
+                    <MarketingAirline Code="PA"/>
+                  </FlightSegment>
+                </OriginDestinationOption>
+              </OriginDestinationOptions>
+            </AirItinerary>
+            <AirItineraryPricingInfo>
+              <ItinTotalFare>
+                <BaseFare Amount="24100.00" CurrencyCode="PKR"/>
+                <Taxes Amount="3000.00" CurrencyCode="PKR"/>
+                <TotalFare Amount="27100.00" CurrencyCode="PKR"/>
+              </ItinTotalFare>
+              <PTC_FareBreakdowns>
+                <PTC_FareBreakdown>
+                  <PassengerTypeQuantity Code="ADT" Quantity="1"/>
+                  <PassengerFare>
+                    <BaseFare Amount="24100.00" CurrencyCode="PKR"/>
+                    <Taxes Amount="3000.00" CurrencyCode="PKR"/>
+                    <TotalFare Amount="27100.00" CurrencyCode="PKR"/>
+                    <FareBasisCodes>
+                      <FareBasisCode>UEX1</FareBasisCode>
+                    </FareBasisCodes>
+                  </PassengerFare>
+                </PTC_FareBreakdown>
+              </PTC_FareBreakdowns>
+            </AirItineraryPricingInfo>
+          </PricedItinerary>
+          <!-- PA207 — distinct itinerary with EF only (different flight / departure) -->
+          <PricedItinerary OriginDestinationRefNumber="1">
+            <AirItinerary>
+              <OriginDestinationOptions>
+                <OriginDestinationOption>
+                  <FlightSegment DepartureDateTime="2026-12-29T19:30:00" ArrivalDateTime="2026-12-29T21:30:00" FlightNumber="207" ResBookDesigCode="U" FareType="EF" CabinClass="Y" RPH="1">
+                    <DepartureAirport LocationCode="ISB"/>
+                    <ArrivalAirport LocationCode="KHI"/>
+                    <MarketingAirline Code="PA"/>
+                  </FlightSegment>
+                </OriginDestinationOption>
+              </OriginDestinationOptions>
+            </AirItinerary>
+            <AirItineraryPricingInfo>
+              <ItinTotalFare>
+                <BaseFare Amount="23000.00" CurrencyCode="PKR"/>
+                <Taxes Amount="3000.00" CurrencyCode="PKR"/>
+                <TotalFare Amount="26000.00" CurrencyCode="PKR"/>
+              </ItinTotalFare>
+              <PTC_FareBreakdowns>
+                <PTC_FareBreakdown>
+                  <PassengerTypeQuantity Code="ADT" Quantity="1"/>
+                  <PassengerFare>
+                    <BaseFare Amount="23000.00" CurrencyCode="PKR"/>
+                    <Taxes Amount="3000.00" CurrencyCode="PKR"/>
+                    <TotalFare Amount="26000.00" CurrencyCode="PKR"/>
+                    <FareBasisCodes>
+                      <FareBasisCode>UEF1</FareBasisCode>
+                    </FareBasisCodes>
+                  </PassengerFare>
+                </PTC_FareBreakdown>
+              </PTC_FareBreakdowns>
+            </AirItineraryPricingInfo>
+          </PricedItinerary>
+        </PricedItineraries>
+      </OTA_AirLowFareSearchRS>
+    </AirLowFareSearchResponse>
+  </soap:Body>
+</soap:Envelope>

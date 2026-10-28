@@ -138,4 +138,97 @@ class ItineraryFareConsolidatorTest extends TestCase
 
         $this->assertCount(2, ItineraryFareConsolidator::consolidate([$withBranded, $single]));
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function baseAirBlueOffer(string $id, string $flightNumber, string $depart, string $arrive, string $fareType, float $supplierTotal, string $fareBasis): array
+    {
+        return [
+            'offer_id' => $id,
+            'supplier_provider' => 'airblue',
+            'supplier_connection_id' => 22,
+            'validating_carrier' => 'PA',
+            'primary_display_carrier' => 'PA',
+            'airline_code' => 'PA',
+            'airline_name' => 'AirBlue',
+            'flight_number' => $flightNumber,
+            'cabin' => 'economy',
+            'fare_family' => $fareType,
+            'stops' => 0,
+            'departure_at' => $depart,
+            'arrival_at' => $arrive,
+            'final_customer_price' => $supplierTotal,
+            'supplier_total_source' => $supplierTotal,
+            'refundable' => false,
+            'baggage' => ['checked' => null, 'cabin' => null, 'summary' => null],
+            'fare_breakdown' => [
+                'supplier_total' => $supplierTotal,
+                'currency' => 'PKR',
+                'passenger_counts' => ['adults' => 1, 'children' => 0, 'infants' => 0],
+            ],
+            'segments' => [[
+                'airline_code' => 'PA',
+                'operating_airline_code' => 'PA',
+                'flight_number' => $flightNumber,
+                'origin' => 'ISB',
+                'destination' => 'KHI',
+                'departure_at' => $depart,
+                'arrival_at' => $arrive,
+                'rbd' => 'U',
+                'booking_class' => 'U',
+                'fare_type' => $fareType,
+                'cabin_class' => 'Y',
+            ]],
+            'provider_context' => [
+                'fare_type_code' => $fareType,
+                'rbd' => 'U',
+                'fare_basis' => $fareBasis,
+            ],
+            'raw_payload' => [
+                'provider_context' => [
+                    'fare_type_code' => $fareType,
+                    'rbd' => 'U',
+                    'fare_basis' => $fareBasis,
+                    'priced_itineraries' => [['offer_ref' => $id]],
+                ],
+                'customer_display_fields' => [
+                    'booking_class' => 'U',
+                    'fare_basis' => $fareBasis,
+                    'fare_type' => $fareType,
+                ],
+            ],
+        ];
+    }
+
+    #[Test]
+    public function test_airblue_same_itinerary_faretypes_consolidate_without_cross_flight_bleed(): void
+    {
+        $offers = [
+            $this->baseAirBlueOffer('ab-ev', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EV', 25000, 'UEV1'),
+            $this->baseAirBlueOffer('ab-ef', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EF', 26000, 'UEF1'),
+            $this->baseAirBlueOffer('ab-ex', '201', '2026-12-29T10:45:00', '2026-12-29T12:45:00', 'EX', 27100, 'UEX1'),
+            $this->baseAirBlueOffer('ab-207', '207', '2026-12-29T19:30:00', '2026-12-29T21:30:00', 'EF', 26000, 'UEF1'),
+        ];
+
+        $consolidated = ItineraryFareConsolidator::consolidate($offers);
+        $this->assertCount(2, $consolidated);
+
+        $parents = [];
+        foreach ($consolidated as $row) {
+            $parents[(string) ($row['flight_number'] ?? '')] = $row;
+        }
+
+        $this->assertTrue(ItineraryFareConsolidator::isConsolidatedParent($parents['201']));
+        $this->assertCount(3, $parents['201']['fare_family_options']);
+        $names = array_map(static fn ($o) => (string) ($o['name'] ?? ''), $parents['201']['fare_family_options']);
+        $this->assertSame(['EV', 'EF', 'EX'], $names);
+        $this->assertSame(25000.0, (float) $parents['201']['fare_family_options'][0]['price_total']);
+        $this->assertSame('U', $parents['201']['fare_family_options'][0]['booking_class']);
+        $this->assertSame('EV', $parents['201']['fare_family_options'][0]['brand_code']);
+        $this->assertArrayNotHasKey('refundable_display', $parents['201']['fare_family_options'][0]);
+
+        $this->assertFalse(ItineraryFareConsolidator::isConsolidatedParent($parents['207']));
+        $this->assertSame('EF', $parents['207']['fare_family']);
+    }
 }

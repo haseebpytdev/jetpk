@@ -1901,6 +1901,9 @@ class FlightOfferDisplayPresenter
         if ($provider === 'iati') {
             return (bool) config('suppliers.iati.branded_fares_display_enabled', true);
         }
+        if ($provider === SupplierProvider::Airblue->value) {
+            return (bool) config('suppliers.airblue.branded_fares_display_enabled', true);
+        }
 
         return self::brandedFaresDisplayEnabled();
     }
@@ -1921,6 +1924,9 @@ class FlightOfferDisplayPresenter
         }
         if ($provider === 'iati') {
             return (bool) config('suppliers.iati.branded_fares_selection_enabled', true);
+        }
+        if ($provider === SupplierProvider::Airblue->value) {
+            return (bool) config('suppliers.airblue.branded_fares_selection_enabled', true);
         }
 
         return self::brandedFaresSelectionEnabled();
