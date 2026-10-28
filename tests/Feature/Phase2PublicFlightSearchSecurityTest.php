@@ -5,12 +5,11 @@ namespace Tests\Feature;
 use App\Enums\AccountType;
 use App\Models\Airport;
 use App\Models\User;
-use App\Services\FlightSearch\FlightSearchService;
+use App\Services\FlightSearch\FlightSearchResultStore;
 use App\Support\FlightSearch\PublicFlightSearchSecurity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
-use Mockery;
 use Tests\TestCase;
 
 class Phase2PublicFlightSearchSecurityTest extends TestCase
@@ -235,20 +234,23 @@ class Phase2PublicFlightSearchSecurityTest extends TestCase
     }
 
     /**
+     * Seed the cache used by `/flights/results/data` without bootstrapping the HTML results page.
+     *
      * @param  list<array<string, mixed>>  $offers
      */
     private function storeSearch(array $offers): string
     {
-        $mock = Mockery::mock(FlightSearchService::class);
-        $mock->shouldReceive('searchWithMeta')->andReturn(['offers' => $offers, 'warnings' => []]);
-        $mock->shouldReceive('search')->andReturn($offers);
-        $this->instance(FlightSearchService::class, $mock);
+        $criteria = [
+            'origin' => 'LHE',
+            'destination' => 'DXB',
+            'depart_date' => '2026-06-25',
+            'trip_type' => 'one_way',
+            'cabin' => 'economy',
+            'adults' => 1,
+            'children' => 0,
+            'infants' => 0,
+        ];
 
-        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-06-25&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
-            ->assertOk();
-
-        preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
-
-        return $matches[1] ?? '';
+        return app(FlightSearchResultStore::class)->store($criteria, $offers, []);
     }
 }
