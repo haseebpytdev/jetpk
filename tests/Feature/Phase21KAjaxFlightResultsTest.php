@@ -100,9 +100,11 @@ class Phase21KAjaxFlightResultsTest extends TestCase
 
         $response = $this->getJson('/flights/results/data?search_id='.$searchId.'&page=1&per_page=12')->assertOk();
         $offer = $response->json('offers.0');
-        $this->assertArrayHasKey('supplier_total', $offer);
-        $this->assertArrayHasKey('markup', $offer);
-        $this->assertArrayHasKey('service_fee', $offer);
+        // Public commercial privacy: supplier cost / markup components stay off the customer payload.
+        $this->assertArrayNotHasKey('supplier_total', $offer);
+        $this->assertArrayNotHasKey('markup', $offer);
+        $this->assertArrayNotHasKey('base_fare', $offer);
+        $this->assertArrayNotHasKey('taxes', $offer);
         $this->assertArrayHasKey('final_customer_price', $offer);
         $this->assertArrayHasKey('displayed_price', $offer);
         $this->assertArrayHasKey('has_confirmed_pkr_quote', $offer);
@@ -113,7 +115,7 @@ class Phase21KAjaxFlightResultsTest extends TestCase
         $this->assertArrayNotHasKey('raw_payload', $offer);
     }
 
-    public function test_results_payload_price_math_matches_supplier_plus_markup_and_fee(): void
+    public function test_results_payload_exposes_customer_total_without_supplier_cost_math(): void
     {
         $this->mockFlightSearch(1, [], 'duffel', 'PKR', 'same_currency');
         $page = $this->get('/flights/results?'.$this->validOneWayQuery())->assertOk();
@@ -123,11 +125,9 @@ class Phase21KAjaxFlightResultsTest extends TestCase
             ->assertOk()
             ->json('offers.0');
 
-        $supplierTotal = (float) ($offer['supplier_total'] ?? 0);
-        $markup = (float) ($offer['markup'] ?? 0);
-        $serviceFee = (float) ($offer['service_fee'] ?? 0);
-        $final = (float) ($offer['final_customer_price'] ?? 0);
-        $this->assertEqualsWithDelta($supplierTotal + $markup + $serviceFee, $final, 0.01);
+        $this->assertArrayNotHasKey('supplier_total', $offer);
+        $this->assertGreaterThan(0, (float) ($offer['final_customer_price'] ?? 0));
+        $this->assertSame((float) $offer['final_customer_price'], (float) ($offer['displayed_price'] ?? 0));
         $this->assertMatchesRegularExpression('/^\d[\d,]* PKR$/', (string) $offer['price_display']);
     }
 
@@ -329,6 +329,70 @@ class Phase21KAjaxFlightResultsTest extends TestCase
         $filters = $this->getJson('/flights/results/data?search_id='.$searchId.'&page=1&per_page=12')->assertOk()->json('filters');
         $this->assertNotEmpty($filters['cabin_classes']);
         $this->assertNotEmpty($filters['baggage_options']);
+    }
+
+    public function test_results_data_accepts_structured_airblue_baggage_array(): void
+    {
+        $depart = $this->fakeDepartIsoPrefix();
+        $offers = [[
+            'id' => 'ab-structured-1',
+            'offer_id' => 'ab-structured-1',
+            'supplier_provider' => 'airblue',
+            'supplier_connection_id' => 1,
+            'airline_code' => 'PA',
+            'airline_name' => 'airblue',
+            'depart_at' => $depart.'T08:00:00Z',
+            'arrive_at' => $depart.'T10:00:00Z',
+            'duration_h' => 2,
+            'duration_m' => 0,
+            'stops' => 0,
+            'baggage' => [
+                'checked' => null,
+                'cabin' => null,
+                'summary' => null,
+            ],
+            'refundable' => false,
+            'cabin' => 'economy',
+            'fare_family' => 'EF',
+            'currency' => 'PKR',
+            'pricing_currency' => 'PKR',
+            'supplier_currency' => 'PKR',
+            'conversion_status' => 'same_currency',
+            'base_fare' => 20000,
+            'taxes' => 5000,
+            'markup' => 500,
+            'service_fee' => 0,
+            'total' => 26500,
+            'final_customer_price' => 26500,
+            'segments' => [[
+                'origin' => 'LHE',
+                'destination' => 'KHI',
+                'departure_at' => $depart.'T08:00:00Z',
+                'arrival_at' => $depart.'T10:00:00Z',
+                'airline_code' => 'PA',
+                'flight_number' => '200',
+            ]],
+        ]];
+
+        $mock = Mockery::mock(FlightSearchService::class);
+        $mock->shouldReceive('searchWithMeta')->andReturn(['offers' => $offers, 'warnings' => []]);
+        $mock->shouldReceive('search')->andReturn($offers);
+        $this->instance(FlightSearchService::class, $mock);
+
+        $page = $this->get('/flights/results?'.$this->validOneWayQuery())->assertOk();
+        preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
+        $searchId = $matches[1] ?? '';
+        $this->assertNotSame('', $searchId);
+
+        $response = $this->getJson('/flights/results/data?search_id='.$searchId.'&page=1&per_page=12')
+            ->assertOk()
+            ->assertJsonPath('search_id', $searchId);
+
+        $baggageOptions = $response->json('filters.baggage_options');
+        $noInfo = collect($baggageOptions)->firstWhere('value', 'no_baggage_info');
+        $this->assertNotNull($noInfo);
+        $this->assertGreaterThanOrEqual(1, (int) ($noInfo['count'] ?? 0));
+        $this->assertIsString($response->json('offers.0.baggage'));
     }
 
     public function test_duration_bucket_and_bookable_only_filters_work(): void

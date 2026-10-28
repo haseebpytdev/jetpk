@@ -71,6 +71,7 @@ use App\Support\Branding\PublicAgencyContactResolver;
 use App\Services\Client\ClientRedirectResolver;
 use App\Support\Client\ClientCheckoutContextResolver;
 use App\Support\FlightSearch\FlightOfferDisplayPresenter;
+use App\Support\FlightSearch\OfferBaggageResolver;
 use App\Support\FlightSearch\SabreOfferFreshness;
 use App\Support\Geo\CountryList;
 use App\Support\Payments\PublicAbhiPayCheckoutPresenter;
@@ -1851,9 +1852,7 @@ class BookingController extends Controller
             $durationMinutes = $timeline;
         }
         $fare = $offer['fare_breakdown'] ?? [];
-        $baggageSummary = is_array($offer['baggage'] ?? null)
-            ? (string) (($offer['baggage']['summary'] ?? '') ?: ($offer['baggage']['checked'] ?? ''))
-            : (string) ($offer['baggage'] ?? '');
+        $baggageSummary = OfferBaggageResolver::summaryTextFromOffer($offer);
 
         return array_merge($offer, [
             'id' => $offer['offer_id'] ?? null,

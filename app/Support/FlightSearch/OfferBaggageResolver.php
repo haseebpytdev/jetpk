@@ -84,6 +84,95 @@ class OfferBaggageResolver
     }
 
     /**
+     * Customer-safe scalar baggage text for results/filter/display rows.
+     * Never casts a structured baggage array to string.
+     *
+     * @param  array<string, mixed>  $offer
+     */
+    public static function summaryTextFromOffer(array $offer): string
+    {
+        $resolved = self::resolveFromOffer($offer);
+
+        return trim((string) ($resolved['summary'] ?? ''));
+    }
+
+    /**
+     * Primary baggage filter bucket for one offer (exactly one bucket).
+     *
+     * Priority: checked → cabin → summary heuristic (kg ⇒ checked) → no_baggage_info.
+     * Does not invent baggage when structured fields are null/empty.
+     *
+     * @param  array<string, mixed>  $offer
+     * @return 'checked_baggage'|'cabin_baggage'|'no_baggage_info'
+     */
+    public static function filterBucketFromOffer(array $offer): string
+    {
+        $baggage = $offer['baggage'] ?? null;
+
+        // Structured offer.baggage: classify from explicit fields only.
+        // Do not invent checked from a cabin-only summary via splitCombinedSummary.
+        if (is_array($baggage)) {
+            $checked = self::scalarAllowanceText($baggage['checked'] ?? null);
+            $cabin = self::scalarAllowanceText($baggage['cabin'] ?? null);
+            $summary = self::scalarAllowanceText($baggage['summary'] ?? null);
+
+            if ($checked === '') {
+                $checked = self::scalarAllowanceText(
+                    $offer['baggage_checked_display'] ?? $offer['baggage_checked'] ?? null
+                );
+            }
+            if ($cabin === '') {
+                $cabin = self::scalarAllowanceText(
+                    $offer['baggage_cabin_display'] ?? $offer['baggage_cabin'] ?? null
+                );
+            }
+
+            if ($checked !== '') {
+                return 'checked_baggage';
+            }
+            if ($cabin !== '') {
+                return 'cabin_baggage';
+            }
+            if ($summary !== '') {
+                return str_contains(strtolower($summary), 'kg')
+                    ? 'checked_baggage'
+                    : 'cabin_baggage';
+            }
+
+            // Structured baggage present but empty/null — do not invent from nested sources.
+            return 'no_baggage_info';
+        }
+
+        $resolved = self::resolveFromOffer($offer);
+        $checked = trim((string) ($resolved['checked'] ?? ''));
+        $cabin = trim((string) ($resolved['cabin'] ?? ''));
+        $summary = trim((string) ($resolved['summary'] ?? ''));
+
+        if ($checked !== '') {
+            return 'checked_baggage';
+        }
+        if ($cabin !== '') {
+            return 'cabin_baggage';
+        }
+        if ($summary !== '') {
+            return str_contains(strtolower($summary), 'kg')
+                ? 'checked_baggage'
+                : 'cabin_baggage';
+        }
+
+        return 'no_baggage_info';
+    }
+
+    protected static function scalarAllowanceText(mixed $value): string
+    {
+        if ($value === null || is_array($value)) {
+            return '';
+        }
+
+        return trim((string) $value);
+    }
+
+    /**
      * Normalize and fill missing carry-on / checked fields on a fare-option row.
      *
      * @param  array<string, mixed>  $row
@@ -248,7 +337,7 @@ class OfferBaggageResolver
      */
     protected static function pushCandidate(array &$candidates, mixed $value): void
     {
-        if ($value === null) {
+        if ($value === null || is_array($value)) {
             return;
         }
         $text = trim((string) $value);

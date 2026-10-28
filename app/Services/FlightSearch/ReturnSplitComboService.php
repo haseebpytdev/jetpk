@@ -4,6 +4,7 @@ namespace App\Services\FlightSearch;
 
 use App\Support\FlightSearch\AirlineDisplayNameResolver;
 use App\Support\FlightSearch\FlightOfferDisplayPresenter;
+use App\Support\FlightSearch\OfferBaggageResolver;
 use App\Support\Suppliers\SupplierSourcePresenter;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -249,7 +250,7 @@ class ReturnSplitComboService
                 'total_display' => $total !== null && $total > 0 ? 'PKR '.number_format((float) $total, 0) : 'Fare unavailable',
                 'cabin' => (string) ($offer['cabin'] ?? ''),
                 'fare_family' => (string) ($offer['fare_family'] ?? ''),
-                'baggage' => (string) ($offer['baggage'] ?? ($offer['baggage_summary_display'] ?? '')),
+                'baggage' => OfferBaggageResolver::summaryTextFromOffer($offer),
                 'refundable' => (bool) ($offer['refundable'] ?? false),
                 'can_book' => $total !== null && $total > 0,
                 'pairing_authority' => 'SUPPLIER_RETURNED',
@@ -625,6 +626,7 @@ class ReturnSplitComboService
         $fareFamilyOptionsDisplay = FlightOfferDisplayPresenter::buildFareFamilyOptionsDisplay($offer);
         $brandedFaresPresentation = FlightOfferDisplayPresenter::buildBrandedFaresPresentationFields($fareFamilyOptionsDisplay, $offer);
         $presentation = FlightOfferDisplayPresenter::buildPresentation($offer, $criteria, $cityMap, $airlineNameMap);
+        $resolvedBaggage = OfferBaggageResolver::resolveFromOffer($offer);
 
         $passengerPricing = is_array(data_get($offer, 'fare_breakdown.passenger_pricing'))
             ? data_get($offer, 'fare_breakdown.passenger_pricing')
@@ -643,9 +645,9 @@ class ReturnSplitComboService
                 null,
             ),
             'refundable' => (bool) ($offer['refundable'] ?? false),
-            'baggage_summary_display' => (string) ($offer['baggage_summary_display'] ?? $offer['baggage'] ?? ''),
-            'baggage_checked_display' => (string) ($offer['baggage_checked_display'] ?? ''),
-            'baggage_cabin_display' => (string) ($offer['baggage_cabin_display'] ?? ''),
+            'baggage_summary_display' => OfferBaggageResolver::summaryTextFromOffer($offer),
+            'baggage_checked_display' => trim((string) ($resolvedBaggage['checked'] ?? '')),
+            'baggage_cabin_display' => trim((string) ($resolvedBaggage['cabin'] ?? '')),
             'baggage_lines' => is_array($offer['baggage_lines'] ?? null) ? $offer['baggage_lines'] : [],
             'passenger_mix_display' => $adults.' adult, '.$children.' child, '.$infants.' infant',
             'displayed_price' => $displayedPrice,
@@ -1069,10 +1071,10 @@ class ReturnSplitComboService
         }
 
         $baggage = is_array($fareIntent)
-            ? trim((string) ($fareIntent['baggage_summary'] ?? $fareIntent['baggage'] ?? ''))
+            ? OfferBaggageResolver::summaryTextFromOffer($fareIntent)
             : '';
         if ($baggage === '') {
-            $baggage = trim((string) ($offer['baggage_summary_display'] ?? $offer['baggage'] ?? ''));
+            $baggage = OfferBaggageResolver::summaryTextFromOffer($offer);
         }
 
         $origin = trim((string) ($journey['origin'] ?? ''));

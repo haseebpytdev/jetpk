@@ -13,6 +13,7 @@ use App\Services\Suppliers\SupplierAdapterResolver;
 use App\Services\TravelData\AirportProximityService;
 use App\Support\FlightSearch\DirectFlightsOfferFilter;
 use App\Support\FlightSearch\FlightSearchCriteriaCacheKey;
+use App\Support\FlightSearch\OfferBaggageResolver;
 use App\Support\FlightSearch\PublicSabreMulticitySearchPostProcessor;
 use App\Support\FlightSearch\SabreFareVerificationDigest;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
@@ -367,8 +368,7 @@ class FlightSearchService
         $total = (float) ($offer['final_customer_price'] ?? $offer['total'] ?? $fare['supplier_total'] ?? 0);
         $currency = strtoupper((string) ($offer['pricing_currency'] ?? $offer['currency'] ?? $fare['currency'] ?? $offer['supplier_currency'] ?? ''));
 
-        $baggage = is_array($offer['baggage'] ?? null) ? $offer['baggage'] : [];
-        $bagSummary = trim((string) ($baggage['summary'] ?? ($offer['baggage'] ?? '')));
+        $bagSummary = OfferBaggageResolver::summaryTextFromOffer($offer);
 
         return [
             'name' => $name,
@@ -425,15 +425,13 @@ class FlightSearchService
     protected function toDisplayOffer(array $offer, array $pricing): array
     {
         $durationMinutes = (int) ($offer['duration_minutes'] ?? 0);
-        $baggageSummary = is_array($offer['baggage'] ?? null)
-            ? (string) (($offer['baggage']['summary'] ?? '') ?: ($offer['baggage']['checked'] ?? ''))
-            : (string) ($offer['baggage'] ?? '');
+        $resolvedBaggage = OfferBaggageResolver::resolveFromOffer($offer);
+        $baggageSummary = OfferBaggageResolver::summaryTextFromOffer($offer);
         $fare = is_array($offer['fare_breakdown'] ?? null) ? $offer['fare_breakdown'] : [];
         $airlineCode = (string) ($offer['airline_code'] ?? 'XX');
 
-        $bagArray = is_array($offer['baggage'] ?? null) ? $offer['baggage'] : [];
-        $bagCheckedVal = isset($bagArray['checked']) ? trim((string) $bagArray['checked']) : '';
-        $bagCabinVal = isset($bagArray['cabin']) ? trim((string) $bagArray['cabin']) : '';
+        $bagCheckedVal = trim((string) ($resolvedBaggage['checked'] ?? ''));
+        $bagCabinVal = trim((string) ($resolvedBaggage['cabin'] ?? ''));
 
         $displayBase = array_key_exists('display_base_fare', $fare) && $fare['display_base_fare'] !== null
             ? (float) $fare['display_base_fare']
