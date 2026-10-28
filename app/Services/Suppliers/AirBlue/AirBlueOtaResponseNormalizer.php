@@ -86,6 +86,26 @@ class AirBlueOtaResponseNormalizer
             }
         }
 
+        $ticketingRecords = is_array($parsed['ticketing_records'] ?? null) ? $parsed['ticketing_records'] : null;
+        $allRefunded = false;
+        if (is_array($ticketingRecords) && $ticketingRecords !== []) {
+            $allRefunded = true;
+            foreach ($ticketingRecords as $record) {
+                if (! is_array($record)) {
+                    continue;
+                }
+                $status = strtoupper(trim((string) ($record['ticketing_status'] ?? '')));
+                $doc = trim((string) ($record['ticket_document_number'] ?? ''));
+                if ($status === '' && $doc === '') {
+                    continue;
+                }
+                if ($status !== 'REFUNDED') {
+                    $allRefunded = false;
+                    break;
+                }
+            }
+        }
+
         return array_filter([
             'api_channel' => AirBlueApiChannel::ZapwaysOta->value,
             'protocol_version' => (string) ($existing['protocol_version'] ?? AirBlueZapwaysProtocolVersion::V2->value),
@@ -93,6 +113,8 @@ class AirBlueOtaResponseNormalizer
             'instance' => trim((string) ($booking['instance'] ?? $parsed['instance'] ?? $existing['instance'] ?? '')),
             'ticketing_status' => $ticketNumbers !== [] ? 'ticketed' : ($existing['ticketing_status'] ?? 'pending_ticketing'),
             'ticket_numbers' => $ticketNumbers !== [] ? $ticketNumbers : null,
+            'ticketing_records' => $ticketingRecords,
+            'refund_status' => $allRefunded ? 'refunded' : ($existing['refund_status'] ?? null),
             'seats' => is_array($parsed['seats'] ?? null) ? $parsed['seats'] : null,
             'items' => is_array($parsed['items'] ?? null) ? $parsed['items'] : null,
             'transaction_history' => is_array($parsed['transaction_history'] ?? null) ? $parsed['transaction_history'] : null,
@@ -155,6 +177,185 @@ class AirBlueOtaResponseNormalizer
             'held_seats_removed' => is_array($parsed['seats'] ?? null) ? $parsed['seats'] === [] : true,
             'held_items_removed' => is_array($parsed['items'] ?? null) ? $parsed['items'] === [] : true,
         ];
+    }
+
+    /**
+     * Normalize Zapways full-refund AirBookModify / Read truth into airblue_context fields.
+     * Does not overwrite original supplier_payable_amount / ticket_numbers / markup.
+     *
+     * @param  array<string, mixed>  $parsedResponse
+     * @param  array<string, mixed>  $existing
+     * @return array{
+     *     refund_status: string,
+     *     refunded_ticket_count: int,
+     *     refund_transaction_amount: float|null,
+     *     refund_currency: string|null,
+     *     seats_refunded: bool,
+     *     items_refunded: bool,
+     *     ticketing_records: list<array<string, mixed>>,
+     *     provider_context: array<string, mixed>
+     * }
+     */
+    public function normalizeRefundResponse(array $parsedResponse, array $existing = []): array
+    {
+        $parsed = is_array($parsedResponse['parsed'] ?? null) ? $parsedResponse['parsed'] : [];
+        $errors = is_array($parsedResponse['errors'] ?? null) ? $parsedResponse['errors'] : [];
+        $soapFault = is_array($parsedResponse['soap_fault'] ?? null) ? $parsedResponse['soap_fault'] : null;
+        $records = is_array($parsed['ticketing_records'] ?? null) ? $parsed['ticketing_records'] : [];
+        $history = is_array($parsed['transaction_history'] ?? null) ? $parsed['transaction_history'] : [];
+        $seats = is_array($parsed['seats'] ?? null) ? $parsed['seats'] : [];
+        $items = is_array($parsed['items'] ?? null) ? $parsed['items'] : [];
+
+        $refundedDocs = [];
+        foreach ($records as $record) {
+            if (! is_array($record)) {
+                continue;
+            }
+            $status = strtoupper(trim((string) ($record['ticketing_status'] ?? '')));
+            if ($status !== 'REFUNDED') {
+                continue;
+            }
+            $doc = trim((string) ($record['ticket_document_number'] ?? ''));
+            if ($doc !== '') {
+                $refundedDocs[$doc] = true;
+            } else {
+                $refundedDocs['coupon_'.count($refundedDocs)] = true;
+            }
+        }
+        $refundedTicketCount = count($refundedDocs);
+        $applicableCount = 0;
+        foreach ($records as $record) {
+            if (is_array($record) && (
+                trim((string) ($record['ticketing_status'] ?? '')) !== ''
+                || trim((string) ($record['ticket_document_number'] ?? '')) !== ''
+            )) {
+                $applicableCount++;
+            }
+        }
+        $allCouponsRefunded = $applicableCount > 0 && $refundedTicketCount > 0 && $refundedTicketCount >= $this->uniqueTicketingDocumentCount($records)
+            && $this->allTicketingRecordsRefunded($records);
+
+        $refundAmount = null;
+        $refundCurrency = null;
+        foreach ($history as $tx) {
+            if (! is_array($tx)) {
+                continue;
+            }
+            $amount = (float) ($tx['amount'] ?? 0);
+            if ($amount < 0) {
+                $refundAmount = $amount;
+                $currency = trim((string) ($tx['currency'] ?? ''));
+                $refundCurrency = $currency !== '' ? strtoupper($currency) : null;
+                break;
+            }
+        }
+
+        $seatsRefunded = false;
+        foreach ($seats as $seat) {
+            if (is_array($seat) && strcasecmp(trim((string) ($seat['status'] ?? '')), 'Refunded') === 0) {
+                $seatsRefunded = true;
+                break;
+            }
+        }
+        $itemsRefunded = false;
+        foreach ($items as $item) {
+            if (is_array($item) && strcasecmp(trim((string) ($item['status'] ?? '')), 'Refunded') === 0) {
+                $itemsRefunded = true;
+                break;
+            }
+        }
+
+        if ($soapFault !== null || $errors !== []) {
+            $refundStatus = 'failed';
+        } elseif ($allCouponsRefunded) {
+            $refundStatus = 'refunded';
+        } else {
+            $refundStatus = 'failed';
+        }
+
+        $providerContext = array_merge($existing, [
+            'api_channel' => AirBlueApiChannel::ZapwaysOta->value,
+            'protocol_version' => (string) ($existing['protocol_version'] ?? AirBlueZapwaysProtocolVersion::V2->value),
+            'refund_status' => $refundStatus,
+            'refunded_ticket_count' => $refundedTicketCount,
+            'ticketing_records' => $records,
+            'seats' => $seats !== [] ? $seats : ($existing['seats'] ?? null),
+            'items' => $items !== [] ? $items : ($existing['items'] ?? null),
+            'transaction_history' => $history !== [] ? $history : ($existing['transaction_history'] ?? null),
+        ]);
+        // Preserve commercial history — never overwrite original supplier payable from refund tx.
+        if (array_key_exists('supplier_payable_amount', $existing)) {
+            $providerContext['supplier_payable_amount'] = $existing['supplier_payable_amount'];
+        }
+        if (array_key_exists('ticket_numbers', $existing) && is_array($existing['ticket_numbers'])) {
+            $providerContext['ticket_numbers'] = $existing['ticket_numbers'];
+        }
+        if ($refundAmount !== null) {
+            $providerContext['refund_transaction_amount'] = $refundAmount;
+        }
+        if ($refundCurrency !== null) {
+            $providerContext['refund_currency'] = $refundCurrency;
+        }
+        if ($refundStatus === 'refunded') {
+            $providerContext['refunded_at'] = now()->toIso8601String();
+        }
+        $providerContext = array_filter($providerContext, static fn ($v) => $v !== null && $v !== '');
+
+        return [
+            'refund_status' => $refundStatus,
+            'refunded_ticket_count' => $refundedTicketCount,
+            'refund_transaction_amount' => $refundAmount,
+            'refund_currency' => $refundCurrency,
+            'seats_refunded' => $seatsRefunded,
+            'items_refunded' => $itemsRefunded,
+            'ticketing_records' => $records,
+            'provider_context' => $providerContext,
+        ];
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $records
+     */
+    private function allTicketingRecordsRefunded(array $records): bool
+    {
+        $seen = false;
+        foreach ($records as $record) {
+            if (! is_array($record)) {
+                continue;
+            }
+            $status = strtoupper(trim((string) ($record['ticketing_status'] ?? '')));
+            $doc = trim((string) ($record['ticket_document_number'] ?? ''));
+            if ($status === '' && $doc === '') {
+                continue;
+            }
+            $seen = true;
+            if ($status !== 'REFUNDED') {
+                return false;
+            }
+        }
+
+        return $seen;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $records
+     */
+    private function uniqueTicketingDocumentCount(array $records): int
+    {
+        $docs = [];
+        foreach ($records as $record) {
+            if (! is_array($record)) {
+                continue;
+            }
+            $status = strtoupper(trim((string) ($record['ticketing_status'] ?? '')));
+            if ($status !== 'REFUNDED') {
+                continue;
+            }
+            $doc = trim((string) ($record['ticket_document_number'] ?? ''));
+            $docs[$doc !== '' ? $doc : 'anon_'.count($docs)] = true;
+        }
+
+        return count($docs);
     }
 
     /**

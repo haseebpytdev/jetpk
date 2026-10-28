@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <AirBookModifyResponse xmlns="http://zapways.com/air/ota/3.0">
+      <AirBookModifyResult Version="1.04" xmlns="http://www.opentravel.org/OTA/2003/05">
+        <Success />
+        <AirReservation>
+          <AirItinerary>
+            <OriginDestinationOptions>
+              <OriginDestinationOption RPH="B1">
+                <FlightSegment DepartureDateTime="2026-12-01T07:15:00" ArrivalDateTime="2026-12-01T09:15:00" StopQuantity="0" RPH="1" FlightNumber="210" FareType="EF" ResBookDesigCode="Y" CabinClass="Y" Status="ONTIME">
+                  <DepartureAirport LocationCode="ISB"/>
+                  <ArrivalAirport LocationCode="KHI"/>
+                  <MarketingAirline Code="PA"/>
+                </FlightSegment>
+              </OriginDestinationOption>
+            </OriginDestinationOptions>
+          </AirItinerary>
+          <PriceInfo>
+            <ItinTotalFare>
+              <TotalFare CurrencyCode="PKR" Amount="-24500"/>
+            </ItinTotalFare>
+          </PriceInfo>
+          <TravelerInfo>
+            <SpecialReqDetails>
+              <SeatRequests>
+                <SeatRequest SeatNumber="A" RowNumber="28" Status="Refunded" TravelerRefNumberRPHList="T1" FlightRefNumberRPHList="1"/>
+              </SeatRequests>
+              <SpecialServiceRequests>
+                <SpecialServiceRequest ItemCode="XBAG" ItemCount="1" Status="Refunded" TravelerRefNumberRPHList="T1" FlightRefNumberRPHList="1"/>
+              </SpecialServiceRequests>
+            </SpecialReqDetails>
+          </TravelerInfo>
+          <Ticketing TicketingStatus="REFUNDED" FlightSegmentRefNumber="1" TravelerRefNumber="T1" TicketDocumentNbr="0002306438886" PassengerTypeCode="ADT">
+            <TicketingVendor Code="PA"/>
+          </Ticketing>
+          <BookingReferenceID ID="EUOPCL" Instance="INST-REFUND-1"/>
+        </AirReservation>
+      </AirBookModifyResult>
+    </AirBookModifyResponse>
+  </soap:Body>
+</soap:Envelope>

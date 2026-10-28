@@ -1,0 +1,19 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:zap="http://zapways.com/air/ota/3.0" xmlns:ota="http://www.opentravel.org/OTA/2003/05">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <zap:AirBookModify>
+            <ota:airBookModifyRQ EchoToken="SANITIZED" Target="Test" Version="1.04">
+                <ota:POS>
+                    <ota:Source ERSP_UserID="CLIENT/KEY">
+                        <ota:RequestorID Type="5" ID="AGENT" MessagePassword="REDACTED"/>
+                    </ota:Source>
+                </ota:POS>
+                <ota:AirBookModifyRQ ModificationType="1">
+                </ota:AirBookModifyRQ>
+                <ota:AirReservation>
+                    <ota:BookingReferenceID ID="EUOPCL"/>
+                </ota:AirReservation>
+            </ota:airBookModifyRQ>
+        </zap:AirBookModify>
+    </soapenv:Body>
+</soapenv:Envelope>
