@@ -128,12 +128,18 @@ class ItineraryFareConsolidator
         }
 
         if (! self::isConsolidatedParent($offer)) {
+            if (! FlightOfferDisplayPresenter::isRefundabilityKnown($offer)) {
+                return false;
+            }
             $refundable = (bool) ($offer['refundable'] ?? false);
 
             return ($filter === '1' && $refundable) || ($filter === '0' && ! $refundable);
         }
 
         foreach (self::iterFareOptionRows($offer) as $row) {
+            if (! self::rowHasKnownRefundability($row, $offer)) {
+                continue;
+            }
             $refundable = self::rowIsRefundable($row, $offer);
             if (($filter === '1' && $refundable) || ($filter === '0' && ! $refundable)) {
                 return true;
@@ -350,12 +356,13 @@ class ItineraryFareConsolidator
             'check_in_summary' => $baggage['checked'],
             'baggage_summary' => $baggage['summary'],
             'meal_included' => data_get($member, 'customer_display_fields.meal') ?? null,
-            'refundable_display' => (bool) ($member['refundable'] ?? false) ? 'Refundable' : 'Non-refundable',
+            // AirBlue Zapways search does not assert refund policy — omit invented labels.
+            'refundable_display' => self::refundableDisplayForMember($member),
             'refund_rule' => trim((string) ($member['refund_rule'] ?? '')) ?: null,
             'modification_rule' => trim((string) ($member['change_rule'] ?? '')) ?: null,
             'cancellation_rule' => trim((string) ($member['cancellation_rule'] ?? '')) ?: null,
             'cabin' => strtolower(trim((string) ($member['cabin'] ?? ''))) ?: null,
-            'booking_class' => trim((string) ($member['booking_class'] ?? data_get($member, 'customer_display_fields.booking_class', data_get($member, 'provider_context.rbd', '')))) ?: null,
+            'booking_class' => trim((string) ($member['booking_class'] ?? data_get($member, 'customer_display_fields.booking_class', data_get($member, 'provider_context.rbd', data_get($member, 'segments.0.rbd', data_get($member, 'segments.0.booking_class', '')))))) ?: null,
             'fare_basis' => trim((string) ($member['fare_basis'] ?? data_get($member, 'customer_display_fields.fare_basis', data_get($member, 'provider_context.fare_basis', '')))) ?: null,
             'brand_code' => trim((string) (data_get($member, 'provider_context.fare_type_code', ''))) ?: null,
             'departure_fare_key' => trim((string) (
@@ -370,6 +377,22 @@ class ItineraryFareConsolidator
             'pia_ndc_provider_backed' => self::memberHasPiaNdcProviderContext($member),
             'selectable' => true,
         ], static fn (mixed $v): bool => $v !== null && $v !== '');
+    }
+
+    /**
+     * @param  array<string, mixed>  $member
+     */
+    protected static function refundableDisplayForMember(array $member): ?string
+    {
+        $provider = strtolower(trim((string) ($member['supplier_provider'] ?? '')));
+        if ($provider === SupplierProvider::Airblue->value) {
+            $explicitRule = trim((string) ($member['refund_rule'] ?? $member['cancellation_rule'] ?? ''));
+            if ($explicitRule === '') {
+                return null;
+            }
+        }
+
+        return (bool) ($member['refundable'] ?? false) ? 'Refundable' : 'Non-refundable';
     }
 
     /**
@@ -500,6 +523,31 @@ class ItineraryFareConsolidator
         $rows = is_array($offer['fare_family_options'] ?? null) ? $offer['fare_family_options'] : [];
 
         return array_values(array_filter($rows, is_array(...)));
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     * @param  array<string, mixed>  $offer
+     */
+    protected static function rowHasKnownRefundability(array $row, array $offer): bool
+    {
+        $display = trim((string) ($row['refundable_display'] ?? ''));
+        if ($display !== '') {
+            return true;
+        }
+        $rule = trim((string) ($row['refund_rule'] ?? $row['cancellation_rule'] ?? ''));
+        if ($rule !== '') {
+            return true;
+        }
+        $memberCtx = is_array($row['provider_context'] ?? null) ? $row['provider_context'] : [];
+        if ($memberCtx !== []) {
+            return FlightOfferDisplayPresenter::isRefundabilityKnown([
+                'supplier_provider' => $offer['supplier_provider'] ?? null,
+                'provider_context' => $memberCtx,
+            ]);
+        }
+
+        return FlightOfferDisplayPresenter::isRefundabilityKnown($offer);
     }
 
     /**

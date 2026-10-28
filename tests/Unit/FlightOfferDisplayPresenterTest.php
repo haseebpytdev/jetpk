@@ -623,6 +623,46 @@ class FlightOfferDisplayPresenterTest extends TestCase
         $this->assertSame('Sabre', $summary['provider_label']);
     }
 
+    public function test_airblue_unknown_refundability_omits_refund_status_and_is_not_known(): void
+    {
+        $offer = [
+            'supplier_provider' => 'airblue',
+            'airline_code' => 'PA',
+            'flight_number' => '201',
+            'cabin' => 'economy',
+            'fare_family' => 'EV',
+            'refundable' => false,
+            'provider_context' => [
+                'refundability_known' => false,
+                'fare_type_code' => 'EV',
+                'rbd' => 'U',
+            ],
+            'baggage' => ['checked' => null, 'cabin' => null, 'summary' => null],
+            'segments' => [
+                ['origin' => 'ISB', 'destination' => 'KHI', 'departure_at' => '2026-12-29T10:45:00', 'arrival_at' => '2026-12-29T12:45:00', 'duration_minutes' => 120, 'airline_code' => 'PA'],
+            ],
+        ];
+
+        $this->assertFalse(FlightOfferDisplayPresenter::isRefundabilityKnown($offer));
+        $summary = FlightOfferDisplayPresenter::buildFareSummaryDisplay($offer, 'AirBlue', null, null, null);
+        $this->assertNull($summary['refund_status']);
+        $this->assertSame('AirBlue', $summary['provider_label']);
+    }
+
+    public function test_known_non_refundable_provider_still_shows_non_refundable(): void
+    {
+        $offer = [
+            'supplier_provider' => 'sabre',
+            'airline_code' => 'EK',
+            'refundable' => false,
+            'segments' => [],
+        ];
+
+        $this->assertTrue(FlightOfferDisplayPresenter::isRefundabilityKnown($offer));
+        $summary = FlightOfferDisplayPresenter::buildFareSummaryDisplay($offer, 'Emirates', null, null, null);
+        $this->assertSame('Non-refundable', $summary['refund_status']);
+    }
+
     public function test_fare_family_options_display_single_synthetic_default_when_universal_choice_enabled(): void
     {
         Config::set('ota.universal_fare_choice_enabled', true);
@@ -1032,6 +1072,69 @@ class FlightOfferDisplayPresenterTest extends TestCase
         $this->assertTrue($p['has_branded_fares']);
         $this->assertSame([], $p['branded_fares_display_options']);
         $this->assertSame([], $p['fare_family_options_display']);
+    }
+
+    public function test_airblue_branded_fare_gates_use_airblue_config_not_sabre_defaults(): void
+    {
+        Config::set('suppliers.sabre.branded_fares_display_enabled', false);
+        Config::set('suppliers.sabre.branded_fares_selection_enabled', false);
+        Config::set('suppliers.airblue.branded_fares_display_enabled', true);
+        Config::set('suppliers.airblue.branded_fares_selection_enabled', true);
+
+        $offer = [
+            'supplier_provider' => 'airblue',
+            'origin' => 'ISB',
+            'destination' => 'KHI',
+            'fare_family' => 'EV',
+            'branded_fares' => [],
+            'fare_family_options' => [
+                [
+                    'name' => 'EV',
+                    'brand_name' => 'EV',
+                    'brand_code' => 'EV',
+                    'option_key' => 'grouped-offer-ev',
+                    'source_offer_id' => 'ab-ev',
+                    'price_total' => 25000,
+                    'currency' => 'PKR',
+                    'booking_class' => 'U',
+                    'cabin' => 'economy',
+                    'selectable' => true,
+                    'is_grouped_offer_option' => true,
+                ],
+                [
+                    'name' => 'EF',
+                    'brand_name' => 'EF',
+                    'brand_code' => 'EF',
+                    'option_key' => 'grouped-offer-ef',
+                    'source_offer_id' => 'ab-ef',
+                    'price_total' => 26000,
+                    'currency' => 'PKR',
+                    'booking_class' => 'U',
+                    'cabin' => 'economy',
+                    'selectable' => true,
+                    'is_grouped_offer_option' => true,
+                ],
+            ],
+            'itinerary_fare_group' => [
+                'is_consolidated_parent' => true,
+                'grouped_offer_count' => 2,
+            ],
+            'segments' => [
+                ['origin' => 'ISB', 'destination' => 'KHI', 'departure_at' => '2026-12-29T10:45:00', 'arrival_at' => '2026-12-29T12:45:00', 'duration_minutes' => 120],
+            ],
+        ];
+
+        $this->assertTrue(FlightOfferDisplayPresenter::brandedFaresDisplayEnabledForOffer($offer));
+        $this->assertTrue(FlightOfferDisplayPresenter::brandedFaresSelectionEnabledForOffer($offer));
+
+        $p = FlightOfferDisplayPresenter::buildPresentation($offer, ['origin' => 'ISB', 'destination' => 'KHI'], []);
+        $this->assertTrue($p['branded_fares_display_enabled']);
+        $this->assertTrue($p['has_branded_fares'] || $p['has_fare_choice_options'] || count($p['fare_family_options_display']) >= 2);
+        $this->assertGreaterThanOrEqual(2, count($p['fare_family_options_display']));
+        $this->assertSame('EV', $p['fare_family_options_display'][0]['name'] ?? null);
+
+        Config::set('suppliers.airblue.branded_fares_display_enabled', false);
+        $this->assertFalse(FlightOfferDisplayPresenter::brandedFaresDisplayEnabledForOffer($offer));
     }
 
     public function test_format_criteria_route_label_round_trip_and_multi_city(): void

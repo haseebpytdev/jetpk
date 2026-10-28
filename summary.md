@@ -19,6 +19,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
+| 2026-10-28 | AIRBLUE-V3-FRONTEND-FARE-PRESENTATION | Zapways same-itinerary FareType variants (EF/EX/EV) → exact `fare_family`/`fare_type_code`/`rbd`/`cabin`; consolidator selectable options; **`suppliers.airblue.branded_fares_*`** gates; no invented baggage/refund labels. Evidence: **`docs/evidence/jp-airblue-v3-frontend-uat/`**. Status: **PR_READY** (no merge/deploy). |
 | 2026-10-28 | AirBlue v3 mutation safety | Shared **`AirBlueAmbiguousMutationClassifier`**; ticketed Cancel → `ticketed_booking_requires_refund`; AirDemandTicket / Cancel / Type5 seat uncertain-after-send + Retrieve reconciliation (Cancel uncertain stays blocked). Tests: ticketing/cancel/ancillary uncertain suites. Status: **PR_READY** (zero provider calls; no deploy). |
 | 2026-10-28 | AirBlue Zapways v3 Type=1 full refund | **`AirBlueRefundService::refundFull`** (fail-closed `credentials.refund_enabled`); Type=1 AirBookModify builder omits Instance; Ticketing REFUNDED + negative fare parse; duplicate/uncertain guards (no Type=1 retry). Tests: **`AirBlueFullRefundType1Test`**. Status: **RUNTIME_PR_READY** (no provider mutation / no deploy). |
 | 2026-10-16 | OPS-DEF-0011/0012 guest token hardening | **TWO_PHASE:** atomic token rotation (expire prior active rows); session bind + token-free /guest/bookings/{id} + mutation/doc URLs; legacy /access/{token} exchange-only; guest Referrer-Policy: no-referrer + no-store; Next clean page. Status: **FIX_READY_FOR_DEPLOYMENT** (no prod deploy). |
@@ -1201,7 +1202,7 @@ Dual-channel AirBlue (PA): **`crane_ndc`** (Hitit Crane NDC 20.1) and **`zapways
 | `AirBlueClient.php` | Routes NDC vs OTA SOAP calls + `air-blue` log. | `call`, `callNdc`, `callOta` |
 | `AirBlueConfigResolver.php` | Channel-aware endpoint/credentials. | `resolve`, `resolveNdc`, `resolveOta`, `apiChannel` |
 | `AirBlueXmlBuilder.php` / `AirBlueXmlParser.php` / `AirBlueResponseNormalizer.php` | Crane NDC 20.1 stack. | search/book/ticket/cancel normalizers |
-| `AirBlueOtaXmlBuilder.php` / `AirBlueOtaXmlParser.php` / `AirBlueOtaResponseNormalizer.php` | Zapways OTA stack. | `AirLowFareSearch`, book/retrieve normalizers |
+| `AirBlueOtaXmlBuilder.php` / `AirBlueOtaXmlParser.php` / `AirBlueOtaResponseNormalizer.php` | Zapways OTA stack; search normalizer preserves exact FareType/RBD/CabinClass (+ consolidator fare options). | `AirLowFareSearch`, book/retrieve normalizers |
 | `AirBlueFlightSearchService.php` | Channel branch search. | `search` |
 | `AirBlueBookingService.php` | NDC `DoOrderCreate` (+ OTA path when channel=ota). | `createSupplierBooking` |
 | `AirBlueRetrieveService.php` | Retrieve/sync `airblue_context`; reconciles uncertain ticketing/seat modify. | `retrieveAndSync` |

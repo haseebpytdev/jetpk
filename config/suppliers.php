@@ -456,6 +456,13 @@ return [
         'connect_timeout_seconds' => (int) env('AIRBLUE_CONNECT_TIMEOUT_SECONDS', 10),
         'username_header' => env('AIRBLUE_USERNAME_HEADER', 'username'),
         'password_header' => env('AIRBLUE_PASSWORD_HEADER', 'password'),
+        /**
+         * AirBlue Zapways often returns multiple FareType variants for the same itinerary.
+         * When enabled, ItineraryFareConsolidator + FlightOfferDisplayPresenter expose those
+         * exact supplier FareType codes as selectable fare-family options (no invented labels).
+         */
+        'branded_fares_display_enabled' => (bool) env('AIRBLUE_BRANDED_FARES_DISPLAY_ENABLED', true),
+        'branded_fares_selection_enabled' => (bool) env('AIRBLUE_BRANDED_FARES_SELECTION_ENABLED', true),
         'default_protocol_version' => '2.0',
         'protocol_versions' => [
             '2.0' => [

@@ -1535,14 +1535,18 @@ class FlightOfferDisplayPresenter
         $flightNumber = trim((string) ($offer['flight_number'] ?? ''));
         $cabin = trim((string) ($offer['cabin'] ?? ''));
         $fareFamily = trim((string) ($offer['fare_family'] ?? ''));
-        $refundable = (bool) ($offer['refundable'] ?? false);
         $provider = strtolower(trim((string) ($offer['supplier_provider'] ?? '')));
         $providerLabel = match ($provider) {
             'sabre' => 'Sabre',
             'duffel' => 'Duffel',
             'iati' => 'IATI',
+            'airblue' => 'AirBlue',
             default => '',
         };
+        $refundStatus = null;
+        if (self::isRefundabilityKnown($offer)) {
+            $refundStatus = (bool) ($offer['refundable'] ?? false) ? 'Refundable' : 'Non-refundable';
+        }
 
         $airlineLine = $primaryDisplayName !== ''
             ? ($airlineCode !== '' ? $primaryDisplayName.' ('.$airlineCode.')' : $primaryDisplayName)
@@ -1560,7 +1564,7 @@ class FlightOfferDisplayPresenter
             'airline' => $airlineLine,
             'flight_numbers' => $flightNumber !== '' ? $flightNumber : null,
             'cabin' => $cabin !== '' ? $cabin : null,
-            'refund_status' => $refundable ? 'Refundable' : 'Non-refundable',
+            'refund_status' => $refundStatus,
             'fare_family' => $fareFamily !== '' ? $fareFamily : null,
             'baggage_lines' => $baggageLines,
             'provider_label' => $providerLabel !== '' ? $providerLabel : null,
@@ -1880,6 +1884,36 @@ class FlightOfferDisplayPresenter
         return $mapped;
     }
 
+    /**
+     * Whether the offer's refundable bool is supplier-asserted truth (not a DTO default).
+     *
+     * AirBlue Zapways search does not supply refundability; presentation/filter layers
+     * must treat those offers as UNKNOWN rather than Non-refundable.
+     *
+     * @param  array<string, mixed>  $offer
+     */
+    public static function isRefundabilityKnown(array $offer): bool
+    {
+        $ctx = null;
+        if (is_array($offer['provider_context'] ?? null)) {
+            $ctx = $offer['provider_context'];
+        } elseif (is_array($offer['raw_payload']['provider_context'] ?? null)) {
+            $ctx = $offer['raw_payload']['provider_context'];
+        }
+
+        if (is_array($ctx) && array_key_exists('refundability_known', $ctx)) {
+            return (bool) $ctx['refundability_known'];
+        }
+
+        $provider = strtolower(trim((string) ($offer['supplier_provider'] ?? '')));
+        if ($provider === SupplierProvider::Airblue->value) {
+            // Defensive: stale cache / fixtures without the marker stay UNKNOWN.
+            return false;
+        }
+
+        return true;
+    }
+
     public static function brandedFaresDisplayEnabled(): bool
     {
         return (bool) config('suppliers.sabre.branded_fares_display_enabled', false);
@@ -1901,6 +1935,9 @@ class FlightOfferDisplayPresenter
         if ($provider === 'iati') {
             return (bool) config('suppliers.iati.branded_fares_display_enabled', true);
         }
+        if ($provider === SupplierProvider::Airblue->value) {
+            return (bool) config('suppliers.airblue.branded_fares_display_enabled', true);
+        }
 
         return self::brandedFaresDisplayEnabled();
     }
@@ -1921,6 +1958,9 @@ class FlightOfferDisplayPresenter
         }
         if ($provider === 'iati') {
             return (bool) config('suppliers.iati.branded_fares_selection_enabled', true);
+        }
+        if ($provider === SupplierProvider::Airblue->value) {
+            return (bool) config('suppliers.airblue.branded_fares_selection_enabled', true);
         }
 
         return self::brandedFaresSelectionEnabled();

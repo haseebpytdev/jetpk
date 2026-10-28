@@ -1486,7 +1486,6 @@ class FlightController extends Controller
             'duration' => $durationLabel,
             'stops' => (int) ($offer['stops'] ?? 0),
             'baggage' => (string) ($offer['baggage'] ?? ''),
-            'refundable' => (bool) ($offer['refundable'] ?? false),
             'currency' => (string) ($offer['currency'] ?? 'PKR'),
             'supplier_currency' => (string) ($offer['supplier_currency'] ?? $pricingCurrency),
             'supplier_total' => $supplierTotal,
@@ -1568,6 +1567,11 @@ class FlightController extends Controller
                 'revalidation_note' => 'Airline price validation is required before booking.',
                 'search_age_display' => 'From current search results',
             ];
+        }
+
+        // Omit unknown refundability so clients (FareBadge) do not invent Non-refundable.
+        if (FlightOfferDisplayPresenter::isRefundabilityKnown($offer)) {
+            $row['refundable'] = (bool) ($offer['refundable'] ?? false);
         }
 
         if (PublicFlightSearchSecurity::allowsDebugFares($request)) {
@@ -2108,10 +2112,12 @@ class FlightController extends Controller
             if ($stops >= 2) {
                 $twoPlus++;
             }
-            if ((bool) ($offer['refundable'] ?? false)) {
-                $refundable++;
-            } else {
-                $nonRefundable++;
+            if (FlightOfferDisplayPresenter::isRefundabilityKnown($offer)) {
+                if ((bool) ($offer['refundable'] ?? false)) {
+                    $refundable++;
+                } else {
+                    $nonRefundable++;
+                }
             }
             $isBookable = $this->offerIsCustomerBookable($offer, $criteria);
             if ($isBookable) {
