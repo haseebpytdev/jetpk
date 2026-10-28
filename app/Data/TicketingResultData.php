@@ -22,5 +22,7 @@ class TicketingResultData
         public ?string $error_code = null,
         public ?string $error_message = null,
         public array $warnings = [],
+        public string $outcome = 'UNKNOWN',
+        public int $provider_calls = 0,
     ) {}
 }

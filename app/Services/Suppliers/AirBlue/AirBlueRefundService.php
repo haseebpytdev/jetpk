@@ -193,17 +193,7 @@ class AirBlueRefundService
             // OTA Error/@Code after HTTP 200 is definitive. Transport/HTTP/SOAP-fault after
             // send is ambiguous — persist uncertain and never auto-retry Type=1.
             $code = (string) $exception->normalizedCode;
-            $ambiguousAfterSend = $transmitted && in_array($code, [
-                'supplier_transport_failed',
-                'supplier_http_error',
-                'soap_fault',
-                'supplier_auth_failed',
-                'malformed_xml',
-                'empty_xml',
-                'xml_too_large',
-            ], true);
-
-            if ($ambiguousAfterSend) {
+            if (AirBlueAmbiguousMutationClassifier::isUncertainAfterTransmission($transmitted, $code)) {
                 $this->persistUncertain($booking, $context);
 
                 return new RefundResultData(
