@@ -1,0 +1,38 @@
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/hero-desktop.avif 13115
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/hero-desktop.webp 2320
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/hero-desktop.jpg 13069
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/hero-tablet.avif 9834
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/hero-tablet.webp 1796
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/hero-mobile.avif 6244
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/hero-mobile.webp 1374
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/hero-original.jpg 46678
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/card-320.avif 2473
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/card-320.webp 836
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/card-640.avif 5437
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/card-640.webp 1168
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/card-640.jpg 5429
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/card-original.jpg 26880
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/support-desktop.avif 9982
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/support-desktop.webp 2054
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/support-desktop.jpg 9967
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/support-mobile.avif 9797
+/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive/support-mobile.webp 1924
+AVIF=NO
+WEBP=YES
+[pr139-fixtures] PHP produced non-AVIF .avif bytes; falling back to seed
+[pr139-fixtures] php failed: PHP Fatal error:  Uncaught Error: Call to undefined function imagecreatetruecolor() in /home/pkjetp/tmp/pr139-cleanup-proof/repo/docs/evidence/jp-ui-perf-stability-01a-media/_gen-evidence-images.php:11
+Stack trace:
+#0 /home/pkjetp/tmp/pr139-cleanup-proof/repo/docs/evidence/jp-ui-perf-stability-01a-m
+[pr139-fixtures] /usr/bin/php failed: PHP Fatal error:  Uncaught Error: Call to undefined function imagecreatetruecolor() in /home/pkjetp/tmp/pr139-cleanup-proof/repo/docs/evidence/jp-ui-perf-stability-01a-media/_gen-evidence-images.php:11
+Stack trace:
+#0 /home/pkjetp/tmp/pr139-cleanup-proof/repo/docs/evidence/jp-ui-perf-stability-01a-m
+[pr139-fixtures] copied seed from /home/pkjetp/tmp/pr139-cleanup-proof/repo/docs/evidence/jp-ui-perf-stability-01a-media/fixture-seed
+[pr139-fixtures] ready mode=seed count=19 dir=/home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive
+
+Running 1 test using 1 worker
+
+  ✓  1 [chromium] › tests/pr139-responsive-media-evidence.spec.ts:294:5 › PR139 responsive media browser evidence (4.9s)
+[pr139-fixtures] cleaned /home/pkjetp/tmp/pr139-cleanup-proof/repo/frontend/public/_evidence/pr139-responsive
+[pr139-fixtures] present_after_cleanup=NO
+
+  1 passed (10.3s)

@@ -14,6 +14,8 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   timeout: 90_000,
+  globalSetup: "./scripts/pr139-evidence-global-setup.mjs",
+  globalTeardown: "./scripts/pr139-evidence-global-teardown.mjs",
   use: {
     baseURL,
     trace: "off",

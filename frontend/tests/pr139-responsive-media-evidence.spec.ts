@@ -73,34 +73,28 @@ async function readPictureState(page: Page, testId: string) {
 
 async function captureViewport(page: Page, name: string, width: number, height: number): Promise<Capture> {
   const imageRequests: Capture["imageRequests"] = [];
-  const onRequest = (req: Request) => {
+  const onRequestFinished = async (req: Request) => {
     if (req.resourceType() !== "image") return;
     const url = req.url();
-    if (!isEvidenceImage(url) && !url.includes("/_evidence/")) return;
+    if (!isEvidenceImage(url)) return;
+    const response = await req.response();
+    let transferredBytes: number | null = null;
+    try {
+      // Prefer network transfer size (0 when served from cache / reused).
+      const sizes = await req.sizes();
+      transferredBytes = sizes.responseBodySize;
+    } catch {
+      transferredBytes = null;
+    }
     imageRequests.push({
       url,
       resourceType: req.resourceType(),
+      contentType: response?.headers()["content-type"] ?? null,
+      transferredBytes,
     });
   };
-  const onResponse = async (response: import("@playwright/test").Response) => {
-    const url = response.url();
-    if (!isEvidenceImage(url)) return;
-    const entry = imageRequests.find((item) => item.url === url && item.contentType == null);
-    if (!entry) {
-      imageRequests.push({
-        url,
-        resourceType: "image",
-        contentType: response.headers()["content-type"] ?? null,
-        transferredBytes: (await response.body().catch(() => Buffer.alloc(0))).byteLength,
-      });
-      return;
-    }
-    entry.contentType = response.headers()["content-type"] ?? null;
-    entry.transferredBytes = (await response.body().catch(() => Buffer.alloc(0))).byteLength;
-  };
 
-  page.on("request", onRequest);
-  page.on("response", onResponse);
+  page.on("requestfinished", onRequestFinished);
 
   await page.setViewportSize({ width, height });
 
@@ -216,13 +210,17 @@ async function captureViewport(page: Page, name: string, width: number, height: 
     });
   }
 
-  const heroUrls = imageRequests
-    .map((item) => item.url)
-    .filter((url) => url.includes("/hero-"));
-  const uniqueHero = new Set(heroUrls.map((url) => url.split("?")[0]));
-  const mobileAndDesktopBoth =
-    [...uniqueHero].some((url) => url.includes("hero-mobile.")) &&
-    [...uniqueHero].some((url) => url.includes("hero-desktop."));
+  const heroRequests = imageRequests.filter((item) => item.url.includes("/hero-"));
+  const uniqueHero = new Set(heroRequests.map((item) => item.url.split("?")[0]));
+  const heroNonZeroEvents = heroRequests.filter(
+    (item) => typeof item.transferredBytes === "number" && item.transferredBytes > 0,
+  );
+  const heroZeroByte = heroRequests.filter((item) => item.transferredBytes === 0);
+  // Unique hero URLs that incurred at least one non-zero body transfer.
+  const heroNonZeroUrls = new Set(heroNonZeroEvents.map((item) => item.url.split("?")[0]));
+  const mobileAndDesktopBothTransferred =
+    [...heroNonZeroUrls].some((url) => url.includes("hero-mobile.")) &&
+    [...heroNonZeroUrls].some((url) => url.includes("hero-desktop."));
 
   const supportUrls = imageRequests
     .map((item) => item.url)
@@ -238,8 +236,15 @@ async function captureViewport(page: Page, name: string, width: number, height: 
     HERO_SELECTED_FORMAT: formatFromUrl(String(hero.currentSrc)),
     HERO_SELECTED_URL_IS_DERIVATIVE: isDerivative(String(hero.currentSrc)) ? "YES" : "NO",
     HERO_ORIGINAL_MULTI_MB_SOURCE_SELECTED: isOriginal(String(hero.currentSrc)) ? "YES" : "NO",
-    HERO_DUPLICATE_DOWNLOAD: uniqueHero.size <= 1 ? "NO" : "YES",
-    MOBILE_AND_DESKTOP_HERO_BOTH_DOWNLOADED: mobileAndDesktopBoth ? "YES" : "NO",
+    HERO_UNIQUE_URL_COUNT: uniqueHero.size,
+    HERO_NONZERO_TRANSFER_COUNT: heroNonZeroUrls.size,
+    HERO_NONZERO_RESPONSE_EVENTS: heroNonZeroEvents.length,
+    HERO_ZERO_BYTE_CACHE_OR_REUSE_EVENTS: heroZeroByte.length,
+    // Duplicate cost = more than one distinct hero URL with a non-zero transfer.
+    HERO_DUPLICATE_TRANSFER: heroNonZeroUrls.size <= 1 ? "NO" : "YES",
+    HERO_DUPLICATE_DOWNLOAD: heroNonZeroUrls.size <= 1 ? "NO" : "YES",
+    MOBILE_AND_DESKTOP_HERO_BOTH_TRANSFERRED: mobileAndDesktopBothTransferred ? "YES" : "NO",
+    MOBILE_AND_DESKTOP_HERO_BOTH_DOWNLOADED: mobileAndDesktopBothTransferred ? "YES" : "NO",
     DESTINATION_BROWSER_DERIVATIVE_SELECTED: isDerivative(String(destination.currentSrc))
       ? "YES"
       : "NO",
@@ -272,8 +277,7 @@ async function captureViewport(page: Page, name: string, width: number, height: 
     HERO_REQUEST_COUNT: uniqueHero.size,
   };
 
-  page.off("request", onRequest);
-  page.off("response", onResponse);
+  page.off("requestfinished", onRequestFinished);
 
   return {
     viewport: name,
@@ -299,7 +303,13 @@ test("PR139 responsive media browser evidence", async ({ page }) => {
     expect(capture.assertions.HERO_ORIGINAL_MULTI_MB_SOURCE_SELECTED, `vp ${viewport.name}`).toBe(
       "NO",
     );
+    expect(capture.assertions.HERO_UNIQUE_URL_COUNT, `vp ${viewport.name}`).toBe(1);
+    expect(capture.assertions.HERO_NONZERO_TRANSFER_COUNT, `vp ${viewport.name}`).toBe(1);
+    expect(capture.assertions.HERO_DUPLICATE_TRANSFER, `vp ${viewport.name}`).toBe("NO");
     expect(capture.assertions.HERO_DUPLICATE_DOWNLOAD, `vp ${viewport.name}`).toBe("NO");
+    expect(capture.assertions.MOBILE_AND_DESKTOP_HERO_BOTH_TRANSFERRED, `vp ${viewport.name}`).toBe(
+      "NO",
+    );
     expect(capture.assertions.MOBILE_AND_DESKTOP_HERO_BOTH_DOWNLOADED, `vp ${viewport.name}`).toBe(
       "NO",
     );

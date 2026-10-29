@@ -2,15 +2,17 @@
 
 ```text
 REVIEW_CODE_HEAD_SHA=35a9bdf83aff79464adba173f1f8ae152dab363a
-REVIEW_EVIDENCE_HEAD_SHA=996452feb0c93c913e663617b5bcb74c72794780
-START_HEAD_SHA=996452feb0c93c913e663617b5bcb74c72794780
-EVIDENCE_PUSH_SHA=163394aea3c3cf2937e491a895bdd39102056b62
-FINAL_HEAD_SHA=163394aea3c3cf2937e491a895bdd39102056b62
+REVIEW_EVIDENCE_START_HEAD_SHA=996452feb0c93c913e663617b5bcb74c72794780
+BROWSER_EVIDENCE_HEAD_SHA=6870f5906a3a180c3ffdd3395559c1e6c8906981
 ```
 
-Bookkeeping note: an amend after writing `68e8f1cf` into this file produced tip
-`163394ae` (pushed). Any later bookkeeping-only commit updates `FINAL_HEAD_SHA`
-in the return block / Git tip, not by rewriting history.
+Historical note: an intermediate evidence commit tip was `163394ae` (after an
+amend of `68e8f1cf`); bookkeeping commit `6870f590` was the certified browser-
+evidence head before public-fixture cleanup. See `09-FIXTURE-CLEANUP.md` for the
+post-cleanup tip (`FINAL_CLEANUP_HEAD_SHA` / git tip).
+
+Public synthetic fixtures under `frontend/public/_evidence/` are **no longer
+tracked**; they are generated at Playwright globalSetup and cleaned in teardown.
 
 ## Build hang root cause
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T09:30:29.924Z",
+  "generatedAt": "2026-10-29T09:59:58.720Z",
   "captures": [
     {
       "viewport": "390",
@@ -132,14 +132,14 @@
         {
           "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-mobile.avif",
           "resourceType": "image",
-          "contentType": "image/avif",
-          "transferredBytes": 480
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 21001
         },
         {
           "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.avif",
           "resourceType": "image",
-          "contentType": "image/avif",
-          "transferredBytes": 450
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 34143
         }
       ],
       "assertions": {
@@ -148,7 +148,13 @@
         "HERO_SELECTED_FORMAT": "AVIF",
         "HERO_SELECTED_URL_IS_DERIVATIVE": "YES",
         "HERO_ORIGINAL_MULTI_MB_SOURCE_SELECTED": "NO",
+        "HERO_UNIQUE_URL_COUNT": 1,
+        "HERO_NONZERO_TRANSFER_COUNT": 1,
+        "HERO_NONZERO_RESPONSE_EVENTS": 1,
+        "HERO_ZERO_BYTE_CACHE_OR_REUSE_EVENTS": 0,
+        "HERO_DUPLICATE_TRANSFER": "NO",
         "HERO_DUPLICATE_DOWNLOAD": "NO",
+        "MOBILE_AND_DESKTOP_HERO_BOTH_TRANSFERRED": "NO",
         "MOBILE_AND_DESKTOP_HERO_BOTH_DOWNLOADED": "NO",
         "DESTINATION_BROWSER_DERIVATIVE_SELECTED": "YES",
         "ROUTE_BROWSER_DERIVATIVE_SELECTED": "YES",
@@ -291,14 +297,14 @@
         {
           "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-mobile.avif",
           "resourceType": "image",
-          "contentType": null,
-          "transferredBytes": 0
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 34146
         },
         {
           "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.avif",
           "resourceType": "image",
-          "contentType": null,
-          "transferredBytes": 0
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 21061
         }
       ],
       "assertions": {
@@ -307,7 +313,13 @@
         "HERO_SELECTED_FORMAT": "AVIF",
         "HERO_SELECTED_URL_IS_DERIVATIVE": "YES",
         "HERO_ORIGINAL_MULTI_MB_SOURCE_SELECTED": "NO",
+        "HERO_UNIQUE_URL_COUNT": 1,
+        "HERO_NONZERO_TRANSFER_COUNT": 1,
+        "HERO_NONZERO_RESPONSE_EVENTS": 1,
+        "HERO_ZERO_BYTE_CACHE_OR_REUSE_EVENTS": 0,
+        "HERO_DUPLICATE_TRANSFER": "NO",
         "HERO_DUPLICATE_DOWNLOAD": "NO",
+        "MOBILE_AND_DESKTOP_HERO_BOTH_TRANSFERRED": "NO",
         "MOBILE_AND_DESKTOP_HERO_BOTH_DOWNLOADED": "NO",
         "DESTINATION_BROWSER_DERIVATIVE_SELECTED": "YES",
         "ROUTE_BROWSER_DERIVATIVE_SELECTED": "YES",
@@ -390,7 +402,7 @@
         ]
       },
       "route": {
-        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.avif",
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-320.avif",
         "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.jpg",
         "loading": "lazy",
         "sources": [
@@ -468,38 +480,38 @@
         {
           "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-desktop.avif",
           "resourceType": "image",
-          "contentType": "image/avif",
-          "transferredBytes": 496
-        },
-        {
-          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/support-desktop.avif",
-          "resourceType": "image",
-          "contentType": "image/avif",
-          "transferredBytes": 530
-        },
-        {
-          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-desktop.avif",
-          "resourceType": "image",
-          "contentType": null,
-          "transferredBytes": 0
-        },
-        {
-          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.avif",
-          "resourceType": "image",
-          "contentType": null,
-          "transferredBytes": 0
-        },
-        {
-          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/support-desktop.avif",
-          "resourceType": "image",
-          "contentType": null,
-          "transferredBytes": 0
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 21001
         },
         {
           "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-320.avif",
           "resourceType": "image",
-          "contentType": "image/avif",
-          "transferredBytes": 443
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 21001
+        },
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/support-desktop.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 21001
+        },
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-desktop.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 34147
+        },
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-320.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 23646
+        },
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/support-desktop.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 23646
         }
       ],
       "assertions": {
@@ -508,7 +520,13 @@
         "HERO_SELECTED_FORMAT": "AVIF",
         "HERO_SELECTED_URL_IS_DERIVATIVE": "YES",
         "HERO_ORIGINAL_MULTI_MB_SOURCE_SELECTED": "NO",
+        "HERO_UNIQUE_URL_COUNT": 1,
+        "HERO_NONZERO_TRANSFER_COUNT": 1,
+        "HERO_NONZERO_RESPONSE_EVENTS": 2,
+        "HERO_ZERO_BYTE_CACHE_OR_REUSE_EVENTS": 0,
+        "HERO_DUPLICATE_TRANSFER": "NO",
         "HERO_DUPLICATE_DOWNLOAD": "NO",
+        "MOBILE_AND_DESKTOP_HERO_BOTH_TRANSFERRED": "NO",
         "MOBILE_AND_DESKTOP_HERO_BOTH_DOWNLOADED": "NO",
         "DESTINATION_BROWSER_DERIVATIVE_SELECTED": "YES",
         "ROUTE_BROWSER_DERIVATIVE_SELECTED": "YES",
