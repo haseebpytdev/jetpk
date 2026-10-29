@@ -1,0 +1,49 @@
+{
+  "beforeDecode": {
+    "src": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+    "complete": false,
+    "naturalWidth": 0,
+    "naturalHeight": 0,
+    "widthAttr": "144",
+    "heightAttr": "36",
+    "box": {
+      "width": 144,
+      "height": 36,
+      "x": 84,
+      "y": 14
+    }
+  },
+  "after": {
+    "src": "http://127.0.0.1:3021/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+    "complete": true,
+    "naturalWidth": 0,
+    "naturalHeight": 0,
+    "widthAttr": "144",
+    "heightAttr": "36",
+    "box": {
+      "width": 144,
+      "height": 36,
+      "x": 84,
+      "y": 14
+    }
+  },
+  "mutations": [
+    {
+      "at": "dom-ready",
+      "src": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+      "srcset": null,
+      "width": "144",
+      "height": "36",
+      "box": {
+        "x": 84,
+        "y": 14,
+        "width": 144,
+        "height": 36
+      }
+    }
+  ],
+  "srcChanges": [],
+  "configRequests": [],
+  "widthDelta": 0,
+  "heightDelta": 0
+}

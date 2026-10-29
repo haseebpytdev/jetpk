@@ -1,0 +1,5 @@
+route=/flights
+source=production-readonly
+logo_src=/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png
+width=144
+height=36

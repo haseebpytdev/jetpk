@@ -46,6 +46,20 @@ export type PublicConfig = {
   ai_assistant_mode?: string;
 };
 
+/** Thrown inside unstable_cache so a null/failed fetch is not persisted as a valid HIT. */
+export const PUBLIC_CONFIG_UNAVAILABLE = "PUBLIC_CONFIG_UNAVAILABLE";
+
+/**
+ * Successful public-config payloads are cacheable; null/failure must not become
+ * a durable cached value for PUBLIC_CONTENT_CACHE_TTL_SECONDS.
+ */
+export function requirePublicConfigForCache(config: PublicConfig | null): PublicConfig {
+  if (!config) {
+    throw new Error(PUBLIC_CONFIG_UNAVAILABLE);
+  }
+  return config;
+}
+
 function publicConfigEndpoint(): string {
   if (typeof window !== "undefined") {
     return laravelApiPath("/api/public/content/config");
@@ -91,20 +105,26 @@ async function fetchPublicConfigRaw(): Promise<PublicConfig | null> {
 
 async function getCachedPublicConfig(): Promise<PublicConfig | null> {
   let cacheMiss = false;
-  const data = await unstable_cache(
-    async () => {
-      cacheMiss = true;
-      return fetchPublicConfigRaw();
-    },
-    ["jp-public-config"],
-    {
-      revalidate: PUBLIC_CONTENT_CACHE_TTL_SECONDS,
-      tags: [PUBLIC_CACHE_TAGS.content, PUBLIC_CACHE_TAGS.config],
-    },
-  )();
+  try {
+    const data = await unstable_cache(
+      async () => {
+        cacheMiss = true;
+        return requirePublicConfigForCache(await fetchPublicConfigRaw());
+      },
+      ["jp-public-config"],
+      {
+        revalidate: PUBLIC_CONTENT_CACHE_TTL_SECONDS,
+        tags: [PUBLIC_CACHE_TAGS.content, PUBLIC_CACHE_TAGS.config],
+      },
+    )();
 
-  recordLaravelPublicConfigCall(cacheMiss ? "MISS" : "HIT");
-  return data;
+    recordLaravelPublicConfigCall(cacheMiss ? "MISS" : "HIT");
+    return data;
+  } catch {
+    // Transient failure: degrade this render with null, do not poison the 1h cache.
+    recordLaravelPublicConfigCall("MISS");
+    return null;
+  }
 }
 
 async function getConfigImpl(options?: { preview?: boolean }): Promise<PublicConfig | null> {
@@ -121,6 +141,7 @@ export const PublicConfigService = {
   /**
    * React cache() → unstable_cache → raw Laravel fetch.
    * One config resolution per RSC request; persistent across requests for published public.
+   * Null/failed fetches are not persisted as valid cache entries.
    */
   getConfig: cache(getConfigImpl),
 };
