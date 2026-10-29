@@ -1,0 +1,178 @@
+
+> jetpk-public-frontend@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.22
+   - Experiments (use with caution):
+     · staleTimes
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 37.1s
+   Linting and checking validity of types ...
+
+./components/layout/SiteFooter.tsx
+8:8  Warning: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/ui/Dropdown.tsx
+78:6  Warning: React Hook useLayoutEffect has a missing dependency: 'updatePortalPosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./lib/homepage-media.ts
+104:3  Warning: 'index' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+151:3  Warning: '_index' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/40) ...
+{"scope":"jp-public-content","resource":"managed_page","pageKey":"about","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_PAGE_CALLS":1}
+{"scope":"jp-public-content","resource":"managed_page","pageKey":"faq","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_PAGE_CALLS":2}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_CONFIG_CALLS":1}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_CONFIG_CALLS":1}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_CONFIG_CALLS":2}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_CONFIG_CALLS":3}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_CONFIG_CALLS":4}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_CONFIG_CALLS":2}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_CONFIG_CALLS":3}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_CONFIG_CALLS":4}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_CONFIG_CALLS":6}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":4}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+   Generating static pages (10/40) 
+   Generating static pages (20/40) 
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":5}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+{"scope":"jp-public-content","resource":"managed_page","pageKey":"terms","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_PAGE_CALLS":3}
+{"scope":"jp-public-content","resource":"managed_page","pageKey":"privacy","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_PAGE_CALLS":4}
+{"scope":"jp-public-content","resource":"managed_page","pageKey":"support","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_PAGE_CALLS":5}
+{"scope":"jp-public-content","resource":"homepage","CACHE_STATUS":"MISS","LARAVEL_PUBLIC_HOMEPAGE_CALLS":1}
+   Generating static pages (30/40) 
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+{"scope":"jp-public-content","resource":"public_config","CACHE_STATUS":"HIT","LARAVEL_PUBLIC_CONFIG_CALLS":7}
+ ✓ Generating static pages (40/40)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                       Size  First Load JS  Revalidate  Expire
+┌ ƒ /                                          1.99 kB         187 kB
+├ ƒ /_not-found                                  198 B         103 kB
+├ ƒ /[slug]                                    1.99 kB         187 kB
+├ ƒ /about-us                                  1.99 kB         187 kB
+├ ƒ /access-denied                             2.88 kB         186 kB
+├ ƒ /agent                                       198 B         103 kB
+├ ƒ /agent/accounting/ledger                     143 B         145 kB
+├ ƒ /agent/agency                                144 B         145 kB
+├ ƒ /agent/bookings                              144 B         145 kB
+├ ƒ /agent/bookings/[reference]                  144 B         145 kB
+├ ƒ /agent/bookings/create                       144 B         145 kB
+├ ƒ /agent/commissions                           144 B         145 kB
+├ ƒ /agent/dashboard                             144 B         145 kB
+├ ƒ /agent/deposits                              145 B         145 kB
+├ ƒ /agent/deposits/new                          144 B         145 kB
+├ ƒ /agent/finance/statement                     144 B         145 kB
+├ ƒ /agent/invoices                              144 B         145 kB
+├ ƒ /agent/notifications                         144 B         145 kB
+├ ƒ /agent/payments                              144 B         145 kB
+├ ƒ /agent/profile                               144 B         145 kB
+├ ƒ /agent/register                              254 B         193 kB
+├ ƒ /agent/register/submitted                    265 B         193 kB
+├ ƒ /agent/reports                               144 B         145 kB
+├ ƒ /agent/security                              144 B         145 kB
+├ ƒ /agent/staff                                 144 B         145 kB
+├ ƒ /agent/staff/[id]                            144 B         145 kB
+├ ƒ /agent/staff/new                             144 B         145 kB
+├ ƒ /agent/support                               144 B         145 kB
+├ ƒ /agent/support/[reference]                   144 B         145 kB
+├ ƒ /agent/travelers                             144 B         145 kB
+├ ƒ /agent/travelers/[id]/edit                   144 B         145 kB
+├ ƒ /agent/travelers/new                         144 B         145 kB
+├ ƒ /agent/wallet                                144 B         145 kB
+├ ƒ /agent/wallet/ledger                         144 B         145 kB
+├ ƒ /api/internal/revalidate-public-content      198 B         103 kB
+├ ƒ /api/internal/revalidate/seo                 198 B         103 kB
+├ ƒ /booking/confirmation                        143 B         129 kB
+├ ƒ /booking/invoice                           6.41 kB         123 kB
+├ ƒ /booking/passengers                        19.4 kB         161 kB
+├ ƒ /booking/payment                             198 B         103 kB
+├ ƒ /booking/payment/card                      8.39 kB         125 kB
+├ ƒ /booking/payment/manual                    7.03 kB         124 kB
+├ ƒ /booking/payment/return                      198 B         103 kB
+├ ƒ /booking/payment/status                    8.39 kB         125 kB
+├ ƒ /booking/review                            10.1 kB         127 kB
+├ ƒ /booking/status                              143 B         129 kB
+├ ƒ /contact                                   1.99 kB         187 kB
+├ ƒ /customer                                    198 B         103 kB
+├ ƒ /customer/bookings                           144 B         137 kB
+├ ƒ /customer/bookings/[reference]               143 B         137 kB
+├ ƒ /customer/dashboard                          144 B         137 kB
+├ ƒ /customer/invoices                           144 B         137 kB
+├ ƒ /customer/invoices/[reference]               144 B         137 kB
+├ ƒ /customer/notifications                      144 B         137 kB
+├ ƒ /customer/payments                           144 B         137 kB
+├ ƒ /customer/profile                            144 B         137 kB
+├ ƒ /customer/security                           144 B         137 kB
+├ ƒ /customer/support                            143 B         137 kB
+├ ƒ /customer/support/[reference]                143 B         137 kB
+├ ƒ /customer/travelers                          144 B         137 kB
+├ ƒ /dev/jetpk-theme-lab                       4.69 kB         115 kB
+├ ƒ /faq                                       1.99 kB         187 kB
+├ ƒ /flights/fare-selection                    7.43 kB         204 kB
+├ ƒ /flights/results                             151 B         221 kB
+├ ƒ /flights/return-options                    10.4 kB         204 kB
+├ ƒ /flights/s/[ref]                             151 B         221 kB
+├ ƒ /forgot-password                             265 B         193 kB
+├ ○ /groups                                    6.64 kB         195 kB          1m      1y
+├ ƒ /groups/[packageId]                          863 B         136 kB
+├ ƒ /groups/[packageId]/passengers               863 B         136 kB
+├ ƒ /groups/booking/[bookingRef]/confirmation    863 B         136 kB
+├ ƒ /groups/booking/[bookingRef]/payment         863 B         136 kB
+├ ƒ /groups/booking/[bookingRef]/review          863 B         136 kB
+├ ƒ /groups/search                               317 B         203 kB
+├ ƒ /guest/bookings/[booking]                   6.3 kB         199 kB
+├ ƒ /guest/bookings/[booking]/access/[token]   1.99 kB         187 kB
+├ ƒ /legal/[slug]                              1.99 kB         187 kB
+├ ƒ /login                                     1.16 kB         194 kB
+├ ƒ /login/otp                                   265 B         193 kB
+├ ƒ /lookup-booking                            4.08 kB         193 kB
+├ ƒ /pages/[slug]                              1.99 kB         187 kB
+├ ƒ /password/force-change                       254 B         193 kB
+├ ƒ /privacy                                   1.99 kB         187 kB
+├ ƒ /register                                    512 B         193 kB
+├ ƒ /reset-password/[token]                      254 B         193 kB
+├ ○ /robots.txt                                  198 B         103 kB
+├ ƒ /sitemap                                   1.99 kB         187 kB
+├ ƒ /sitemap.xml                                 198 B         103 kB
+├ ƒ /support                                   1.99 kB         187 kB
+├ ƒ /terms                                     1.99 kB         187 kB
+└ ƒ /verify-email                                265 B         193 kB
++ First Load JS shared by all                   102 kB
+  ├ chunks/1255-6a221ac26670bd41.js              46 kB
+  ├ chunks/4bd1b696-100b9d70ed4e49c1.js        54.2 kB
+  └ other shared chunks (total)                2.23 kB
+
+
+ƒ Middleware                                   34.1 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

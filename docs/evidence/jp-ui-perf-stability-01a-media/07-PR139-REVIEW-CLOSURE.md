@@ -1,11 +1,17 @@
 # PR #139 review closure note
 
 ```text
-FINAL_HEAD_SHA=35a9bdf83aff79464adba173f1f8ae152dab363a
-RELEASE_GUARDS_NEW_HEAD=PASS
+REVIEW_CODE_HEAD_SHA=35a9bdf83aff79464adba173f1f8ae152dab363a
+REVIEW_EVIDENCE_HEAD_SHA=996452feb0c93c913e663617b5bcb74c72794780
+RELEASE_GUARDS_REVIEW_CODE_HEAD=PASS
 ```
 
-## Closed in code
+Bookkeeping: `07` was first written at `35a9bdf8`, then that evidence file itself
+was committed, advancing the PR head to `996452fe`. Do not rewrite git history;
+use the fields above plus `FINAL_HEAD_SHA` in `08-BUILD-AND-BROWSER-EVIDENCE.md`
+after the build/browser evidence commit.
+
+## Closed in code (unchanged)
 
 - Canonical JetPakistan backfill scope
 - Support CTA mobile JSON contract
@@ -14,13 +20,12 @@ RELEASE_GUARDS_NEW_HEAD=PASS
 - SSR hero `react-dom` preload
 - Large fixture size evidence
 
-## Remaining local evidence gap
+## Build + browser evidence (now closed)
+
+See `08-BUILD-AND-BROWSER-EVIDENCE.md`.
 
 ```text
-NEXT_BUILD=TEMPORARILY_BLOCKED (local Next hung at "Creating an optimized production build")
-PLAYWRIGHT_HOMEPAGE_NETWORK=NOT_RUN
-HERO_PRELOAD_INITIAL_HTML_CAPTURE=NOT_CAPTURED_LOCALLY
+NEXT_BUILD=PASS (isolated Linux scratch; local Windows was BUILD_MEMORY_FAILURE)
+HERO_PRELOAD_INITIAL_DOCUMENT=YES
+PLAYWRIGHT_HOMEPAGE_NETWORK=PASS (1 passed / 0 failed)
 ```
-
-CI `release-guards` completed successfully on `35a9bdf8`.
-Browser/network derivative selection should be confirmed after a successful local or CI Next build, or during post-deploy UAT.
