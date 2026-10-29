@@ -18,6 +18,7 @@ import type {
   HomepageDestinationCard,
   HomepageFeaturedDeal,
   HomepageHeroContent,
+  HomepageResponsiveMedia,
   HomepageRouteCard,
   HomepageSupportCta,
   HomepageTrustChip,
@@ -60,6 +61,54 @@ function emptyHero(): HomepageHeroContent {
   };
 }
 
+export function mapResponsiveMedia(remote: unknown): HomepageResponsiveMedia | null {
+  if (!remote || typeof remote !== "object") return null;
+  const data = remote as Record<string, unknown>;
+  const fallbackUrl = String(data.fallback_url ?? data.fallbackUrl ?? "").trim();
+  if (!fallbackUrl) return null;
+
+  const sourcesRaw = Array.isArray(data.sources) ? data.sources : [];
+  const sources = sourcesRaw
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") return null;
+      const source = entry as Record<string, unknown>;
+      const srcSet = String(source.srcset ?? source.srcSet ?? "").trim();
+      const type = String(source.type ?? "").trim();
+      if (!srcSet || !type) return null;
+      const media = source.media ? String(source.media) : undefined;
+      return media ? { type, srcSet, media } : { type, srcSet };
+    })
+    .filter((entry): entry is { type: string; srcSet: string; media?: string } => entry !== null);
+
+  const preloadsRaw = Array.isArray(data.preloads) ? data.preloads : [];
+  const preloads: Array<{ href: string; type?: string | null; media?: string }> = [];
+  for (const entry of preloadsRaw) {
+    if (!entry || typeof entry !== "object") continue;
+    const preload = entry as Record<string, unknown>;
+    const href = String(preload.href ?? "").trim();
+    if (!href) continue;
+    const mapped: { href: string; type?: string | null; media?: string } = {
+      href,
+      type: preload.type ? String(preload.type) : null,
+    };
+    if (preload.media) {
+      mapped.media = String(preload.media);
+    }
+    preloads.push(mapped);
+  }
+
+  return {
+    fallbackUrl,
+    width: Number(data.width ?? 0) || undefined,
+    height: Number(data.height ?? 0) || undefined,
+    sizes: data.sizes ? String(data.sizes) : undefined,
+    sources,
+    preloads: preloads.length > 0 ? preloads : undefined,
+    hasResponsiveVariants: data.has_responsive_variants === true || sources.length > 0,
+    fingerprint: data.fingerprint ? String(data.fingerprint) : null,
+  };
+}
+
 export function mapHero(remote?: Record<string, unknown>): HomepageHeroContent {
   const image = remote?.image as { url?: string; alt?: string } | null | undefined;
   const imageMobile = remote?.image_mobile as { url?: string; alt?: string } | null | undefined;
@@ -77,6 +126,7 @@ export function mapHero(remote?: Record<string, unknown>): HomepageHeroContent {
     imageMobile: imageMobile?.url
       ? { url: imageMobile.url, alt: String(imageMobile.alt ?? "JetPakistan flights") }
       : null,
+    responsive: mapResponsiveMedia(remote?.responsive),
   };
 }
 
@@ -101,6 +151,7 @@ export function mapRoutes(items: Array<Record<string, unknown>> = []): HomepageR
     badge: item.badge ? String(item.badge) : undefined,
     image: item.image ? String(item.image) : null,
     imageAlt: item.image_alt ? String(item.image_alt) : undefined,
+    responsive: mapResponsiveMedia(item.responsive),
   }));
 }
 
@@ -116,6 +167,7 @@ export function mapDestinations(items: Array<Record<string, unknown>> = []): Hom
     priceLabel: String(item.price_label ?? ""),
     href: item.href ? String(item.href) : item.link ? String(item.link) : null,
     winningOrigin: item.winning_origin ? String(item.winning_origin) : null,
+    responsive: mapResponsiveMedia(item.responsive),
   }));
 }
 
@@ -133,6 +185,7 @@ export function mapFeaturedDeals(items: Array<Record<string, unknown>> = []): Ho
     image: item.image ? String(item.image) : null,
     imageAlt: item.image_alt ? String(item.image_alt) : undefined,
     href: item.href ? String(item.href) : null,
+    responsive: mapResponsiveMedia(item.responsive),
   }));
 }
 
@@ -166,6 +219,9 @@ export function mapSupportCta(remote?: Record<string, unknown>): HomepageSupport
     chatLabel: String(remote?.chat_label ?? "Get support"),
     chatHref: sanitizePublicActionHref(remote?.chat_href ? String(remote.chat_href) : null),
     image: remote?.image ? String(remote.image) : null,
+    imageMobile: remote?.image_mobile ? String(remote.image_mobile) : null,
+    responsive: mapResponsiveMedia(remote?.responsive),
+    responsiveMobile: mapResponsiveMedia(remote?.responsive_mobile),
   };
 }
 

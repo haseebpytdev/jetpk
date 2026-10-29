@@ -1,0 +1,542 @@
+{
+  "generatedAt": "2026-10-29T09:59:58.720Z",
+  "captures": [
+    {
+      "viewport": "390",
+      "hero": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-mobile.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-desktop.jpg",
+        "loading": "eager",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": "(min-width: 1025px)",
+            "srcset": "/_evidence/pr139-responsive/hero-desktop.avif",
+            "sizes": null
+          },
+          {
+            "type": "image/webp",
+            "media": "(min-width: 1025px)",
+            "srcset": "/_evidence/pr139-responsive/hero-desktop.webp",
+            "sizes": null
+          },
+          {
+            "type": "image/avif",
+            "media": "(min-width: 769px) and (max-width: 1024px)",
+            "srcset": "/_evidence/pr139-responsive/hero-tablet.avif",
+            "sizes": null
+          },
+          {
+            "type": "image/webp",
+            "media": "(min-width: 769px) and (max-width: 1024px)",
+            "srcset": "/_evidence/pr139-responsive/hero-tablet.webp",
+            "sizes": null
+          },
+          {
+            "type": "image/avif",
+            "media": "(max-width: 768px)",
+            "srcset": "/_evidence/pr139-responsive/hero-mobile.avif",
+            "sizes": null
+          },
+          {
+            "type": "image/webp",
+            "media": "(max-width: 768px)",
+            "srcset": "/_evidence/pr139-responsive/hero-mobile.webp",
+            "sizes": null
+          }
+        ]
+      },
+      "destination": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.jpg",
+        "loading": "lazy",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.avif 320w, /_evidence/pr139-responsive/card-640.avif 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/webp",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.webp 320w, /_evidence/pr139-responsive/card-640.webp 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/jpeg",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-640.jpg 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          }
+        ]
+      },
+      "route": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.jpg",
+        "loading": "lazy",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.avif 320w, /_evidence/pr139-responsive/card-640.avif 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/webp",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.webp 320w, /_evidence/pr139-responsive/card-640.webp 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/jpeg",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-640.jpg 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          }
+        ]
+      },
+      "featuredDeal": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.jpg",
+        "loading": "lazy",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.avif 320w, /_evidence/pr139-responsive/card-640.avif 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/webp",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.webp 320w, /_evidence/pr139-responsive/card-640.webp 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/jpeg",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-640.jpg 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          }
+        ]
+      },
+      "support": {
+        "currentSrc": "",
+        "src": "",
+        "loading": null,
+        "sources": [],
+        "skipped": true
+      },
+      "imageRequests": [
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-mobile.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 21001
+        },
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 34143
+        }
+      ],
+      "assertions": {
+        "HERO_PRELOAD_INITIAL_DOCUMENT": "YES",
+        "HERO_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "HERO_SELECTED_FORMAT": "AVIF",
+        "HERO_SELECTED_URL_IS_DERIVATIVE": "YES",
+        "HERO_ORIGINAL_MULTI_MB_SOURCE_SELECTED": "NO",
+        "HERO_UNIQUE_URL_COUNT": 1,
+        "HERO_NONZERO_TRANSFER_COUNT": 1,
+        "HERO_NONZERO_RESPONSE_EVENTS": 1,
+        "HERO_ZERO_BYTE_CACHE_OR_REUSE_EVENTS": 0,
+        "HERO_DUPLICATE_TRANSFER": "NO",
+        "HERO_DUPLICATE_DOWNLOAD": "NO",
+        "MOBILE_AND_DESKTOP_HERO_BOTH_TRANSFERRED": "NO",
+        "MOBILE_AND_DESKTOP_HERO_BOTH_DOWNLOADED": "NO",
+        "DESTINATION_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "ROUTE_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "FEATURED_DEAL_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "SUPPORT_BROWSER_DERIVATIVE_SELECTED": "N/A_HIDDEN_BELOW_LG",
+        "SUPPORT_DUPLICATE_DESKTOP_MOBILE_DOWNLOAD": "NO",
+        "GIANT_ORIGINAL_SELECTED_WHEN_DERIVATIVE_AVAILABLE": "NO",
+        "BELOW_FOLD_LAZY_LOADING_PRESERVED": "YES",
+        "HERO_REQUEST_COUNT": 1
+      }
+    },
+    {
+      "viewport": "768",
+      "hero": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-mobile.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-desktop.jpg",
+        "loading": "eager",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": "(min-width: 1025px)",
+            "srcset": "/_evidence/pr139-responsive/hero-desktop.avif",
+            "sizes": null
+          },
+          {
+            "type": "image/webp",
+            "media": "(min-width: 1025px)",
+            "srcset": "/_evidence/pr139-responsive/hero-desktop.webp",
+            "sizes": null
+          },
+          {
+            "type": "image/avif",
+            "media": "(min-width: 769px) and (max-width: 1024px)",
+            "srcset": "/_evidence/pr139-responsive/hero-tablet.avif",
+            "sizes": null
+          },
+          {
+            "type": "image/webp",
+            "media": "(min-width: 769px) and (max-width: 1024px)",
+            "srcset": "/_evidence/pr139-responsive/hero-tablet.webp",
+            "sizes": null
+          },
+          {
+            "type": "image/avif",
+            "media": "(max-width: 768px)",
+            "srcset": "/_evidence/pr139-responsive/hero-mobile.avif",
+            "sizes": null
+          },
+          {
+            "type": "image/webp",
+            "media": "(max-width: 768px)",
+            "srcset": "/_evidence/pr139-responsive/hero-mobile.webp",
+            "sizes": null
+          }
+        ]
+      },
+      "destination": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.jpg",
+        "loading": "lazy",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.avif 320w, /_evidence/pr139-responsive/card-640.avif 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/webp",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.webp 320w, /_evidence/pr139-responsive/card-640.webp 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/jpeg",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-640.jpg 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          }
+        ]
+      },
+      "route": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.jpg",
+        "loading": "lazy",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.avif 320w, /_evidence/pr139-responsive/card-640.avif 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/webp",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.webp 320w, /_evidence/pr139-responsive/card-640.webp 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/jpeg",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-640.jpg 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          }
+        ]
+      },
+      "featuredDeal": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.jpg",
+        "loading": "lazy",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.avif 320w, /_evidence/pr139-responsive/card-640.avif 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/webp",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.webp 320w, /_evidence/pr139-responsive/card-640.webp 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/jpeg",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-640.jpg 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          }
+        ]
+      },
+      "support": {
+        "currentSrc": "",
+        "src": "",
+        "loading": null,
+        "sources": [],
+        "skipped": true
+      },
+      "imageRequests": [
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-mobile.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 34146
+        },
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 21061
+        }
+      ],
+      "assertions": {
+        "HERO_PRELOAD_INITIAL_DOCUMENT": "YES",
+        "HERO_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "HERO_SELECTED_FORMAT": "AVIF",
+        "HERO_SELECTED_URL_IS_DERIVATIVE": "YES",
+        "HERO_ORIGINAL_MULTI_MB_SOURCE_SELECTED": "NO",
+        "HERO_UNIQUE_URL_COUNT": 1,
+        "HERO_NONZERO_TRANSFER_COUNT": 1,
+        "HERO_NONZERO_RESPONSE_EVENTS": 1,
+        "HERO_ZERO_BYTE_CACHE_OR_REUSE_EVENTS": 0,
+        "HERO_DUPLICATE_TRANSFER": "NO",
+        "HERO_DUPLICATE_DOWNLOAD": "NO",
+        "MOBILE_AND_DESKTOP_HERO_BOTH_TRANSFERRED": "NO",
+        "MOBILE_AND_DESKTOP_HERO_BOTH_DOWNLOADED": "NO",
+        "DESTINATION_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "ROUTE_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "FEATURED_DEAL_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "SUPPORT_BROWSER_DERIVATIVE_SELECTED": "N/A_HIDDEN_BELOW_LG",
+        "SUPPORT_DUPLICATE_DESKTOP_MOBILE_DOWNLOAD": "NO",
+        "GIANT_ORIGINAL_SELECTED_WHEN_DERIVATIVE_AVAILABLE": "NO",
+        "BELOW_FOLD_LAZY_LOADING_PRESERVED": "YES",
+        "HERO_REQUEST_COUNT": 1
+      }
+    },
+    {
+      "viewport": "1440",
+      "hero": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-desktop.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-desktop.jpg",
+        "loading": "eager",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": "(min-width: 1025px)",
+            "srcset": "/_evidence/pr139-responsive/hero-desktop.avif",
+            "sizes": null
+          },
+          {
+            "type": "image/webp",
+            "media": "(min-width: 1025px)",
+            "srcset": "/_evidence/pr139-responsive/hero-desktop.webp",
+            "sizes": null
+          },
+          {
+            "type": "image/avif",
+            "media": "(min-width: 769px) and (max-width: 1024px)",
+            "srcset": "/_evidence/pr139-responsive/hero-tablet.avif",
+            "sizes": null
+          },
+          {
+            "type": "image/webp",
+            "media": "(min-width: 769px) and (max-width: 1024px)",
+            "srcset": "/_evidence/pr139-responsive/hero-tablet.webp",
+            "sizes": null
+          },
+          {
+            "type": "image/avif",
+            "media": "(max-width: 768px)",
+            "srcset": "/_evidence/pr139-responsive/hero-mobile.avif",
+            "sizes": null
+          },
+          {
+            "type": "image/webp",
+            "media": "(max-width: 768px)",
+            "srcset": "/_evidence/pr139-responsive/hero-mobile.webp",
+            "sizes": null
+          }
+        ]
+      },
+      "destination": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-320.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.jpg",
+        "loading": "lazy",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.avif 320w, /_evidence/pr139-responsive/card-640.avif 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/webp",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.webp 320w, /_evidence/pr139-responsive/card-640.webp 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/jpeg",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-640.jpg 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          }
+        ]
+      },
+      "route": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-320.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.jpg",
+        "loading": "lazy",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.avif 320w, /_evidence/pr139-responsive/card-640.avif 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/webp",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.webp 320w, /_evidence/pr139-responsive/card-640.webp 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/jpeg",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-640.jpg 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          }
+        ]
+      },
+      "featuredDeal": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-320.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-640.jpg",
+        "loading": "lazy",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.avif 320w, /_evidence/pr139-responsive/card-640.avif 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/webp",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-320.webp 320w, /_evidence/pr139-responsive/card-640.webp 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          },
+          {
+            "type": "image/jpeg",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/card-640.jpg 640w",
+            "sizes": "(max-width: 768px) 100vw, 320px"
+          }
+        ]
+      },
+      "support": {
+        "currentSrc": "http://127.0.0.1:3019/_evidence/pr139-responsive/support-desktop.avif",
+        "src": "http://127.0.0.1:3019/_evidence/pr139-responsive/support-desktop.jpg",
+        "loading": "lazy",
+        "sources": [
+          {
+            "type": "image/avif",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/support-desktop.avif 960w",
+            "sizes": "(max-width: 1024px) 100vw, 16rem"
+          },
+          {
+            "type": "image/webp",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/support-desktop.webp 960w",
+            "sizes": "(max-width: 1024px) 100vw, 16rem"
+          },
+          {
+            "type": "image/jpeg",
+            "media": null,
+            "srcset": "/_evidence/pr139-responsive/support-desktop.jpg 960w",
+            "sizes": "(max-width: 1024px) 100vw, 16rem"
+          }
+        ]
+      },
+      "imageRequests": [
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-desktop.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 21001
+        },
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-320.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 21001
+        },
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/support-desktop.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 21001
+        },
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/hero-desktop.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 34147
+        },
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/card-320.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 23646
+        },
+        {
+          "url": "http://127.0.0.1:3019/_evidence/pr139-responsive/support-desktop.avif",
+          "resourceType": "image",
+          "contentType": "text/html; charset=utf-8",
+          "transferredBytes": 23646
+        }
+      ],
+      "assertions": {
+        "HERO_PRELOAD_INITIAL_DOCUMENT": "YES",
+        "HERO_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "HERO_SELECTED_FORMAT": "AVIF",
+        "HERO_SELECTED_URL_IS_DERIVATIVE": "YES",
+        "HERO_ORIGINAL_MULTI_MB_SOURCE_SELECTED": "NO",
+        "HERO_UNIQUE_URL_COUNT": 1,
+        "HERO_NONZERO_TRANSFER_COUNT": 1,
+        "HERO_NONZERO_RESPONSE_EVENTS": 2,
+        "HERO_ZERO_BYTE_CACHE_OR_REUSE_EVENTS": 0,
+        "HERO_DUPLICATE_TRANSFER": "NO",
+        "HERO_DUPLICATE_DOWNLOAD": "NO",
+        "MOBILE_AND_DESKTOP_HERO_BOTH_TRANSFERRED": "NO",
+        "MOBILE_AND_DESKTOP_HERO_BOTH_DOWNLOADED": "NO",
+        "DESTINATION_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "ROUTE_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "FEATURED_DEAL_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "SUPPORT_BROWSER_DERIVATIVE_SELECTED": "YES",
+        "SUPPORT_DUPLICATE_DESKTOP_MOBILE_DOWNLOAD": "NO",
+        "GIANT_ORIGINAL_SELECTED_WHEN_DERIVATIVE_AVAILABLE": "NO",
+        "BELOW_FOLD_LAZY_LOADING_PRESERVED": "YES",
+        "HERO_REQUEST_COUNT": 1
+      }
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { ScrollReveal } from "@/features/motion";
-import { ImageSlot } from "@/components/ui/ImageSlot";
+import { ResponsiveCmsPicture } from "@/components/ui/ResponsiveCmsPicture";
 import { resolveRouteMedia } from "@/lib/homepage-media";
 import Link from "next/link";
 import type { HomepageSectionHeader, HomepageRouteCard } from "../types/homepage";
@@ -41,12 +41,13 @@ export function RoutesSection({ enabled, eyebrow, title, subtitle, ctaText, ctaU
               return (
                 <article key={route.id} className={fullCardArticleClass} data-testid="route-card">
                   <div className="relative aspect-[4/3] bg-jp-surface-muted">
-                    <ImageSlot
+                    <ResponsiveCmsPicture
                       src={media.image}
                       alt={media.imageAlt}
                       width={320}
                       height={240}
                       sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, (max-width: 1180px) 33vw, 25vw"
+                      responsive={route.responsive}
                       className="!max-w-none h-full w-full !rounded-none"
                       fallbackLabel={`${route.from} to ${route.to}`}
                       brandedFallback

@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { ImageSlot } from "@/components/ui/ImageSlot";
+import { ResponsiveCmsPicture } from "@/components/ui/ResponsiveCmsPicture";
 import { cn } from "@/lib/cn";
 import type { HomepageContent, HomepageHeroContent, HomepageTrustChip } from "../types/homepage";
 import { BenefitStrip } from "../components/BenefitStrip";
@@ -59,34 +59,49 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
 
   const hasTitle = headline.trim() !== "" || highlight.trim() !== "";
   const desktopSrc = hero.image?.url ?? fallbackImage;
-  const mobileSrc = hero.imageMobile?.url ?? desktopSrc;
   const objectPosition =
     hero.focalPoint === "left" ? "left center" : hero.focalPoint === "right" ? "right center" : "center";
+  const heroResponsive =
+    hero.responsive && hero.responsive.sources.length > 0
+      ? hero.responsive
+      : hero.imageMobile?.url
+        ? {
+            fallbackUrl: desktopSrc,
+            width: 1440,
+            height: 560,
+            sizes: "100vw",
+            hasResponsiveVariants: true,
+            sources: [
+              { type: "image/jpeg", srcSet: hero.imageMobile.url, media: "(max-width: 767px)" },
+              { type: "image/jpeg", srcSet: desktopSrc, media: "(min-width: 768px)" },
+            ],
+          }
+        : hero.responsive ?? null;
 
   return (
     <section
       className="relative isolate overflow-x-hidden"
       data-testid="homepage-public-hero"
     >
+      {/* Hero image preloads are emitted from HomepageContent via react-dom preload (SSR). */}
       <div className="relative isolate overflow-hidden" data-testid="homepage-hero-backdrop">
         <div className="absolute inset-0" data-testid="homepage-hero-image" aria-hidden={!hasTitle}>
-          <picture className="absolute inset-0 block h-full w-full">
-            <source media="(max-width: 767px)" srcSet={mobileSrc} />
-            <ImageSlot
-              src={desktopSrc}
-              alt={hero.image?.alt ?? hero.imageMobile?.alt ?? "JetPakistan flights"}
-              width={1440}
-              height={560}
-              priority
-              sizes="100vw"
-              fillContainer
-              className="!absolute !inset-0 !h-full !w-full !max-w-none !rounded-none [&_img]:!h-full [&_img]:!w-full [&_img]:!object-cover"
-              objectFit="cover"
-              objectPosition={objectPosition}
-              fallbackLabel="JetPakistan hero"
-              brandedFallback
-            />
-          </picture>
+          <ResponsiveCmsPicture
+            src={desktopSrc}
+            alt={hero.image?.alt ?? hero.imageMobile?.alt ?? "JetPakistan flights"}
+            width={1440}
+            height={560}
+            priority
+            sizes="100vw"
+            responsive={heroResponsive}
+            fillContainer
+            className="!absolute !inset-0 !h-full !w-full !max-w-none !rounded-none [&_img]:!h-full [&_img]:!w-full [&_img]:!object-cover"
+            objectFit="cover"
+            objectPosition={objectPosition}
+            fallbackLabel="JetPakistan hero"
+            brandedFallback
+            data-testid="homepage-hero-responsive-picture"
+          />
           <div
             className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-black/55 dark:from-black/55 dark:via-black/40 dark:to-black/70"
             aria-hidden="true"

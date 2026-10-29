@@ -55,14 +55,14 @@ final class JetpkHeroImagePixelValidator
         return $this->result(true, 'ok', $width, $height, $bytes, $stats);
     }
 
-    public function validateFile(string $absolutePath, int $expectedWidth, int $expectedHeight): array
+    public function validateFile(string $absolutePath, int $expectedWidth, int $expectedHeight, ?string $format = null): array
     {
         $bytes = is_file($absolutePath) ? (int) filesize($absolutePath) : 0;
         if ($bytes < 1) {
             return $this->failure('empty file', $expectedWidth, $expectedHeight, $bytes);
         }
 
-        if ($bytes < $this->minimumBytesFor($expectedWidth, $expectedHeight)) {
+        if ($bytes < $this->minimumBytesFor($expectedWidth, $expectedHeight, $format)) {
             return $this->failure('implausibly small file', $expectedWidth, $expectedHeight, $bytes);
         }
 
@@ -145,9 +145,15 @@ final class JetpkHeroImagePixelValidator
         return function_exists('imagewebp') && function_exists('imagecreatefromwebp');
     }
 
-    private function minimumBytesFor(int $width, int $height): int
+    private function minimumBytesFor(int $width, int $height, ?string $format = null): int
     {
         $pixels = max(1, $width * $height);
+        $normalized = strtolower((string) $format);
+
+        // Efficient AVIF/WebP derivatives are intentionally much smaller than JPEG.
+        if (in_array($normalized, ['webp', 'avif'], true)) {
+            return (int) max(350, round($pixels * 0.006));
+        }
 
         return (int) max(900, round($pixels * 0.02));
     }

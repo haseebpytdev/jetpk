@@ -1,0 +1,21 @@
+
+> jetpk-public-frontend@0.1.0 lint
+> next lint
+
+`next lint` is deprecated and will be removed in Next.js 16.
+For new projects, use create-next-app to choose your preferred linter.
+For existing projects, migrate to the ESLint CLI:
+npx @next/codemod@canary next-lint-to-eslint-cli .
+
+
+./components/layout/SiteFooter.tsx
+8:8  Warning: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/ui/Dropdown.tsx
+78:6  Warning: React Hook useLayoutEffect has a missing dependency: 'updatePortalPosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./lib/homepage-media.ts
+104:3  Warning: 'index' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+151:3  Warning: '_index' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules

@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [chromium] › tests/pr139-responsive-media-evidence.spec.ts:290:5 › PR139 responsive media browser evidence (5.0s)
+
+  1 passed (9.6s)

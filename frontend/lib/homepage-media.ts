@@ -8,6 +8,17 @@ type ApprovedMedia = {
   imageAlt: string;
 };
 
+export type HomepageMediaWithResponsive = ApprovedMedia & {
+  responsive?: {
+    fallbackUrl: string;
+    sources: Array<{ type: string; srcSet: string; media?: string }>;
+    sizes?: string;
+    width?: number;
+    height?: number;
+    hasResponsiveVariants?: boolean;
+  } | null;
+};
+
 const routeMediaByKey: Record<string, ApprovedMedia> = {
   dubai: {
     image: "/images/home/destination-dubai.jpg",
