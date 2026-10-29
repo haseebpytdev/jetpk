@@ -8,6 +8,7 @@ use App\Services\Client\ClientPageSeoResolver;
 use App\Services\Client\CurrentClientContext;
 use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Support\Client\ClientPageKeys;
+use App\Support\Client\JetpkHomepageMediaAuthorityCatalog;
 use App\Support\Client\JetpkHomepageSectionData;
 use App\Support\Homepage\JetpkHeroLcpPresenter;
 use App\Support\Homepage\JetpkResponsiveMediaPresenter;
@@ -311,8 +312,7 @@ final class HomepagePublicContentPresenter
             return $item;
         }
 
-        $assetKey = $this->guessCardAssetKey($item, $kind);
-        $manifest = $assetKey !== null ? $this->manifestForAssetKey($assetKey, $image) : null;
+        $manifest = $this->manifestForCardItem($item, $kind, $image);
         $item['responsive'] = $this->responsiveMediaPresenter->presentWidthSrcset(
             $image,
             $manifest,
@@ -325,21 +325,74 @@ final class HomepagePublicContentPresenter
     }
 
     /**
+     * Ordered unique asset-key candidates for responsive manifest lookup.
+     *
+     * Precedence: explicit image_asset_key variants → generated helper key variants
+     * → legacy route_/destination_/featured_deal_ + literal id variants.
+     *
      * @param  array<string, mixed>  $item
+     * @return list<string>
      */
-    private function guessCardAssetKey(array $item, string $kind): ?string
+    private function cardAssetKeyCandidates(array $item, string $kind): array
     {
-        $id = trim((string) ($item['id'] ?? ''));
-        if ($id === '') {
-            return null;
+        $candidates = [];
+
+        $explicit = trim((string) ($item['image_asset_key'] ?? ''));
+        if ($explicit !== '') {
+            $candidates = array_merge(
+                $candidates,
+                JetpkHomepageMediaAuthorityCatalog::assetKeyVariants($explicit),
+            );
         }
 
-        return match ($kind) {
+        $id = trim((string) ($item['id'] ?? ''));
+        if ($id === '') {
+            return array_values(array_unique(array_filter($candidates)));
+        }
+
+        $generated = match ($kind) {
             'route' => JetpkHomepageAssetService::routeAssetKey($id),
             'destination' => JetpkHomepageAssetService::destinationAssetKey($id),
             'featured_deal' => JetpkHomepageAssetService::featuredDealAssetKey($id),
             default => null,
         };
+        if (is_string($generated) && $generated !== '') {
+            $candidates = array_merge(
+                $candidates,
+                JetpkHomepageMediaAuthorityCatalog::assetKeyVariants($generated),
+            );
+        }
+
+        $prefix = match ($kind) {
+            'route' => 'route_',
+            'destination' => 'destination_',
+            'featured_deal' => 'featured_deal_',
+            default => null,
+        };
+        if ($prefix !== null) {
+            $candidates = array_merge(
+                $candidates,
+                JetpkHomepageMediaAuthorityCatalog::assetKeyVariants($prefix.$id),
+            );
+        }
+
+        return array_values(array_unique(array_filter($candidates)));
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return array<string, mixed>|null
+     */
+    private function manifestForCardItem(array $item, string $kind, string $sourceUrl): ?array
+    {
+        foreach ($this->cardAssetKeyCandidates($item, $kind) as $assetKey) {
+            $manifest = $this->manifestForAssetKey($assetKey, $sourceUrl);
+            if ($manifest !== null) {
+                return $manifest;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -390,23 +443,7 @@ final class HomepagePublicContentPresenter
      */
     private function manifestForAssetKey(string $assetKey, string $sourceUrl): ?array
     {
-        $asset = $this->homepageAssetsByKey[$assetKey] ?? null;
-        if ($asset === null) {
-            // Fallback for callers outside present() (should be rare).
-            $profile = $this->clientContext->get();
-            $path = $this->storageRelativeFromUrl($sourceUrl);
-            $query = ClientPageAsset::query()
-                ->where('page_key', ClientPageKeys::HOME)
-                ->where('asset_key', $assetKey);
-            if ($profile !== null) {
-                $query->where('client_profile_id', $profile->id);
-            }
-            if ($path !== null) {
-                $query->where('path', $path);
-            }
-            $asset = $query->first();
-        }
-
+        $asset = $this->resolveHomepageAsset($assetKey, $sourceUrl);
         if ($asset === null) {
             return null;
         }
@@ -417,11 +454,40 @@ final class HomepagePublicContentPresenter
         }
 
         $meta = is_array($asset->meta_json) ? $asset->meta_json : [];
-        if ($assetKey === 'hero_background' && is_array($meta['hero_lcp'] ?? null)) {
+        if ($asset->asset_key === 'hero_background' && is_array($meta['hero_lcp'] ?? null)) {
             return $meta['hero_lcp'];
         }
 
         return is_array($meta['responsive_media'] ?? null) ? $meta['responsive_media'] : null;
+    }
+
+    private function resolveHomepageAsset(string $assetKey, string $sourceUrl): ?ClientPageAsset
+    {
+        if ($this->homepageAssetsByKey !== null) {
+            foreach (JetpkHomepageMediaAuthorityCatalog::assetKeyVariants($assetKey) as $candidate) {
+                $asset = $this->homepageAssetsByKey[$candidate] ?? null;
+                if ($asset !== null) {
+                    return $asset;
+                }
+            }
+
+            return null;
+        }
+
+        // Fallback for callers outside present() (should be rare).
+        $profile = $this->clientContext->get();
+        $path = $this->storageRelativeFromUrl($sourceUrl);
+        $query = ClientPageAsset::query()
+            ->where('page_key', ClientPageKeys::HOME)
+            ->whereIn('asset_key', JetpkHomepageMediaAuthorityCatalog::assetKeyVariants($assetKey));
+        if ($profile !== null) {
+            $query->where('client_profile_id', $profile->id);
+        }
+        if ($path !== null) {
+            $query->where('path', $path);
+        }
+
+        return $query->first();
     }
 
     private function storageRelativeFromUrl(string $url): ?string
