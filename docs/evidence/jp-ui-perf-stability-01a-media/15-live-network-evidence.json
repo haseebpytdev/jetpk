@@ -1,0 +1,621 @@
+{
+  "capturedAt": "2026-10-29T16:19:47.286Z",
+  "origin": "https://jetpakistan.pk",
+  "viewports": {
+    "390": {
+      "viewport": "390",
+      "status": 200,
+      "media": {
+        "hero": {
+          "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+          "loading": "eager",
+          "complete": true,
+          "naturalWidth": 768,
+          "alt": "JetPakistan flights",
+          "currentSrcIsDerivative": true
+        },
+        "route": {
+          "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+          "loading": "lazy",
+          "complete": true,
+          "naturalWidth": 389,
+          "alt": "Lahore to Dubai Flights",
+          "currentSrcIsDerivative": true
+        },
+        "destination": {
+          "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+          "loading": "lazy",
+          "complete": true,
+          "naturalWidth": 389,
+          "alt": "Lahore to Dubai Flights",
+          "currentSrcIsDerivative": true
+        },
+        "featured": {
+          "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/269ea6178cd31fa6/card-480.webp",
+          "loading": "lazy",
+          "complete": true,
+          "naturalWidth": 389,
+          "alt": "LHE to JED",
+          "currentSrcIsDerivative": true
+        },
+        "images": [
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 400,
+            "alt": "JetPakistan"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+            "loading": "eager",
+            "complete": true,
+            "naturalWidth": 768,
+            "alt": "JetPakistan flights"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 389,
+            "alt": "Lahore to Dubai Flights"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/269ea6178cd31fa6/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 389,
+            "alt": "LHE to JED"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/eff8aca22eec2262/card-768.jpg",
+            "loading": "lazy",
+            "complete": false,
+            "naturalWidth": 0,
+            "alt": "ISB to LHR"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/02f48809df33978e/card-768.jpg",
+            "loading": "lazy",
+            "complete": false,
+            "naturalWidth": 0,
+            "alt": "KHI to RUH"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 389,
+            "alt": "Dubai"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 389,
+            "alt": "Jeddah"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/3260b2972528473c/card-768.jpg",
+            "loading": "lazy",
+            "complete": false,
+            "naturalWidth": 0,
+            "alt": "London"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 389,
+            "alt": "Istanbul"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 389,
+            "alt": "ISB"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 389,
+            "alt": "LHE"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 389,
+            "alt": "ISB"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/support/ce84d186700df9b1/support-1280.jpg",
+            "loading": "lazy",
+            "complete": false,
+            "naturalWidth": 0,
+            "alt": ""
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 400,
+            "alt": "JetPakistan"
+          }
+        ],
+        "branding": true,
+        "overflow": false,
+        "broken": 4
+      },
+      "routeCurrentSrcIsDerivative": true,
+      "routeSeedKhiDxbOriginalTransferred": false,
+      "routeSeedLheJedOriginalTransferred": false,
+      "giantOriginalSelected": false,
+      "totals": {
+        "totalPage": 383832,
+        "totalImage": 274532,
+        "png": 29312,
+        "jpeg": 0,
+        "webp": 245220,
+        "avif": 0
+      },
+      "uniqueTotals": {
+        "totalImage": 274532,
+        "png": 29312,
+        "jpeg": 0,
+        "webp": 245220,
+        "avif": 0
+      },
+      "imageUrls": [
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+          "bytes": 69576
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+          "bytes": 25180
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+          "bytes": 29312
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+          "bytes": 37384
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/269ea6178cd31fa6/card-480.webp",
+          "bytes": 25614
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+          "bytes": 44526
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+          "bytes": 42940
+        }
+      ]
+    },
+    "768": {
+      "viewport": "768",
+      "status": 200,
+      "media": {
+        "hero": {
+          "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+          "loading": "eager",
+          "complete": true,
+          "naturalWidth": 768,
+          "alt": "JetPakistan flights",
+          "currentSrcIsDerivative": true
+        },
+        "route": {
+          "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+          "loading": "lazy",
+          "complete": true,
+          "naturalWidth": 384,
+          "alt": "Lahore to Dubai Flights",
+          "currentSrcIsDerivative": true
+        },
+        "destination": {
+          "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+          "loading": "lazy",
+          "complete": true,
+          "naturalWidth": 384,
+          "alt": "Lahore to Dubai Flights",
+          "currentSrcIsDerivative": true
+        },
+        "featured": {
+          "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/269ea6178cd31fa6/card-480.webp",
+          "loading": "lazy",
+          "complete": true,
+          "naturalWidth": 384,
+          "alt": "LHE to JED",
+          "currentSrcIsDerivative": true
+        },
+        "images": [
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 400,
+            "alt": "JetPakistan"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+            "loading": "eager",
+            "complete": true,
+            "naturalWidth": 768,
+            "alt": "JetPakistan flights"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 384,
+            "alt": "Lahore to Dubai Flights"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/269ea6178cd31fa6/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 384,
+            "alt": "LHE to JED"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/eff8aca22eec2262/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 384,
+            "alt": "ISB to LHR"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/02f48809df33978e/card-768.jpg",
+            "loading": "lazy",
+            "complete": false,
+            "naturalWidth": 0,
+            "alt": "KHI to RUH"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 384,
+            "alt": "Dubai"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 384,
+            "alt": "Jeddah"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/3260b2972528473c/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 384,
+            "alt": "London"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 384,
+            "alt": "Istanbul"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 384,
+            "alt": "ISB"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 384,
+            "alt": "LHE"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 384,
+            "alt": "ISB"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/support/ce84d186700df9b1/support-1280.jpg",
+            "loading": "lazy",
+            "complete": false,
+            "naturalWidth": 0,
+            "alt": ""
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 400,
+            "alt": "JetPakistan"
+          }
+        ],
+        "branding": true,
+        "overflow": false,
+        "broken": 2
+      },
+      "routeCurrentSrcIsDerivative": true,
+      "routeSeedKhiDxbOriginalTransferred": false,
+      "routeSeedLheJedOriginalTransferred": false,
+      "giantOriginalSelected": false,
+      "totals": {
+        "totalPage": 450742,
+        "totalImage": 341442,
+        "png": 29312,
+        "jpeg": 0,
+        "webp": 312130,
+        "avif": 0
+      },
+      "uniqueTotals": {
+        "totalImage": 341442,
+        "png": 29312,
+        "jpeg": 0,
+        "webp": 312130,
+        "avif": 0
+      },
+      "imageUrls": [
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+          "bytes": 69576
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+          "bytes": 29312
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/269ea6178cd31fa6/card-480.webp",
+          "bytes": 25614
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+          "bytes": 42940
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+          "bytes": 25180
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+          "bytes": 37384
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+          "bytes": 44526
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/eff8aca22eec2262/card-480.webp",
+          "bytes": 22852
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/3260b2972528473c/card-480.webp",
+          "bytes": 44058
+        }
+      ]
+    },
+    "1440": {
+      "viewport": "1440",
+      "status": 200,
+      "media": {
+        "hero": {
+          "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp",
+          "loading": "eager",
+          "complete": true,
+          "naturalWidth": 1200,
+          "alt": "JetPakistan flights",
+          "currentSrcIsDerivative": true
+        },
+        "route": {
+          "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+          "loading": "lazy",
+          "complete": true,
+          "naturalWidth": 360,
+          "alt": "Lahore to Dubai Flights",
+          "currentSrcIsDerivative": true
+        },
+        "destination": {
+          "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+          "loading": "lazy",
+          "complete": true,
+          "naturalWidth": 360,
+          "alt": "Lahore to Dubai Flights",
+          "currentSrcIsDerivative": true
+        },
+        "featured": {
+          "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/269ea6178cd31fa6/card-480.webp",
+          "loading": "lazy",
+          "complete": true,
+          "naturalWidth": 360,
+          "alt": "LHE to JED",
+          "currentSrcIsDerivative": true
+        },
+        "images": [
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 400,
+            "alt": "JetPakistan"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp",
+            "loading": "eager",
+            "complete": true,
+            "naturalWidth": 1200,
+            "alt": "JetPakistan flights"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 360,
+            "alt": "Lahore to Dubai Flights"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/269ea6178cd31fa6/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 360,
+            "alt": "LHE to JED"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/eff8aca22eec2262/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 360,
+            "alt": "ISB to LHR"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/02f48809df33978e/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 360,
+            "alt": "KHI to RUH"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 360,
+            "alt": "Dubai"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 360,
+            "alt": "Jeddah"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/3260b2972528473c/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 360,
+            "alt": "London"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 360,
+            "alt": "Istanbul"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 360,
+            "alt": "ISB"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 360,
+            "alt": "LHE"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 360,
+            "alt": "ISB"
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/support/ce84d186700df9b1/support-480.webp",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 256,
+            "alt": ""
+          },
+          {
+            "currentSrc": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+            "loading": "lazy",
+            "complete": true,
+            "naturalWidth": 400,
+            "alt": "JetPakistan"
+          }
+        ],
+        "branding": true,
+        "overflow": false,
+        "broken": 0
+      },
+      "routeCurrentSrcIsDerivative": true,
+      "routeSeedKhiDxbOriginalTransferred": false,
+      "routeSeedLheJedOriginalTransferred": false,
+      "giantOriginalSelected": false,
+      "totals": {
+        "totalPage": 552520,
+        "totalImage": 443220,
+        "png": 29312,
+        "jpeg": 0,
+        "webp": 413908,
+        "avif": 0
+      },
+      "uniqueTotals": {
+        "totalImage": 443220,
+        "png": 29312,
+        "jpeg": 0,
+        "webp": 413908,
+        "avif": 0
+      },
+      "imageUrls": [
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp",
+          "bytes": 137730
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+          "bytes": 29312
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+          "bytes": 25180
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+          "bytes": 42940
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/269ea6178cd31fa6/card-480.webp",
+          "bytes": 25614
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+          "bytes": 37384
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+          "bytes": 44526
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/support/ce84d186700df9b1/support-480.webp",
+          "bytes": 10780
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/eff8aca22eec2262/card-480.webp",
+          "bytes": 22852
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/02f48809df33978e/card-480.webp",
+          "bytes": 22844
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/3260b2972528473c/card-480.webp",
+          "bytes": 44058
+        }
+      ]
+    }
+  }
+}

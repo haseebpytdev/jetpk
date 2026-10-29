@@ -1,0 +1,422 @@
+{
+  "capturedAt": "2026-10-29T16:35:38.120Z",
+  "primaryViewport": "1440",
+  "rawRequestCount": 51,
+  "rawTransferBytes": 1699279,
+  "uniqueNonzeroRequestCount": 51,
+  "uniqueNonzeroTransferBytes": 1699279,
+  "byType": {
+    "HTML": 109300,
+    "font": 93208,
+    "CSS": 125027,
+    "image": 443220,
+    "JS": 905820,
+    "API": 86,
+    "RSC": 22618
+  },
+  "image": {
+    "total": 443220,
+    "png": 29312,
+    "webp": 413908,
+    "jpeg": 0,
+    "avif": 0,
+    "heroBytes": 137730,
+    "routeBytes": 265398,
+    "destinationBytes": 265398,
+    "featuredBytes": 0,
+    "supportBytes": 10780,
+    "largest": {
+      "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp",
+      "bytes": 137730
+    }
+  },
+  "hero": {
+    "preloadInitialDocument": true,
+    "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp",
+    "currentSrcIsDerivative": true,
+    "originalSelected": false,
+    "duplicateTransfer": false,
+    "mobileAndDesktopBoth": false,
+    "selectedFormat": "webp",
+    "transferBytes": 137730
+  },
+  "routeDerivative": true,
+  "destinationDerivative": true,
+  "featuredDerivative": true,
+  "belowFoldLazy": true,
+  "giantOriginalSelected": false,
+  "top15": [
+    {
+      "url": "https://jetpakistan.pk/_next/static/chunks/1255-6a221ac26670bd41.js",
+      "bytes": 174044,
+      "type": "JS"
+    },
+    {
+      "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+      "bytes": 173025,
+      "type": "JS"
+    },
+    {
+      "url": "https://jetpakistan.pk/_next/static/chunks/1124-88ec4cbe98da450a.js",
+      "bytes": 156234,
+      "type": "JS"
+    },
+    {
+      "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp",
+      "bytes": 137730,
+      "type": "image"
+    },
+    {
+      "url": "https://jetpakistan.pk/",
+      "bytes": 109300,
+      "type": "HTML"
+    },
+    {
+      "url": "https://jetpakistan.pk/_next/static/chunks/161-643d8e536bc9af52.js",
+      "bytes": 68659,
+      "type": "JS"
+    },
+    {
+      "url": "https://jetpakistan.pk/_next/static/css/ddec74e89663f76c.css",
+      "bytes": 67574,
+      "type": "CSS"
+    },
+    {
+      "url": "https://jetpakistan.pk/_next/static/chunks/9583-28b2a2156b9be929.js",
+      "bytes": 59799,
+      "type": "JS"
+    },
+    {
+      "url": "https://jetpakistan.pk/_next/static/chunks/891-e21fdd37fcb10223.js",
+      "bytes": 52615,
+      "type": "JS"
+    },
+    {
+      "url": "https://jetpakistan.pk/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "bytes": 48432,
+      "type": "font"
+    },
+    {
+      "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+      "bytes": 44526,
+      "type": "image"
+    },
+    {
+      "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/3260b2972528473c/card-480.webp",
+      "bytes": 44058,
+      "type": "image"
+    },
+    {
+      "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+      "bytes": 42940,
+      "type": "image"
+    },
+    {
+      "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+      "bytes": 37384,
+      "type": "image"
+    },
+    {
+      "url": "https://jetpakistan.pk/_next/static/chunks/2172-dafae62ad4740670.js",
+      "bytes": 36329,
+      "type": "JS"
+    }
+  ],
+  "rscCount": 3,
+  "homepageApiCount": 0,
+  "viewports": {
+    "390": {
+      "uniqueNonzeroTransferBytes": 1454014,
+      "image": 274532,
+      "overflow": false,
+      "broken": 4,
+      "routeDerivative": true,
+      "hero": {
+        "preloadInitialDocument": true,
+        "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+        "currentSrcIsDerivative": true,
+        "originalSelected": false,
+        "duplicateTransfer": false,
+        "mobileAndDesktopBoth": false,
+        "selectedFormat": "webp",
+        "transferBytes": 69576
+      }
+    },
+    "768": {
+      "uniqueNonzeroTransferBytes": 1524911,
+      "image": 341442,
+      "overflow": false,
+      "broken": 2,
+      "routeDerivative": true,
+      "hero": {
+        "preloadInitialDocument": true,
+        "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+        "currentSrcIsDerivative": true,
+        "originalSelected": false,
+        "duplicateTransfer": false,
+        "mobileAndDesktopBoth": false,
+        "selectedFormat": "webp",
+        "transferBytes": 69576
+      }
+    },
+    "1440": {
+      "uniqueNonzeroTransferBytes": 1699279,
+      "image": 443220,
+      "overflow": false,
+      "broken": 0,
+      "routeDerivative": true,
+      "hero": {
+        "preloadInitialDocument": true,
+        "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp",
+        "currentSrcIsDerivative": true,
+        "originalSelected": false,
+        "duplicateTransfer": false,
+        "mobileAndDesktopBoth": false,
+        "selectedFormat": "webp",
+        "transferBytes": 137730
+      }
+    }
+  },
+  "fab": {
+    "320": {
+      "overflow": false,
+      "fixedCount": 4,
+      "overlap": false,
+      "boxes": [
+        {
+          "tag": "HEADER",
+          "cls": "sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface",
+          "x": 0,
+          "y": 0,
+          "w": 320,
+          "h": 62
+        },
+        {
+          "tag": "DETAILS",
+          "cls": "jp-public-fab-dock group pointer-events-none fixed right-[max(1rem,env(safe-area",
+          "x": 248,
+          "y": 628,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "DIV",
+          "cls": "AskJetPakistanChat_fabWrap__f_cmL",
+          "x": 252,
+          "y": 560,
+          "w": 54,
+          "h": 54
+        },
+        {
+          "tag": "DIV",
+          "cls": "pointer-events-none fixed bottom-4 right-4 z-[110] flex w-full max-w-sm flex-col",
+          "x": -16,
+          "y": 684,
+          "w": 320,
+          "h": 0
+        }
+      ]
+    },
+    "360": {
+      "overflow": true,
+      "fixedCount": 4,
+      "overlap": true,
+      "boxes": [
+        {
+          "tag": "HEADER",
+          "cls": "sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface",
+          "x": 0,
+          "y": 0,
+          "w": 360,
+          "h": 62.125
+        },
+        {
+          "tag": "DETAILS",
+          "cls": "jp-public-fab-dock group pointer-events-none fixed right-[max(1rem,env(safe-area",
+          "x": 288,
+          "y": 628,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "DIV",
+          "cls": "AskJetPakistanChat_fabWrap__f_cmL",
+          "x": 292,
+          "y": 632,
+          "w": 54,
+          "h": 54
+        },
+        {
+          "tag": "DIV",
+          "cls": "pointer-events-none fixed bottom-4 right-4 z-[110] flex w-full max-w-sm flex-col",
+          "x": -16,
+          "y": 684,
+          "w": 360,
+          "h": 0
+        }
+      ]
+    },
+    "390": {
+      "overflow": true,
+      "fixedCount": 4,
+      "overlap": true,
+      "boxes": [
+        {
+          "tag": "HEADER",
+          "cls": "sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface",
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 62.21875
+        },
+        {
+          "tag": "DETAILS",
+          "cls": "jp-public-fab-dock group pointer-events-none fixed right-[max(1rem,env(safe-area",
+          "x": 318,
+          "y": 630,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "DIV",
+          "cls": "AskJetPakistanChat_fabWrap__f_cmL",
+          "x": 322,
+          "y": 634,
+          "w": 54,
+          "h": 54
+        },
+        {
+          "tag": "DIV",
+          "cls": "pointer-events-none fixed bottom-4 right-4 z-[110] flex w-full max-w-sm flex-col",
+          "x": -10,
+          "y": 686,
+          "w": 384,
+          "h": 0
+        }
+      ]
+    },
+    "430": {
+      "overflow": true,
+      "fixedCount": 4,
+      "overlap": true,
+      "boxes": [
+        {
+          "tag": "HEADER",
+          "cls": "sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface",
+          "x": 0,
+          "y": 0,
+          "w": 430,
+          "h": 62.34375
+        },
+        {
+          "tag": "DETAILS",
+          "cls": "jp-public-fab-dock group pointer-events-none fixed right-[max(1rem,env(safe-area",
+          "x": 358,
+          "y": 702,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "DIV",
+          "cls": "AskJetPakistanChat_fabWrap__f_cmL",
+          "x": 362,
+          "y": 706,
+          "w": 54,
+          "h": 54
+        },
+        {
+          "tag": "DIV",
+          "cls": "pointer-events-none fixed bottom-4 right-4 z-[110] flex w-full max-w-sm flex-col",
+          "x": 30,
+          "y": 758,
+          "w": 384,
+          "h": 0
+        }
+      ]
+    },
+    "768": {
+      "overflow": true,
+      "fixedCount": 4,
+      "overlap": true,
+      "boxes": [
+        {
+          "tag": "HEADER",
+          "cls": "sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface",
+          "x": 0,
+          "y": 0,
+          "w": 768,
+          "h": 63.390625
+        },
+        {
+          "tag": "DETAILS",
+          "cls": "jp-public-fab-dock group pointer-events-none fixed right-[max(1rem,env(safe-area",
+          "x": 696,
+          "y": 1310,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "DIV",
+          "cls": "AskJetPakistanChat_fabWrap__f_cmL",
+          "x": 692,
+          "y": 1306,
+          "w": 58,
+          "h": 58
+        },
+        {
+          "tag": "DIV",
+          "cls": "pointer-events-none fixed bottom-4 right-4 z-[110] flex w-full max-w-sm flex-col",
+          "x": 368,
+          "y": 1366,
+          "w": 384,
+          "h": 0
+        }
+      ]
+    },
+    "1440": {
+      "overflow": true,
+      "fixedCount": 3,
+      "overlap": false,
+      "boxes": [
+        {
+          "tag": "HEADER",
+          "cls": "sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface",
+          "x": 0,
+          "y": 0,
+          "w": 1440,
+          "h": 65.5
+        },
+        {
+          "tag": "DIV",
+          "cls": "AskJetPakistanChat_fabWrap__f_cmL",
+          "x": 1364,
+          "y": 2516,
+          "w": 58,
+          "h": 58
+        },
+        {
+          "tag": "DIV",
+          "cls": "pointer-events-none fixed bottom-4 right-4 z-[110] flex w-full max-w-sm flex-col",
+          "x": 1040,
+          "y": 2576,
+          "w": 384,
+          "h": 0
+        }
+      ]
+    }
+  },
+  "logoFirstPaint": {
+    "early": {
+      "imgs": [],
+      "hasBrandStorage": false,
+      "hasPlaceholder": false
+    },
+    "late": {
+      "logoSrc": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+      "width": "144",
+      "height": "36",
+      "naturalWidth": 400,
+      "complete": true
+    }
+  }
+}

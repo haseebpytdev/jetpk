@@ -1,0 +1,1384 @@
+{
+  "capturedAt": "2026-10-29T16:35:38.120Z",
+  "origin": "https://jetpakistan.pk",
+  "viewports": {
+    "390": {
+      "viewport": "390",
+      "status": 200,
+      "rawRequestCount": 44,
+      "rawTransferBytes": 1454014,
+      "uniqueNonzeroRequestCount": 42,
+      "uniqueNonzeroTransferBytes": 1454014,
+      "byType": {
+        "HTML": 109300,
+        "CSS": 125027,
+        "image": 274532,
+        "font": 93208,
+        "JS": 851861,
+        "API": 86
+      },
+      "image": {
+        "total": 274532,
+        "png": 29312,
+        "webp": 245220,
+        "jpeg": 0,
+        "avif": 0,
+        "heroBytes": 69576,
+        "routeBytes": 175644,
+        "destinationBytes": 175644,
+        "featuredBytes": 0,
+        "supportBytes": 0,
+        "largest": {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+          "bytes": 69576
+        }
+      },
+      "hero": {
+        "preloadInitialDocument": true,
+        "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+        "currentSrcIsDerivative": true,
+        "originalSelected": false,
+        "duplicateTransfer": false,
+        "mobileAndDesktopBoth": false,
+        "selectedFormat": "webp",
+        "transferBytes": 69576
+      },
+      "routeDerivative": true,
+      "destinationDerivative": true,
+      "featuredDerivative": true,
+      "belowFoldLazy": true,
+      "giantOriginalSelected": false,
+      "khiOriginal": false,
+      "lheOriginal": false,
+      "branding": true,
+      "overflow": false,
+      "broken": 4,
+      "searchVisible": true,
+      "logo": {
+        "currentSrc": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+        "src": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+        "srcset": "",
+        "loading": "lazy",
+        "complete": true,
+        "naturalWidth": 400,
+        "alt": "JetPakistan"
+      },
+      "top15": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1255-6a221ac26670bd41.js",
+          "bytes": 174044,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "bytes": 173025,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1124-88ec4cbe98da450a.js",
+          "bytes": 156234,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/",
+          "bytes": 109300,
+          "type": "HTML"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+          "bytes": 69576,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/161-643d8e536bc9af52.js",
+          "bytes": 68659,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/ddec74e89663f76c.css",
+          "bytes": 67574,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/9583-28b2a2156b9be929.js",
+          "bytes": 59799,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+          "bytes": 48432,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+          "bytes": 44526,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+          "bytes": 42940,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+          "bytes": 37384,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2172-dafae62ad4740670.js",
+          "bytes": 36329,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1638.e24d394fe2790718.js",
+          "bytes": 34035,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+          "bytes": 29312,
+          "type": "image"
+        }
+      ],
+      "rscCount": 0,
+      "homepageApiCount": 0,
+      "apiUrls": [
+        "https://jetpakistan.pk/laravel/api/public/auth/session"
+      ],
+      "uniqueEntries": [
+        {
+          "url": "https://jetpakistan.pk/",
+          "bytes": 109300,
+          "type": "HTML"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/ddec74e89663f76c.css",
+          "bytes": 67574,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/30f6347f158826f7.css",
+          "bytes": 14817,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/e0bc26304c95f2c0.css",
+          "bytes": 16980,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/a0e8f16c1ada1dcc.css",
+          "bytes": 20917,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/efa246bd6145874a.css",
+          "bytes": 4739,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+          "bytes": 69576,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+          "bytes": 48432,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "bytes": 10060,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "bytes": 10052,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "bytes": 10120,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+          "bytes": 29312,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/webpack-6e02f237f1d7e484.js",
+          "bytes": 3848,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/main-app-f3c6bac63e7d0a5a.js",
+          "bytes": 572,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/fonts/clash-display/ClashDisplay-Bold.woff2",
+          "bytes": 14544,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/269ea6178cd31fa6/card-480.webp",
+          "bytes": 25614,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+          "bytes": 25180,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+          "bytes": 42940,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+          "bytes": 44526,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+          "bytes": 37384,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1255-6a221ac26670bd41.js",
+          "bytes": 174044,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "bytes": 173025,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/layout-ae91f2c318d6a29c.js",
+          "bytes": 8353,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4909-60c88923efbb24ad.js",
+          "bytes": 20149,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/751-04a061cc9676f8a6.js",
+          "bytes": 10350,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2619-b8db57ac19da49ac.js",
+          "bytes": 7813,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/6394-e2d66ef25028a706.js",
+          "bytes": 15295,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/161-643d8e536bc9af52.js",
+          "bytes": 68659,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/error-22f4674e38a6ee75.js",
+          "bytes": 18338,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2455-d2f20072bcfd9176.js",
+          "bytes": 17193,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/9583-28b2a2156b9be929.js",
+          "bytes": 59799,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1124-88ec4cbe98da450a.js",
+          "bytes": 156234,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/page-f2bf3d15ef41d1a2.js",
+          "bytes": 4779,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-abd1d8756fd1ae0a.js",
+          "bytes": 10611,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4173-05a4e021dccb4245.js",
+          "bytes": 10327,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/8433.d84581d0f826ecf8.js",
+          "bytes": 8418,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1638.e24d394fe2790718.js",
+          "bytes": 34035,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/api/public/auth/session",
+          "bytes": 86,
+          "type": "API"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1556-9e1ba882e09e838e.js",
+          "bytes": 9922,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/layout-1ffb602679c945fa.js",
+          "bytes": 1182,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/(auth)/login/page-4fc5ad8ce3c85d30.js",
+          "bytes": 2586,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2172-dafae62ad4740670.js",
+          "bytes": 36329,
+          "type": "JS"
+        }
+      ]
+    },
+    "768": {
+      "viewport": "768",
+      "status": 200,
+      "rawRequestCount": 47,
+      "rawTransferBytes": 1524911,
+      "uniqueNonzeroRequestCount": 46,
+      "uniqueNonzeroTransferBytes": 1524911,
+      "byType": {
+        "HTML": 109300,
+        "CSS": 125027,
+        "image": 341442,
+        "font": 93208,
+        "JS": 851861,
+        "API": 1306,
+        "RSC": 2767
+      },
+      "image": {
+        "total": 341442,
+        "png": 29312,
+        "webp": 312130,
+        "jpeg": 0,
+        "avif": 0,
+        "heroBytes": 69576,
+        "routeBytes": 242554,
+        "destinationBytes": 242554,
+        "featuredBytes": 0,
+        "supportBytes": 0,
+        "largest": {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+          "bytes": 69576
+        }
+      },
+      "hero": {
+        "preloadInitialDocument": true,
+        "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+        "currentSrcIsDerivative": true,
+        "originalSelected": false,
+        "duplicateTransfer": false,
+        "mobileAndDesktopBoth": false,
+        "selectedFormat": "webp",
+        "transferBytes": 69576
+      },
+      "routeDerivative": true,
+      "destinationDerivative": true,
+      "featuredDerivative": true,
+      "belowFoldLazy": true,
+      "giantOriginalSelected": false,
+      "khiOriginal": false,
+      "lheOriginal": false,
+      "branding": true,
+      "overflow": false,
+      "broken": 2,
+      "searchVisible": true,
+      "logo": {
+        "currentSrc": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+        "src": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+        "srcset": "",
+        "loading": "lazy",
+        "complete": true,
+        "naturalWidth": 400,
+        "alt": "JetPakistan"
+      },
+      "top15": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1255-6a221ac26670bd41.js",
+          "bytes": 174044,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "bytes": 173025,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1124-88ec4cbe98da450a.js",
+          "bytes": 156234,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/",
+          "bytes": 109300,
+          "type": "HTML"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+          "bytes": 69576,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/161-643d8e536bc9af52.js",
+          "bytes": 68659,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/ddec74e89663f76c.css",
+          "bytes": 67574,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/9583-28b2a2156b9be929.js",
+          "bytes": 59799,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+          "bytes": 48432,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+          "bytes": 44526,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/3260b2972528473c/card-480.webp",
+          "bytes": 44058,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+          "bytes": 42940,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+          "bytes": 37384,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2172-dafae62ad4740670.js",
+          "bytes": 36329,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1638.e24d394fe2790718.js",
+          "bytes": 34035,
+          "type": "JS"
+        }
+      ],
+      "rscCount": 1,
+      "homepageApiCount": 0,
+      "apiUrls": [
+        "https://jetpakistan.pk/laravel/api/public/auth/session",
+        "https://jetpakistan.pk/laravel/api/public/content/config"
+      ],
+      "uniqueEntries": [
+        {
+          "url": "https://jetpakistan.pk/",
+          "bytes": 109300,
+          "type": "HTML"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/30f6347f158826f7.css",
+          "bytes": 14817,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/e0bc26304c95f2c0.css",
+          "bytes": 16980,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/ddec74e89663f76c.css",
+          "bytes": 67574,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/efa246bd6145874a.css",
+          "bytes": 4739,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/a0e8f16c1ada1dcc.css",
+          "bytes": 20917,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-mobile.webp",
+          "bytes": 69576,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "bytes": 10060,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "bytes": 10052,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "bytes": 10120,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+          "bytes": 48432,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/main-app-f3c6bac63e7d0a5a.js",
+          "bytes": 572,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/webpack-6e02f237f1d7e484.js",
+          "bytes": 3848,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2619-b8db57ac19da49ac.js",
+          "bytes": 7813,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/6394-e2d66ef25028a706.js",
+          "bytes": 15295,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/layout-ae91f2c318d6a29c.js",
+          "bytes": 8353,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4909-60c88923efbb24ad.js",
+          "bytes": 20149,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "bytes": 173025,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/751-04a061cc9676f8a6.js",
+          "bytes": 10350,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2455-d2f20072bcfd9176.js",
+          "bytes": 17193,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1124-88ec4cbe98da450a.js",
+          "bytes": 156234,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-abd1d8756fd1ae0a.js",
+          "bytes": 10611,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/error-22f4674e38a6ee75.js",
+          "bytes": 18338,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1255-6a221ac26670bd41.js",
+          "bytes": 174044,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/fonts/clash-display/ClashDisplay-Bold.woff2",
+          "bytes": 14544,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/161-643d8e536bc9af52.js",
+          "bytes": 68659,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/9583-28b2a2156b9be929.js",
+          "bytes": 59799,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+          "bytes": 29312,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/page-f2bf3d15ef41d1a2.js",
+          "bytes": 4779,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/269ea6178cd31fa6/card-480.webp",
+          "bytes": 25614,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/api/public/auth/session",
+          "bytes": 86,
+          "type": "API"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+          "bytes": 42940,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+          "bytes": 37384,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+          "bytes": 44526,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+          "bytes": 25180,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4173-05a4e021dccb4245.js",
+          "bytes": 10327,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1638.e24d394fe2790718.js",
+          "bytes": 34035,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/api/public/content/config",
+          "bytes": 1220,
+          "type": "API"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/8433.d84581d0f826ecf8.js",
+          "bytes": 8418,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/eff8aca22eec2262/card-480.webp",
+          "bytes": 22852,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/login?_rsc=c9BZJ8X-vYiReVMz",
+          "bytes": 2767,
+          "type": "RSC"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1556-9e1ba882e09e838e.js",
+          "bytes": 9922,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/layout-1ffb602679c945fa.js",
+          "bytes": 1182,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/(auth)/login/page-4fc5ad8ce3c85d30.js",
+          "bytes": 2586,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2172-dafae62ad4740670.js",
+          "bytes": 36329,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/3260b2972528473c/card-480.webp",
+          "bytes": 44058,
+          "type": "image"
+        }
+      ]
+    },
+    "1440": {
+      "viewport": "1440",
+      "status": 200,
+      "rawRequestCount": 51,
+      "rawTransferBytes": 1699279,
+      "uniqueNonzeroRequestCount": 51,
+      "uniqueNonzeroTransferBytes": 1699279,
+      "byType": {
+        "HTML": 109300,
+        "font": 93208,
+        "CSS": 125027,
+        "image": 443220,
+        "JS": 905820,
+        "API": 86,
+        "RSC": 22618
+      },
+      "image": {
+        "total": 443220,
+        "png": 29312,
+        "webp": 413908,
+        "jpeg": 0,
+        "avif": 0,
+        "heroBytes": 137730,
+        "routeBytes": 265398,
+        "destinationBytes": 265398,
+        "featuredBytes": 0,
+        "supportBytes": 10780,
+        "largest": {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp",
+          "bytes": 137730
+        }
+      },
+      "hero": {
+        "preloadInitialDocument": true,
+        "currentSrc": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp",
+        "currentSrcIsDerivative": true,
+        "originalSelected": false,
+        "duplicateTransfer": false,
+        "mobileAndDesktopBoth": false,
+        "selectedFormat": "webp",
+        "transferBytes": 137730
+      },
+      "routeDerivative": true,
+      "destinationDerivative": true,
+      "featuredDerivative": true,
+      "belowFoldLazy": true,
+      "giantOriginalSelected": false,
+      "khiOriginal": false,
+      "lheOriginal": false,
+      "branding": true,
+      "overflow": false,
+      "broken": 0,
+      "searchVisible": true,
+      "logo": {
+        "currentSrc": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+        "src": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+        "srcset": "",
+        "loading": "lazy",
+        "complete": true,
+        "naturalWidth": 400,
+        "alt": "JetPakistan"
+      },
+      "top15": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1255-6a221ac26670bd41.js",
+          "bytes": 174044,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "bytes": 173025,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1124-88ec4cbe98da450a.js",
+          "bytes": 156234,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp",
+          "bytes": 137730,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/",
+          "bytes": 109300,
+          "type": "HTML"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/161-643d8e536bc9af52.js",
+          "bytes": 68659,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/ddec74e89663f76c.css",
+          "bytes": 67574,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/9583-28b2a2156b9be929.js",
+          "bytes": 59799,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/891-e21fdd37fcb10223.js",
+          "bytes": 52615,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+          "bytes": 48432,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+          "bytes": 44526,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/3260b2972528473c/card-480.webp",
+          "bytes": 44058,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+          "bytes": 42940,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+          "bytes": 37384,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2172-dafae62ad4740670.js",
+          "bytes": 36329,
+          "type": "JS"
+        }
+      ],
+      "rscCount": 3,
+      "homepageApiCount": 0,
+      "apiUrls": [
+        "https://jetpakistan.pk/laravel/api/public/auth/session"
+      ],
+      "uniqueEntries": [
+        {
+          "url": "https://jetpakistan.pk/",
+          "bytes": 109300,
+          "type": "HTML"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "bytes": 10060,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "bytes": 10052,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/30f6347f158826f7.css",
+          "bytes": 14817,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/ddec74e89663f76c.css",
+          "bytes": 67574,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/e0bc26304c95f2c0.css",
+          "bytes": 16980,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/efa246bd6145874a.css",
+          "bytes": 4739,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/css/a0e8f16c1ada1dcc.css",
+          "bytes": 20917,
+          "type": "CSS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "bytes": 10120,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp",
+          "bytes": 137730,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/main-app-f3c6bac63e7d0a5a.js",
+          "bytes": 572,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2619-b8db57ac19da49ac.js",
+          "bytes": 7813,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4909-60c88923efbb24ad.js",
+          "bytes": 20149,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/6394-e2d66ef25028a706.js",
+          "bytes": 15295,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+          "bytes": 48432,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/fonts/clash-display/ClashDisplay-Bold.woff2",
+          "bytes": 14544,
+          "type": "font"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/webpack-6e02f237f1d7e484.js",
+          "bytes": 3848,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/161-643d8e536bc9af52.js",
+          "bytes": 68659,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "bytes": 173025,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/751-04a061cc9676f8a6.js",
+          "bytes": 10350,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2455-d2f20072bcfd9176.js",
+          "bytes": 17193,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1124-88ec4cbe98da450a.js",
+          "bytes": 156234,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/error-22f4674e38a6ee75.js",
+          "bytes": 18338,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/9583-28b2a2156b9be929.js",
+          "bytes": 59799,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-abd1d8756fd1ae0a.js",
+          "bytes": 10611,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/page-f2bf3d15ef41d1a2.js",
+          "bytes": 4779,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/layout-ae91f2c318d6a29c.js",
+          "bytes": 8353,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1255-6a221ac26670bd41.js",
+          "bytes": 174044,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+          "bytes": 42940,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/a785083bc13a5d57/card-480.webp",
+          "bytes": 37384,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/f6ae84c0f9522eec/card-480.webp",
+          "bytes": 44526,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/269ea6178cd31fa6/card-480.webp",
+          "bytes": 25614,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+          "bytes": 29312,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+          "bytes": 25180,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/02f48809df33978e/card-480.webp",
+          "bytes": 22844,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/eff8aca22eec2262/card-480.webp",
+          "bytes": 22852,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4173-05a4e021dccb4245.js",
+          "bytes": 10327,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1638.e24d394fe2790718.js",
+          "bytes": 34035,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/8433.d84581d0f826ecf8.js",
+          "bytes": 8418,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/api/public/auth/session",
+          "bytes": 86,
+          "type": "API"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/support/ce84d186700df9b1/support-480.webp",
+          "bytes": 10780,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/3260b2972528473c/card-480.webp",
+          "bytes": 44058,
+          "type": "image"
+        },
+        {
+          "url": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-22&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&_rsc=c9BZJ8X-vYiReVMz",
+          "bytes": 5371,
+          "type": "RSC"
+        },
+        {
+          "url": "https://jetpakistan.pk/groups/search?_rsc=9r76Ghkn5KINVUxz",
+          "bytes": 5490,
+          "type": "RSC"
+        },
+        {
+          "url": "https://jetpakistan.pk/login?_rsc=9r76Ghkn5KINVUxz",
+          "bytes": 11757,
+          "type": "RSC"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/groups/search/page-48ebb24fb8c5c4b9.js",
+          "bytes": 1344,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/layout-1ffb602679c945fa.js",
+          "bytes": 1182,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1556-9e1ba882e09e838e.js",
+          "bytes": 9922,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/(auth)/login/page-4fc5ad8ce3c85d30.js",
+          "bytes": 2586,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2172-dafae62ad4740670.js",
+          "bytes": 36329,
+          "type": "JS"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/891-e21fdd37fcb10223.js",
+          "bytes": 52615,
+          "type": "JS"
+        }
+      ]
+    }
+  },
+  "fab": {
+    "320": {
+      "overflow": false,
+      "fixedCount": 4,
+      "overlap": false,
+      "boxes": [
+        {
+          "tag": "HEADER",
+          "cls": "sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface",
+          "x": 0,
+          "y": 0,
+          "w": 320,
+          "h": 62
+        },
+        {
+          "tag": "DETAILS",
+          "cls": "jp-public-fab-dock group pointer-events-none fixed right-[max(1rem,env(safe-area",
+          "x": 248,
+          "y": 628,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "DIV",
+          "cls": "AskJetPakistanChat_fabWrap__f_cmL",
+          "x": 252,
+          "y": 560,
+          "w": 54,
+          "h": 54
+        },
+        {
+          "tag": "DIV",
+          "cls": "pointer-events-none fixed bottom-4 right-4 z-[110] flex w-full max-w-sm flex-col",
+          "x": -16,
+          "y": 684,
+          "w": 320,
+          "h": 0
+        }
+      ]
+    },
+    "360": {
+      "overflow": true,
+      "fixedCount": 4,
+      "overlap": true,
+      "boxes": [
+        {
+          "tag": "HEADER",
+          "cls": "sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface",
+          "x": 0,
+          "y": 0,
+          "w": 360,
+          "h": 62.125
+        },
+        {
+          "tag": "DETAILS",
+          "cls": "jp-public-fab-dock group pointer-events-none fixed right-[max(1rem,env(safe-area",
+          "x": 288,
+          "y": 628,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "DIV",
+          "cls": "AskJetPakistanChat_fabWrap__f_cmL",
+          "x": 292,
+          "y": 632,
+          "w": 54,
+          "h": 54
+        },
+        {
+          "tag": "DIV",
+          "cls": "pointer-events-none fixed bottom-4 right-4 z-[110] flex w-full max-w-sm flex-col",
+          "x": -16,
+          "y": 684,
+          "w": 360,
+          "h": 0
+        }
+      ]
+    },
+    "390": {
+      "overflow": true,
+      "fixedCount": 4,
+      "overlap": true,
+      "boxes": [
+        {
+          "tag": "HEADER",
+          "cls": "sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface",
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 62.21875
+        },
+        {
+          "tag": "DETAILS",
+          "cls": "jp-public-fab-dock group pointer-events-none fixed right-[max(1rem,env(safe-area",
+          "x": 318,
+          "y": 630,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "DIV",
+          "cls": "AskJetPakistanChat_fabWrap__f_cmL",
+          "x": 322,
+          "y": 634,
+          "w": 54,
+          "h": 54
+        },
+        {
+          "tag": "DIV",
+          "cls": "pointer-events-none fixed bottom-4 right-4 z-[110] flex w-full max-w-sm flex-col",
+          "x": -10,
+          "y": 686,
+          "w": 384,
+          "h": 0
+        }
+      ]
+    },
+    "430": {
+      "overflow": true,
+      "fixedCount": 4,
+      "overlap": true,
+      "boxes": [
+        {
+          "tag": "HEADER",
+          "cls": "sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface",
+          "x": 0,
+          "y": 0,
+          "w": 430,
+          "h": 62.34375
+        },
+        {
+          "tag": "DETAILS",
+          "cls": "jp-public-fab-dock group pointer-events-none fixed right-[max(1rem,env(safe-area",
+          "x": 358,
+          "y": 702,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "DIV",
+          "cls": "AskJetPakistanChat_fabWrap__f_cmL",
+          "x": 362,
+          "y": 706,
+          "w": 54,
+          "h": 54
+        },
+        {
+          "tag": "DIV",
+          "cls": "pointer-events-none fixed bottom-4 right-4 z-[110] flex w-full max-w-sm flex-col",
+          "x": 30,
+          "y": 758,
+          "w": 384,
+          "h": 0
+        }
+      ]
+    },
+    "768": {
+      "overflow": true,
+      "fixedCount": 4,
+      "overlap": true,
+      "boxes": [
+        {
+          "tag": "HEADER",
+          "cls": "sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface",
+          "x": 0,
+          "y": 0,
+          "w": 768,
+          "h": 63.390625
+        },
+        {
+          "tag": "DETAILS",
+          "cls": "jp-public-fab-dock group pointer-events-none fixed right-[max(1rem,env(safe-area",
+          "x": 696,
+          "y": 1310,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "DIV",
+          "cls": "AskJetPakistanChat_fabWrap__f_cmL",
+          "x": 692,
+          "y": 1306,
+          "w": 58,
+          "h": 58
+        },
+        {
+          "tag": "DIV",
+          "cls": "pointer-events-none fixed bottom-4 right-4 z-[110] flex w-full max-w-sm flex-col",
+          "x": 368,
+          "y": 1366,
+          "w": 384,
+          "h": 0
+        }
+      ]
+    },
+    "1440": {
+      "overflow": true,
+      "fixedCount": 3,
+      "overlap": false,
+      "boxes": [
+        {
+          "tag": "HEADER",
+          "cls": "sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface",
+          "x": 0,
+          "y": 0,
+          "w": 1440,
+          "h": 65.5
+        },
+        {
+          "tag": "DIV",
+          "cls": "AskJetPakistanChat_fabWrap__f_cmL",
+          "x": 1364,
+          "y": 2516,
+          "w": 58,
+          "h": 58
+        },
+        {
+          "tag": "DIV",
+          "cls": "pointer-events-none fixed bottom-4 right-4 z-[110] flex w-full max-w-sm flex-col",
+          "x": 1040,
+          "y": 2576,
+          "w": 384,
+          "h": 0
+        }
+      ]
+    }
+  },
+  "logoFirstPaint": {
+    "early": {
+      "imgs": [],
+      "hasBrandStorage": false,
+      "hasPlaceholder": false
+    },
+    "late": {
+      "logoSrc": "https://jetpakistan.pk/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png",
+      "width": "144",
+      "height": "36",
+      "naturalWidth": 400,
+      "complete": true
+    }
+  }
+}

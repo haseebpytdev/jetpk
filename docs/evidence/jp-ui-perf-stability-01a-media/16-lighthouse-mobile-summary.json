@@ -1,0 +1,18 @@
+{
+  "source": "lighthouse@12.2.1 local Chromium (Playwright chrome-win64)",
+  "url": "https://jetpakistan.pk/",
+  "formFactor": "mobile",
+  "throttlingMethod": "simulate",
+  "categoriesScoreNote": "LH12 JSON categories object empty; metric audits used. Simulated mobile throttle is not used to reopen media Phase A.",
+  "performance": null,
+  "accessibility": null,
+  "bestPractices": null,
+  "seo": null,
+  "fcpMs": 14945,
+  "lcpMs": 15395,
+  "tbtMs": 8761,
+  "cls": 0.003,
+  "speedIndexMs": 45518,
+  "ttiMs": 26040,
+  "ttfbMs": 256
+}
