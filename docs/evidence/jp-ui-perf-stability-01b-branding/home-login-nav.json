@@ -1,0 +1,87 @@
+{
+  "base": "http://127.0.0.1:3021",
+  "n": 12,
+  "ok": 12,
+  "median": 130,
+  "p95": 336,
+  "samples": [
+    {
+      "i": 0,
+      "ok": true,
+      "ms": 147,
+      "logoSrc": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "i": 1,
+      "ok": true,
+      "ms": 158,
+      "logoSrc": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "i": 2,
+      "ok": true,
+      "ms": 104,
+      "logoSrc": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "i": 3,
+      "ok": true,
+      "ms": 130,
+      "logoSrc": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "i": 4,
+      "ok": true,
+      "ms": 89,
+      "logoSrc": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "i": 5,
+      "ok": true,
+      "ms": 188,
+      "logoSrc": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "i": 6,
+      "ok": true,
+      "ms": 114,
+      "logoSrc": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "i": 7,
+      "ok": true,
+      "ms": 130,
+      "logoSrc": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "i": 8,
+      "ok": true,
+      "ms": 336,
+      "logoSrc": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "i": 9,
+      "ok": true,
+      "ms": 104,
+      "logoSrc": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "i": 10,
+      "ok": true,
+      "ms": 146,
+      "logoSrc": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    },
+    {
+      "i": 11,
+      "ok": true,
+      "ms": 156,
+      "logoSrc": "/storage/agencies/1/branding/1py7vHKBiZEVF7Wr9TEcaK8eRNpVYflrRyWYiMoM.png"
+    }
+  ],
+  "configLog": {
+    "total": 13,
+    "hits": 12,
+    "misses": 1,
+    "bypass": 0
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "url": "https://jetpakistan.pk",
+  "hero": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp",
+  "route": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/2f5f8ced8f55a2d6/card-480.webp",
+  "destination": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+  "featured": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/card/35721c7a0e6f2d08/card-480.webp",
+  "HERO_CURRENT_SRC_IS_DERIVATIVE": true,
+  "ROUTE_CURRENT_SRC_IS_DERIVATIVE": true,
+  "DESTINATION_CURRENT_SRC_IS_DERIVATIVE": true,
+  "FEATURED_CURRENT_SRC_IS_DERIVATIVE": true,
+  "GIANT_ORIGINAL_SELECTED_WHEN_DERIVATIVE_AVAILABLE": false
+}

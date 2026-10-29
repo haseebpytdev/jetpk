@@ -1,0 +1,107 @@
+[
+  {
+    "viewport": {
+      "w": 320,
+      "h": 720
+    },
+    "logoBox": {
+      "x": 23.25,
+      "y": 12.5,
+      "width": 140.796875,
+      "height": 36
+    },
+    "headerHeight": 62,
+    "overlapAccount": false,
+    "clipped": false
+  },
+  {
+    "viewport": {
+      "w": 360,
+      "h": 740
+    },
+    "logoBox": {
+      "x": 23.28125,
+      "y": 12.5625,
+      "width": 144,
+      "height": 36
+    },
+    "headerHeight": 62.125,
+    "overlapAccount": false,
+    "clipped": false
+  },
+  {
+    "viewport": {
+      "w": 390,
+      "h": 844
+    },
+    "logoBox": {
+      "x": 23.296875,
+      "y": 12.609375,
+      "width": 144,
+      "height": 36
+    },
+    "headerHeight": 62.21875,
+    "overlapAccount": false,
+    "clipped": false
+  },
+  {
+    "viewport": {
+      "w": 430,
+      "h": 932
+    },
+    "logoBox": {
+      "x": 23.328125,
+      "y": 12.671875,
+      "width": 144,
+      "height": 36
+    },
+    "headerHeight": 62.34375,
+    "overlapAccount": false,
+    "clipped": false
+  },
+  {
+    "viewport": {
+      "w": 768,
+      "h": 1024
+    },
+    "logoBox": {
+      "x": 23.59375,
+      "y": 13.1875,
+      "width": 144,
+      "height": 36
+    },
+    "headerHeight": 63.390625,
+    "overlapAccount": false,
+    "clipped": false
+  },
+  {
+    "viewport": {
+      "w": 1024,
+      "h": 768
+    },
+    "logoBox": {
+      "x": 23.796875,
+      "y": 13.59375,
+      "width": 144,
+      "height": 36
+    },
+    "headerHeight": 64.1875,
+    "overlapAccount": false,
+    "clipped": false
+  },
+  {
+    "viewport": {
+      "w": 1440,
+      "h": 900
+    },
+    "logoBox": {
+      "x": 162.875,
+      "y": 14.25,
+      "width": 144,
+      "height": 36
+    },
+    "headerHeight": 65.5,
+    "overlapAccount": false,
+    "clipped": false
+  }
+]

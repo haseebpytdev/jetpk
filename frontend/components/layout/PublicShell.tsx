@@ -26,7 +26,8 @@ type Branding = Pick<PublicConfig, "brand_name" | "logo_url" | "header_logo_heig
 
 /**
  * Public chrome. Layouts may pass anonymous session for static soft-nav;
- * this shell upgrades session + branding from Laravel after hydration.
+ * this shell upgrades session after hydration. Branding/config is only
+ * browser-refetched when SSR did not already supply authoritative branding.
  */
 export function PublicShell({
   children,
@@ -42,28 +43,32 @@ export function PublicShell({
   useEffect(() => {
     document.documentElement.dataset.jpHydrated = "1";
     let cancelled = false;
+    const ssrBrandingPresent = initialBranding != null;
 
     void (async () => {
       try {
-        const [bootstrap, config] = await Promise.all([
-          fetchSessionBootstrap().catch(() => null),
-          PublicConfigService.getConfig().catch(() => null),
-        ]);
-
+        const bootstrap = await fetchSessionBootstrap().catch(() => null);
         if (cancelled) return;
 
         if (bootstrap) {
           setSession(mapBootstrapToPublicSession(bootstrap));
         }
 
-        if (config) {
-          setBranding({
-            brand_name: config.brand_name,
-            logo_url: config.logo_url,
-            header_logo_height: config.header_logo_height,
-          });
-          setAiEnabled(Boolean(config.ai_assistant_enabled));
+        // SSR branding/config is authoritative when present — do not refetch
+        // public config merely to overwrite the same values after hydration.
+        if (ssrBrandingPresent) {
+          return;
         }
+
+        const config = await PublicConfigService.getConfig().catch(() => null);
+        if (cancelled || !config) return;
+
+        setBranding({
+          brand_name: config.brand_name,
+          logo_url: config.logo_url,
+          header_logo_height: config.header_logo_height,
+        });
+        setAiEnabled(Boolean(config.ai_assistant_enabled));
       } catch {
         /* keep SSR/anonymous defaults */
       }
@@ -73,6 +78,8 @@ export function PublicShell({
       cancelled = true;
       delete document.documentElement.dataset.jpHydrated;
     };
+    // Capture first-paint SSR branding only; remount handles layout changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
