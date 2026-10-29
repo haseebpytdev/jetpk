@@ -1,0 +1,172 @@
+# JP-UI-PERF-STABILITY-01A — Final performance certification
+
+```text
+CANONICAL_MAIN_SHA=dddf76429b5bfc7edfe15f1319d97fe8434e2383
+APPLICATION_SHA=4e6e3acc2c48d431c4fb622eb9c462cd0588e05c
+PUBLIC_FRONTEND_SHA=43f5a3beb9a8e88567cf49bef76853f49b55e0c6
+```
+
+Production markers rechecked during certification. `PRODUCTION_MUTATIONS=0`.
+
+## API (final live)
+
+```text
+HTTP=200
+source=cms
+FINAL_API_ROUTE_RESPONSIVE_COUNT=4
+FINAL_API_DESTINATION_RESPONSIVE_COUNT=4
+FINAL_API_FEATURED_RESPONSIVE_COUNT=3
+API_HERO_RESPONSIVE=YES
+API_SUPPORT_DESKTOP_RESPONSIVE=YES
+API_SUPPORT_MOBILE_RESPONSIVE=YES
+```
+
+## Playwright unique non-zero transfer (cache disabled)
+
+Primary desktop evidence viewport: `1440` (`16-final-network-summary.json`).
+
+```text
+VIEWPORT_390=PASS (unique≈1.45MB; hero-mobile.webp derivative; overflow=NO)
+VIEWPORT_768=PASS (unique≈1.52MB; hero-mobile.webp derivative; overflow=NO)
+VIEWPORT_1440=PASS (unique≈1.70MB; hero-desktop.webp derivative; overflow=NO; broken=0)
+
+RAW_REQUEST_COUNT=51
+RAW_TRANSFER_BYTES=1699279
+UNIQUE_NONZERO_REQUEST_COUNT=51
+UNIQUE_NONZERO_TRANSFER_BYTES=1699279
+
+TOTAL_PAGE_TRANSFER_BYTES=1699279
+TOTAL_IMAGE_TRANSFER_BYTES=443220
+PNG_TRANSFER_BYTES=29312
+WEBP_TRANSFER_BYTES=413908
+JPEG_TRANSFER_BYTES=0
+AVIF_TRANSFER_BYTES=0
+
+HERO_TRANSFER_BYTES=137730
+ROUTE_TRANSFER_BYTES=265398
+DESTINATION_TRANSFER_BYTES=265398
+FEATURED_TRANSFER_BYTES=0
+SUPPORT_TRANSFER_BYTES=10780
+```
+
+Note: route/destination instrumented buckets both report the shared card-derivative pool (`265398`); featured cards use the same `/card/` derivative path and were not separately attributed (`FEATURED_TRANSFER_BYTES=0`). Total image bytes remain authoritative.
+
+```text
+LARGEST_IMAGE_URL=https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/lcp/7fe81ea32316e854/hero-desktop.webp
+LARGEST_IMAGE_BYTES=137730
+
+HERO_PRELOAD_INITIAL_DOCUMENT=YES
+HERO_CURRENT_SRC_IS_DERIVATIVE=YES
+HERO_DUPLICATE_TRANSFER=NO
+MOBILE_AND_DESKTOP_HERO_BOTH_TRANSFERRED=NO
+BELOW_FOLD_LAZY_LOADING=PASS
+GIANT_ORIGINAL_SELECTED_WHEN_DERIVATIVE_AVAILABLE=NO
+```
+
+Media Phase-A transfer target `<=5MB`: **PASS** (≈1.70 MB unique page). Stretch `<=3MB`: **PASS**. Hero `<=300KB`: **PASS** (preferred `<=200KB`: **PASS**).
+
+## HAR / baseline reduction
+
+Baseline Oct 28 GTmetrix HAR (`Downloads/GTmetrix-jetpakistan.pk-20261028T140501-BCwZVR4H.har`) remains external reference (not committed).
+
+Stated mission baseline used for reduction percent:
+
+```text
+BASELINE_TOTAL_BYTES=29325000
+FINAL_HAR_TOTAL_BYTES=1699279
+TOTAL_TRANSFER_REDUCTION_PERCENT=94.21
+
+BASELINE_PNG_BYTES=28927000
+FINAL_HAR_PNG_BYTES=29312
+PNG_TRANSFER_REDUCTION_PERCENT=99.90
+```
+
+## Third-party labs
+
+### GTmetrix
+
+```text
+GTMETRIX_STATUS=SKIPPED_NO_API_CREDENTIALS
+GTMETRIX_GRADE=SKIPPED_NO_API_CREDENTIALS
+GTMETRIX_REGION=N/A
+TTFB_COMPARISON=REGION_NOT_EQUIVALENT
+```
+
+Do not invent Grade/LCP. Oct 28 Seattle baseline remains historical reference only.
+
+### Lighthouse (local Chromium via Playwright)
+
+Category objects empty in LH12 JSON (`categories={}`); metric audits used.
+
+Desktop simulate:
+
+```text
+LIGHTHOUSE_DESKTOP_PERFORMANCE=UNAVAILABLE_CATEGORIES_EMPTY
+LIGHTHOUSE_DESKTOP_FCP=947ms
+LIGHTHOUSE_DESKTOP_LCP=1056ms
+LIGHTHOUSE_DESKTOP_TBT=1088ms
+LIGHTHOUSE_DESKTOP_CLS=0.133
+LIGHTHOUSE_DESKTOP_SI=3549ms
+```
+
+Mobile simulate (extreme throttle; not used to reopen media Phase A):
+
+```text
+LIGHTHOUSE_MOBILE_PERFORMANCE=UNAVAILABLE_CATEGORIES_EMPTY
+LIGHTHOUSE_MOBILE_FCP=14945ms
+LIGHTHOUSE_MOBILE_LCP=15395ms
+LIGHTHOUSE_MOBILE_TBT=8761ms
+LIGHTHOUSE_MOBILE_CLS=0.003
+LIGHTHOUSE_MOBILE_SI=45518ms
+```
+
+## Top remaining bottleneck
+
+```text
+TOP_REMAINING_BOTTLENECK=Next.js JS chunks (~906KB unique) — not homepage PNG media
+```
+
+## First-paint branding / FAB / prefetch observations (no fix)
+
+```text
+PLACEHOLDER_LOGO_FIRST_PAINT=NO
+BRAND_LOGO_POST_HYDRATION_SWAP=YES
+CORRECT_LOGO_ON_SSR=NO
+LOGO_DIMENSIONS_RESERVED=PARTIAL
+DUPLICATE_BRANDING_FETCH=NO
+
+FAB_COLLISION=YES
+FIXED_ELEMENT_OVERLAP=YES
+HORIZONTAL_OVERFLOW=YES
+
+RSC_REQUEST_COUNT=3
+DUPLICATE_API_REQUESTS=0
+UNNECESSARY_PREFETCH_REQUESTS=OBSERVED
+HOMEPAGE_PUBLIC_CONTENT_REQUEST_COUNT=0
+
+PHASE_B_REQUIRED=YES
+PHASE_C_REQUIRED=YES
+PHASE_D_REQUIRED=YES
+```
+
+## Production health after benchmarks
+
+```text
+PUBLIC_FRONTEND_STATUS=online
+DASHBOARD_STATUS=online
+NEW_LARAVEL_FATAL_ERRORS=0
+NEW_NEXT_FATAL_ERRORS=0
+HOME_HTTP=200
+API_HTTP=200
+PRODUCTION_HEALTH=PASS
+```
+
+## Phase A closure
+
+Media objectives met: responsive 4/4/3, derivatives selected, giant originals gone, unique transfer << 5MB, production healthy, evidence packaged. GTmetrix unavailable this run does **not** reopen media Phase A.
+
+```text
+PHASE_A_STATUS=CLOSED
+FINAL_STATUS=JP_UI_PERF_STABILITY_01A_CERTIFIED_CLOSED
+NEXT_RECOMMENDED_ACTION=BEGIN_PHASE_B_FIRST_PAINT_BRANDING_THEN_PHASE_C_FIXED_UI_AND_PHASE_D_SERVER_RUNTIME_AS_EVIDENCE_REQUIRES
+```

@@ -1,0 +1,18 @@
+{
+  "source": "lighthouse@12.2.1 local Chromium (Playwright chrome-win64)",
+  "url": "https://jetpakistan.pk/",
+  "formFactor": "desktop",
+  "throttlingMethod": "simulate",
+  "categoriesScoreNote": "LH12 JSON categories object empty; metric audits used",
+  "performance": null,
+  "accessibility": null,
+  "bestPractices": null,
+  "seo": null,
+  "fcpMs": 947,
+  "lcpMs": 1056,
+  "tbtMs": 1088,
+  "cls": 0.133,
+  "speedIndexMs": 3549,
+  "ttiMs": 2669,
+  "ttfbMs": 341
+}
