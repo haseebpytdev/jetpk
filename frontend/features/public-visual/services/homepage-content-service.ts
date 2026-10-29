@@ -81,19 +81,21 @@ export function mapResponsiveMedia(remote: unknown): HomepageResponsiveMedia | n
     .filter((entry): entry is { type: string; srcSet: string; media?: string } => entry !== null);
 
   const preloadsRaw = Array.isArray(data.preloads) ? data.preloads : [];
-  const preloads = preloadsRaw
-    .map((entry) => {
-      if (!entry || typeof entry !== "object") return null;
-      const preload = entry as Record<string, unknown>;
-      const href = String(preload.href ?? "").trim();
-      if (!href) return null;
-      return {
-        href,
-        type: preload.type ? String(preload.type) : null,
-        media: preload.media ? String(preload.media) : undefined,
-      };
-    })
-    .filter((entry): entry is { href: string; type: string | null; media?: string } => entry !== null);
+  const preloads: Array<{ href: string; type?: string | null; media?: string }> = [];
+  for (const entry of preloadsRaw) {
+    if (!entry || typeof entry !== "object") continue;
+    const preload = entry as Record<string, unknown>;
+    const href = String(preload.href ?? "").trim();
+    if (!href) continue;
+    const mapped: { href: string; type?: string | null; media?: string } = {
+      href,
+      type: preload.type ? String(preload.type) : null,
+    };
+    if (preload.media) {
+      mapped.media = String(preload.media);
+    }
+    preloads.push(mapped);
+  }
 
   return {
     fallbackUrl,
