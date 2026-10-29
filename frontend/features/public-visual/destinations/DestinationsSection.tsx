@@ -3,7 +3,7 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Badge } from "@/components/ui/Badge";
-import { ImageSlot } from "@/components/ui/ImageSlot";
+import { ResponsiveCmsPicture } from "@/components/ui/ResponsiveCmsPicture";
 import { ScrollReveal } from "@/features/motion";
 import { resolveDestinationMedia } from "@/lib/homepage-media";
 import Link from "next/link";
@@ -49,12 +49,13 @@ export function DestinationsSection({
               const cardBody = (
                 <>
                   <div className="relative aspect-[4/3] bg-jp-surface-muted">
-                    <ImageSlot
+                    <ResponsiveCmsPicture
                       src={media.image}
                       alt={media.imageAlt}
                       width={320}
                       height={240}
                       sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, (max-width: 1180px) 33vw, 25vw"
+                      responsive={destination.responsive}
                       className="!max-w-none h-full w-full !rounded-none"
                       fallbackLabel={destination.title}
                       brandedFallback

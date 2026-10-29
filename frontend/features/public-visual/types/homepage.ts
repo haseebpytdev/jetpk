@@ -1,3 +1,14 @@
+export type HomepageResponsiveMedia = {
+  fallbackUrl: string;
+  width?: number;
+  height?: number;
+  sizes?: string;
+  sources: Array<{ type: string; srcSet: string; media?: string }>;
+  preloads?: Array<{ href: string; type?: string | null; media?: string }>;
+  hasResponsiveVariants: boolean;
+  fingerprint?: string | null;
+};
+
 export type HomepageHeroContent = {
   eyebrow: string;
   headline: string;
@@ -8,6 +19,7 @@ export type HomepageHeroContent = {
   overlayStrength?: string;
   image: { url: string; alt: string } | null;
   imageMobile?: { url: string; alt: string } | null;
+  responsive?: HomepageResponsiveMedia | null;
 };
 
 export type HomepageTrustChip = {
@@ -23,6 +35,7 @@ export type HomepageRouteCard = {
   badge?: string;
   image?: string | null;
   imageAlt?: string;
+  responsive?: HomepageResponsiveMedia | null;
 };
 
 export type HomepageDestinationCard = {
@@ -36,6 +49,7 @@ export type HomepageDestinationCard = {
   priceLabel: string;
   href: string | null;
   winningOrigin?: string | null;
+  responsive?: HomepageResponsiveMedia | null;
 };
 
 export type HomepageFeaturedDeal = {
@@ -51,6 +65,7 @@ export type HomepageFeaturedDeal = {
   image?: string | null;
   imageAlt?: string;
   href?: string | null;
+  responsive?: HomepageResponsiveMedia | null;
 };
 
 export type HomepageWhyCard = {
@@ -82,6 +97,10 @@ export type HomepageSupportCta = {
   chatLabel: string;
   chatHref: string | null;
   image: string | null;
+  /** Legacy CMS mobile banner; Blade primary. Next illustration is lg+ desktop. */
+  imageMobile?: string | null;
+  responsive?: HomepageResponsiveMedia | null;
+  responsiveMobile?: HomepageResponsiveMedia | null;
 };
 
 export type HomepageFeatureStat = {
