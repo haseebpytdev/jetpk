@@ -2,20 +2,32 @@
 
 namespace App\Services\PublicContent;
 
+use App\Models\ClientPageAsset;
 use App\Services\Client\ClientPageContentResolver;
 use App\Services\Client\ClientPageSeoResolver;
+use App\Services\Client\CurrentClientContext;
+use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\JetpkHomepageSectionData;
+use App\Support\Homepage\JetpkHeroLcpPresenter;
+use App\Support\Homepage\JetpkResponsiveMediaPresenter;
 
 /**
  * Shapes published homepage CMS content for the Next.js public frontend.
  */
 final class HomepagePublicContentPresenter
 {
+    private const CARD_SIZES = '(max-width: 640px) 100vw, (max-width: 900px) 50vw, (max-width: 1180px) 33vw, 25vw';
+
+    private const SUPPORT_SIZES = '(max-width: 1024px) 100vw, 16rem';
+
     public function __construct(
         private readonly JetpkHomepageSectionData $homepage,
         private readonly ClientPageContentResolver $contentResolver,
         private readonly ClientPageSeoResolver $seoResolver,
+        private readonly CurrentClientContext $clientContext,
+        private readonly JetpkHeroLcpPresenter $heroLcpPresenter,
+        private readonly JetpkResponsiveMediaPresenter $responsiveMediaPresenter,
     ) {}
 
     /**
@@ -55,6 +67,23 @@ final class HomepagePublicContentPresenter
         }
 
         $imageUrl = $this->homepage->assetUrl('hero_background');
+        $alt = trim((string) ($hero['image_alt'] ?? 'JetPakistan flights'));
+        $responsive = null;
+        if ($imageUrl !== null && $imageUrl !== '') {
+            $manifest = $this->manifestForAssetKey('hero_background', $imageUrl);
+            $presented = $this->heroLcpPresenter->present($imageUrl, $manifest, $alt !== '' ? $alt : 'JetPakistan flights');
+            if (is_array($presented)) {
+                $responsive = [
+                    'fallback_url' => $presented['fallback_url'],
+                    'width' => $presented['width'],
+                    'height' => $presented['height'],
+                    'sources' => $presented['sources'],
+                    'preloads' => $presented['preloads'],
+                    'has_responsive_variants' => $presented['has_responsive_variants'],
+                    'fingerprint' => $presented['manifest_fingerprint'] ?? null,
+                ];
+            }
+        }
 
         return [
             'eyebrow' => $hasCms ? trim((string) ($hero['eyebrow'] ?? '')) : '',
@@ -63,8 +92,9 @@ final class HomepagePublicContentPresenter
             'subtitle' => $hasCms ? trim((string) ($hero['subtitle'] ?? '')) : '',
             'search_visible' => ($hero['search_visible'] ?? '1') !== '0',
             'image' => $imageUrl !== null && $imageUrl !== ''
-                ? ['url' => $imageUrl, 'alt' => trim((string) ($hero['image_alt'] ?? 'JetPakistan flights'))]
+                ? ['url' => $imageUrl, 'alt' => $alt !== '' ? $alt : 'JetPakistan flights']
                 : null,
+            'responsive' => $responsive,
         ];
     }
 
@@ -108,6 +138,12 @@ final class HomepagePublicContentPresenter
         }
 
         $items = $itemsResolver();
+        if ($key === 'routes') {
+            $items = array_map(fn (array $item): array => $this->attachCardResponsive($item, 'route'), $items);
+        }
+        if ($key === 'destinations') {
+            $items = array_map(fn (array $item): array => $this->attachCardResponsive($item, 'destination'), $items);
+        }
 
         return [
             'enabled' => $items !== [],
@@ -138,13 +174,13 @@ final class HomepagePublicContentPresenter
             'subtitle' => trim((string) $this->homepage->field('featured_deals.subtitle', '')),
             'cta_text' => trim((string) $this->homepage->field('featured_deals.cta_text', '')),
             'cta_url' => trim((string) $this->homepage->field('featured_deals.cta_url', '')),
-            'items' => array_map(static function (array $item): array {
+            'items' => array_map(function (array $item): array {
                 $id = trim((string) ($item['id'] ?? ''));
                 if ($id === '') {
                     $id = md5(($item['from'] ?? '').($item['to'] ?? '').($item['airline'] ?? ''));
                 }
 
-                return [
+                $mapped = [
                     'id' => $id,
                     'airline' => (string) ($item['airline'] ?? ''),
                     'from' => (string) ($item['from'] ?? ''),
@@ -162,6 +198,8 @@ final class HomepagePublicContentPresenter
                         : null,
                     'image_alt' => trim((string) ($item['image_alt'] ?? '')),
                 ];
+
+                return $this->attachCardResponsive($mapped, 'featured_deal');
             }, $items),
         ];
     }
@@ -240,7 +278,122 @@ final class HomepagePublicContentPresenter
             'chat_label' => trim((string) $this->homepage->field('support_cta.chat_label', 'Get support')),
             'chat_href' => $this->resolveActionHref($chatUrlRaw, ''),
             'image' => $this->homepage->assetUrl('support_cta_background'),
+            'responsive' => $this->presentSupportResponsive(
+                $this->homepage->assetUrl('support_cta_background'),
+            ),
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return array<string, mixed>
+     */
+    private function attachCardResponsive(array $item, string $kind): array
+    {
+        $image = isset($item['image']) && is_string($item['image']) ? trim($item['image']) : '';
+        if ($image === '' || ! str_contains($image, '/storage/')) {
+            $item['responsive'] = null;
+
+            return $item;
+        }
+
+        $assetKey = $this->guessCardAssetKey($item, $kind);
+        $manifest = $assetKey !== null ? $this->manifestForAssetKey($assetKey, $image) : null;
+        $item['responsive'] = $this->responsiveMediaPresenter->presentWidthSrcset(
+            $image,
+            $manifest,
+            self::CARD_SIZES,
+            640,
+            480,
+        );
+
+        return $item;
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    private function guessCardAssetKey(array $item, string $kind): ?string
+    {
+        $id = trim((string) ($item['id'] ?? ''));
+        if ($id === '') {
+            return null;
+        }
+
+        return match ($kind) {
+            'route' => JetpkHomepageAssetService::routeAssetKey($id),
+            'destination' => JetpkHomepageAssetService::destinationAssetKey($id),
+            'featured_deal' => JetpkHomepageAssetService::featuredDealAssetKey($id),
+            default => null,
+        };
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function presentSupportResponsive(?string $imageUrl): ?array
+    {
+        if ($imageUrl === null || trim($imageUrl) === '') {
+            return null;
+        }
+
+        $manifest = $this->manifestForAssetKey('support_cta_background', $imageUrl);
+
+        return $this->responsiveMediaPresenter->presentWidthSrcset(
+            $imageUrl,
+            $manifest,
+            self::SUPPORT_SIZES,
+            1280,
+            720,
+        );
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function manifestForAssetKey(string $assetKey, string $sourceUrl): ?array
+    {
+        $profile = $this->clientContext->get();
+        $path = $this->storageRelativeFromUrl($sourceUrl);
+
+        $query = ClientPageAsset::query()
+            ->where('page_key', ClientPageKeys::HOME)
+            ->where('asset_key', $assetKey);
+
+        if ($profile !== null) {
+            $query->where('client_profile_id', $profile->id);
+        }
+
+        if ($path !== null) {
+            $query->where('path', $path);
+        }
+
+        $asset = $query->first();
+        if ($asset === null) {
+            return null;
+        }
+
+        $meta = is_array($asset->meta_json) ? $asset->meta_json : [];
+        if ($assetKey === 'hero_background' && is_array($meta['hero_lcp'] ?? null)) {
+            return $meta['hero_lcp'];
+        }
+
+        return is_array($meta['responsive_media'] ?? null) ? $meta['responsive_media'] : null;
+    }
+
+    private function storageRelativeFromUrl(string $url): ?string
+    {
+        $path = parse_url($url, PHP_URL_PATH);
+        if (! is_string($path) || $path === '') {
+            return null;
+        }
+
+        $path = rawurldecode($path);
+        if (! str_starts_with($path, '/storage/')) {
+            return null;
+        }
+
+        return ltrim(substr($path, strlen('/storage/')), '/');
     }
 
     /**

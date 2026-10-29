@@ -2,7 +2,7 @@
 
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { ImageSlot } from "@/components/ui/ImageSlot";
+import { ResponsiveCmsPicture } from "@/components/ui/ResponsiveCmsPicture";
 import { ScrollReveal } from "@/features/motion";
 import { resolveOfferMedia } from "@/lib/homepage-media";
 import Link from "next/link";
@@ -48,12 +48,13 @@ export function FeaturedOffersSection({
               const cardInner = (
                 <>
                   <div className="relative aspect-[16/9] bg-jp-surface-muted">
-                    <ImageSlot
+                    <ResponsiveCmsPicture
                       src={media.image}
                       alt={media.imageAlt}
                       width={480}
                       height={270}
                       sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, (max-width: 1000px) 33vw, 25vw"
+                      responsive={offer.responsive}
                       className="!max-w-none h-full w-full !rounded-none"
                       fallbackLabel={offer.from}
                       brandedFallback

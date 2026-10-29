@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { ResponsiveCmsPicture } from "@/components/ui/ResponsiveCmsPicture";
 import { ScrollReveal } from "@/features/motion";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SecondaryButton } from "@/components/ui/SecondaryButton";
@@ -74,8 +75,17 @@ export function PublicSupportBanner({ support }: PublicSupportBannerProps) {
             data-media-slot="support-callout-illustration"
           >
             {cmsImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={cmsImage} alt="" className="h-full w-full object-cover" />
+              <ResponsiveCmsPicture
+                src={cmsImage}
+                alt=""
+                decorative
+                width={640}
+                height={360}
+                sizes="(max-width: 1024px) 100vw, 16rem"
+                responsive={support.responsive}
+                className="h-full w-full"
+                objectFit="cover"
+              />
             ) : (
               <div aria-hidden="true" className="h-full w-full">
                 <SupportIllustration />
