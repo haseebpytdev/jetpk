@@ -4,8 +4,13 @@
 REVIEW_CODE_HEAD_SHA=35a9bdf83aff79464adba173f1f8ae152dab363a
 REVIEW_EVIDENCE_HEAD_SHA=996452feb0c93c913e663617b5bcb74c72794780
 START_HEAD_SHA=996452feb0c93c913e663617b5bcb74c72794780
-FINAL_HEAD_SHA=68e8f1cfc5a5cbcea14d658b02841c5d2945a3ec
+EVIDENCE_PUSH_SHA=163394aea3c3cf2937e491a895bdd39102056b62
+FINAL_HEAD_SHA=163394aea3c3cf2937e491a895bdd39102056b62
 ```
+
+Bookkeeping note: an amend after writing `68e8f1cf` into this file produced tip
+`163394ae` (pushed). Any later bookkeeping-only commit updates `FINAL_HEAD_SHA`
+in the return block / Git tip, not by rewriting history.
 
 ## Build hang root cause
 
