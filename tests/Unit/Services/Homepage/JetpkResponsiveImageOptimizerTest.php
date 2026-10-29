@@ -71,6 +71,44 @@ class JetpkResponsiveImageOptimizerTest extends TestCase
         $this->assertNotSame($first['fingerprint'], $second['fingerprint']);
     }
 
+    public function test_large_photographic_fixtures_emit_public_urls_only_in_manifest_urls(): void
+    {
+        Storage::fake('public');
+        $optimizer = app(JetpkResponsiveImageOptimizer::class);
+
+        $hero = $optimizer->optimize(
+            $this->noisyJpeg('hero-1920.jpg', 1920, 1080, 33),
+            'jetpk-assets',
+            JetpkResponsiveImageOptimizer::PROFILE_HERO,
+            'home',
+            'jetpk/homepage/hero/jetpk/hero-1920.jpg',
+        );
+        $card = $optimizer->optimize(
+            $this->noisyJpeg('card-1200.jpg', 1200, 800, 55),
+            'jetpk-assets',
+            JetpkResponsiveImageOptimizer::PROFILE_CARD,
+            'home',
+            'jetpk/homepage/popular-destinations/jetpk/card-1200.jpg',
+        );
+
+        $this->assertTrue($hero['activated'], $hero['warning'] ?? 'hero failed');
+        $this->assertTrue($card['activated'], $card['warning'] ?? 'card failed');
+        $this->assertGreaterThan(200_000, $hero['manifest']['source_bytes']);
+        $this->assertGreaterThan(80_000, $card['manifest']['source_bytes']);
+
+        foreach ([$hero['manifest'], $card['manifest']] as $manifest) {
+            foreach ($manifest['variants'] as $formats) {
+                foreach ($formats as $variant) {
+                    $url = (string) ($variant['url'] ?? '');
+                    $this->assertNotSame('', $url);
+                    $this->assertStringContainsString('/storage/', $url);
+                    $this->assertStringNotContainsString(storage_path(), $url);
+                    $this->assertDoesNotMatchRegularExpression('#^[A-Za-z]:\\\\#', $url);
+                }
+            }
+        }
+    }
+
     /**
      * @param  array<string, array<string, array<string, mixed>>>  $variants
      */
@@ -104,6 +142,33 @@ class JetpkResponsiveImageOptimizerTest extends TestCase
             imageline($img, $x, 0, $x, $height - 1, $color);
         }
         imagejpeg($img, $path, 90);
+        imagedestroy($img);
+
+        return $path;
+    }
+
+    private function noisyJpeg(string $filename, int $width, int $height, int $offset = 40): string
+    {
+        $dir = storage_path('app/testing/responsive-media-fixtures');
+        if (! is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $path = $dir.'/'.$filename;
+        $img = imagecreatetruecolor($width, $height);
+        for ($y = 0; $y < $height; $y += 2) {
+            for ($x = 0; $x < $width; $x += 2) {
+                $noise = (($x * 37) + ($y * 53) + $offset) % 255;
+                $color = imagecolorallocate(
+                    $img,
+                    ($noise + $x) % 255,
+                    ($noise + $y + 40) % 255,
+                    (220 - ($noise % 90)) % 255,
+                );
+                imagefilledrectangle($img, $x, $y, $x + 1, $y + 1, $color);
+            }
+        }
+        imagejpeg($img, $path, 92);
         imagedestroy($img);
 
         return $path;

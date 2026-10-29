@@ -65,3 +65,19 @@ test("missing responsive metadata falls back safely to original src contract", (
   assert.equal(typeof image, "string");
   assert.match(image, /^\/storage\//);
 });
+
+test("support CTA keeps desktop primary with optional mobile payload fields", () => {
+  const desktop = mapResponsiveMedia({
+    fallback_url: "/storage/desk.jpg",
+    has_responsive_variants: true,
+    sources: [{ type: "image/webp", srcset: "/storage/d.webp 640w" }],
+  });
+  const mobile = mapResponsiveMedia({
+    fallback_url: "/storage/mob.jpg",
+    has_responsive_variants: true,
+    sources: [{ type: "image/webp", srcset: "/storage/m.webp 480w" }],
+  });
+  assert.equal(desktop.fallbackUrl, "/storage/desk.jpg");
+  assert.equal(mobile.fallbackUrl, "/storage/mob.jpg");
+  assert.notEqual(desktop.fallbackUrl, mobile.fallbackUrl);
+});

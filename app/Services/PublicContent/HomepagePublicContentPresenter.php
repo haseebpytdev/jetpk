@@ -21,6 +21,9 @@ final class HomepagePublicContentPresenter
 
     private const SUPPORT_SIZES = '(max-width: 1024px) 100vw, 16rem';
 
+    /** @var array<string, ClientPageAsset>|null */
+    private ?array $homepageAssetsByKey = null;
+
     public function __construct(
         private readonly JetpkHomepageSectionData $homepage,
         private readonly ClientPageContentResolver $contentResolver,
@@ -37,23 +40,28 @@ final class HomepagePublicContentPresenter
     {
         $published = $this->contentResolver->contentFor(ClientPageKeys::HOME);
         $hasCms = $published !== [];
+        $this->homepageAssetsByKey = $this->loadHomepageAssetsByKey();
 
-        return [
-            'source' => $hasCms ? 'cms' : 'empty',
-            'seo' => $this->seoResolver->forPage(
-                ClientPageKeys::HOME,
-                'JetPakistan | Affordable Flights, Umrah Packages & Tours',
-                'Search and compare domestic and international flights from Pakistan, explore Umrah packages, and plan travel with JetPakistan.',
-            ),
-            'hero' => $this->presentHero($hasCms),
-            'trust_chips' => $this->presentTrustChips($hasCms),
-            'routes' => $this->presentSection('routes', fn (): array => $this->homepage->routesForDisplay()),
-            'destinations' => $this->presentSection('destinations', fn (): array => $this->homepage->destinationsForDisplay()),
-            'featured_deals' => $this->presentFeaturedDeals(),
-            'why_book' => $this->presentWhyBook(),
-            'support_cta' => $this->presentSupportCta(),
-            'feature_board' => $this->presentFeatureBoard(),
-        ];
+        try {
+            return [
+                'source' => $hasCms ? 'cms' : 'empty',
+                'seo' => $this->seoResolver->forPage(
+                    ClientPageKeys::HOME,
+                    'JetPakistan | Affordable Flights, Umrah Packages & Tours',
+                    'Search and compare domestic and international flights from Pakistan, explore Umrah packages, and plan travel with JetPakistan.',
+                ),
+                'hero' => $this->presentHero($hasCms),
+                'trust_chips' => $this->presentTrustChips($hasCms),
+                'routes' => $this->presentSection('routes', fn (): array => $this->homepage->routesForDisplay()),
+                'destinations' => $this->presentSection('destinations', fn (): array => $this->homepage->destinationsForDisplay()),
+                'featured_deals' => $this->presentFeaturedDeals(),
+                'why_book' => $this->presentWhyBook(),
+                'support_cta' => $this->presentSupportCta(),
+                'feature_board' => $this->presentFeatureBoard(),
+            ];
+        } finally {
+            $this->homepageAssetsByKey = null;
+        }
     }
 
     /**
@@ -278,8 +286,14 @@ final class HomepagePublicContentPresenter
             'chat_label' => trim((string) $this->homepage->field('support_cta.chat_label', 'Get support')),
             'chat_href' => $this->resolveActionHref($chatUrlRaw, ''),
             'image' => $this->homepage->assetUrl('support_cta_background'),
+            'image_mobile' => $this->homepage->assetUrl('support_cta_background_mobile'),
             'responsive' => $this->presentSupportResponsive(
                 $this->homepage->assetUrl('support_cta_background'),
+                'support_cta_background',
+            ),
+            'responsive_mobile' => $this->presentSupportResponsive(
+                $this->homepage->assetUrl('support_cta_background_mobile'),
+                'support_cta_background_mobile',
             ),
         ];
     }
@@ -331,13 +345,13 @@ final class HomepagePublicContentPresenter
     /**
      * @return array<string, mixed>|null
      */
-    private function presentSupportResponsive(?string $imageUrl): ?array
+    private function presentSupportResponsive(?string $imageUrl, string $assetKey): ?array
     {
         if ($imageUrl === null || trim($imageUrl) === '') {
             return null;
         }
 
-        $manifest = $this->manifestForAssetKey('support_cta_background', $imageUrl);
+        $manifest = $this->manifestForAssetKey($assetKey, $imageUrl);
 
         return $this->responsiveMediaPresenter->presentWidthSrcset(
             $imageUrl,
@@ -349,27 +363,56 @@ final class HomepagePublicContentPresenter
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return array<string, ClientPageAsset>
      */
-    private function manifestForAssetKey(string $assetKey, string $sourceUrl): ?array
+    private function loadHomepageAssetsByKey(): array
     {
         $profile = $this->clientContext->get();
-        $path = $this->storageRelativeFromUrl($sourceUrl);
-
-        $query = ClientPageAsset::query()
-            ->where('page_key', ClientPageKeys::HOME)
-            ->where('asset_key', $assetKey);
-
+        $query = ClientPageAsset::query()->where('page_key', ClientPageKeys::HOME);
         if ($profile !== null) {
             $query->where('client_profile_id', $profile->id);
         }
 
-        if ($path !== null) {
-            $query->where('path', $path);
+        $byKey = [];
+        foreach ($query->get() as $asset) {
+            $key = (string) $asset->asset_key;
+            if ($key === '') {
+                continue;
+            }
+            $byKey[$key] = $asset;
         }
 
-        $asset = $query->first();
+        return $byKey;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function manifestForAssetKey(string $assetKey, string $sourceUrl): ?array
+    {
+        $asset = $this->homepageAssetsByKey[$assetKey] ?? null;
         if ($asset === null) {
+            // Fallback for callers outside present() (should be rare).
+            $profile = $this->clientContext->get();
+            $path = $this->storageRelativeFromUrl($sourceUrl);
+            $query = ClientPageAsset::query()
+                ->where('page_key', ClientPageKeys::HOME)
+                ->where('asset_key', $assetKey);
+            if ($profile !== null) {
+                $query->where('client_profile_id', $profile->id);
+            }
+            if ($path !== null) {
+                $query->where('path', $path);
+            }
+            $asset = $query->first();
+        }
+
+        if ($asset === null) {
+            return null;
+        }
+
+        $path = $this->storageRelativeFromUrl($sourceUrl);
+        if ($path !== null && trim((string) $asset->path) !== '' && trim((string) $asset->path) !== $path) {
             return null;
         }
 

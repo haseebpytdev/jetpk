@@ -247,9 +247,28 @@ final class JetpkHomepageAssetService
         }
 
         $previousFingerprint = $plan['existing_fingerprint'];
+        $sourceFingerprint = substr(hash_file('sha256', $absolute), 0, 16);
+        $resolvedProfileSlug = $profileSlug !== '' ? $profileSlug : 'jetpk-assets';
+
+        // Idempotent skip: same source fingerprint with active meta already published.
+        if (
+            $previousFingerprint !== ''
+            && $previousFingerprint === $sourceFingerprint
+            && $this->activeManifestMatchesSource($asset, $mediaProfile, (string) $asset->path)
+        ) {
+            return array_merge($plan, [
+                'dry_run' => false,
+                'activated' => true,
+                'fingerprint' => $previousFingerprint,
+                'unchanged' => true,
+                'writes' => false,
+                'warning' => null,
+            ]);
+        }
+
         $result = $this->responsiveOptimizer->optimize(
             $absolute,
-            $profileSlug !== '' ? $profileSlug : 'jetpk-assets',
+            $resolvedProfileSlug,
             $mediaProfile,
             ClientPageKeys::HOME,
             (string) $asset->path,
@@ -259,7 +278,7 @@ final class JetpkHomepageAssetService
         if ($result['activated'] && is_array($result['manifest'])) {
             if ($previousFingerprint !== '' && $previousFingerprint !== $result['fingerprint']) {
                 $this->responsiveOptimizer->deleteVariantDirectory(
-                    $profileSlug !== '' ? $profileSlug : 'jetpk-assets',
+                    $resolvedProfileSlug,
                     ClientPageKeys::HOME,
                     $mediaProfile,
                     $previousFingerprint,
@@ -291,8 +310,39 @@ final class JetpkHomepageAssetService
             'dry_run' => false,
             'activated' => $result['activated'],
             'fingerprint' => $result['fingerprint'],
+            'unchanged' => false,
+            'writes' => true,
             'warning' => $result['warning'],
         ]);
+    }
+
+    private function activeManifestMatchesSource(ClientPageAsset $asset, string $mediaProfile, string $sourcePath): bool
+    {
+        $meta = is_array($asset->meta_json) ? $asset->meta_json : [];
+        $manifest = $mediaProfile === JetpkResponsiveImageOptimizer::PROFILE_HERO
+            ? ($meta['hero_lcp'] ?? null)
+            : ($meta['responsive_media'] ?? null);
+
+        if (! is_array($manifest) || ! is_array($manifest['variants'] ?? null)) {
+            return false;
+        }
+
+        $manifestSource = trim((string) ($manifest['source_path'] ?? ''));
+        if ($manifestSource !== '' && $manifestSource !== trim($sourcePath)) {
+            return false;
+        }
+
+        foreach ($manifest['variants'] as $formats) {
+            if (! is_array($formats) || ! is_array($formats['jpg'] ?? null)) {
+                continue;
+            }
+            $path = trim((string) ($formats['jpg']['path'] ?? ''));
+            if ($path !== '' && Storage::disk('public')->exists($path)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function finalizeResponsiveOptimization(

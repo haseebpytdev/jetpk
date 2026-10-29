@@ -97,7 +97,10 @@ export type HomepageSupportCta = {
   chatLabel: string;
   chatHref: string | null;
   image: string | null;
+  /** Legacy CMS mobile banner; Blade primary. Next illustration is lg+ desktop. */
+  imageMobile?: string | null;
   responsive?: HomepageResponsiveMedia | null;
+  responsiveMobile?: HomepageResponsiveMedia | null;
 };
 
 export type HomepageFeatureStat = {

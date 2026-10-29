@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\ClientPageAsset;
 use App\Models\ClientProfile;
+use App\Services\Client\ClientProfileResolver;
 use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Services\Homepage\JetpkResponsiveImageOptimizer;
 use App\Support\Client\ClientPageKeys;
@@ -21,9 +22,9 @@ class JetpkHomepageMediaOptimizeCommand extends Command
 
     protected $description = 'Generate responsive homepage CMS media derivatives for JetPakistan only';
 
-    public function handle(JetpkHomepageAssetService $homepageAssets): int
+    public function handle(JetpkHomepageAssetService $homepageAssets, ClientProfileResolver $profileResolver): int
     {
-        $profileSlug = trim((string) $this->option('profile')) ?: 'jetpk';
+        $profileSlug = trim((string) $this->option('profile')) ?: $profileResolver->defaultDeploymentSlug();
         $dryRun = (bool) $this->option('dry-run');
         $assetFilter = trim((string) $this->option('asset'));
 
@@ -34,9 +35,12 @@ class JetpkHomepageMediaOptimizeCommand extends Command
             return self::FAILURE;
         }
 
-        // Hard scope: refuse non-JetPakistan profiles unless explicitly jetpk*.
-        if (! str_starts_with(strtolower($profileSlug), 'jetpk')) {
-            $this->error('Refusing cross-client optimize. Profile must be JetPakistan-scoped (jetpk*).');
+        // Hard scope: only the canonical JetPakistan deployment slug (not jetpk-* prefixes).
+        if (! $profileResolver->isDefaultDeploymentSlug($profileSlug)) {
+            $this->error(sprintf(
+                'Refusing cross-client optimize. Profile must be the canonical JetPakistan slug (%s).',
+                $profileResolver->defaultDeploymentSlug(),
+            ));
 
             return self::FAILURE;
         }

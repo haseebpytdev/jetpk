@@ -114,7 +114,6 @@ export function ResponsiveCmsPicture({
           sizes={source.media ? undefined : resolvedSizes}
         />
       ))}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={fallback}
         alt={decorative ? "" : alt}

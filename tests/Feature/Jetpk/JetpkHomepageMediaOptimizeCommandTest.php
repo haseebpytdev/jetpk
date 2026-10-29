@@ -55,6 +55,50 @@ class JetpkHomepageMediaOptimizeCommandTest extends TestCase
         $this->assertStringContainsString('Refusing cross-client', Artisan::output());
     }
 
+    public function test_refuses_non_canonical_jetpk_prefix_profile(): void
+    {
+        ClientProfile::query()->create([
+            'name' => 'JetPK Staging Clone',
+            'slug' => 'jetpk-staging',
+            'asset_profile' => 'jetpk-staging',
+            'is_active' => true,
+        ]);
+
+        $exit = Artisan::call('jetpk:homepage-media-optimize', [
+            '--dry-run' => true,
+            '--profile' => 'jetpk-staging',
+        ]);
+
+        $this->assertSame(1, $exit);
+        $this->assertStringContainsString('canonical JetPakistan slug', Artisan::output());
+    }
+
+    public function test_second_write_run_is_idempotent_for_same_source(): void
+    {
+        Storage::fake('public');
+        $profile = $this->makeJetpkProfile();
+        $asset = $this->storeDestinationWithoutDerivatives($profile);
+
+        $exit1 = Artisan::call('jetpk:homepage-media-optimize', [
+            '--profile' => 'jetpk',
+            '--asset' => $asset->asset_key,
+        ]);
+        $this->assertSame(0, $exit1);
+        $first = $asset->fresh();
+        $fp1 = (string) ($first->meta_json['responsive_media']['fingerprint'] ?? '');
+        $this->assertNotSame('', $fp1);
+
+        $exit2 = Artisan::call('jetpk:homepage-media-optimize', [
+            '--profile' => 'jetpk',
+            '--asset' => $asset->asset_key,
+        ]);
+        $this->assertSame(0, $exit2);
+        $second = $asset->fresh();
+        $fp2 = (string) ($second->meta_json['responsive_media']['fingerprint'] ?? '');
+        $this->assertSame($fp1, $fp2);
+        $this->assertSame($first->meta_json['responsive_media'], $second->meta_json['responsive_media']);
+    }
+
     public function test_write_mode_stores_responsive_media_and_keeps_original_url(): void
     {
         Storage::fake('public');

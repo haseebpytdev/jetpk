@@ -219,7 +219,9 @@ export function mapSupportCta(remote?: Record<string, unknown>): HomepageSupport
     chatLabel: String(remote?.chat_label ?? "Get support"),
     chatHref: sanitizePublicActionHref(remote?.chat_href ? String(remote.chat_href) : null),
     image: remote?.image ? String(remote.image) : null,
+    imageMobile: remote?.image_mobile ? String(remote.image_mobile) : null,
     responsive: mapResponsiveMedia(remote?.responsive),
+    responsiveMobile: mapResponsiveMedia(remote?.responsive_mobile),
   };
 }
 

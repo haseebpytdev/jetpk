@@ -83,16 +83,7 @@ export function PublicHero({ hero, trustChips, fallbackImage, contentSource }: P
       className="relative isolate overflow-x-hidden"
       data-testid="homepage-public-hero"
     >
-      {heroResponsive?.preloads?.map((preload) => (
-        <link
-          key={`${preload.href}-${preload.media ?? "all"}`}
-          rel="preload"
-          as="image"
-          href={preload.href}
-          type={preload.type ?? undefined}
-          media={preload.media}
-        />
-      ))}
+      {/* Hero image preloads are emitted from HomepageContent via react-dom preload (SSR). */}
       <div className="relative isolate overflow-hidden" data-testid="homepage-hero-backdrop">
         <div className="absolute inset-0" data-testid="homepage-hero-image" aria-hidden={!hasTitle}>
           <ResponsiveCmsPicture

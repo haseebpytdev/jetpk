@@ -1,0 +1,34 @@
+{
+    "generated_at": "2026-10-29T07:36:34+00:00",
+    "avif_encoder_available": true,
+    "webp_encoder_available": true,
+    "rows": [
+        {
+            "category": "hero",
+            "dims": "1920x1080",
+            "source_bytes": 1924635,
+            "best_avif": null,
+            "best_webp": 154890,
+            "best_jpg": 153768,
+            "webp_reduction_pct": 92
+        },
+        {
+            "category": "card",
+            "dims": "1200x800",
+            "source_bytes": 889775,
+            "best_avif": null,
+            "best_webp": 19742,
+            "best_jpg": 20431,
+            "webp_reduction_pct": 97.8
+        },
+        {
+            "category": "support",
+            "dims": "1600x900",
+            "source_bytes": 1342519,
+            "best_avif": null,
+            "best_webp": 50152,
+            "best_jpg": 48591,
+            "webp_reduction_pct": 96.3
+        }
+    ]
+}

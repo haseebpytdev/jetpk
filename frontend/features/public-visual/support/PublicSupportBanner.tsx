@@ -32,7 +32,10 @@ function SupportIllustration() {
 export function PublicSupportBanner({ support }: PublicSupportBannerProps) {
   if (!support.enabled) return null;
 
-  const cmsImage = support.image?.trim() ?? "";
+  // Next illustration column is lg+ only; desktop CMS asset is the active visual source.
+  // Mobile CMS asset remains in the payload for Blade / future mobile illustration without dual download here.
+  const cmsImage = support.image?.trim() || support.imageMobile?.trim() || "";
+  const cmsResponsive = support.responsive ?? support.responsiveMobile ?? null;
 
   return (
     <ScrollReveal as="section">
@@ -82,7 +85,7 @@ export function PublicSupportBanner({ support }: PublicSupportBannerProps) {
                 width={640}
                 height={360}
                 sizes="(max-width: 1024px) 100vw, 16rem"
-                responsive={support.responsive}
+                responsive={cmsResponsive}
                 className="h-full w-full"
                 objectFit="cover"
               />
