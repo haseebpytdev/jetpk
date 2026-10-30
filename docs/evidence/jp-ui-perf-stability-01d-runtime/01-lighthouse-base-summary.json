@@ -1,0 +1,319 @@
+{
+  "url": "http://127.0.0.1:3001/",
+  "capturedAt": "2026-10-30T22:13:46.071Z",
+  "FCP": 1488,
+  "LCP": 7361,
+  "TBT": 6934,
+  "SPEED_INDEX": 15168,
+  "TTI": 11739,
+  "TTFB": 466,
+  "SCRIPT_EVALUATION_MS": 10937,
+  "SCRIPT_PARSE_MS": 323,
+  "STYLE_LAYOUT_MS": 2647,
+  "RENDER_MS": 405,
+  "TOP_MAIN_THREAD_SCRIPT": "http://127.0.0.1:3001/_next/static/chunks/1255-6a221ac26670bd41.js",
+  "TOP_MAIN_THREAD_SCRIPT_TOTAL_MS": 12419,
+  "TOP_UNUSED_JS_CHUNK": "http://127.0.0.1:3001/_next/static/chunks/1124-88ec4cbe98da450a.js",
+  "TOP_UNUSED_JS_BYTES": 29828,
+  "categories": {
+    "performance": {
+      "title": "Performance",
+      "supportedModes": [
+        "navigation",
+        "timespan",
+        "snapshot"
+      ],
+      "auditRefs": [
+        {
+          "id": "first-contentful-paint",
+          "weight": 10,
+          "group": "metrics",
+          "acronym": "FCP"
+        },
+        {
+          "id": "largest-contentful-paint",
+          "weight": 25,
+          "group": "metrics",
+          "acronym": "LCP"
+        },
+        {
+          "id": "total-blocking-time",
+          "weight": 30,
+          "group": "metrics",
+          "acronym": "TBT"
+        },
+        {
+          "id": "cumulative-layout-shift",
+          "weight": 25,
+          "group": "metrics",
+          "acronym": "CLS"
+        },
+        {
+          "id": "speed-index",
+          "weight": 10,
+          "group": "metrics",
+          "acronym": "SI"
+        },
+        {
+          "id": "interactive",
+          "weight": 0,
+          "group": "hidden",
+          "acronym": "TTI"
+        },
+        {
+          "id": "max-potential-fid",
+          "weight": 0,
+          "group": "hidden"
+        },
+        {
+          "id": "first-meaningful-paint",
+          "weight": 0,
+          "acronym": "FMP",
+          "group": "hidden"
+        },
+        {
+          "id": "render-blocking-resources",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "uses-responsive-images",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "offscreen-images",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "unminified-css",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "unminified-javascript",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "unused-css-rules",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "unused-javascript",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "uses-optimized-images",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "modern-image-formats",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "uses-text-compression",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "uses-rel-preconnect",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "server-response-time",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "redirects",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "uses-http2",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "efficient-animated-content",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "duplicated-javascript",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "legacy-javascript",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "prioritize-lcp-image",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "total-byte-weight",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "uses-long-cache-ttl",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "dom-size",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "critical-request-chains",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "user-timings",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "bootup-time",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "mainthread-work-breakdown",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "font-display",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "third-party-summary",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "third-party-facades",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "largest-contentful-paint-element",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "lcp-lazy-loaded",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "layout-shifts",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "uses-passive-event-listeners",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "no-document-write",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "long-tasks",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "non-composited-animations",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "unsized-images",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "viewport",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "bf-cache",
+          "weight": 0,
+          "group": "diagnostics"
+        },
+        {
+          "id": "network-requests",
+          "weight": 0,
+          "group": "hidden"
+        },
+        {
+          "id": "network-rtt",
+          "weight": 0,
+          "group": "hidden"
+        },
+        {
+          "id": "network-server-latency",
+          "weight": 0,
+          "group": "hidden"
+        },
+        {
+          "id": "main-thread-tasks",
+          "weight": 0,
+          "group": "hidden"
+        },
+        {
+          "id": "diagnostics",
+          "weight": 0,
+          "group": "hidden"
+        },
+        {
+          "id": "metrics",
+          "weight": 0,
+          "group": "hidden"
+        },
+        {
+          "id": "screenshot-thumbnails",
+          "weight": 0,
+          "group": "hidden"
+        },
+        {
+          "id": "final-screenshot",
+          "weight": 0,
+          "group": "hidden"
+        },
+        {
+          "id": "script-treemap-data",
+          "weight": 0,
+          "group": "hidden"
+        },
+        {
+          "id": "resource-summary",
+          "weight": 0,
+          "group": "hidden"
+        }
+      ],
+      "id": "performance",
+      "score": 0.19
+    }
+  }
+}

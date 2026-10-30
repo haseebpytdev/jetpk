@@ -1,0 +1,17 @@
+{
+  "ASK_PANEL_CHUNK_TRANSFERRED_BEFORE_OPEN": "NO",
+  "ASK_PANEL_CHUNK_TRANSFERRED_AFTER_OPEN": "YES",
+  "beforeCount": 0,
+  "afterCount": 1,
+  "chunks": [
+    {
+      "u": "http://127.0.0.1:3000/_next/static/chunks/ask-jetpakistan-panel.486a450545b6aabd.js",
+      "bytes": 23685,
+      "t": 1793397407023
+    }
+  ],
+  "ASK_PANEL_OPEN": "PASS",
+  "ASK_QUICK_ACTIONS": "PASS",
+  "ASK_CLOSE": "PASS",
+  "ASK_REOPEN": "PASS"
+}

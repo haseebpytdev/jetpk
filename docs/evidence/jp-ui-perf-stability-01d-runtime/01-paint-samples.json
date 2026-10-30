@@ -1,0 +1,144 @@
+{
+  "BASE": {
+    "samples": [
+      {
+        "fcp": 1744,
+        "lcp": null,
+        "ttfb": 1133,
+        "dcl": 2603,
+        "wall": 7464
+      },
+      {
+        "fcp": 552,
+        "lcp": null,
+        "ttfb": 121,
+        "dcl": 999,
+        "wall": 5161
+      },
+      {
+        "fcp": 324,
+        "lcp": null,
+        "ttfb": 33,
+        "dcl": 3818,
+        "wall": 7843
+      },
+      {
+        "fcp": 592,
+        "lcp": null,
+        "ttfb": 34,
+        "dcl": 395,
+        "wall": 4415
+      },
+      {
+        "fcp": 448,
+        "lcp": null,
+        "ttfb": 35,
+        "dcl": 574,
+        "wall": 4616
+      },
+      {
+        "fcp": 400,
+        "lcp": null,
+        "ttfb": 50,
+        "dcl": 1948,
+        "wall": 6296
+      },
+      {
+        "fcp": 720,
+        "lcp": null,
+        "ttfb": 61,
+        "dcl": 2407,
+        "wall": 6646
+      },
+      {
+        "fcp": 232,
+        "lcp": null,
+        "ttfb": 29,
+        "dcl": 4663,
+        "wall": 8696
+      }
+    ],
+    "fcp_median": 500,
+    "fcp_p95": 1744,
+    "lcp_median": null,
+    "lcp_p95": null,
+    "ttfb_median": 43
+  },
+  "CAND": {
+    "samples": [
+      {
+        "fcp": 648,
+        "lcp": null,
+        "ttfb": 136,
+        "dcl": 2794,
+        "wall": 8107
+      },
+      {
+        "fcp": 1376,
+        "lcp": null,
+        "ttfb": 222,
+        "dcl": 4229,
+        "wall": 9596
+      },
+      {
+        "fcp": 1740,
+        "lcp": null,
+        "ttfb": 54,
+        "dcl": 2833,
+        "wall": 6872
+      },
+      {
+        "fcp": 440,
+        "lcp": null,
+        "ttfb": 39,
+        "dcl": 1373,
+        "wall": 5403
+      },
+      {
+        "fcp": 448,
+        "lcp": null,
+        "ttfb": 35,
+        "dcl": 3487,
+        "wall": 7515
+      },
+      {
+        "fcp": 684,
+        "lcp": null,
+        "ttfb": 47,
+        "dcl": 2813,
+        "wall": 7787
+      },
+      {
+        "fcp": 992,
+        "lcp": null,
+        "ttfb": 214,
+        "dcl": 6705,
+        "wall": 10737
+      },
+      {
+        "fcp": 528,
+        "lcp": null,
+        "ttfb": 40,
+        "dcl": 2783,
+        "wall": 7179
+      }
+    ],
+    "fcp_median": 666,
+    "fcp_p95": 1740,
+    "lcp_median": null,
+    "lcp_p95": null,
+    "ttfb_median": 51
+  },
+  "delta": {
+    "fcp_median": {
+      "abs": 166,
+      "relPct": 33.2,
+      "material": true
+    },
+    "lcp_median": {
+      "abs": 0,
+      "relPct": null,
+      "material": false
+    }
+  }
+}

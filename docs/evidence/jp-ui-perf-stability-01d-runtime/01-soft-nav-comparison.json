@@ -1,0 +1,44 @@
+{
+  "harness": "interleaved same-host BASE:3001 (prod SHA 4697b228) vs CAND:3000 (main+C), N=20, viewport 1440x900",
+  "materialRegressionRule": ">100ms absolute AND >15% relative at P95",
+  "source": "01-soft-nav-interleaved.json",
+  "BASE": {
+    "home_login_p95": 453,
+    "home_groups_p95": 325,
+    "login_home_p95": 414,
+    "groups_home_p95": 545
+  },
+  "A_CANDIDATE": {
+    "note": "Hypothesis A rejected earlier; not re-accepted. Prior A+C sequential soft-nav was contaminated.",
+    "A_CANDIDATE_ACCEPTED": false,
+    "A_CANDIDATE_REJECTED": true,
+    "A_REJECT_REASON": "groups_home P95 +180ms (+85.7%) on paired sequential A+C run; priorityPrefetch preserved"
+  },
+  "C_CANDIDATE_INTERLEAVED": {
+    "home_login_p95": 345,
+    "home_groups_p95": 282,
+    "login_home_p95": 466,
+    "groups_home_p95": 460,
+    "deltas_p95_ms": {
+      "home_login": -108,
+      "home_groups": -43,
+      "login_home": 52,
+      "groups_home": -85
+    },
+    "deltas_p95_pct": {
+      "home_login": -23.8,
+      "home_groups": -13.2,
+      "login_home": 12.6,
+      "groups_home": -15.6
+    },
+    "material": {
+      "home_login": false,
+      "home_groups": false,
+      "login_home": false,
+      "groups_home": false
+    },
+    "C_SOFT_NAV_MATERIAL_REGRESSION": false
+  },
+  "A_CANDIDATE_ACCEPTED": false,
+  "C_CANDIDATE_ACCEPTED": true
+}

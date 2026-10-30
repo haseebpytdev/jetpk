@@ -229,7 +229,8 @@ test.describe("JP-UI-PERF-01C floating layout collision suite", () => {
     await expect(page.getByTestId("ask-jetpakistan-fab")).toBeVisible();
 
     await page.getByTestId("ask-jetpakistan-fab").click();
-    await expect(page.getByTestId("ask-jetpakistan-panel")).toBeVisible();
+    // Phase-D C: panel chunk loads on first open — allow async import settle.
+    await expect(page.getByTestId("ask-jetpakistan-panel")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("public-fab-dock")).toBeHidden();
     await page.keyboard.press("Escape");
     await expect(page.getByTestId("ask-jetpakistan-panel")).toHaveCount(0);

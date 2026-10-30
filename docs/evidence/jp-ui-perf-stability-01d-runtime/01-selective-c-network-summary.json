@@ -1,0 +1,504 @@
+{
+  "baseUrl": "http://127.0.0.1:3002",
+  "capturedAt": "2026-10-30T22:39:11.251Z",
+  "viewports": {
+    "390": {
+      "viewport": "390",
+      "loadMs": 18703,
+      "total": 1393829,
+      "js": 829494,
+      "css": 125015,
+      "image": 267245,
+      "html": 109001,
+      "font": 62976,
+      "rsc": 0,
+      "api": 98,
+      "other": 0,
+      "requestCount": 40,
+      "jsRequestCount": 23,
+      "rscRequestCount": 1,
+      "apiRequestCount": 1,
+      "idleRsc": [
+        {
+          "url": "http://127.0.0.1:3002/login?_rsc=c9BZJ8X-vYiReVMz",
+          "dest": "/login",
+          "bytes": 0,
+          "when": 1793399858603
+        }
+      ],
+      "idleRscCount": 1,
+      "idleRscRoutes": [
+        "/login"
+      ],
+      "idleRscBytes": 0,
+      "topJs": [
+        {
+          "bytes": 174019,
+          "url": "/_next/static/chunks/4800-7baec7ac08000aad.js"
+        },
+        {
+          "bytes": 173024,
+          "url": "/_next/static/chunks/7592d615-e996de8be6b26522.js"
+        },
+        {
+          "bytes": 156260,
+          "url": "/_next/static/chunks/7771-1d02a45c03435df1.js"
+        },
+        {
+          "bytes": 68652,
+          "url": "/_next/static/chunks/9101-f8c5c05899b448d2.js"
+        },
+        {
+          "bytes": 44073,
+          "url": "/_next/static/chunks/5283-31c833647772904e.js"
+        },
+        {
+          "bytes": 34034,
+          "url": "/_next/static/chunks/5088.b13cd7ec5eba82d3.js"
+        },
+        {
+          "bytes": 31095,
+          "url": "/_next/static/chunks/1606-f919ae4bcf5d8394.js"
+        },
+        {
+          "bytes": 20150,
+          "url": "/_next/static/chunks/2037-31ad32feef04a1d5.js"
+        },
+        {
+          "bytes": 18231,
+          "url": "/_next/static/chunks/app/error-aa32b8fad0b1ca9a.js"
+        },
+        {
+          "bytes": 17193,
+          "url": "/_next/static/chunks/7674-25fd3aec62515a8f.js"
+        },
+        {
+          "bytes": 15286,
+          "url": "/_next/static/chunks/6948-79293c0634f2372f.js"
+        },
+        {
+          "bytes": 10395,
+          "url": "/_next/static/chunks/5008-7c4589f00461db26.js"
+        }
+      ],
+      "intentResult": null,
+      "tesseractHits": 0,
+      "tesseractBytes": 0,
+      "askPanelChunks": []
+    },
+    "768": {
+      "viewport": "768",
+      "loadMs": 9849,
+      "total": 1473634,
+      "js": 829494,
+      "css": 125015,
+      "image": 347050,
+      "html": 109001,
+      "font": 62976,
+      "rsc": 0,
+      "api": 98,
+      "other": 0,
+      "requestCount": 42,
+      "jsRequestCount": 23,
+      "rscRequestCount": 1,
+      "apiRequestCount": 1,
+      "idleRsc": [
+        {
+          "url": "http://127.0.0.1:3002/login?_rsc=c9BZJ8X-vYiReVMz",
+          "dest": "/login",
+          "bytes": 0,
+          "when": 1793399869819
+        }
+      ],
+      "idleRscCount": 1,
+      "idleRscRoutes": [
+        "/login"
+      ],
+      "idleRscBytes": 0,
+      "topJs": [
+        {
+          "bytes": 174019,
+          "url": "/_next/static/chunks/4800-7baec7ac08000aad.js"
+        },
+        {
+          "bytes": 173024,
+          "url": "/_next/static/chunks/7592d615-e996de8be6b26522.js"
+        },
+        {
+          "bytes": 156260,
+          "url": "/_next/static/chunks/7771-1d02a45c03435df1.js"
+        },
+        {
+          "bytes": 68652,
+          "url": "/_next/static/chunks/9101-f8c5c05899b448d2.js"
+        },
+        {
+          "bytes": 44073,
+          "url": "/_next/static/chunks/5283-31c833647772904e.js"
+        },
+        {
+          "bytes": 34034,
+          "url": "/_next/static/chunks/5088.b13cd7ec5eba82d3.js"
+        },
+        {
+          "bytes": 31095,
+          "url": "/_next/static/chunks/1606-f919ae4bcf5d8394.js"
+        },
+        {
+          "bytes": 20150,
+          "url": "/_next/static/chunks/2037-31ad32feef04a1d5.js"
+        },
+        {
+          "bytes": 18231,
+          "url": "/_next/static/chunks/app/error-aa32b8fad0b1ca9a.js"
+        },
+        {
+          "bytes": 17193,
+          "url": "/_next/static/chunks/7674-25fd3aec62515a8f.js"
+        },
+        {
+          "bytes": 15286,
+          "url": "/_next/static/chunks/6948-79293c0634f2372f.js"
+        },
+        {
+          "bytes": 10395,
+          "url": "/_next/static/chunks/5008-7c4589f00461db26.js"
+        }
+      ],
+      "intentResult": null,
+      "tesseractHits": 0,
+      "tesseractBytes": 0,
+      "askPanelChunks": []
+    },
+    "1440": {
+      "viewport": "1440",
+      "loadMs": 21843,
+      "total": 1629273,
+      "js": 883355,
+      "css": 125015,
+      "image": 448828,
+      "html": 109001,
+      "font": 62976,
+      "rsc": 0,
+      "api": 98,
+      "other": 0,
+      "requestCount": 47,
+      "jsRequestCount": 25,
+      "rscRequestCount": 2,
+      "apiRequestCount": 1,
+      "idleRsc": [
+        {
+          "url": "http://127.0.0.1:3002/groups/search?_rsc=9r76Ghkn5KINVUxz",
+          "dest": "/groups/search",
+          "bytes": 0,
+          "when": 1793399891423
+        },
+        {
+          "url": "http://127.0.0.1:3002/login?_rsc=9r76Ghkn5KINVUxz",
+          "dest": "/login",
+          "bytes": 0,
+          "when": 1793399892504
+        }
+      ],
+      "idleRscCount": 2,
+      "idleRscRoutes": [
+        "/groups/search",
+        "/login"
+      ],
+      "idleRscBytes": 0,
+      "topJs": [
+        {
+          "bytes": 174019,
+          "url": "/_next/static/chunks/4800-7baec7ac08000aad.js"
+        },
+        {
+          "bytes": 173024,
+          "url": "/_next/static/chunks/7592d615-e996de8be6b26522.js"
+        },
+        {
+          "bytes": 156260,
+          "url": "/_next/static/chunks/7771-1d02a45c03435df1.js"
+        },
+        {
+          "bytes": 68652,
+          "url": "/_next/static/chunks/9101-f8c5c05899b448d2.js"
+        },
+        {
+          "bytes": 52511,
+          "url": "/_next/static/chunks/9566-2c6ffc77aa57ec30.js"
+        },
+        {
+          "bytes": 44073,
+          "url": "/_next/static/chunks/5283-31c833647772904e.js"
+        },
+        {
+          "bytes": 34034,
+          "url": "/_next/static/chunks/5088.b13cd7ec5eba82d3.js"
+        },
+        {
+          "bytes": 31095,
+          "url": "/_next/static/chunks/1606-f919ae4bcf5d8394.js"
+        },
+        {
+          "bytes": 20150,
+          "url": "/_next/static/chunks/2037-31ad32feef04a1d5.js"
+        },
+        {
+          "bytes": 18231,
+          "url": "/_next/static/chunks/app/error-aa32b8fad0b1ca9a.js"
+        },
+        {
+          "bytes": 17193,
+          "url": "/_next/static/chunks/7674-25fd3aec62515a8f.js"
+        },
+        {
+          "bytes": 15286,
+          "url": "/_next/static/chunks/6948-79293c0634f2372f.js"
+        }
+      ],
+      "intentResult": null,
+      "tesseractHits": 0,
+      "tesseractBytes": 0,
+      "askPanelChunks": []
+    }
+  },
+  "intent": {
+    "loginHover": {
+      "viewport": "1440",
+      "loadMs": 11211,
+      "total": 1616378,
+      "js": 883355,
+      "css": 125015,
+      "image": 435933,
+      "html": 109001,
+      "font": 62976,
+      "rsc": 0,
+      "api": 98,
+      "other": 0,
+      "requestCount": 47,
+      "jsRequestCount": 25,
+      "rscRequestCount": 2,
+      "apiRequestCount": 1,
+      "idleRsc": [],
+      "idleRscCount": 0,
+      "idleRscRoutes": [],
+      "idleRscBytes": 0,
+      "topJs": [
+        {
+          "bytes": 174019,
+          "url": "/_next/static/chunks/4800-7baec7ac08000aad.js"
+        },
+        {
+          "bytes": 173024,
+          "url": "/_next/static/chunks/7592d615-e996de8be6b26522.js"
+        },
+        {
+          "bytes": 156260,
+          "url": "/_next/static/chunks/7771-1d02a45c03435df1.js"
+        },
+        {
+          "bytes": 68652,
+          "url": "/_next/static/chunks/9101-f8c5c05899b448d2.js"
+        },
+        {
+          "bytes": 52511,
+          "url": "/_next/static/chunks/9566-2c6ffc77aa57ec30.js"
+        },
+        {
+          "bytes": 44073,
+          "url": "/_next/static/chunks/5283-31c833647772904e.js"
+        },
+        {
+          "bytes": 34034,
+          "url": "/_next/static/chunks/5088.b13cd7ec5eba82d3.js"
+        },
+        {
+          "bytes": 31095,
+          "url": "/_next/static/chunks/1606-f919ae4bcf5d8394.js"
+        },
+        {
+          "bytes": 20150,
+          "url": "/_next/static/chunks/2037-31ad32feef04a1d5.js"
+        },
+        {
+          "bytes": 18231,
+          "url": "/_next/static/chunks/app/error-aa32b8fad0b1ca9a.js"
+        },
+        {
+          "bytes": 17193,
+          "url": "/_next/static/chunks/7674-25fd3aec62515a8f.js"
+        },
+        {
+          "bytes": 15286,
+          "url": "/_next/static/chunks/6948-79293c0634f2372f.js"
+        }
+      ],
+      "intentResult": {
+        "intent": "hover-login",
+        "newRsc": [],
+        "count": 0
+      },
+      "tesseractHits": 0,
+      "tesseractBytes": 0,
+      "askPanelChunks": []
+    },
+    "groupsHover": {
+      "viewport": "1440",
+      "loadMs": 10767,
+      "total": 1641452,
+      "js": 883355,
+      "css": 125015,
+      "image": 448828,
+      "html": 109001,
+      "font": 62976,
+      "rsc": 12179,
+      "api": 98,
+      "other": 0,
+      "requestCount": 47,
+      "jsRequestCount": 25,
+      "rscRequestCount": 2,
+      "apiRequestCount": 1,
+      "idleRsc": [],
+      "idleRscCount": 0,
+      "idleRscRoutes": [],
+      "idleRscBytes": 0,
+      "topJs": [
+        {
+          "bytes": 174019,
+          "url": "/_next/static/chunks/4800-7baec7ac08000aad.js"
+        },
+        {
+          "bytes": 173024,
+          "url": "/_next/static/chunks/7592d615-e996de8be6b26522.js"
+        },
+        {
+          "bytes": 156260,
+          "url": "/_next/static/chunks/7771-1d02a45c03435df1.js"
+        },
+        {
+          "bytes": 68652,
+          "url": "/_next/static/chunks/9101-f8c5c05899b448d2.js"
+        },
+        {
+          "bytes": 52511,
+          "url": "/_next/static/chunks/9566-2c6ffc77aa57ec30.js"
+        },
+        {
+          "bytes": 44073,
+          "url": "/_next/static/chunks/5283-31c833647772904e.js"
+        },
+        {
+          "bytes": 34034,
+          "url": "/_next/static/chunks/5088.b13cd7ec5eba82d3.js"
+        },
+        {
+          "bytes": 31095,
+          "url": "/_next/static/chunks/1606-f919ae4bcf5d8394.js"
+        },
+        {
+          "bytes": 20150,
+          "url": "/_next/static/chunks/2037-31ad32feef04a1d5.js"
+        },
+        {
+          "bytes": 18231,
+          "url": "/_next/static/chunks/app/error-aa32b8fad0b1ca9a.js"
+        },
+        {
+          "bytes": 17193,
+          "url": "/_next/static/chunks/7674-25fd3aec62515a8f.js"
+        },
+        {
+          "bytes": 15286,
+          "url": "/_next/static/chunks/6948-79293c0634f2372f.js"
+        }
+      ],
+      "intentResult": {
+        "intent": "hover-groups",
+        "newRsc": [],
+        "count": 0
+      },
+      "tesseractHits": 0,
+      "tesseractBytes": 0,
+      "askPanelChunks": []
+    },
+    "loginPointerdown": {
+      "viewport": "1440",
+      "loadMs": 25053,
+      "total": 1623949,
+      "js": 883355,
+      "css": 125015,
+      "image": 443504,
+      "html": 109001,
+      "font": 62976,
+      "rsc": 0,
+      "api": 98,
+      "other": 0,
+      "requestCount": 47,
+      "jsRequestCount": 25,
+      "rscRequestCount": 2,
+      "apiRequestCount": 1,
+      "idleRsc": [],
+      "idleRscCount": 0,
+      "idleRscRoutes": [],
+      "idleRscBytes": 0,
+      "topJs": [
+        {
+          "bytes": 174019,
+          "url": "/_next/static/chunks/4800-7baec7ac08000aad.js"
+        },
+        {
+          "bytes": 173024,
+          "url": "/_next/static/chunks/7592d615-e996de8be6b26522.js"
+        },
+        {
+          "bytes": 156260,
+          "url": "/_next/static/chunks/7771-1d02a45c03435df1.js"
+        },
+        {
+          "bytes": 68652,
+          "url": "/_next/static/chunks/9101-f8c5c05899b448d2.js"
+        },
+        {
+          "bytes": 52511,
+          "url": "/_next/static/chunks/9566-2c6ffc77aa57ec30.js"
+        },
+        {
+          "bytes": 44073,
+          "url": "/_next/static/chunks/5283-31c833647772904e.js"
+        },
+        {
+          "bytes": 34034,
+          "url": "/_next/static/chunks/5088.b13cd7ec5eba82d3.js"
+        },
+        {
+          "bytes": 31095,
+          "url": "/_next/static/chunks/1606-f919ae4bcf5d8394.js"
+        },
+        {
+          "bytes": 20150,
+          "url": "/_next/static/chunks/2037-31ad32feef04a1d5.js"
+        },
+        {
+          "bytes": 18231,
+          "url": "/_next/static/chunks/app/error-aa32b8fad0b1ca9a.js"
+        },
+        {
+          "bytes": 17193,
+          "url": "/_next/static/chunks/7674-25fd3aec62515a8f.js"
+        },
+        {
+          "bytes": 15286,
+          "url": "/_next/static/chunks/6948-79293c0634f2372f.js"
+        }
+      ],
+      "intentResult": {
+        "intent": "pointerdown-login",
+        "newRsc": [],
+        "count": 0
+      },
+      "tesseractHits": 0,
+      "tesseractBytes": 0,
+      "askPanelChunks": []
+    }
+  }
+}

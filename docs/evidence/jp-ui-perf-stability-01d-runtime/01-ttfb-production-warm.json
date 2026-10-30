@@ -1,0 +1,527 @@
+{
+  "baseUrl": "https://jetpakistan.pk",
+  "n": 20,
+  "capturedAt": "2026-10-30T07:41:03.914Z",
+  "results": {
+    "/": {
+      "n": 20,
+      "mode": "warm_after_1_discard",
+      "samples": [
+        {
+          "status": 200,
+          "ttfb": 349,
+          "total": 714,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 502,
+          "total": 507,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 294,
+          "total": 300,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 268,
+          "total": 293,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 231,
+          "total": 387,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 247,
+          "total": 487,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 385,
+          "total": 602,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 211,
+          "total": 262,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 217,
+          "total": 339,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 211,
+          "total": 259,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 205,
+          "total": 268,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 199,
+          "total": 291,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 194,
+          "total": 259,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 257,
+          "total": 269,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 204,
+          "total": 251,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 194,
+          "total": 246,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 198,
+          "total": 241,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 195,
+          "total": 256,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 202,
+          "total": 259,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 209,
+          "total": 334,
+          "cache": null
+        }
+      ],
+      "TTFB_MEDIAN": 211,
+      "TTFB_P95": 385,
+      "TOTAL_MEDIAN": 280,
+      "TOTAL_P95": 602
+    },
+    "/login": {
+      "n": 20,
+      "mode": "warm_after_1_discard",
+      "samples": [
+        {
+          "status": 200,
+          "ttfb": 215,
+          "total": 243,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 214,
+          "total": 229,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 236,
+          "total": 259,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 206,
+          "total": 234,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 212,
+          "total": 248,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 191,
+          "total": 214,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 247,
+          "total": 267,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 225,
+          "total": 245,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 192,
+          "total": 269,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 195,
+          "total": 218,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 210,
+          "total": 230,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 203,
+          "total": 233,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 201,
+          "total": 222,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 214,
+          "total": 328,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 200,
+          "total": 475,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 213,
+          "total": 458,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 218,
+          "total": 283,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 205,
+          "total": 243,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 200,
+          "total": 243,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 210,
+          "total": 241,
+          "cache": null
+        }
+      ],
+      "TTFB_MEDIAN": 210,
+      "TTFB_P95": 236,
+      "TOTAL_MEDIAN": 243,
+      "TOTAL_P95": 458
+    },
+    "/groups/search": {
+      "n": 20,
+      "mode": "warm_after_1_discard",
+      "samples": [
+        {
+          "status": 200,
+          "ttfb": 201,
+          "total": 233,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 357,
+          "total": 390,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 349,
+          "total": 366,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 221,
+          "total": 236,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 248,
+          "total": 248,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 214,
+          "total": 1005,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 214,
+          "total": 244,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 239,
+          "total": 249,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 250,
+          "total": 269,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 234,
+          "total": 237,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 247,
+          "total": 249,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 211,
+          "total": 244,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 216,
+          "total": 235,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 200,
+          "total": 224,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 211,
+          "total": 231,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 199,
+          "total": 219,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 205,
+          "total": 223,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 200,
+          "total": 216,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 340,
+          "total": 352,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 266,
+          "total": 279,
+          "cache": null
+        }
+      ],
+      "TTFB_MEDIAN": 219,
+      "TTFB_P95": 349,
+      "TOTAL_MEDIAN": 244,
+      "TOTAL_P95": 390
+    },
+    "/flights/results": {
+      "n": 20,
+      "mode": "warm_after_1_discard",
+      "samples": [
+        {
+          "status": 200,
+          "ttfb": 201,
+          "total": 225,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 190,
+          "total": 221,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 188,
+          "total": 235,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 192,
+          "total": 209,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 204,
+          "total": 228,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 190,
+          "total": 211,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 194,
+          "total": 239,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 224,
+          "total": 241,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 204,
+          "total": 231,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 192,
+          "total": 224,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 211,
+          "total": 263,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 217,
+          "total": 247,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 218,
+          "total": 419,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 221,
+          "total": 239,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 214,
+          "total": 290,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 270,
+          "total": 321,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 220,
+          "total": 247,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 222,
+          "total": 248,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 206,
+          "total": 230,
+          "cache": null
+        },
+        {
+          "status": 200,
+          "ttfb": 213,
+          "total": 219,
+          "cache": null
+        }
+      ],
+      "TTFB_MEDIAN": 209,
+      "TTFB_P95": 224,
+      "TOTAL_MEDIAN": 237,
+      "TOTAL_P95": 321
+    }
+  }
+}
