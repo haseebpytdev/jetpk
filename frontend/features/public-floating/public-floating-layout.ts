@@ -1,6 +1,6 @@
 /**
  * Shared layout contract for Ask JetPakistan FAB + PublicFloatingActionDock.
- * Coordinates bottom offsets so controls never overlap on sub-lg viewports.
+ * Dock bottom is the authority on sub-lg; Ask stacks above it with a fixed gap.
  */
 
 export const PUBLIC_FLOATING_LAYOUT_EVENT = "jp-public-floating-layout";
@@ -11,34 +11,69 @@ export type PublicFloatingLayoutState = {
   dockOpen: boolean;
   liftCheckout: boolean;
   liftFlightCta: boolean;
+  /** When false (lg+), dock is hidden and Ask uses standalone bottom. */
+  viewportIsSubLg: boolean;
 };
 
 export const FAB_SAFE_BOTTOM_PX = 18;
 export const FAB_DOCK_BOTTOM_PX = 16;
+/** Matches CSS max(6.75rem, …) lift used above sticky booking/flight CTAs. */
+export const FAB_DOCK_LIFT_BOTTOM_PX = 108;
 export const FAB_DOCK_TRIGGER_PX = 56;
 export const FAB_ASK_SIZE_PX = 58;
 export const FAB_GAP_PX = 14;
-export const FAB_DOCK_PANEL_OFFSET_PX = 72;
 
-export function computeAskFabBottomPx(state: PublicFloatingLayoutState): number {
-  let bottom = FAB_SAFE_BOTTOM_PX;
+export const DOCK_BOTTOM_CSS_BASE =
+  "max(1rem, env(safe-area-inset-bottom))";
+export const DOCK_BOTTOM_CSS_LIFT =
+  "max(6.75rem, calc(env(safe-area-inset-bottom) + 5.5rem))";
+export const ASK_BOTTOM_CSS_STANDALONE =
+  "max(18px, env(safe-area-inset-bottom))";
 
+export function computeDockBottomPx(state: PublicFloatingLayoutState): number {
   if (state.liftCheckout || state.liftFlightCta) {
-    bottom = Math.max(bottom, 108);
+    return FAB_DOCK_LIFT_BOTTOM_PX;
+  }
+  return FAB_DOCK_BOTTOM_PX;
+}
+
+export function computeDockBottomCss(state: PublicFloatingLayoutState): string {
+  if (state.liftCheckout || state.liftFlightCta) {
+    return DOCK_BOTTOM_CSS_LIFT;
+  }
+  return DOCK_BOTTOM_CSS_BASE;
+}
+
+/**
+ * Pixel bottom for Ask FAB geometry assertions / JS consumers.
+ * Sub-lg + AI: stacks above the (possibly lifted) dock trigger.
+ * Desktop / dock-open / ask-open / AI-off: standalone safe bottom (FAB may be hidden).
+ */
+export function computeAskFabBottomPx(state: PublicFloatingLayoutState): number {
+  if (
+    !state.aiEnabled ||
+    state.askOpen ||
+    state.dockOpen ||
+    !state.viewportIsSubLg
+  ) {
+    return FAB_SAFE_BOTTOM_PX;
   }
 
-  if (state.aiEnabled && !state.askOpen) {
-    // Stack Ask FAB above the dock trigger footprint (bottom + height + gap).
-    bottom = Math.max(
-      bottom,
-      FAB_DOCK_BOTTOM_PX + FAB_DOCK_TRIGGER_PX + FAB_GAP_PX,
-    );
-    if (state.dockOpen) {
-      bottom += FAB_DOCK_PANEL_OFFSET_PX;
-    }
+  return computeDockBottomPx(state) + FAB_DOCK_TRIGGER_PX + FAB_GAP_PX;
+}
+
+export function computeAskFabBottomCss(state: PublicFloatingLayoutState): string {
+  if (
+    !state.aiEnabled ||
+    state.askOpen ||
+    state.dockOpen ||
+    !state.viewportIsSubLg
+  ) {
+    return ASK_BOTTOM_CSS_STANDALONE;
   }
 
-  return bottom;
+  // Derive from the dock bottom expression so safe-area stays in the chain.
+  return `calc(var(--jp-dock-fab-bottom) + ${FAB_DOCK_TRIGGER_PX}px + ${FAB_GAP_PX}px)`;
 }
 
 export function applyPublicFloatingLayout(state: PublicFloatingLayoutState): void {
@@ -49,13 +84,10 @@ export function applyPublicFloatingLayout(state: PublicFloatingLayoutState): voi
   root.dataset.jpAskOpen = state.askOpen ? "1" : "0";
   root.dataset.jpDockOpen = state.dockOpen ? "1" : "0";
   root.dataset.jpFabLift = state.liftCheckout || state.liftFlightCta ? "1" : "0";
+  root.dataset.jpFabSubLg = state.viewportIsSubLg ? "1" : "0";
 
-  const askBottom = computeAskFabBottomPx(state);
-  root.style.setProperty("--jp-ask-fab-bottom", `${askBottom}px`);
-  root.style.setProperty(
-    "--jp-dock-fab-bottom",
-    state.liftCheckout || state.liftFlightCta ? "max(6.75rem, calc(env(safe-area-inset-bottom) + 5.5rem))" : "max(1rem, env(safe-area-inset-bottom))",
-  );
+  root.style.setProperty("--jp-dock-fab-bottom", computeDockBottomCss(state));
+  root.style.setProperty("--jp-ask-fab-bottom", computeAskFabBottomCss(state));
 }
 
 export function publishPublicFloatingLayout(state: PublicFloatingLayoutState): void {

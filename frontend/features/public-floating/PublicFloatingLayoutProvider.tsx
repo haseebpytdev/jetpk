@@ -19,6 +19,7 @@ type PublicFloatingLayoutContextValue = {
   aiEnabled: boolean;
   askOpen: boolean;
   dockOpen: boolean;
+  viewportIsSubLg: boolean;
   setAskOpen: (open: boolean) => void;
   setDockOpen: (open: boolean) => void;
 };
@@ -43,6 +44,15 @@ type PublicFloatingLayoutProviderProps = {
   aiEnabled: boolean;
 };
 
+const SUB_LG_QUERY = "(max-width: 1023px)";
+
+function readViewportIsSubLg(): boolean {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return true;
+  }
+  return window.matchMedia(SUB_LG_QUERY).matches;
+}
+
 export function PublicFloatingLayoutProvider({
   children,
   aiEnabled,
@@ -50,6 +60,7 @@ export function PublicFloatingLayoutProvider({
   const pathname = usePathname() ?? "";
   const [askOpen, setAskOpen] = useState(false);
   const [dockOpen, setDockOpen] = useState(false);
+  const [viewportIsSubLg, setViewportIsSubLg] = useState(true);
 
   const liftCheckout =
     pathname.startsWith("/booking/") || pathname.startsWith("/groups/booking/");
@@ -58,6 +69,14 @@ export function PublicFloatingLayoutProvider({
     pathname.startsWith("/flights/return") ||
     pathname.startsWith("/flights/details");
 
+  useLayoutEffect(() => {
+    const sync = () => setViewportIsSubLg(readViewportIsSubLg());
+    sync();
+    const mq = window.matchMedia(SUB_LG_QUERY);
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
   const layoutState = useMemo<PublicFloatingLayoutState>(
     () => ({
       aiEnabled,
@@ -65,8 +84,9 @@ export function PublicFloatingLayoutProvider({
       dockOpen,
       liftCheckout,
       liftFlightCta,
+      viewportIsSubLg,
     }),
-    [aiEnabled, askOpen, dockOpen, liftCheckout, liftFlightCta],
+    [aiEnabled, askOpen, dockOpen, liftCheckout, liftFlightCta, viewportIsSubLg],
   );
 
   useLayoutEffect(() => {
@@ -80,15 +100,23 @@ export function PublicFloatingLayoutProvider({
     }
   }, []);
 
+  const setDockOpenStable = useCallback((open: boolean) => {
+    setDockOpen(open);
+    if (open) {
+      setAskOpen(false);
+    }
+  }, []);
+
   const value = useMemo(
     () => ({
       aiEnabled,
       askOpen,
       dockOpen,
+      viewportIsSubLg,
       setAskOpen: setAskOpenStable,
-      setDockOpen,
+      setDockOpen: setDockOpenStable,
     }),
-    [aiEnabled, askOpen, dockOpen, setAskOpenStable],
+    [aiEnabled, askOpen, dockOpen, viewportIsSubLg, setAskOpenStable, setDockOpenStable],
   );
 
   return (
