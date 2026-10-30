@@ -1,0 +1,10 @@
+﻿docs/evidence/jp-ui-perf-stability-01c-floating/01-FLOATING-COLLISION-PREFLIGHT.md
+frontend/app/globals.css
+frontend/components/layout/PublicShell.tsx
+frontend/components/navigation/PublicFloatingActionDock.tsx
+frontend/features/ai-assistant/components/AskJetPakistanChat.tsx
+frontend/features/public-floating/PublicFloatingLayoutProvider.tsx
+frontend/features/public-floating/public-floating-layout.ts
+frontend/tests/jp-ui-perf-01c-floating-layout.spec.ts
+frontend/tests/regression/jp-favicon-fab-closure.test.mjs
+frontend/tests/regression/jp-ui-perf-01c-floating-layout.test.mjs
