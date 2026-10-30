@@ -62,6 +62,13 @@ export function PublicFloatingActionDock({
     };
   }, []);
 
+  // Ask panel open → close native <details> so exclusivity is structural, not CSS-only.
+  useEffect(() => {
+    if (layout?.askOpen && detailsRef.current?.open) {
+      detailsRef.current.open = false;
+    }
+  }, [layout?.askOpen]);
+
   const navItems = primaryNavigationForSession(session);
   const tiles: { href: string; label: string; testId?: string }[] = [];
 

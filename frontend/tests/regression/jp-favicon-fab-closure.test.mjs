@@ -61,18 +61,28 @@ check(
   "jp-fab-content-clear clears Ask FAB footprint (>=5.5rem)",
   /jp-fab-content-clear[\s\S]*?5\.5rem/.test(globals),
 );
+const homepage = read("app/(public)/page.tsx");
 check(
-  "homepage passes Company Profile branding into PublicShell",
-  /PublicShell[\s\S]*branding=\{branding\}/.test(read("app/page.tsx")) &&
-    /logo_url:\s*config\.logo_url/.test(read("app/page.tsx")),
+  "public layout passes Company Profile branding into PublicShell",
+  /PublicShell[\s\S]*branding=\{branding\}/.test(publicLayout) &&
+    /logo_url:\s*config\.logo_url/.test(publicLayout),
 );
 check(
   "homepage generateMetadata sets icons via resolveFaviconUrl",
-  /resolveFaviconUrl/.test(read("app/page.tsx")) && /icons:/.test(read("app/page.tsx")),
+  /resolveFaviconUrl/.test(homepage) && /icons:/.test(homepage),
 );
 check(
   "globals.css hides dock while Ask panel open",
   /data-jp-ask-open="1"[\s\S]*?\.jp-public-fab-dock/.test(globals),
+);
+check(
+  "globals.css hides Ask FAB while dock panel open",
+  /data-jp-dock-open="1"[\s\S]*?data-jp-ask-fab-wrap/.test(globals),
+);
+check(
+  "lift + base dock bottoms both use --jp-dock-fab-bottom authority",
+  /jp-public-fab-dock--base[\s\S]*?jp-public-fab-dock--lift[\s\S]*?--jp-dock-fab-bottom/.test(globals) ||
+    /jp-public-fab-dock--base,\s*\n\s*\.jp-public-fab-dock--lift[\s\S]*?--jp-dock-fab-bottom/.test(globals),
 );
 
 const resultsPage = read("features/flight-results/components/FlightResultsPage.tsx");
