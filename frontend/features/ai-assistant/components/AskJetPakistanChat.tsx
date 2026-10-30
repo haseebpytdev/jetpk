@@ -220,6 +220,15 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
     floatingLayout?.setAskOpen(open);
   }, [floatingLayout, open]);
 
+  // Mutual exclusivity: opening the quick-action dock closes Ask.
+  useEffect(() => {
+    if (floatingLayout?.dockOpen && open) {
+      setOpen(false);
+      setMenuOpen(false);
+      clearHash();
+    }
+  }, [floatingLayout?.dockOpen, open, clearHash]);
+
   useEffect(() => {
     if (!enabled) return;
 
@@ -580,8 +589,8 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
 
   return (
     <>
-      {!open ? (
-        <div className={styles.fabWrap}>
+      {!open && !floatingLayout?.dockOpen ? (
+        <div className={styles.fabWrap} data-jp-ask-fab-wrap="">
           <span className={styles.fabTooltip} role="tooltip">
             Ask JetPakistan
             <small>Get instant travel help</small>

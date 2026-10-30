@@ -1,0 +1,12 @@
+﻿20cea825 perf(ui): coordinate floating actions across responsive states
+ .../01-FLOATING-COLLISION-PREFLIGHT.md             |  87 +++++++
+ frontend/app/globals.css                           |  15 +-
+ frontend/components/layout/PublicShell.tsx         |  10 +-
+ .../navigation/PublicFloatingActionDock.tsx        |   7 +
+ .../ai-assistant/components/AskJetPakistanChat.tsx |  13 +-
+ .../PublicFloatingLayoutProvider.tsx               |  34 ++-
+ .../public-floating/public-floating-layout.ts      |  74 ++++--
+ .../tests/jp-ui-perf-01c-floating-layout.spec.ts   | 283 +++++++++++++++++++++
+ .../regression/jp-favicon-fab-closure.test.mjs     |  18 +-
+ .../jp-ui-perf-01c-floating-layout.test.mjs        | 120 +++++++++
+ 10 files changed, 624 insertions(+), 37 deletions(-)

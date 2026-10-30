@@ -44,6 +44,12 @@ export function PublicShell({
     document.documentElement.dataset.jpHydrated = "1";
     let cancelled = false;
     const ssrBrandingPresent = initialBranding != null;
+    const forceAi =
+      typeof document !== "undefined" &&
+      document.cookie.split(";").some((part) => part.trim() === "jp_playwright_force_ai=1");
+    if (forceAi) {
+      setAiEnabled(true);
+    }
 
     void (async () => {
       try {
@@ -68,7 +74,9 @@ export function PublicShell({
           logo_url: config.logo_url,
           header_logo_height: config.header_logo_height,
         });
-        setAiEnabled(Boolean(config.ai_assistant_enabled));
+        if (!forceAi) {
+          setAiEnabled(Boolean(config.ai_assistant_enabled));
+        }
       } catch {
         /* keep SSR/anonymous defaults */
       }

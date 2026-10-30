@@ -1,0 +1,8 @@
+﻿CANONICAL=20cea825a9fdf54b75749ccfe4cf00a60b315af8
+RC=4697b228e3e2c19c788cd0996a8d621a46b381d6
+EQ frontend/features/public-floating/public-floating-layout.ts 3f4d65dd50ee7461048dd1f2f034ffa8b0ea201e
+EQ frontend/features/public-floating/PublicFloatingLayoutProvider.tsx 55c79f99d64acb2bf5fe496e77a844ed9e3aebd3
+EQ frontend/components/navigation/PublicFloatingActionDock.tsx 58f59773183fa22009bb3e98af0f536f4bf76a4e
+EQ frontend/features/ai-assistant/components/AskJetPakistanChat.tsx 60372fc77fa2789763d099bf1a49f6293019d7dd
+EQ frontend/app/globals.css 59a68a277b539bb2d558bcd0b3e0143ae05daf30
+EQ frontend/components/layout/PublicShell.tsx dff7c15d459c54a0d211d10ceb61867ac0de4793
