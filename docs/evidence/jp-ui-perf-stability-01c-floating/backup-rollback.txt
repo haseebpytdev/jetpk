@@ -1,0 +1,12 @@
+=== backup listing ===
+total 44
+drwxrwxr-x   5 pkjetp pkjetp  4096 Oct 30 07:27 .
+drwxrwxr-x 131 pkjetp pkjetp 20480 Oct 30 07:27 ..
+drwxrwxr-x   7 pkjetp pkjetp  4096 Oct 29 21:40 frontend.next
+drwxrwxr-x   2 pkjetp pkjetp  4096 Oct 30 07:27 markers
+drwxrwxr-x   3 pkjetp pkjetp  4096 Oct 30 07:27 sources
+-rw-rw-r--   1 pkjetp pkjetp    17 Oct 30 07:27 STAMP.txt
+=== rollback build id ===
+ITH5uzTuo-a7Gi6Il1jAN
+=== live build id ===
+RDupyPzXOcemU2XTemQLQ

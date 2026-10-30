@@ -1,0 +1,8 @@
+=== LIVE vs RC blob parity ===
+EQ frontend/app/globals.css
+EQ frontend/components/layout/PublicShell.tsx
+EQ frontend/components/navigation/PublicFloatingActionDock.tsx
+EQ frontend/features/ai-assistant/components/AskJetPakistanChat.tsx
+EQ frontend/features/public-floating/PublicFloatingLayoutProvider.tsx
+EQ frontend/features/public-floating/public-floating-layout.ts
+LIVE_SOURCE_BLOB_PARITY=6_OF_6

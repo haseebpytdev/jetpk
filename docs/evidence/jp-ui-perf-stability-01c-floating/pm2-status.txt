@@ -1,0 +1,8 @@
+jetpk-public-frontend_status=online
+jetpk-public-frontend_restarts=4
+jetpk-public-frontend_uptime_ms=1793341836214
+jetpk-public-frontend_pid=148161
+jetpk-dashboard_status=online
+jetpk-dashboard_restarts=0
+jetpk-dashboard_uptime_ms=1792414211677
+jetpk-dashboard_pid=61738
