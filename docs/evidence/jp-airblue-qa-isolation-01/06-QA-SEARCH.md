@@ -1,18 +1,25 @@
-# QA search
+# QA search — live evidence
 
-Bootstrap: `GET/POST /staff/qa/airblue-search`
+DATE: 2026-10-31
 
-Activate redirects to `/flights/results?from=LHE&to=KHI&...` with QA session active.
-
-Store payload (server-authoritative):
+Server-side QA channel probe (`source_channel=qa_staff_airblue`):
 
 ```
-qa_scope=true
-qa_scope_type=airblue_sandbox
-qa_connection_id=23
-qa_actor_user_id=<actor>
-qa_created_at / qa_expires_at
-source_channel=qa_staff_airblue
+SCOPE_ALLOWED=YES
+CONNECTION_ID=23
+PROVIDER=airblue
+ENVIRONMENT=sandbox
+PROTOCOL=3.0
+HOST=otatest4.zapways.com
+SERVICE_TARGET=Test
+ROUTE=LHE→KHI one_way
+DEPART=2026-11-21
+RAW_OFFERS=6
+QA_CONNECTION_IDS={"23":6}
+QA_PROVIDERS={"airblue":6}
+AFTER_CONSOLIDATION_STORED=2
+FARE_FAMILIES=EV,EF,EX
+BOOK_CREATE_CALLS=0
 ```
 
-Short-ref mint skipped for QA searches. Resolve of any QA-targeted short-ref returns 410.
+Display sample (hashed offer ids only): customer totals present; `has_supplier_total=false` on sampled offers.

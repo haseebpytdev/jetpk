@@ -1,17 +1,18 @@
-# Normal public regression
+# Normal public regression — post-deploy smoke
 
-Unchanged:
-
-```
-OTA_PUBLIC_FLIGHT_RESULTS_SUPPLIERS excludes airblue
-AirBlueConnectionSearchPolicy public certification still fail-closed for pending v3
-QA path bypasses allowlist ONLY when source_channel=qa_staff_airblue
-```
-
-Require after deploy:
+DATE: 2026-10-31
 
 ```
+UP=200
+PUBLIC_SEARCH=200
+RESULTS_DATA=200
+OFFERS=12
+PROVIDERS=sabre
+AIRBLUE_OFFERS=0
+QA_META_LEAK=False
+SUPPLIER_TOTAL_LEAK=False
 NORMAL_PUBLIC_AIRBLUE_TEST_EXPOSURE=0
-PUBLIC_ANON_AIRBLUE_CALLS=0
-public search 200 / results data 200
+QA_ANON_BOOTSTRAP=302 (login redirect)
 ```
+
+Allowlist unchanged (airblue not added). Config `ota.php` not overwritten on prod (root-owned); QA connection defaults remain 23 in code.

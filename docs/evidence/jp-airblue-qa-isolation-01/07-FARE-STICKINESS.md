@@ -1,11 +1,17 @@
 # Fare stickiness
 
-Live certification target (post-deploy staff browser):
+Consolidation proves multi-family inventory on conn23:
 
 ```
-RESULT_FARE = SELECTED_FARE = PASSENGER_FARE = REVIEW_FARE
-RESULT_CUSTOMER_TOTAL = SELECTED_TOTAL = PASSENGER_TOTAL = REVIEW_TOTAL
-Prefer non-default EF when EV/EF/EX present.
+FARE_FAMILIES_AVAILABLE=EV,EF,EX
+PREFERRED_NON_DEFAULT=EF
 ```
 
-Status before live UAT: PENDING_DEPLOY_UAT
+Staff browser corridor (`/staff/qa/airblue-search` → results → select EF → passengers → review) requires authenticated platform_admin/staff session.
+
+```
+AIRBLUE_FARE_STICKINESS=PENDING_STAFF_BROWSER_UAT
+AIRBLUE_CUSTOMER_TOTAL_STICKINESS=PENDING_STAFF_BROWSER_UAT
+```
+
+Hard stop remains: no AirBook during stickiness UAT.

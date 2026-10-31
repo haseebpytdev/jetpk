@@ -2,34 +2,64 @@
 
 ```
 START_MAIN_SHA=706b8d79adcbf9e8cd4ff2d3b5848ff1be13176e
+FINAL_MAIN_SHA=706b8d79adcbf9e8cd4ff2d3b5848ff1be13176e
 BRANCH=fix/jp-airblue-qa-isolation-01
+BRANCH_HEAD=304b0d7b62fccfbbfec6bdae8e06a5fbffc17ea8
+BACKUP=/home/pkjetp/backups/jp-airblue-qa-isolation-01-20261031214419
+
 QA_ISOLATION_IMPLEMENTED=YES
+QA_ISOLATION_DEPLOYED=YES (selective; config/ota.php skipped — root-owned; code defaults OK)
+
 QA_ALLOWED_ROLES=platform_admin,staff
+QA_ANONYMOUS_ACCESS=DENY
+QA_CUSTOMER_ACCESS=DENY
+QA_AGENT_ACCESS=DENY
+
 QA_CONNECTION_ID=23
+QA_CONNECTION_PINNING=PASS
 QA_ENVIRONMENT=sandbox
 QA_HOST=otatest4.zapways.com
 QA_PROTOCOL=3.0
-NORMAL_PUBLIC_AIRBLUE_EXPOSURE=0 (by design; live re-verify post-deploy)
-SECURITY_TESTS=24 PASS
-BOOK_CREATE_CALLS=0
-AIRBLUE_PREBOOK_GATE=STOP
-```
 
-## SERVICE_FEE P3 (audit only)
+NORMAL_PUBLIC_AIRBLUE_EXPOSURE=0
+NORMAL_PUBLIC_SEARCH=PASS
 
-`PublicCustomerPricing` rejects `service_fee` from public customer `final_total` (not supplier cost; OTA fee bucket). Top-level public `service_fee` field may still appear in some JSON presenters — **not** P0 supplier-cost leak. Classification:
+QA_SEARCH=PASS
+QA_RAW_OFFERS=6
+QA_DISPLAY_OFFERS=2 (consolidated parents; families EV/EF/EX)
 
-```
+QA_SHORT_REF_ANON=BLOCKED (no mint + resolve 410)
+QA_RESULTS_DATA_ANON=BLOCKED (404)
+QA_OFFER_SELECT_ANON=BLOCKED (404)
+
+AIRBLUE_FARE_STICKINESS=PENDING_STAFF_BROWSER_UAT
+AIRBLUE_CUSTOMER_TOTAL_STICKINESS=PENDING_STAFF_BROWSER_UAT
+AIRBLUE_PASSENGER_FLOW=PENDING_STAFF_BROWSER_UAT
+AIRBLUE_REVIEW=PENDING_STAFF_BROWSER_UAT
+
+CUSTOMER_SUPPLIER_PRICE_SEPARATION=PASS (sample has_supplier_total=false)
+PUBLIC_SUPPLIER_COST_LEAKAGE=PASS
+
+SERVICE_FEE_CLASSIFICATION=P3_RESIDUAL_FIELD_NOT_SUPPLIER_COST
 SERVICE_FEE_IS_CUSTOMER_CHARGE=AMBIGUOUS_LEGACY (rejected from public final_total)
 SERVICE_FEE_IS_SUPPLIER_COST=NO
 SERVICE_FEE_PUBLIC_DISPLAY_REQUIRED=NO
-SERVICE_FEE_CLASSIFICATION=P3_RESIDUAL_FIELD_NOT_SUPPLIER_COST
+
+AIRBLUE_PREBOOK_GATE=STOP
+BOOK_CREATE_CALLS=0
+TICKET_CALLS=0
+CANCEL_CALLS=0
+REFUND_CALLS=0
+VOID_CALLS=0
+REISSUE_CALLS=0
+
+SECURITY_TESTS=24 PASS
+P0_OPEN=0
+P1_OPEN=0
+P2_OPEN=1 (staff browser fare-stickiness UAT not completed — needs QA credentials)
+P3_OPEN=1 (top-level service_fee field residual)
 ```
 
-## IatiOfferFallbackDetailsTest residuals
+## Safe to proceed to JP-AIRBLUE-TEST-AIRBOOK-01?
 
-Prior post-P0 noise: stale Blade assertion + airlines-table env — classify **STALE_TEST / TEST_ENVIRONMENT_DEFECT**, not customer P0. Deferred to separate test-maintenance commit.
-
-## Hard stop
-
-Do **not** execute AirBook / ticket / cancel / void / refund / payment in this phase.
+**NOT YET.** Corridor + pinning + public isolation are live. Complete staff browser stickiness (EF through review) before AirBook certification.
