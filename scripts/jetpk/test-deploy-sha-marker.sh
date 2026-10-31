@@ -82,4 +82,31 @@ if [[ "${MARKER_AFTER_FAIL}" != "${MARKER_BEFORE_FAIL}" ]]; then
   exit 1
 fi
 
+# Case 4: frontend component must not overwrite application/legacy marker.
+APP_SHA="${NEW_SHA}"
+FE_SHA="d9e08e18907ebf2b3621d48bc0843588571caa96"
+printf '%s\n' "${APP_SHA}" > "${TMP_APP}/storage/app/deploy-sha.txt"
+printf '%s\n' "${APP_SHA}" > "${TMP_APP}/storage/app/deploy-application-sha.txt"
+FE_OUT="$(
+  APP="${TMP_APP}" DEPLOY_SHA="${FE_SHA}" DEPLOY_COMPONENT=frontend \
+    MARKER_SCRIPT="${ROOT}/scripts/jetpk/write-deploy-sha-marker.sh" \
+    bash "${ROOT}/scripts/jetpk/finalize-deploy-sha-marker.sh"
+)"
+echo "${FE_OUT}"
+LEGACY_AFTER_FE="$(tr -d '\n' < "${TMP_APP}/storage/app/deploy-sha.txt")"
+APP_AFTER_FE="$(tr -d '\n' < "${TMP_APP}/storage/app/deploy-application-sha.txt")"
+FE_AFTER="$(tr -d '\n' < "${TMP_APP}/storage/app/deploy-frontend-sha.txt")"
+if [[ "${LEGACY_AFTER_FE}" != "${APP_SHA}" ]]; then
+  echo "DEPLOY_SHA_MARKER_TEST_FAIL reason=frontend_overwrote_legacy_application_marker"
+  exit 1
+fi
+if [[ "${APP_AFTER_FE}" != "${APP_SHA}" ]]; then
+  echo "DEPLOY_SHA_MARKER_TEST_FAIL reason=frontend_overwrote_application_marker"
+  exit 1
+fi
+if [[ "${FE_AFTER}" != "${FE_SHA}" ]]; then
+  echo "DEPLOY_SHA_MARKER_TEST_FAIL reason=frontend_marker_not_written"
+  exit 1
+fi
+
 echo "DEPLOY_SHA_MARKER_TEST=PASS"
