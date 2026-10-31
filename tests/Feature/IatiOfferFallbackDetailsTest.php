@@ -148,7 +148,13 @@ class IatiOfferFallbackDetailsTest extends TestCase
 
         $this->assertTrue($fallback['has_fallback_details']);
         $this->assertSame('YLOWPK', $fallback['fallback_details']['fare_rules']['fare_basis'] ?? null);
-        $this->assertSame(320.0, $fallback['fallback_details']['fare_breakdown']['supplier_total'] ?? null);
+
+        $publicBreakdown = $fallback['fallback_details']['fare_breakdown'] ?? [];
+        $this->assertIsArray($publicBreakdown);
+        $this->assertSame(89716.0, (float) ($publicBreakdown['grand_total'] ?? 0));
+        foreach (['supplier_total', 'base_fare', 'taxes', 'markup', 'service_fee'] as $sensitiveKey) {
+            $this->assertArrayNotHasKey($sensitiveKey, $publicBreakdown);
+        }
     }
 
     #[Test]
