@@ -3057,7 +3057,9 @@ class FlightOfferDisplayPresenter
             // Next.js Book Now only forwards fare_option_key when this flag is true.
             // Grouped consolidator options (AirBlue FareType variants) are authoritative keys.
             'selection_key_authoritative' => self::selectionKeyAuthoritativeForFareFamilyRow($row),
-            'provider_context' => is_array($row['provider_context'] ?? null) ? $row['provider_context'] : null,
+            // provider_context is authoritative supplier/booking state and may contain
+            // raw priced itineraries, connection ids, correlation ids, or commercial
+            // components. Never copy it into customer-facing fare-option rows.
             'pia_ndc_provider_backed' => (bool) ($row['pia_ndc_provider_backed'] ?? false),
         ];
 
