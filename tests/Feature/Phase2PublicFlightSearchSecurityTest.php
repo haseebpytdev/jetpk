@@ -99,6 +99,13 @@ class Phase2PublicFlightSearchSecurityTest extends TestCase
             'supplier payable must not be reconstructable from public base_fare+taxes',
         );
 
+        $fallbackBreakdown = data_get($offer, 'fallback_details.fare_breakdown', []);
+        $this->assertIsArray($fallbackBreakdown);
+        $this->assertSame(112500.0, (float) ($fallbackBreakdown['grand_total'] ?? 0));
+        foreach (['supplier_total', 'base_fare', 'taxes', 'markup', 'service_fee'] as $sensitiveKey) {
+            $this->assertArrayNotHasKey($sensitiveKey, $fallbackBreakdown);
+        }
+
         $stored = app(FlightSearchResultStore::class)->get($searchId);
         $serverOffer = is_array($stored['offers'][0] ?? null) ? $stored['offers'][0] : [];
         $this->assertSame(100000.0, (float) ($serverOffer['base_fare'] ?? 0));
