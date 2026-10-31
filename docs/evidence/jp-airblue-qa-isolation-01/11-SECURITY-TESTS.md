@@ -1,18 +1,15 @@
-# Security tests
+﻿# Security / stickiness tests — pre-AirBook closure
 
-Commands:
+DATE: 2026-10-31
+SHA_UNDER_TEST: local tree aligned to `25e2abb7` presenter + PR #160 tests
 
-```
-php vendor/phpunit/phpunit/phpunit tests/Unit/Support/FlightSearch/AirBlueQaSearchScopeTest.php
-php vendor/phpunit/phpunit/phpunit tests/Feature/FlightSearch/QaStaffAirBlueAccessGuardTest.php tests/Feature/FlightSearch/QaStaffAirBlueHttpIsolationTest.php
-```
-
-Results (2026-10-31):
+Command:
 
 ```
-AirBlueQaSearchScopeTest: 8 passed
-QaStaffAirBlueAccessGuardTest + QaStaffAirBlueHttpIsolationTest: 16 passed
-TOTAL=24 PASS
+php vendor/phpunit/phpunit/phpunit tests/Unit/FlightOfferDisplayPresenterTest.php tests/Feature/Phase2PublicFlightSearchSecurityTest.php tests/Feature/FlightSearch/QaStaffAirBlueAccessGuardTest.php tests/Feature/FlightSearch/QaStaffAirBlueHttpIsolationTest.php tests/Feature/AirBlueGroupedFareBookingTotalStickinessTest.php
 ```
 
-Coverage includes: pin reject, provider/env/host/protocol reject, module-off reject, anon/customer/agent deny bootstrap, anon deny results/offer, short-ref 410, allowlist excludes airblue, cache channel ≠ public_guest.
+{"tool":"phpunit","result":"passed","tests":82,"passed":82,"assertions":481,"duration_ms":255148}
+
+`SECURITY_TESTS=PASS`
+`STICKINESS_TESTS=PASS`
