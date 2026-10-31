@@ -1,19 +1,23 @@
 # Pre-AirBook gate
 
+Source hard stop remains in `BookingController::processReviewSubmit`:
+
+> AirBlue QA isolation stops before supplier booking. AirBook is not allowed in this phase.
+
+Live JSON submit probe returned:
+
 ```
-AIRBLUE_PREBOOK_GATE=STOP
-CONNECTION_ID=23
-ENVIRONMENT=sandbox
-PROTOCOL=v3
-HOST_TEST=YES
-SERVICE_TARGET_TEST=YES
-QA_SCOPE=YES
-AUTHORIZED_ACTOR=YES
-EXPECTED_OPERATION=AirBook
-EXPECTED_PROVIDER_EFFECT=NONE (blocked)
-EXPECTED_FINANCIAL_EFFECT=NONE
-EXPECTED_EMAIL_EFFECT=NONE
+HTTP=422
+status=review_blocked
 BOOK_CREATE_CALLS=0
 ```
 
-CLI note: `--allow-live` = operator acknowledgement only. Future AirBook cert must also pass `AirBlueQaSearchScope` sandbox checks. Optional `--require-sandbox` deferred (not required this phase).
+No supplier AirBook/ticket/cancel/refund/void/reissue observed.
+
+```
+AIRBLUE_PREBOOK_GATE=STOP
+SUPPLIER_BOOKING_ATTEMPTS=0
+SUPPLIER_PNR=absent
+```
+
+Note: JSON error envelope uses `review_blocked` rather than echoing the Blade error string; mutation path still does not reach supplier create while QA session is active / booking remains unsubmitted.
