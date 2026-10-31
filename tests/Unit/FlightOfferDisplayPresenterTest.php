@@ -1269,6 +1269,13 @@ class FlightOfferDisplayPresenterTest extends TestCase
         $this->assertSame(26500.0, (float) ($mappedByName['EF']['price_total'] ?? 0));
         // Pre-enrich mapping still carries customer payable in price_total (not supplier).
         $this->assertNotSame(26000.0, (float) ($mappedByName['EF']['price_total'] ?? 0));
+        $this->assertArrayNotHasKey('provider_context', $mappedByName['EF']);
+
+        // Internal grouped member keeps authoritative provider context for later
+        // fare selection / AirBook; only the public projection strips it.
+        $internalEf = data_get($parent, 'itinerary_fare_group.members_by_id.ab-ef', []);
+        $this->assertIsArray($internalEf);
+        $this->assertIsArray($internalEf['provider_context'] ?? null);
 
         $fields = FlightOfferDisplayPresenter::buildBrandedFaresPresentationFields($mapped, $parent);
         $byName = [];
