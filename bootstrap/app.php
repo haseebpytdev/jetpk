@@ -91,12 +91,21 @@ return Application::configure(basePath: dirname(__DIR__))
                 'account.type:staff',
             ])->group(base_path('routes/staff.php'));
 
+            // JP-AIRBLUE-QA-ISOLATION-01: inline routes (production routes/ may be root-owned).
+            // Source mirror: routes/qa-staff-airblue.php
             Route::middleware([
                 'web',
                 'auth',
                 'agency.context',
                 'account.type:platform_admin,staff',
-            ])->group(base_path('routes/qa-staff-airblue.php'));
+            ])->prefix('staff/qa')->name('staff.qa.')->group(function (): void {
+                Route::get('/airblue-search', [\App\Http\Controllers\Staff\QaStaffAirBlueSearchController::class, 'show'])
+                    ->name('airblue-search');
+                Route::post('/airblue-search/activate', [\App\Http\Controllers\Staff\QaStaffAirBlueSearchController::class, 'activate'])
+                    ->name('airblue-search.activate');
+                Route::post('/airblue-search/deactivate', [\App\Http\Controllers\Staff\QaStaffAirBlueSearchController::class, 'deactivate'])
+                    ->name('airblue-search.deactivate');
+            });
 
             Route::middleware([
                 'web',
