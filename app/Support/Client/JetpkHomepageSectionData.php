@@ -86,6 +86,7 @@ final class JetpkHomepageSectionData
             $priceLabel = $fare['label'] ?? JetpkHomepageFareDisplay::neutralAvailabilityLabel();
             $imageUrl = $this->routeImageUrl($item, $routeId);
 
+            $searchUrl = $this->routeSearchUrl($item);
             $routes[] = array_merge($item, [
                 'from' => $from,
                 'to' => $to,
@@ -93,7 +94,9 @@ final class JetpkHomepageSectionData
                 'price' => $fare['label'] ?? '',
                 'airlines' => $fare['label'] ?? JetpkHomepageFareDisplay::neutralAvailabilityLabel(),
                 'fare_source' => $fare['source'] ?? 'none',
-                'search_url' => $this->routeSearchUrl($item),
+                'search_url' => $searchUrl,
+                // Prevent stale CMS-pinned cta_url from leaking into public payloads.
+                'cta_url' => $searchUrl,
                 'image' => $imageUrl,
                 'image_alt' => trim((string) ($item['image_alt'] ?? $item['alt'] ?? '')),
             ]);
@@ -385,9 +388,60 @@ final class JetpkHomepageSectionData
     {
         $custom = trim((string) ($item['cta_url'] ?? ''));
         if ($custom !== '') {
-            return str_starts_with($custom, 'http') ? $custom : client_url($custom);
+            $resolved = str_starts_with($custom, 'http') ? $custom : client_url($custom);
+            $sanitized = $this->sanitizePastDepartSearchUrl($resolved, $item);
+            if ($sanitized !== null) {
+                return $sanitized;
+            }
         }
 
+        return $this->buildFutureRouteSearchUrl($item);
+    }
+
+    /**
+     * Permanent rule: homepage fare/search CTAs must never expose a departure date before today.
+     * CMS-pinned cta_url values with stale depart=… are rewritten (or rebuilt) instead of linked as-is.
+     *
+     * @param  array<string, mixed>  $item
+     */
+    private function sanitizePastDepartSearchUrl(string $url, array $item): ?string
+    {
+        $parts = parse_url($url);
+        if ($parts === false) {
+            return $this->buildFutureRouteSearchUrl($item);
+        }
+
+        $query = [];
+        if (isset($parts['query'])) {
+            parse_str($parts['query'], $query);
+        }
+
+        $depart = trim((string) ($query['depart'] ?? ''));
+        if ($depart === '') {
+            // Non-date CTA (or missing depart) — keep as authored.
+            return $url;
+        }
+
+        try {
+            $departDate = \Carbon\Carbon::parse($depart, config('app.timezone', 'Asia/Karachi'))->startOfDay();
+        } catch (\Throwable) {
+            return $this->buildFutureRouteSearchUrl($item);
+        }
+
+        $today = now(config('app.timezone', 'Asia/Karachi'))->startOfDay();
+        if ($departDate->greaterThanOrEqualTo($today)) {
+            return $url;
+        }
+
+        // Stale pinned URL: rebuild a future search for the same route when possible.
+        return $this->buildFutureRouteSearchUrl($item);
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    private function buildFutureRouteSearchUrl(array $item): string
+    {
         $offset = max(1, (int) config('jetpk_homepage.route_date_offset_days', 7));
         $depart = now(config('app.timezone', 'Asia/Karachi'))->addDays($offset)->toDateString();
         $tripType = (string) ($item['trip_type'] ?? 'one_way');
