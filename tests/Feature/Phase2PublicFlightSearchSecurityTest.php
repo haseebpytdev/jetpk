@@ -153,6 +153,9 @@ class Phase2PublicFlightSearchSecurityTest extends TestCase
         $this->assertSame(27600.0, (float) ($optionByName['EX']['price_total'] ?? 0));
         $this->assertNotSame(26000, (int) ($optionByName['EF']['displayed_price'] ?? 0));
         $this->assertNotSame(26000.0, (float) ($optionByName['EF']['price_total'] ?? 0));
+        foreach ($optionByName as $publicOption) {
+            $this->assertArrayNotHasKey('provider_context', $publicOption);
+        }
 
         $stored = app(FlightSearchResultStore::class)->get($searchId);
         $server = is_array($stored['offers'][0] ?? null) ? $stored['offers'][0] : [];
