@@ -196,12 +196,10 @@ class FlightOfferFallbackDetailsPresenter
             ? $offer['passenger_pricing']
             : (is_array(data_get($offer, 'fare_breakdown.passenger_pricing')) ? data_get($offer, 'fare_breakdown.passenger_pricing') : []);
 
+        // Customer fallback details must never republish supplier-commercial
+        // components stripped by PublicFlightSearchSecurity. Keep those values
+        // server-side for checkout/ticketing and expose only customer-payable data.
         return array_filter([
-            'base_fare' => $base > 0 ? $base : null,
-            'taxes' => $taxes > 0 ? $taxes : null,
-            'supplier_total' => $supplierTotal > 0 ? $supplierTotal : null,
-            'markup' => $markup > 0 ? $markup : null,
-            'service_fee' => $serviceFee > 0 ? $serviceFee : null,
             'grand_total' => $grandTotal > 0 ? $grandTotal : null,
             'displayed_price' => $displayedPrice,
             'displayed_currency' => $displayedPrice !== null ? 'PKR' : null,
