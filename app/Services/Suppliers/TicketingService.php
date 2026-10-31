@@ -29,6 +29,7 @@ use App\Services\Suppliers\TicketingAdapters\PiaNdcSupplierTicketingAdapter;
 use App\Services\Suppliers\TicketingAdapters\SabreSupplierTicketingAdapter;
 use App\Support\Bookings\AdminBookingSupplierActionAuditor;
 use App\Support\Bookings\AdminBookingSupplierActionGate;
+use App\Support\Bookings\AirBlueQaTicketingScope;
 use App\Support\Platform\PlatformModuleEnforcer;
 use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +52,7 @@ class TicketingService
         protected AdminBookingSupplierActionGate $adminBookingSupplierActionGate,
         protected AdminBookingSupplierActionAuditor $adminBookingSupplierActionAuditor,
         protected SabreGdsTicketingReadiness $sabreGdsTicketingReadiness,
+        protected AirBlueQaTicketingScope $airBlueQaTicketingScope,
     ) {}
 
     public function isBookingEligibleForTicketing(Booking $booking): bool
@@ -83,8 +85,18 @@ class TicketingService
         return $this->operationalPrecheckService->validatePassengerReadiness($booking) === [];
     }
 
-    public function issueTickets(Booking $booking, User $actor, bool $adminManualOverride = false, bool $sabreGdsAdminIssue = false): TicketingResultData
-    {
+    /**
+     * @param  bool  $allowControlledQaAirBlueTicketing  Default false. When true, may bypass ONLY
+     *                                                   unpaid payment eligibility for AirBlue sandbox
+     *                                                   QA after {@see AirBlueQaTicketingScope} passes.
+     */
+    public function issueTickets(
+        Booking $booking,
+        User $actor,
+        bool $adminManualOverride = false,
+        bool $sabreGdsAdminIssue = false,
+        bool $allowControlledQaAirBlueTicketing = false,
+    ): TicketingResultData {
         $booking->loadMissing(['passengers', 'latestSupplierBooking']);
 
         $provider = strtolower(trim((string) ($booking->latestSupplierBooking?->provider ?? $booking->supplier ?? '')));
@@ -158,7 +170,19 @@ class TicketingService
                 && ($gdsReadiness['live_supplier_call_allowed'] ?? false);
         }
 
-        if (! $allowManualPiaNdc && ! $allowSabreGdsAdmin && ! $this->isBookingEligibleForTicketing($booking)) {
+        $allowQaAirBlue = false;
+        if ($provider === SupplierProvider::Airblue->value && $allowControlledQaAirBlueTicketing) {
+            $qaScope = $this->airBlueQaTicketingScope->evaluate($booking, $actor);
+            $allowQaAirBlue = (bool) ($qaScope['allowed'] ?? false);
+            if (! $allowQaAirBlue) {
+                $this->logTicketingEvent('ticketing.qa_airblue_scope_denied', $booking, $actor, [
+                    'provider' => $provider,
+                    'reason' => (string) ($qaScope['reason'] ?? 'denied'),
+                ]);
+            }
+        }
+
+        if (! $allowManualPiaNdc && ! $allowSabreGdsAdmin && ! $allowQaAirBlue && ! $this->isBookingEligibleForTicketing($booking)) {
             $precheckErrors = $this->operationalPrecheckService->validatePassengerReadiness($booking);
             $this->logTicketingEvent('ticketing.not_ready', $booking, $actor, [
                 'provider' => (string) ($booking->supplier ?? 'unknown'),
