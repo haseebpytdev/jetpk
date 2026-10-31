@@ -1,0 +1,34 @@
+# CQ46 deploy parity probe (post-cert re-read)
+
+RUNTIME_SHA=3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492
+DEPLOY_MARKER=3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492
+AUTHORIZED_SHA=3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492
+PREVIOUS_RUNTIME_SHA=c115cc5712ad0fca0ab9729d6d34907220959a93
+
+APP_AiChatOrchestrator.php=ba948e509394a6410144492b68e2a380f996025edb7cdd55e790787221bd1e19
+GIT_AiChatOrchestrator.php=ba948e509394a6410144492b68e2a380f996025edb7cdd55e790787221bd1e19
+APP_ServerTravelSignals.php=51ef7966186a7bd7b4fe08c31c046ac3d39ea94966aecbfb097b71feb0c7a62b
+GIT_ServerTravelSignals.php=51ef7966186a7bd7b4fe08c31c046ac3d39ea94966aecbfb097b71feb0c7a62b
+APPLICATION_CODE_PARITY=PASS
+
+BACKUP_PATH=/home/pkjetp/backups/jetpk-ai-runtime-20260929T125701Z
+RELEASE_PATH=/home/pkjetp/releases/jetpk-ai-runtime-3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492-20260929T125701Z
+PROTECTED_AI_DEPLOY=PASS
+CHANGED_PATH_COUNT=2
+DEPLOYED_FILES=
+  app/Services/Ai/AiChatOrchestrator.php
+  app/Services/Ai/Hybrid/ServerTravelSignals.php
+
+Deploy script excerpt (20260929T125701Z):
+BACKUP_PATH=/home/pkjetp/backups/jetpk-ai-runtime-20260929T125701Z
+RELEASE_PATH=/home/pkjetp/releases/jetpk-ai-runtime-3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492-20260929T125701Z
+AUTHORIZED_SHA=3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492
+CURRENT_DEPLOYED_SHA=c115cc5712ad0fca0ab9729d6d34907220959a93
+CHANGED_PATH_COUNT=2
+DEPLOYED app/Services/Ai/Hybrid/ServerTravelSignals.php
+DEPLOYED app/Services/Ai/AiChatOrchestrator.php
+DEPLOYED_FILE_COUNT=2
+RUNTIME_OWNERSHIP_GATE=PASS
+DEPLOY_SHA_MARKER_WRITTEN=3de07cdb9cbb5236e8e4f37e8c2487bacb4cb492
+FINAL_DEPLOY_STATUS=PASS
+PROTECTED_AI_DEPLOY=PASS

@@ -1,0 +1,18 @@
+{
+  "MORNING_FAMILY_PRODUCTION": "PASS",
+  "EVENING_FAMILY_PRODUCTION": "PASS",
+  "NIGHT_FAMILY_PRODUCTION": "PASS",
+  "phrases": {
+    "morning": "morning",
+    "subah": "morning",
+    "صبح": "morning",
+    "evening": "evening",
+    "shaam": "evening",
+    "شام": "evening",
+    "night": "night",
+    "raat": "night",
+    "رات": "night"
+  },
+  "per_phrase": "lead_name=null; MODEL_CALLS=0; SEARCH_CALLS=0",
+  "downstream_filtering_claim": "NOT_CLAIMED"
+}
