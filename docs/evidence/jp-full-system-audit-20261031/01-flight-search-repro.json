@@ -1,0 +1,18 @@
+{
+  "SEARCH_INPUT": {
+    "from": "LHE",
+    "to": "KHI",
+    "depart": "2026-11-20",
+    "trip_type": "one_way",
+    "cabin": "economy",
+    "adults": 1
+  },
+  "SEARCH_CLICK_TIME": "2026-10-31T12:22:26.114Z",
+  "REQUEST_URL": "/laravel/flights/results/search?from=LHE&to=KHI&depart=2026-11-20&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+  "HTTP_STATUS": 500,
+  "elapsed_ms": 1910,
+  "response_body": { "message": "Server Error" },
+  "search_id": null,
+  "FLIGHT_SEARCH_FIRST_BROKEN_BOUNDARY": "/laravel/flights/results/search",
+  "notes": "results/data not reached because search init failed"
+}
