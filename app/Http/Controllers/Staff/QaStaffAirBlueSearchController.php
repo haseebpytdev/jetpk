@@ -29,7 +29,7 @@ class QaStaffAirBlueSearchController extends Controller
         $connection = SupplierConnection::query()->find($connectionId);
         $readiness = $this->scope->evaluate($connection, $request->user());
 
-        return view('staff.qa.airblue-search', [
+        return view('dashboard.staff.qa-airblue-search', [
             'readiness' => $readiness,
             'connectionId' => $connectionId,
             'qaActive' => QaStaffAirBlueContext::isActive($request),
