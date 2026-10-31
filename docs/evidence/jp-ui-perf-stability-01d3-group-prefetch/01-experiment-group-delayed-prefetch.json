@@ -1,0 +1,30 @@
+{
+  "BASE_GROUP_RSC_WITHIN_1500MS": 0,
+  "B2_GROUP_RSC_WITHIN_1500MS": 0,
+  "GROUP_BACKGROUND_PREFETCH_EVENTUALLY_RUNS": "YES",
+  "base": {
+    "label": "base",
+    "within1500": 0,
+    "eventually": 1,
+    "samples": [
+      {
+        "t": 14383,
+        "u": "http://127.0.0.1:3010/groups/search?_rsc=9r76Ghkn5KINVUxz"
+      }
+    ]
+  },
+  "b2": {
+    "label": "b2",
+    "within1500": 0,
+    "eventually": 1,
+    "samples": [
+      {
+        "t": 4978,
+        "u": "http://127.0.0.1:3011/groups/search?_rsc=9r76Ghkn5KINVUxz"
+      }
+    ]
+  },
+  "D3_B2_ACCEPTED": "NO",
+  "B2_TESTED": "YES",
+  "reason": "soft-nav P95 still material vs BASE"
+}

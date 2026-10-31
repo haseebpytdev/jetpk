@@ -1,0 +1,65 @@
+{
+  "baseGroupish": [
+    {
+      "bytes": 52519,
+      "file": "1271-f027e91ebde6b4ac.js",
+      "facets": true,
+      "csrf": true,
+      "pay": false,
+      "search": true
+    },
+    {
+      "bytes": 34037,
+      "file": "8289.25d5c738c94d6e08.js",
+      "facets": true,
+      "csrf": false,
+      "pay": false,
+      "search": false
+    },
+    {
+      "bytes": 10332,
+      "file": "2280-70912b9b7a3c67cc.js",
+      "facets": true,
+      "csrf": true,
+      "pay": false,
+      "search": true
+    }
+  ],
+  "candGroupish": [
+    {
+      "bytes": 34035,
+      "file": "1638.e24d394fe2790718.js",
+      "facets": true,
+      "csrf": false,
+      "pay": false,
+      "search": false
+    },
+    {
+      "bytes": 10538,
+      "file": "745-6e020870e7da130e.js",
+      "facets": true,
+      "csrf": false,
+      "pay": false,
+      "search": true
+    },
+    {
+      "bytes": 9372,
+      "file": "4173-4c138722a864ac8f.js",
+      "facets": true,
+      "csrf": false,
+      "pay": false,
+      "search": true
+    }
+  ],
+  "BASE_GROUP_PREFETCH_JS_BYTES": 96888,
+  "A_GROUP_PREFETCH_JS_BYTES": 53945,
+  "A_GROUP_JS_REDUCTION_BYTES": 42943,
+  "A_GROUP_JS_REDUCTION_PERCENT": 44.32,
+  "A_INITIAL_JS_BYTES": 828392,
+  "BASE_INITIAL_JS_BYTES": 883416,
+  "A_TOTAL_JS_REDUCTION_BYTES": 55024,
+  "candHasCsrfInGroupish": false,
+  "D3_A_ACCEPTED": "YES",
+  "GROUP_SEARCH_API_IMPORTS_AUTH_CSRF": "NO",
+  "CSRF_BOOTSTRAP_CALLS": 0
+}

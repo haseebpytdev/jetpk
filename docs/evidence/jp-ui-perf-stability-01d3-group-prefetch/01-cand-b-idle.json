@@ -1,0 +1,13 @@
+{
+  "baseUrl": "http://127.0.0.1:3011",
+  "jsBytes": 813163,
+  "jsCount": 22,
+  "rscCount": 1,
+  "rscBytes": 0,
+  "idleRscRoutes": [
+    "/login"
+  ],
+  "groupsIdle": 0,
+  "loginIdle": 1,
+  "flightsIdle": 0
+}

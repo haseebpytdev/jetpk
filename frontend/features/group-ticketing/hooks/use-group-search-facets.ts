@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { fetchGroupSearchFacets } from "../services/group-ticketing-api";
+import { fetchGroupSearchFacets } from "../services/group-search-api";
 import type {
   GroupDiscoveryTile,
   GroupSearchFacetsLoadState,

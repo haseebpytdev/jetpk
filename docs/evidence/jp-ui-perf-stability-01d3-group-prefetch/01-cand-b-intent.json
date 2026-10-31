@@ -1,0 +1,14 @@
+{
+  "GROUPS_IDLE_BEFORE_INTENT": 0,
+  "GROUPS_HOVER_PREFETCH": "YES",
+  "GROUPS_FOCUS_PREFETCH": "YES",
+  "GROUPS_POINTERDOWN_PREFETCH": "YES",
+  "counts": {
+    "before": 0,
+    "afterHover": 1,
+    "beforeFocus": 1,
+    "afterFocus": 2,
+    "beforePtr": 2,
+    "afterPtr": 3
+  }
+}
