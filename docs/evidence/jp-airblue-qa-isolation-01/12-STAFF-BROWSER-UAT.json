@@ -1,5 +1,5 @@
 {
-  "phase": "JP-AIRBLUE-STAFF-BROWSER-UAT-01",
+  "phase": "JP-AIRBLUE-PRE-AIRBOOK-CLOSURE-01",
   "date": "2026-10-31",
   "actor_role": "platform_admin",
   "qa_connection_id": 23,
@@ -11,22 +11,26 @@
   "stages": {
     "login": { "ok": true },
     "qa_page": { "readiness_allowed": true, "host": "otatest4.zapways.com", "protocol": "3.0" },
-    "search": { "search_http": 200, "results_data_http": 200, "display_offers": 2, "connection_ids": [23] },
+    "search": { "search_http": 200, "results_data_http": 200, "display_offers": 2, "connection_ids": [23], "fare_option_rows_scanned": 12, "fare_option_sensitive_present": [] },
     "result": { "families": ["EV", "EF", "EX"], "selected": "EF", "customer_total": 23750 },
-    "selected_offer": { "http": 200, "fare_family": "EF", "customer_total": 23750 },
-    "passengers": { "validation": "PASS", "status": "accepted", "next": "/booking/review", "customer_total": 23750 },
-    "review": { "ok": true, "fare_family": "EF", "pricing_total": 23750, "session_status": "review", "booking_reference": null },
-    "prebook": { "http": 422, "status": "review_blocked", "book_create_calls": 0 },
+    "selected_offer": { "http": 200, "fare_family": "EF", "customer_total": 23750, "commercial_leak_hits": [] },
+    "passengers": { "validation": "PASS", "customer_total": 23750, "fare_option_key_retained": true },
+    "review": { "ok": true, "pricing_total": 23750, "fare_option_key_retained": true, "booking_reference": null },
+    "prebook": { "http": 422, "book_create_calls": 0 },
     "escape": { "anon_results_data_http": 404 },
-    "public_regression": { "up": 200, "search": 200, "data": 200, "offers": 12, "airblue": 0 }
+    "public_regression": { "up": 200, "search": 200, "data": 200, "offers": 9, "airblue": 0 }
   },
   "stickiness": {
     "fare_family": { "result": "EF", "select": "EF", "passengers": "EF", "review": "EF" },
     "customer_total": { "result": 23750, "select": 23750, "passengers": 23750, "review": 23750 }
   },
   "findings": {
-    "offer_provider_context_taxes_present": true,
-    "supplier_total_absent_on_offer": true,
-    "fallback_details_supplier_cost_leak": false
+    "offer_provider_context_taxes_present": false,
+    "public_fare_option_provider_context": "ABSENT",
+    "public_priced_itineraries": "ABSENT",
+    "supplier_total_absent_on_fare_option_rows": true,
+    "fallback_details_supplier_cost_leak": false,
+    "server_provider_context_present": true,
+    "server_airbook_authority_preserved": "PASS"
   }
 }
