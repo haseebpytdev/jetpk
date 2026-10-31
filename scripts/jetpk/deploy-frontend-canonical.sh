@@ -51,9 +51,11 @@ echo "FRONTEND_SKIP_RESTART=${FRONTEND_SKIP_RESTART}"
 
 FINALIZE_SCRIPT="${REPO}/scripts/jetpk/finalize-deploy-sha-marker.sh"
 MARKER_SCRIPT="${REPO}/scripts/jetpk/write-deploy-sha-marker.sh"
+# Frontend deploys must never overwrite Laravel/application deploy-sha.txt provenance.
 if [[ -f "${FINALIZE_SCRIPT}" ]]; then
-  DEPLOY_SHA="${AUTHORIZED_SHA}" APP="${APP}" MARKER_SCRIPT="${MARKER_SCRIPT}" bash "${FINALIZE_SCRIPT}"
+  DEPLOY_SHA="${AUTHORIZED_SHA}" APP="${APP}" DEPLOY_COMPONENT=frontend MARKER_SCRIPT="${MARKER_SCRIPT}" bash "${FINALIZE_SCRIPT}"
 else
+  printf '%s\n' "${ARCHIVED_SHA}" > "${APP}/storage/app/deploy-frontend-sha.txt"
   echo "DEPLOY_COMPONENT_APPLIED=YES"
   echo "DEPLOY_SHA_MARKER=SKIP"
   echo "FINAL_DEPLOY_STATUS=PASS"
