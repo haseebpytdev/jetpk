@@ -37,6 +37,8 @@ use App\Services\Suppliers\Sabre\SabreBookingService;
 use App\Services\Suppliers\Sabre\SabreFlightSearchNormalizer;
 use App\Services\TravelData\AirlineBrandingService;
 use App\Support\Booking\AgentBookingContext;
+use App\Support\FlightSearch\QaFlightSearchAccessGuard;
+use App\Support\FlightSearch\QaStaffAirBlueContext;
 use App\Support\Booking\StandardBookingCheckoutJsonResponder;
 use App\Support\Booking\StandardBookingJsonPresenter;
 use App\Support\Bookings\BookingHoldSessionSupplierOfferIdResolver;
@@ -197,6 +199,7 @@ class BookingController extends Controller
 
             $offer = null;
             if ($searchId !== '') {
+                $this->assertQaSearchAccess($this->searchStore->get($searchId), $request);
                 $offer = $this->searchStore->findOffer($searchId, $selectedOfferId);
             }
             // Offer may be missing from the cached slice (MAX_STORED_OFFERS); fall back to a fresh search before treating the session as expired.
@@ -590,6 +593,13 @@ class BookingController extends Controller
                             'supplier_connection_id' => $checkoutSupplier['supplier_connection_id'],
                             'search_criteria' => $criteria,
                             'origin_channel' => $channelContext['source_channel'],
+                            'qa_scope' => ($channelContext['source_channel'] ?? '') === QaStaffAirBlueContext::SOURCE_CHANNEL,
+                            'qa_scope_type' => ($channelContext['source_channel'] ?? '') === QaStaffAirBlueContext::SOURCE_CHANNEL
+                                ? QaStaffAirBlueContext::SCOPE_TYPE
+                                : null,
+                            'qa_connection_id' => ($channelContext['source_channel'] ?? '') === QaStaffAirBlueContext::SOURCE_CHANNEL
+                                ? (int) ($channelContext['qa_connection_id'] ?? config('ota.qa_staff_airblue.connection_id', 23))
+                                : null,
                             'pricing_snapshot' => SensitiveDataRedactor::redact($pricing),
                             'applied_rules' => SensitiveDataRedactor::redact($pricing['applied_rules'] ?? []),
                             'offer_validation_status' => $validation->status,
@@ -912,7 +922,9 @@ class BookingController extends Controller
         if ($effectiveFlightId !== '') {
             $offer = null;
             if (is_string($draft['search_id'] ?? null) && ($draft['search_id'] ?? '') !== '') {
-                $offer = $this->searchStore->findOffer((string) $draft['search_id'], $effectiveFlightId);
+                $getSearchId = (string) $draft['search_id'];
+                $this->assertQaSearchAccess($this->searchStore->get($getSearchId), $request);
+                $offer = $this->searchStore->findOffer($getSearchId, $effectiveFlightId);
             }
             if ($offer === null) {
                 $offers = $agency !== null && $criteria['origin'] !== '' && $criteria['destination'] !== '' && $criteria['depart_date'] !== ''
@@ -4143,7 +4155,19 @@ class BookingController extends Controller
      */
     protected function checkoutChannelContext(Request $request): array
     {
+        if (QaStaffAirBlueContext::isActive($request)) {
+            return QaStaffAirBlueContext::resolveCheckoutChannel($request);
+        }
+
         return AgentBookingContext::resolveCheckoutChannel($request);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $payload
+     */
+    protected function assertQaSearchAccess(?array $payload, Request $request): void
+    {
+        app(QaFlightSearchAccessGuard::class)->assertCanAccess($payload, $request);
     }
 
     /**
@@ -4368,6 +4392,13 @@ class BookingController extends Controller
     }
     protected function processReviewSubmit(Request $request): RedirectResponse
     {
+            // JP-AIRBLUE-QA-ISOLATION-01 hard stop: QA corridor ends at review (no AirBook/submit).
+            if (QaStaffAirBlueContext::isActive($request)) {
+                return back()->withErrors([
+                    'booking_method' => __('AirBlue QA isolation stops before supplier booking. AirBook is not allowed in this phase.'),
+                ]);
+            }
+
             $validated = $request->validate([
                 'booking_method' => ['required', 'string', 'in:pay_later,bank_transfer,office,pay_later_booking_request,offline_bank_transfer,office_confirmation,online_card'],
                 'confirm_updated_fare' => ['nullable', 'boolean'],

@@ -95,6 +95,19 @@ return [
     ))),
 
     /**
+     * Staff/platform-admin AirBlue QA isolation (JP-AIRBLUE-QA-ISOLATION-01).
+     * Pins a single Zapways TEST connection; never add airblue to public_flight_results_suppliers.
+     */
+    'qa_staff_airblue' => [
+        'connection_id' => max(1, (int) env('OTA_QA_STAFF_AIRBLUE_CONNECTION_ID', 23)),
+        'session_ttl_seconds' => max(300, (int) env('OTA_QA_STAFF_AIRBLUE_SESSION_TTL_SECONDS', 3600)),
+        'approved_test_hosts' => array_values(array_filter(array_map(
+            static fn (string $v): string => strtolower(trim($v)),
+            explode(',', (string) env('OTA_QA_STAFF_AIRBLUE_TEST_HOSTS', 'otatest4.zapways.com'))
+        ))),
+    ],
+
+    /**
      * RETURN-SPLIT-SELECT-R1: two-step outbound/return selection for round-trip searches.
      */
     'return_split_select_enabled' => filter_var(env('OTA_RETURN_SPLIT_SELECT_ENABLED', true), FILTER_VALIDATE_BOOL),
