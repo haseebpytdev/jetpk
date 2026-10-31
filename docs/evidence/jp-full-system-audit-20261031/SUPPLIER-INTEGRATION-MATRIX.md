@@ -30,7 +30,7 @@ Connection inventory from production DB (safe fields). Capabilities from **curre
 | Duffel | Factory/code | No active row | duffel_supplier | Source | Source | Source | Source | Source | ? | ? | Source | No active connection | BLOCKED_CONFIGURATION |
 | Al-Haider (group) | Y | Mixed | group module | Inventory sync | N/A | Gated `ALHAIDER_BOOKING_ENABLED` | N/A | N/A | Release cmd | N/A | Sync | Scheduler registered + cron | Booking flag / inventory proof | PARTIAL |
 | Ameer-e-Millat (group) | Registry | ? | group | Inventory | N/A | Source | N/A | N/A | Release | N/A | Sync | Need inventory stamp | Config | STALE_EVIDENCE_REQUIRES_RECHECK |
-| SMTP (retired as supplier) | Y | Y | N/A | Must skip | — | — | — | — | — | — | — | Caused search 500; code fixed | Deactivate/misclassified row | INTENTIONALLY_DISABLED (as flight) / ops cleanup |
+| SMTP (retired as supplier) | Y | **inactive / is_active=0** (2026-10-31) | N/A | Must skip | — | — | — | — | — | — | — | Deactivated after mail independence proof | Keep retired; do not delete | INTENTIONALLY_DISABLED |
 
 ## Live search fan-out note (post-fix LHE→KHI 2026-11-20)
 
