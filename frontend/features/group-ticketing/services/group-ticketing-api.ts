@@ -1,4 +1,3 @@
-import { laravelApiPath } from "@/services/flight-search";
 import { ensureLaravelCsrfToken } from "@/features/auth/utils/laravel-auth-api";
 import type { LaravelValidationErrors } from "@/features/auth/utils/laravel-auth-api";
 import type {
@@ -6,48 +5,29 @@ import type {
   GroupBookingReview,
   GroupPassengersContext,
   GroupPaymentInstructions,
-  GroupResultsPageResponse,
-  GroupSearchDataResponse,
-  GroupSearchFilters,
   GroupPackage,
   GroupLockState,
-  GroupSearchFacetsResponse,
-  GroupSearchFacetsLoadState,
-  GroupSearchFacetOption,
 } from "../types";
+import { GROUP_JSON_HEADERS, groupGet, laravelApiPath, type GroupApiResult } from "./group-api-base";
 
-const JSON_HEADERS = {
-  Accept: "application/json",
-  "X-Requested-With": "XMLHttpRequest",
-} as const;
+/**
+ * Group booking/payment API (mutations + authenticated booking reads).
+ * Public search/facets live in group-search-api.ts — do not re-export them here.
+ */
 
-function buildQuery(filters: GroupSearchFilters): string {
-  const params = new URLSearchParams();
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      params.set(key, String(value));
-    }
-  });
-  return params.toString();
-}
+type MutatingResult<T> = GroupApiResult<T>;
 
-async function groupFetch<T>(
-  path: string,
-  init?: RequestInit,
-): Promise<
-  | { ok: true; data: T }
-  | { ok: false; status: number; message: string; errors?: LaravelValidationErrors; data?: Partial<T> }
-> {
-  const csrf = init?.method && init.method !== "GET" ? await ensureLaravelCsrfToken() : null;
+async function groupMutate<T>(path: string, init: RequestInit): Promise<MutatingResult<T>> {
+  const csrf = await ensureLaravelCsrfToken();
 
   try {
     const response = await fetch(laravelApiPath(path), {
       ...init,
       credentials: "include",
       headers: {
-        ...JSON_HEADERS,
+        ...GROUP_JSON_HEADERS,
         ...(csrf ? { "X-XSRF-TOKEN": csrf } : {}),
-        ...init?.headers,
+        ...init.headers,
       },
     });
 
@@ -70,24 +50,8 @@ async function groupFetch<T>(
   }
 }
 
-export async function fetchGroupSearchData(filters: GroupSearchFilters) {
-  return groupFetch<GroupSearchDataResponse>(`/groups/search/data?${buildQuery(filters)}`);
-}
-
-export async function fetchGroupResultsPage(filters: GroupSearchFilters) {
-  return groupFetch<GroupResultsPageResponse>(`/groups/search/results?${buildQuery(filters)}`);
-}
-
-export async function fetchGroupSearchFacets() {
-  return groupFetch<GroupSearchFacetsResponse>("/groups/search/facets");
-}
-
-export async function fetchGroupFacets() {
-  return groupFetch<{ sectors: string[]; categories: Array<{ slug: string; name: string }> }>("/groups/facets");
-}
-
 export async function fetchGroupPackage(packageId: string) {
-  return groupFetch<{
+  return groupGet<{
     success: boolean;
     package: GroupPackage;
     available: boolean;
@@ -97,20 +61,20 @@ export async function fetchGroupPackage(packageId: string) {
 }
 
 export async function fetchGroupPassengersContext(packageId: string) {
-  return groupFetch<{ success: boolean } & GroupPassengersContext>(
+  return groupGet<{ success: boolean } & GroupPassengersContext>(
     `/groups/${encodeURIComponent(packageId)}/passengers?format=json`,
   );
 }
 
 export async function submitGroupPassengers(packageId: string, formData: FormData) {
-  return groupFetch<{ success: boolean; redirect_path: string; booking: GroupBookingReview }>(
+  return groupMutate<{ success: boolean; redirect_path: string; booking: GroupBookingReview }>(
     `/groups/${encodeURIComponent(packageId)}/passengers`,
     { method: "POST", body: formData },
   );
 }
 
 export async function fetchGroupReview(bookingRef: string) {
-  return groupFetch<{ success: boolean } & GroupBookingReview>(
+  return groupGet<{ success: boolean } & GroupBookingReview>(
     `/groups/booking/${encodeURIComponent(bookingRef)}/review?format=json`,
   );
 }
@@ -120,33 +84,33 @@ export async function confirmGroupReview(bookingRef: string) {
   const formData = new FormData();
   if (csrf) formData.set("_token", csrf);
 
-  return groupFetch<{ success: boolean; redirect_path: string; booking: GroupPaymentInstructions }>(
+  return groupMutate<{ success: boolean; redirect_path: string; booking: GroupPaymentInstructions }>(
     `/groups/booking/${encodeURIComponent(bookingRef)}/review`,
     { method: "POST", body: formData },
   );
 }
 
 export async function fetchGroupPayment(bookingRef: string) {
-  return groupFetch<{ success: boolean } & GroupPaymentInstructions>(
+  return groupGet<{ success: boolean } & GroupPaymentInstructions>(
     `/groups/booking/${encodeURIComponent(bookingRef)}/payment?format=json`,
   );
 }
 
 export async function submitGroupPayment(bookingRef: string, formData: FormData) {
-  return groupFetch<{ success: boolean; redirect_path: string; booking: GroupBookingConfirmation }>(
+  return groupMutate<{ success: boolean; redirect_path: string; booking: GroupBookingConfirmation }>(
     `/groups/booking/${encodeURIComponent(bookingRef)}/payment`,
     { method: "POST", body: formData },
   );
 }
 
 export async function fetchGroupConfirmation(bookingRef: string) {
-  return groupFetch<{ success: boolean } & GroupBookingConfirmation>(
+  return groupGet<{ success: boolean } & GroupBookingConfirmation>(
     `/groups/booking/${encodeURIComponent(bookingRef)}/confirmation?format=json`,
   );
 }
 
 export async function fetchGroupBookingStatus(bookingRef: string) {
-  return groupFetch<{ success: boolean; booking: GroupBookingReview }>(
+  return groupGet<{ success: boolean; booking: GroupBookingReview }>(
     `/groups/booking/${encodeURIComponent(bookingRef)}/status`,
   );
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { GroupSearchPage } from "@/features/group-ticketing";
+import { GroupSearchPage } from "@/features/group-ticketing/components/GroupSearchPage";
 import { CardListLoadingSkeleton } from "@/components/ui/LoadingRegion";
 import { noIndexMetadata } from "@/features/public-content";
 
