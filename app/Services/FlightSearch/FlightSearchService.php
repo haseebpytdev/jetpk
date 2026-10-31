@@ -567,7 +567,7 @@ class FlightSearchService
             return ! $this->platformModuleEnforcer->sabreConnectionSearchEnabled($connection);
         }
 
-        return ! $this->platformModuleEnforcer->providerChannelEnabled($connection->provider->value);
+        return ! $this->platformModuleEnforcer->providerChannelEnabled($connection->providerKey());
     }
 
     protected function resolveConnectionSkipReason(SupplierConnection $connection): string
@@ -590,7 +590,7 @@ class FlightSearchService
                 : 'sabre_search_modules_disabled';
         }
 
-        $moduleKey = $this->platformModuleEnforcer->providerModuleKey($connection->provider->value);
+        $moduleKey = $this->platformModuleEnforcer->providerModuleKey($connection->providerKey());
 
         return $moduleKey === null
             ? 'provider_module_unknown'
@@ -599,9 +599,22 @@ class FlightSearchService
 
     /**
      * Non-flight / retired modules must never enter search fan-out.
+     *
+     * {@see SupplierProviderCast} may hydrate retired/unknown DB values as plain strings.
      */
-    protected function isFlightSearchProvider(SupplierProvider $provider): bool
+    protected function isFlightSearchProvider(SupplierProvider|string|null $provider): bool
     {
+        if ($provider === null || $provider === '') {
+            return false;
+        }
+
+        if (is_string($provider)) {
+            $provider = SupplierProvider::tryFrom(strtolower(trim($provider)));
+            if ($provider === null) {
+                return false;
+            }
+        }
+
         return match ($provider) {
             SupplierProvider::Sabre,
             SupplierProvider::PiaNdc,
@@ -633,7 +646,7 @@ class FlightSearchService
                 : [];
             $scope[] = [
                 'connection_id' => $connection->id,
-                'provider' => $connection->provider->value,
+                'provider' => $connection->providerKey(),
                 'lanes' => $lanes,
             ];
         }
@@ -670,7 +683,7 @@ class FlightSearchService
     {
         $enabledSuppliers = $connections
             ->filter(fn (SupplierConnection $connection): bool => ! $this->shouldSkipSupplierConnection($connection))
-            ->map(fn (SupplierConnection $connection): string => $connection->provider->value)
+            ->map(fn (SupplierConnection $connection): string => $connection->providerKey())
             ->values()
             ->all();
 
@@ -723,9 +736,11 @@ class FlightSearchService
     ): void {
         $connectionRows = $connections->map(fn (SupplierConnection $connection): array => [
             'id' => $connection->id,
-            'provider' => $connection->provider->value,
+            'provider' => $connection->providerKey(),
             'is_active' => (bool) $connection->is_active,
-            'status' => $connection->status?->value ?? (string) $connection->status,
+            'status' => $connection->status instanceof \BackedEnum
+                ? $connection->status->value
+                : (string) ($connection->status ?? ''),
             'eligible' => ! $this->shouldSkipSupplierConnection($connection),
             'connection_active' => $connection->isEligibleForSupplierSearch(),
             'supplier_health_healthy' => $connection->supplierHealthHealthy(),
@@ -754,7 +769,9 @@ class FlightSearchService
             'agency_slug' => $agency?->slug,
             'source_channel' => $sourceChannel,
             'connection_ids' => $connections->pluck('id')->all(),
-            'connection_providers' => $connections->pluck('provider')->map->value->all(),
+            'connection_providers' => $connections->map(
+                fn (SupplierConnection $connection): string => $connection->providerKey()
+            )->values()->all(),
             'eligible_connections' => $connectionRows,
             'iati_connection_12_eligible' => collect($connectionRows)->contains(
                 fn (array $row): bool => (int) ($row['id'] ?? 0) === 12 && ($row['eligible'] ?? false) === true
@@ -886,7 +903,7 @@ class FlightSearchService
                     'search_id' => (string) ($variantCriteria['search_id'] ?? ''),
                     'search_origin' => $request->origin,
                     'connection_id' => $connection->id,
-                    'provider' => $connection->provider->value,
+                    'provider' => $connection->providerKey(),
                     'skipped_reason' => $skipReason,
                     'blocking_reason' => $skipReason,
                     'connection_active' => $connection->isEligibleForSupplierSearch(),
@@ -903,7 +920,7 @@ class FlightSearchService
 
             Log::info('flight_search.pipeline', [
                 'stage' => 'supplier_adapter_returned',
-                'provider' => $connection->provider->value,
+                'provider' => $connection->providerKey(),
                 'connection_id' => $connection->id,
                 'search_origin' => $request->origin,
                 'adapter_offer_count' => count($result->offers),
@@ -923,7 +940,7 @@ class FlightSearchService
 
                 $fare = $offer['fare_breakdown'] ?? [];
                 try {
-                    $supplierFareInput = strtolower((string) ($offer['supplier_provider'] ?? $connection->provider->value)) === SupplierProvider::Iati->value
+                    $supplierFareInput = strtolower((string) ($offer['supplier_provider'] ?? $connection->providerKey())) === SupplierProvider::Iati->value
                         ? IatiFarePricingResolver::supplierFareFromBreakdown($fare)
                         : [
                             'base_fare' => (float) ($fare['base_fare'] ?? 0),
@@ -937,7 +954,7 @@ class FlightSearchService
                             'origin' => $request->origin,
                             'destination' => $request->destination,
                             'airline' => strtolower((string) ($offer['airline_code'] ?? '')),
-                            'supplier' => $offer['supplier_provider'] ?? $connection->provider->value,
+                            'supplier' => $offer['supplier_provider'] ?? $connection->providerKey(),
                             'agent_id' => $agentId,
                             'cabin' => $offer['cabin'] ?? null,
                             'fare_family' => $offer['fare_family'] ?? null,
@@ -957,7 +974,7 @@ class FlightSearchService
                         'stage' => 'pricing_exception',
                         'reason' => 'exception_class',
                         'exception_class' => $e::class,
-                        'provider' => $connection->provider->value,
+                        'provider' => $connection->providerKey(),
                         'connection_id' => $connection->id,
                     ]);
 
@@ -993,7 +1010,7 @@ class FlightSearchService
 
             $supplierCallSummaries[] = [
                 'connection_id' => $connection->id,
-                'provider' => $connection->provider->value,
+                'provider' => $connection->providerKey(),
                 'search_origin' => $request->origin,
                 'raw_offer_count' => count($result->offers),
                 'accepted_offer_count' => $acceptedForMerge,
@@ -1006,7 +1023,7 @@ class FlightSearchService
                 'search_id' => (string) ($variantCriteria['search_id'] ?? ''),
                 'search_origin' => $request->origin,
                 'connection_id' => $connection->id,
-                'provider' => $connection->provider->value,
+                'provider' => $connection->providerKey(),
                 'raw_offer_count' => count($result->offers),
                 'accepted_offer_count' => $acceptedForMerge,
                 'warning_count' => count($result->warnings),
@@ -1016,7 +1033,7 @@ class FlightSearchService
 
             Log::info('flight_search.pipeline', [
                 'stage' => 'connection_pricing_complete',
-                'provider' => $connection->provider->value,
+                'provider' => $connection->providerKey(),
                 'connection_id' => $connection->id,
                 'search_origin' => $request->origin,
                 'pricing_input_count' => count($result->offers),
