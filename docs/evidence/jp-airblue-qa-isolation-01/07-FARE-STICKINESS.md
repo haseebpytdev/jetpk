@@ -1,17 +1,31 @@
-# Fare stickiness
+# Fare stickiness — staff browser UAT
 
-Consolidation proves multi-family inventory on conn23:
-
-```
-FARE_FAMILIES_AVAILABLE=EV,EF,EX
-PREFERRED_NON_DEFAULT=EF
-```
-
-Staff browser corridor (`/staff/qa/airblue-search` → results → select EF → passengers → review) requires authenticated platform_admin/staff session.
+DATE: 2026-10-31  
+ACTOR_ROLE: platform_admin (existing QA marker)  
+ROUTE: LHE→KHI one-way 2026-11-21  
+CONNECTION: 23 only
 
 ```
-AIRBLUE_FARE_STICKINESS=PENDING_STAFF_BROWSER_UAT
-AIRBLUE_CUSTOMER_TOTAL_STICKINESS=PENDING_STAFF_BROWSER_UAT
+FAMILIES=EV,EF,EX
+SELECTED=EF
+FARE_OPTION_KEY=grouped-offer-* (authoritative grouped key)
+BOOKING_CLASS=W
+FARE_BASIS=EFTAOWW
 ```
 
-Hard stop remains: no AirBook during stickiness UAT.
+## Four-stage customer total
+
+| Stage | Fare family | Customer total (PKR) |
+|---|---|---|
+| Results (EF option) | EF | 23750 |
+| Selected offer JSON | EF | 23750 |
+| Passengers handoff | EF (option key retained) | 23750 |
+| Review itinerary/pricing | EF / total | 23750 |
+
+```
+AIRBLUE_FARE_STICKINESS=PASS
+AIRBLUE_CUSTOMER_TOTAL_STICKINESS=PASS
+NO_EV_FALLBACK=PASS
+```
+
+Offer details HTTP=200 with `fare_family=EF` when using parent grouped `offer_id` + EF `fare_option_key`.
