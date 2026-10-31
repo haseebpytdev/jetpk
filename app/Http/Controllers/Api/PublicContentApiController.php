@@ -6,10 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\ClientPage;
 use App\Models\CmsPage;
 use App\Services\Client\ClientPageContentResolver;
+use App\Services\FlightSearch\FlightSearchResultStore;
 use App\Services\PublicContent\HomepagePublicContentPresenter;
 use App\Services\PublicContent\PublicContentApiPresenter;
+use App\Services\PublicContent\PublicShortRefService;
 use App\Support\Client\ClientManagedPageReservedSlugs;
 use App\Support\Client\ClientPageKeys;
+use App\Support\FlightSearch\PublicFlightSearchSecurity;
+use App\Support\FlightSearch\QaStaffAirBlueContext;
 use App\Support\Security\TurnstileVerifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -134,6 +138,24 @@ class PublicContentApiController extends Controller
                 'expired' => true,
                 'message' => 'Search reference not found or expired.',
             ], 410);
+        }
+
+        // Defense-in-depth: QA AirBlue searches must never resolve via public short refs.
+        $targetType = (string) ($record['target_type'] ?? '');
+        $targetKey = trim((string) ($record['target_key'] ?? ''));
+        if (
+            $purpose === PublicShortRefService::PURPOSE_FLIGHT_SEARCH
+            && $targetType === 'search_id'
+            && $targetKey !== ''
+            && PublicFlightSearchSecurity::isValidSearchId($targetKey)
+        ) {
+            $payload = app(FlightSearchResultStore::class)->get($targetKey);
+            if (is_array($payload) && QaStaffAirBlueContext::payloadIsQaScope($payload)) {
+                return response()->json([
+                    'expired' => true,
+                    'message' => 'Search reference not found or expired.',
+                ], 410);
+            }
         }
 
         return response()->json([

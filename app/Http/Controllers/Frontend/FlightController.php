@@ -22,6 +22,8 @@ use App\Services\Suppliers\Sabre\Gds\SabreSelectedOfferRevalidationGate;
 use App\Services\TravelData\AirlineBrandingService;
 use App\Support\Booking\AgentBookingContext;
 use App\Support\Client\ClientCheckoutContextResolver;
+use App\Support\FlightSearch\QaFlightSearchAccessGuard;
+use App\Support\FlightSearch\QaStaffAirBlueContext;
 use App\Support\Bookings\CheckoutFareBreakdownPresenter;
 use App\Support\FlightSearch\AirlineDisplayNameResolver;
 use App\Support\FlightSearch\FlightOfferDisplayPresenter;
@@ -167,11 +169,17 @@ class FlightController extends Controller
         [, $searchId, $warnings] = $this->runSearch($criteria, $request);
 
         $freshness = app(SabreOfferFreshness::class);
-        $shortRef = app(PublicShortRefService::class)->mintFlightSearch(
-            $searchId,
-            FlightSearchResultStore::SESSION_TTL_SECONDS
-        );
-        $shortUrl = '/flights/s/'.$shortRef;
+        $qaActive = QaStaffAirBlueContext::isActive($request);
+        // QA searches must not mint publicly shareable short refs.
+        $shortRef = null;
+        $shortUrl = null;
+        if (! $qaActive) {
+            $shortRef = app(PublicShortRefService::class)->mintFlightSearch(
+                $searchId,
+                FlightSearchResultStore::SESSION_TTL_SECONDS
+            );
+            $shortUrl = '/flights/s/'.$shortRef;
+        }
 
         return response()->json([
             'search_id' => $searchId,
@@ -221,6 +229,8 @@ class FlightController extends Controller
                 'message' => (string) __('This fare search has expired. Please search again.'),
             ], 410);
         }
+
+        $this->assertQaFlightSearchAccess($payload, $request);
 
         if ($this->searchPayloadBlocksSelection($payload)) {
             return response()->json([
@@ -511,6 +521,8 @@ class FlightController extends Controller
             return PublicFlightSearchSecurity::expiredSearchIdResponse();
         }
 
+        app(QaFlightSearchAccessGuard::class)->assertCanAccess($payload, $request);
+
         $debugAllowed = PublicFlightSearchSecurity::allowsDebugFares($request);
 
         $page = max(1, (int) $request->query('page', 1));
@@ -739,8 +751,10 @@ class FlightController extends Controller
             return PublicFlightSearchSecurity::expiredSearchIdResponse();
         }
 
+        $this->assertQaFlightSearchAccess($payload, $request);
+
         $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
-        $channel = AgentBookingContext::resolveCheckoutChannel($request);
+        $channel = $this->resolveFlightSearchChannel($request);
         $agency = $channel['agency'];
         if ($agency === null) {
             return response()->json([
@@ -788,6 +802,8 @@ class FlightController extends Controller
                 ->with('offer_warning', __('This fare search has expired. Please search again.'));
         }
 
+        $this->assertQaFlightSearchAccess($payload, $request);
+
         $index = $this->searchStore->getReturnSplitIndex($searchId);
         if ($index === null || ! $this->returnSplitComboService->outboundKeyExists($index, $outboundKey)) {
             $crit = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
@@ -833,6 +849,8 @@ class FlightController extends Controller
         if ($payload === null) {
             return PublicFlightSearchSecurity::expiredSearchIdResponse();
         }
+
+        $this->assertQaFlightSearchAccess($payload, $request);
 
         $index = $this->searchStore->getReturnSplitIndex($searchId);
         if ($index === null || ! $this->returnSplitComboService->outboundKeyExists($index, $outboundKey)) {
@@ -920,6 +938,8 @@ class FlightController extends Controller
             return redirect()->to(client_home_flight_search_url())
                 ->with('offer_warning', __('This fare search has expired. Please search again.'));
         }
+
+        $this->assertQaFlightSearchAccess($payload, $request);
 
         $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
         $offer = $this->searchStore->findOffer($searchId, $comboId);
@@ -1208,6 +1228,9 @@ class FlightController extends Controller
 
         if ($searchId !== '') {
             $payload = $this->searchStore->get($searchId);
+            if (is_array($payload)) {
+                $this->assertQaFlightSearchAccess($payload, $request);
+            }
             $crit = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
 
             return $this->redirectSelectedOfferWarning($crit);
@@ -1254,6 +1277,8 @@ class FlightController extends Controller
                 'message' => (string) __('This fare search has expired. Please search again.'),
             ], 410);
         }
+
+        $this->assertQaFlightSearchAccess($payload, $request);
 
         $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
         $resolvedOfferId = $comboId !== '' ? $comboId : $offerId;
@@ -2411,8 +2436,9 @@ class FlightController extends Controller
     protected function runSearch(array $criteria, ?Request $request = null): array
     {
         $request = $request ?? request();
-        $channel = AgentBookingContext::resolveCheckoutChannel($request);
+        $channel = $this->resolveFlightSearchChannel($request);
         $agency = $channel['agency'];
+        $qaChannel = ($channel['source_channel'] ?? '') === QaStaffAirBlueContext::SOURCE_CHANNEL;
         $result = $this->flightSearch->searchWithMeta(
             $criteria,
             $agency,
@@ -2420,7 +2446,8 @@ class FlightController extends Controller
             $channel['agent_id'],
         );
         $allOffers = is_array($result['offers'] ?? null) ? $result['offers'] : [];
-        $restrictPublicSuppliers = ! app()->environment('testing');
+        // QA AirBlue path skips public supplier allowlist; normal public path unchanged.
+        $restrictPublicSuppliers = ! app()->environment('testing') && ! $qaChannel;
         /** @var list<string> $allowedList */
         $allowedList = config('ota.public_flight_results_suppliers', ['duffel', 'sabre']);
         $allowed = array_values(array_filter(array_map(
@@ -2505,24 +2532,44 @@ class FlightController extends Controller
         // consolidation still runs in FlightSearchResultStore::displayOffersFromPayload().
         $storedOffers = ItineraryFareConsolidator::consolidateAirblueForStorage($storedOffers);
 
-        $searchId = $this->searchStore->store($criteria, $storedOffers, $warnings, [
+        $qaMeta = [];
+        if ($qaChannel) {
+            $qaCtx = QaStaffAirBlueContext::resolve($request);
+            $qaMeta = [
+                'qa_scope' => true,
+                'qa_scope_type' => QaStaffAirBlueContext::SCOPE_TYPE,
+                'qa_connection_id' => (int) ($channel['qa_connection_id'] ?? config('ota.qa_staff_airblue.connection_id', 23)),
+                'qa_actor_user_id' => (int) ($qaCtx['qa_actor_user_id'] ?? ($request->user()?->id ?? 0)),
+                'qa_created_at' => now()->toIso8601String(),
+                'qa_expires_at' => now()->addSeconds(FlightSearchResultStore::SESSION_TTL_SECONDS)->toIso8601String(),
+                'source_channel' => QaStaffAirBlueContext::SOURCE_CHANNEL,
+            ];
+        }
+
+        $searchId = $this->searchStore->store($criteria, $storedOffers, $warnings, array_merge([
             'mixed_carrier_filter' => $mixedCarrierFilter,
             'multicity_diagnostics' => $multicityDiagnostics,
             'criteria_cache' => is_array($result['criteria_cache'] ?? null) ? $result['criteria_cache'] : null,
-            'criteria_cache_context' => [
+            'criteria_cache_context' => array_filter([
                 'client_slug' => current_client_slug(),
                 'agency_id' => $agency?->id,
                 'source_channel' => $channel['source_channel'],
                 'agent_id' => $channel['agent_id'],
-            ],
-        ]);
-        $this->captureMarketingSearchSnapshot($agency, $searchId, $criteria, $storedOffers, $warnings);
-        if (function_exists('session')) {
-            session()->put('home_recent_fares', [
-                'criteria' => $criteria,
-                'offers' => array_slice($storedOffers, 0, 3),
-                'captured_at' => now()->toIso8601String(),
-            ]);
+                'search_mode' => $qaChannel ? 'airblue_qa' : null,
+                'result_source' => $qaChannel ? 'qa_staff_airblue' : null,
+                'qa_connection_id' => $qaChannel ? ($channel['qa_connection_id'] ?? null) : null,
+                'qa_actor_user_id' => $qaChannel ? ($qaMeta['qa_actor_user_id'] ?? null) : null,
+            ], static fn ($v) => $v !== null && $v !== ''),
+        ], $qaMeta));
+        if (! $qaChannel) {
+            $this->captureMarketingSearchSnapshot($agency, $searchId, $criteria, $storedOffers, $warnings);
+            if (function_exists('session')) {
+                session()->put('home_recent_fares', [
+                    'criteria' => $criteria,
+                    'offers' => array_slice($storedOffers, 0, 3),
+                    'captured_at' => now()->toIso8601String(),
+                ]);
+            }
         }
         $safeWarnings = [];
         foreach ($warnings as $w) {
@@ -2822,6 +2869,8 @@ class FlightController extends Controller
                 ->withErrors(['flight_id' => __('This fare search has expired. Please search again.')]);
         }
 
+        $this->assertQaFlightSearchAccess($payload, $request);
+
         $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
         if (! PublicMulticityInquiryPolicy::isMulticitySearch($criteria)) {
             return redirect()->to(client_home_flight_search_url())
@@ -2889,5 +2938,33 @@ class FlightController extends Controller
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * @return array{
+     *     agency: \App\Models\Agency|null,
+     *     source_channel: string,
+     *     agent_id: int|null,
+     *     agent: mixed,
+     *     agent_booking_mode: bool,
+     *     qa_staff_airblue?: bool,
+     *     qa_connection_id?: int|null
+     * }
+     */
+    protected function resolveFlightSearchChannel(Request $request): array
+    {
+        if (QaStaffAirBlueContext::isActive($request)) {
+            return QaStaffAirBlueContext::resolveCheckoutChannel($request);
+        }
+
+        return AgentBookingContext::resolveCheckoutChannel($request);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $payload
+     */
+    protected function assertQaFlightSearchAccess(?array $payload, Request $request): void
+    {
+        app(QaFlightSearchAccessGuard::class)->assertCanAccess($payload, $request);
     }
 }

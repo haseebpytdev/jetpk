@@ -64,6 +64,26 @@ class FlightSearchService
         $criteria = $this->ensureSearchCriteriaId($criteria);
         if ($agency === null) {
             $connections = collect();
+        } elseif ($sourceChannel === \App\Support\FlightSearch\QaStaffAirBlueContext::SOURCE_CHANNEL) {
+            // QA isolation: pin configured AirBlue TEST connection only; skip public cert dedupe.
+            $qaConnectionId = (int) config('ota.qa_staff_airblue.connection_id', 23);
+            $qaConnection = SupplierConnection::query()
+                ->where('agency_id', $agency->id)
+                ->where('id', $qaConnectionId)
+                ->first();
+            $scope = app(\App\Support\FlightSearch\AirBlueQaSearchScope::class)->evaluate($qaConnection);
+            if (! ($scope['allowed'] ?? false)) {
+                $this->logPublicSearchDiagnostics($criteria, $agency, $sourceChannel, collect(), [
+                    'blocking_reason' => 'qa_airblue_scope_denied:'.($scope['reason'] ?? 'unknown'),
+                    'qa_connection_id' => $qaConnectionId,
+                ]);
+
+                return [
+                    'offers' => [],
+                    'warnings' => ['AirBlue QA scope denied: '.($scope['reason'] ?? 'unknown')],
+                ];
+            }
+            $connections = collect([$qaConnection])->filter();
         } else {
             $connections = SupplierConnection::query()
                 ->where('agency_id', $agency->id)
