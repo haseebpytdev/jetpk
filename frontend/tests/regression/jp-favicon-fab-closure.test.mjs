@@ -58,8 +58,14 @@ check(
 check("globals.css defines .jp-public-fab-dock--lift", globals.includes(".jp-public-fab-dock--lift"));
 check("globals.css defines .jp-fab-content-clear", globals.includes(".jp-fab-content-clear"));
 check(
-  "jp-fab-content-clear clears Ask FAB footprint (>=5.5rem)",
-  /jp-fab-content-clear[\s\S]*?5\.5rem/.test(globals),
+  "jp-fab-content-clear is bottom-only (>=5.5rem padding-bottom, no padding-right)",
+  /jp-fab-content-clear\s*\{[^}]*padding-bottom:\s*max\(5\.5rem/.test(globals) &&
+    !/jp-fab-content-clear\s*\{[^}]*padding-right:/.test(globals),
+);
+check(
+  "jp-fab-card-clear is bottom-only (no padding-right)",
+  /jp-fab-card-clear\s*\{[^}]*padding-bottom:/.test(globals) &&
+    !/jp-fab-card-clear\s*\{[^}]*padding-right:/.test(globals),
 );
 const homepage = read("app/(public)/page.tsx");
 check(
@@ -89,9 +95,13 @@ const resultsPage = read("features/flight-results/components/FlightResultsPage.t
 check("FlightResultsPage uses jp-fab-content-clear", resultsPage.includes("jp-fab-content-clear"));
 
 const returnForm = read("features/search/components/ReturnForm.tsx");
+const oneWayForm = read("features/search/components/OneWayForm.tsx");
+const multiCityForm = read("features/search/components/MultiCityForm.tsx");
 check(
-  "ReturnForm Search CTA uses calc width to clear FAB on mobile",
-  /max-lg:w-\[calc\(100%-4\.5rem\)\]/.test(returnForm),
+  "JP-UI-FAB-02: search CTAs do not reserve horizontal FAB width on mobile",
+  !/max-lg:w-\[calc\(100%-4\.5rem\)\]/.test(returnForm) &&
+    !/max-lg:w-\[calc\(100%-4\.5rem\)\]/.test(oneWayForm) &&
+    !/max-lg:w-\[calc\(100%-4\.5rem\)\]/.test(multiCityForm),
 );
 
 const dock = read("components/navigation/PublicFloatingActionDock.tsx");

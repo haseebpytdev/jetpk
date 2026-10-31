@@ -58,9 +58,14 @@ body {
     bottom: var(--jp-dock-fab-bottom, max(1rem, env(safe-area-inset-bottom)));
   }
 
-  /* Keep content clear of Ask FAB (58px) + dock inset on the right. */
+  /*
+   * JP-UI-FAB-02: bottom-only clearance for fixed Ask/dock controls.
+   * Do NOT reserve horizontal/right space — that artificially narrows and
+   * left-shifts normal cards on mobile. Horizontal FAB geometry is handled
+   * by the fixed dock itself (Phase C), not by shrinking page content.
+   */
   .jp-fab-content-clear {
-    padding-right: max(5.5rem, calc(env(safe-area-inset-right) + 4.5rem)) !important;
+    padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem)) !important;
   }
 
   /* Footer / end-of-page blocks that scroll under the fixed Ask FAB dock. */
@@ -68,9 +73,8 @@ body {
     padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem)) !important;
   }
 
-  /* Auth / marketing cards near the bottom of short viewports. */
+  /* Auth / marketing cards near the bottom of short viewports — bottom only. */
   .jp-fab-card-clear {
-    padding-right: max(5.5rem, calc(env(safe-area-inset-right) + 4.5rem)) !important;
     padding-bottom: max(5.25rem, calc(env(safe-area-inset-bottom) + 4.25rem)) !important;
   }
 
