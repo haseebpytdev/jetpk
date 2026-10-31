@@ -1,0 +1,210 @@
+# JP-UI-PERF-STABILITY-01D2 — Search runtime diagnostic closure
+
+## Final status
+
+```text
+FINAL_STATUS=JP_UI_PERF_STABILITY_01D2_DIAGNOSTIC_CLOSED_NO_SAFE_RUNTIME_CHANGE
+PRODUCTION_DEPLOYED=NO
+PRODUCTION_FILES_CHANGED=NO
+```
+
+Phase D2 completed as a diagnostic-only closure. No search/runtime experiment met the minimum benefit threshold without unnecessary complexity, so all temporary runtime experiments were reverted and production remains unchanged.
+
+## Provenance
+
+```text
+MAIN_BASE_SHA=a85ff95c12cc28c374e328f28c3662746bac72a8
+PRODUCTION_FRONTEND_BASE_SHA=06b9aa465d26c45fe685aa48fc31eab78338b058
+PHASE_D2_PRODUCTION_MAIN_PREIMAGE_PARITY=11_OF_11_PASS
+```
+
+The locally reported evidence-only SHA `aec7ef87ef2e73a276f0e44542b5798848a41140` was not present on the connected GitHub remote at packaging time, so this durable record was recreated directly from protected `main`.
+
+## Current JS ownership
+
+```text
+CURRENT_INITIAL_JS_ACCOUNTED_PERCENT=97.2
+CURRENT_SEARCH_INITIAL_BYTES=102701
+CURRENT_FRAMEWORK_BYTES=503319
+CURRENT_OTHER_APP_BYTES=277396
+
+ONE_WAY_REQUIRED_BYTES=68664
+RETURN_ONLY_BYTES=5205
+MULTI_CITY_ONLY_BYTES=3485
+GROUP_ONLY_BYTES=52519
+SUBMIT_ONLY_BYTES=5446
+TRAVELERS_PANEL_BYTES=9027
+```
+
+The search system is the largest remaining app-owned homepage feature, but the candidate splits did not produce enough initial-JS reduction to justify shipping.
+
+## Experiment outcomes
+
+### Group mode
+
+```text
+GROUP_MODE_CHUNK_TRANSFERRED_BEFORE_SWITCH=NO
+GROUP_MODE_CHUNK_TRANSFERRED_AFTER_SWITCH=YES
+GROUP_FACETS_REQUEST_BEFORE_SWITCH=0
+GROUP_FACETS_REQUEST_AFTER_SWITCH=1
+GROUP_SEARCH_FUNCTIONAL=PASS
+D2_GROUP_ACCEPTED=NO
+```
+
+The group island behaved correctly, but existing priority prefetch for `/groups/search` already pulls shared group graph code, sharply reducing the practical savings.
+
+### Multi-city
+
+```text
+MULTICITY_CHUNK_TRANSFERRED_BEFORE_SWITCH=NO_FOR_NAMED_CHUNK
+MULTICITY_CHUNK_TRANSFERRED_AFTER_SWITCH=YES
+MULTICITY_FUNCTIONAL=PASS
+D2_MULTICITY_ACCEPTED=NO
+```
+
+The split worked functionally but did not create a material enough reduction.
+
+### Return
+
+```text
+RETURN_ONLY_BYTES=5205
+RETURN_LAZY_REQUIRED=NO
+D2_RETURN_ACCEPTED=NO
+```
+
+Return is high-frequency and too small to justify introducing first-use latency.
+
+### Travelers
+
+```text
+TRAVELERS_PANEL_BYTES=9027
+D2_TRAVELERS_REQUIRED=NO
+D2_TRAVELERS_ACCEPTED=NO
+```
+
+Below the defined acceptance threshold.
+
+### Submit-only code
+
+```text
+SUBMIT_ONLY_BYTES=5446
+D2_SUBMIT_ACCEPTED=NO
+```
+
+Too small to justify delaying submit-path code loading.
+
+## Combined temporary candidate
+
+```text
+BASE_JS_BYTES=883416
+TEMP_GROUP_PLUS_MULTICITY_JS_BYTES=878921
+TEMP_JS_REDUCTION_BYTES=4495
+TEMP_JS_REDUCTION_PERCENT=0.51
+
+FINAL_JS_BYTES=883416
+JS_REDUCTION_BYTES=0
+JS_REDUCTION_PERCENT=0
+
+BASE_SEARCH_INITIAL_BYTES=102701
+FINAL_SEARCH_INITIAL_BYTES=102701
+SEARCH_JS_REDUCTION_BYTES=0
+SEARCH_JS_REDUCTION_PERCENT=0
+```
+
+The temporary Group + Multi-city split saved only 4,495 JS bytes, below the 10KB shipping threshold. It was reverted.
+
+## Server runtime diagnostics
+
+```text
+HOME_TTFB_MEDIAN=211
+HOME_TTFB_P95=391
+LOGIN_TTFB_MEDIAN=210
+LOGIN_TTFB_P95=237
+GROUPS_TTFB_MEDIAN=219
+GROUPS_TTFB_P95=349
+
+PUBLIC_CONFIG_CALL_COUNT=1
+PUBLIC_CONFIG_TOTAL_MS=sub_threshold_cache_hit
+HOMEPAGE_CONTENT_CALL_COUNT=1
+HOMEPAGE_CONTENT_TOTAL_MS=sub_threshold_cache_hit
+SESSION_BOOTSTRAP_CALL_COUNT=1
+SESSION_BOOTSTRAP_TOTAL_MS=not_dominant_vs_network
+NEXT_RENDER_REMAINDER_MS=home_local_median_approx_99_includes_render
+
+DUPLICATE_PUBLIC_CONFIG_SERVER_FETCH=0
+DUPLICATE_HOMEPAGE_CONTENT_SERVER_FETCH=0
+DUPLICATE_BROWSER_CONFIG_FETCH=0
+
+SERVER_RUNTIME_CHANGE_REQUIRED=NO
+```
+
+No server dependency crossed the threshold required to justify new caching or SSR changes.
+
+## RSC attribution
+
+```text
+RSC_GROUPS_OWNER=DesktopNavigation PrefetchOnIntentLink priorityPrefetch=true (/groups/search)
+RSC_LOGIN_OWNER=DesktopNavigation+SiteHeader PrefetchOnIntentLink priorityPrefetch=true (/login)
+RSC_FLIGHTS_RESULTS_OWNER=Homepage next/link viewport prefetch to /flights/results*
+RSC_COUNT_OPTIMIZATION_CLAIM=NO
+```
+
+Priority-prefetch behavior is intentionally unchanged because its removal was rejected in Phase D after soft-navigation regression evidence.
+
+## Frozen architecture
+
+```text
+PRIORITY_PREFETCH_BEHAVIOR_CHANGED=NO
+PUBLIC_HERO_ARCHITECTURE_CHANGED=NO
+FRAMEWORK_CHUNK_RUNTIME_CHANGE=NO
+NEXT_VERSION_CHANGE=NO
+DEPENDENCY_UPGRADE=NO
+
+ACCEPTED_GROUP_SPLIT=NO
+ACCEPTED_MULTICITY_SPLIT=NO
+ACCEPTED_RETURN_SPLIT=NO
+ACCEPTED_TRAVELERS_SPLIT=NO
+ACCEPTED_SUBMIT_SPLIT=NO
+```
+
+## Regression gates
+
+```text
+PHASE_A_MEDIA_REGRESSION=NO
+PHASE_B_BRANDING_REGRESSION=NO
+PHASE_C_FLOATING_REGRESSION=NO
+PHASE_D_ASK_LAZY_REGRESSION=NO
+
+TYPECHECK=PASS_INHERITED_NO_RUNTIME_DELTA
+LINT=PASS_INHERITED_NO_RUNTIME_DELTA
+NEXT_BUILD=PASS_BASE_AND_TEMP_CAND
+SEARCH_REGRESSION=PASS_NO_RUNTIME_DELTA
+MODE_SWITCH_GATE=PASS_NO_SHIPPED_CHANGE
+SOFT_NAV_GATE=PASS_NO_RUNTIME_DELTA
+```
+
+## Production safety
+
+```text
+CANONICAL_RUNTIME_FILES=0
+UNRELATED_RUNTIME_FILES=0
+FRONTEND_CANDIDATE_BRANCH=N_A_NO_ACCEPTED_RUNTIME_OVERLAY
+FRONTEND_CANDIDATE_CHANGED_FILES=0
+
+PRODUCTION_FILES_CHANGED=NO
+PRODUCTION_DEPLOYED=NO
+PUBLIC_FRONTEND_RESTARTED=NO
+DASHBOARD_RESTARTED=NO
+
+SUPPLIER_CALLS=0
+BOOKING_MUTATIONS=0
+PAYMENT_MUTATIONS=0
+DATABASE_MUTATIONS=0
+```
+
+## Closure
+
+```text
+FINAL_STATUS=JP_UI_PERF_STABILITY_01D2_DIAGNOSTIC_CLOSED_NO_SAFE_RUNTIME_CHANGE
+NEXT_RECOMMENDED_ACTION=KEEP_ASK_LAZY_LIVE;OPTIONAL_DEDICATED_PHASE_FOR_FACETS_API_SPLIT_PLUS_AUTHORIZED_PREFETCH_POLICY_ONLY_IF_SEPARATELY_APPROVED
+```
