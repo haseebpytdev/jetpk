@@ -151,7 +151,11 @@ class AirBlueBookingService
     private function resolveProviderContext(Booking $booking, array $meta): array
     {
         $fromMeta = is_array($meta['airblue_context'] ?? null) ? $meta['airblue_context'] : [];
-        $snapshot = is_array($booking->offer_snapshot) ? $booking->offer_snapshot : [];
+        // Booking checkout can persist the authoritative offer under one of the
+        // validated/normalized meta snapshots instead of the legacy offer_snapshot
+        // column. Use the same resolver as ticketing payment context so AirBook
+        // receives the current protocol/provider context rather than stale fallback data.
+        $snapshot = $this->resolveOfferSnapshot($booking, $meta);
         $raw = is_array($snapshot['raw_payload'] ?? null) ? $snapshot['raw_payload'] : [];
         $fromSnapshot = is_array($raw['provider_context'] ?? null) ? $raw['provider_context'] : [];
 
