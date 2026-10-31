@@ -1,0 +1,26 @@
+{
+  "experiment": "D3-B Groups intent-only priorityPrefetch",
+  "LOGIN_PRIORITY_PREFETCH_CHANGED": "NO",
+  "PHASE_D_A_REJECTION_REMAINS_VALID_FOR_OLD_GRAPH": "YES",
+  "BASE_IDLE_RSC_ROUTES": ["/groups/search", "/login"],
+  "B_IDLE_RSC_ROUTES": ["/login"],
+  "GROUPS_IDLE_RSC_REQUESTS": 0,
+  "GROUPS_HOVER_PREFETCH": "YES",
+  "GROUPS_FOCUS_PREFETCH": "YES",
+  "GROUPS_POINTERDOWN_PREFETCH": "YES",
+  "PREFETCH_SINGLE_FLIGHT": "YES",
+  "softNav": {
+    "BASE_HOME_GROUPS_MEDIAN": 104,
+    "BASE_HOME_GROUPS_P95": 182,
+    "B_HOME_GROUPS_MEDIAN": 134,
+    "B_HOME_GROUPS_P95": 453,
+    "BASE_GROUPS_HOME_MEDIAN": 99,
+    "BASE_GROUPS_HOME_P95": 208,
+    "B_GROUPS_HOME_MEDIAN": 99,
+    "B_GROUPS_HOME_P95": 361,
+    "GROUPS_SOFT_NAV_MATERIAL_REGRESSION": "YES",
+    "rule": ">100ms absolute AND >15% relative at P95"
+  },
+  "D3_B_ACCEPTED": "NO",
+  "restored": "Groups priorityPrefetch=true (baseline policy)"
+}

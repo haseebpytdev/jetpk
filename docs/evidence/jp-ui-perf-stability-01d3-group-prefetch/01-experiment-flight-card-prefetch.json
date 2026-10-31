@@ -1,0 +1,11 @@
+{
+  "experiment": "D3-C below-fold /flights/results Link intent prefetch",
+  "FLIGHTS_RESULTS_PREFETCH_SOURCE_SELECTOR": "a[href*=\"/flights/results\"] inside [data-testid=route-card] / featured offers",
+  "FLIGHTS_RESULTS_PREFETCH_SOURCE_HREF": "/flights/results* or absolute https://jetpakistan.pk/flights/results*",
+  "FLIGHTS_RESULTS_PREFETCH_SOURCE_FILE": "frontend/features/public-visual/destinations/RoutesSection.tsx (also FeaturedOffersSection.tsx)",
+  "BASE_FLIGHTS_RESULTS_IDLE_RSC": 0,
+  "C_FLIGHTS_RESULTS_IDLE_RSC": 0,
+  "note": "Same-host harness observed 0 idle /flights/results RSC; live Phase-D attribution remains homepage next/link when href is app-relative. No measurable local idle RSC to eliminate → reject shipping C.",
+  "D3_C_ACCEPTED": "NO",
+  "implemented": false
+}

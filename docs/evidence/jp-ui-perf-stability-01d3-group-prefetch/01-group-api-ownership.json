@@ -1,0 +1,26 @@
+{
+  "module": "frontend/features/group-ticketing/services/group-ticketing-api.ts",
+  "preSplit": {
+    "importsAuthCsrfStatically": true,
+    "csrfRuntimeOnGet": false,
+    "note": "groupFetch imported ensureLaravelCsrfToken at module scope; GET paths skipped calling it but bundler still included auth/CSRF + co-located POST payment/passengers/review helpers."
+  },
+  "postSplitDesign": {
+    "group-api-base.ts": "neutral GET helpers; no auth import",
+    "group-search-api.ts": ["fetchGroupSearchData", "fetchGroupResultsPage", "fetchGroupSearchFacets"],
+    "group-ticketing-api.ts": ["fetchGroupPackage", "passengers/review/payment/confirmation", "mutations with CSRF"],
+    "GROUP_SEARCH_API_IMPORTS_AUTH_CSRF": "NO",
+    "forbiddenEdge": "group-search-api must not import group-ticketing-api"
+  },
+  "callersMigrated": [
+    "hooks/use-group-search-facets.ts",
+    "components/GroupSearchPage.tsx"
+  ],
+  "callersUnchangedBooking": [
+    "GroupPackageDetailsPage",
+    "GroupPassengersPage",
+    "GroupReviewPage",
+    "GroupPaymentPage",
+    "GroupConfirmationPage"
+  ]
+}

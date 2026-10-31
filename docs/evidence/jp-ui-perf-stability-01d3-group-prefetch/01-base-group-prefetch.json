@@ -1,0 +1,30 @@
+{
+  "baseSha": "06b9aa465d26c45fe685aa48fc31eab78338b058",
+  "baseUrl": "http://127.0.0.1:3010",
+  "viewport": "1440",
+  "BASE_INITIAL_JS_BYTES": 883416,
+  "BASE_INITIAL_RSC_COUNT": 2,
+  "BASE_INITIAL_RSC_BYTES": 0,
+  "BASE_IDLE_RSC_ROUTES": ["/groups/search", "/login"],
+  "BASE_GROUP_RSC_BYTES": 0,
+  "BASE_GROUP_PREFETCH_JS_BYTES": 62851,
+  "BASE_GROUP_PREFETCH_JS_FILES": [
+    { "file": "1271-f027e91ebde6b4ac.js", "bytes": 52519, "role": "GROUP_SHARED_API_UI" },
+    { "file": "2280-70912b9b7a3c67cc.js", "bytes": 10332, "role": "GROUP_FACETS_API_FRAGMENT" }
+  ],
+  "note": "Group prefetch JS attribution = homepage topJs chunks that contain groups/search ownership markers (facets + GroupSearchPage). 8289 SEARCH_ASYNC also references useGroupSearchFacets via homepage SearchModule (34037) — counted separately as homepage search graph, not exclusive prefetch-only.",
+  "DOES_GROUP_PREFETCH_PULL_AUTH_CSRF_OR_BOOKING_PAYMENT_CODE": "YES",
+  "evidence": {
+    "1271": ["ensureLaravelCsrfToken", "X-XSRF-TOKEN", "fetchGroupPayment", "GroupSearchPage", "useGroupSearchFacets"],
+    "2280": ["ensureLaravelCsrfToken", "X-XSRF-TOKEN", "groups/search/facets", "fetchGroupPayment", "GroupSearchPage"]
+  },
+  "classification": {
+    "GROUP_SEARCH_UI": true,
+    "GROUP_SEARCH_FACETS": true,
+    "GROUP_SEARCH_RESULTS": true,
+    "GROUP_BOOKING": "strings_present_via_shared_module",
+    "GROUP_PAYMENT": "strings_present_via_shared_module",
+    "AUTH_CSRF": true,
+    "SHARED_UI": true
+  }
+}

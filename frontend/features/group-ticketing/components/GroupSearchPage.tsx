@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useGroupSearchFacets } from "../hooks/use-group-search-facets";
 import { GroupTicketingForm } from "@/features/search/components/GroupTicketingForm";
 import { validateGroupSearch } from "@/features/search/utils/validation";
-import { fetchGroupResultsPage, fetchGroupSearchData } from "../services/group-ticketing-api";
+import { fetchGroupResultsPage, fetchGroupSearchData } from "../services/group-search-api";
 import type { GroupPackage, GroupSearchFilters } from "../types";
 import { GroupEmptyResultsState } from "./GroupStateCards";
 import { GroupLockedState } from "./GroupStateCards";
