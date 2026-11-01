@@ -1,0 +1,17 @@
+# 04 — Candidate seat
+
+Selected future TEST mutation candidate:
+
+```
+CANDIDATE_ROW=27
+CANDIDATE_SEAT=A
+CANDIDATE_AVAILABLE=YES
+CANDIDATE_CHARGEABLE=NO
+CANDIDATE_SUPPLIER_AMOUNT=0
+CANDIDATE_CURRENCY=PKR
+CANDIDATE_TRAVELER_REF=len32:c0a1df97
+CANDIDATE_FLIGHT_REF=len1:6b86b273
+SEAT_REQUIRES_PAYMENT=NO
+```
+
+Candidate 27A is complimentary and was not attached during readiness.
