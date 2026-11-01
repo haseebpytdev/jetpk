@@ -8,6 +8,7 @@ use App\Enums\BookingDocumentStatus;
 use App\Enums\BookingDocumentType;
 use App\Enums\OtaNotificationEvent;
 use App\Mail\BookingUniversalNotification;
+use App\Mail\JetpkOperationalEventMail;
 use App\Models\Booking;
 use App\Models\BookingDocument;
 use App\Models\BookingPayment;
@@ -15,6 +16,10 @@ use App\Models\CommunicationLog;
 use App\Models\User;
 use App\Services\Customer\GuestBookingAccessService;
 use App\Support\Bookings\SabreHostErrorClassifier;
+use App\Support\Emails\EmailBaseVariables;
+use App\Support\Emails\JetpkBookingUniversalPayloadAdapter;
+use App\Support\Emails\JetpkEmailEventRenderer;
+use App\Support\Emails\JetpkOperationalEmailEventRegistry;
 use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Log;
@@ -700,7 +705,7 @@ class BookingCommunicationService
         }
 
         try {
-            $mailable = $mailableFactory($booking);
+            $mailable = $this->canonicalizeCustomerMailable($booking, $mailableFactory($booking), $event->value);
             $subject = $mailable->envelope()->subject;
 
             if (! $this->shouldQueueMail()) {
@@ -710,6 +715,10 @@ class BookingCommunicationService
                     'subject' => $renderedTemplate['subject'] ?: $subject,
                     'message' => $renderedTemplate['body'] ?: null,
                     'sent_at' => now(),
+                    'meta' => array_merge(is_array($log->meta) ? $log->meta : [], [
+                        'jetpk_universal_layout' => JetpkOperationalEmailEventRegistry::isJetpkClient(),
+                        'universal_mailable' => $mailable instanceof BookingUniversalNotification,
+                    ]),
                 ])->save();
                 $this->logWhatsappFutureProviderEvent($booking, $event->value, $settings->notification_rules ?? []);
 
@@ -723,6 +732,10 @@ class BookingCommunicationService
                 'status' => 'queued',
                 'subject' => $renderedTemplate['subject'] ?: $subject,
                 'message' => $renderedTemplate['body'] ?: null,
+                'meta' => array_merge(is_array($log->meta) ? $log->meta : [], [
+                    'jetpk_universal_layout' => JetpkOperationalEmailEventRegistry::isJetpkClient(),
+                    'universal_mailable' => $mailable instanceof BookingUniversalNotification,
+                ]),
             ])->save();
             $this->logWhatsappFutureProviderEvent($booking, $event->value, $settings->notification_rules ?? []);
         } catch (Throwable $e) {
@@ -732,6 +745,92 @@ class BookingCommunicationService
             ])->save();
             $this->logWhatsappFutureProviderEvent($booking, $event->value, $settings->notification_rules ?? []);
         }
+    }
+
+    /**
+     * Rewrap legacy BookingUniversalNotification into JetPK canonical HTML when JetPK client is active.
+     */
+    protected function canonicalizeCustomerMailable(Booking $booking, Mailable $mailable, string $eventKey): Mailable
+    {
+        if (! JetpkOperationalEmailEventRegistry::isJetpkClient()) {
+            return $mailable;
+        }
+
+        if (! $mailable instanceof BookingUniversalNotification) {
+            return $mailable;
+        }
+
+        $universal = $mailable->payload;
+        $jetpkPayload = JetpkBookingUniversalPayloadAdapter::toJetpkPayload($universal, 'customer');
+        $renderEvent = JetpkBookingUniversalPayloadAdapter::eventKeyFromUniversal($universal, $eventKey);
+
+        try {
+            JetpkOperationalEmailEventRegistry::assertKnownEvent($renderEvent);
+            $rendered = app(JetpkEmailEventRenderer::class)->render(
+                eventKey: $renderEvent,
+                agency: $booking->agency,
+                runtimeVariables: EmailBaseVariables::merge($booking->agency, $booking, [
+                    'booking_reference' => (string) $booking->reference_code,
+                    'customer_name' => (string) ($universal['greeting_name'] ?? ''),
+                ]),
+                payload: $jetpkPayload,
+            );
+        } catch (Throwable $e) {
+            Log::warning('jetpk.customer_email.render_fallback', [
+                'event' => $renderEvent,
+                'booking_id' => $booking->id,
+                'message' => $e->getMessage(),
+            ]);
+
+            return $mailable;
+        }
+
+        $subject = trim((string) ($universal['subject'] ?? ''));
+        if ($subject === '') {
+            $subject = $rendered->subject !== '' ? $rendered->subject : 'Booking notification';
+        }
+
+        $plain = trim(html_entity_decode(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $rendered->html))));
+        $attachments = $this->jetpkAttachmentsFromUniversalMailable($mailable);
+
+        return new JetpkOperationalEventMail(
+            $rendered->html,
+            $subject,
+            $plain !== '' ? $plain : (string) ($universal['intro'] ?? ''),
+            $attachments,
+        );
+    }
+
+    /**
+     * @return list<array{name: string, mime: string, content: string}>
+     */
+    protected function jetpkAttachmentsFromUniversalMailable(BookingUniversalNotification $mailable): array
+    {
+        $attachment = $mailable->attachment;
+        if (! is_array($attachment)) {
+            return [];
+        }
+
+        $path = trim((string) ($attachment['path'] ?? ''));
+        if ($path === '') {
+            return [];
+        }
+
+        $disk = (string) ($attachment['disk'] ?? 'local');
+        if (! Storage::disk($disk)->exists($path)) {
+            return [];
+        }
+
+        $content = Storage::disk($disk)->get($path);
+        if (! is_string($content) || $content === '') {
+            return [];
+        }
+
+        return [[
+            'name' => (string) ($attachment['name'] ?? basename($path)),
+            'mime' => 'application/pdf',
+            'content' => $content,
+        ]];
     }
 
     protected function logWhatsappFutureProviderEvent(Booking $booking, string $event, array $rules): void
@@ -1279,13 +1378,17 @@ class BookingCommunicationService
         }
 
         try {
-            $mailable = new BookingUniversalNotification(
-                $this->bookingEmailPayloadFactory->itineraryReady($booking, $note, true),
-                [
-                    'disk' => 'local',
-                    'path' => $attachmentPath,
-                    'name' => 'ticket-itinerary-'.$booking->reference_code.'.pdf',
-                ]
+            $mailable = $this->canonicalizeCustomerMailable(
+                $booking,
+                new BookingUniversalNotification(
+                    $this->bookingEmailPayloadFactory->itineraryReady($booking, $note, true),
+                    [
+                        'disk' => 'local',
+                        'path' => $attachmentPath,
+                        'name' => 'ticket-itinerary-'.$booking->reference_code.'.pdf',
+                    ]
+                ),
+                'itinerary_ready',
             );
             $subject = $mailable->envelope()->subject;
 

@@ -16,6 +16,8 @@
     $passengers  = $b['passenger_count'] ?? null;
     $amount      = $b['amount']         ?? null;
     $currency    = $b['currency']       ?? null;
+    $fareFamily  = $b['selected_fare_family'] ?? null;
+    $fareBaggage = $b['selected_fare_baggage'] ?? null;
     $total       = ($amount !== null) ? trim(($currency ? $currency.' ' : '').$amount) : null;
     $pnrText     = $pnr ?: ($status && strtolower($status) === 'confirmed' ? null : 'Will appear once confirmed');
 @endphp
@@ -31,7 +33,9 @@
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Passengers', 'value' => $passengers, 'emailBrand' => $brand])
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Booking status', 'value' => $status, 'emailBrand' => $brand])
                 @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Payment status', 'value' => $paymentSt, 'emailBrand' => $brand])
-                @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Total amount', 'value' => $total, 'emailBrand' => $brand])
+                @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Selected fare family', 'value' => $fareFamily, 'emailBrand' => $brand])
+                @include('emails.themes.jetpakistan.partials.info-row', ['label' => 'Baggage', 'value' => $fareBaggage, 'emailBrand' => $brand])
+                @include('emails.themes.jetpakistan.partials.info-row', ['label' => !empty($fareFamily) ? 'Estimated selected fare' : 'Total amount', 'value' => $total, 'emailBrand' => $brand])
             </table>
         </td>
     </tr>

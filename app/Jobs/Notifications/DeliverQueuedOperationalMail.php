@@ -3,6 +3,7 @@
 namespace App\Jobs\Notifications;
 
 use App\Mail\BookingUniversalNotification;
+use App\Mail\JetpkOperationalEventMail;
 use App\Mail\OtaOperationalNotificationMail;
 use App\Models\CommunicationLog;
 use App\Support\Communication\NotificationErrorSanitizer;
@@ -124,8 +125,28 @@ class DeliverQueuedOperationalMail implements ShouldQueue
         }
     }
 
-    private function mailable(): BookingUniversalNotification|OtaOperationalNotificationMail
+    private function mailable(): BookingUniversalNotification|JetpkOperationalEventMail|OtaOperationalNotificationMail
     {
+        // Prefer pre-rendered HTML so JetPK canonical shell is not discarded when
+        // a legacy universal_email payload is also present on the job.
+        if (trim($this->htmlBody) !== '') {
+            if (str_contains($this->htmlBody, 'jetpk-container')) {
+                return new JetpkOperationalEventMail(
+                    $this->htmlBody,
+                    $this->subject,
+                    $this->plainBody,
+                    $this->attachments,
+                );
+            }
+
+            return new OtaOperationalNotificationMail(
+                $this->htmlBody,
+                $this->subject,
+                $this->plainBody,
+                $this->attachments,
+            );
+        }
+
         if ($this->universalPayload !== null) {
             return new BookingUniversalNotification($this->universalPayload);
         }

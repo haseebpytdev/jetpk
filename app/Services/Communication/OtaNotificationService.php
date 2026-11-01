@@ -5,6 +5,7 @@ namespace App\Services\Communication;
 use App\Enums\AccountType;
 use App\Jobs\Notifications\DeliverQueuedOperationalMail;
 use App\Mail\BookingUniversalNotification;
+use App\Mail\JetpkOperationalEventMail;
 use App\Mail\OtaOperationalNotificationMail;
 use App\Models\Agency;
 use App\Models\AgencyNotificationSetting;
@@ -13,6 +14,8 @@ use App\Models\CommunicationLog;
 use App\Models\User;
 use App\Support\Branding\BrandDisplayResolver;
 use App\Support\Emails\EmailBaseVariables;
+use App\Support\Emails\EmailRecipientRoleSubjectTagger;
+use App\Support\Emails\JetpkBookingUniversalPayloadAdapter;
 use App\Support\Emails\JetpkEmailEventRenderer;
 use App\Support\Communication\NotificationErrorSanitizer;
 use App\Support\Emails\JetpkOperationalEmailEventRegistry;
@@ -76,11 +79,48 @@ class OtaNotificationService
             return;
         }
 
+        if (
+            JetpkOperationalEmailEventRegistry::isJetpkClient()
+            && ! ($recipientContext['_per_bucket_child'] ?? false)
+            && $this->shouldFanOutNotifyBucketsByRole($recipientContext)
+        ) {
+            $this->sendNotifyBucketRoleDeliveries(
+                $agency,
+                $eventKey,
+                $payload,
+                $booking,
+                $actor,
+                $fallbackSubject,
+                $fallbackBody,
+                $templateVariables,
+                $attachments,
+                $recipientContext,
+            );
+
+            return;
+        }
+
         try {
             $settings = $this->communicationSettingsService->getOrCreateSettings($agency);
             $eventSetting = $this->getOrCreateEventSetting($agency, $eventKey);
             $recipientBundle = $this->recipientResolver->resolve($agency, $eventKey, $booking, $actor, $recipientContext);
             $this->logSkippedRecipientBuckets($agency, $eventKey, $booking, $recipientBundle['skipped_buckets']);
+            if (isset($recipientContext['_forced_to']) && is_array($recipientContext['_forced_to'])) {
+                $recipientBundle['to'] = array_values(array_filter(
+                    $recipientContext['_forced_to'],
+                    fn ($email): bool => is_string($email) && trim($email) !== '',
+                ));
+                $recipientBundle['cc'] = [];
+                $recipientBundle['bcc'] = [];
+                if (is_string($recipientContext['delivery_bucket'] ?? null)) {
+                    $recipientBundle['scope'] = EmailRecipientRoleSubjectTagger::roleForBucket(
+                        $recipientContext['delivery_bucket']
+                    ) ?? $recipientBundle['scope'];
+                    $recipientBundle['buckets'] = is_array($recipientContext['notify_buckets'] ?? null)
+                        ? array_values($recipientContext['notify_buckets'])
+                        : [$recipientContext['delivery_bucket']];
+                }
+            }
             $scope = $recipientBundle['scope'];
             $safePayload = $this->payloadSanitizer->sanitizeForScope($payload, $scope);
 
@@ -93,6 +133,21 @@ class OtaNotificationService
                 $mergedVariables = array_merge($mergedVariables, $variantOverrides);
             }
 
+            $roleHint = EmailRecipientRoleSubjectTagger::roleForBucket(
+                is_string($recipientContext['delivery_bucket'] ?? null)
+                    ? $recipientContext['delivery_bucket']
+                    : null
+            ) ?? $scope;
+
+            $jetpkPayload = [];
+            $universalForRender = $this->universalPayloadFrom($safePayload);
+            if ($universalForRender !== null && JetpkOperationalEmailEventRegistry::isJetpkClient()) {
+                $jetpkPayload = JetpkBookingUniversalPayloadAdapter::toJetpkPayload(
+                    $universalForRender,
+                    is_string($roleHint) ? $roleHint : null,
+                );
+            }
+
             $rendered = $this->renderOperationalEmail(
                 $agency,
                 $eventKey,
@@ -100,6 +155,7 @@ class OtaNotificationService
                 $fallbackSubject,
                 $fallbackBody,
                 $booking,
+                $jetpkPayload,
             );
         } catch (Throwable $e) {
             Log::warning('ota.notification.render_failed', [
@@ -116,8 +172,19 @@ class OtaNotificationService
         }
 
         $universalPayload = $this->universalPayloadFrom($safePayload);
+        $deliverySubject = $rendered->subject;
         if ($universalPayload !== null) {
-            $universalPayload['subject'] = $rendered->subject;
+            $factorySubject = trim((string) ($universalPayload['subject'] ?? ''));
+            if ($factorySubject !== '') {
+                $deliverySubject = $factorySubject;
+            }
+        }
+        $deliverySubject = EmailRecipientRoleSubjectTagger::retag(
+            $deliverySubject,
+            is_string($roleHint) ? $roleHint : null,
+        );
+        if ($universalPayload !== null) {
+            $universalPayload['subject'] = $deliverySubject;
         }
 
         if (! $settings->email_enabled || ! $eventSetting->enabled || ! $rendered->templateEnabled) {
@@ -153,7 +220,7 @@ class OtaNotificationService
             'channel' => 'email',
             'event' => $eventKey,
             'recipient_email' => implode(', ', $recipientBundle['to']),
-            'subject' => $rendered->subject,
+            'subject' => $deliverySubject,
             'message' => $rendered->plainBody,
             'status' => $this->isImmediateMailer() ? 'sending' : 'queued',
             'provider' => (string) config('mail.default'),
@@ -188,7 +255,7 @@ class OtaNotificationService
                 $recipientBundle['to'],
                 $recipientBundle['cc'],
                 $recipientBundle['bcc'],
-                $rendered->subject,
+                $deliverySubject,
                 $rendered->html,
                 $rendered->plainBody,
                 $attachments,
@@ -343,9 +410,13 @@ class OtaNotificationService
         array $attachments,
         ?array $universalPayload = null,
     ): void {
-        $mail = $universalPayload !== null
-            ? new BookingUniversalNotification($universalPayload)
-            : new OtaOperationalNotificationMail($htmlBody, $subject, $plainBody, $attachments);
+        if (JetpkOperationalEmailEventRegistry::isJetpkClient() && trim($htmlBody) !== '') {
+            $mail = new JetpkOperationalEventMail($htmlBody, $subject, $plainBody, $attachments);
+        } elseif ($universalPayload !== null) {
+            $mail = new BookingUniversalNotification($universalPayload);
+        } else {
+            $mail = new OtaOperationalNotificationMail($htmlBody, $subject, $plainBody, $attachments);
+        }
         $pending = Mail::to($to);
         if ($cc !== []) {
             $pending->cc($cc);
@@ -716,6 +787,9 @@ class OtaNotificationService
     /**
      * @param  array<string, scalar|null>  $variables
      */
+    /**
+     * @param  array<string, mixed>  $jetpkPayload
+     */
     private function renderOperationalEmail(
         Agency $agency,
         string $eventKey,
@@ -723,6 +797,7 @@ class OtaNotificationService
         string $fallbackSubject,
         string $fallbackBody,
         ?Booking $booking = null,
+        array $jetpkPayload = [],
     ): \App\Support\Emails\OtaOperationalEmailRendered {
         if (JetpkOperationalEmailEventRegistry::isJetpkClient()) {
             try {
@@ -731,6 +806,7 @@ class OtaNotificationService
                     eventKey: $eventKey,
                     agency: $agency,
                     runtimeVariables: $variables,
+                    payload: $jetpkPayload,
                 );
                 $plain = trim(html_entity_decode(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $rendered->html))));
 
@@ -758,6 +834,106 @@ class OtaNotificationService
             $fallbackBody,
             $booking,
         );
+    }
+
+    /**
+     * @param  array<string, mixed>  $recipientContext
+     */
+    private function shouldFanOutNotifyBucketsByRole(array $recipientContext): bool
+    {
+        $buckets = $recipientContext['notify_buckets'] ?? null;
+        if (! is_array($buckets) || count($buckets) < 2) {
+            return false;
+        }
+
+        $tags = [];
+        foreach ($buckets as $bucket) {
+            if (! is_string($bucket) || trim($bucket) === '') {
+                continue;
+            }
+            $role = EmailRecipientRoleSubjectTagger::roleForBucket($bucket);
+            $tag = EmailRecipientRoleSubjectTagger::tagForRole($role) ?? 'UNTAGGED';
+            $tags[$tag] = true;
+        }
+
+        return count($tags) > 1;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, scalar|null>  $templateVariables
+     * @param  list<array{name: string, mime: string, content: string}>  $attachments
+     * @param  array<string, mixed>  $recipientContext
+     */
+    private function sendNotifyBucketRoleDeliveries(
+        Agency $agency,
+        string $eventKey,
+        array $payload,
+        ?Booking $booking,
+        ?User $actor,
+        ?string $fallbackSubject,
+        string $fallbackBody,
+        array $templateVariables,
+        array $attachments,
+        array $recipientContext,
+    ): void {
+        $buckets = array_values(array_filter(
+            is_array($recipientContext['notify_buckets'] ?? null) ? $recipientContext['notify_buckets'] : [],
+            fn ($bucket): bool => is_string($bucket) && trim($bucket) !== '',
+        ));
+
+        $groups = [];
+        foreach ($buckets as $bucket) {
+            $role = EmailRecipientRoleSubjectTagger::roleForBucket($bucket);
+            $tag = EmailRecipientRoleSubjectTagger::tagForRole($role) ?? 'UNTAGGED';
+            $groups[$tag][] = $bucket;
+        }
+
+        $seenEmails = [];
+        foreach ($groups as $groupBuckets) {
+            $resolved = $this->recipientResolver->resolve(
+                $agency,
+                $eventKey,
+                $booking,
+                $actor,
+                array_merge($recipientContext, [
+                    'notify_buckets' => $groupBuckets,
+                ]),
+            );
+
+            $to = [];
+            foreach ($resolved['to'] as $email) {
+                $normalized = strtolower(trim($email));
+                if ($normalized === '' || isset($seenEmails[$normalized])) {
+                    continue;
+                }
+                $seenEmails[$normalized] = true;
+                $to[] = $email;
+            }
+
+            if ($to === []) {
+                continue;
+            }
+
+            $deliveryBucket = $groupBuckets[0];
+            $this->send(
+                agency: $agency,
+                eventKey: $eventKey,
+                payload: $payload,
+                booking: $booking,
+                actor: $actor,
+                fallbackSubject: $fallbackSubject,
+                fallbackBody: $fallbackBody,
+                templateVariables: $templateVariables,
+                attachments: $attachments,
+                recipientContext: array_merge($recipientContext, [
+                    '_per_bucket_child' => true,
+                    'notify_buckets' => $groupBuckets,
+                    'delivery_bucket' => $deliveryBucket,
+                    '_forced_to' => $to,
+                ]),
+            );
+        }
     }
 
     private function maskEmail(string $email): string

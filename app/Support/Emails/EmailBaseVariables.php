@@ -264,16 +264,20 @@ class EmailBaseVariables
 
     protected static function manageBookingUrl(Booking $booking): string
     {
-        if ($booking->customer_id !== null && Route::has('customer.bookings.show')) {
-            return route('customer.bookings.show', $booking, absolute: true);
-        }
+        try {
+            if ($booking->customer_id !== null && Route::has('customer.bookings.show')) {
+                return route('customer.bookings.show', $booking, absolute: true);
+            }
 
-        if ($booking->customer_id !== null && Route::has('customer.bookings.index')) {
-            return route('customer.bookings.index', absolute: true);
-        }
+            if ($booking->customer_id !== null && Route::has('customer.bookings.index')) {
+                return route('customer.bookings.index', absolute: true);
+            }
 
-        if (Route::has('booking.lookup')) {
-            return route('booking.lookup', absolute: true);
+            if (Route::has('booking.lookup')) {
+                return route('booking.lookup', absolute: true);
+            }
+        } catch (\Throwable) {
+            // Fail closed to empty CTA rather than aborting notification render/send.
         }
 
         return '';
@@ -285,6 +289,10 @@ class EmailBaseVariables
             return '';
         }
 
-        return route('admin.bookings.show', $booking, absolute: true);
+        try {
+            return route('admin.bookings.show', $booking, absolute: true);
+        } catch (\Throwable) {
+            return '';
+        }
     }
 }

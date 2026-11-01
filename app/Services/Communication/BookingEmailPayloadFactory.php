@@ -1090,6 +1090,14 @@ class BookingEmailPayloadFactory
             $payload['selected_fare_family'] = $selectedFareFamily;
         }
 
+        $recipientType = (string) ($admin['recipient_type'] ?? 'customer');
+        if ($recipientType !== 'customer') {
+            $payload['subject'] = \App\Support\Emails\EmailRecipientRoleSubjectTagger::apply(
+                (string) $payload['subject'],
+                $recipientType,
+            );
+        }
+
         return $payload;
     }
 
@@ -1411,16 +1419,20 @@ class BookingEmailPayloadFactory
             return $url !== null ? [['label' => 'Open booking', 'url' => $url]] : [];
         }
 
-        if ($booking->customer_id !== null && Route::has('customer.bookings.show')) {
-            return [['label' => 'View booking', 'url' => route('customer.bookings.show', $booking, absolute: true)]];
-        }
+        try {
+            if ($booking->customer_id !== null && Route::has('customer.bookings.show')) {
+                return [['label' => 'View booking', 'url' => route('customer.bookings.show', $booking, absolute: true)]];
+            }
 
-        if ($booking->customer_id !== null && Route::has('customer.bookings.index')) {
-            return [['label' => 'My bookings', 'url' => route('customer.bookings.index', absolute: true)]];
-        }
+            if ($booking->customer_id !== null && Route::has('customer.bookings.index')) {
+                return [['label' => 'My bookings', 'url' => route('customer.bookings.index', absolute: true)]];
+            }
 
-        if (Route::has('booking.lookup')) {
-            return [['label' => 'Look up booking', 'url' => route('booking.lookup', absolute: true)]];
+            if (Route::has('booking.lookup')) {
+                return [['label' => 'Look up booking', 'url' => route('booking.lookup', absolute: true)]];
+            }
+        } catch (Throwable) {
+            return [];
         }
 
         return [];
