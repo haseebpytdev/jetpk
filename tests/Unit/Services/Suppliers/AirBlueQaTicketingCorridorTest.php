@@ -14,6 +14,8 @@ use App\Models\SupplierBooking;
 use App\Models\SupplierConnection;
 use App\Models\TicketingAttempt;
 use App\Models\User;
+use App\Services\Communication\BookingCommunicationService;
+use App\Services\Finance\Ledger\LedgerEventRecorder;
 use App\Services\Suppliers\TicketingAdapters\AirBlueSupplierTicketingAdapter;
 use App\Services\Suppliers\TicketingService;
 use Database\Seeders\OtaFoundationSeeder;
@@ -141,6 +143,13 @@ class AirBlueQaTicketingCorridorTest extends TestCase
                 ]],
             ));
         });
+        $this->mock(BookingCommunicationService::class, function ($mock): void {
+            $mock->shouldReceive('sendTicketIssued')->never();
+            $mock->shouldReceive('notifyTicketingFailure')->never();
+        });
+        $this->mock(LedgerEventRecorder::class, function ($mock): void {
+            $mock->shouldReceive('recordMarkupRevenueForBooking')->never();
+        });
 
         $result = app(TicketingService::class)->issueTickets($booking, $admin, false, false, true);
 
@@ -151,6 +160,33 @@ class AirBlueQaTicketingCorridorTest extends TestCase
         $this->assertSame('ticketed', $booking->fresh()->ticketing_status);
         $this->assertSame('unpaid', $booking->fresh()->payment_status);
         $this->assertSame('0.00', (string) $booking->fresh()->amount_paid);
+        Http::assertNothingSent();
+    }
+
+    public function test_controlled_qa_failure_does_not_send_ticketing_failure_notifications(): void
+    {
+        [$booking, $admin] = $this->unpaidQaBooking(withSeats: true);
+
+        $this->mock(AirBlueSupplierTicketingAdapter::class, function ($mock): void {
+            $mock->shouldReceive('issueTickets')->once()->andReturn(new TicketingResultData(
+                success: false,
+                status: 'failed',
+                provider: 'airblue',
+                error_code: 'qa_test_failure',
+                error_message: 'QA supplier failure.',
+            ));
+        });
+        $this->mock(BookingCommunicationService::class, function ($mock): void {
+            $mock->shouldReceive('notifyTicketingFailure')->never();
+            $mock->shouldReceive('sendTicketIssued')->never();
+        });
+
+        $result = app(TicketingService::class)->issueTickets($booking, $admin, false, false, true);
+
+        $this->assertFalse($result->success);
+        $this->assertSame(1, TicketingAttempt::query()->where('booking_id', $booking->id)->where('status', 'failed')->count());
+        $this->assertSame(0, BookingTicket::query()->where('booking_id', $booking->id)->count());
+        $this->assertSame('unpaid', $booking->fresh()->payment_status);
         Http::assertNothingSent();
     }
 
