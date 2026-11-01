@@ -189,6 +189,25 @@ class AirBlueQaTicketingScopeTest extends TestCase
         $this->assertSame('ticketing_feature_disabled', $result['reason']);
     }
 
+
+    public function test_pre_enable_scope_allows_safe_booking_while_ticketing_flag_is_off(): void
+    {
+        [$booking, $admin, $connection] = $this->fixture();
+        $credentials = is_array($connection->credentials) ? $connection->credentials : [];
+        $credentials['ticketing_enabled'] = false;
+        $connection->forceFill(['credentials' => $credentials])->save();
+
+        $result = app(AirBlueQaTicketingScope::class)->evaluateForTemporaryEnablement(
+            $booking->fresh(['latestSupplierBooking']),
+            $admin,
+            $connection->fresh(),
+        );
+
+        $this->assertTrue($result['allowed']);
+        $this->assertSame('ok', $result['reason']);
+        $this->assertTrue($result['seat_gate_satisfied']);
+    }
+
     public function test_blocks_when_is_active_false_even_if_status_active(): void
     {
         [$booking, $admin, $connection] = $this->fixture();
