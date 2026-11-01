@@ -1,0 +1,21 @@
+# JP-AIRBLUE-TICKET-REJECTION-FIX-01 — Preflight
+
+DATE: 2026-11-01
+
+```
+START_MAIN_SHA=5d75d9c7b8c523be9c0c5cdb8c93ad691402c46f
+FIX_BRANCH=fix/jp-airblue-ticket-rejection-document-01
+LOCAL_SHA=5d75d9c7b8c523be9c0c5cdb8c93ad691402c46f
+WORKTREE_STATUS=clean on fix branch from jetpk/main
+PRODUCTION_UP=200
+CONN23_TICKETING_ENABLED=NO
+BOOKING_57_STATUS=payment_pending
+BOOKING_57_PAYMENT_STATUS=unpaid
+BOOKING_57_SUPPLIER_BOOKING_STATUS=pending_ticketing
+BOOKING_57_TICKET_COUNT=0
+BOOKING_57_TICKETING_ATTEMPT_COUNT=1
+BOOKING_57_LATEST_ATTEMPT=failed
+SUPPLIER_CALLS=0
+```
+
+No booking 57 mutation. No ticketing flag change. No supplier calls.
