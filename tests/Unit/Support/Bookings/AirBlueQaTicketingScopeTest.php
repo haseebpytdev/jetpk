@@ -170,4 +170,84 @@ class AirBlueQaTicketingScopeTest extends TestCase
         $this->assertFalse($result['allowed']);
         $this->assertSame('booking_tickets_present', $result['reason']);
     }
+
+
+    public function test_blocks_when_ticketing_feature_is_disabled(): void
+    {
+        [$booking, $admin, $connection] = $this->fixture();
+        $credentials = is_array($connection->credentials) ? $connection->credentials : [];
+        $credentials['ticketing_enabled'] = false;
+        $connection->forceFill(['credentials' => $credentials])->save();
+
+        $result = app(AirBlueQaTicketingScope::class)->evaluate(
+            $booking->fresh(['latestSupplierBooking']),
+            $admin,
+            $connection->fresh(),
+        );
+
+        $this->assertFalse($result['allowed']);
+        $this->assertSame('ticketing_feature_disabled', $result['reason']);
+    }
+
+    public function test_blocks_when_is_active_false_even_if_status_active(): void
+    {
+        [$booking, $admin, $connection] = $this->fixture();
+        $connection->forceFill(['is_active' => false, 'status' => 'active'])->save();
+
+        $result = app(AirBlueQaTicketingScope::class)->evaluate(
+            $booking->fresh(['latestSupplierBooking']),
+            $admin,
+            $connection->fresh(),
+        );
+
+        $this->assertFalse($result['allowed']);
+        $this->assertSame('connection_inactive', $result['reason']);
+    }
+
+    public function test_blocks_when_status_inactive_even_if_is_active_true(): void
+    {
+        [$booking, $admin, $connection] = $this->fixture();
+        $connection->forceFill(['is_active' => true, 'status' => 'inactive'])->save();
+
+        $result = app(AirBlueQaTicketingScope::class)->evaluate(
+            $booking->fresh(['latestSupplierBooking']),
+            $admin,
+            $connection->fresh(),
+        );
+
+        $this->assertFalse($result['allowed']);
+        $this->assertSame('connection_inactive', $result['reason']);
+    }
+
+    public function test_blocks_wrong_test_host(): void
+    {
+        [$booking, $admin, $connection] = $this->fixture();
+        $connection->forceFill(['base_url' => 'https://example.invalid/v3.0/OTAAPI.asmx'])->save();
+
+        $result = app(AirBlueQaTicketingScope::class)->evaluate(
+            $booking->fresh(['latestSupplierBooking']),
+            $admin,
+            $connection->fresh(),
+        );
+
+        $this->assertFalse($result['allowed']);
+        $this->assertSame('host_not_approved_test', $result['reason']);
+    }
+
+    public function test_blocks_non_v3_protocol(): void
+    {
+        [$booking, $admin, $connection] = $this->fixture();
+        $credentials = is_array($connection->credentials) ? $connection->credentials : [];
+        $credentials['protocol_version'] = '2.0';
+        $connection->forceFill(['credentials' => $credentials])->save();
+
+        $result = app(AirBlueQaTicketingScope::class)->evaluate(
+            $booking->fresh(['latestSupplierBooking']),
+            $admin,
+            $connection->fresh(),
+        );
+
+        $this->assertFalse($result['allowed']);
+        $this->assertSame('protocol_not_v3', $result['reason']);
+    }
 }
