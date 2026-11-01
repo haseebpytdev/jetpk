@@ -1,0 +1,16 @@
+# 03 — SeatMap result
+
+Exactly one AirBlue SeatMap provider call was executed.
+
+```
+SEATMAP_PROVIDER_CALLS=1
+SEATMAP_COUNT=1
+SEAT_ROWS_COUNT=30
+SEATS_TOTAL=210
+SEATS_AVAILABLE=178
+SEATS_CHARGEABLE=156
+SEATS_COMPLIMENTARY=22
+SEATMAP_PARSER=PASS
+```
+
+No seat mutation occurred.
