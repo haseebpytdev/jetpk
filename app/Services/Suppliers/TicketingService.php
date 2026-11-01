@@ -230,8 +230,14 @@ class TicketingService
 
         $result = DB::transaction(function () use ($booking, $supplierBooking, $attempt, $result, $actor, $allowQaAirBlue): TicketingResultData {
             if (! $result->success) {
+                $attemptStatus = match ((string) $result->status) {
+                    'not_supported' => 'not_supported',
+                    'uncertain', 'pending_reconciliation' => 'uncertain',
+                    default => 'failed',
+                };
+
                 $attempt->forceFill([
-                    'status' => $result->status === 'not_supported' ? 'not_supported' : 'failed',
+                    'status' => $attemptStatus,
                     'request_payload' => SensitiveDataRedactor::redact($result->request_payload),
                     'response_payload' => SensitiveDataRedactor::redact($result->response_payload),
                     'safe_summary' => SensitiveDataRedactor::redact($result->safe_summary),
