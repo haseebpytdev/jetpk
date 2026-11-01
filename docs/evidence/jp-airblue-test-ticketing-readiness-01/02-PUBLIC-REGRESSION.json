@@ -1,0 +1,12 @@
+{
+  "phase": "JP-AIRBLUE-TEST-TICKETING-READINESS-01-PUBLIC",
+  "started_at": "2026-10-31T22:45:45.681Z",
+  "up": 200,
+  "results_data_status": 200,
+  "public_offers": 9,
+  "normal_public_airblue_exposure": 0,
+  "providers": [
+    "sabre"
+  ],
+  "finished_at": "2026-10-31T22:46:07.357Z"
+}
