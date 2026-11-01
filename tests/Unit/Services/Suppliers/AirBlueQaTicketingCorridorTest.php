@@ -190,6 +190,37 @@ class AirBlueQaTicketingCorridorTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_controlled_qa_uncertain_result_persists_uncertain_attempt_status(): void
+    {
+        [$booking, $admin] = $this->unpaidQaBooking(withSeats: true);
+
+        $this->mock(AirBlueSupplierTicketingAdapter::class, function ($mock): void {
+            $mock->shouldReceive('issueTickets')->once()->andReturn(new TicketingResultData(
+                success: false,
+                status: 'uncertain',
+                provider: 'airblue',
+                error_code: 'supplier_transport_failed',
+                error_message: 'Provider outcome uncertain.',
+                outcome: 'UNCERTAIN_AFTER_TRANSMISSION',
+                provider_calls: 1,
+            ));
+        });
+
+        $result = app(TicketingService::class)->issueTickets($booking, $admin, false, false, true);
+
+        $this->assertFalse($result->success);
+        $this->assertSame('uncertain', $result->status);
+        $this->assertSame(
+            1,
+            TicketingAttempt::query()
+                ->where('booking_id', $booking->id)
+                ->where('status', 'uncertain')
+                ->count()
+        );
+        $this->assertSame(0, BookingTicket::query()->where('booking_id', $booking->id)->count());
+        $this->assertSame('unpaid', $booking->fresh()->payment_status);
+    }
+
     public function test_qa_flag_blocked_when_seats_missing(): void
     {
         [$booking, $admin] = $this->unpaidQaBooking(withSeats: false);
