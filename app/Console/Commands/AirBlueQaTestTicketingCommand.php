@@ -159,6 +159,9 @@ class AirBlueQaTestTicketingCommand extends Command
         $this->line('success='.($result->success ? 'true' : 'false'));
         $this->line('status='.$result->status);
         $this->line('error_code='.(string) ($result->error_code ?? ''));
+        $this->line('outcome='.(string) ($result->outcome ?? ''));
+        $this->line('provider_calls='.(string) ($result->provider_calls ?? 0));
+        $this->line('ticket_count='.count($result->tickets));
 
         return $result->success ? self::SUCCESS : self::FAILURE;
     }
