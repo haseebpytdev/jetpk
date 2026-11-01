@@ -228,7 +228,7 @@ class TicketingService
 
         $result = $this->resolveAdapter($supplierBooking)->issueTickets($booking, $supplierBooking, $actor);
 
-        $result = DB::transaction(function () use ($booking, $supplierBooking, $attempt, $result, $actor): TicketingResultData {
+        $result = DB::transaction(function () use ($booking, $supplierBooking, $attempt, $result, $actor, $allowQaAirBlue): TicketingResultData {
             if (! $result->success) {
                 $attempt->forceFill([
                     'status' => $result->status === 'not_supported' ? 'not_supported' : 'failed',
@@ -248,19 +248,26 @@ class TicketingService
                 $failureType = $result->status === 'not_supported'
                     ? OtaNotificationEvent::TicketingNotSupported->value
                     : OtaNotificationEvent::TicketingFailed->value;
-                $this->communicationService->notifyTicketingFailure(
-                    $booking,
-                    $failureType,
-                    $actor,
-                    [
-                        'ticketing_attempt_id' => $attempt->id,
+                if (! $allowQaAirBlue) {
+                    $this->communicationService->notifyTicketingFailure(
+                        $booking,
+                        $failureType,
+                        $actor,
+                        [
+                            'ticketing_attempt_id' => $attempt->id,
+                            'provider' => $result->provider,
+                            'error_code' => $result->error_code,
+                            'failure_reason' => $result->error_message,
+                            'supplier_booking_status' => (string) ($booking->supplier_booking_status ?? ''),
+                            'ticketing_status' => (string) ($booking->ticketing_status ?? ''),
+                        ],
+                    );
+                } else {
+                    $this->logTicketingEvent('ticketing.qa_airblue_failure_communication_suppressed', $booking, $actor, [
                         'provider' => $result->provider,
-                        'error_code' => $result->error_code,
-                        'failure_reason' => $result->error_message,
-                        'supplier_booking_status' => (string) ($booking->supplier_booking_status ?? ''),
-                        'ticketing_status' => (string) ($booking->ticketing_status ?? ''),
-                    ],
-                );
+                        'attempt_id' => $attempt->id,
+                    ]);
+                }
 
                 return $result;
             }
@@ -282,7 +289,7 @@ class TicketingService
                     'meta' => SensitiveDataRedactor::redact(['passenger_name' => $ticketData['passenger_name'] ?? null]),
                 ]);
 
-                if ($booking->agent_id !== null) {
+                if (! $allowQaAirBlue && $booking->agent_id !== null) {
                     $this->agentCommissionService->generateCommissionForTicket($ticket);
                 }
             }
@@ -345,15 +352,24 @@ class TicketingService
 
             if ($result->provider === SupplierProvider::PiaNdc->value) {
                 $this->piaNdcEticketDeliveryService->deliverAfterSuccessfulTicketing($booking->fresh(), $actor);
-            } else {
+            } elseif (! $allowQaAirBlue) {
                 $this->communicationService->sendTicketIssued($booking->fresh());
+            } else {
+                $this->logTicketingEvent('ticketing.qa_airblue_success_communication_suppressed', $booking, $actor, [
+                    'provider' => $result->provider,
+                    'attempt_id' => $attempt->id,
+                ]);
             }
 
             return $result;
         });
 
-        if ($result->success) {
+        if ($result->success && ! $allowQaAirBlue) {
             app(LedgerEventRecorder::class)->recordMarkupRevenueForBooking($booking->fresh(), $actor);
+        } elseif ($result->success && $allowQaAirBlue) {
+            $this->logTicketingEvent('ticketing.qa_airblue_financial_side_effects_suppressed', $booking->fresh(), $actor, [
+                'provider' => $provider,
+            ]);
         }
 
         if ($adminManualOverride && $provider === SupplierProvider::PiaNdc->value) {
