@@ -98,7 +98,7 @@ final class AirBlueQaTicketingScope
         $statusValue = $connection->status instanceof \BackedEnum
             ? $connection->status->value
             : (string) $connection->status;
-        if (! $connection->is_active && $statusValue !== 'active') {
+        if (! $connection->is_active || $statusValue !== 'active') {
             return $this->deny($expectedId, 'connection_inactive');
         }
 
@@ -120,6 +120,17 @@ final class AirBlueQaTicketingScope
         $serviceTarget = $this->configResolver->resolveServiceTarget($connection, $credentials);
         if (strcasecmp(trim($serviceTarget), 'Test') !== 0) {
             return $this->deny($expectedId, 'service_target_not_test');
+        }
+
+        if (! filter_var($credentials['ticketing_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+            return $this->deny($expectedId, 'ticketing_feature_disabled', [
+                'environment' => $connection->environment instanceof SupplierEnvironment
+                    ? $connection->environment->value
+                    : (string) $connection->environment,
+                'protocol' => $protocol->value,
+                'test_host' => $host,
+                'service_target' => $serviceTarget,
+            ]);
         }
 
         $supplierBooking = $booking->latestSupplierBooking;
