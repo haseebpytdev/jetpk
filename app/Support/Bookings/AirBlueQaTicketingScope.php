@@ -57,6 +57,32 @@ final class AirBlueQaTicketingScope
      */
     public function evaluate(Booking $booking, User $actor, ?SupplierConnection $connection = null): array
     {
+        return $this->evaluateInternal($booking, $actor, $connection, true);
+    }
+
+    /**
+     * Pre-enable validation used only by the QA CLI before temporarily setting
+     * ticketing_enabled=true. Every other sandbox/booking/actor/seat gate still applies.
+     *
+     * @return array<string, mixed>
+     */
+    public function evaluateForTemporaryEnablement(
+        Booking $booking,
+        User $actor,
+        ?SupplierConnection $connection = null,
+    ): array {
+        return $this->evaluateInternal($booking, $actor, $connection, false);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function evaluateInternal(
+        Booking $booking,
+        User $actor,
+        ?SupplierConnection $connection,
+        bool $requireTicketingFeature,
+    ): array {
         $expectedId = (int) config('ota.qa_staff_airblue.connection_id', 23);
         $booking->loadMissing(['latestSupplierBooking']);
 
@@ -122,7 +148,8 @@ final class AirBlueQaTicketingScope
             return $this->deny($expectedId, 'service_target_not_test');
         }
 
-        if (! filter_var($credentials['ticketing_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+        if ($requireTicketingFeature
+            && ! filter_var($credentials['ticketing_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
             return $this->deny($expectedId, 'ticketing_feature_disabled', [
                 'environment' => $connection->environment instanceof SupplierEnvironment
                     ? $connection->environment->value
