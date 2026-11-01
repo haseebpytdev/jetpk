@@ -35,9 +35,13 @@
 - No booking cancel / seat remove
 - REQUIRES_LATER_CLEANUP=YES
 
+## Post-cert DB RPH proof
+
+DB-only snapshot (PROVIDER_CALLS=0): seat 27A Confirmed with non-empty traveler/flight RPH hashes matching readiness (`len32:c0a1df97` / `len1:6b86b273`).
+
 ## Open
 
 P0_OPEN=0  
 P1_OPEN=0  
-P2_OPEN=0  
+P2_OPEN=1 (optional: wire-meter Type=5/ADT via sanitized request-context logs for future phases)  
 P3_OPEN=0  
