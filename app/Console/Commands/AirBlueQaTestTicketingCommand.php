@@ -86,20 +86,19 @@ class AirBlueQaTestTicketingCommand extends Command
     protected function resolveActor(): ?User
     {
         $username = trim((string) $this->option('actor'));
-        $query = User::query()->orderBy('id');
+
         if ($username !== '') {
-            $query->where('username', $username);
+            $actor = User::query()->where('username', $username)->first();
+
+            return $actor !== null && QaStaffAirBlueContext::actorIsAllowed($actor)
+                ? $actor
+                : null;
         }
 
-        $actor = $query->first();
-        if ($actor === null || ! QaStaffAirBlueContext::actorIsAllowed($actor)) {
-            return User::query()
-                ->whereIn('account_type', [AccountType::PlatformAdmin, AccountType::Staff])
-                ->orderBy('id')
-                ->get()
-                ->first(fn (User $u): bool => QaStaffAirBlueContext::actorIsAllowed($u));
-        }
-
-        return $actor;
+        return User::query()
+            ->whereIn('account_type', [AccountType::PlatformAdmin, AccountType::Staff])
+            ->orderBy('id')
+            ->get()
+            ->first(fn (User $u): bool => QaStaffAirBlueContext::actorIsAllowed($u));
     }
 }
