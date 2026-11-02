@@ -37,7 +37,18 @@ final class OneApiSupplierConnectionNormalizer
         $credentials = is_array($payload['credentials'] ?? null) ? $payload['credentials'] : [];
         $existingCredentials = ($existing !== null && is_array($existing->credentials)) ? $existing->credentials : [];
 
-        foreach (['username', 'password', 'agent_code', 'rest_auth_url', 'rest_search_url', 'soap_url'] as $key) {
+        foreach ([
+            'rest_username',
+            'rest_password',
+            'soap_username',
+            'soap_password',
+            'username',
+            'password',
+            'agent_code',
+            'rest_auth_url',
+            'rest_search_url',
+            'soap_url',
+        ] as $key) {
             $incoming = trim((string) ($credentials[$key] ?? ''));
             if ($incoming === '' && isset($existingCredentials[$key])) {
                 $credentials[$key] = $existingCredentials[$key];

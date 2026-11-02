@@ -8,6 +8,9 @@ use App\Services\Suppliers\OneApi\Exceptions\OneApiValidationException;
 
 /**
  * Resolves One API connection credentials and operational settings.
+ *
+ * REST Aero auth/search and SOAP AAResWebServices are distinct identities.
+ * Legacy username/password remain as fallback for each pair.
  */
 class OneApiConfigResolver
 {
@@ -20,14 +23,35 @@ class OneApiConfigResolver
         $settings = is_array($connection->settings) ? $connection->settings : [];
         $meta = is_array($connection->meta) ? $connection->meta : [];
 
-        $username = trim((string) ($credentials['username'] ?? ''));
-        $password = trim((string) ($credentials['password'] ?? ''));
+        $legacyUsername = trim((string) ($credentials['username'] ?? ''));
+        $legacyPassword = (string) ($credentials['password'] ?? '');
+
+        $restUsername = trim((string) ($credentials['rest_username'] ?? ''));
+        if ($restUsername === '') {
+            $restUsername = $legacyUsername;
+        }
+
+        $restPassword = (string) ($credentials['rest_password'] ?? '');
+        if (trim($restPassword) === '') {
+            $restPassword = $legacyPassword;
+        }
+
+        $soapUsername = trim((string) ($credentials['soap_username'] ?? ''));
+        if ($soapUsername === '') {
+            $soapUsername = $legacyUsername;
+        }
+
+        $soapPassword = (string) ($credentials['soap_password'] ?? '');
+        if (trim($soapPassword) === '') {
+            $soapPassword = $legacyPassword;
+        }
+
         $agentCode = trim((string) ($credentials['agent_code'] ?? ''));
         $restAuthUrl = trim((string) ($credentials['rest_auth_url'] ?? ''));
         $restSearchUrl = trim((string) ($credentials['rest_search_url'] ?? ''));
         $soapUrl = trim((string) ($credentials['soap_url'] ?? ''));
 
-        if ($username === '' || $password === '' || $agentCode === '' || $restAuthUrl === '' || $restSearchUrl === '') {
+        if ($restUsername === '' || trim($restPassword) === '' || $agentCode === '' || $restAuthUrl === '' || $restSearchUrl === '') {
             throw new OneApiValidationException(
                 'configuration_error',
                 422,
@@ -43,8 +67,13 @@ class OneApiConfigResolver
             'connection_id' => (int) $connection->id,
             'environment' => $environment,
             'is_staging' => $isStaging,
-            'username' => $username,
-            'password' => $password,
+            'rest_username' => $restUsername,
+            'rest_password' => $restPassword,
+            'soap_username' => $soapUsername,
+            'soap_password' => $soapPassword,
+            // Legacy aliases retained for older callers/tests; prefer rest_* / soap_*.
+            'username' => $restUsername,
+            'password' => $restPassword,
             'agent_code' => $agentCode,
             'agent_preferred_currency' => strtoupper(trim((string) ($credentials['agent_preferred_currency'] ?? 'AED'))),
             'pos_country' => strtoupper(trim((string) ($credentials['pos_country'] ?? ''))),

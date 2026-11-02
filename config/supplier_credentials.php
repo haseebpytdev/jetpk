@@ -168,17 +168,47 @@ return [
         ],
         'one_api' => [
             'fields' => [
-                'username' => [
-                    'label' => 'API Username',
+                'rest_username' => [
+                    'label' => 'REST API Username',
                     'type' => 'text',
-                    'required' => true,
-                    'placeholder' => 'ONE_API_TEST_USERNAME',
+                    'required' => false,
+                    'placeholder' => 'REST / Aero authenticate login',
+                    'help' => 'Used for REST authenticate + X-AERO-USERID. Distinct from SOAP identity. Required unless legacy username is set.',
+                ],
+                'rest_password' => [
+                    'label' => 'REST API Password',
+                    'type' => 'password',
+                    'required' => false,
+                    'placeholder' => 'Leave blank to keep existing value.',
+                    'help' => 'Required unless legacy password is set. Blank on edit keeps existing encrypted value.',
+                ],
+                'soap_username' => [
+                    'label' => 'SOAP API Username',
+                    'type' => 'text',
+                    'required' => false,
+                    'placeholder' => 'AAResWebServices UsernameToken / RequestorID',
+                    'help' => 'Used for SOAP WS-Security and OTA RequestorID. Distinct from REST identity. Required unless legacy username is set.',
+                ],
+                'soap_password' => [
+                    'label' => 'SOAP API Password',
+                    'type' => 'password',
+                    'required' => false,
+                    'placeholder' => 'Leave blank to keep existing value.',
+                    'help' => 'Required unless legacy password is set. Blank on edit keeps existing encrypted value.',
+                ],
+                'username' => [
+                    'label' => 'Legacy shared username (optional)',
+                    'type' => 'text',
+                    'required' => false,
+                    'placeholder' => 'Fallback when rest_/soap_ username empty',
+                    'help' => 'Historical single identity. Prefer REST/SOAP fields above.',
                 ],
                 'password' => [
-                    'label' => 'API Password',
+                    'label' => 'Legacy shared password (optional)',
                     'type' => 'password',
-                    'required' => true,
+                    'required' => false,
                     'placeholder' => 'Leave blank to keep existing value.',
+                    'help' => 'Historical single identity. Prefer REST/SOAP fields above.',
                 ],
                 'agent_code' => [
                     'label' => 'Agent Code',

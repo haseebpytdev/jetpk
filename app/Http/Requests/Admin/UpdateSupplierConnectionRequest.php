@@ -150,6 +150,29 @@ class UpdateSupplierConnectionRequest extends StoreSupplierConnectionRequest
                 return;
             }
 
+            if ($provider === SupplierProvider::OneApi->value) {
+                $restUser = SupplierCredentialFormPresenter::effectiveValue('rest_username', $credentials, $existingCredentials)
+                    ?: SupplierCredentialFormPresenter::effectiveValue('username', $credentials, $existingCredentials);
+                $restPass = SupplierCredentialFormPresenter::effectiveValue('rest_password', $credentials, $existingCredentials)
+                    ?: SupplierCredentialFormPresenter::effectiveValue('password', $credentials, $existingCredentials);
+                $soapUser = SupplierCredentialFormPresenter::effectiveValue('soap_username', $credentials, $existingCredentials)
+                    ?: SupplierCredentialFormPresenter::effectiveValue('username', $credentials, $existingCredentials);
+                $soapPass = SupplierCredentialFormPresenter::effectiveValue('soap_password', $credentials, $existingCredentials)
+                    ?: SupplierCredentialFormPresenter::effectiveValue('password', $credentials, $existingCredentials);
+                if ($restUser === '') {
+                    $validator->errors()->add('credentials.rest_username', 'REST API username or legacy username is required for ONE_API.');
+                }
+                if ($restPass === '') {
+                    $validator->errors()->add('credentials.rest_password', 'REST API password or legacy password is required for ONE_API.');
+                }
+                if ($soapUser === '') {
+                    $validator->errors()->add('credentials.soap_username', 'SOAP API username or legacy username is required for ONE_API.');
+                }
+                if ($soapPass === '') {
+                    $validator->errors()->add('credentials.soap_password', 'SOAP API password or legacy password is required for ONE_API.');
+                }
+            }
+
             foreach ($providerFields as $fieldKey => $meta) {
                 $required = (bool) ($meta['required'] ?? false);
                 if (! $required) {

@@ -53,6 +53,7 @@ class OneApiRestClient
     ): array {
         try {
             $token = $this->authService->getAccessToken($connection);
+            $journeyType = ! empty($payload['isReturn']) ? 'RETURN' : 'ONEWAY';
             $pending = Http::timeout($timeoutSeconds)
                 ->connectTimeout((int) $config['connect_timeout_seconds'])
                 ->acceptJson()
@@ -60,6 +61,10 @@ class OneApiRestClient
                 ->withHeaders([
                     'Authorization' => 'Bearer '.$token,
                     'X-Correlation-ID' => $correlationId,
+                    'X-AERO-SALES-CHANNEL' => (string) ($config['sales_channel'] ?? 'OTA'),
+                    'X-AERO-JOURNEY-TYPE' => $journeyType,
+                    'X-AERO-USERID' => (string) $config['rest_username'],
+                    'X-AERO-AGENT-CODE' => (string) $config['agent_code'],
                 ]);
 
             if (! ($config['verify_tls'] ?? true)) {

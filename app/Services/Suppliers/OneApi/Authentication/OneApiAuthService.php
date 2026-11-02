@@ -60,8 +60,8 @@ class OneApiAuthService
         $startedAt = microtime(true);
         $url = (string) $config['rest_auth_url'];
         $payload = [
-            'login' => (string) $config['username'],
-            'password' => (string) $config['password'],
+            'login' => (string) $config['rest_username'],
+            'password' => (string) $config['rest_password'],
         ];
 
         try {

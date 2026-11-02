@@ -20,7 +20,7 @@ class OneApiReadRequestBuilder
     public function build(SupplierConnection $connection, string $pnr): string
     {
         $config = $this->configResolver->resolve($connection);
-        $security = $this->securityBuilder->buildUsernameToken((string) $config['username'], (string) $config['password']);
+        $security = $this->securityBuilder->buildUsernameToken((string) $config['soap_username'], (string) $config['soap_password']);
 
         $writer = new XMLWriter;
         $writer->openMemory();
