@@ -35,6 +35,10 @@ class EjmiralAerostCredentialPortalMinimizationTest extends TestCase
         $this->assertArrayNotHasKey('existing_token', $fields, 'AEROST_BEARER_TOKEN_MANUAL_FIELD_PRESENT=NO');
         $this->assertArrayNotHasKey('token_ttl_seconds', $fields);
         $this->assertArrayNotHasKey('connect_timeout_seconds', $fields);
+        $this->assertFalse(
+            \App\Support\Suppliers\SupplierIntegrationCatalog::baseUrlOverridable('ejmiral_aerost'),
+            'AEROST_API_BASE_URL_OPERATOR_EDITABLE=NO'
+        );
     }
 
     public function test_api_host_status_unresolved_until_system_config(): void

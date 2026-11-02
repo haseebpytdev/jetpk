@@ -147,7 +147,8 @@ final class SupplierIntegrationCatalog
                 'supports_enable_disable' => true,
                 'check_type' => 'configuration_validation',
                 'readiness' => 'UAT',
-                'baseUrlOverridable' => true,
+                // API host is system-managed via EJMIRAL_AEROST_API_BASE_URL — not operator-editable.
+                'baseUrlOverridable' => false,
             ],
             [
                 'key' => SupplierProvider::AlHaider->value,
