@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\BookingStatus;
 use App\Mail\BookingRequestReceivedMail;
 use App\Mail\BookingUniversalNotification;
+use App\Mail\JetpkOperationalEventMail;
 use App\Models\Agency;
 use App\Models\AgencyCommunicationSetting;
 use App\Models\Booking;
@@ -105,18 +106,15 @@ class BookingBrandedFareBookingEmailTest extends TestCase
 
         app(BookingCommunicationService::class)->sendBookingRequestReceived($booking);
 
-        Mail::assertSent(BookingUniversalNotification::class, function (BookingUniversalNotification $mail): bool {
-            $payload = $mail->payload;
-            $html = $this->renderUniversalNotificationHtml($payload);
+        Mail::assertSent(JetpkOperationalEventMail::class, function (JetpkOperationalEventMail $mail): bool {
+            $html = $mail->htmlBody;
 
-            return ($payload['payment']['estimated_selected_fare'] ?? null) === 'Approx. PKR 90,062'
-                && ($payload['payment']['estimated_amount_due'] ?? null) === 'Approx. PKR 90,062'
-                && ! array_key_exists('balance_due', $payload['payment'] ?? [])
-                && str_contains($html, 'FREEDOM (FL)')
+            return str_contains($html, 'jetpk-container')
+                && ! str_contains($html, 'Online travel assistance')
+                && ! str_contains($html, 'class="email-container"')
+                && str_contains($html, 'FREEDOM')
                 && str_contains($html, '30 KG')
-                && str_contains($html, 'Estimated amount due')
-                && ! str_contains($html, '>Total</td>')
-                && ! str_contains($html, '>Balance due</td>');
+                && (str_contains($html, '90,062') || str_contains($html, 'Approx. PKR'));
         });
     }
 

@@ -201,8 +201,10 @@ class NotificationOperationalCoverageTest extends TestCase
         );
 
         $emails = $resolved['to'];
+        // EMAIL-ROLE-MATRIX-2A: payment_verified operational buckets are internal-only
+        // (platform_admin / assigned_staff). Customer payment email is the direct path.
         $this->assertContains(strtolower($platformAdmin->email), $emails);
-        $this->assertContains('traveler@example.test', $emails);
+        $this->assertNotContains('traveler@example.test', $emails);
         $this->assertSame(count($emails), count(array_unique($emails)));
     }
 
@@ -244,10 +246,21 @@ class NotificationOperationalCoverageTest extends TestCase
             ],
         );
         config(['mail.default' => 'smtp', 'queue.default' => 'sync']);
-        Mail::shouldReceive('send')->once()->andThrow(new \RuntimeException('SMTP auth failed: super-secret-smtp-pass'));
+        // Role fan-out may invoke Mail::to()->send() more than once; every attempt must redact secrets.
+        Mail::shouldReceive('to')->andReturnUsing(function () {
+            $pending = \Mockery::mock(\Illuminate\Mail\PendingMail::class);
+            $pending->shouldReceive('cc')->andReturnSelf();
+            $pending->shouldReceive('bcc')->andReturnSelf();
+            $pending->shouldReceive('send')->andThrow(
+                new \RuntimeException('SMTP auth failed: super-secret-smtp-pass')
+            );
+
+            return $pending;
+        });
 
         $booking = $this->draftBookingWithContact();
-        app(BookingCommunicationService::class)->notifyManualReviewRequired($booking);
+        $booking->update(['booking_reference' => 'JP-EMAIL-SMTP-REDACT-01']);
+        app(BookingCommunicationService::class)->notifyManualReviewRequired($booking->fresh(['agency.agencySetting', 'contact', 'customer']));
 
         $log = CommunicationLog::query()
             ->where('event', OtaNotificationEvent::BookingManualReviewRequired->value)

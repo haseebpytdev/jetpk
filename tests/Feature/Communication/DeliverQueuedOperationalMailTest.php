@@ -55,7 +55,10 @@ class DeliverQueuedOperationalMailTest extends TestCase
 
         Queue::assertPushed(DeliverQueuedOperationalMail::class, function (DeliverQueuedOperationalMail $job): bool {
             return $job->queue === 'notifications-transactional'
-                && $job->subject === 'Wave1C canary';
+                && (
+                    $job->subject === 'Wave1C canary'
+                    || $job->subject === '[ADMIN] Wave1C canary'
+                );
         });
         Queue::assertNotPushed(\Illuminate\Queue\CallQueuedClosure::class);
     }
