@@ -34,20 +34,23 @@ class OneApiAuthAndSearchTest extends TestCase
             ],
         ]);
 
+        $depart = now()->addMonths(2)->toDateString();
+        $return = now()->addMonths(2)->addDays(7)->toDateString();
+
         $builder = app(OneApiSearchRequestBuilder::class);
         $request = new FlightSearchRequestData(
             origin: 'SHJ',
             destination: 'KHI',
-            departure_date: '2026-08-15',
-            return_date: '2026-08-22',
+            departure_date: $depart,
+            return_date: $return,
             trip_type: 'return',
             adults: 1,
         );
 
         $payload = $builder->build($request, $connection);
         $this->assertTrue($payload['isReturn']);
-        $this->assertSame('2026-08-22', $payload['searchOnds'][1]['searchStartDate']);
-        $this->assertSame('2026-08-22', $payload['searchOnds'][1]['preferredDate']);
+        $this->assertSame($return, $payload['searchOnds'][1]['searchStartDate']);
+        $this->assertSame($return, $payload['searchOnds'][1]['preferredDate']);
     }
 
     public function test_search_parser_filters_not_available(): void
