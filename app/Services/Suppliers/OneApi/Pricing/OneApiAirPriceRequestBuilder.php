@@ -21,7 +21,7 @@ class OneApiAirPriceRequestBuilder
     public function buildInitialPrice(SupplierConnection $connection, array $signedOffer, array $ondGroups, string $directionInd): string
     {
         $config = $this->configResolver->resolve($connection);
-        $security = $this->securityBuilder->buildUsernameToken((string) $config['username'], (string) $config['password']);
+        $security = $this->securityBuilder->buildUsernameToken((string) $config['soap_username'], (string) $config['soap_password']);
 
         $writer = new XMLWriter;
         $writer->openMemory();
@@ -38,7 +38,7 @@ class OneApiAirPriceRequestBuilder
         $writer->startElement('ota:Source');
         $writer->startElement('ota:RequestorID');
         $writer->writeAttribute('Type', '4');
-        $writer->writeAttribute('ID', (string) $config['username']);
+        $writer->writeAttribute('ID', (string) $config['soap_username']);
         $writer->endElement();
         $writer->startElement('ota:BookingChannel');
         $writer->writeAttribute('Type', '12');

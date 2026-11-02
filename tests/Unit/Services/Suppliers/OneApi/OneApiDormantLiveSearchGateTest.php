@@ -125,6 +125,7 @@ class OneApiDormantLiveSearchGateTest extends TestCase
             'status' => SupplierConnectionStatus::Active,
             'is_active' => true,
             'credentials' => $this->credentials(),
+            'settings' => $this->oneApiConfirmedAccountSettings(),
         ]);
 
         $this->mock(OneApiFlightSupplierAdapter::class, function ($mock): void {
@@ -140,7 +141,7 @@ class OneApiDormantLiveSearchGateTest extends TestCase
         $result = app(FlightSearchService::class)->searchWithMeta([
             'origin' => 'SHJ',
             'destination' => 'KHI',
-            'depart_date' => '2026-09-01',
+            'depart_date' => now()->addMonths(2)->toDateString(),
             'adults' => 1,
         ], $agency, 'public_guest');
 
@@ -186,7 +187,7 @@ class OneApiDormantLiveSearchGateTest extends TestCase
         return new FlightSearchRequestData(
             origin: 'SHJ',
             destination: 'KHI',
-            departure_date: '2026-08-15',
+            departure_date: now()->addMonths(2)->toDateString(),
             return_date: null,
             adults: 1,
             children: 0,
@@ -206,6 +207,7 @@ class OneApiDormantLiveSearchGateTest extends TestCase
             'is_active' => true,
             'status' => SupplierConnectionStatus::Active,
             'credentials' => array_merge($this->credentials(), $credentialOverrides),
+            'settings' => $this->oneApiConfirmedAccountSettings(),
         ]);
     }
 

@@ -548,6 +548,10 @@ return [
         ],
     ],
     'one_api' => [
+        'sales_channel' => env('ONE_API_SALES_CHANNEL', 'OTA'),
+        'verify_tls' => (bool) env('ONE_API_VERIFY_TLS', true),
+        'log_payloads' => (bool) env('ONE_API_LOG_PAYLOADS', false),
+        'max_search_results' => (int) env('ONE_API_MAX_SEARCH_RESULTS', 200),
         'connect_timeout_seconds' => (int) env('ONE_API_CONNECT_TIMEOUT_SECONDS', 10),
         'request_timeout_seconds' => (int) env('ONE_API_REQUEST_TIMEOUT_SECONDS', 60),
         'search_timeout_seconds' => (int) env('ONE_API_SEARCH_TIMEOUT_SECONDS', 90),
@@ -557,6 +561,32 @@ return [
         'live_search_enabled' => (bool) env('ONE_API_LIVE_SEARCH_ENABLED', false),
         'live_booking_enabled' => (bool) env('ONE_API_LIVE_BOOKING_ENABLED', false),
         'live_payment_modification_enabled' => (bool) env('ONE_API_LIVE_PAYMENT_MODIFICATION_ENABLED', false),
+        'endpoints' => [
+            'sandbox' => [
+                'rest_auth_url' => env(
+                    'ONE_API_SANDBOX_REST_AUTH_URL',
+                    'https://aero-suite-stage4-airarabia.isaaviation.net/api/auth/authenticate'
+                ),
+                'rest_search_url' => env(
+                    'ONE_API_SANDBOX_REST_SEARCH_URL',
+                    'https://aero-search-api-service-stage4-airarabia.isaaviation.net/aerosearch.FlightService/findOndWiseFlightCombinations'
+                ),
+                'soap_url' => env(
+                    'ONE_API_SANDBOX_SOAP_URL',
+                    'https://g94.isaaviations.com/webservices/services/AAResWebServices'
+                ),
+                'wsdl_url' => env(
+                    'ONE_API_SANDBOX_WSDL_URL',
+                    'https://g94.isaaviations.com/webservices/services/AAResWebServices?wsdl'
+                ),
+            ],
+            'production' => [
+                'rest_auth_url' => env('ONE_API_PRODUCTION_REST_AUTH_URL', ''),
+                'rest_search_url' => env('ONE_API_PRODUCTION_REST_SEARCH_URL', ''),
+                'soap_url' => env('ONE_API_PRODUCTION_SOAP_URL', ''),
+                'wsdl_url' => env('ONE_API_PRODUCTION_WSDL_URL', ''),
+            ],
+        ],
         'soap_operations' => [
             'price' => ['soap_action' => 'OTA_AirPriceRQ'],
             'baggage' => ['soap_action' => 'AA_OTA_AirBaggageDetailsRQ'],

@@ -18,41 +18,34 @@ class OneApiSupplierConnectionFeatureTest extends TestCase
     {
         $existing = SupplierConnection::factory()->create([
             'provider' => SupplierProvider::OneApi,
-            'credentials' => [
-                'username' => 'ONE_API_TEST_USERNAME',
-                'password' => 'ONE_API_TEST_PASSWORD',
-                'agent_code' => 'AGENT',
-                'rest_auth_url' => 'https://example.test/auth',
-                'rest_search_url' => 'https://example.test/search',
-            ],
+            'credentials' => $this->oneApiTestCredentials([
+                'rest_password' => 'ONE_API_TEST_PASSWORD',
+                'soap_password' => 'ONE_API_TEST_PASSWORD',
+            ]),
         ]);
 
         $payload = OneApiSupplierConnectionNormalizer::normalizePayload([
             'provider' => 'one_api',
             'credentials' => [
-                'username' => 'ONE_API_TEST_USERNAME',
-                'password' => '',
+                'rest_username' => 'ONE_API_TEST_USERNAME',
+                'rest_password' => '',
+                'soap_username' => 'ONE_API_TEST_USERNAME',
+                'soap_password' => '',
                 'agent_code' => 'AGENT',
-                'rest_auth_url' => 'https://example.test/auth',
-                'rest_search_url' => 'https://example.test/search',
-                'soap_url' => '',
             ],
         ], $existing);
 
-        $this->assertSame('ONE_API_TEST_PASSWORD', $payload['credentials']['password']);
+        $this->assertSame('ONE_API_TEST_PASSWORD', $payload['credentials']['rest_password']);
+        $this->assertSame('ONE_API_TEST_PASSWORD', $payload['credentials']['soap_password']);
     }
 
     public function test_credentials_are_encrypted_at_rest(): void
     {
         $connection = SupplierConnection::factory()->create([
             'provider' => SupplierProvider::OneApi,
-            'credentials' => [
-                'username' => 'ONE_API_TEST_USERNAME',
-                'password' => 'ONE_API_TEST_PASSWORD',
-                'agent_code' => 'AGENT',
-                'rest_auth_url' => 'https://example.test/auth',
-                'rest_search_url' => 'https://example.test/search',
-            ],
+            'credentials' => $this->oneApiTestCredentials([
+                'rest_password' => 'ONE_API_TEST_PASSWORD',
+            ]),
         ]);
 
         $raw = $connection->getAttributes()['credentials'] ?? '';

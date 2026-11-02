@@ -12,6 +12,8 @@ final class SupplierCredentialFormPresenter
         'access_token',
         'client_secret',
         'password',
+        'rest_password',
+        'soap_password',
         'token',
         'existing_token',
         'api_key',
@@ -22,6 +24,8 @@ final class SupplierCredentialFormPresenter
     /** @var list<string> */
     private const SEMI_SENSITIVE_KEYS = [
         'username',
+        'rest_username',
+        'soap_username',
         'agency_id',
         'mco_invoice_number',
         'sign_in',
@@ -32,7 +36,29 @@ final class SupplierCredentialFormPresenter
         'agent_id',
         'agent_type',
         'agency_name',
+        'agent_code',
     ];
+
+    public static function isFormVisible(array $fieldMeta): bool
+    {
+        return ($fieldMeta['form_visible'] ?? true) !== false;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function visibleFieldKeys(string $provider): array
+    {
+        $fields = (array) config('supplier_credentials.providers.'.$provider.'.fields', []);
+        $keys = [];
+        foreach ($fields as $key => $meta) {
+            if (is_array($meta) && self::isFormVisible($meta)) {
+                $keys[] = (string) $key;
+            }
+        }
+
+        return $keys;
+    }
 
     public static function isSensitive(string $key, array $fieldMeta = []): bool
     {
