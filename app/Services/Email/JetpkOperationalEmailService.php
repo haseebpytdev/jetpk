@@ -10,6 +10,7 @@ use App\Models\CommunicationLog;
 use App\Models\User;
 use App\Support\Emails\EmailBaseVariables;
 use App\Support\Emails\JetpkEmailEventRenderer;
+use App\Support\Emails\JetpkEmailPlainTextRenderer;
 use App\Support\Emails\JetpkOperationalEmailEventRegistry;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -226,9 +227,7 @@ class JetpkOperationalEmailService
 
     protected function plainBodyFromHtml(string $html, string $fallback): string
     {
-        $text = trim(html_entity_decode(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $html))));
-
-        return $text !== '' ? $text : $fallback;
+        return JetpkEmailPlainTextRenderer::fromHtml($html, $fallback);
     }
 
     protected function shouldQueueMail(): bool

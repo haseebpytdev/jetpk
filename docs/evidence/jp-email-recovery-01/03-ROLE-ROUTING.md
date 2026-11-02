@@ -16,6 +16,7 @@ STAFF_SUBJECT_PREFIX=PASS
 - Operational `notify_buckets` that span multiple role tags fan out via `OtaNotificationService::sendNotifyBucketRoleDeliveries` into independent delivery units (separate To:/subject/body/log).
 - Same-role buckets may share a delivery unit; cross-role To: mixing is avoided when subject tags differ.
 - Within-fan-out email dedupe uses a seen-email set across role groups.
+- SAME_ADDRESS_MULTI_ROLE_POLICY=`FIRST_RESOLVED_ROLE_WINS`: role groups are created in `notify_buckets` order (PHP insertion order preserved); the first group that resolves a normalized address owns that single delivery. Later groups skip the address. Role bodies/subjects are never merged into one message (`SAME_ADDRESS_CROSS_ROLE_CONTENT_MERGED=NO`). Proven by `same_address_across_roles_keeps_first_resolved_role_only` (`SAME_ADDRESS_POLICY_TEST=PASS`).
 - Permanent suppression remains applied per delivery unit.
 
 ## Subject tagger

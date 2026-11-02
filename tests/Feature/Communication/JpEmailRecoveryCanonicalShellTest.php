@@ -2,25 +2,32 @@
 
 namespace Tests\Feature\Communication;
 
+use App\Enums\AccountType;
 use App\Enums\BookingStatus;
 use App\Enums\OtaNotificationEvent;
+use App\Enums\UserAccountStatus;
 use App\Jobs\Notifications\DeliverQueuedOperationalMail;
+use App\Mail\BookingUniversalNotification;
 use App\Mail\JetpkOperationalEventMail;
 use App\Models\Agency;
 use App\Models\AgencyCommunicationSetting;
 use App\Models\Booking;
 use App\Models\BookingContact;
+use App\Models\CommunicationLog;
+use App\Models\User;
 use App\Services\Communication\BookingCommunicationService;
 use App\Services\Communication\BookingEmailPayloadFactory;
 use App\Services\Communication\OtaNotificationService;
 use App\Support\Emails\EmailRecipientRoleSubjectTagger;
 use App\Support\Emails\JetpkBookingUniversalPayloadAdapter;
 use App\Support\Emails\JetpkEmailEventRenderer;
+use App\Support\Emails\JetpkEmailPlainTextRenderer;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use PHPUnit\Framework\Attributes\Test;
+use RuntimeException;
 use Tests\TestCase;
 
 class JpEmailRecoveryCanonicalShellTest extends TestCase
@@ -168,12 +175,160 @@ class JpEmailRecoveryCanonicalShellTest extends TestCase
             payload: $payload,
         );
 
-        $plain = trim(html_entity_decode(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $rendered->html))));
-
         $this->assertStringContainsString('jetpk-container', $rendered->html);
-        $this->assertStringNotContainsString('<style', $plain);
+        $this->assertStringContainsString('<style', $rendered->html);
+
+        $plain = JetpkEmailPlainTextRenderer::fromHtml($rendered->html);
+
+        foreach ([
+            '<style',
+            '@media',
+            '.jetpk-container',
+            'jetpk-pad',
+            'font-family',
+            'mso-table-lspace',
+            '-webkit-',
+            '-ms-',
+            '{ margin:',
+            '!important',
+        ] as $forbidden) {
+            $this->assertStringNotContainsString($forbidden, $plain, "CSS/style leak found: {$forbidden}");
+        }
+
         $this->assertDoesNotMatchRegularExpression('/<\/?[a-z][^>]*>/i', $plain);
+        $this->assertStringContainsString((string) $booking->reference_code, $plain);
+        $this->assertNotSame('', trim($plain));
         $this->assertSame('[ADMIN] tagged', EmailRecipientRoleSubjectTagger::apply('tagged', 'admin'));
+    }
+
+    #[Test]
+    public function customer_canonical_render_failure_does_not_send_legacy_universal(): void
+    {
+        Mail::fake();
+        config(['mail.default' => 'array']);
+        $this->seed(OtaFoundationSeeder::class);
+        $this->enableOutboundEmail();
+        $booking = $this->makeBooking();
+
+        $this->partialMock(JetpkEmailEventRenderer::class, function ($mock): void {
+            $mock->shouldReceive('render')->andThrow(new RuntimeException('forced canonical render failure'));
+        });
+
+        app(BookingCommunicationService::class)->sendBookingRequestReceived($booking);
+
+        // Fail-closed: no JetPK or legacy customer/ops mail escapes after canonical failure.
+        Mail::assertNothingSent();
+        Mail::assertNotSent(BookingUniversalNotification::class);
+        Mail::assertNotSent(JetpkOperationalEventMail::class);
+
+        $customerFailed = CommunicationLog::query()
+            ->where('booking_id', $booking->id)
+            ->where('event', 'booking_request_received')
+            ->where('status', 'failed')
+            ->where('meta->recipient_type', 'customer')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($customerFailed, 'CANONICAL_FAILURE_RECORDED expected');
+        $this->assertStringContainsString('forced canonical render failure', (string) $customerFailed->error_message);
+        $this->assertSame(
+            0,
+            CommunicationLog::query()
+                ->where('booking_id', $booking->id)
+                ->where('status', 'sent')
+                ->count(),
+            'BOOKING_UNIVERSAL_NOTIFICATION_SENT must remain 0',
+        );
+    }
+
+    #[Test]
+    public function jetpk_operational_event_mail_uses_global_mail_from_config(): void
+    {
+        config([
+            'mail.from.address' => 'ota@jetpakistan.pk',
+            'mail.from.name' => 'JetPakistan',
+        ]);
+
+        $mail = new JetpkOperationalEventMail(
+            '<p>Hello</p>',
+            'Sender identity proof',
+            'Hello',
+        );
+
+        $envelope = $mail->envelope();
+        $from = $envelope->from;
+
+        $this->assertNotNull($from);
+        $this->assertSame('ota@jetpakistan.pk', $from->address);
+        $this->assertSame('JetPakistan', $from->name);
+    }
+
+    #[Test]
+    public function same_address_across_roles_keeps_first_resolved_role_only(): void
+    {
+        Queue::fake();
+        config([
+            'mail.default' => 'smtp',
+            'queue.default' => 'database',
+        ]);
+        $this->seed(OtaFoundationSeeder::class);
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        AgencyCommunicationSetting::query()->updateOrCreate(
+            ['agency_id' => $agency->id],
+            ['email_enabled' => true, 'smtp_enabled' => false],
+        );
+
+        $shared = User::factory()->create([
+            'current_agency_id' => $agency->id,
+            'account_type' => AccountType::PlatformAdmin,
+            'email' => 'jp-email-shared-role@example.test',
+            'status' => UserAccountStatus::Active,
+        ]);
+        $agency->users()->syncWithoutDetaching([$shared->id]);
+
+        $booking = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'booking_reference' => 'JP-EMAIL-SAME-ADDR-01',
+            'route' => 'LHE → DXB',
+            'travel_date' => now()->addDays(10),
+            'status' => BookingStatus::Pending,
+            'currency' => 'PKR',
+            'assigned_staff_id' => $shared->id,
+        ]);
+        BookingContact::query()->create([
+            'booking_id' => $booking->id,
+            'email' => 'jp-email-same-addr-customer@example.test',
+            'phone' => '+92000000888',
+            'meta' => ['name' => 'Same Addr Customer'],
+        ]);
+
+        $universal = app(BookingEmailPayloadFactory::class)->staffReviewRequired($booking->fresh());
+
+        app(OtaNotificationService::class)->send(
+            agency: $agency,
+            eventKey: OtaNotificationEvent::BookingManualReviewRequired->value,
+            payload: [
+                'booking_reference' => $booking->reference_code,
+                'universal_email' => $universal,
+                'message' => 'Same-address multi-role policy proof.',
+            ],
+            booking: $booking->fresh(['agency.agencySetting', 'assignedStaff', 'contact', 'customer']),
+            fallbackSubject: 'Staff review required',
+            fallbackBody: 'Review required',
+            recipientContext: [
+                // STAFF group is first in bucket order → first-resolved-role-wins = STAFF
+                'notify_buckets' => ['assigned_staff', 'platform_admin'],
+            ],
+        );
+
+        $jobs = collect(Queue::pushed(DeliverQueuedOperationalMail::class));
+        $this->assertCount(1, $jobs, 'Same address must not fan out into two deliveries');
+        $this->assertTrue(str_starts_with($jobs->first()->subject, '[STAFF]'));
+        $this->assertFalse(
+            $jobs->contains(fn (DeliverQueuedOperationalMail $job): bool => str_starts_with($job->subject, '[ADMIN]')),
+            'SAME_ADDRESS_CROSS_ROLE_CONTENT_MERGED must be NO',
+        );
+        $this->assertSame(['jp-email-shared-role@example.test'], $jobs->first()->to);
     }
 
     protected function makeBooking(): Booking

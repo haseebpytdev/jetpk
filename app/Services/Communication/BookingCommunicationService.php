@@ -19,6 +19,7 @@ use App\Support\Bookings\SabreHostErrorClassifier;
 use App\Support\Emails\EmailBaseVariables;
 use App\Support\Emails\JetpkBookingUniversalPayloadAdapter;
 use App\Support\Emails\JetpkEmailEventRenderer;
+use App\Support\Emails\JetpkEmailPlainTextRenderer;
 use App\Support\Emails\JetpkOperationalEmailEventRegistry;
 use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Mail\Mailable;
@@ -776,13 +777,14 @@ class BookingCommunicationService
                 payload: $jetpkPayload,
             );
         } catch (Throwable $e) {
-            Log::warning('jetpk.customer_email.render_fallback', [
+            // Fail closed: never silently downgrade JetPK customer mail to BookingUniversalNotification.
+            Log::warning('jetpk.customer_email.render_failed', [
                 'event' => $renderEvent,
                 'booking_id' => $booking->id,
                 'message' => $e->getMessage(),
             ]);
 
-            return $mailable;
+            throw $e;
         }
 
         $subject = trim((string) ($universal['subject'] ?? ''));
@@ -790,13 +792,16 @@ class BookingCommunicationService
             $subject = $rendered->subject !== '' ? $rendered->subject : 'Booking notification';
         }
 
-        $plain = trim(html_entity_decode(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $rendered->html))));
+        $plain = JetpkEmailPlainTextRenderer::fromHtml(
+            $rendered->html,
+            (string) ($universal['intro'] ?? ''),
+        );
         $attachments = $this->jetpkAttachmentsFromUniversalMailable($mailable);
 
         return new JetpkOperationalEventMail(
             $rendered->html,
             $subject,
-            $plain !== '' ? $plain : (string) ($universal['intro'] ?? ''),
+            $plain,
             $attachments,
         );
     }

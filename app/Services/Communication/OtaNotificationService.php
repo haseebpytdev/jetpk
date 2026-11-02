@@ -16,7 +16,9 @@ use App\Support\Branding\BrandDisplayResolver;
 use App\Support\Emails\EmailBaseVariables;
 use App\Support\Emails\EmailRecipientRoleSubjectTagger;
 use App\Support\Emails\JetpkBookingUniversalPayloadAdapter;
+use App\Support\Emails\JetpkEmailEventContentRegistry;
 use App\Support\Emails\JetpkEmailEventRenderer;
+use App\Support\Emails\JetpkEmailPlainTextRenderer;
 use App\Support\Communication\NotificationErrorSanitizer;
 use App\Support\Emails\JetpkOperationalEmailEventRegistry;
 use App\Support\Emails\OtaOperationalEmailRenderer;
@@ -799,30 +801,36 @@ class OtaNotificationService
         ?Booking $booking = null,
         array $jetpkPayload = [],
     ): \App\Support\Emails\OtaOperationalEmailRendered {
-        if (JetpkOperationalEmailEventRegistry::isJetpkClient()) {
+        if (JetpkOperationalEmailEventRegistry::isJetpkClient()
+            && JetpkEmailEventContentRegistry::find($eventKey) !== null
+        ) {
             try {
-                JetpkOperationalEmailEventRegistry::assertKnownEvent($eventKey);
                 $rendered = $this->jetpkEmailEventRenderer->render(
                     eventKey: $eventKey,
                     agency: $agency,
                     runtimeVariables: $variables,
                     payload: $jetpkPayload,
                 );
-                $plain = trim(html_entity_decode(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $rendered->html))));
+                $plain = JetpkEmailPlainTextRenderer::fromHtml($rendered->html, $fallbackBody);
 
                 return new \App\Support\Emails\OtaOperationalEmailRendered(
                     subject: $rendered->subject !== '' ? $rendered->subject : $fallbackSubject,
                     html: $rendered->html,
-                    plainBody: $plain !== '' ? $plain : $fallbackBody,
+                    plainBody: $plain,
                     usedTemplate: $rendered->usedDbTemplate,
                     templateEnabled: (bool) ($rendered->content['enabled'] ?? true),
                     profile: \App\Support\Branding\CompanyEmailProfileResolver::resolve($agency),
                 );
             } catch (Throwable $e) {
-                Log::warning('jetpk.operational_email.render_fallback', [
+                // Fail closed for known JetPK events: never silently downgrade to modern/legacy shells.
+                Log::warning('jetpk.operational_email.render_failed', [
                     'event' => $eventKey,
+                    'agency_id' => $agency->id,
+                    'booking_id' => $booking?->id,
                     'message' => $e->getMessage(),
                 ]);
+
+                throw $e;
             }
         }
 
@@ -889,6 +897,10 @@ class OtaNotificationService
             $groups[$tag][] = $bucket;
         }
 
+        // SAME_ADDRESS_MULTI_ROLE_POLICY=FIRST_RESOLVED_ROLE_WINS
+        // Groups are built in notify_buckets order (PHP insertion order). The first
+        // role group that claims a normalized address owns the single delivery; later
+        // role groups skip that address. Bodies/subjects are never merged across roles.
         $seenEmails = [];
         foreach ($groups as $groupBuckets) {
             $resolved = $this->recipientResolver->resolve(
