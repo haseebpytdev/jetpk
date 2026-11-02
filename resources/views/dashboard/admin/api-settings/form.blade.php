@@ -130,6 +130,9 @@
         <div data-credentials-container>
             @foreach ($selectedProviderFields as $credentialKey => $fieldMeta)
                 @php
+                    if (! \App\Support\Suppliers\SupplierCredentialFormPresenter::isFormVisible($fieldMeta)) {
+                        continue;
+                    }
                     $fieldStates = $credentialFieldStatesByProvider[$selectedProvider] ?? [];
                     $fieldState = $fieldStates[$credentialKey] ?? SupplierCredentialFormPresenter::buildFieldStates(
                         $selectedProvider,
@@ -155,6 +158,7 @@
                         || ($selectedProvider === 'iati' && $credentialKey === 'secret')
                         || ($selectedProvider === 'pia_ndc' && in_array($credentialKey, ['username', 'password', 'agency_id', 'agency_name', 'owner_code', 'mco_invoice_number', 'payment_type'], true))
                         || ($selectedProvider === 'airblue' && in_array($credentialKey, ['username', 'password', 'agency_id', 'agency_name', 'owner_code', 'agent_password', 'client_id', 'client_key', 'agent_type', 'agent_id'], true))
+                        || ($selectedProvider === 'one_api' && in_array($credentialKey, ['rest_password', 'soap_password', 'password'], true))
                         || (in_array($selectedProvider, ['al_haider', 'ameer_e_millat'], true) && in_array($credentialKey, ['existing_token', 'username', 'email', 'password'], true))
                         || (($fieldState['has_saved'] ?? false) && ! empty($fieldMeta['required']))
                     );

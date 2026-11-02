@@ -125,6 +125,7 @@ class OneApiDormantLiveSearchGateTest extends TestCase
             'status' => SupplierConnectionStatus::Active,
             'is_active' => true,
             'credentials' => $this->credentials(),
+            'settings' => $this->oneApiConfirmedAccountSettings(),
         ]);
 
         $this->mock(OneApiFlightSupplierAdapter::class, function ($mock): void {
@@ -206,6 +207,7 @@ class OneApiDormantLiveSearchGateTest extends TestCase
             'is_active' => true,
             'status' => SupplierConnectionStatus::Active,
             'credentials' => array_merge($this->credentials(), $credentialOverrides),
+            'settings' => $this->oneApiConfirmedAccountSettings(),
         ]);
     }
 

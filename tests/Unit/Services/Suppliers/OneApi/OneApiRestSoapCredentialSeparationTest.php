@@ -167,6 +167,7 @@ class OneApiRestSoapCredentialSeparationTest extends TestCase
                 'rest_search_url' => 'https://example.test/search',
                 'soap_url' => 'https://example.test/soap',
             ], $credentialOverrides),
+            'settings' => $this->oneApiConfirmedAccountSettings(),
         ]);
     }
 }

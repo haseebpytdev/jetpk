@@ -286,6 +286,9 @@ class SupplierConnectionController extends Controller
             if (! is_array($meta)) {
                 continue;
             }
+            if (! SupplierCredentialFormPresenter::isFormVisible($meta)) {
+                continue;
+            }
             $fields[] = [
                 'key' => (string) $key,
                 'label' => (string) ($meta['label'] ?? $key),
@@ -475,13 +478,17 @@ class SupplierConnectionController extends Controller
 
         $credentials = array_merge($baseCredentials, $normalizedCredentials);
 
-        $settings = [];
+        $settings = ($existing !== null && is_array($existing->settings)) ? $existing->settings : [];
         $settingsRaw = trim((string) $request->input('settings_json', ''));
-        if ($settingsRaw !== '') {
+        if ($settingsRaw !== '' && $settingsRaw !== '{}') {
             $decoded = json_decode($settingsRaw, true);
             if (is_array($decoded)) {
-                $settings = $decoded;
+                $settings = array_merge($settings, $decoded);
             }
+        }
+        $incomingSettings = $request->input('settings', []);
+        if (is_array($incomingSettings)) {
+            $settings = array_replace_recursive($settings, $incomingSettings);
         }
 
         $meta = $request->input('meta', []);
@@ -503,6 +510,7 @@ class SupplierConnectionController extends Controller
             'meta' => $meta,
             'is_active' => $status === SupplierConnectionStatus::Active->value,
             'advanced_base_url_override' => $request->boolean('advanced_base_url_override'),
+            'account_context_confirm' => $request->boolean('account_context_confirm'),
         ];
 
         if ($provider === SupplierProvider::Sabre->value) {

@@ -42,6 +42,8 @@ class StoreSupplierConnectionRequest extends FormRequest
             'base_url' => ['nullable', 'url', 'max:500'],
             'credentials' => ['nullable', 'array'],
             'credentials.*' => ['nullable', 'string', 'max:2000'],
+            'settings' => ['nullable', 'array'],
+            'account_context_confirm' => ['nullable', 'boolean'],
             'settings_json' => ['nullable', 'json'],
             'meta' => ['nullable', 'array'],
             'sabre_gds_enabled' => ['nullable', 'boolean'],
@@ -100,21 +102,10 @@ class StoreSupplierConnectionRequest extends FormRequest
             }
 
             if ($provider === SupplierProvider::OneApi->value) {
-                $hasRestUser = in_array('rest_username', $keys, true) || in_array('username', $keys, true);
-                $hasRestPass = in_array('rest_password', $keys, true) || in_array('password', $keys, true);
-                $hasSoapUser = in_array('soap_username', $keys, true) || in_array('username', $keys, true);
-                $hasSoapPass = in_array('soap_password', $keys, true) || in_array('password', $keys, true);
-                if (! $hasRestUser) {
-                    $validator->errors()->add('credentials.rest_username', 'REST API username or legacy username is required for ONE_API.');
-                }
-                if (! $hasRestPass) {
-                    $validator->errors()->add('credentials.rest_password', 'REST API password or legacy password is required for ONE_API.');
-                }
-                if (! $hasSoapUser) {
-                    $validator->errors()->add('credentials.soap_username', 'SOAP API username or legacy username is required for ONE_API.');
-                }
-                if (! $hasSoapPass) {
-                    $validator->errors()->add('credentials.soap_password', 'SOAP API password or legacy password is required for ONE_API.');
+                foreach (['rest_username', 'rest_password', 'soap_username', 'soap_password', 'agent_code'] as $field) {
+                    if (! in_array($field, $keys, true)) {
+                        $validator->errors()->add('credentials.'.$field, 'This field is required for ONE_API.');
+                    }
                 }
             }
 

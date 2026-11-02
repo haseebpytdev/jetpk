@@ -47,6 +47,7 @@ class OneApiAuthenticationMatrixTest extends TestCase
             'provider' => SupplierProvider::OneApi,
             'environment' => 'live',
             'credentials' => $this->cred(),
+            'settings' => $this->oneApiConfirmedAccountSettings(),
         ]);
         $auth = app(OneApiAuthService::class);
         $auth->getAccessToken($sandbox);
@@ -178,6 +179,7 @@ class OneApiAuthenticationMatrixTest extends TestCase
         return SupplierConnection::factory()->create([
             'provider' => SupplierProvider::OneApi,
             'credentials' => $this->cred(),
+            'settings' => $this->oneApiConfirmedAccountSettings(),
         ]);
     }
 }

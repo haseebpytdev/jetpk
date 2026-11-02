@@ -6,7 +6,7 @@ use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
 
 /**
- * Canonical One API admin form mapping — preserve vendor-supplied REST/SOAP URLs, merge defaults.
+ * Canonical One API admin form mapping — preserve legacy credentials; account context lives in settings.
  */
 final class OneApiSupplierConnectionNormalizer
 {
@@ -55,14 +55,20 @@ final class OneApiSupplierConnectionNormalizer
             }
         }
 
-        foreach (['agent_preferred_currency' => 'AED', 'pos_country' => 'AE', 'pos_station' => 'DXB', 'sales_channel' => 'OTA'] as $key => $default) {
-            if (trim((string) ($credentials[$key] ?? '')) === '') {
-                $credentials[$key] = trim((string) ($existingCredentials[$key] ?? '')) ?: $default;
+        if (trim((string) ($credentials['sales_channel'] ?? '')) === '') {
+            $existingChannel = trim((string) ($existingCredentials['sales_channel'] ?? ''));
+            if ($existingChannel !== '') {
+                $credentials['sales_channel'] = $existingChannel;
             }
         }
 
         $payload['credentials'] = $credentials;
-        $payload['settings'] = is_array($payload['settings'] ?? null) ? $payload['settings'] : [];
+
+        $settings = is_array($payload['settings'] ?? null) ? $payload['settings'] : [];
+        $existingSettings = ($existing !== null && is_array($existing->settings)) ? $existing->settings : [];
+        $confirmChecked = (bool) ($payload['account_context_confirm'] ?? false);
+        $payload['settings'] = OneApiAccountContext::mergeSettings($settings, $existingSettings, $confirmChecked);
+        unset($payload['account_context_confirm']);
 
         return $payload;
     }

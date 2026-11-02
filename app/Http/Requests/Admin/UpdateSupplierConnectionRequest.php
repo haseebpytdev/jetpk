@@ -159,18 +159,24 @@ class UpdateSupplierConnectionRequest extends StoreSupplierConnectionRequest
                     ?: SupplierCredentialFormPresenter::effectiveValue('username', $credentials, $existingCredentials);
                 $soapPass = SupplierCredentialFormPresenter::effectiveValue('soap_password', $credentials, $existingCredentials)
                     ?: SupplierCredentialFormPresenter::effectiveValue('password', $credentials, $existingCredentials);
+                $agentCode = SupplierCredentialFormPresenter::effectiveValue('agent_code', $credentials, $existingCredentials);
                 if ($restUser === '') {
-                    $validator->errors()->add('credentials.rest_username', 'REST API username or legacy username is required for ONE_API.');
+                    $validator->errors()->add('credentials.rest_username', 'REST API username is required for ONE_API.');
                 }
                 if ($restPass === '') {
-                    $validator->errors()->add('credentials.rest_password', 'REST API password or legacy password is required for ONE_API.');
+                    $validator->errors()->add('credentials.rest_password', 'REST API password is required for ONE_API.');
                 }
                 if ($soapUser === '') {
-                    $validator->errors()->add('credentials.soap_username', 'SOAP API username or legacy username is required for ONE_API.');
+                    $validator->errors()->add('credentials.soap_username', 'SOAP API username is required for ONE_API.');
                 }
                 if ($soapPass === '') {
-                    $validator->errors()->add('credentials.soap_password', 'SOAP API password or legacy password is required for ONE_API.');
+                    $validator->errors()->add('credentials.soap_password', 'SOAP API password is required for ONE_API.');
                 }
+                if ($agentCode === '') {
+                    $validator->errors()->add('credentials.agent_code', 'Agent code is required for ONE_API.');
+                }
+
+                return;
             }
 
             foreach ($providerFields as $fieldKey => $meta) {
