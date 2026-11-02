@@ -15,6 +15,7 @@ enum SupplierProvider: string
     case Duffel = 'duffel';
     case Iati = 'iati';
     case OneApi = 'one_api';
+    case EjmiralAerost = 'ejmiral_aerost';
     case AlHaider = 'al_haider';
     case AmeerEMillat = 'ameer_e_millat';
 
@@ -35,6 +36,7 @@ enum SupplierProvider: string
             self::Duffel => 'Duffel',
             self::Iati => 'IATI',
             self::OneApi => 'One API',
+            self::EjmiralAerost => 'EJMIRAL AEROST',
             self::AlHaider => 'Al-Haider',
             self::AmeerEMillat => 'Ameer-e-Millat',
         };

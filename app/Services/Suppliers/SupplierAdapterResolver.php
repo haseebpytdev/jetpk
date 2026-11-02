@@ -6,6 +6,7 @@ use App\Contracts\Suppliers\FlightSupplierInterface;
 use App\Enums\SupplierProvider;
 use App\Services\Suppliers\Adapters\AirBlueFlightSupplierAdapter;
 use App\Services\Suppliers\Adapters\DuffelFlightSupplierAdapter;
+use App\Services\Suppliers\Adapters\EjmiralAerostFlightSupplierAdapter;
 use App\Services\Suppliers\Adapters\IatiFlightSupplierAdapter;
 use App\Services\Suppliers\Adapters\OneApiFlightSupplierAdapter;
 use App\Services\Suppliers\Adapters\PiaNdcFlightSupplierAdapter;
@@ -21,6 +22,7 @@ class SupplierAdapterResolver
         protected DuffelFlightSupplierAdapter $duffelAdapter,
         protected IatiFlightSupplierAdapter $iatiAdapter,
         protected OneApiFlightSupplierAdapter $oneApiAdapter,
+        protected EjmiralAerostFlightSupplierAdapter $ejmiralAerostAdapter,
     ) {}
 
     public function resolve(SupplierProvider $provider): FlightSupplierInterface
@@ -32,6 +34,7 @@ class SupplierAdapterResolver
             SupplierProvider::Duffel => $this->duffelAdapter,
             SupplierProvider::Iati => $this->iatiAdapter,
             SupplierProvider::OneApi => $this->oneApiAdapter,
+            SupplierProvider::EjmiralAerost => $this->ejmiralAerostAdapter,
             default => throw new InvalidArgumentException('Unsupported supplier provider: '.$provider->value),
         };
     }

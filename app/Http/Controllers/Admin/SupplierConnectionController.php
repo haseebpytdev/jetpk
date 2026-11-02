@@ -195,6 +195,16 @@ class SupplierConnectionController extends Controller
         $definition = SupplierIntegrationCatalog::definitionFor($provider);
         $checkType = SupplierIntegrationCatalog::checkTypeFor($provider);
         $baseUrlOverridable = SupplierIntegrationCatalog::baseUrlOverridable($provider);
+        $advancedReadOnly = [];
+        if ($provider === SupplierProvider::EjmiralAerost->value) {
+            $apiHostStatus = app(\App\Services\Suppliers\EjmiralAerost\EjmiralAerostConfigResolver::class)->apiBaseUrlStatus();
+            $advancedReadOnly[] = [
+                'key' => 'aerost_api_host_status',
+                'label' => 'API Host Status',
+                'value' => $apiHostStatus === 'CONFIGURED' ? 'Configured' : 'Unresolved',
+                'help' => 'System EJMIRAL_AEROST_API_BASE_URL only — not operator-editable.',
+            ];
+        }
 
         return [
             'id' => (string) $connection->id,
@@ -229,7 +239,7 @@ class SupplierConnectionController extends Controller
                 'timeouts' => is_array($connection->settings) ? ($connection->settings['timeouts'] ?? null) : null,
                 'timeoutsUserConfigurable' => false,
                 'baseUrlOverridable' => $baseUrlOverridable,
-                'readOnly' => [],
+                'readOnly' => $advancedReadOnly,
             ],
             'audit' => [
                 'history' => $this->auditHistoryFor($connection),

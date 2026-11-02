@@ -166,6 +166,23 @@ return [
                 ],
             ],
         ],
+        'ejmiral_aerost' => [
+            'fields' => [
+                'username' => [
+                    'label' => 'Sub Travel Agent Username',
+                    'type' => 'text',
+                    'required' => true,
+                    'placeholder' => 'UAT Sub Travel Agent username',
+                    'help' => 'Runtime API uses Sub Travel Agent credentials only. PSA portal login is administrative and must not be stored here.',
+                ],
+                'password' => [
+                    'label' => 'Sub Travel Agent Password',
+                    'type' => 'password',
+                    'required' => true,
+                    'placeholder' => 'Leave blank to keep existing value.',
+                ],
+            ],
+        ],
         'one_api' => [
             'fields' => [
                 'rest_username' => [

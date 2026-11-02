@@ -21,6 +21,7 @@
     $isPiaNdc = $selectedProvider === 'pia_ndc';
     $isAirblue = $selectedProvider === 'airblue';
     $isOneApi = $selectedProvider === 'one_api';
+    $isEjmiralAerost = $selectedProvider === 'ejmiral_aerost';
     $lockProvider = ($isIati && ($isEdit || $preselectedProvider === 'iati'))
         || ($isPiaNdc && ($isEdit || $preselectedProvider === 'pia_ndc'))
         || ($isAirblue && ($isEdit || $preselectedProvider === 'airblue'));
@@ -99,6 +100,7 @@
         @include('dashboard.admin.api-settings.partials.supplier-panels.pia_ndc')
         @include('dashboard.admin.api-settings.partials.supplier-panels.airblue')
         @include('dashboard.admin.api-settings.partials.supplier-panels.one_api')
+        @include('dashboard.admin.api-settings.partials.supplier-panels.ejmiral_aerost')
         @include('dashboard.admin.api-settings.partials.supplier-panels.sabre')
         @include('dashboard.admin.api-settings.partials.supplier-panels.generic')
     </div>
@@ -160,6 +162,7 @@
                         || ($selectedProvider === 'airblue' && in_array($credentialKey, ['username', 'password', 'agency_id', 'agency_name', 'owner_code', 'agent_password', 'client_id', 'client_key', 'agent_type', 'agent_id'], true))
                         || ($selectedProvider === 'one_api' && in_array($credentialKey, ['rest_password', 'soap_password', 'password'], true))
                         || (in_array($selectedProvider, ['al_haider', 'ameer_e_millat'], true) && in_array($credentialKey, ['existing_token', 'username', 'email', 'password'], true))
+                        || ($selectedProvider === 'ejmiral_aerost' && in_array($credentialKey, ['username', 'password'], true))
                         || (($fieldState['has_saved'] ?? false) && ! empty($fieldMeta['required']))
                     );
                     if ($selectedProvider === 'airblue' && $credentialKey === 'api_channel') { continue; }
