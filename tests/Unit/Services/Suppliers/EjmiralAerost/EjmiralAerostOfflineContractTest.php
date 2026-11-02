@@ -28,16 +28,34 @@ class EjmiralAerostOfflineContractTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config(['suppliers.ejmiral_aerost.default_api_base_url' => 'https://aerost.example.test']);
+    }
+
     public function test_config_resolution_requires_sub_agent_credentials(): void
     {
         $connection = $this->connection([
             'username' => '',
             'password' => '',
-            'api_base_url' => 'https://aerost.example.test',
         ]);
 
         $this->expectException(\App\Services\Suppliers\EjmiralAerost\Exceptions\EjmiralAerostValidationException::class);
         app(EjmiralAerostConfigResolver::class)->resolve($connection);
+    }
+
+    public function test_api_base_url_unresolved_fails_closed_without_psa_fallback(): void
+    {
+        config(['suppliers.ejmiral_aerost.default_api_base_url' => '']);
+
+        $connection = $this->connection();
+        $resolver = app(EjmiralAerostConfigResolver::class);
+
+        $this->assertSame(EjmiralAerostConfigResolver::API_BASE_URL_STATUS_UNRESOLVED, $resolver->apiBaseUrlStatus());
+        $this->expectException(\App\Services\Suppliers\EjmiralAerost\Exceptions\EjmiralAerostValidationException::class);
+        $resolver->resolve($connection);
     }
 
     public function test_login_token_capture_and_reuse(): void
@@ -227,7 +245,6 @@ class EjmiralAerostOfflineContractTest extends TestCase
             'credentials' => array_merge([
                 'username' => 'uat_sub_agent',
                 'password' => 'uat_password_fixture',
-                'api_base_url' => 'https://aerost.example.test',
             ], $overrides),
         ]);
     }

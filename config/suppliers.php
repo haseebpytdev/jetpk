@@ -619,12 +619,14 @@ return [
         'max_automatic_token_generations_per_365_days' => 1,
     ],
     'ejmiral_aerost' => [
+        // UAT hostname remains UNRESOLVED until vendor-proven. Do not guess or use PSA portal host.
         'default_api_base_url' => env('EJMIRAL_AEROST_API_BASE_URL', ''),
         'ota_base_path' => '/api/ota/v1',
         'connect_timeout_seconds' => (int) env('EJMIRAL_AEROST_CONNECT_TIMEOUT_SECONDS', 10),
         'request_timeout_seconds' => (int) env('EJMIRAL_AEROST_REQUEST_TIMEOUT_SECONDS', 60),
         'token_ttl_seconds' => (int) env('EJMIRAL_AEROST_TOKEN_TTL_SECONDS', 604800),
         'token_expiry_margin_seconds' => (int) env('EJMIRAL_AEROST_TOKEN_EXPIRY_MARGIN_SECONDS', 300),
+        'verify_tls' => (bool) env('EJMIRAL_AEROST_VERIFY_TLS', true),
         'live_search_enabled' => (bool) env('EJMIRAL_AEROST_LIVE_SEARCH_ENABLED', false),
         'live_booking_enabled' => (bool) env('EJMIRAL_AEROST_LIVE_BOOKING_ENABLED', false),
         'live_ticketing_enabled' => (bool) env('EJMIRAL_AEROST_LIVE_TICKETING_ENABLED', false),
