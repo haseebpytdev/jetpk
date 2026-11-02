@@ -334,6 +334,7 @@ final class PlatformModuleEnforcer
             'iati' => 'iati_supplier',
             'pia_ndc' => 'pia_ndc_supplier',
             'one_api' => 'one_api_supplier',
+            'ejmiral_aerost' => 'ejmiral_aerost_supplier',
             'airblue' => 'airblue_supplier',
             default => null,
         };

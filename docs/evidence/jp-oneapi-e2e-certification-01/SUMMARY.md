@@ -1,0 +1,58 @@
+# OneAPI E2E Certification Summary
+
+DATE: 2026-11-02  
+BRANCH: `feat/jp-oneapi-e2e-certification-01`  
+BASE: `884ee8145fd2d58e90c090dfbb62fe394804a799`
+
+## Matrix (current)
+
+| Gate | Value |
+|------|-------|
+| ONEAPI_BRANCH | feat/jp-oneapi-e2e-certification-01 |
+| ONEAPI_BASE_TESTS | 138 |
+| ONEAPI_BASE_ASSERTIONS | 804 |
+| ONEAPI_BASE_FAILURES | 0 |
+| ONEAPI_TESTS | 143 |
+| ONEAPI_ASSERTIONS | 825 |
+| ONEAPI_FAILURES | 0 |
+| ONEAPI_WSDL_SHA256 | 3bb629ec328bb0922453733537647a0967cbed2bd41ef52b87db9ebfbc4db0b9 |
+| ONEAPI_PRICE_OPERATION | getPrice |
+| ONEAPI_BOOK_OPERATION | book |
+| ONEAPI_READ_OPERATION | getReservationbyPNR |
+| ONEAPI_MODIFY_QUERY_OPERATION | modifyResQuery |
+| ONEAPI_MODIFY_OPERATION | modifyReservation |
+| ONEAPI_TICKETING_OPERATION | NONE |
+| ONEAPI_TICKETING_CONTRACT_PROVEN | NO |
+| ONEAPI_TICKETING_UAT | NOT_ATTEMPTED |
+| ONEAPI_END_TO_END_SCOPE | AUTH_SEARCH_PRICE_BOOK_READ |
+| JSESSIONID_CAPTURE | PASS (offline) |
+| TRANSACTION_ID_CAPTURE | PASS (offline) |
+| PRICE_TO_BOOK_SESSION_CONTINUITY | PASS (offline) |
+| CROSS_REQUEST_SESSION_PRESERVATION | PASS (offline) |
+| CROSS_BOOKING_SESSION_LEAK | 0 |
+| STALE_TRANSACTION_REUSE | 0 |
+| ONEAPI_AUTH | NOT_ATTEMPTED_LIVE |
+| ONEAPI_SEARCH | NOT_ATTEMPTED_LIVE |
+| ONEAPI_PRICE | NOT_ATTEMPTED_LIVE |
+| ONEAPI_ANCILLARY_READ | NOT_ATTEMPTED_LIVE |
+| ONEAPI_BOOK | NOT_ATTEMPTED_LIVE |
+| ONEAPI_RESERVATION_READ | NOT_ATTEMPTED_LIVE |
+| ONEAPI_BOOKING_RECONCILED | NOT_ATTEMPTED_LIVE |
+| ONEAPI_MODIFY_SUPPORTED | YES |
+| ONEAPI_MODIFY_UAT_RESULT | NOT_ATTEMPTED |
+| ONEAPI_REAL_PRODUCTION_MUTATIONS | 0 |
+| ONEAPI_LIVE_CREDENTIAL_GATE | TEMPORARILY_BLOCKED |
+
+## Blocker
+
+Encrypted UAT `SupplierConnection` for `one_api` is absent locally (0 DB rows, 0 `.env` ONE_API keys).  
+Live AUTH→SEARCH→PRICE→BOOK→READ cannot proceed until credentials + live flags are provisioned securely.
+
+## Next
+
+1. Provision encrypted OneAPI UAT connection (vendor stage4 URLs + SOAP g94 endpoint)
+2. Enable `ONE_API_LIVE_SEARCH_ENABLED` / booking confirm flags for UAT only
+3. Execute single controlled search→price→(ancillary read)→one book→read
+4. Keep ticketing NOT_ATTEMPTED while contract remains unproven
+
+NEXT_PHASE_IF_LIVE_BLOCKED=`JP-ONEAPI-UAT-CLOSURE` (credential provisioning)

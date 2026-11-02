@@ -47,6 +47,7 @@ class OneApiAuthenticationMatrixTest extends TestCase
             'provider' => SupplierProvider::OneApi,
             'environment' => 'live',
             'credentials' => $this->cred(),
+            'settings' => $this->oneApiConfirmedAccountSettings(),
         ]);
         $auth = app(OneApiAuthService::class);
         $auth->getAccessToken($sandbox);
@@ -97,7 +98,7 @@ class OneApiAuthenticationMatrixTest extends TestCase
         $request = new FlightSearchRequestData(
             origin: 'SHJ',
             destination: 'KHI',
-            departure_date: '2026-09-01',
+            departure_date: now()->addMonths(2)->toDateString(),
             return_date: null,
             adults: 1,
             children: 0,
@@ -178,6 +179,7 @@ class OneApiAuthenticationMatrixTest extends TestCase
         return SupplierConnection::factory()->create([
             'provider' => SupplierProvider::OneApi,
             'credentials' => $this->cred(),
+            'settings' => $this->oneApiConfirmedAccountSettings(),
         ]);
     }
 }

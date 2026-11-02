@@ -8,6 +8,8 @@ class SensitiveDataRedactor
 {
     protected const SENSITIVE_KEYS = [
         'password',
+        'rest_password',
+        'soap_password',
         'smtp_password',
         'whatsapp_access_token',
         'whatsapp_webhook_verify_token',

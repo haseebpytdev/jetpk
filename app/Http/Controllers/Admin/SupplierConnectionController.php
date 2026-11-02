@@ -195,6 +195,16 @@ class SupplierConnectionController extends Controller
         $definition = SupplierIntegrationCatalog::definitionFor($provider);
         $checkType = SupplierIntegrationCatalog::checkTypeFor($provider);
         $baseUrlOverridable = SupplierIntegrationCatalog::baseUrlOverridable($provider);
+        $advancedReadOnly = [];
+        if ($provider === SupplierProvider::EjmiralAerost->value) {
+            $apiHostStatus = app(\App\Services\Suppliers\EjmiralAerost\EjmiralAerostConfigResolver::class)->apiBaseUrlStatus();
+            $advancedReadOnly[] = [
+                'key' => 'aerost_api_host_status',
+                'label' => 'API Host Status',
+                'value' => $apiHostStatus === 'CONFIGURED' ? 'Configured' : 'Unresolved',
+                'help' => 'System EJMIRAL_AEROST_API_BASE_URL only — not operator-editable.',
+            ];
+        }
 
         return [
             'id' => (string) $connection->id,
@@ -229,7 +239,7 @@ class SupplierConnectionController extends Controller
                 'timeouts' => is_array($connection->settings) ? ($connection->settings['timeouts'] ?? null) : null,
                 'timeoutsUserConfigurable' => false,
                 'baseUrlOverridable' => $baseUrlOverridable,
-                'readOnly' => [],
+                'readOnly' => $advancedReadOnly,
             ],
             'audit' => [
                 'history' => $this->auditHistoryFor($connection),
@@ -284,6 +294,9 @@ class SupplierConnectionController extends Controller
         $fields = [];
         foreach ($configured as $key => $meta) {
             if (! is_array($meta)) {
+                continue;
+            }
+            if (! SupplierCredentialFormPresenter::isFormVisible($meta)) {
                 continue;
             }
             $fields[] = [
@@ -475,13 +488,17 @@ class SupplierConnectionController extends Controller
 
         $credentials = array_merge($baseCredentials, $normalizedCredentials);
 
-        $settings = [];
+        $settings = ($existing !== null && is_array($existing->settings)) ? $existing->settings : [];
         $settingsRaw = trim((string) $request->input('settings_json', ''));
-        if ($settingsRaw !== '') {
+        if ($settingsRaw !== '' && $settingsRaw !== '{}') {
             $decoded = json_decode($settingsRaw, true);
             if (is_array($decoded)) {
-                $settings = $decoded;
+                $settings = array_merge($settings, $decoded);
             }
+        }
+        $incomingSettings = $request->input('settings', []);
+        if (is_array($incomingSettings)) {
+            $settings = array_replace_recursive($settings, $incomingSettings);
         }
 
         $meta = $request->input('meta', []);
@@ -503,6 +520,7 @@ class SupplierConnectionController extends Controller
             'meta' => $meta,
             'is_active' => $status === SupplierConnectionStatus::Active->value,
             'advanced_base_url_override' => $request->boolean('advanced_base_url_override'),
+            'account_context_confirm' => $request->boolean('account_context_confirm'),
         ];
 
         if ($provider === SupplierProvider::Sabre->value) {

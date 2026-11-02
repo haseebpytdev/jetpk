@@ -10,6 +10,7 @@ use App\Services\Suppliers\OneApi\Exceptions\OneApiException;
 use App\Services\Suppliers\OneApi\Exceptions\OneApiValidationException;
 use App\Services\Suppliers\OneApi\Normalization\OneApiResponseNormalizer;
 use App\Services\Suppliers\OneApi\Support\OneApiConfigResolver;
+use App\Services\Suppliers\OneApi\Support\OneApiReadinessService;
 use App\Services\Suppliers\OneApi\Transport\OneApiRestClient;
 use App\Services\Suppliers\SupplierDiagnosticLogger;
 use App\Support\OneApi\OneApiFixtureTransportScope;
@@ -24,12 +25,22 @@ class OneApiFlightSearchService
         private readonly OneApiRestClient $restClient,
         private readonly OneApiResponseNormalizer $normalizer,
         private readonly OneApiConfigResolver $configResolver,
+        private readonly OneApiReadinessService $readinessService,
         private readonly SupplierDiagnosticLogger $diagnosticLogger,
     ) {}
 
     public function search(FlightSearchRequestData $request, SupplierConnection $connection): FlightSearchResultData
     {
         try {
+            if (! $this->readinessService->isSearchReady($connection)) {
+                $detail = $this->readinessService->searchReadiness($connection)['detail'];
+                throw new OneApiValidationException(
+                    'account_context_unconfirmed',
+                    422,
+                    $detail,
+                );
+            }
+
             $config = $this->configResolver->resolve($connection);
             if (! ($config['live_search_enabled'] ?? false) && ! OneApiFixtureTransportScope::isEnabled()) {
                 throw new OneApiValidationException(

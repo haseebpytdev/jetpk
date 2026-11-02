@@ -1,0 +1,20 @@
+{
+  "NLD": "NLD_FIXTURE_OPAQUE",
+  "currency": "PKR",
+  "itinerary": [
+    {
+      "origin": "LHE",
+      "destination": "DXB",
+      "departure": "2026-12-15T09:00:00",
+      "arrival": "2026-12-15T11:30:00",
+      "operator": "PK",
+      "flight_number": "201",
+      "equipment": "A320",
+      "acceptance": ["ACCEPT_HASH_OUTBOUND"],
+      "fare": 45000,
+      "tax": 5000,
+      "total": 50000,
+      "features": ["20KG"]
+    }
+  ]
+}

@@ -55,16 +55,20 @@ class OneApiSupplierConnectionAuthorizationTest extends TestCase
             'is_active' => '1',
             'agency_id' => $agency->id,
             'credentials' => [
-                'username' => 'ONE_API_TEST_USERNAME',
-                'password' => 'ONE_API_TEST_PASSWORD',
+                'rest_username' => 'ONE_API_TEST_USERNAME',
+                'rest_password' => 'ONE_API_TEST_PASSWORD',
+                'soap_username' => 'ONE_API_TEST_USERNAME',
+                'soap_password' => 'ONE_API_TEST_PASSWORD',
                 'agent_code' => 'AGENT',
-                'agent_preferred_currency' => 'AED',
-                'pos_country' => 'AE',
-                'pos_station' => 'DXB',
-                'rest_auth_url' => 'https://example.test/auth',
-                'rest_search_url' => 'https://example.test/search',
-                'soap_url' => '',
             ],
+            'settings' => [
+                'account_context' => [
+                    'agent_preferred_currency' => 'AED',
+                    'pos_country' => 'AE',
+                    'pos_station' => 'DXB',
+                ],
+            ],
+            'account_context_confirm' => '1',
         ]);
         $response->assertRedirect();
         $response->assertSessionHasNoErrors();
@@ -82,17 +86,24 @@ class OneApiSupplierConnectionAuthorizationTest extends TestCase
             'is_active' => true,
             'agency_id' => $agency->id,
             'credentials' => [
-                'username' => 'ONE_API_TEST_USERNAME',
-                'password' => '',
+                'rest_username' => 'ONE_API_TEST_USERNAME',
+                'rest_password' => '',
+                'soap_username' => 'ONE_API_TEST_USERNAME',
+                'soap_password' => '',
                 'agent_code' => 'AGENT',
-                'rest_auth_url' => 'https://example.test/auth',
-                'rest_search_url' => 'https://example.test/search',
-                'soap_url' => '',
+            ],
+            'account_context_confirm' => '1',
+            'settings' => [
+                'account_context' => [
+                    'agent_preferred_currency' => 'AED',
+                    'pos_country' => 'AE',
+                    'pos_station' => 'DXB',
+                ],
             ],
         ])->assertRedirect();
 
         $connection->refresh();
-        $this->assertSame('ONE_API_TEST_PASSWORD', $connection->credentials['password']);
+        $this->assertSame('ONE_API_TEST_PASSWORD', $connection->credentials['rest_password']);
         $this->actingAs($admin)->get(route('admin.api-settings.edit', $connection))
             ->assertRedirect('/admin/dashboard/api-connections?manage='.$connection->id);
 
@@ -105,9 +116,12 @@ class OneApiSupplierConnectionAuthorizationTest extends TestCase
     {
         $connection = SupplierConnection::factory()->create([
             'provider' => SupplierProvider::OneApi,
+            'environment' => 'live',
             'credentials' => [
-                'username' => 'ONE_API_TEST_USERNAME',
-                'password' => 'ONE_API_TEST_PASSWORD',
+                'rest_username' => 'ONE_API_TEST_USERNAME',
+                'rest_password' => 'ONE_API_TEST_PASSWORD',
+                'soap_username' => 'ONE_API_TEST_USERNAME',
+                'soap_password' => 'ONE_API_TEST_PASSWORD',
                 'agent_code' => 'AGENT',
                 'rest_auth_url' => 'https://example.test/auth',
                 'rest_search_url' => 'https://example.test/search',

@@ -1,5 +1,5 @@
 @php
-    $isGeneric = ! $isSabre && ! $isIati && ! $isPiaNdc && ! $isAirblue;
+    $isGeneric = ! $isSabre && ! $isIati && ! $isPiaNdc && ! $isAirblue && ! ($isOneApi ?? false) && ! ($isEjmiralAerost ?? false);
 @endphp
 <div class="jp-provider-panel {{ $isGeneric ? '' : 'jp-is-hidden' }}" data-provider-panel="generic">
     <div class="jp-form-grid jp-form-grid--2">

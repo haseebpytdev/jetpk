@@ -224,11 +224,13 @@ class SupplierConnectionService
                 && in_array('client_key', $keys, true)
                 && in_array('agent_id', $keys, true)
                 && in_array('agent_password', $keys, true),
-            SupplierProvider::OneApi => in_array('username', $keys, true)
-                && in_array('password', $keys, true)
-                && in_array('agent_code', $keys, true)
-                && in_array('rest_auth_url', $keys, true)
-                && in_array('rest_search_url', $keys, true),
+            SupplierProvider::EjmiralAerost => in_array('username', $keys, true)
+                && in_array('password', $keys, true),
+            SupplierProvider::OneApi => (in_array('rest_username', $keys, true) || in_array('username', $keys, true))
+                && (in_array('rest_password', $keys, true) || in_array('password', $keys, true))
+                && (in_array('soap_username', $keys, true) || in_array('username', $keys, true))
+                && (in_array('soap_password', $keys, true) || in_array('password', $keys, true))
+                && in_array('agent_code', $keys, true),
             SupplierProvider::AlHaider => $this->groupTokenProviderCredentialsConfigured($credentials, AlHaiderSupplierConnectionNormalizer::class),
             SupplierProvider::AmeerEMillat => $this->groupTokenProviderCredentialsConfigured(
                 $credentials,

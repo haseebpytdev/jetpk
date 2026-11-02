@@ -42,6 +42,8 @@ class StoreSupplierConnectionRequest extends FormRequest
             'base_url' => ['nullable', 'url', 'max:500'],
             'credentials' => ['nullable', 'array'],
             'credentials.*' => ['nullable', 'string', 'max:2000'],
+            'settings' => ['nullable', 'array'],
+            'account_context_confirm' => ['nullable', 'boolean'],
             'settings_json' => ['nullable', 'json'],
             'meta' => ['nullable', 'array'],
             'sabre_gds_enabled' => ['nullable', 'boolean'],
@@ -96,6 +98,14 @@ class StoreSupplierConnectionRequest extends FormRequest
                 // auth_code required; organization_id optional (matches resolver/config contract).
                 if (! in_array('auth_code', $keys, true)) {
                     $validator->errors()->add('credentials.auth_code', 'This field is required for IATI.');
+                }
+            }
+
+            if ($provider === SupplierProvider::OneApi->value) {
+                foreach (['rest_username', 'rest_password', 'soap_username', 'soap_password', 'agent_code'] as $field) {
+                    if (! in_array($field, $keys, true)) {
+                        $validator->errors()->add('credentials.'.$field, 'This field is required for ONE_API.');
+                    }
                 }
             }
 
