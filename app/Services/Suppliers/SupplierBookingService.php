@@ -21,6 +21,7 @@ use App\Services\Booking\BookingService;
 use App\Services\Communication\BookingCommunicationService;
 use App\Services\Suppliers\BookingAdapters\AirBlueSupplierBookingAdapter;
 use App\Services\Suppliers\BookingAdapters\DuffelSupplierBookingAdapter;
+use App\Services\Suppliers\BookingAdapters\EjmiralAerostSupplierBookingAdapter;
 use App\Services\Suppliers\BookingAdapters\IatiSupplierBookingAdapter;
 use App\Services\Suppliers\BookingAdapters\OneApiSupplierBookingAdapter;
 use App\Services\Suppliers\BookingAdapters\PiaNdcSupplierBookingAdapter;
@@ -57,6 +58,7 @@ class SupplierBookingService
         protected DuffelSupplierBookingAdapter $duffelAdapter,
         protected IatiSupplierBookingAdapter $iatiAdapter,
         protected OneApiSupplierBookingAdapter $oneApiAdapter,
+        protected EjmiralAerostSupplierBookingAdapter $ejmiralAerostAdapter,
         protected PlatformModuleEnforcer $platformModuleEnforcer,
         protected SupplierBookingPreflightGuard $preflightGuard,
         protected SabrePnrCertificationSupport $sabrePnrCertificationSupport,
@@ -590,6 +592,7 @@ class SupplierBookingService
             SupplierProvider::Duffel => $this->duffelAdapter,
             SupplierProvider::Iati => $this->iatiAdapter,
             SupplierProvider::OneApi => $this->oneApiAdapter,
+            SupplierProvider::EjmiralAerost => $this->ejmiralAerostAdapter,
             default => throw new InvalidArgumentException(
                 'Automated supplier booking is not implemented for provider: '.$provider->value
             ),

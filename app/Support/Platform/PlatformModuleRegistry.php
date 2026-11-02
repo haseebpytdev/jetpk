@@ -408,6 +408,7 @@ final class PlatformModuleRegistry
                     'iati_supplier' => false,
                     'pia_ndc_supplier' => false,
                     'one_api_supplier' => false,
+                    'ejmiral_aerost_supplier' => false,
                     'airblue_supplier' => false,
                     'ticketing' => false,
                     'payment_proofs' => false,
@@ -524,6 +525,7 @@ final class PlatformModuleRegistry
             $modules['iati_supplier'] = false;
             $modules['pia_ndc_supplier'] = false;
             $modules['one_api_supplier'] = false;
+            $modules['ejmiral_aerost_supplier'] = false;
             $modules['airblue_supplier'] = false;
         }
 
@@ -783,6 +785,14 @@ final class PlatformModuleRegistry
                 'supplier_sabre',
                 'high',
                 configHints: ['ONE_API_LIVE_SEARCH_ENABLED', 'ONE_API_LIVE_BOOKING_ENABLED'],
+            ),
+            self::mod(
+                'ejmiral_aerost_supplier',
+                'EJMIRAL AEROST supplier',
+                'EJMIRAL Aviation Systems AEROST OTA REST (Sub Travel Agent Bearer).',
+                'supplier_sabre',
+                'high',
+                configHints: ['EJMIRAL_AEROST_LIVE_SEARCH_ENABLED', 'EJMIRAL_AEROST_LIVE_BOOKING_ENABLED'],
             ),
             self::mod(
                 'airblue_supplier',

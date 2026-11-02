@@ -44,6 +44,7 @@ final class PlatformModuleGate
         'iati_supplier',
         'pia_ndc_supplier',
         'one_api_supplier',
+        'ejmiral_aerost_supplier',
         'airblue_supplier',
         'supplier_booking',
         'ticketing',
@@ -57,6 +58,7 @@ final class PlatformModuleGate
         'iati_supplier',
         'pia_ndc_supplier',
         'one_api_supplier',
+        'ejmiral_aerost_supplier',
         'airblue_supplier',
     ];
 
@@ -174,6 +176,7 @@ final class PlatformModuleGate
             'iati_supplier' => 'Filters IATI search, fare confirmation, booking, and ticketing.',
             'pia_ndc_supplier' => 'Filters PIA NDC search, option PNR, ticketing, cancel, and void.',
             'one_api_supplier' => 'Filters One API (FlyJinnah / Air Arabia) search, price, ancillaries, and booking.',
+            'ejmiral_aerost_supplier' => 'Filters EJMIRAL AEROST search, booking, fare info, and ticketing.',
             'airblue_supplier' => 'Filters AirBlue Crane NDC and Zapways OTA search, booking, ticketing, and cancel.',
             default => null,
         };
@@ -264,7 +267,7 @@ final class PlatformModuleGate
      */
     private static function supplierSnapshotFor(string $moduleKey, ?int $agencyId): array
     {
-        if (! in_array($moduleKey, ['sabre_gds', 'sabre_ndc', 'duffel_supplier', 'iati_supplier', 'pia_ndc_supplier', 'one_api_supplier', 'airblue_supplier', 'supplier_search', 'supplier_booking', 'ticketing'], true)) {
+        if (! in_array($moduleKey, ['sabre_gds', 'sabre_ndc', 'duffel_supplier', 'iati_supplier', 'pia_ndc_supplier', 'one_api_supplier', 'ejmiral_aerost_supplier', 'airblue_supplier', 'supplier_search', 'supplier_booking', 'ticketing'], true)) {
             return [];
         }
 
@@ -280,6 +283,7 @@ final class PlatformModuleGate
             'iati_supplier' => [SupplierProvider::Iati],
             'pia_ndc_supplier' => [SupplierProvider::PiaNdc],
             'one_api_supplier' => [SupplierProvider::OneApi],
+            'ejmiral_aerost_supplier' => [SupplierProvider::EjmiralAerost],
             'airblue_supplier' => [SupplierProvider::Airblue],
             'sabre_gds', 'sabre_ndc' => [SupplierProvider::Sabre],
             default => [SupplierProvider::Sabre, SupplierProvider::Duffel, SupplierProvider::Iati],

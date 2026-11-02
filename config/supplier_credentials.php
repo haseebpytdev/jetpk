@@ -166,6 +166,30 @@ return [
                 ],
             ],
         ],
+        'ejmiral_aerost' => [
+            'fields' => [
+                'username' => [
+                    'label' => 'Sub Travel Agent Username',
+                    'type' => 'text',
+                    'required' => true,
+                    'placeholder' => 'UAT Sub Travel Agent username',
+                    'help' => 'API booking/ticketing uses Sub Travel Agent credentials only. PSA portal login is administrative.',
+                ],
+                'password' => [
+                    'label' => 'Sub Travel Agent Password',
+                    'type' => 'password',
+                    'required' => true,
+                    'placeholder' => 'Leave blank to keep existing value.',
+                ],
+                'api_base_url' => [
+                    'label' => 'AEROST API Base URL',
+                    'type' => 'text',
+                    'required' => true,
+                    'placeholder' => 'https://... (UAT host only)',
+                    'help' => 'Base host for /api/ota/v1/* endpoints. Do not hardcode in application code.',
+                ],
+            ],
+        ],
         'one_api' => [
             'fields' => [
                 'username' => [

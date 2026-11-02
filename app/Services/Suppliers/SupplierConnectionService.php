@@ -224,6 +224,9 @@ class SupplierConnectionService
                 && in_array('client_key', $keys, true)
                 && in_array('agent_id', $keys, true)
                 && in_array('agent_password', $keys, true),
+            SupplierProvider::EjmiralAerost => in_array('username', $keys, true)
+                && in_array('password', $keys, true)
+                && in_array('api_base_url', $keys, true),
             SupplierProvider::OneApi => in_array('username', $keys, true)
                 && in_array('password', $keys, true)
                 && in_array('agent_code', $keys, true)
